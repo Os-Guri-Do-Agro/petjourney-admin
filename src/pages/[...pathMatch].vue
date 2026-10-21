@@ -131,11 +131,14 @@ function goBack() {
 
 .perdido__pata {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 13px;
   background: var(--rail);
+  box-shadow:
+    var(--sombra-1),
+    inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
 .perdido__pata img {
@@ -149,16 +152,22 @@ function goBack() {
   height: auto;
 }
 
+/* A folha flutua sobre o claro, com a luz do lugar descendo do alto, como a cabeça dos cartões. */
 .perdido__folha {
   display: grid;
   width: 100%;
   justify-items: center;
   gap: 10px;
-  padding: 32px 28px 28px;
+  overflow: hidden;
+  padding: 36px 32px 30px;
   border: 1px solid var(--linha);
-  border-radius: 20px;
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
+  border-radius: var(--raio-painel);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--musgo-fundo) 45%, var(--superficie)),
+    var(--superficie) 44%
+  );
+  box-shadow: var(--sombra-2);
   text-align: center;
 }
 
@@ -192,15 +201,16 @@ function goBack() {
 
 .trilha__fim {
   display: grid;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   margin-inline-start: 8px;
   border: 1.5px dashed var(--salvia);
-  border-radius: 50%;
-  background: var(--musgo-fundo);
+  border-radius: 13px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--musgo);
-  font-size: 20px;
+  font-size: 22px;
   animation: pegada-chega 420ms var(--pj-curva-chega) both;
   animation-delay: 700ms;
 }
@@ -220,8 +230,8 @@ function goBack() {
 
 .perdido__titulo {
   margin: 4px 0 0;
-  font-size: 26px;
-  font-weight: 600;
+  font-size: 28px;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -247,8 +257,9 @@ function goBack() {
 .perdido__caminho {
   max-width: 100%;
   overflow: hidden;
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 5px 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-controle);
   background: var(--superficie-2);
   color: var(--tinta-2);
   font-family: var(--font-dados);

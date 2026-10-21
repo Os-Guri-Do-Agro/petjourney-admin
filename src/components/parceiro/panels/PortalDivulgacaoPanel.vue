@@ -16,7 +16,6 @@ import { RouterLink } from 'vue-router'
 
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 // Volta junto com o teaser de cupom (ver o comentário no fim do template).
 // import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
@@ -333,7 +332,7 @@ watch(lastSuccessAt, (at) => {
 <template>
   <div class="divulgacao">
     <div v-if="error" class="estado ui-folha" role="alert">
-      <span class="estado__icone estado__icone--erro" aria-hidden="true">
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
         <i class="ph ph-warning-circle" />
       </span>
       <p>{{ error }}</p>
@@ -398,7 +397,7 @@ watch(lastSuccessAt, (at) => {
 
         <!-- Sem afiliado ativo não há código: a folha diz o que falta e leva aos programas. -->
         <div v-if="!indicacao.podeIndicar" class="estado ui-folha">
-          <span class="estado__icone estado__icone--lugar" aria-hidden="true">
+          <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
             <i class="ph ph-hourglass" />
           </span>
           <h2>{{ t('carteira.gate.title') }}</h2>
@@ -419,9 +418,12 @@ watch(lastSuccessAt, (at) => {
           <div class="kit__principal">
             <div class="kit__codigo">
               <span class="kit__rotulo">
+                <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
+                  <i class="ph ph-ticket" />
+                </span>
                 {{ t('inicio.indique.seuCodigo') }}
               </span>
-              <div class="kit__codigo-linha">
+              <div class="kit__bilhete">
                 <strong class="kit__valor ui-num">
                   <bdi dir="ltr">{{ codigoIndicacao }}</bdi>
                 </strong>
@@ -442,30 +444,28 @@ watch(lastSuccessAt, (at) => {
             </div>
 
             <div class="kit__link">
-              <span class="kit__para">
-                <i class="ph ph-link" aria-hidden="true" />
+              <span class="kit__rotulo">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-link" /></span>
                 {{ t('divulgacao.kit.link') }}
               </span>
-              <div class="kit__link-linha">
-                <bdi class="kit__endereco" dir="ltr" :title="linkIndicacao">{{ linkLegivel }}</bdi>
-                <div class="kit__link-acoes">
-                  <Button
-                    type="button"
-                    icon="ph ph-copy"
-                    :label="t('divulgacao.shareKit.copyLink')"
-                    @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
-                  />
-                  <Button
-                    as="a"
-                    :href="whatsappHref"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    icon="ph ph-whatsapp-logo"
-                    :label="t('divulgacao.kit.whatsapp')"
-                    severity="secondary"
-                    outlined
-                  />
-                </div>
+              <bdi class="kit__endereco" dir="ltr" :title="linkIndicacao">{{ linkLegivel }}</bdi>
+              <div class="kit__link-acoes">
+                <Button
+                  type="button"
+                  icon="ph ph-copy"
+                  :label="t('divulgacao.shareKit.copyLink')"
+                  @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
+                />
+                <Button
+                  as="a"
+                  :href="whatsappHref"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  icon="ph ph-whatsapp-logo"
+                  :label="t('divulgacao.kit.whatsapp')"
+                  severity="secondary"
+                  outlined
+                />
               </div>
             </div>
           </div>
@@ -493,45 +493,53 @@ watch(lastSuccessAt, (at) => {
       />
 
       <!-- ------------------------------------------------------------ as regras -->
-      <UiSecao id="div-terms" :titulo="t('divulgacao.regras.titulo')">
-        <template #acoes>
-          <Button
-            type="button"
-            :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
-            :icon="termsOpen ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-            icon-pos="right"
-            severity="secondary"
-            text
-            size="small"
-            :aria-expanded="termsOpen"
-            aria-controls="div-terms-full"
-            @click="termsOpen = !termsOpen"
-          />
-        </template>
-
-        <p class="regras__frase">{{ t('divulgacao.regras.frase') }}</p>
+      <section
+        id="div-terms"
+        class="regras ui-folha ui-cartao"
+        :class="{ 'regras--aberta': termsOpen }"
+        aria-labelledby="div-terms-titulo"
+      >
+        <header class="ui-cartao__cabeca regras__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-percent" /></span>
+          <div class="ui-cartao__titulos">
+            <h2 id="div-terms-titulo" class="ui-cartao__titulo">{{ t('divulgacao.regras.titulo') }}</h2>
+            <p class="ui-cartao__descricao regras__frase">{{ t('divulgacao.regras.frase') }}</p>
+          </div>
+          <div class="ui-cartao__acoes">
+            <Button
+              type="button"
+              :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
+              :icon="termsOpen ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+              icon-pos="right"
+              severity="secondary"
+              text
+              size="small"
+              :aria-expanded="termsOpen"
+              aria-controls="div-terms-full"
+              @click="termsOpen = !termsOpen"
+            />
+          </div>
+        </header>
 
         <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-        <dl v-show="termsOpen" id="div-terms-full" class="regras ui-folha">
-          <div v-for="term in indicacaoTerms" :key="term.id" class="regra">
+        <dl v-show="termsOpen" id="div-terms-full" class="regras__lista">
+          <div v-for="term in indicacaoTerms" :key="term.id" class="regra ui-poco">
             <dt>
-              <i :class="term.icon" aria-hidden="true" />
+              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i :class="term.icon" /></span>
               {{ term.title }}
             </dt>
             <dd>{{ term.body }}</dd>
           </div>
         </dl>
-      </UiSecao>
+      </section>
 
       <!-- ------------------------------------------------------------ cupons e resgates -->
       <template v-if="cupomFeatureEnabled">
-        <ul class="numeros ui-folha" :aria-label="t('divulgacao.metrics.aria')">
-          <li v-for="metric in metrics" :key="metric.id" class="numero">
-            <span class="numero__rotulo">
-              <i :class="metric.icon" aria-hidden="true" />
-              {{ metric.label }}
-            </span>
-            <strong class="numero__valor ui-num">{{ metric.value }}</strong>
+        <ul class="ui-indicadores numeros" :aria-label="t('divulgacao.metrics.aria')">
+          <li v-for="metric in metrics" :key="metric.id" class="ui-indicador">
+            <span class="ui-ladrilho" aria-hidden="true"><i :class="metric.icon" /></span>
+            <strong class="ui-indicador__valor ui-num">{{ metric.value }}</strong>
+            <span class="ui-indicador__rotulo">{{ metric.label }}</span>
           </li>
         </ul>
 
@@ -539,14 +547,23 @@ watch(lastSuccessAt, (at) => {
 
         <div class="listas">
           <div id="cupons" class="listas__coluna">
-            <UiSecao
-              id="divulgacao-cupons"
-              :titulo="t('divulgacao.cupons.title')"
-              :contagem="cupons.length"
-              :descricao="isGuidanceVisible ? t('divulgacao.cupons.lede') : ''"
-              icone="ph ph-ticket"
-              folha
+            <section
+              class="ui-folha ui-cartao lista-cartao"
+              aria-labelledby="divulgacao-cupons-titulo"
             >
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-ticket" /></span>
+                <div class="ui-cartao__titulos">
+                  <h2 id="divulgacao-cupons-titulo" class="ui-cartao__titulo">
+                    {{ t('divulgacao.cupons.title') }}
+                    <span class="ui-contagem">{{ cupons.length }}</span>
+                  </h2>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('divulgacao.cupons.lede') }}
+                  </p>
+                </div>
+              </header>
+
               <p v-if="cupons.length === 0" class="ui-vazio">{{ t('divulgacao.cupons.empty') }}</p>
 
               <ul v-else class="ui-lista">
@@ -574,7 +591,7 @@ watch(lastSuccessAt, (at) => {
                   </span>
                 </li>
               </ul>
-            </UiSecao>
+            </section>
 
             <Button
               v-if="cuponsCursor"
@@ -589,21 +606,30 @@ watch(lastSuccessAt, (at) => {
           </div>
 
           <div id="resgates" class="listas__coluna">
-            <UiSecao
-              id="divulgacao-resgates"
-              :titulo="t('divulgacao.resgates.title')"
-              :contagem="resgates.length"
-              :descricao="isGuidanceVisible ? t('divulgacao.resgates.lede') : ''"
-              icone="ph ph-receipt"
-              folha
+            <section
+              class="ui-folha ui-cartao lista-cartao"
+              aria-labelledby="divulgacao-resgates-titulo"
             >
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-receipt" /></span>
+                <div class="ui-cartao__titulos">
+                  <h2 id="divulgacao-resgates-titulo" class="ui-cartao__titulo">
+                    {{ t('divulgacao.resgates.title') }}
+                    <span class="ui-contagem">{{ resgates.length }}</span>
+                  </h2>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('divulgacao.resgates.lede') }}
+                  </p>
+                </div>
+              </header>
+
               <p v-if="resgates.length === 0" class="ui-vazio">
                 {{ t('divulgacao.resgates.empty') }}
               </p>
 
               <ul v-else class="ui-lista">
                 <li v-for="resgate in resgates" :key="resgate.resgateId" class="ui-linha">
-                  <span class="resgate__icone" aria-hidden="true">
+                  <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
                     <i class="ph" :class="resgate.canal === 'QR' ? 'ph-qr-code' : 'ph-keyboard'" />
                   </span>
                   <span class="ui-linha__texto">
@@ -629,7 +655,7 @@ watch(lastSuccessAt, (at) => {
                   </span>
                 </li>
               </ul>
-            </UiSecao>
+            </section>
 
             <Button
               v-if="resgatesCursor"
@@ -660,7 +686,7 @@ watch(lastSuccessAt, (at) => {
 .divulgacao {
   display: grid;
   min-width: 0;
-  gap: 32px;
+  gap: 24px;
 }
 
 .divulgacao__lede {
@@ -701,38 +727,27 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
-.estado__icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 22px;
-}
-
-.estado__icone--erro {
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
-}
-
-.estado__icone--lugar {
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-}
-
 .estado__acao {
   gap: 8px;
   margin-top: 10px;
   text-decoration: none;
 }
 
-/* ------------------------------------------------------------------ o kit */
+/* ------------------------------------------------------------------ o kit
+ * O cartão do código: o alto ganha a luz do Portal, como o saldo da Carteira. O código mora num
+ * bilhete de contorno tracejado, do tamanho de quem vai ditá-lo do outro lado do balcão; o link
+ * fica ao lado em tela larga e embaixo na estreita.
+ */
 
 .kit {
   display: grid;
   overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--pj-lugar-fundo) 55%, var(--superficie)),
+      var(--superficie) 72%
+    );
   container: kit / inline-size;
 }
 
@@ -740,49 +755,76 @@ watch(lastSuccessAt, (at) => {
   grid-template-columns: minmax(0, 1fr) auto;
 }
 
-/* O código ocupa a altura que sobra ao lado do QR; o link fica embaixo, encostado no pé. */
 .kit__principal {
   display: grid;
   min-width: 0;
-  grid-template-rows: 1fr auto;
-}
-
-.kit__codigo {
-  align-content: center;
 }
 
 .kit__codigo,
 .kit__link {
   display: grid;
   min-width: 0;
-  gap: 10px;
-  padding: 24px 26px;
+  align-content: start;
+  gap: 14px;
+  padding: 24px 28px 26px;
 }
 
 .kit__link {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
+}
+
+/* Em tela larga o código e o link ficam lado a lado (com o QR, só quando sobra largura). */
+@container kit (min-width: 820px) {
+  .kit:not(.kit--com-qr) .kit__principal {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+
+  .kit:not(.kit--com-qr) .kit__link {
+    border-top: 0;
+    border-inline-start: 1px solid var(--linha-suave);
+  }
+}
+
+@container kit (min-width: 1100px) {
+  .kit--com-qr .kit__principal {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  }
+
+  .kit--com-qr .kit__link {
+    border-top: 0;
+    border-inline-start: 1px solid var(--linha-suave);
+  }
 }
 
 .kit__rotulo {
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-.kit__codigo-linha {
+/* O bilhete: tracejado na cor do Portal, o código grande e o copiar ao lado. */
+.kit__bilhete {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 20px;
+  justify-content: space-between;
+  gap: 12px 20px;
+  padding: 16px 16px 16px 22px;
+  border: 1.5px dashed color-mix(in oklab, var(--pj-lugar) 55%, var(--linha-media));
+  border-radius: var(--raio-cartao);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 35%, var(--superficie));
 }
 
-/* O código, do tamanho de quem vai ditá-lo do outro lado do balcão. */
 .kit__valor {
   overflow-wrap: anywhere;
   color: var(--tinta);
-  font-size: 46px;
+  font-size: 44px;
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
   line-height: 1.05;
 }
 
@@ -799,25 +841,16 @@ watch(lastSuccessAt, (at) => {
   font-size: 17px;
 }
 
-.kit__link-linha {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-}
-
 .kit__endereco {
   overflow: hidden;
-  min-width: min(100%, 14rem);
-  flex: 1 1 16rem;
-  padding: 10px 14px;
-  border: 1px solid var(--linha);
-  border-radius: var(--raio-controle, 10px);
+  padding: 13px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
   color: var(--tinta);
   font-family: var(--font-dados);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 15.5px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -828,18 +861,18 @@ watch(lastSuccessAt, (at) => {
   gap: 8px;
 }
 
-/* O QR num painel ao lado, no tom de fundo: a folha tem duas partes, não dois cartões. */
+/* O QR num painel ao lado, em poço: a folha tem duas partes, não dois cartões. */
 .kit__lado {
   display: grid;
   place-items: center;
   padding: 20px 24px;
-  border-inline-start: 1px solid var(--linha);
-  background: var(--superficie-2);
+  border-inline-start: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
 }
 
 @container kit (max-width: 640px) {
   .kit__valor {
-    font-size: 38px;
+    font-size: 36px;
   }
 }
 
@@ -849,7 +882,7 @@ watch(lastSuccessAt, (at) => {
   }
 
   .kit__lado {
-    border-top: 1px solid var(--linha);
+    border-top: 1px solid var(--linha-suave);
     border-inline-start: 0;
   }
 
@@ -858,7 +891,6 @@ watch(lastSuccessAt, (at) => {
     padding: 20px 18px;
   }
 
-  .kit__link-acoes,
   .kit__link-acoes :deep(.p-button) {
     flex: 1 1 auto;
   }
@@ -866,42 +898,41 @@ watch(lastSuccessAt, (at) => {
 
 /* ------------------------------------------------------------------ regras */
 
-.regras__frase {
-  max-width: 72ch;
-  margin: 0;
-  color: var(--tinta);
-  font-size: 14.5px;
-  line-height: 1.55;
-}
-
 .regras {
-  display: grid;
-  overflow: hidden;
-  margin: 14px 0 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  overflow: clip;
 }
 
-.regra {
+.regras:not(.regras--aberta) .regras__cabeca {
+  padding-bottom: 16px;
+}
+
+.regras__frase.ui-cartao__descricao {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.regras__lista {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 18px 20px 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.regra.ui-poco {
   display: grid;
   align-content: start;
-  gap: 4px;
-  margin-bottom: -1px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--linha);
+  gap: 6px;
+  padding: 14px 16px;
 }
 
 .regra dt {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: var(--tinta);
   font-size: 14.5px;
   font-weight: 600;
-}
-
-.regra dt i {
-  color: var(--pj-lugar);
-  font-size: 18px;
 }
 
 .regra dd {
@@ -911,46 +942,49 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
+@media (max-width: 1100px) {
+  .regras__lista {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .regras__lista {
+    padding: 16px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* No estreito o botão de abrir desce para baixo do título, alinhado com o texto. */
+  .regras__cabeca {
+    flex-wrap: wrap;
+  }
+
+  .regras__cabeca .ui-cartao__titulos {
+    flex-basis: 0;
+  }
+
+  .regras__cabeca .ui-cartao__acoes {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    margin-top: -4px;
+    padding-inline-start: 42px;
+  }
+}
+
 /* ------------------------------------------------------------------ números e listas */
 
 .numeros {
-  display: grid;
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.numero {
-  display: grid;
-  gap: 4px;
-  padding: 16px 22px 18px;
+.lista-cartao {
+  overflow: clip;
 }
 
-.numero + .numero {
-  border-inline-start: 1px solid var(--linha);
-}
-
-.numero__rotulo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.numero__rotulo i {
-  color: var(--pj-lugar);
-  font-size: 16px;
-}
-
-.numero__valor {
-  color: var(--tinta);
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.lista-cartao .ui-lista > li:first-child > .ui-linha {
+  border-radius: 0;
 }
 
 .listas {
@@ -983,18 +1017,6 @@ watch(lastSuccessAt, (at) => {
   text-align: end;
 }
 
-.resgate__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 18px;
-}
-
 .resgate__quando {
   color: var(--tinta-2);
   font-size: 13px;
@@ -1023,15 +1045,6 @@ watch(lastSuccessAt, (at) => {
 }
 
 @media (max-width: 640px) {
-  .numeros {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .numero + .numero {
-    border-top: 1px solid var(--linha);
-    border-inline-start: 0;
-  }
-
   .cupom__usos {
     display: none;
   }

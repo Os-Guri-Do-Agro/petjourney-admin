@@ -10,7 +10,6 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ProgramaParticipacaoCard from '@/components/parceiro/ProgramaParticipacaoCard.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 
@@ -61,29 +60,44 @@ const activationSteps = computed(() => [
       <ProgramaParticipacaoCard modo="participativo" :skeleton="isLoading" />
     </section>
 
-    <UiSecao id="programas-ativacao" :titulo="t('programas.ativacao.titulo')">
-      <ol class="etapas">
-        <li
-          v-for="step in activationSteps"
-          :key="step.id"
-          class="etapa"
-          :class="`etapa--${step.id}`"
-          :data-step="step.id"
-        >
-          <span class="etapa__marco" aria-hidden="true">
-            <span class="etapa__n ui-num">{{ step.number }}</span>
-          </span>
-          <span class="etapa__texto">
-            <strong>
-              <i :class="step.icon" aria-hidden="true" />
-              {{ step.title }}
-            </strong>
-            <span>{{ step.description }}</span>
-          </span>
-        </li>
-      </ol>
+    <section
+      id="programas-ativacao"
+      class="ativacao ui-folha ui-cartao"
+      aria-labelledby="programas-ativacao-titulo"
+    >
+      <header class="ui-cartao__cabeca">
+        <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-flag-checkered" /></span>
+        <div class="ui-cartao__titulos">
+          <h2 id="programas-ativacao-titulo" class="ui-cartao__titulo">
+            {{ t('programas.ativacao.titulo') }}
+          </h2>
+        </div>
+      </header>
 
-      <p class="etapas__nota">
+      <div class="ui-cartao__corpo ativacao__corpo">
+        <ol class="etapas">
+          <li
+            v-for="step in activationSteps"
+            :key="step.id"
+            class="etapa"
+            :class="`etapa--${step.id}`"
+            :data-step="step.id"
+          >
+            <span class="etapa__marco" aria-hidden="true">
+              <span class="etapa__n ui-num">{{ step.number }}</span>
+            </span>
+            <span class="etapa__texto">
+              <strong>
+                <i :class="step.icon" aria-hidden="true" />
+                {{ step.title }}
+              </strong>
+              <span>{{ step.description }}</span>
+            </span>
+          </li>
+        </ol>
+      </div>
+
+      <p class="ui-cartao__pe etapas__nota">
         <i class="ph ph-info" aria-hidden="true" />
         <template v-if="store.semAcessoParceiro">
           {{ t('programas.activation.noteNoAccess') }}
@@ -92,19 +106,27 @@ const activationSteps = computed(() => [
           {{ t('programas.activation.noteWithAccess') }}
         </template>
       </p>
-    </UiSecao>
+    </section>
   </div>
 </template>
 
 <style scoped>
 .programas-view {
   display: grid;
-  gap: 32px;
+  gap: 24px;
   min-width: 0;
 }
 
+.ativacao {
+  overflow: clip;
+}
+
+.ativacao__corpo.ui-cartao__corpo {
+  padding: 22px 22px 20px;
+}
+
 .programas-view__lede {
-  margin: 0 0 -16px;
+  margin: 0 0 -8px;
   color: var(--tinta-2);
   font-size: 14px;
 }
@@ -152,7 +174,7 @@ const activationSteps = computed(() => [
   top: 50%;
   height: 2px;
   border-radius: 2px;
-  background: var(--linha-forte);
+  background: var(--linha-media);
   content: '';
 }
 
@@ -204,11 +226,11 @@ const activationSteps = computed(() => [
   font-size: 13.5px;
 }
 
-.etapas__nota {
-  display: flex;
+.etapas__nota.ui-cartao__pe {
+  flex-wrap: nowrap;
   align-items: flex-start;
-  gap: 8px;
-  margin: 18px 0 0;
+  gap: 10px;
+  margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;

@@ -39,14 +39,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.tela-equipe {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-}
-
 .equipe-pagina {
   display: grid;
   gap: 20px;

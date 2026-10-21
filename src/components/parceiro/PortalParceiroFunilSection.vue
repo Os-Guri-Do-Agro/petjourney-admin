@@ -372,29 +372,39 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
     <!-- PENDENTE/APROVADO (dono): dados sempre visíveis para edição, como no Perfil -->
     <article
       v-if="showInlineEdit"
-      class="funil__card funil__edit"
+      class="funil__edit ui-folha cfg-folha"
       aria-labelledby="funil-edit-title"
     >
-      <header class="funil__edit-head">
-        <h3 id="funil-edit-title">{{ t('parceiroCadastro.editar.title') }}</h3>
-        <p>{{ t('parceiroCadastro.editar.lede') }}</p>
-      </header>
+      <!-- O mesmo desenho das outras abas: nome e frase à esquerda, os campos à direita. -->
+      <section class="cfg-secao">
+        <header class="cfg-secao__cabeca">
+          <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+            <i class="ph ph-buildings" />
+          </span>
+          <h3 id="funil-edit-title" class="cfg-secao__titulo">
+            {{ t('parceiroCadastro.editar.title') }}
+          </h3>
+          <p class="cfg-secao__descricao">{{ t('parceiroCadastro.editar.lede') }}</p>
+        </header>
 
-      <p v-if="submitError" class="funil__submit-error" role="alert">{{ submitError }}</p>
+        <div class="cfg-secao__corpo">
+          <p v-if="submitError" class="funil__submit-error" role="alert">{{ submitError }}</p>
 
-      <div v-if="loadingCadastro" class="funil__form-loading" aria-hidden="true">
-        <Skeleton width="100%" height="2.4rem" border-radius="10px" />
-        <Skeleton width="100%" height="2.4rem" border-radius="10px" />
-        <Skeleton width="60%" height="2.4rem" border-radius="10px" />
-      </div>
-      <PortalParceiroCadastroForm
-        v-else
-        :initial="cadastro"
-        :submit-label="t('parceiroCadastro.editar.submit')"
-        :submitting="submitting"
-        :error-field="errorField"
-        @submit="handleSubmit"
-      />
+          <div v-if="loadingCadastro" class="funil__form-loading" aria-hidden="true">
+            <Skeleton width="100%" height="2.4rem" border-radius="10px" />
+            <Skeleton width="100%" height="2.4rem" border-radius="10px" />
+            <Skeleton width="60%" height="2.4rem" border-radius="10px" />
+          </div>
+          <PortalParceiroCadastroForm
+            v-else
+            :initial="cadastro"
+            :submit-label="t('parceiroCadastro.editar.submit')"
+            :submitting="submitting"
+            :error-field="errorField"
+            @submit="handleSubmit"
+          />
+        </div>
+      </section>
     </article>
   </section>
 </template>
@@ -417,21 +427,31 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   gap: 18px;
   padding: 22px 24px;
   border: 1px solid var(--linha);
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
 }
 
+/* A linha do estado, quando aprovada: o tom de "ok" desce do alto e some no branco. */
 .funil__card--compact {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px;
-  padding: 16px 20px;
+  padding: 18px 22px;
+}
+
+.funil__card--compact[data-tone='success'] {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .funil__card--compact .funil__icon {
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
 }
 
 .funil__compact-main {
@@ -440,8 +460,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   min-width: 0;
 }
 
-.funil__compact-main h3,
-.funil__edit-head h3 {
+.funil__compact-main h3 {
   margin: 0;
   color: var(--tinta);
   font-size: 16px;
@@ -449,17 +468,11 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
   letter-spacing: -0.01em;
 }
 
-.funil__compact-main p,
-.funil__edit-head p {
+.funil__compact-main p {
   margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;
-}
-
-.funil__edit-head {
-  display: grid;
-  gap: 3px;
 }
 
 .funil__head {
@@ -491,11 +504,11 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
 .funil__icon {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 14px;
+  border-radius: 13px;
   font-size: 22px;
 }
 

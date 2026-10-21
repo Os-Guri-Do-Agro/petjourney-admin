@@ -116,7 +116,7 @@ onMounted(() => {
   >
     <template #cabecalho>
       <div class="centro-cabeca">
-        <span class="centro-cabeca__selo" aria-hidden="true"><i class="ph ph-buildings" /></span>
+        <span class="ui-ladrilho ui-ladrilho--lugar centro-cabeca__selo" aria-hidden="true"><i class="ph ph-buildings" /></span>
         <h1 class="centro-cabeca__titulo">{{ t('parceiro.selecionar.title') }}</h1>
         <p class="centro-cabeca__texto">{{ t('parceiro.selecionar.body') }}</p>
       </div>
@@ -128,7 +128,7 @@ onMounted(() => {
           <button
             type="button"
             class="ui-linha empresa"
-            :class="{ 'empresa--ativa': opcao.ativo }"
+            :class="{ 'empresa--ativa ui-marca ui-marca--lugar': opcao.ativo }"
             :disabled="trocandoId != null && trocandoId !== opcao.parceiroId"
             :aria-current="opcao.ativo ? 'true' : undefined"
             :aria-busy="trocandoId === opcao.parceiroId || undefined"
@@ -191,22 +191,18 @@ onMounted(() => {
   text-align: center;
 }
 
-.centro-cabeca__selo {
-  display: grid;
-  width: 56px;
-  height: 56px;
-  place-items: center;
+.centro-cabeca__selo.ui-ladrilho {
+  width: 60px;
+  height: 60px;
   border-radius: 18px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 27px;
+  font-size: 28px;
 }
 
 .centro-cabeca__titulo {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: var(--tinta);
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -242,29 +238,39 @@ onMounted(() => {
 }
 
 .empresa--ativa.ui-linha {
-  background: var(--pj-lugar-fundo);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 55%, var(--superficie));
 }
 
 .empresa--ativa.ui-linha:hover {
-  background: var(--pj-lugar-fundo);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie));
 }
 
+/* O rosto da empresa: o degradê do Portal para o seu negócio, papel claro para a equipe. */
 .empresa__rosto {
   display: grid;
   width: 44px;
   height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 12px;
-  background: var(--pj-lugar);
-  color: var(--superficie);
+  border-radius: 13px;
+  background: var(--pj-lugar-degrade);
+  box-shadow:
+    var(--pj-lugar-sombra),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
   font-family: var(--font-dados);
   font-size: 15px;
   font-weight: 650;
 }
 
-.empresa__rosto--equipe {
+.app-dark .empresa__rosto {
+  color: var(--rail);
+}
+
+.empresa__rosto--equipe,
+.app-dark .empresa__rosto--equipe {
   background: var(--superficie-3);
+  box-shadow: none;
   color: var(--tinta);
 }
 
@@ -290,9 +296,9 @@ onMounted(() => {
   min-height: 72px;
   align-items: center;
   gap: 14px;
-  padding: 12px 18px;
-  border: 1px dashed var(--linha-forte);
-  border-radius: 16px;
+  padding: 12px 20px;
+  border: 1.5px dashed var(--linha-media);
+  border-radius: var(--raio-cartao);
   color: var(--tinta);
   text-decoration: none;
 }
@@ -312,8 +318,8 @@ onMounted(() => {
   height: 44px;
   flex: none;
   place-items: center;
-  border-radius: 12px;
-  background: var(--superficie-2);
+  border-radius: 13px;
+  background: var(--superficie-3);
   color: var(--tinta-2);
   font-size: 20px;
 }

@@ -95,6 +95,9 @@ async function handleChangePassword() {
   <form class="ui-folha cfg-folha" novalidate @submit.prevent="handleChangePassword">
     <section class="cfg-secao" aria-labelledby="seguranca-senha-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-password" />
+        </span>
         <h3 id="seguranca-senha-titulo" class="cfg-secao__titulo">
           {{ t('settings.seguranca.aside.title') }}
         </h3>

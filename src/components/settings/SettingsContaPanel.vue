@@ -56,9 +56,7 @@ const initials = computed(() => usuarioPerfilStore.initials)
 
 const avatarUrl = computed(() => usuarioPerfilStore.avatarUrl)
 
-const sessionEmail = computed(
-  () => usuarioPerfilStore.email || sessionUser.value?.email || '',
-)
+const sessionEmail = computed(() => usuarioPerfilStore.email || sessionUser.value?.email || '')
 
 /** A empresa em que se entrou; o papel vai nos selos ao lado. */
 const empresa = computed(() =>
@@ -133,9 +131,7 @@ async function openInactivateDialog() {
     }
   } catch (error) {
     reasonsError.value =
-      error instanceof Error
-        ? error.message
-        : t('settings.conta.inactivate.errors.loadReasons')
+      error instanceof Error ? error.message : t('settings.conta.inactivate.errors.loadReasons')
   } finally {
     loadingReasons.value = false
   }
@@ -220,6 +216,9 @@ watch(showCustomReason, (allowed) => {
   <div class="ui-folha cfg-folha conta">
     <section class="cfg-secao" aria-labelledby="conta-sessao-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-devices" />
+        </span>
         <h3 id="conta-sessao-titulo" class="cfg-secao__titulo">
           {{ t('settings.conta.session.eyebrow') }}
         </h3>
@@ -227,30 +226,32 @@ watch(showCustomReason, (allowed) => {
       </header>
 
       <div class="cfg-secao__corpo">
-        <div class="sessao">
-          <span class="sessao__rosto" aria-hidden="true">
-            <img v-if="avatarUrl" :src="avatarUrl" alt="" />
-            <template v-else>{{ initials }}</template>
-          </span>
-          <span class="sessao__quem">
-            <strong>{{ displayName }}</strong>
-            <span>{{ sessionEmail }}</span>
-          </span>
-        </div>
+        <div class="sessao__cartao ui-poco">
+          <div class="sessao">
+            <span class="sessao__rosto" aria-hidden="true">
+              <img v-if="avatarUrl" :src="avatarUrl" alt="" />
+              <template v-else>{{ initials }}</template>
+            </span>
+            <span class="sessao__quem">
+              <strong>{{ displayName }}</strong>
+              <span>{{ sessionEmail }}</span>
+            </span>
+          </div>
 
-        <ul
-          v-if="empresa || roleHints.length"
-          class="sessao__papeis"
-          :aria-label="t('settings.conta.aria.roles')"
-        >
-          <li v-if="empresa" class="sessao__empresa">
-            <i class="ph ph-buildings" aria-hidden="true" />
-            {{ empresa }}
-          </li>
-          <li v-for="role in roleHints" :key="role" class="ui-selo ui-selo--contorno">
-            {{ role }}
-          </li>
-        </ul>
+          <ul
+            v-if="empresa || roleHints.length"
+            class="sessao__papeis"
+            :aria-label="t('settings.conta.aria.roles')"
+          >
+            <li v-if="empresa" class="sessao__empresa">
+              <i class="ph ph-buildings" aria-hidden="true" />
+              {{ empresa }}
+            </li>
+            <li v-for="role in roleHints" :key="role" class="ui-selo ui-selo--contorno">
+              {{ role }}
+            </li>
+          </ul>
+        </div>
 
         <div class="sessao__acoes">
           <Button
@@ -274,8 +275,10 @@ watch(showCustomReason, (allowed) => {
 
     <section class="cfg-secao risco" aria-labelledby="conta-risco-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho ui-ladrilho--risco" aria-hidden="true">
+          <i class="ph ph-user-minus" />
+        </span>
         <h3 id="conta-risco-titulo" class="cfg-secao__titulo">
-          <i class="ph ph-user-minus risco__icone" aria-hidden="true" />
           {{ t('settings.conta.risk.title') }}
         </h3>
         <p class="cfg-secao__descricao">{{ t('settings.conta.risk.lede') }}</p>
@@ -396,6 +399,13 @@ watch(showCustomReason, (allowed) => {
 </template>
 
 <style scoped>
+/* Quem está nesta sessão, num poço: o rosto, o nome, a empresa e os papéis. */
+.sessao__cartao.ui-poco {
+  display: grid;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
 .sessao {
   display: flex;
   align-items: center;
@@ -410,11 +420,16 @@ watch(showCustomReason, (allowed) => {
   place-items: center;
   overflow: hidden;
   border-radius: 999px;
-  background: var(--musgo-fundo);
-  color: var(--musgo);
+  background: var(--pj-lugar-degrade, var(--musgo-fundo));
+  box-shadow: 0 0 0 3px var(--superficie);
+  color: #fff;
   font-family: var(--font-dados);
   font-size: 19px;
   font-weight: 650;
+}
+
+.app-dark .sessao__rosto {
+  color: var(--rail);
 }
 
 .sessao__rosto img {
@@ -478,10 +493,6 @@ watch(showCustomReason, (allowed) => {
 /* A desativação: separada, com o vermelho só no ícone e no botão — o resto é texto para ler. */
 .risco {
   background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
-}
-
-.risco__icone.ph {
-  color: var(--risco-tinta);
 }
 
 .risco__pontos {

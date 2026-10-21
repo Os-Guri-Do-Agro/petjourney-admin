@@ -226,7 +226,6 @@ onMounted(() => {
   <div id="partner-panel-extrato" class="extrato">
     <div
       v-if="loading"
-      class="extrato__folha ui-folha"
       role="status"
       aria-live="polite"
       :aria-label="t('carteira.extrato.loadingTitle')"
@@ -235,7 +234,7 @@ onMounted(() => {
         <Skeleton width="6rem" height="0.8rem" border-radius="6px" />
       </div>
       <div v-for="n in 3" :key="n" class="lancamento" aria-hidden="true">
-        <Skeleton width="36px" height="36px" border-radius="10px" />
+        <Skeleton width="36px" height="36px" border-radius="11px" />
         <span class="lancamento__texto">
           <Skeleton width="11rem" height="0.9rem" border-radius="6px" />
           <Skeleton width="8rem" height="0.75rem" border-radius="6px" />
@@ -244,8 +243,8 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-else-if="error" class="extrato__estado ui-folha" role="alert">
-      <span class="extrato__estado-icone extrato__estado-icone--erro" aria-hidden="true">
+    <div v-else-if="error" class="extrato__estado" role="alert">
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
         <i class="ph ph-warning-circle" />
       </span>
       <p>{{ error }}</p>
@@ -259,115 +258,128 @@ onMounted(() => {
       />
     </div>
 
-    <div v-else-if="items.length === 0" class="extrato__estado ui-folha">
-      <span class="extrato__estado-icone" aria-hidden="true"><i class="ph ph-list-bullets" /></span>
+    <div v-else-if="items.length === 0" class="extrato__estado">
+      <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+        <i class="ph ph-list-bullets" />
+      </span>
       <strong>{{ t('carteira.extrato.emptyTitle') }}</strong>
       <p>{{ t('carteira.extrato.emptyBody') }}</p>
     </div>
 
     <template v-else>
-      <div class="extrato__folha ui-folha">
-        <section
-          v-for="day in groupedItems"
-          :key="day.dayKey"
-          class="extrato__dia"
-          :aria-label="day.dataLonga"
-        >
-          <header class="extrato__dia-cab">
-            <h3 class="extrato__dia-nome">
-              <time :datetime="day.dayKey">{{ day.label }}</time>
-            </h3>
+      <section
+        v-for="day in groupedItems"
+        :key="day.dayKey"
+        class="extrato__dia"
+        :aria-label="day.dataLonga"
+      >
+        <header class="extrato__dia-cab">
+          <h3 class="extrato__dia-nome">
+            <i class="ph ph-calendar-blank" aria-hidden="true" />
+            <time :datetime="day.dayKey">{{ day.label }}</time>
+          </h3>
+          <span
+            class="extrato__dia-total ui-num"
+            :class="{ 'is-positivo': day.totalCentavos > 0 }"
+          >
+            {{ valorComSinal(day.totalCentavos) }}
+          </span>
+        </header>
+
+        <ul class="extrato__lista">
+          <li
+            v-for="item in day.items"
+            :key="item.id"
+            class="lancamento"
+            :class="item.valorCentavos > 0 ? 'lancamento--credito' : 'lancamento--debito'"
+          >
             <span
-              class="extrato__dia-total ui-num"
-              :class="{ 'is-positivo': day.totalCentavos > 0 }"
+              class="ui-ladrilho lancamento__icone"
+              :class="item.valorCentavos > 0 ? 'ui-ladrilho--ok' : 'ui-ladrilho--neutro'"
+              aria-hidden="true"
             >
-              {{ valorComSinal(day.totalCentavos) }}
+              <i :class="ICONE_DO_TIPO[item.tipo] ?? 'ph ph-circle'" />
             </span>
-          </header>
 
-          <ul class="extrato__lista">
-            <li
-              v-for="item in day.items"
-              :key="item.id"
-              class="lancamento"
-              :class="item.valorCentavos > 0 ? 'lancamento--credito' : 'lancamento--debito'"
+            <span class="lancamento__texto">
+              <strong class="lancamento__titulo">{{ t(`carteira.extrato.tipo.${item.tipo}`) }}</strong>
+              <span class="lancamento__meta ui-num">{{ detalheDo(item) }}</span>
+            </span>
+
+            <span v-if="liberaEm(item)" class="ui-selo ui-selo--lugar lancamento__libera">
+              <i class="ph ph-hourglass-medium" aria-hidden="true" />
+              {{ t('carteira.extrato.liberaEm', { data: liberaEm(item) }) }}
+            </span>
+
+            <strong
+              class="lancamento__valor ui-num"
+              :class="{ 'is-negative': item.valorCentavos < 0, 'is-positivo': item.valorCentavos > 0 }"
             >
-              <span class="lancamento__icone" aria-hidden="true">
-                <i :class="ICONE_DO_TIPO[item.tipo] ?? 'ph ph-circle'" />
-              </span>
+              {{ valorComSinal(item.valorCentavos) }}
+            </strong>
+          </li>
+        </ul>
+      </section>
 
-              <span class="lancamento__texto">
-                <strong class="lancamento__titulo">{{ t(`carteira.extrato.tipo.${item.tipo}`) }}</strong>
-                <span class="lancamento__meta ui-num">{{ detalheDo(item) }}</span>
-              </span>
-
-              <span v-if="liberaEm(item)" class="ui-selo lancamento__libera">
-                <i class="ph ph-hourglass-medium" aria-hidden="true" />
-                {{ t('carteira.extrato.liberaEm', { data: liberaEm(item) }) }}
-              </span>
-
-              <strong
-                class="lancamento__valor ui-num"
-                :class="{ 'is-negative': item.valorCentavos < 0, 'is-positivo': item.valorCentavos > 0 }"
-              >
-                {{ valorComSinal(item.valorCentavos) }}
-              </strong>
-            </li>
-          </ul>
-        </section>
+      <div v-if="nextCursor" class="extrato__mais">
+        <Button
+          type="button"
+          :label="t('carteira.extrato.loadMore')"
+          icon="ph ph-arrow-down"
+          :loading="loadingMore"
+          severity="secondary"
+          outlined
+          @click="loadExtrato(nextCursor ?? undefined)"
+        />
       </div>
-
-      <Button
-        v-if="nextCursor"
-        class="extrato__mais"
-        type="button"
-        :label="t('carteira.extrato.loadMore')"
-        :loading="loadingMore"
-        severity="secondary"
-        outlined
-        @click="loadExtrato(nextCursor ?? undefined)"
-      />
     </template>
   </div>
 </template>
 
 <style scoped>
+/* As movimentações moram no cartão da página (`carteira/index.vue`): aqui não há folha própria. */
 .extrato {
   display: grid;
-  gap: 14px;
 }
 
-.extrato__folha {
-  overflow: hidden;
-}
-
-.extrato__mais.p-button {
-  justify-self: center;
+.extrato__mais {
+  display: flex;
+  justify-content: center;
+  padding: 14px 20px 16px;
+  border-top: 1px solid var(--linha-suave);
 }
 
 /* ------------------------------------------------------------------ o dia */
 
 .extrato__dia + .extrato__dia {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
-/* A faixa do dia: o nome do dia à esquerda e o que ele somou à direita, na coluna dos valores. */
+/* A faixa do dia, em poço: o nome do dia à esquerda e o que ele somou à direita. */
 .extrato__dia-cab {
   display: flex;
   min-height: 40px;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 20px;
-  border-bottom: 1px solid var(--linha);
-  background: var(--superficie-2);
+  padding: 0 22px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 80%, var(--superficie));
 }
 
 .extrato__dia-nome {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   color: var(--tinta);
   font-size: 13.5px;
   font-weight: 600;
+}
+
+.extrato__dia-nome i {
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 /* Só a primeira letra: `capitalize` fazia "Seg., 7 De Out." (e "Septembar" no sérvio). */
@@ -396,31 +408,19 @@ onMounted(() => {
 
 .lancamento {
   display: flex;
-  min-height: 64px;
+  min-height: 66px;
   align-items: center;
   gap: 14px;
-  padding: 10px 20px;
+  padding: 10px 22px;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.lancamento:hover {
+  background: color-mix(in oklab, var(--superficie-2) 60%, var(--superficie));
 }
 
 .lancamento + .lancamento {
-  border-top: 1px solid var(--linha);
-}
-
-.lancamento__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--superficie-3);
-  color: var(--tinta-2);
-  font-size: 18px;
-}
-
-.lancamento--credito .lancamento__icone {
-  background: var(--ok-fundo);
-  color: var(--ok-tinta);
+  border-top: 1px solid var(--linha-suave);
 }
 
 .lancamento__texto {
@@ -456,8 +456,9 @@ onMounted(() => {
   min-width: 8.5rem;
   flex: none;
   color: var(--tinta);
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 650;
+  letter-spacing: -0.01em;
   text-align: end;
   white-space: nowrap;
 }
@@ -476,8 +477,12 @@ onMounted(() => {
   display: grid;
   justify-items: center;
   gap: 8px;
-  padding: 36px 24px;
+  padding: 40px 24px;
   text-align: center;
+}
+
+.extrato__estado .ui-ladrilho {
+  margin-bottom: 4px;
 }
 
 .extrato__estado strong {
@@ -494,26 +499,10 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-.extrato__estado-icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 22px;
-}
-
-.extrato__estado-icone--erro {
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
-}
-
 @media (max-width: 640px) {
   .extrato__dia-cab,
   .lancamento {
-    padding-inline: 14px;
+    padding-inline: 16px;
   }
 
   .lancamento {

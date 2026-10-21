@@ -378,15 +378,22 @@ function estadoDoPasso(indice: number) {
   margin-bottom: 12px;
 }
 
-/* O ladrilho na cor do lugar (azul da clínica, lavanda do hotel), como os discos da barra. */
+/* O ladrilho no degradê do lugar (azul da clínica, lavanda do hotel), como o título das telas. */
 .publica__icone {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   flex: none;
   place-items: center;
-  border-radius: 15px;
-  background: var(--pj-lugar-claro);
+  border-radius: 16px;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, var(--pj-lugar-claro) 80%, #fff) 0%,
+    var(--pj-lugar-claro) 100%
+  );
+  box-shadow:
+    0 10px 24px -12px color-mix(in oklab, var(--pj-lugar-claro) 80%, transparent),
+    inset 0 1px 0 rgb(255 255 255 / 35%);
   color: var(--rail);
   font-size: 26px;
 }

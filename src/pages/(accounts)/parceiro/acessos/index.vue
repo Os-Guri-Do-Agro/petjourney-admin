@@ -886,7 +886,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         <h2 id="acessos-guia-titulo" class="guia__titulo">{{ t('acessos.guia.titulo') }}</h2>
         <ol class="passos">
           <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
-            <span class="passo__icone" aria-hidden="true"><i :class="passo.icone" /></span>
+            <span class="ui-ladrilho" aria-hidden="true"><i :class="passo.icone" /></span>
             <span class="passo__texto">
               <strong>
                 <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
@@ -1061,7 +1061,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
       </div>
 
       <div v-else-if="error" class="estado ui-folha" role="alert">
-        <span class="estado__icone estado__icone--erro" aria-hidden="true">
+        <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
           <i class="ph ph-warning-circle" />
         </span>
         <p>{{ error }}</p>
@@ -1077,7 +1077,9 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
       <!-- Vazio por filtro é outro problema: a saída é limpar o filtro, não vincular código. -->
       <div v-else-if="items.length === 0 && temFiltroAtivo" class="estado ui-folha">
-        <span class="estado__icone" aria-hidden="true"><i class="ph ph-funnel-x" /></span>
+        <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
+          <i class="ph ph-funnel-x" />
+        </span>
         <h2>{{ t('acessos.list.emptyFiltroTitle') }}</h2>
         <p>{{ t('acessos.list.emptyFiltroBody') }}</p>
         <Button
@@ -1092,14 +1094,14 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
       <!-- Nenhum acesso ativo: é aqui que se aprende como um acesso chega. -->
       <div v-else-if="items.length === 0 && activeTab === 'ativos'" class="estado ui-folha">
-        <span class="estado__icone estado__icone--lugar" aria-hidden="true">
+        <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
           <i class="ph ph-key" />
         </span>
         <h2>{{ t('acessos.list.emptyAtivosTitle') }}</h2>
         <p>{{ t('acessos.list.emptyAtivosBody') }}</p>
         <ol v-if="!isGuidanceVisible" class="passos passos--vazio">
           <li v-for="(passo, indice) in passosDoGuia" :key="passo.id" class="passo">
-            <span class="passo__icone" aria-hidden="true"><i :class="passo.icone" /></span>
+            <span class="ui-ladrilho" aria-hidden="true"><i :class="passo.icone" /></span>
             <span class="passo__texto">
               <strong>
                 <span class="passo__n ui-num" aria-hidden="true">{{ indice + 1 }}</span>
@@ -1121,7 +1123,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
       </div>
 
       <div v-else-if="items.length === 0" class="estado ui-folha">
-        <span class="estado__icone" aria-hidden="true">
+        <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
           <i class="ph ph-clock-counter-clockwise" />
         </span>
         <h2>{{ t('acessos.list.emptyHistoricoTitle') }}</h2>
@@ -1129,7 +1131,23 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
       </div>
 
       <template v-else>
-        <div class="quadro ui-folha" :class="`quadro--${activeTab}`">
+        <section
+          class="quadro ui-folha ui-cartao"
+          :class="`quadro--${activeTab}`"
+          aria-labelledby="acessos-quadro-titulo"
+        >
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true">
+              <i :class="activeTab === 'ativos' ? 'ph ph-key' : 'ph ph-clock-counter-clockwise'" />
+            </span>
+            <div class="ui-cartao__titulos">
+              <h2 id="acessos-quadro-titulo" class="ui-cartao__titulo">
+                {{ t(`acessos.tabs.${activeTab}.label`) }}
+              </h2>
+              <p class="ui-cartao__descricao">{{ t(`acessos.tabs.${activeTab}.description`) }}</p>
+            </div>
+          </header>
+
           <div class="quadro__cab" aria-hidden="true">
             <span>{{ t('acessos.lista.colunas.pet') }}</span>
             <span>{{ t('acessos.lista.colunas.vinculado') }}</span>
@@ -1479,7 +1497,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
               </template>
             </li>
           </ul>
-        </div>
+        </section>
 
         <div v-if="hasMore" class="mais">
           <Button
@@ -1501,20 +1519,6 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como em Pacientes.
- */
-.tela-acessos {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .acessos {
   display: grid;
   gap: 16px;
@@ -1613,22 +1617,19 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px;
+  padding: 16px 18px;
   border: 1px solid var(--linha);
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
 }
 
-.passo__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 21px;
+/* No vazio, os passos moram dentro da folha: viram poços, não cartões. */
+.passos--vazio .passo {
+  border-color: var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
+  box-shadow: none;
 }
 
 .passo__texto {
@@ -1693,7 +1694,6 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 .barra__busca :deep(.p-inputtext) {
   min-height: 46px;
   padding-inline-start: 44px;
-  border-radius: 12px;
   font-size: 15.5px;
 }
 
@@ -1707,7 +1707,6 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   min-height: 46px;
   gap: 8px;
   padding-inline: 16px;
-  border-radius: 12px;
   font-size: 14.5px;
   font-weight: 500;
 }
@@ -1846,8 +1845,9 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   min-height: 40px;
   align-items: center;
   column-gap: 16px;
-  padding: 0 18px;
+  padding: 0 20px;
   border-bottom: 1px solid var(--linha);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 12.5px;
   font-weight: 550;
@@ -1860,6 +1860,12 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
 .col-num {
   justify-self: start;
+}
+
+/* No cartão, a primeira linha vem depois do cabeçalho: sem canto arredondado no hover. */
+.quadro .ui-lista > li:first-child > .ui-linha {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .linha.ui-linha {
@@ -1893,8 +1899,13 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
 
 .linha__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 0 6px;
+}
+
+.linha__servico {
+  white-space: nowrap;
 }
 
 .linha__meta > span + span::before {
@@ -2039,7 +2050,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   height: 100%;
   min-inline-size: 4px;
   border-radius: inherit;
-  background: var(--salvia);
+  background: var(--pj-lugar);
 }
 
 .prazo small {
@@ -2193,15 +2204,15 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   display: grid;
   justify-items: center;
   gap: 8px;
-  padding: 36px 24px;
+  padding: 40px 24px;
   text-align: center;
 }
 
 .estado h2 {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   color: var(--tinta);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .estado p {
@@ -2216,27 +2227,6 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   margin-top: 10px;
 }
 
-.estado__icone {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  border-radius: 16px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 24px;
-}
-
-.estado__icone--lugar {
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-}
-
-.estado__icone--erro {
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
-}
-
 .passos--vazio {
   width: 100%;
   max-width: 900px;
@@ -2244,10 +2234,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
   text-align: start;
 }
 
-.passos--vazio .passo {
-  background: var(--superficie-2);
-  border-color: transparent;
-}
+
 
 /* ------------------------------------------------------------------ movimento */
 

@@ -142,7 +142,9 @@ watch(
   >
     <template #header>
       <h2 class="sg-titulo">
-        <i class="ph ph-hand-coins" aria-hidden="true" />
+        <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
+          <i class="ph ph-hand-coins" />
+        </span>
         {{ t('carteira.detail.title') }}
       </h2>
     </template>
@@ -231,7 +233,7 @@ watch(
 
         <section class="sg__secao" aria-labelledby="sg-pix">
           <h3 id="sg-pix" class="sg__subtitulo">{{ t('carteira.detail.pixSnapshot') }}</h3>
-          <div class="sg__pix">
+          <div class="sg__pix ui-poco">
             <bdi class="sg__chave" dir="ltr">{{ saque.chavePixSnapshot }}</bdi>
             <Button
               type="button"
@@ -264,29 +266,18 @@ watch(
 .sg-titulo {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
   color: var(--tinta);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.01em;
-}
-
-.sg-titulo i {
-  color: var(--portal-tinta);
-  font-size: 22px;
 }
 
 .sg {
   display: grid;
-  gap: 22px;
+  gap: 24px;
   padding-bottom: 8px;
-
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
 }
 
 .sg__carregando {
@@ -320,11 +311,19 @@ watch(
   font-size: 14px;
 }
 
-/* O valor e o estado, no alto. */
+/* O valor e o estado, no alto, num poço com a luz do Portal. */
 .sg__topo {
   display: grid;
   justify-items: start;
   gap: 6px;
+  padding: 18px 20px 20px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie)),
+    color-mix(in oklab, var(--superficie-2) 60%, var(--superficie))
+  );
 }
 
 .sg__rotulo {
@@ -334,7 +333,7 @@ watch(
 
 .sg__valor {
   color: var(--tinta);
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.1;
@@ -349,7 +348,7 @@ watch(
   align-items: flex-start;
   gap: 10px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--risco-fundo);
   color: var(--tinta);
   font-size: 14px;
@@ -375,9 +374,9 @@ watch(
 
 .sg__subtitulo {
   margin: 0;
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
 }
 
 /* A linha do tempo: um ponto por marco e um fio entre eles. */
@@ -402,12 +401,12 @@ watch(
 
 .marco:not(:last-child)::before {
   position: absolute;
-  top: 28px;
-  bottom: 2px;
+  top: 32px;
+  bottom: 4px;
   inset-inline-start: 13px;
   width: 2px;
   border-radius: 2px;
-  background: var(--linha-forte);
+  background: var(--linha-media);
   content: '';
 }
 
@@ -452,15 +451,13 @@ watch(
   font-size: 13.5px;
 }
 
-.sg__pix {
+.sg__pix.ui-poco {
   display: flex;
+  min-height: 52px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 8px 10px 14px;
-  border: 1px solid var(--linha);
-  border-radius: 12px;
-  background: var(--superficie-2);
+  padding: 8px 8px 8px 16px;
 }
 
 .sg__chave {
@@ -478,7 +475,7 @@ watch(
   margin: 0;
   padding: 12px 14px;
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   color: var(--tinta-2);
   font-size: 14px;
   overflow-wrap: anywhere;

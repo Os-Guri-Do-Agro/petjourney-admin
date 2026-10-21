@@ -23,21 +23,42 @@
 }
 
 .cfg-secao + .cfg-secao {
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
 }
 
 @container cfg-folha (min-width: 720px) {
   .cfg-secao {
-    padding: 28px 28px 30px;
-    grid-template-columns: 14rem minmax(0, 1fr);
+    padding: 28px 30px 30px;
+    grid-template-columns: 15rem minmax(0, 1fr);
   }
 }
 
+/*
+ * A cabeça da seção: o ladrilho do assunto em cima (na cor clara do lugar), o nome e a frase.
+ * No estreito, o ladrilho fica ao lado do nome.
+ */
 .cfg-secao__cabeca {
   display: grid;
   min-width: 0;
   align-content: start;
   gap: 4px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cfg-secao__ladrilho.ui-ladrilho {
+  margin-bottom: 10px;
+}
+
+@container cfg-folha (max-width: 719px) {
+  .cfg-secao__cabeca:has(.cfg-secao__ladrilho) {
+    column-gap: 12px;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cfg-secao__ladrilho.ui-ladrilho {
+    grid-row: span 2;
+    margin-bottom: 0;
+  }
 }
 
 .cfg-secao__titulo {
@@ -47,13 +68,13 @@
   margin: 0;
   color: var(--tinta);
   font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
   line-height: 1.35;
 }
 
 .cfg-secao__titulo i {
-  color: var(--musgo);
+  color: var(--pj-lugar-tinta, var(--musgo));
   font-size: 18px;
 }
 
@@ -91,9 +112,9 @@
   align-items: center;
   justify-content: flex-end;
   gap: 10px 16px;
-  padding: 16px 24px;
-  border-top: 1px solid var(--linha);
-  background: var(--superficie-2);
+  padding: 16px 30px;
+  border-top: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
 }
 
 .cfg-rodape__nota {
@@ -144,7 +165,7 @@
   width: 52px;
   height: 52px;
   place-items: center;
-  border-radius: 16px;
+  border-radius: 15px;
   background: var(--risco-fundo);
   color: var(--risco-tinta);
   font-size: 24px;
@@ -153,7 +174,7 @@
 .cfg-estado h2 {
   margin: 8px 0 0;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .cfg-estado p {

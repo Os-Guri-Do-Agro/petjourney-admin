@@ -1281,6 +1281,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <aside v-if="isAtivo" class="ficha" aria-labelledby="atd-ficha-titulo">
             <header class="coluna__cab">
               <h2 id="atd-ficha-titulo" class="coluna__titulo">
+                <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+                  <i class="ph ph-clipboard-text" />
+                </span>
                 {{ t('acessos.detalhe.tabs.resumo.label') }}
               </h2>
               <!-- O responsável mexeu no resumo depois de entregar: a leitura de ontem pode não
@@ -1326,7 +1329,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
             <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a ficha existe
                  e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
             <section v-if="resumoVazio" class="vazio-ficha ui-folha">
-              <span class="vazio-ficha__icone" aria-hidden="true">
+              <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
                 <i class="ph ph-lock-simple-open" />
               </span>
               <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
@@ -1607,11 +1610,15 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
             <section v-if="podeAnotar" class="folha ui-folha" aria-labelledby="atd-folha-titulo">
               <header class="folha__cab">
-                <h2 id="atd-folha-titulo" class="folha__titulo">
-                  <i class="ph ph-note-pencil" aria-hidden="true" />
-                  {{ t('acessos.anotacao.title') }}
-                </h2>
-                <p class="folha__lede">{{ t('acessos.anotacao.lede') }}</p>
+                <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
+                  <i class="ph ph-note-pencil" />
+                </span>
+                <div class="folha__titulos">
+                  <h2 id="atd-folha-titulo" class="folha__titulo">
+                    {{ t('acessos.anotacao.title') }}
+                  </h2>
+                  <p class="folha__lede">{{ t('acessos.anotacao.lede') }}</p>
+                </div>
               </header>
 
               <div class="folha__secao">
@@ -1903,13 +1910,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   --p-textarea-padding-x: 12px;
   --p-select-padding-y: 10px;
   --p-select-padding-x: 12px;
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
 }
 
 .tela-acesso :deep(.p-inputtext),
@@ -2025,12 +2025,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 /* O peso e o prazo: os dois números da capa, separados por um fio, como na ficha da Clínica. */
+/* O peso e o prazo num cartão pequeno ao lado do nome, com fio entre os dois. */
 .capa__dados {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 12px 0;
   margin: 0;
+  padding: 16px 0;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-cartao);
+  background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
 }
 
 .capa__dado {
@@ -2038,8 +2043,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   min-width: 0;
   align-content: start;
   gap: 4px;
-  padding-inline: 24px;
-  border-inline-start: 1px solid var(--linha);
+  padding-inline: 22px;
+}
+
+.capa__dado + .capa__dado {
+  border-inline-start: 1px solid var(--linha-suave);
 }
 
 .capa__dado dt {
@@ -2099,7 +2107,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   height: 100%;
   min-inline-size: 4px;
   border-radius: inherit;
-  background: var(--salvia);
+  background: var(--pj-lugar);
 }
 
 .capa__prazo small {
@@ -2256,11 +2264,23 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .coluna__titulo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0;
   color: var(--tinta);
   font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.coluna__cab:has(.coluna__titulo .ui-ladrilho) .carimbo {
+  padding-inline-start: 42px;
+}
+
+.coluna__cab:has(.coluna__titulo .ui-ladrilho) .carimbo--atualizado {
+  margin-inline-start: 42px;
+  padding-inline-start: 10px;
 }
 
 .carimbo {
@@ -2295,7 +2315,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 0;
   padding: 18px 20px 16px 52px;
   border: 1px solid color-mix(in oklab, var(--pj-lugar) 28%, var(--linha));
-  border-radius: 16px;
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-xs);
   background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
 }
 
@@ -2362,11 +2383,12 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .sem-dados {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
-  padding: 12px 14px;
-  border: 1px dashed var(--linha-forte);
-  border-radius: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.45;
@@ -2382,17 +2404,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   justify-items: start;
   gap: 8px;
   padding: 20px;
-}
-
-.vazio-ficha__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 20px;
 }
 
 .vazio-ficha strong {
@@ -2736,32 +2747,40 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   container: folha / inline-size;
 }
 
+/* A cabeça da folha: o ladrilho do Portal, o título e a frase, sobre a luz do lugar. */
 .folha__cab {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px var(--folha-pad-x) 16px;
+  border-bottom: 1px solid var(--linha-suave);
+  border-radius: calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px) 0 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)),
+    var(--superficie)
+  );
+}
+
+.folha__titulos {
   display: grid;
-  gap: 4px;
-  padding: 20px var(--folha-pad-x) 6px;
+  min-width: 0;
+  gap: 3px;
 }
 
 .folha__titulo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   margin: 0;
   color: var(--tinta);
-  font-size: 20px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.folha__titulo i {
-  color: var(--pj-lugar-tinta);
-  font-size: 22px;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
 }
 
 .folha__lede {
   margin: 0;
   color: var(--tinta-2);
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.5;
 }
 
@@ -2773,7 +2792,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .folha__cab + .folha__secao {
-  padding-top: 12px;
+  padding-top: 20px;
   border-top: 0;
 }
 
@@ -2788,16 +2807,24 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .folha__subtitulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 15.5px;
   font-weight: 600;
 }
 
+/* O ícone do subtítulo num ladrilho pequeno, na cor clara do lugar. */
 .folha__subtitulo i {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .folha__duas {

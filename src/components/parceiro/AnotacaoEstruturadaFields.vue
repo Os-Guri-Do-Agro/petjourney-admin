@@ -973,7 +973,7 @@ function removeExame(indice: number) {
 .est__titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 15.5px;
@@ -981,9 +981,17 @@ function removeExame(indice: number) {
   letter-spacing: -0.01em;
 }
 
+/* O ícone do título num ladrilho pequeno, na cor clara do lugar (como os subtítulos da folha). */
 .est__titulo i {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo, var(--musgo-fundo));
   color: var(--pj-lugar-tinta, var(--musgo));
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .est__contagem {
@@ -1006,6 +1014,11 @@ function removeExame(indice: number) {
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.45;
+}
+
+/* A frase embaixo do título alinha com o texto dele, não com o ladrilho. */
+.est__cab > .est__lede {
+  padding-inline-start: 40px;
 }
 
 .est__field {

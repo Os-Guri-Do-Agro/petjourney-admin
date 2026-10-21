@@ -259,15 +259,23 @@ async function handleVincular() {
   color: var(--tinta);
 }
 
+/* O ladrilho do Portal, no degradê do lugar, como o título das telas. */
 .vincular-dialog__badge {
   display: grid;
   width: 56px;
   height: 56px;
   place-items: center;
-  border-radius: 18px;
-  background: var(--portal-fundo);
-  color: var(--portal-tinta);
+  border-radius: 17px;
+  background: var(--pj-lugar-degrade, var(--portal));
+  box-shadow:
+    var(--pj-lugar-sombra, var(--sombra-1)),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
   font-size: 26px;
+}
+
+.app-dark .vincular-dialog__badge {
+  color: var(--rail);
 }
 
 .vincular-dialog__title {

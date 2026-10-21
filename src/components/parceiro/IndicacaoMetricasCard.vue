@@ -161,83 +161,90 @@ function barraAria(day: string, count: number) {
 </script>
 
 <template>
-  <section class="qrm ui-folha" aria-labelledby="qrm-title">
-    <header class="qrm__cabeca">
-      <div class="qrm__titulos">
-        <h3 id="qrm-title" class="qrm__titulo">
-          <i class="ph ph-qr-code" aria-hidden="true" />
-          {{ t('divulgacao.metricas.title') }}
-        </h3>
-        <p v-if="isGuidanceVisible">{{ t('divulgacao.metricas.lede') }}</p>
+  <!-- As leituras são do Portal: o cartão leva a luz dele, também na gaveta do Início. -->
+  <section class="qrm ui-folha ui-cartao pj-lugar--portal" aria-labelledby="qrm-title">
+    <header class="ui-cartao__cabeca qrm__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-qr-code" /></span>
+      <div class="ui-cartao__titulos">
+        <h3 id="qrm-title" class="ui-cartao__titulo">{{ t('divulgacao.metricas.title') }}</h3>
+        <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+          {{ t('divulgacao.metricas.lede') }}
+        </p>
       </div>
-      <Button
-        v-if="erro === 'indisponivel' || erro === 'erro'"
-        :label="t('common.retry')"
-        icon="ph ph-arrow-clockwise"
-        severity="secondary"
-        text
-        size="small"
-        @click="emit('retry')"
-      />
+      <div v-if="erro === 'indisponivel' || erro === 'erro'" class="ui-cartao__acoes">
+        <Button
+          :label="t('common.retry')"
+          icon="ph ph-arrow-clockwise"
+          severity="secondary"
+          text
+          size="small"
+          @click="emit('retry')"
+        />
+      </div>
     </header>
 
-    <div v-if="loading" class="qrm__carregando" role="status" aria-live="polite" aria-busy="true">
-      <Skeleton width="8rem" height="2.2rem" border-radius="8px" />
-      <Skeleton width="100%" height="7rem" border-radius="10px" />
-    </div>
-
-    <p v-else-if="erro" class="qrm__aviso" role="status">
-      <i class="ph ph-info" aria-hidden="true" />
-      {{ t(`divulgacao.metricas.erro.${erro}`) }}
-    </p>
-
-    <p v-else-if="semLeitura" class="qrm__aviso" role="status">
-      <i class="ph ph-qr-code" aria-hidden="true" />
-      {{ t('divulgacao.metricas.vazio') }}
-    </p>
-
-    <div v-else class="qrm__corpo">
-      <div class="qrm__grafico">
-        <p class="qrm__total">
-          <strong class="ui-num">{{ scanCount }}</strong>
-          <span>{{ t('divulgacao.metricas.aoTodo', scanCount) }}</span>
-          <span class="qrm__periodo ui-num">
-            {{ t('divulgacao.metricas.ultimos14', { n: leiturasNoPeriodo }) }}
-          </span>
-        </p>
-
-        <!-- A lista é a tabela do gráfico: cada dia diz a data e a contagem ao leitor de tela. -->
-        <ol class="qrm__barras" :aria-label="t('divulgacao.metricas.chartAria')">
-          <li
-            v-for="dia in dias"
-            :key="dia.day"
-            class="qrm__dia"
-            :class="{
-              'qrm__dia--hoje': dia.hoje,
-              'qrm__dia--pico': dia.pico,
-              'qrm__dia--zero': dia.count === 0,
-            }"
-          >
-            <span class="qrm__coluna" aria-hidden="true">
-              <span v-if="dia.pico" class="qrm__rotulo ui-num">{{ dia.count }}</span>
-              <span class="qrm__barra" :style="{ blockSize: `${dia.percent}%` }" />
-            </span>
-            <span class="qrm__eixo ui-num" aria-hidden="true">{{ dia.eixo }}</span>
-            <span class="qrm__dica" aria-hidden="true">{{ barraAria(dia.day, dia.count) }}</span>
-            <span class="qrm__sr">{{ barraAria(dia.day, dia.count) }}</span>
-          </li>
-        </ol>
+    <div class="qrm__miolo">
+      <div v-if="loading" class="qrm__carregando" role="status" aria-live="polite" aria-busy="true">
+        <Skeleton width="8rem" height="2.2rem" border-radius="8px" />
+        <Skeleton width="100%" height="7rem" border-radius="10px" />
       </div>
 
-      <div v-if="recentes.length" class="qrm__recentes">
-        <h4 class="qrm__subtitulo">{{ t('divulgacao.metricas.recentes') }}</h4>
-        <ul class="qrm__lista">
-          <li v-for="item in recentes" :key="item.id" class="qrm__leitura">
-            <span class="qrm__aparelho" aria-hidden="true"><i :class="item.icone" /></span>
-            <time class="qrm__quando ui-num" :datetime="item.at">{{ item.quando }}</time>
-            <span v-if="item.dispositivo" class="qrm__dispositivo">{{ item.dispositivo }}</span>
-          </li>
-        </ul>
+      <p v-else-if="erro" class="qrm__aviso ui-poco" role="status">
+        <i class="ph ph-info" aria-hidden="true" />
+        {{ t(`divulgacao.metricas.erro.${erro}`) }}
+      </p>
+
+      <p v-else-if="semLeitura" class="qrm__aviso ui-poco" role="status">
+        <i class="ph ph-qr-code" aria-hidden="true" />
+        {{ t('divulgacao.metricas.vazio') }}
+      </p>
+
+      <div v-else class="qrm__corpo">
+        <div class="qrm__grafico">
+          <p class="qrm__total">
+            <strong class="ui-num">{{ scanCount }}</strong>
+            <span>{{ t('divulgacao.metricas.aoTodo', scanCount) }}</span>
+            <span class="ui-selo ui-selo--lugar qrm__periodo ui-num">
+              <i class="ph ph-calendar-blank" aria-hidden="true" />
+              {{ t('divulgacao.metricas.ultimos14', { n: leiturasNoPeriodo }) }}
+            </span>
+          </p>
+
+          <!-- A lista é a tabela do gráfico: cada dia diz a data e a contagem ao leitor de tela. -->
+          <ol class="qrm__barras" :aria-label="t('divulgacao.metricas.chartAria')">
+            <li
+              v-for="dia in dias"
+              :key="dia.day"
+              class="qrm__dia"
+              :class="{
+                'qrm__dia--hoje': dia.hoje,
+                'qrm__dia--pico': dia.pico,
+                'qrm__dia--zero': dia.count === 0,
+              }"
+            >
+              <span class="qrm__coluna" aria-hidden="true">
+                <span v-if="dia.pico" class="qrm__rotulo ui-num">{{ dia.count }}</span>
+                <span class="qrm__barra" :style="{ blockSize: `${dia.percent}%` }" />
+              </span>
+              <span class="qrm__eixo ui-num" aria-hidden="true">{{ dia.eixo }}</span>
+              <span class="qrm__dica" aria-hidden="true">{{ barraAria(dia.day, dia.count) }}</span>
+              <span class="qrm__sr">{{ barraAria(dia.day, dia.count) }}</span>
+            </li>
+          </ol>
+        </div>
+
+        <div v-if="recentes.length" class="qrm__recentes ui-poco">
+          <h4 class="qrm__subtitulo">{{ t('divulgacao.metricas.recentes') }}</h4>
+          <ul class="qrm__lista">
+            <li v-for="item in recentes" :key="item.id" class="qrm__leitura">
+              <span class="ui-ladrilho ui-ladrilho--p qrm__aparelho" aria-hidden="true">
+                <i :class="item.icone" />
+              </span>
+              <time class="qrm__quando ui-num" :datetime="item.at">{{ item.quando }}</time>
+              <span v-if="item.dispositivo" class="qrm__dispositivo">{{ item.dispositivo }}</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
@@ -245,14 +252,10 @@ function barraAria(day: string, count: number) {
 
 <style scoped>
 /*
- * Folha própria, nos tokens do Trilha: o mesmo bloco aparece na Divulgação (largo) e na gaveta
- * do QR no Início (estreito). Quem decide a forma é a largura do bloco, não a da janela.
+ * Cartão com cabeçalho, nos tokens do Trilha: o mesmo bloco aparece na Divulgação (largo) e na
+ * gaveta do QR no Início (estreito). Quem decide a forma é a largura do bloco, não a da janela.
  */
 .qrm {
-  display: grid;
-  align-content: start;
-  gap: 16px;
-  padding: 20px 22px 22px;
   container: qrm / inline-size;
 }
 
@@ -265,40 +268,10 @@ function barraAria(day: string, count: number) {
   white-space: nowrap;
 }
 
-.qrm__cabeca {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.qrm__titulos {
+.qrm__miolo {
   display: grid;
-  gap: 2px;
-}
-
-.qrm__titulo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.qrm__titulo i {
-  color: var(--portal);
-  font-size: 19px;
-}
-
-.qrm__titulos p {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  line-height: 1.45;
+  min-width: 0;
+  padding: 18px 20px 20px;
 }
 
 .qrm__carregando {
@@ -306,14 +279,12 @@ function barraAria(day: string, count: number) {
   gap: 12px;
 }
 
-.qrm__aviso {
+.qrm__aviso.ui-poco {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   margin: 0;
   padding: 14px 16px;
-  border-radius: 12px;
-  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
@@ -327,33 +298,29 @@ function barraAria(day: string, count: number) {
 
 .qrm__corpo {
   display: grid;
-  gap: 22px;
+  gap: 20px;
 }
 
 @container qrm (min-width: 640px) {
   .qrm__corpo {
-    align-items: start;
-    gap: 32px;
-    grid-template-columns: minmax(0, 1.7fr) minmax(220px, 1fr);
-  }
-
-  .qrm__recentes {
-    padding-inline-start: 28px;
-    border-inline-start: 1px solid var(--linha);
+    align-items: stretch;
+    gap: 24px;
+    grid-template-columns: minmax(0, 1.8fr) minmax(240px, 1fr);
   }
 }
 
 .qrm__grafico {
   display: grid;
   min-width: 0;
-  gap: 16px;
+  align-content: start;
+  gap: 18px;
 }
 
 .qrm__total {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
+  align-items: center;
+  gap: 6px 10px;
   margin: 0;
   color: var(--tinta-2);
   font-size: 14px;
@@ -361,41 +328,46 @@ function barraAria(day: string, count: number) {
 
 .qrm__total strong {
   color: var(--tinta);
-  font-size: 30px;
+  font-family: var(--font-dados);
+  font-size: 32px;
   font-weight: 650;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   line-height: 1;
 }
 
-.qrm__periodo {
-  color: var(--tinta-3);
-  font-size: 13px;
-}
-
-.qrm__periodo::before {
-  margin-inline-end: 8px;
-  content: '·';
+.qrm__periodo.ui-selo {
+  margin-inline-start: 4px;
 }
 
 /* ------------------------------------------------------------------ o gráfico
- * Colunas finas, ponta de cima arredondada (4px) e presa à linha de base, 2px de folga entre
- * elas, grade nenhuma: o pico leva o número; os outros dias, a dica ao passar o mouse.
+ * Colunas na cor do Portal, presas à linha de base, com duas guias tracejadas bem leves por trás;
+ * o pico leva o número numa pílula; os outros dias, a dica ao passar o mouse.
  */
 .qrm__barras {
   position: relative;
   display: grid;
-  gap: 2px;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
   grid-template-columns: repeat(14, minmax(0, 1fr));
 }
 
+.qrm__barras::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 140px;
+  background: linear-gradient(var(--linha) 1px, transparent 1px) 0 0 / 100% 33.34%;
+  content: '';
+  mask-image: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 8px);
+  pointer-events: none;
+}
+
 .qrm__dia {
   position: relative;
   display: grid;
-  gap: 6px;
-  grid-template-rows: 128px auto;
+  gap: 8px;
+  grid-template-rows: 140px auto;
   cursor: default;
 }
 
@@ -405,29 +377,38 @@ function barraAria(day: string, count: number) {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  border-bottom: 1px solid var(--linha-forte);
+  border-bottom: 1px solid var(--linha-media);
 }
 
 .qrm__barra {
-  width: min(70%, 22px);
-  min-block-size: 3px;
-  border-radius: 4px 4px 0 0;
-  background: var(--portal);
-  transition: background-color var(--pj-tempo-curto, 140ms) ease-out;
+  width: min(72%, 26px);
+  min-block-size: 4px;
+  border-radius: 7px 7px 2px 2px;
+  background: linear-gradient(180deg, var(--pj-lugar-claro, var(--portal-claro)), var(--pj-lugar, var(--portal)));
+  transition:
+    filter var(--pj-tempo-curto, 140ms) ease-out,
+    transform var(--pj-tempo-curto, 140ms) ease-out;
 }
 
 .qrm__dia--zero .qrm__barra {
-  background: var(--linha-forte);
+  width: 8px;
+  min-block-size: 8px;
+  margin-bottom: 4px;
+  border-radius: 999px;
+  background: var(--linha-media);
 }
 
 .qrm__dia:hover .qrm__barra {
-  background: var(--portal-tinta);
+  filter: saturate(1.2) brightness(0.92);
 }
 
 .qrm__rotulo {
-  margin-bottom: 4px;
-  color: var(--tinta);
-  font-size: 12.5px;
+  margin-bottom: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--tinta);
+  color: var(--superficie);
+  font-size: 12px;
   font-weight: 650;
 }
 
@@ -438,7 +419,11 @@ function barraAria(day: string, count: number) {
 }
 
 .qrm__dia--hoje .qrm__eixo {
-  color: var(--tinta);
+  justify-self: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--pj-lugar-fundo, var(--portal-fundo));
+  color: var(--pj-lugar-tinta, var(--portal-tinta));
   font-weight: 650;
 }
 
@@ -500,24 +485,37 @@ function barraAria(day: string, count: number) {
   }
 
   .qrm__dia {
-    grid-template-rows: 104px auto;
+    grid-template-rows: 112px auto;
+  }
+
+  .qrm__barras {
+    gap: 2px;
+  }
+
+  .qrm__barras::before {
+    height: 112px;
+  }
+
+  .qrm__miolo {
+    padding: 16px;
   }
 }
 
 /* ------------------------------------------------------------------ leituras recentes */
 
-.qrm__recentes {
+.qrm__recentes.ui-poco {
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
+  padding: 14px 16px 8px;
 }
 
 .qrm__subtitulo {
   margin: 0;
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 650;
 }
 
 .qrm__lista {
@@ -529,25 +527,19 @@ function barraAria(day: string, count: number) {
 
 .qrm__leitura {
   display: flex;
-  min-height: 44px;
+  min-height: 48px;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .qrm__leitura + .qrm__leitura {
   border-top: 1px solid var(--linha);
 }
 
-.qrm__aparelho {
-  display: grid;
-  width: 28px;
-  height: 28px;
-  flex: none;
-  place-items: center;
-  border-radius: 8px;
-  background: var(--superficie-2);
+.qrm__aparelho.ui-ladrilho {
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta-2);
-  font-size: 16px;
 }
 
 .qrm__quando {
@@ -555,7 +547,7 @@ function barraAria(day: string, count: number) {
   min-width: 0;
   color: var(--tinta);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550;
 }
 
 .qrm__dispositivo {

@@ -131,7 +131,13 @@ watch(
 </script>
 
 <template>
-  <UiPagina class="tela-conta" :titulo="t('settings.title')" :resumo="resumo" largura="leitura">
+  <UiPagina
+    class="tela-conta"
+    :titulo="t('settings.title')"
+    :resumo="resumo"
+    largura="leitura"
+    icone="ph ph-gear-six"
+  >
     <nav class="conta-abas" :aria-label="t('settings.abasAria')">
       <RouterLink
         v-for="aba in tabs"
@@ -159,21 +165,7 @@ watch(
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha, como nas outras telas redesenhadas:
- * fora do antigo `.hc-tema` o PrimeVue usaria o cinza do preset.
- */
-.tela-conta {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
-/* As abas da conta, no desenho das abas de destino: sublinhado de 3 px no musgo. */
+/* As abas da conta, no desenho das abas de destino: sublinhado de 3 px na cor do lugar. */
 .conta-abas {
   display: flex;
   gap: 4px;
@@ -216,7 +208,7 @@ watch(
 
 .conta-abas__aba:focus-visible {
   border-radius: 6px;
-  outline: 2px solid var(--musgo);
+  outline: 2px solid var(--pj-lugar);
   outline-offset: -4px;
 }
 
@@ -226,7 +218,7 @@ watch(
 }
 
 .conta-abas__aba--atual i {
-  color: var(--musgo);
+  color: var(--pj-lugar);
 }
 
 .conta-abas__aba--atual::after {
@@ -236,7 +228,7 @@ watch(
   left: 14px;
   height: 3px;
   border-radius: 3px 3px 0 0;
-  background: var(--musgo);
+  background: var(--pj-lugar);
   content: '';
 }
 

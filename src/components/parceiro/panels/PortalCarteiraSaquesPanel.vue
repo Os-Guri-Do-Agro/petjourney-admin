@@ -152,14 +152,13 @@ watch(drawerVisible, (open) => {
   <div id="partner-panel-saques" class="saques">
     <div
       v-if="loading"
-      class="ui-folha"
       role="status"
       aria-live="polite"
       :aria-label="t('carteira.saques.loadingTitle')"
     >
       <ul class="ui-lista" aria-hidden="true">
         <li v-for="n in 3" :key="n" class="ui-linha saque saque--esqueleto">
-          <Skeleton width="36px" height="36px" border-radius="10px" />
+          <Skeleton width="36px" height="36px" border-radius="11px" />
           <span class="ui-linha__texto">
             <Skeleton width="7rem" height="1rem" border-radius="6px" />
             <Skeleton width="10rem" height="0.75rem" border-radius="6px" />
@@ -169,8 +168,8 @@ watch(drawerVisible, (open) => {
       </ul>
     </div>
 
-    <div v-else-if="error" class="saques__estado ui-folha" role="alert">
-      <span class="saques__estado-icone saques__estado-icone--erro" aria-hidden="true">
+    <div v-else-if="error" class="saques__estado" role="alert">
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
         <i class="ph ph-warning-circle" />
       </span>
       <p>{{ error }}</p>
@@ -184,85 +183,80 @@ watch(drawerVisible, (open) => {
       />
     </div>
 
-    <div v-else-if="saques.length === 0" class="saques__estado ui-folha">
-      <span class="saques__estado-icone" aria-hidden="true"><i class="ph ph-hand-coins" /></span>
+    <div v-else-if="saques.length === 0" class="saques__estado">
+      <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+        <i class="ph ph-hand-coins" />
+      </span>
       <strong>{{ t('carteira.saques.emptyTitle') }}</strong>
       <p>{{ t('carteira.tela.saquesVazio') }}</p>
     </div>
 
-    <div v-else class="ui-folha">
-      <ul class="ui-lista">
-        <li v-for="saque in saquesOrdenados" :key="saque.id">
-          <button
-            type="button"
-            class="ui-linha saque"
-            :class="{
-              'ui-marca ui-marca--risco': saque.status === 'FALHA',
-              'saque--aberto': drawerVisible && selectedSaqueId === saque.id,
-            }"
-            :aria-current="drawerVisible && selectedSaqueId === saque.id ? 'true' : undefined"
-            @click="openSaqueDetail(saque.id)"
-          >
-            <span class="saque__icone" aria-hidden="true">
-              <i class="ph ph-arrow-up-right" />
-            </span>
+    <ul v-else class="ui-lista saques__lista">
+      <li v-for="saque in saquesOrdenados" :key="saque.id">
+        <button
+          type="button"
+          class="ui-linha saque"
+          :class="{
+            'ui-marca ui-marca--risco': saque.status === 'FALHA',
+            'saque--aberto': drawerVisible && selectedSaqueId === saque.id,
+          }"
+          :aria-current="drawerVisible && selectedSaqueId === saque.id ? 'true' : undefined"
+          @click="openSaqueDetail(saque.id)"
+        >
+          <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+            <i class="ph ph-arrow-up-right" />
+          </span>
 
-            <span class="ui-linha__texto">
-              <strong class="ui-linha__titulo ui-num saque__valor">
-                {{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}
-              </strong>
-              <span class="ui-linha__meta ui-num">
-                {{ t('carteira.saques.requestedAt', { data: formatDateTime(saque.createdAt) }) }}
-              </span>
-              <span v-if="saque.motivoFalha" class="ui-linha__meta saque__falha">
-                {{ saque.motivoFalha }}
-              </span>
+          <span class="ui-linha__texto">
+            <strong class="ui-linha__titulo ui-num saque__valor">
+              {{ formatCentavosToBrl(saque.valorCentavos, intlLocale()) }}
+            </strong>
+            <span class="ui-linha__meta ui-num">
+              {{ t('carteira.saques.requestedAt', { data: formatDateTime(saque.createdAt) }) }}
             </span>
+            <span v-if="saque.motivoFalha" class="ui-linha__meta saque__falha">
+              {{ saque.motivoFalha }}
+            </span>
+          </span>
 
-            <span class="ui-linha__fim">
-              <span class="ui-selo" :class="SELO_DO_SAQUE[saque.status].classe">
-                <i :class="SELO_DO_SAQUE[saque.status].icone" aria-hidden="true" />
-                {{ t(`carteira.saques.status.${saque.status}`) }}
-              </span>
-              <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+          <span class="ui-linha__fim">
+            <span class="ui-selo" :class="SELO_DO_SAQUE[saque.status].classe">
+              <i :class="SELO_DO_SAQUE[saque.status].icone" aria-hidden="true" />
+              {{ t(`carteira.saques.status.${saque.status}`) }}
             </span>
-          </button>
-        </li>
-      </ul>
-    </div>
+            <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />
+          </span>
+        </button>
+      </li>
+    </ul>
 
     <PortalSaqueDetalheDrawer v-model:visible="drawerVisible" :saque-id="selectedSaqueId" />
   </div>
 </template>
 
+
 <style scoped>
+/* Os saques moram no cartão da página (`carteira/index.vue`): aqui não há folha própria. */
 .saques {
   display: grid;
-  gap: 14px;
 }
 
 .saque.ui-linha {
   min-height: 68px;
+  padding-inline: 22px;
+}
+
+/* No cartão, a linha não arredonda: o cartão já recorta os cantos. */
+.saques__lista > li > .ui-linha {
+  border-radius: 0;
 }
 
 .saque--aberto.ui-linha {
   background: color-mix(in oklab, var(--pj-lugar-fundo) 65%, var(--superficie));
 }
 
-.saque__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--superficie-3);
-  color: var(--tinta-2);
-  font-size: 18px;
-}
-
 .saque__valor {
-  font-size: 15.5px;
+  font-size: 16px;
   font-weight: 650;
 }
 
@@ -274,8 +268,12 @@ watch(drawerVisible, (open) => {
   display: grid;
   justify-items: center;
   gap: 8px;
-  padding: 36px 24px;
+  padding: 40px 24px;
   text-align: center;
+}
+
+.saques__estado .ui-ladrilho {
+  margin-bottom: 4px;
 }
 
 .saques__estado strong {
@@ -290,21 +288,5 @@ watch(drawerVisible, (open) => {
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
-}
-
-.saques__estado-icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 22px;
-}
-
-.saques__estado-icone--erro {
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
 }
 </style>

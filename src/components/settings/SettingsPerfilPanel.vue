@@ -541,6 +541,9 @@ onMounted(() => {
 
     <section class="cfg-secao" aria-labelledby="perfil-secao-identidade">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-identification-badge" />
+        </span>
         <h3 id="perfil-secao-identidade" class="cfg-secao__titulo">
           {{ t('settings.perfil.sections.identidade') }}
         </h3>
@@ -574,6 +577,9 @@ onMounted(() => {
 
     <section class="cfg-secao" aria-labelledby="perfil-secao-contato">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-phone" />
+        </span>
         <h3 id="perfil-secao-contato" class="cfg-secao__titulo">
           {{ t('settings.perfil.sections.contato') }}
         </h3>
@@ -607,6 +613,9 @@ onMounted(() => {
 
     <section class="cfg-secao" aria-labelledby="perfil-secao-documento">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-file-text" />
+        </span>
         <h3 id="perfil-secao-documento" class="cfg-secao__titulo">
           {{ t('settings.perfil.sections.documento') }}
         </h3>
@@ -632,6 +641,9 @@ onMounted(() => {
 
     <section class="cfg-secao" aria-labelledby="perfil-secao-vet">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-stethoscope" />
+        </span>
         <h3 id="perfil-secao-vet" class="cfg-secao__titulo">
           {{ t('settings.perfil.sections.vet') }}
         </h3>
@@ -674,13 +686,19 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* A capa: a foto e quem é, sobre a luz do lugar, como a cabeça dos cartões de estado. */
 .perfil__capa {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 20px 28px;
-  padding: 28px;
-  border-bottom: 1px solid var(--linha);
+  padding: 28px 30px;
+  border-bottom: 1px solid var(--linha-suave);
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .perfil__esqueleto {
@@ -700,11 +718,12 @@ onMounted(() => {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: var(--musgo-fundo);
+  background: var(--pj-lugar-degrade, var(--musgo-fundo));
   box-shadow:
     0 0 0 4px var(--superficie),
-    0 0 0 5px var(--linha);
-  color: var(--musgo);
+    0 0 0 5px var(--linha),
+    var(--sombra-2);
+  color: #fff;
   cursor: pointer;
 }
 
@@ -766,8 +785,8 @@ onMounted(() => {
 
 .perfil__nome {
   margin: 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -824,6 +843,10 @@ onMounted(() => {
   padding-inline-end: 10px;
   color: var(--tinta-3);
   font-size: 17px;
+}
+
+.app-dark .perfil__foto {
+  color: var(--rail);
 }
 
 @media (max-width: 600px) {

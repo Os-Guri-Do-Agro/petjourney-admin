@@ -34,6 +34,26 @@ const ganhos = [
 <template>
   <main class="entrada">
     <aside class="entrada__marca">
+      <!-- A trilha da marca, os nós ligados da pata, como no painel de abertura do portal. -->
+      <svg
+        class="marca__trilha"
+        viewBox="0 0 480 640"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        <path
+          d="M 520 40 C 400 60 380 170 300 190 S 140 170 120 280 S 260 420 210 520 S 60 600 -40 660"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-dasharray="2 9"
+        />
+        <circle cx="300" cy="190" r="5" />
+        <circle cx="128" cy="300" r="3.5" />
+        <circle cx="212" cy="500" r="4.5" />
+      </svg>
+
       <div class="marca__topo">
         <span class="marca__pata" aria-hidden="true"><img src="/pata-escura.png" alt="" /></span>
         <img class="marca__nome" :src="logoNomeUrl" alt="PetJourney" />
@@ -117,6 +137,18 @@ const ganhos = [
   --marca-fundo: var(--musgo-fundo);
 }
 
+.marca__trilha {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: rgb(255 255 255 / 22%);
+  fill: rgb(255 255 255 / 30%);
+  /* Só no canto de cima, à direita: atrás da frase e dos ganhos ela só atrapalharia a leitura. */
+  mask-image: linear-gradient(215deg, #000 0%, #000 12%, transparent 34%);
+}
+
 /* A pata da marca, grande e quase sumida, saindo pelo canto de baixo. */
 .entrada__marca::after {
   position: absolute;
@@ -195,13 +227,20 @@ const ganhos = [
   list-style: none;
 }
 
+/* Os ganhos em vidro, como os números do painel de abertura. */
 .marca__ganhos li {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgb(255 255 255 / 11%);
+  border-radius: var(--raio-cartao-pequeno);
+  background: rgb(255 255 255 / 6%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
   font-size: 15px;
   font-weight: 500;
   line-height: 1.4;
+  backdrop-filter: blur(6px);
 }
 
 .marca__disco {
@@ -211,8 +250,9 @@ const ganhos = [
   flex: none;
   place-items: center;
   border-radius: 11px;
-  background: color-mix(in oklab, var(--sobre-rail) 11%, transparent);
-  color: var(--salvia);
+  background: linear-gradient(145deg, color-mix(in oklab, var(--salvia) 70%, #fff), var(--salvia));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
+  color: var(--rail);
   font-size: 19px;
 }
 
@@ -233,10 +273,16 @@ const ganhos = [
   inset-inline-end: 8px;
 }
 
+/* O formulário num cartão que flutua sobre o claro: o que se preenche junto vai junto. */
 .entrada__caixa {
   display: grid;
-  width: min(100%, 27rem);
+  width: min(100%, 31rem);
   gap: 28px;
+  padding: 36px 38px 34px;
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-painel);
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
 }
 
 .entrada__voltar :deep(a) {
@@ -275,8 +321,8 @@ const ganhos = [
 
 .entrada__cabeca h1 {
   margin: 0;
-  font-size: 32px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 650;
   letter-spacing: -0.025em;
   line-height: 1.15;
 }
@@ -354,8 +400,17 @@ const ganhos = [
   }
 
   .entrada__caixa {
+    width: min(100%, 27rem);
     margin-inline: auto;
     gap: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .marca__trilha {
+    display: none;
   }
 
   .entrada__cabeca h1 {

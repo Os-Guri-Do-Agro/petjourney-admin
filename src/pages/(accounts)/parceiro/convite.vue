@@ -79,7 +79,7 @@ onMounted(() => {
   <UiPagina class="tela-convite" :titulo="t('parceiro.convite.title')">
     <template #cabecalho>
       <div class="centro-cabeca">
-        <span class="centro-cabeca__selo" aria-hidden="true">
+        <span class="ui-ladrilho ui-ladrilho--lugar centro-cabeca__selo" aria-hidden="true">
           <i :class="accepted ? 'ph ph-check-circle' : 'ph ph-envelope-open'" />
         </span>
         <h1 class="centro-cabeca__titulo">{{ t('parceiro.convite.title') }}</h1>
@@ -132,22 +132,18 @@ onMounted(() => {
   text-align: center;
 }
 
-.centro-cabeca__selo {
-  display: grid;
-  width: 56px;
-  height: 56px;
-  place-items: center;
+.centro-cabeca__selo.ui-ladrilho {
+  width: 60px;
+  height: 60px;
   border-radius: 18px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 27px;
+  font-size: 28px;
 }
 
 .centro-cabeca__titulo {
-  margin: 10px 0 0;
+  margin: 12px 0 0;
   color: var(--tinta);
   font-size: 28px;
-  font-weight: 600;
+  font-weight: 650;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -166,7 +162,7 @@ onMounted(() => {
   max-width: 30rem;
   gap: 18px;
   margin: 8px auto 0;
-  padding: 24px;
+  padding: 26px 26px 22px;
 }
 
 .convite__campo {
@@ -204,8 +200,10 @@ onMounted(() => {
   align-items: flex-start;
   gap: 10px;
   margin: 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--linha);
+  padding: 12px 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;

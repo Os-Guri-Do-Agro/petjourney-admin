@@ -125,17 +125,6 @@ watch(
 </template>
 
 <style scoped>
-/* Botões de contorno e de texto nas cores do Trilha (fora do antigo `.hc-tema`). */
-.tela-divulgacao {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .divulgacao-pagina {
   display: grid;
   gap: 20px;

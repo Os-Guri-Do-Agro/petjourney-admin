@@ -31,9 +31,24 @@ const { store, ensureContext } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(CARTEIRA_TABS, 'extrato')
 
 const tabs = computed(() => [
-  { id: 'extrato', label: t('carteira.tabs.extrato.label') },
-  { id: 'saques', label: t('carteira.tabs.saques.label') },
+  {
+    id: 'extrato',
+    label: t('carteira.tabs.extrato.label'),
+    descricao: t('carteira.tabs.extrato.description'),
+    icone: 'ph ph-list-bullets',
+  },
+  {
+    id: 'saques',
+    label: t('carteira.tabs.saques.label'),
+    descricao: t('carteira.tabs.saques.description'),
+    icone: 'ph ph-hand-coins',
+  },
 ])
+
+/** A cabeça do cartão das listas diz qual das duas está aberta. */
+const abaAberta = computed(
+  () => tabs.value.find((tab) => tab.id === activeTab.value) ?? tabs.value[0]!,
+)
 
 const tabsAriaLabel = computed(() =>
   t('carteira.tabs.ariaLabel', { labels: tabs.value.map((tab) => tab.label).join(', ') }),
@@ -102,7 +117,9 @@ onMounted(() => {
 
     <!-- Sem o programa de afiliados não há carteira: a folha diz isso e leva aos programas. -->
     <div v-if="showAfiliadoGate" class="carteira-gate ui-folha">
-      <span class="carteira-gate__icone" aria-hidden="true"><i class="ph ph-wallet" /></span>
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+        <i class="ph ph-wallet" />
+      </span>
       <h2>{{ t('carteira.gate.title') }}</h2>
       <p>{{ t('carteira.gate.body') }}</p>
       <Button
@@ -119,17 +136,26 @@ onMounted(() => {
         @needs-programas="goToProgramas"
       />
 
-      <section class="carteira__listas" :aria-label="tabsAriaLabel">
-        <SelectButton
-          class="carteira__abas"
-          :model-value="activeTab"
-          :options="tabs"
-          option-label="label"
-          option-value="id"
-          :allow-empty="false"
-          :aria-label="tabsAriaLabel"
-          @update:model-value="escolherAba"
-        />
+      <section class="carteira__listas ui-folha ui-cartao" :aria-label="tabsAriaLabel">
+        <header class="ui-cartao__cabeca carteira__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i :class="abaAberta.icone" /></span>
+          <div class="ui-cartao__titulos">
+            <h2 class="ui-cartao__titulo">{{ abaAberta.label }}</h2>
+            <p class="ui-cartao__descricao">{{ abaAberta.descricao }}</p>
+          </div>
+          <div class="ui-cartao__acoes">
+            <SelectButton
+              class="carteira__abas"
+              :model-value="activeTab"
+              :options="tabs"
+              option-label="label"
+              option-value="id"
+              :allow-empty="false"
+              :aria-label="tabsAriaLabel"
+              @update:model-value="escolherAba"
+            />
+          </div>
+        </header>
 
         <PortalCarteiraExtratoPanel
           v-if="activeTab === 'extrato'"
@@ -144,35 +170,28 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Botões de contorno e de texto nas cores do Trilha (fora do antigo `.hc-tema`). */
-.tela-carteira {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .carteira {
   display: grid;
-  gap: 32px;
+  gap: 24px;
 }
 
 .carteira__listas {
-  display: grid;
-  gap: 16px;
+  overflow: clip;
 }
 
-.carteira__abas {
-  justify-self: start;
+.carteira__cabeca {
+  flex-wrap: wrap;
+}
+
+/* Base zero: o título divide a linha com o ladrilho, e só a troca de lista desce no estreito. */
+.carteira__cabeca .ui-cartao__titulos {
+  flex-basis: 0;
 }
 
 .carteira__abas :deep(.p-togglebutton-content) {
-  min-height: 38px;
-  padding-inline: 16px;
-  font-size: 14.5px;
+  min-height: 34px;
+  padding-inline: 14px;
+  font-size: 14px;
 }
 
 .carteira-gate {
@@ -185,22 +204,11 @@ onMounted(() => {
   text-align: center;
 }
 
-.carteira-gate__icone {
-  display: grid;
-  width: 52px;
-  height: 52px;
-  place-items: center;
-  border-radius: 16px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 24px;
-}
-
 .carteira-gate h2 {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   color: var(--tinta);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .carteira-gate p {
@@ -208,5 +216,12 @@ onMounted(() => {
   margin: 0 0 12px;
   color: var(--tinta-2);
   line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .carteira__cabeca .ui-cartao__acoes {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 </style>

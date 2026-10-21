@@ -9,8 +9,6 @@ import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
 const { t } = useI18n()
 
 const CONTACT_EMAIL = 'atendimento@petjourney.health'
@@ -48,32 +46,39 @@ const itens = computed(() => [
 </script>
 
 <template>
-  <UiSecao
+  <section
     id="carteira-ajuda"
-    :titulo="t('carteira.help.title')"
-    :descricao="t('carteira.help.lede')"
-    icone="ph ph-info"
+    class="ajuda ui-folha ui-cartao"
+    :class="{ 'ajuda--aberta': aberta }"
+    aria-labelledby="carteira-ajuda-titulo"
   >
-    <template #acoes>
-      <Button
-        type="button"
-        :label="aberta ? t('carteira.ajuda.fechar') : t('carteira.ajuda.abrir')"
-        :icon="aberta ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-        icon-pos="right"
-        severity="secondary"
-        text
-        size="small"
-        :aria-expanded="aberta"
-        aria-controls="carteira-ajuda-corpo"
-        @click="aberta = !aberta"
-      />
-    </template>
+    <header class="ui-cartao__cabeca ajuda__cabeca">
+      <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-info" /></span>
+      <div class="ui-cartao__titulos">
+        <h2 id="carteira-ajuda-titulo" class="ui-cartao__titulo">{{ t('carteira.help.title') }}</h2>
+        <p class="ui-cartao__descricao">{{ t('carteira.help.lede') }}</p>
+      </div>
+      <div class="ui-cartao__acoes">
+        <Button
+          type="button"
+          :label="aberta ? t('carteira.ajuda.fechar') : t('carteira.ajuda.abrir')"
+          :icon="aberta ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+          icon-pos="right"
+          severity="secondary"
+          text
+          size="small"
+          :aria-expanded="aberta"
+          aria-controls="carteira-ajuda-corpo"
+          @click="aberta = !aberta"
+        />
+      </div>
+    </header>
 
     <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
-    <div v-show="aberta" id="carteira-ajuda-corpo" class="ajuda ui-folha">
+    <div v-show="aberta" id="carteira-ajuda-corpo" class="ajuda__corpo">
       <ul class="ajuda__itens">
-        <li v-for="item in itens" :key="item.id" class="ajuda__item">
-          <span class="ajuda__icone" aria-hidden="true"><i :class="item.icon" /></span>
+        <li v-for="item in itens" :key="item.id" class="ajuda__item ui-poco">
+          <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i :class="item.icon" /></span>
           <span class="ajuda__texto">
             <strong>{{ item.title }}</strong>
             <span>{{ item.description }}</span>
@@ -81,7 +86,7 @@ const itens = computed(() => [
         </li>
       </ul>
 
-      <p class="ajuda__contato">
+      <p class="ajuda__contato ui-cartao__pe">
         <i class="ph ph-chat-circle" aria-hidden="true" />
         <span>
           {{ t('carteira.help.footerPrefix') }}
@@ -93,42 +98,58 @@ const itens = computed(() => [
         </span>
       </p>
     </div>
-  </UiSecao>
+  </section>
 </template>
 
 <style scoped>
 .ajuda {
-  display: grid;
-  overflow: hidden;
+  overflow: clip;
+}
+
+/* Fechada, a cabeça é o cartão inteiro: sem o fio de baixo. */
+.ajuda:not(.ajuda--aberta) .ajuda__cabeca {
+  padding-bottom: 16px;
 }
 
 .ajuda__itens {
   display: grid;
+  gap: 12px;
   margin: 0;
-  padding: 0;
+  padding: 18px 20px;
   list-style: none;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.ajuda__item {
+@media (max-width: 760px) {
+  .ajuda__itens {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* No estreito o botão de abrir desce para baixo do título, alinhado com o texto. */
+  .ajuda__cabeca {
+    flex-wrap: wrap;
+  }
+
+  .ajuda__cabeca .ui-cartao__titulos {
+    flex-basis: 0;
+  }
+
+  .ajuda__cabeca .ui-cartao__acoes {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    margin-top: -4px;
+    padding-inline-start: 42px;
+  }
+}
+
+.ajuda__item.ui-poco {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  margin-bottom: -1px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--linha);
-}
-
-.ajuda__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 18px;
+  padding: 14px 16px;
 }
 
 .ajuda__texto {
@@ -149,14 +170,12 @@ const itens = computed(() => [
   font-size: 13.5px;
 }
 
-.ajuda__contato {
+.ajuda__contato.ui-cartao__pe {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 10px;
   margin: 0;
-  padding: 14px 18px;
-  border-top: 1px solid var(--linha);
-  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;

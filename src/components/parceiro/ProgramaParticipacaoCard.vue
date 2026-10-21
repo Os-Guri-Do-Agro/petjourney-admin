@@ -238,37 +238,51 @@ watch(modoStatus, () => {
     certa para o estado (pedir, pedir de novo, ir para os ganhos). Em análise não há botão: a
     linha de atenção diz o que está acontecendo.
   -->
-  <article v-if="skeleton" class="programa ui-folha" aria-hidden="true">
-    <div class="programa__cabeca">
-      <Skeleton width="48px" height="48px" border-radius="14px" />
-      <div class="programa__nomes">
+  <article v-if="skeleton" class="programa ui-folha ui-cartao" aria-hidden="true">
+    <div class="ui-cartao__cabeca">
+      <Skeleton width="44px" height="44px" border-radius="13px" />
+      <div class="ui-cartao__titulos">
         <Skeleton width="11rem" height="1.1rem" border-radius="6px" />
         <Skeleton width="7rem" height="0.8rem" border-radius="6px" />
       </div>
     </div>
-    <Skeleton width="100%" height="0.85rem" border-radius="6px" />
-    <Skeleton width="80%" height="0.85rem" border-radius="6px" />
-    <div class="programa__da">
-      <Skeleton v-for="n in 3" :key="n" width="70%" height="0.8rem" border-radius="6px" />
+    <div class="ui-cartao__corpo programa__corpo">
+      <Skeleton width="100%" height="0.85rem" border-radius="6px" />
+      <Skeleton width="80%" height="0.85rem" border-radius="6px" />
+      <div class="programa__da ui-poco">
+        <Skeleton v-for="n in 3" :key="n" width="70%" height="0.8rem" border-radius="6px" />
+      </div>
     </div>
   </article>
 
   <article
     v-else
     :id="modo === 'afiliado' ? 'programas-afiliado' : undefined"
-    class="programa ui-folha"
+    class="programa ui-folha ui-cartao"
     :class="`programa--${modo}`"
     :data-status="modoStatus"
     :aria-labelledby="`programa-${modo}-nome`"
   >
-    <header class="programa__cabeca">
-      <span class="programa__icone" aria-hidden="true">
+    <header
+      class="ui-cartao__cabeca programa__cabeca"
+      :class="{ 'ui-cartao__cabeca--lugar': modoStatus === 'ATIVO' }"
+    >
+      <span
+        class="ui-ladrilho ui-ladrilho--g"
+        :class="{ 'ui-ladrilho--lugar': modoStatus === 'ATIVO' }"
+        aria-hidden="true"
+      >
         <i :class="meta.icon" />
       </span>
 
-      <div class="programa__nomes">
-        <h3 :id="`programa-${modo}-nome`" class="programa__nome">{{ meta.title }}</h3>
-        <p class="programa__sub">{{ meta.subtitle }}</p>
+      <div class="ui-cartao__titulos">
+        <h3 :id="`programa-${modo}-nome`" class="ui-cartao__titulo programa__nome">
+          {{ meta.title }}
+        </h3>
+        <p class="ui-cartao__descricao">{{ meta.subtitle }}</p>
+      </div>
+
+      <div class="ui-cartao__acoes">
         <span class="ui-selo programa__selo" :class="badge.classe">
           <i :class="badge.icone" aria-hidden="true" />
           {{
@@ -280,67 +294,69 @@ watch(modoStatus, () => {
       </div>
     </header>
 
-    <p class="programa__descricao">{{ meta.description }}</p>
+    <div class="ui-cartao__corpo programa__corpo">
+      <p class="programa__descricao">{{ meta.description }}</p>
 
-    <div class="programa__da">
-      <h4 class="programa__rotulo">{{ t('programas.card.oQueDa') }}</h4>
-      <ul class="programa__lista">
-        <li v-for="feature in meta.features" :key="feature">
-          <i class="ph ph-check" aria-hidden="true" />
-          <span>{{ feature }}</span>
-        </li>
-      </ul>
+      <div class="programa__da ui-poco">
+        <h4 class="programa__rotulo">{{ t('programas.card.oQueDa') }}</h4>
+        <ul class="programa__lista">
+          <li v-for="feature in meta.features" :key="feature">
+            <i class="ph ph-check" aria-hidden="true" />
+            <span>{{ feature }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <p v-if="modoStatus === 'ATIVO' && modo === 'participativo'" class="programa__aviso">
+        <i class="ph ph-phone" aria-hidden="true" />
+        <span>{{ t('programas.card.activeNoteParticipativo') }}</span>
+      </p>
+
+      <p
+        v-else-if="modoStatus === 'SOLICITADO'"
+        class="programa__aviso programa__aviso--atencao"
+        role="status"
+      >
+        <i class="ph ph-hourglass" aria-hidden="true" />
+        <span>{{ t('programas.card.info.pending') }}</span>
+      </p>
+
+      <div
+        v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
+        class="programa__aviso programa__aviso--risco"
+      >
+        <i
+          class="ph"
+          :class="modoStatus === 'REJEITADO' ? 'ph-x-circle' : 'ph-prohibit'"
+          aria-hidden="true"
+        />
+        <span class="programa__decisao">
+          <span>
+            {{
+              modoStatus === 'REJEITADO'
+                ? t('programas.card.info.rejected')
+                : t('programas.card.info.suspended')
+            }}
+          </span>
+          <span v-if="modoBloco.motivo">
+            <strong>{{ t('programas.card.info.motivoLabel') }}</strong> {{ modoBloco.motivo }}
+          </span>
+          <span v-if="decididoEmLabel" class="programa__quando ui-num">
+            {{ t('programas.card.info.decididoEm', { data: decididoEmLabel }) }}
+          </span>
+          <a
+            v-if="modoStatus === 'SUSPENSO'"
+            class="ui-mais programa__suporte"
+            href="mailto:atendimento@petjourney.health"
+          >
+            <i class="ph ph-envelope-simple" aria-hidden="true" />
+            {{ t('programas.card.info.contactSupport') }}
+          </a>
+        </span>
+      </div>
     </div>
 
-    <p v-if="modoStatus === 'ATIVO' && modo === 'participativo'" class="programa__aviso">
-      <i class="ph ph-phone" aria-hidden="true" />
-      <span>{{ t('programas.card.activeNoteParticipativo') }}</span>
-    </p>
-
-    <p
-      v-else-if="modoStatus === 'SOLICITADO'"
-      class="programa__aviso programa__aviso--atencao"
-      role="status"
-    >
-      <i class="ph ph-hourglass" aria-hidden="true" />
-      <span>{{ t('programas.card.info.pending') }}</span>
-    </p>
-
-    <div
-      v-else-if="modoStatus === 'REJEITADO' || modoStatus === 'SUSPENSO'"
-      class="programa__aviso programa__aviso--risco"
-    >
-      <i
-        class="ph"
-        :class="modoStatus === 'REJEITADO' ? 'ph-x-circle' : 'ph-prohibit'"
-        aria-hidden="true"
-      />
-      <span class="programa__decisao">
-        <span>
-          {{
-            modoStatus === 'REJEITADO'
-              ? t('programas.card.info.rejected')
-              : t('programas.card.info.suspended')
-          }}
-        </span>
-        <span v-if="modoBloco.motivo">
-          <strong>{{ t('programas.card.info.motivoLabel') }}</strong> {{ modoBloco.motivo }}
-        </span>
-        <span v-if="decididoEmLabel" class="programa__quando ui-num">
-          {{ t('programas.card.info.decididoEm', { data: decididoEmLabel }) }}
-        </span>
-        <a
-          v-if="modoStatus === 'SUSPENSO'"
-          class="ui-mais programa__suporte"
-          href="mailto:atendimento@petjourney.health"
-        >
-          <i class="ph ph-envelope-simple" aria-hidden="true" />
-          {{ t('programas.card.info.contactSupport') }}
-        </a>
-      </span>
-    </div>
-
-    <footer v-if="temPe" class="programa__pe">
+    <footer v-if="temPe" class="ui-cartao__pe programa__pe">
       <span v-if="modoStatus === 'ATIVO' && modo === 'afiliado'" class="programa__saldo">
         <span>{{ t('programas.card.info.saldo') }}</span>
         <strong class="ui-num">{{ saldoLabel }}</strong>
@@ -376,57 +392,32 @@ watch(modoStatus, () => {
 </template>
 
 <style scoped>
+/* Um cartão por programa: a cabeça com o nome e o estado, o corpo e, no pé, a ação. */
 .programa {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 16px;
-  padding: 22px 22px 20px;
+  overflow: clip;
 }
 
 .programa__cabeca {
-  display: flex;
   align-items: flex-start;
-  gap: 14px;
+  padding-top: 18px;
 }
 
-.programa__icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  flex: none;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 24px;
+.programa__nome.ui-cartao__titulo {
+  font-size: 17px;
 }
 
-.programa__nomes {
+.programa__cabeca .ui-cartao__acoes {
+  padding-top: 2px;
+}
+
+.programa__corpo {
   display: grid;
   flex: 1;
-  min-width: 0;
-  gap: 2px;
-}
-
-.programa__nome {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
-}
-
-.programa__sub {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-}
-
-.programa__selo {
-  justify-self: start;
-  margin-top: 6px;
+  align-content: start;
+  gap: 16px;
 }
 
 .programa__descricao {
@@ -437,21 +428,22 @@ watch(modoStatus, () => {
   line-height: 1.55;
 }
 
-.programa__da {
+.programa__da.ui-poco {
   display: grid;
-  gap: 8px;
+  gap: 10px;
+  padding: 14px 16px;
 }
 
 .programa__rotulo {
   margin: 0;
   color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .programa__lista {
   display: grid;
-  gap: 8px;
+  gap: 9px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -491,7 +483,7 @@ watch(modoStatus, () => {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
   color: var(--tinta);
   font-size: 13.5px;
@@ -540,16 +532,11 @@ watch(modoStatus, () => {
   color: var(--risco-tinta);
 }
 
-/* O pé: o que se lê à esquerda, a ação à direita. Encosta no fim da folha. */
-.programa__pe {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+/* O pé: o que se lê à esquerda, a ação à direita. */
+.programa__pe.ui-cartao__pe {
   justify-content: space-between;
   gap: 12px 16px;
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--linha);
+  padding-block: 14px 16px;
 }
 
 .programa__saldo {
@@ -564,9 +551,10 @@ watch(modoStatus, () => {
 
 .programa__saldo strong {
   color: var(--tinta);
-  font-size: 22px;
+  font-family: var(--font-dados);
+  font-size: 24px;
   font-weight: 650;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .programa__so-dono {
@@ -583,8 +571,14 @@ watch(modoStatus, () => {
 }
 
 @media (max-width: 520px) {
-  .programa {
-    padding: 18px 16px;
+  .programa__cabeca {
+    flex-wrap: wrap;
+  }
+
+  .programa__cabeca .ui-cartao__acoes {
+    width: 100%;
+    justify-content: flex-start;
+    padding-inline-start: 58px;
   }
 
   .programa__acao.p-button {

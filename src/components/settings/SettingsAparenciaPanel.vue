@@ -141,6 +141,9 @@ function alternarExplicacoes(ligado: boolean) {
   <div class="ui-folha cfg-folha aparencia">
     <section class="cfg-secao" aria-labelledby="aparencia-tema-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-circle-half" />
+        </span>
         <h3 id="aparencia-tema-titulo" class="cfg-secao__titulo">
           {{ t('settings.aparencia.tema.titulo') }}
         </h3>
@@ -173,6 +176,9 @@ function alternarExplicacoes(ligado: boolean) {
 
     <section class="cfg-secao" aria-labelledby="aparencia-barra-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-sidebar-simple" />
+        </span>
         <h3 id="aparencia-barra-titulo" class="cfg-secao__titulo">
           {{ t('settings.aparencia.barra.titulo') }}
         </h3>
@@ -206,6 +212,9 @@ function alternarExplicacoes(ligado: boolean) {
 
     <section class="cfg-secao" aria-labelledby="aparencia-densidade-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-rows" />
+        </span>
         <h3 id="aparencia-densidade-titulo" class="cfg-secao__titulo">
           {{ t('settings.aparencia.densidade.titulo') }}
         </h3>
@@ -243,6 +252,9 @@ function alternarExplicacoes(ligado: boolean) {
 
     <section class="cfg-secao" aria-labelledby="aparencia-explicacoes-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-info" />
+        </span>
         <h3 id="aparencia-explicacoes-titulo" class="cfg-secao__titulo">
           {{ t('settings.aparencia.explicacoes.titulo') }}
         </h3>
@@ -266,6 +278,9 @@ function alternarExplicacoes(ligado: boolean) {
 
     <section class="cfg-secao" aria-labelledby="aparencia-idioma-titulo">
       <header class="cfg-secao__cabeca">
+        <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
+          <i class="ph ph-translate" />
+        </span>
         <h3 id="aparencia-idioma-titulo" class="cfg-secao__titulo">
           {{ t('settings.conta.prefs.title') }}
         </h3>

@@ -109,6 +109,17 @@ const retidoCentavos = computed(() =>
     : 0,
 )
 
+/** Quanto do saldo total já está livre, em %, para a barra do saldo. */
+const parteLivre = computed(() => {
+  const total = carteira.value?.saldoTotalCentavos ?? 0
+
+  if (total <= 0) {
+    return 0
+  }
+
+  return Math.min(100, Math.max(0, (carteira.value!.saldoSacavelCentavos / total) * 100))
+})
+
 /**
  * A ação primária do saldo: sacar quando dá; cadastrar a chave quando é só ela que falta. Fora
  * disso, nenhuma — o motivo está na frase do topo da página.
@@ -322,28 +333,34 @@ onBeforeUnmount(() => {
   <div class="carteira-saldo">
     <div
       v-if="loading"
-      class="saldo ui-folha"
+      class="carteira-saldo__grade"
       role="status"
       aria-live="polite"
       aria-busy="true"
       :aria-label="t('carteira.visao.loadingAria')"
     >
-      <div class="saldo__topo" aria-hidden="true">
-        <div class="saldo__principal">
-          <Skeleton width="9rem" height="0.85rem" border-radius="6px" />
-          <Skeleton width="14rem" height="2.8rem" border-radius="10px" />
+      <div class="saldo ui-folha" aria-hidden="true">
+        <div class="saldo__topo">
+          <div class="saldo__principal">
+            <Skeleton width="11rem" height="2.2rem" border-radius="10px" />
+            <Skeleton width="15rem" height="3rem" border-radius="12px" />
+            <Skeleton width="100%" height="0.7rem" border-radius="999px" />
+          </div>
         </div>
       </div>
-      <div class="saldo__fatos" aria-hidden="true">
-        <div v-for="n in 3" :key="n" class="fato">
+      <div class="ui-indicadores saldo__indicadores" aria-hidden="true">
+        <div v-for="n in 3" :key="n" class="ui-indicador">
+          <Skeleton width="8rem" height="1.8rem" border-radius="8px" />
           <Skeleton width="6rem" height="0.8rem" border-radius="6px" />
-          <Skeleton width="8rem" height="1.4rem" border-radius="6px" />
+          <Skeleton width="10rem" height="0.7rem" border-radius="6px" />
         </div>
       </div>
     </div>
 
     <div v-else-if="error" class="saldo-erro ui-folha" role="alert">
-      <span class="saldo-erro__icone" aria-hidden="true"><i class="ph ph-warning-circle" /></span>
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
+        <i class="ph ph-warning-circle" />
+      </span>
       <p>{{ error }}</p>
       <Button
         type="button"
@@ -356,74 +373,108 @@ onBeforeUnmount(() => {
     </div>
 
     <template v-else-if="carteira">
-      <section class="saldo ui-folha" :aria-label="t('carteira.resumo.aria')">
-        <div class="saldo__topo">
-          <div class="saldo__principal">
-            <span class="saldo__rotulo">
-              <i class="ph ph-wallet" aria-hidden="true" />
-              {{ t('carteira.tela.disponivel') }}
-            </span>
-            <strong class="saldo__valor ui-num">
-              {{ formatBrl(carteira.saldoSacavelCentavos) }}
-            </strong>
+      <section class="carteira-saldo__grade" :aria-label="t('carteira.resumo.aria')">
+        <!-- O saldo: o que dá para sacar agora, grande, e a barra do saldo total (livre e liberando). -->
+        <div class="saldo ui-folha">
+          <div class="saldo__topo">
+            <div class="saldo__principal">
+              <span class="saldo__rotulo">
+                <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
+                  <i class="ph ph-wallet" />
+                </span>
+                {{ t('carteira.tela.disponivel') }}
+              </span>
+              <strong class="saldo__valor ui-num">
+                {{ formatBrl(carteira.saldoSacavelCentavos) }}
+              </strong>
+            </div>
+
+            <div v-if="acaoPrimaria" class="saldo__acoes">
+              <Button
+                v-if="acaoPrimaria === 'sacar'"
+                type="button"
+                class="saldo__acao"
+                icon="ph ph-hand-coins"
+                :label="t('carteira.visao.saque.submit')"
+                @click="abrirSaque"
+              />
+              <Button
+                v-else
+                type="button"
+                class="saldo__acao"
+                icon="ph ph-key"
+                :label="t('carteira.saudacao.cadastrarPix')"
+                @click="abrirPix"
+              />
+            </div>
           </div>
 
-          <div v-if="acaoPrimaria" class="saldo__acoes">
-            <Button
-              v-if="acaoPrimaria === 'sacar'"
-              type="button"
-              class="saldo__acao"
-              icon="ph ph-hand-coins"
-              :label="t('carteira.visao.saque.submit')"
-              @click="abrirSaque"
-            />
-            <Button
-              v-else
-              type="button"
-              class="saldo__acao"
-              icon="ph ph-key"
-              :label="t('carteira.saudacao.cadastrarPix')"
-              @click="abrirPix"
-            />
+          <div v-if="carteira.saldoTotalCentavos > 0" class="saldo__composicao">
+            <div
+              class="saldo__barra"
+              role="img"
+              :aria-label="
+                t('inicio.saldo.barraAria', {
+                  liberado: formatBrl(carteira.saldoSacavelCentavos),
+                  total: formatBrl(carteira.saldoTotalCentavos),
+                })
+              "
+            >
+              <span
+                v-if="parteLivre > 0"
+                class="saldo__barra-livre"
+                :style="{ width: `${parteLivre}%` }"
+              />
+              <span
+                v-if="parteLivre < 100"
+                class="saldo__barra-retida"
+                :style="{ width: `${100 - parteLivre}%` }"
+              />
+            </div>
+            <div class="saldo__legenda">
+              <span class="saldo__chave saldo__chave--livre">{{ t('carteira.tela.disponivel') }}</span>
+              <span v-if="retidoCentavos > 0" class="saldo__chave saldo__chave--retida">
+                {{ t('carteira.tela.liberando') }}
+              </span>
+              <span class="saldo__total">
+                {{ t('inicio.saldo.total') }}
+                <strong class="ui-num">{{ formatBrl(carteira.saldoTotalCentavos) }}</strong>
+              </span>
+            </div>
           </div>
         </div>
 
-        <dl class="saldo__fatos">
-          <div class="fato">
-            <dt class="fato__rotulo">
-              <i class="ph ph-hourglass-medium" aria-hidden="true" />
-              {{ t('carteira.tela.liberando') }}
-            </dt>
-            <dd class="fato__valor ui-num">{{ formatBrl(retidoCentavos) }}</dd>
-            <dd class="fato__nota">
+        <ul class="ui-indicadores saldo__indicadores">
+          <li class="ui-indicador ui-indicador--topo saldo__indicador">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-hourglass-medium" /></span>
+            <span class="ui-indicador__valor ui-num">{{ formatBrl(retidoCentavos) }}</span>
+            <span class="ui-indicador__rotulo">{{ t('carteira.tela.liberando') }}</span>
+            <span class="ui-indicador__nota">
               {{ retidoCentavos > 0 ? t('carteira.tela.liberandoNota') : t('carteira.tela.nadaLiberando') }}
-            </dd>
-          </div>
+            </span>
+          </li>
 
-          <div class="fato">
-            <dt class="fato__rotulo">
-              <i class="ph ph-arrow-circle-up-right" aria-hidden="true" />
-              {{ t('inicio.saldo.sacado') }}
-            </dt>
-            <dd class="fato__valor ui-num">{{ formatBrl(carteira.totalSacadoCentavos) }}</dd>
-            <dd class="fato__nota">{{ t('carteira.resumo.ciclo') }}</dd>
-          </div>
+          <li class="ui-indicador ui-indicador--topo saldo__indicador">
+            <span class="ui-ladrilho" aria-hidden="true">
+              <i class="ph ph-arrow-circle-up-right" />
+            </span>
+            <span class="ui-indicador__valor ui-num">
+              {{ formatBrl(carteira.totalSacadoCentavos) }}
+            </span>
+            <span class="ui-indicador__rotulo">{{ t('inicio.saldo.sacado') }}</span>
+            <span class="ui-indicador__nota">{{ t('carteira.resumo.ciclo') }}</span>
+          </li>
 
-          <div class="fato">
-            <dt class="fato__rotulo">
-              <i class="ph ph-key" aria-hidden="true" />
-              {{ t('carteira.visao.pix.label') }}
-            </dt>
-            <dd class="fato__valor fato__valor--chave">
-              <bdi
-                v-if="carteira.chavePix"
-                class="fato__chave"
-                dir="ltr"
-                :title="carteira.chavePix"
-              >
+          <li class="ui-indicador ui-indicador--topo saldo__indicador saldo__indicador--chave">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-key" /></span>
+            <span class="ui-indicador__valor saldo__chave-pix">
+              <bdi v-if="carteira.chavePix" dir="ltr" :title="carteira.chavePix">
                 {{ chaveMascarada }}
               </bdi>
-              <span v-else class="fato__vazio">{{ t('carteira.tela.semPix') }}</span>
+              <span v-else class="saldo__sem-chave">{{ t('carteira.tela.semPix') }}</span>
+            </span>
+            <span class="ui-indicador__rotulo saldo__rotulo-chave">
+              {{ t('carteira.visao.pix.label') }}
               <button
                 v-if="mostraBotaoDaChave"
                 type="button"
@@ -432,13 +483,13 @@ onBeforeUnmount(() => {
               >
                 {{ carteira.chavePix ? t('carteira.tela.trocarPix') : t('carteira.tela.cadastrarPix') }}
               </button>
-            </dd>
-            <dd class="fato__nota">
+            </span>
+            <span class="ui-indicador__nota">
               {{ t('carteira.resumo.minimo') }}
               <span class="ui-num">{{ formatBrl(minSaqueCentavos) }}</span>
-            </dd>
-          </div>
-        </dl>
+            </span>
+          </li>
+        </ul>
       </section>
 
       <p v-if="showComissaoDisabledNotice" class="saldo-aviso" role="status">
@@ -616,7 +667,15 @@ onBeforeUnmount(() => {
   gap: 12px;
 }
 
-/* ------------------------------------------------------------------ o saldo */
+.carteira-saldo__grade {
+  display: grid;
+  gap: 14px;
+}
+
+/* ------------------------------------------------------------------ o saldo
+ * O cartão do saldo: o número da tela, a ação e a barra do saldo total. O alto ganha a luz do
+ * Portal, num degradê que some no branco, como a cabeça dos cartões de estado.
+ */
 
 .saldo {
   display: grid;
@@ -628,37 +687,37 @@ onBeforeUnmount(() => {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px 24px;
-  padding: 24px 26px 22px;
+  gap: 18px 24px;
+  padding: 24px 28px 20px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 62%, var(--superficie)),
+    var(--superficie)
+  );
 }
 
 .saldo__principal {
   display: grid;
-  gap: 6px;
+  gap: 12px;
   min-width: 0;
 }
 
 .saldo__rotulo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   color: var(--tinta-2);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.saldo__rotulo i {
-  color: var(--pj-lugar);
-  font-size: 18px;
+  font-size: 14.5px;
+  font-weight: 600;
 }
 
 /* O número da tela: o que dá para sacar agora. */
 .saldo__valor {
   color: var(--tinta);
-  font-size: 44px;
+  font-size: 48px;
   font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 .saldo__acoes {
@@ -669,90 +728,131 @@ onBeforeUnmount(() => {
 
 .saldo__acao.p-button {
   min-height: 46px;
-  padding-inline: 20px;
+  padding-inline: 22px;
   font-size: 15px;
 }
 
-/* A régua de fatos: três colunas com fio entre elas, no tom de fundo da folha. */
-.saldo__fatos {
+/* A barra do saldo total: o livre na cor do Portal, o que ainda libera em listras. */
+.saldo__composicao {
   display: grid;
-  margin: 0;
-  border-top: 1px solid var(--linha);
-  background: var(--superficie-2);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 4px 28px 22px;
 }
 
-.fato {
-  display: grid;
-  align-content: start;
-  gap: 4px;
-  min-width: 0;
-  padding: 16px 26px 18px;
-}
-
-.fato + .fato {
-  border-inline-start: 1px solid var(--linha);
-}
-
-.fato__rotulo {
+.saldo__barra {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 500;
+  overflow: hidden;
+  height: 10px;
+  gap: 3px;
+  border-radius: 999px;
+  background: var(--superficie-3);
 }
 
-.fato__rotulo i {
-  color: var(--tinta-3);
-  font-size: 16px;
+.saldo__barra span {
+  height: 100%;
+  border-radius: 999px;
 }
 
-.fato dd {
-  margin: 0;
+.saldo__barra-livre {
+  background: linear-gradient(90deg, var(--pj-lugar-claro), var(--pj-lugar));
 }
 
-.fato__valor {
-  color: var(--tinta);
-  font-size: 22px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+.saldo__barra-retida {
+  background: repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklab, var(--pj-lugar) 38%, transparent) 0 3px,
+      transparent 3px 7px
+    ),
+    var(--pj-lugar-fundo);
 }
 
-.fato__valor--chave {
+.saldo__legenda {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  font-family: var(--font-dados);
-  font-size: 17px;
-  font-weight: 600;
+  align-items: center;
+  gap: 6px 20px;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
-.fato__chave {
-  display: inline-block;
+.saldo__chave {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.saldo__chave::before {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  content: '';
+}
+
+.saldo__chave--livre::before {
+  background: var(--pj-lugar);
+}
+
+.saldo__chave--retida::before {
+  background: repeating-linear-gradient(
+      -45deg,
+      color-mix(in oklab, var(--pj-lugar) 50%, transparent) 0 2px,
+      transparent 2px 4px
+    ),
+    var(--pj-lugar-fundo);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--pj-lugar) 40%, transparent);
+}
+
+.saldo__total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.saldo__total strong {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+/* ------------------------------------------------------------------ os indicadores */
+
+.saldo__indicadores {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.saldo__indicador .ui-indicador__valor {
+  font-size: 26px;
+}
+
+.saldo__chave-pix.ui-indicador__valor {
   overflow: hidden;
-  max-width: 100%;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  line-height: 1.55;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.fato__vazio {
+.saldo__sem-chave {
   color: var(--tinta-2);
   font-family: var(--font-texto);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
+}
+
+.saldo__rotulo-chave {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
 }
 
 .fato__trocar.ui-mais {
   font-family: var(--font-texto);
-}
-
-.fato__nota {
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  line-height: 1.4;
+  font-size: 13px;
 }
 
 .saldo-erro {
@@ -768,24 +868,13 @@ onBeforeUnmount(() => {
   color: var(--tinta-2);
 }
 
-.saldo-erro__icone {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: 14px;
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
-  font-size: 22px;
-}
-
 .saldo-aviso {
   display: flex;
   align-items: flex-start;
   gap: 10px;
   margin: 0;
   padding: 12px 16px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--atencao-fundo);
   color: var(--tinta);
   font-size: 14px;
@@ -800,11 +889,15 @@ onBeforeUnmount(() => {
 
 @media (max-width: 760px) {
   .saldo__topo {
-    padding: 20px 18px;
+    padding: 20px 18px 16px;
+  }
+
+  .saldo__composicao {
+    padding: 2px 18px 18px;
   }
 
   .saldo__valor {
-    font-size: 38px;
+    font-size: 40px;
   }
 
   .saldo__acoes,
@@ -812,23 +905,26 @@ onBeforeUnmount(() => {
     width: 100%;
   }
 
-  /* Estreito: os dois valores lado a lado; a chave, que é longa, na linha de baixo inteira. */
-  .saldo__fatos {
+  .saldo__total {
+    margin-inline-start: 0;
+  }
+
+  .saldo__indicador .ui-indicador__valor {
+    font-size: 21px;
+  }
+
+  /* Os dois valores lado a lado; a chave, que é longa, na linha de baixo inteira. */
+  .saldo__indicadores.ui-indicadores {
+    gap: 12px;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .fato {
-    padding: 14px 16px;
+  .saldo__indicador.ui-indicador {
+    padding: 16px;
   }
 
-  .fato:last-child {
+  .saldo__indicador--chave {
     grid-column: 1 / -1;
-    border-top: 1px solid var(--linha);
-    border-inline-start: 0;
-  }
-
-  .fato__valor {
-    font-size: 19px;
   }
 }
 
@@ -864,15 +960,23 @@ onBeforeUnmount(() => {
   border-radius: 10px;
 }
 
+/* O ladrilho do Portal, no degradê do lugar, como o título das telas. */
 .cd__selo {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 54px;
+  height: 54px;
   place-items: center;
   border-radius: 16px;
-  background: var(--portal-fundo);
-  color: var(--portal-tinta);
+  background: var(--pj-lugar-degrade, var(--portal));
+  box-shadow:
+    var(--pj-lugar-sombra, var(--sombra-1)),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
   font-size: 25px;
+}
+
+.app-dark .cd__selo {
+  color: var(--rail);
 }
 
 .cd__titulo {
