@@ -583,19 +583,35 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               rótulo em cada uma faria o cabeçalho competir com o nome do corredor.
             -->
             <span class="corredor__acoes">
-              <!-- Criar a vaga onde ela vai morar: o diálogo já abre neste corredor. -->
-              <Button
-                v-if="grupo.acomodacoes.length > 0"
-                type="button"
-                class="corredor__nova"
-                icon="ph ph-plus"
-                :label="t('hotel.acomodacoes.nova')"
-                :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
-                severity="secondary"
-                text
-                size="small"
-                @click="abrirAcomodacao(null, grupo.bloco.id)"
-              />
+              <!--
+                Criar a vaga onde ela vai morar: o diálogo já abre neste corredor. No corredor
+                estreito fica só o "+" — um botão só-ícone de verdade, e não o rotulado com a
+                palavra escondida, que guardava o vão do rótulo e deixava o "+" fora do centro.
+              -->
+              <template v-if="grupo.acomodacoes.length > 0">
+                <Button
+                  type="button"
+                  class="corredor__nova corredor__nova--rotulo"
+                  icon="ph ph-plus"
+                  :label="t('hotel.acomodacoes.nova')"
+                  :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
+                  severity="secondary"
+                  text
+                  size="small"
+                  @click="abrirAcomodacao(null, grupo.bloco.id)"
+                />
+                <Button
+                  type="button"
+                  class="corredor__nova corredor__nova--icone"
+                  icon="ph ph-plus"
+                  :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
+                  :title="t('hotel.acomodacoes.nova')"
+                  severity="secondary"
+                  text
+                  rounded
+                  @click="abrirAcomodacao(null, grupo.bloco.id)"
+                />
+              </template>
               <Button
                 type="button"
                 icon="ph ph-arrow-up"
@@ -731,28 +747,35 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   <strong>{{ t('hotel.casa.ladrilho.livreAgora') }}</strong>
                 </p>
 
+                <!--
+                  O pé em duas colunas de duas linhas: à esquerda quantos cabem e, embaixo, os
+                  recursos numa fileira só; à direita a diária e, embaixo, a tabela. Os recursos
+                  espremidos entre os dois quebravam em 2 × 2 e desalinhavam o pé dos vizinhos.
+                -->
                 <footer class="ladrilho__pe">
-                  <span class="ladrilho__cabem">
-                    <i class="ph ph-paw-print" aria-hidden="true" />
-                    {{
-                      t(
-                        'hotel.acomodacoes.cabem',
-                        { total: acomodacao.capacidade },
-                        acomodacao.capacidade,
-                      )
-                    }}
-                  </span>
+                  <span class="ladrilho__capacidade">
+                    <span class="ladrilho__cabem">
+                      <i class="ph ph-paw-print" aria-hidden="true" />
+                      {{
+                        t(
+                          'hotel.acomodacoes.cabem',
+                          { total: acomodacao.capacidade },
+                          acomodacao.capacidade,
+                        )
+                      }}
+                    </span>
 
-                  <!-- Os recursos como desenho, com o nome na dica e para o leitor de tela. -->
-                  <span v-if="acomodacao.recursos.length > 0" class="ladrilho__recursos">
-                    <span
-                      v-for="recurso in acomodacao.recursos"
-                      :key="recurso"
-                      class="ladrilho__recurso"
-                      :title="formato.recurso(recurso)"
-                    >
-                      <i :class="ICONE_DO_RECURSO[recurso]" aria-hidden="true" />
-                      <span class="oculto">{{ formato.recurso(recurso) }}</span>
+                    <!-- Os recursos como desenho, com o nome na dica e para o leitor de tela. -->
+                    <span v-if="acomodacao.recursos.length > 0" class="ladrilho__recursos">
+                      <span
+                        v-for="recurso in acomodacao.recursos"
+                        :key="recurso"
+                        class="ladrilho__recurso"
+                        :title="formato.recurso(recurso)"
+                      >
+                        <i :class="ICONE_DO_RECURSO[recurso]" aria-hidden="true" />
+                        <span class="oculto">{{ formato.recurso(recurso) }}</span>
+                      </span>
                     </span>
                   </span>
 
@@ -829,14 +852,30 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 :title="t('hotel.acomodacoes.corredor.descer')"
                 @click="moverTipo(tipo.id, 'desce')"
               />
+              <!--
+                Na lista estreita (celular) o "Editar" vira só o lápis: com a palavra, os três
+                botões tomavam a linha e o nome do tipo saía cortado ("Isolame…").
+              -->
               <Button
                 type="button"
+                class="tipo__editar tipo__editar--rotulo"
                 icon="ph ph-pencil-simple"
                 :label="t('hotel.casa.editar')"
                 severity="secondary"
                 outlined
                 size="small"
                 :aria-label="t('hotel.acomodacoes.tipo.editar')"
+                @click="abrirTipo(tipo)"
+              />
+              <Button
+                type="button"
+                class="tipo__editar tipo__editar--icone"
+                icon="ph ph-pencil-simple"
+                severity="secondary"
+                text
+                rounded
+                :aria-label="t('hotel.acomodacoes.tipo.editar')"
+                :title="t('hotel.acomodacoes.tipo.editar')"
                 @click="abrirTipo(tipo)"
               />
             </span>
@@ -1244,18 +1283,22 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 2px;
 }
 
-.corredor__nova {
+.corredor__nova--rotulo {
   margin-inline-end: 6px;
+}
+
+.corredor__nova--icone {
+  display: none;
 }
 
 /* No corredor estreito, o "+" fica sozinho: o nome do corredor precisa do espaço. */
 @container corredor (max-width: 620px) {
-  .corredor__nova :deep(.p-button-label) {
+  .corredor__nova--rotulo {
     display: none;
   }
 
-  .corredor__nova {
-    margin-inline-end: 0;
+  .corredor__nova--icone {
+    display: inline-flex;
   }
 }
 
@@ -1623,14 +1666,22 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   border-top: 1px solid var(--linha);
 }
 
+/* Quantos cabem em cima e os recursos embaixo: a mesma altura de duas linhas da diária ao lado. */
+.ladrilho__capacidade {
+  display: grid;
+  min-width: 0;
+  justify-items: start;
+  gap: 5px;
+}
+
 .ladrilho__cabem {
   display: inline-flex;
-  flex: none;
   align-items: center;
   gap: 5px;
   color: var(--tinta-2);
   font-size: 12.5px;
   font-weight: 550;
+  white-space: nowrap;
 }
 
 .ladrilho__cabem i {
@@ -1640,15 +1691,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .ladrilho__recursos {
   display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
+  max-width: 100%;
   gap: 3px;
 }
 
 .ladrilho__recurso {
   display: inline-grid;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
+  flex: none;
   place-items: center;
   border-radius: 6px;
   background: var(--superficie-2);
@@ -1731,8 +1782,32 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* ------------------------------------------------------------------ tipos */
 
+.tipos {
+  container: tipos / inline-size;
+}
+
 .tipo {
   padding-inline: 18px 12px;
+}
+
+.tipo__editar--icone {
+  display: none;
+}
+
+/* Lista estreita: o lápis sozinho, e o nome do tipo fica com a largura. */
+@container tipos (max-width: 480px) {
+  .tipo {
+    gap: 12px;
+    padding-inline: 14px 8px;
+  }
+
+  .tipo__editar--rotulo {
+    display: none;
+  }
+
+  .tipo__editar--icone {
+    display: inline-flex;
+  }
 }
 
 .tipo__desenho {
@@ -1759,6 +1834,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .precos {
   overflow: hidden;
+  container: precos / inline-size;
 }
 
 /* A tabela larga rola dentro da folha; a página nunca rola de lado. */
@@ -1775,9 +1851,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   padding-inline-start: 20px;
 }
 
-/* O nome da tabela é cabeçalho da linha, mas lê como a primeira célula: tinta cheia, não rótulo. */
+/*
+ * O nome da tabela é cabeçalho da linha, mas lê como a primeira célula: tinta cheia, não rótulo,
+ * e o papel e o fio da linha — não o poço e o fio forte do cabeçalho de colunas, que o `th` do kit
+ * trazia e faziam a primeira coluna parecer uma faixa à parte, com as linhas desencontradas.
+ */
 .tabela tbody th {
   height: 58px;
+  border-bottom-color: var(--linha-suave);
+  background: var(--superficie);
   color: var(--tinta);
   font-size: 14.5px;
   font-weight: 400;
@@ -1821,6 +1903,26 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   text-align: end;
 }
 
+/*
+ * Quando a tabela rola de lado (celular, janela estreita), o nome fica parado à esquerda: rolar até
+ * "Gigante" sem saber de que tabela é aquele preço é ler número solto. O fio separa o que fica do
+ * que passa por baixo.
+ */
+@container precos (max-width: 760px) {
+  .tabela thead th:first-child,
+  .tabela tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    border-inline-end: 1px solid var(--linha-suave);
+  }
+
+  .tabela th:first-child,
+  .tabela td:first-child {
+    padding-inline-start: 16px;
+  }
+}
+
 /* ------------------------------------------------------------- temporadas */
 
 .temporada {
@@ -1855,8 +1957,48 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   block-size: 8px;
 }
 
+.temporadas {
+  container: temporadas / inline-size;
+}
+
+/*
+ * Lista estreita: o selo e a seta ficam na linha do nome, à direita, e a régua desce para a linha
+ * de baixo alinhada com o texto. Antes a linha quebrava e o selo caía sozinho embaixo do ícone.
+ */
+@container temporadas (max-width: 560px) {
+  .temporada {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: 14px;
+    row-gap: 10px;
+    padding-inline: 16px;
+  }
+
+  .temporada__icone {
+    grid-row: 1;
+  }
+
+  .temporada__texto {
+    grid-row: 1;
+    grid-column: 2;
+  }
+
+  .temporada .ui-linha__fim {
+    grid-row: 1;
+    grid-column: 3;
+  }
+
+  .temporada__regua {
+    min-width: 0;
+    grid-row: 2;
+    grid-column: 2 / -1;
+  }
+}
+
 @media (max-width: 900px) {
-  .corredor {
+  /* Os corredores um embaixo do outro, e o "Novo corredor" com a mesma largura que eles. */
+  .corredor,
+  .corredor-novo {
     flex-basis: 100%;
   }
 }
@@ -1906,17 +2048,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     min-height: 92px;
   }
 
-  .corredor__nova :deep(.p-button-label) {
+  .corredor__nova--rotulo {
     display: none;
   }
 
-  .temporada {
-    flex-wrap: wrap;
-  }
-
-  .temporada__regua {
-    order: 3;
-    flex-basis: 100%;
+  .corredor__nova--icone {
+    display: inline-flex;
   }
 }
 

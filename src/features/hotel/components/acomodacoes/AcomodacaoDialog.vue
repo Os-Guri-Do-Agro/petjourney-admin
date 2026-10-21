@@ -508,6 +508,15 @@ function salvar() {
 }
 
 /*
+ * O rótulo do Select vem do PrimeVue em 1rem, por cima do tamanho do `.clinic-scope` que os
+ * outros campos usam: "Canil A" saía maior e 2 px mais alto que o "Baia A1" ao lado, na mesma
+ * fileira. Herdar devolve a mesma letra e a mesma altura a todos os campos.
+ */
+.campo :deep(.p-select-label) {
+  font-size: inherit;
+}
+
+/*
  * Os chips quebram linha em vez de espremer: numa coluna de 12rem, dois recursos não cabem lado a
  * lado, e o segundo chip perdia o próprio "x" de remover.
  */

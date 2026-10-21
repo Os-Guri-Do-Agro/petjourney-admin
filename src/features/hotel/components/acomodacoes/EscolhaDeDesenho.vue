@@ -87,43 +87,67 @@ const OPCOES = Object.keys(DESENHOS) as IconeDeAcomodacao[]
   <fieldset class="desenhos">
     <legend class="desenhos__titulo">{{ rotulo }}</legend>
 
-    <label
-      v-for="opcao in OPCOES"
-      :key="opcao"
-      class="desenho"
-      :class="{ 'desenho--ativo': desenho === opcao }"
-      :title="t(NOME[opcao])"
+    <!--
+      As formas numa grade de colunas iguais: todas numa fileira quando cabem, e em duas fileiras
+      equilibradas quando não — em vez de oito numa linha e a nona sozinha embaixo.
+    -->
+    <div
+      class="desenhos__grade"
+      :style="{ '--formas': OPCOES.length, '--formas-meia': Math.ceil(OPCOES.length / 2) }"
     >
-      <input v-model="desenho" type="radio" :name="grupo" :value="opcao" class="desenho__radio" />
-      <component :is="DESENHOS[opcao]" weight="duotone" aria-hidden="true" />
-      <span class="desenho__nome">{{ t(NOME[opcao]) }}</span>
-    </label>
+      <label
+        v-for="opcao in OPCOES"
+        :key="opcao"
+        class="desenho"
+        :class="{ 'desenho--ativo': desenho === opcao }"
+        :title="t(NOME[opcao])"
+      >
+        <input v-model="desenho" type="radio" :name="grupo" :value="opcao" class="desenho__radio" />
+        <component :is="DESENHOS[opcao]" weight="duotone" aria-hidden="true" />
+        <span class="desenho__nome">{{ t(NOME[opcao]) }}</span>
+      </label>
+    </div>
   </fieldset>
 </template>
 
 <style scoped>
 .desenhos {
-  display: flex;
-  flex-wrap: wrap;
+  min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
-  gap: 8px;
+  container: desenhos / inline-size;
 }
 
 .desenhos__titulo {
   width: 100%;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
   padding-inline: 0;
   color: var(--tinta);
   font-size: 14px;
   font-weight: 600;
 }
 
+/*
+ * Uma coluna por forma, de até 48 px: no diálogo largo elas ficam numa fileira só. Abaixo da
+ * largura de nove quadrados de 36 px (24.25rem com os vãos), a grade vira metade das colunas —
+ * cinco e quatro.
+ */
+.desenhos__grade {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(var(--formas), minmax(0, 48px));
+}
+
+@container desenhos (max-width: 24.25rem) {
+  .desenhos__grade {
+    grid-template-columns: repeat(var(--formas-meia), minmax(0, 48px));
+  }
+}
+
 .desenho {
   display: grid;
-  width: 46px;
-  height: 46px;
+  aspect-ratio: 1;
   place-items: center;
   border: 1px solid var(--linha-forte);
   border-radius: 12px;

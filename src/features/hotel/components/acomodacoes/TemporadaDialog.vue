@@ -76,7 +76,11 @@ const DIAS_NO_MES = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 const { locale } = useI18n()
 
 const meses = computed(() => {
-  const nomeDoMes = new Intl.DateTimeFormat(locale.value, { month: 'long' })
+  /*
+   * Em UTC dos dois lados: a data é montada em UTC, e formatada no fuso do navegador o dia 1º à
+   * meia-noite vira a noite do dia 30 no Brasil — a lista dizia "novembro" para dezembro.
+   */
+  const nomeDoMes = new Intl.DateTimeFormat(locale.value, { month: 'long', timeZone: 'UTC' })
 
   return DIAS_NO_MES.map((_, indice) => ({
     valor: indice + 1,
@@ -380,6 +384,15 @@ function salvar() {
 .par > :last-child {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+/*
+ * O rótulo do Select vem do PrimeVue em 1rem, por cima do tamanho do `.clinic-scope` que os
+ * outros campos do diálogo usam: o "20" e o "dezembro" saíam maiores e mais altos que o nome e o
+ * acréscimo. Herdar devolve a mesma letra e a mesma altura a todos os campos.
+ */
+.forma :deep(.p-select-label) {
+  font-size: inherit;
 }
 
 /* A prévia: onde a faixa cai no ano, antes de salvar. */

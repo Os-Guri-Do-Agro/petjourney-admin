@@ -916,6 +916,14 @@ function confirmar() {
   gap: 8px;
 }
 
+/*
+ * O "+" não encolhe: o campo ao lado ocupa 100% e o flex espremia o botão só-ícone até 34 px de
+ * largura por 42 de altura — uma tira com o "+" que parecia fora do lugar.
+ */
+.pertences__novo > .p-button {
+  flex: none;
+}
+
 .autorizacoes {
   display: grid;
   gap: 10px 16px;

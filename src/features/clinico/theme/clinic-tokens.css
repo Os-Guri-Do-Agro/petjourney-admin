@@ -607,9 +607,14 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--clinic-accent) 35%, transparent);
 }
 
+/*
+ * O PrimeVue fixa o texto do Select em 1rem; dentro do módulo o campo de escolha precisa ter o
+ * mesmo corpo do campo de texto ao lado, senão a linha do formulário fica desigual.
+ */
 .clinic-scope .p-select-label,
 .clinic-scope .p-multiselect-label {
   color: var(--clinic-text);
+  font-size: inherit;
 }
 
 /*

@@ -520,15 +520,18 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 {{ excecao.hospede.acomodacaoNome }} · {{ excecao.ajuste.motivo }}
               </span>
             </span>
-            <span class="excecao__servico">
-              <IconeDeTarefa :kind="excecao.ajuste.kind" class="excecao__icone" />
-              {{ formato.tarefaKind(excecao.ajuste.kind) }}
-            </span>
-            <span
-              class="excecao__muda"
-              :class="{ 'excecao__muda--suspenso': suspende(excecao.ajuste) }"
-            >
-              {{ oQueMuda(excecao.ajuste) }}
+            <!-- O serviço e o que muda andam juntos: no celular descem juntos, sob o nome. -->
+            <span class="excecao__fim">
+              <span class="excecao__servico">
+                <IconeDeTarefa :kind="excecao.ajuste.kind" class="excecao__icone" />
+                {{ formato.tarefaKind(excecao.ajuste.kind) }}
+              </span>
+              <span
+                class="excecao__muda"
+                :class="{ 'excecao__muda--suspenso': suspende(excecao.ajuste) }"
+              >
+                {{ oQueMuda(excecao.ajuste) }}
+              </span>
             </span>
           </li>
         </ul>
@@ -846,12 +849,27 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* ------------------------------------------------------------------ fora do padrão */
 
+.excecoes {
+  container: excecoes / inline-size;
+}
+
+/*
+ * Rosto, quem é (nome, acomodação e motivo) e, à direita, o serviço e o que muda. O texto é a
+ * coluna elástica; o fim tem a largura do que diz.
+ */
 .excecao {
+  display: grid;
+  align-items: center;
+  column-gap: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 64px;
+  padding: 10px 18px;
+}
+
+.excecao__fim {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 64px;
-  padding: 10px 18px;
 }
 
 .excecao__servico {
@@ -925,9 +943,25 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   }
 }
 
-@media (max-width: 640px) {
+/*
+ * Lista estreita: o serviço e o que muda descem para a linha de baixo, alinhados com o nome — e
+ * não espremem o motivo a uma palavra por linha, nem caem embaixo do rosto.
+ */
+@container excecoes (max-width: 560px) {
   .excecao {
+    row-gap: 6px;
+    grid-template-columns: auto minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+
+  .excecao > :first-child {
+    align-self: start;
+  }
+
+  .excecao__fim {
     flex-wrap: wrap;
+    gap: 2px 12px;
+    grid-column: 2;
   }
 
   .excecao__muda {
