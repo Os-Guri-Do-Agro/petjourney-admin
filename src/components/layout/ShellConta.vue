@@ -14,21 +14,38 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
-import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { useLogout } from '@/composables/useLogout'
+import { changeLocale } from '@/i18n'
+import { BANDEIRA_DO_IDIOMA, NOME_NATIVO_DO_IDIOMA } from '@/i18n/idiomas'
+import { LOCALES, type Locale } from '@/i18n/locales'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { isDarkMode, toggleColorMode } from '@/theme/color-mode'
 
 defineProps<{ recolhida: boolean }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const perfil = useUsuarioPerfilStore()
 const { logout } = useLogout()
 
 const menu = ref<InstanceType<typeof Popover> | null>(null)
 const menuAberto = ref(false)
 const confirmarSaida = ref(false)
+
+/*
+ * O idioma abre como uma lista dentro do próprio menu, e não como outro menu suspenso por cima
+ * dele: um seletor dentro de um menu flutuante abria cortado e sobreposto aos itens.
+ */
+const idiomasAbertos = ref(false)
+const idiomaAtual = computed(() => locale.value as Locale)
+
+async function escolherIdioma(codigo: Locale) {
+  if (codigo !== idiomaAtual.value) {
+    await changeLocale(codigo)
+  }
+
+  idiomasAbertos.value = false
+}
 
 const nome = computed(
   () => perfil.displayName || getAuthUser()?.nome || t('shell.user.fallbackName'),
@@ -63,7 +80,6 @@ async function sair() {
     <button
       type="button"
       class="conta__botao"
-      :class="{ 'conta__botao--recolhida': recolhida }"
       aria-haspopup="menu"
       :aria-expanded="menuAberto"
       :title="recolhida ? nome : undefined"
@@ -73,20 +89,38 @@ async function sair() {
         <img v-if="perfil.avatarUrl" :src="perfil.avatarUrl" alt="" />
         <template v-else>{{ perfil.initials }}</template>
       </span>
-      <span v-if="!recolhida" class="conta__quem">
+      <span class="conta__quem shell-rotulo">
         <strong>{{ nome }}</strong>
         <small>{{ t('shell.user.role') }}</small>
       </span>
-      <i v-if="!recolhida" class="ph ph-dots-three-vertical conta__mais" aria-hidden="true" />
+      <i class="ph ph-caret-up-down conta__mais shell-rotulo" aria-hidden="true" />
     </button>
 
     <Popover
       ref="menu"
       class="conta__menu"
       @show="menuAberto = true"
-      @hide="menuAberto = false"
+      @hide="
+        () => {
+          menuAberto = false
+          idiomasAbertos = false
+        }
+      "
     >
       <div class="conta__lista" role="menu">
+        <div class="conta__cabeca" role="none">
+          <span class="conta__avatar conta__avatar--grande" aria-hidden="true">
+            <img v-if="perfil.avatarUrl" :src="perfil.avatarUrl" alt="" />
+            <template v-else>{{ perfil.initials }}</template>
+          </span>
+          <span class="conta__quem">
+            <strong>{{ nome }}</strong>
+            <small>{{ t('shell.user.role') }}</small>
+          </span>
+        </div>
+
+        <hr class="conta__divisa" />
+
         <RouterLink role="menuitem" class="conta__item" to="/settings?aba=perfil" @click="fechar">
           <i class="ph ph-user-circle" aria-hidden="true" />
           {{ t('shell.user.perfil') }}
@@ -102,11 +136,62 @@ async function sair() {
 
         <hr class="conta__divisa" />
 
-        <div class="conta__linha" role="none">
+        <button
+          type="button"
+          role="menuitem"
+          class="conta__item conta__idioma"
+          aria-controls="conta-idiomas"
+          :aria-expanded="idiomasAbertos"
+          @click="idiomasAbertos = !idiomasAbertos"
+        >
           <i class="ph ph-translate" aria-hidden="true" />
           <span class="conta__linha-rotulo">{{ t('languageSwitcher.label') }}</span>
-          <LanguageSwitcher variant="menu" />
+          <span class="conta__idioma-atual">
+            <span
+              class="conta__bandeira"
+              aria-hidden="true"
+              v-html="BANDEIRA_DO_IDIOMA[idiomaAtual]"
+            />
+            {{ t(`languageSwitcher.${idiomaAtual}`) }}
+          </span>
+          <i
+            class="ph ph-caret-down conta__seta"
+            :class="{ 'conta__seta--aberta': idiomasAbertos }"
+            aria-hidden="true"
+          />
+        </button>
+
+        <div
+          id="conta-idiomas"
+          class="conta__idiomas"
+          :class="{ 'conta__idiomas--abertos': idiomasAbertos }"
+          :inert="!idiomasAbertos || undefined"
+        >
+          <div class="conta__idiomas-dobra">
+            <div class="conta__idiomas-lista" role="group" :aria-label="t('languageSwitcher.label')">
+              <button
+                v-for="codigo in LOCALES"
+                :key="codigo"
+                type="button"
+                role="menuitemradio"
+                class="conta__opcao"
+                :class="{ 'conta__opcao--atual': codigo === idiomaAtual }"
+                :aria-checked="codigo === idiomaAtual"
+                @click="escolherIdioma(codigo)"
+              >
+                <span class="conta__bandeira" aria-hidden="true" v-html="BANDEIRA_DO_IDIOMA[codigo]" />
+                <span class="conta__opcao-nome" dir="auto">{{ NOME_NATIVO_DO_IDIOMA[codigo] }}</span>
+                <span class="conta__opcao-codigo">{{ t(`languageSwitcher.${codigo}`) }}</span>
+                <i
+                  v-if="codigo === idiomaAtual"
+                  class="ph ph-check conta__opcao-marca"
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+          </div>
         </div>
+
         <div class="conta__linha" role="none">
           <i class="ph ph-moon-stars" aria-hidden="true" />
           <label class="conta__linha-rotulo" for="conta-tema">{{ t('shell.theme.darkTitle') }}</label>
@@ -145,51 +230,59 @@ async function sair() {
 </template>
 
 <style scoped>
+/* O gatilho: a conta num cartão de vidro no pé da barra. */
 .conta__botao {
   display: flex;
   width: 100%;
   align-items: center;
   gap: 10px;
-  padding: 8px;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
+  overflow: hidden;
+  padding: 7px 8px 7px 7px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 5%);
   color: var(--sobre-rail);
   cursor: pointer;
-  text-align: left;
+  text-align: start;
+  white-space: nowrap;
+  transition: background-color var(--pj-tempo-curto) ease;
 }
 
 .conta__botao:hover {
-  background: rgb(255 255 255 / 6%);
+  background: rgb(255 255 255 / 9%);
 }
 
 .conta__botao:focus-visible {
   outline: 2px solid var(--sobre-rail);
-  outline-offset: -2px;
-}
-
-.conta__botao--recolhida {
-  justify-content: center;
+  outline-offset: 2px;
 }
 
 .conta__avatar {
   display: grid;
   flex: none;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   overflow: hidden;
   place-items: center;
   border-radius: 50%;
-  background: var(--salvia);
-  color: var(--sobre-salvia);
+  background: linear-gradient(145deg, var(--pets-claro), var(--salvia));
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 14%);
+  color: var(--rail);
   font-size: 13px;
-  font-weight: 650;
+  font-weight: 700;
 }
 
 .conta__avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.conta__avatar--grande {
+  width: 42px;
+  height: 42px;
+  box-shadow: 0 0 0 3px var(--superficie), 0 0 0 4px var(--linha);
+  font-size: 15px;
 }
 
 .conta__quem {
@@ -213,40 +306,70 @@ async function sair() {
 }
 
 .conta__mais {
+  flex: none;
   color: var(--sobre-rail-2);
-  font-size: 18px;
+  font-size: 16px;
 }
+
+/* ------------------------------------------------------------------------------------ menu */
 
 .conta__lista {
   display: grid;
-  min-width: 248px;
+  width: 296px;
   gap: 2px;
+}
+
+.conta__cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 8px;
+}
+
+.conta__cabeca .conta__quem strong {
+  color: var(--tinta);
+  font-size: 14.5px;
+}
+
+.conta__cabeca .conta__quem small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .conta__item,
 .conta__linha {
   display: flex;
+  width: 100%;
+  min-height: 42px;
   align-items: center;
   gap: 12px;
-  min-height: 40px;
   padding: 0 10px;
-  border-radius: 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
   color: var(--tinta);
+  font: inherit;
   font-size: 14px;
+  text-align: start;
   text-decoration: none;
+}
+
+button.conta__item {
+  cursor: pointer;
 }
 
 .conta__item:hover {
   background: var(--superficie-2);
 }
 
-.conta__item:focus-visible {
+.conta__item:focus-visible,
+.conta__opcao:focus-visible {
   outline: 2px solid var(--musgo);
   outline-offset: -2px;
 }
 
-.conta__item i,
-.conta__linha i {
+.conta__item > i:first-child,
+.conta__linha > i:first-child {
   color: var(--tinta-2);
   font-size: 18px;
 }
@@ -262,11 +385,124 @@ async function sair() {
   background: var(--linha);
 }
 
+/* ------------------------------------------------------------------------------- idioma */
+
+.conta__idioma-atual {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+
+.conta__bandeira {
+  display: inline-flex;
+  width: 20px;
+  height: 14px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 8%);
+}
+
+.conta__bandeira :deep(svg) {
+  width: 100%;
+  height: 100%;
+}
+
+.conta__seta {
+  color: var(--tinta-3);
+  font-size: 13px;
+  transition: transform var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.conta__seta--aberta {
+  transform: rotate(180deg);
+}
+
+.conta__idiomas {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms var(--pj-curva-chega);
+}
+
+.conta__idiomas--abertos {
+  grid-template-rows: 1fr;
+}
+
+.conta__idiomas-dobra {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.conta__idiomas-lista {
+  display: grid;
+  gap: 2px;
+  margin: 2px 4px 6px 34px;
+  padding: 4px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  background: var(--superficie-2);
+}
+
+.conta__opcao {
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tinta);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  text-align: start;
+}
+
+.conta__opcao:hover {
+  background: var(--superficie);
+}
+
+.conta__opcao--atual {
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  font-weight: 600;
+}
+
+.conta__opcao-nome {
+  flex: 1;
+  min-width: 0;
+  text-align: match-parent;
+}
+
+.conta__opcao-codigo {
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.conta__opcao-marca {
+  color: var(--musgo);
+  font-size: 15px;
+}
+
 .conta__sair.p-button {
   justify-content: flex-start;
   gap: 12px;
-  min-height: 40px;
+  min-height: 42px;
   padding: 0 10px;
   font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conta__idiomas,
+  .conta__seta,
+  .conta__botao {
+    transition: none;
+  }
 }
 </style>

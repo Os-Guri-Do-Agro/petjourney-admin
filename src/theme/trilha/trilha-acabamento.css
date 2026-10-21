@@ -84,8 +84,13 @@ html.trilha .p-button.p-button-sm {
   font-size: 13.5px;
 }
 
+/*
+ * Só ícone: sem vão. O PrimeVue põe um filho vazio depois do ícone (o Badge/ripple), e com o vão
+ * de 8px do botão o ícone ficava 4px à esquerda do centro — o "X" dos diálogos torto.
+ */
 html.trilha .p-button.p-button-icon-only {
   width: var(--altura-controle);
+  gap: 0;
   padding-inline: 0;
 }
 

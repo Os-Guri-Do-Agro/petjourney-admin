@@ -110,7 +110,7 @@ const rotulos = useRotulosDoTratamento()
   display: grid;
   min-width: 0;
   gap: 8px;
-  padding: 16px 20px;
+  padding: 16px 24px;
 }
 
 .remedio + .remedio {

@@ -556,7 +556,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   gap: 10px;
   margin: 0;
-  padding: 16px 20px 10px;
+  padding: 16px 24px 10px;
   color: var(--tinta);
   font-size: 14.5px;
   font-weight: 650;

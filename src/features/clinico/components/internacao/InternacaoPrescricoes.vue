@@ -575,7 +575,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 16px 20px;
+  padding: 16px 24px;
 }
 
 .item__icone {

@@ -1114,7 +1114,7 @@ onMounted(carregar)
   align-items: start;
   gap: 14px;
   grid-template-columns: 56px minmax(0, 1fr);
-  padding: 14px 20px;
+  padding: 14px 24px;
 }
 
 .falta__quando {

@@ -1014,7 +1014,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 20px 14px;
+  padding: 18px 24px 16px;
   border-radius: var(--raio-cartao) var(--raio-cartao) 0 0;
 }
 
@@ -1065,7 +1065,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .posto__item {
   display: grid;
   gap: 12px;
-  padding: 16px 20px 18px;
+  padding: 16px 24px 18px;
 }
 
 .posto__item--link {
@@ -1195,7 +1195,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .posto__pe {
   margin-top: auto;
-  padding: 14px 20px 18px;
+  padding: 14px 24px 18px;
   border-top: 1px solid var(--linha-suave);
 }
 

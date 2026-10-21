@@ -6,8 +6,8 @@
  * pendências deles — ninguém precisa abrir o Hotel para saber que lá há sete coisas paradas.
  * No modo "lista" (Configurações), todos ficam abertos.
  *
- * Os destinos penduram numa linha vertical na cor do espaço — a trilha —, e o destino atual é o
- * ponto aceso nela.
+ * Os destinos do espaço aberto ficam num painel de vidro, e o destino atual acende na cor do
+ * espaço. Abrir e fechar um espaço desliza.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -48,8 +48,8 @@ function destinoAtivo(id: string, espaco: Espaco) {
       :title="recolhida ? t('shell.barra.inicio') : undefined"
       @click="emit('navegou')"
     >
-      <i class="ph ph-house-simple" aria-hidden="true" />
-      <span class="mapa__rotulo">{{ t('shell.barra.inicio') }}</span>
+      <span class="mapa__ladrilho" aria-hidden="true"><i class="ph ph-house-simple" /></span>
+      <span class="mapa__rotulo shell-rotulo">{{ t('shell.barra.inicio') }}</span>
     </RouterLink>
 
     <section
@@ -65,8 +65,8 @@ function destinoAtivo(id: string, espaco: Espaco) {
         :title="recolhida ? espaco.rotulo : undefined"
         @click="emit('navegou')"
       >
-        <span class="espaco__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
-        <span class="mapa__rotulo espaco__nome">{{ espaco.rotulo }}</span>
+        <span class="mapa__ladrilho espaco__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
+        <span class="mapa__rotulo espaco__nome shell-rotulo">{{ espaco.rotulo }}</span>
         <span
           v-if="espaco.selo && !aberto(espaco)"
           class="mapa__selo"
@@ -75,51 +75,73 @@ function destinoAtivo(id: string, espaco: Espaco) {
           {{ espaco.selo }}
         </span>
         <i
-          v-if="!recolhida && !todosAbertos"
-          class="ph ph-caret-right espaco__seta"
+          v-if="!todosAbertos"
+          class="ph ph-caret-right espaco__seta shell-rotulo"
           aria-hidden="true"
         />
       </RouterLink>
 
-      <ul v-if="aberto(espaco)" class="espaco__destinos">
-        <li v-for="destino in espaco.destinos" :key="destino.id">
-          <RouterLink
-            class="destino"
-            :class="{
-              'destino--ativo': destinoAtivo(destino.id, espaco),
-              'destino--bloqueado': destino.bloqueado,
-            }"
-            :to="destino.to"
-            active-class=""
-            exact-active-class=""
-            :aria-current="destinoAtivo(destino.id, espaco) ? 'page' : undefined"
-            :title="recolhida ? destino.rotulo : (destino.tituloDoSelo ?? undefined)"
-            @click="emit('navegou')"
-          >
-            <i class="destino__icone" :class="destino.icone" aria-hidden="true" />
-            <span class="mapa__rotulo">{{ destino.rotulo }}</span>
-            <i v-if="destino.bloqueado" class="ph ph-lock-simple destino__cadeado" aria-hidden="true" />
-            <span
-              v-else-if="destino.selo"
-              class="mapa__selo"
-              :class="`mapa__selo--${destino.tom ?? 'neutro'}`"
-              :aria-label="destino.tituloDoSelo"
-            >
-              {{ destino.selo }}
-            </span>
-          </RouterLink>
-        </li>
-      </ul>
+      <!--
+        A gaveta do espaço fica montada mesmo fechada: assim ela abre e fecha deslizando (a linha
+        da grade vai de 0 a 1fr). Fechada, sai da ordem do Tab e do leitor de tela.
+      -->
+      <div
+        class="espaco__gaveta"
+        :inert="!aberto(espaco) || undefined"
+        :aria-hidden="!aberto(espaco) || undefined"
+      >
+        <div class="espaco__dobra">
+          <ul class="espaco__destinos">
+            <li v-for="destino in espaco.destinos" :key="destino.id">
+              <RouterLink
+                class="destino"
+                :class="{
+                  'destino--ativo': destinoAtivo(destino.id, espaco),
+                  'destino--bloqueado': destino.bloqueado,
+                }"
+                :to="destino.to"
+                active-class=""
+                exact-active-class=""
+                :aria-current="destinoAtivo(destino.id, espaco) ? 'page' : undefined"
+                :title="recolhida ? destino.rotulo : (destino.tituloDoSelo ?? undefined)"
+                @click="emit('navegou')"
+              >
+                <i class="destino__icone" :class="destino.icone" aria-hidden="true" />
+                <span class="mapa__rotulo shell-rotulo">{{ destino.rotulo }}</span>
+                <i
+                  v-if="destino.bloqueado"
+                  class="ph ph-lock-simple destino__cadeado shell-rotulo"
+                  aria-hidden="true"
+                />
+                <span
+                  v-else-if="destino.selo"
+                  class="mapa__selo"
+                  :class="`mapa__selo--${destino.tom ?? 'neutro'}`"
+                  :aria-label="destino.tituloDoSelo"
+                >
+                  {{ destino.selo }}
+                </span>
+              </RouterLink>
+            </li>
+          </ul>
+        </div>
+      </div>
     </section>
   </nav>
 </template>
 
 <style scoped>
+/*
+ * A barra no acabamento novo (20/10/2026): cada espaço é uma linha com o ladrilho da cor dele; o
+ * espaço aberto mostra os destinos num painel de vidro, como um cartão dentro da moldura verde, e o
+ * destino atual acende na cor do espaço. Abrir e fechar desliza, e recolher a barra só esconde as
+ * palavras — os ícones ficam no mesmo lugar.
+ */
 .mapa {
   display: grid;
   align-content: start;
-  gap: 2px;
-  padding: 4px 12px 12px;
+  gap: 4px;
+  padding: 4px 12px 14px;
 }
 
 .mapa__inicio,
@@ -128,17 +150,22 @@ function destinoAtivo(id: string, espaco: Espaco) {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 40px;
-  padding: 0 10px;
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--sobre-rail-2);
-  font-size: 14px;
-  font-weight: 450;
   text-decoration: none;
+  white-space: nowrap;
   transition:
     background-color var(--pj-tempo-curto) var(--pj-curva-chega),
     color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.mapa__inicio,
+.espaco__cabeca {
+  min-height: 46px;
+  gap: 12px;
+  padding: 0 10px 0 8px;
+  font-size: 14.5px;
+  font-weight: 550;
 }
 
 .mapa__inicio:hover,
@@ -156,19 +183,36 @@ function destinoAtivo(id: string, espaco: Espaco) {
 }
 
 .mapa__inicio {
-  margin-bottom: 10px;
-}
-
-.mapa__inicio i {
-  width: 28px;
-  font-size: 19px;
-  text-align: center;
+  margin-bottom: 8px;
 }
 
 .mapa__inicio--ativo {
-  background: var(--rail-ativo);
+  background: rgb(255 255 255 / 9%);
   color: var(--sobre-rail);
-  font-weight: 600;
+  font-weight: 650;
+}
+
+/* O ladrilho: o mesmo quadrado macio das telas, aqui em vidro sobre o verde. */
+.mapa__ladrilho {
+  display: grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 7%);
+  color: var(--sobre-rail);
+  font-size: 17px;
+  transition:
+    background var(--pj-tempo-medio) var(--pj-curva-chega),
+    box-shadow var(--pj-tempo-medio) var(--pj-curva-chega),
+    color var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.mapa__inicio--ativo .mapa__ladrilho {
+  background: linear-gradient(145deg, var(--pets-claro), var(--salvia));
+  box-shadow: 0 6px 14px -6px rgb(0 0 0 / 55%);
+  color: var(--rail);
 }
 
 .mapa__rotulo {
@@ -176,41 +220,37 @@ function destinoAtivo(id: string, espaco: Espaco) {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-/* O espaço: o ícone mora num disco da cor do lugar, que é a cor que a tela inteira vai usar. */
+/* ------------------------------------------------------------------------------- espaço */
+
 .espaco {
   --lugar-na-barra: var(--pj-lugar-claro);
 }
 
-.espaco + .espaco {
-  margin-top: 6px;
-}
-
 .espaco__cabeca {
   color: var(--sobre-rail);
-  font-weight: 550;
 }
 
 .espaco__icone {
-  display: grid;
-  flex: none;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  border-radius: 8px;
-  background: color-mix(in oklab, var(--lugar-na-barra) 22%, transparent);
+  background: color-mix(in oklab, var(--lugar-na-barra) 18%, transparent);
   color: var(--lugar-na-barra);
-  font-size: 16px;
 }
 
 .espaco--aberto .espaco__icone {
-  background: var(--lugar-na-barra);
-  color: var(--rail);
+  background: var(--pj-lugar-degrade);
+  box-shadow:
+    0 6px 14px -6px rgb(0 0 0 / 60%),
+    inset 0 1px 0 rgb(255 255 255 / 22%);
+  color: #fff;
+}
+
+.espaco--aberto .espaco__cabeca {
+  font-weight: 650;
 }
 
 .espaco__seta {
+  flex: none;
   color: var(--sobre-rail-2);
   font-size: 12px;
   transition: transform var(--pj-tempo-medio) var(--pj-curva-chega);
@@ -220,67 +260,71 @@ function destinoAtivo(id: string, espaco: Espaco) {
   transform: rotate(90deg);
 }
 
-/*
- * A trilha: os destinos penduram numa linha na cor do espaço, alinhada ao centro do disco. O
- * destino atual é o ponto aceso nela.
- */
-.espaco__destinos {
-  position: relative;
+/* A gaveta desliza: a linha da grade vai de 0 a 1fr, e o miolo corta o que ainda não cabe. */
+.espaco__gaveta {
   display: grid;
-  gap: 1px;
-  margin: 2px 0 4px;
-  padding: 0 0 0 26px;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 280ms var(--pj-curva-chega),
+    opacity 200ms var(--pj-curva-chega);
+}
+
+.espaco--aberto .espaco__gaveta {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.espaco__dobra {
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* O painel de vidro com os destinos: um cartão dentro da moldura. */
+.espaco__destinos {
+  display: grid;
+  gap: 2px;
+  margin: 4px 0 8px;
+  padding: 6px;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 4%);
   list-style: none;
 }
 
-.espaco__destinos::before {
-  position: absolute;
-  top: 0;
-  bottom: 14px;
-  left: 23px;
-  width: 2px;
-  border-radius: 2px;
-  background: color-mix(in oklab, var(--lugar-na-barra) 30%, transparent);
-  content: '';
-}
-
 .destino {
-  min-height: 36px;
-  padding-left: 14px;
+  min-height: 38px;
+  gap: 11px;
+  padding: 0 10px;
+  border-radius: 10px;
   font-size: 13.5px;
-}
-
-.destino::before {
-  position: absolute;
-  top: 50%;
-  left: -5.5px;
-  width: 9px;
-  height: 9px;
-  border: 2px solid var(--rail);
-  border-radius: 50%;
-  background: transparent;
-  content: '';
-  transform: translateY(-50%) scale(0.4);
-  transition:
-    transform var(--pj-tempo-medio) var(--pj-curva-chega),
-    background-color var(--pj-tempo-medio) var(--pj-curva-chega);
-}
-
-.destino--ativo {
-  background: var(--rail-ativo);
-  color: var(--sobre-rail);
-  font-weight: 600;
-}
-
-.destino--ativo::before {
-  background: var(--lugar-na-barra);
-  transform: translateY(-50%) scale(1);
+  font-weight: 450;
 }
 
 .destino__icone {
   flex: none;
-  font-size: 17px;
-  opacity: 0.85;
+  width: 20px;
+  font-size: 18px;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.destino--ativo,
+.destino--ativo:hover {
+  background: color-mix(in oklab, var(--lugar-na-barra) 17%, transparent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.destino--ativo::before {
+  position: absolute;
+  top: 9px;
+  bottom: 9px;
+  inset-inline-start: -6px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--lugar-na-barra);
+  content: '';
 }
 
 .destino--ativo .destino__icone {
@@ -302,6 +346,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
  */
 .mapa__selo {
   display: inline-grid;
+  flex: none;
   min-width: 22px;
   height: 20px;
   padding: 0 6px;
@@ -312,6 +357,9 @@ function destinoAtivo(id: string, espaco: Espaco) {
   font-variant-numeric: tabular-nums;
   font-weight: 650;
   line-height: 1;
+  transition:
+    transform var(--pj-tempo-medio) var(--pj-curva-chega),
+    opacity var(--pj-tempo-curto) ease;
 }
 
 .mapa__selo--neutro {
@@ -329,69 +377,54 @@ function destinoAtivo(id: string, espaco: Espaco) {
   color: #3a0d09;
 }
 
-/* Recolhida: só os ícones; o destino atual continua aceso. */
-.mapa--recolhida {
-  padding-inline: 10px;
-}
-
-.mapa--recolhida .mapa__rotulo,
-.mapa--recolhida .espaco__seta {
-  display: none;
-}
-
-.mapa--recolhida .mapa__inicio,
-.mapa--recolhida .espaco__cabeca,
-.mapa--recolhida .destino {
-  justify-content: center;
-  padding: 0;
-}
-
-.mapa--recolhida .espaco__destinos {
-  padding-left: 0;
-}
-
-.mapa--recolhida .espaco__destinos::before,
-.mapa--recolhida .destino::before {
-  display: none;
-}
-
+/*
+ * Recolhida: as palavras somem (a moldura cuida do esmaecer) e nada muda de lugar — os ícones já
+ * estão na coluna de 76px. O selo vai para o canto do ladrilho.
+ */
 .mapa--recolhida .mapa__selo {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 3px;
+  inset-inline-start: 30px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
   font-size: 10px;
 }
 
+.mapa--recolhida .destino--ativo::before {
+  display: none;
+}
+
 /* Densidade compacta (Configurações → Aparência): mais destinos à vista sem rolar a barra. */
 .shell--densa .mapa__inicio,
 .shell--densa .espaco__cabeca {
-  min-height: 34px;
+  min-height: 38px;
 }
 
 .shell--densa .destino {
-  min-height: 30px;
+  min-height: 32px;
   font-size: 13px;
 }
 
-.shell--densa .espaco + .espaco {
-  margin-top: 2px;
+.shell--densa .mapa__ladrilho {
+  width: 28px;
+  height: 28px;
+  font-size: 15px;
 }
 
-.shell--densa .espaco__icone {
-  width: 24px;
-  height: 24px;
-  font-size: 14px;
+.shell--densa .espaco__destinos {
+  margin-block: 2px 6px;
+  padding: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mapa__inicio,
   .espaco__cabeca,
   .destino,
-  .destino::before,
-  .espaco__seta {
+  .espaco__seta,
+  .espaco__gaveta,
+  .mapa__ladrilho,
+  .mapa__selo {
     transition: none;
   }
 }

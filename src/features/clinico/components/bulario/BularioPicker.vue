@@ -244,7 +244,7 @@ function confirmar() {
   min-width: 0;
   max-height: min(30rem, 62vh);
   overflow-y: auto;
-  padding: 18px 20px;
+  padding: 18px 24px;
   border: 1px solid var(--linha);
   border-radius: 16px;
   background: var(--superficie);

@@ -389,7 +389,7 @@ function hrefDoTelefone(telefone: string) {
 .paciente__cabeca {
   flex-wrap: wrap;
   gap: 12px 16px;
-  padding: 18px 20px 16px;
+  padding: 18px 24px 16px;
 }
 
 .paciente__quem {
@@ -436,7 +436,7 @@ function hrefDoTelefone(telefone: string) {
   align-items: start;
   gap: 16px 18px;
   grid-template-columns: auto minmax(0, 1fr) 340px;
-  padding: 18px 20px 20px;
+  padding: 18px 24px 20px;
 }
 
 .tratamento__icone {

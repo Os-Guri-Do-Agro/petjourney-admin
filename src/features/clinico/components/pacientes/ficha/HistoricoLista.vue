@@ -173,19 +173,22 @@ const tiposPresentes = computed(() => {
 })
 
 /**
- * "Tudo" primeiro, depois os tipos do mais frequente ao mais raro — com a contagem na opção. Sem
- * ícone: a palavra e o número cabem numa linha, e o ícone já está em cada acontecimento.
+ * "Tudo" primeiro, depois os tipos do mais frequente ao mais raro — com a contagem na opção. Cada
+ * opção leva o mesmo ícone que marca o acontecimento na linha: quem procura "a cirurgia" acha a
+ * opção pelo desenho que acabou de ver embaixo.
  */
 const opcoesDoFiltro = computed(() => [
   {
     valor: 'todos' as Filtro,
     rotulo: t('clinico.paciente.atos.filtro.todos'),
     total: itens.value.length,
+    icone: 'ph ph-list-bullets',
   },
   ...tiposPresentes.value.map((item) => ({
     valor: item.tipo as Filtro,
     rotulo: nomeDoTipo(item.tipo),
     total: item.total,
+    icone: ICONE[item.tipo],
   })),
 ])
 
@@ -305,6 +308,7 @@ function abrir(item: Item) {
         >
           <template #option="{ option }">
             <span class="filtro__opcao">
+              <i class="filtro__icone" :class="option.icone" aria-hidden="true" />
               <span>{{ option.rotulo }}</span>
               <span class="filtro__total ui-num">{{ option.total }}</span>
             </span>
@@ -406,7 +410,7 @@ function abrir(item: Item) {
   align-items: center;
   gap: 6px 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  padding: 14px 20px 14px 22px;
+  padding: 14px 24px 14px 22px;
 }
 
 .proximos__texto {
@@ -477,13 +481,29 @@ function abrir(item: Item) {
 .filtro__opcao {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   white-space: nowrap;
 }
 
-.filtro__total {
+.filtro__icone {
   color: var(--tinta-3);
-  font-size: 12px;
+  font-size: 16px;
+}
+
+:deep(.p-togglebutton-checked) .filtro__icone {
+  color: var(--pj-lugar, var(--clinica));
+}
+
+.filtro__total {
+  display: inline-grid;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--tinta-3) 12%, transparent);
+  color: var(--tinta-2);
+  font-size: 11.5px;
   font-weight: 650;
 }
 

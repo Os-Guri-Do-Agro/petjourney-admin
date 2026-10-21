@@ -244,7 +244,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
 .pre {
   display: grid;
   gap: 14px;
-  padding: 18px 20px;
+  padding: 18px 24px;
   border: 1.5px dashed color-mix(in oklab, var(--pj-lugar) 55%, var(--linha));
   border-radius: var(--raio-cartao);
   background: color-mix(in oklab, var(--pj-lugar-fundo) 40%, var(--superficie));

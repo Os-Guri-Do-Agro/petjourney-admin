@@ -324,7 +324,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
   /* Larguras fixas no começo e no fim: cada linha é uma grade própria, e colunas medidas pelo
      conteúdo desalinhavam as horas e os botões de uma linha para a outra. */
   grid-template-columns: 6.5rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 15rem;
-  padding: 14px 20px 14px 18px;
+  padding: 14px 24px 14px 18px;
   cursor: pointer;
   transition: background-color var(--pj-tempo-curto) ease-out;
 }

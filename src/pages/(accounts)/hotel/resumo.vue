@@ -645,7 +645,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .ocupacao {
   display: grid;
   gap: 14px;
-  padding: 18px 20px 16px;
+  padding: 18px 24px 16px;
 }
 
 .grafico {
@@ -797,7 +797,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: grid;
   gap: 14px;
   margin: 0;
-  padding: 18px 20px;
+  padding: 18px 24px;
   list-style: none;
 }
 
@@ -876,7 +876,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   display: grid;
   align-content: start;
   gap: 4px;
-  padding: 18px 20px 20px;
+  padding: 18px 24px 20px;
 }
 
 .perda + .perda {

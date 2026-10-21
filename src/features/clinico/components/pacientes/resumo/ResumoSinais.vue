@@ -238,7 +238,7 @@ const linhas = computed(() =>
   align-items: start;
   gap: 4px 14px;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  padding: 14px 20px 14px 22px;
+  padding: 14px 24px 14px 22px;
 }
 
 .sinal__icone {

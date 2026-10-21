@@ -511,10 +511,12 @@ async function encerrar(entrada: {
 
     <template #cabecalho>
       <!--
-        O cabeçalho da ficha, como está: as vistas dela (resumo, histórico, vacinas) são as saídas
-        daqui. O `.hc-tema` é o que desenha as pílulas dele até a ficha ser redesenhada.
+        O cabeçalho da ficha, igual ao da ficha do paciente: as vistas dela (resumo, histórico,
+        tratamento, vacinas) no pé do cartão e as ações desta tela na ponta direita, onde a ficha
+        põe as dela. Encerrar fica contornado — acontece uma vez e não se desfaz —; a cheia é a do
+        momento.
       -->
-      <div class="cabeca hc-tema">
+      <div class="cabeca">
         <FichaCabeca
           v-if="pet && paciente"
           :pet="pet"
@@ -522,34 +524,30 @@ async function encerrar(entrada: {
           :atual="null"
           :frase="fraseDeEstado"
           :peso-kg="paciente.internacao.pesoEntradaKg"
-        />
+        >
+          <template #acoes>
+            <Button
+              v-if="!encerrada"
+              type="button"
+              icon="ph ph-sign-out"
+              :label="t('clinico.internacao.alta.abrir')"
+              severity="secondary"
+              outlined
+              @click="altaAberta = true"
+            />
+            <Button
+              v-if="acaoPrincipal"
+              type="button"
+              class="acao-principal"
+              :icon="acaoPrincipal.icone"
+              :label="acaoPrincipal.rotulo"
+              :disabled="internacao.salvando"
+              @click="acaoPrincipal.executar()"
+            />
+          </template>
+        </FichaCabeca>
         <h1 v-else class="cabeca__reserva">{{ t('clinico.internacao.paciente.titulo') }}</h1>
       </div>
-    </template>
-
-    <template v-if="paciente" #acoes>
-      <!--
-        Encerrar fica contornado: acontece uma vez e não se desfaz. A cheia é a do momento, e não
-        divide a linha com as abas, que são o trabalho de cada meia hora.
-      -->
-      <Button
-        v-if="!encerrada"
-        type="button"
-        icon="ph ph-sign-out"
-        :label="t('clinico.internacao.alta.abrir')"
-        severity="secondary"
-        outlined
-        @click="altaAberta = true"
-      />
-      <Button
-        v-if="acaoPrincipal"
-        type="button"
-        class="acao-principal"
-        :icon="acaoPrincipal.icone"
-        :label="acaoPrincipal.rotulo"
-        :disabled="internacao.salvando"
-        @click="acaoPrincipal.executar()"
-      />
     </template>
 
     <div v-if="paciente" class="internado">
@@ -864,7 +862,7 @@ async function encerrar(entrada: {
   gap: 6px;
   margin-block-start: -1px;
   margin-inline-start: -1px;
-  padding: 18px 20px;
+  padding: 18px 24px;
   border-block-start: 1px solid var(--linha);
   border-inline-start: 1px solid var(--linha);
 }
@@ -925,7 +923,7 @@ async function encerrar(entrada: {
 .quadro__textos {
   display: grid;
   margin: 0;
-  padding: 14px 20px 16px;
+  padding: 14px 24px 16px;
   gap: 12px 28px;
   border-top: 1px solid var(--linha-suave);
   background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));

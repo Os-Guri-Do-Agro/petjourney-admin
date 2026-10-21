@@ -103,10 +103,10 @@ withDefaults(
   position: relative;
   display: grid;
   align-items: center;
-  gap: 24px 40px;
+  gap: 28px 48px;
   grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
-  padding: 30px 32px;
+  padding: 34px 36px;
   border-radius: var(--raio-painel);
   background:
     radial-gradient(
@@ -163,7 +163,7 @@ withDefaults(
   display: grid;
   min-width: 0;
   justify-items: start;
-  gap: 6px;
+  gap: 8px;
 }
 
 .abertura__sobre {
@@ -194,7 +194,7 @@ withDefaults(
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-top: 14px;
+  margin-top: 18px;
 }
 
 /*
@@ -232,8 +232,8 @@ withDefaults(
 /* Os números: vidro sobre a cor, um ao lado do outro. */
 .abertura__indicadores {
   display: grid;
-  gap: 10px;
-  grid-auto-columns: minmax(118px, 1fr);
+  gap: 12px;
+  grid-auto-columns: minmax(148px, 1fr);
   grid-auto-flow: column;
   margin: 0;
   padding: 0;
@@ -243,11 +243,12 @@ withDefaults(
 .abertura__indicador {
   display: grid;
   height: 100%;
+  min-height: 138px;
   align-content: start;
-  gap: 2px;
-  padding: 14px 16px 15px;
+  gap: 4px;
+  padding: 16px 18px 18px;
   border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: var(--raio-cartao-pequeno);
+  border-radius: var(--raio-cartao);
   background: rgb(255 255 255 / 10%);
   color: #fff;
   text-decoration: none;
@@ -271,9 +272,20 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
-  color: rgb(255 255 255 / 82%);
+  margin-bottom: 12px;
+  color: #fff;
   font-size: 18px;
+}
+
+/* O ícone num disco de vidro: dá ao número um ponto de partida e deixa a fileira menos rala. */
+.abertura__indicador-topo > i {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 14%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
 .abertura__ponto {
@@ -293,7 +305,7 @@ withDefaults(
 
 .abertura__valor {
   font-family: var(--font-dados);
-  font-size: 28px;
+  font-size: 32px;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
   letter-spacing: -0.03em;
@@ -301,9 +313,10 @@ withDefaults(
 }
 
 .abertura__rotulo {
-  color: rgb(255 255 255 / 82%);
-  font-size: 12.5px;
-  line-height: 1.3;
+  color: rgb(255 255 255 / 86%);
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 @media (max-width: 1180px) {
@@ -313,7 +326,7 @@ withDefaults(
 
   .abertura__indicadores {
     grid-auto-flow: row;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
 
@@ -333,6 +346,20 @@ withDefaults(
 
   .abertura__indicadores {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .abertura__indicador {
+    min-height: 0;
+    padding: 14px;
+  }
+
+  .abertura__indicador-topo {
+    margin-bottom: 8px;
+  }
+
+  .abertura__valor {
+    font-size: 26px;
   }
 }
 

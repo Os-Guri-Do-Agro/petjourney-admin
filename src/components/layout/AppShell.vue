@@ -234,12 +234,14 @@ onUnmounted(() => {
   >
     <a class="shell__pular" href="#conteudo">{{ t('shell.barra.pular') }}</a>
 
-    <div
-      v-if="compacto && gavetaAberta"
-      class="shell__veu"
-      aria-hidden="true"
-      @click="fecharGaveta"
-    />
+    <Transition name="shell-veu">
+      <div
+        v-if="compacto && gavetaAberta"
+        class="shell__veu"
+        aria-hidden="true"
+        @click="fecharGaveta"
+      />
+    </Transition>
 
     <aside
       id="barra-do-portal"
@@ -247,77 +249,82 @@ onUnmounted(() => {
       :aria-hidden="compacto && !gavetaAberta ? 'true' : undefined"
       :inert="compacto && !gavetaAberta ? true : undefined"
     >
-      <div class="barra__topo">
-        <RouterLink class="barra__marca" to="/inicio" :title="parceiroStore.parceiroNome">
-          <span class="barra__pata" aria-hidden="true">
-            <img src="/pata-escura.png" alt="" />
-          </span>
-          <span v-if="!barraRecolhida" class="barra__empresa">
-            <strong>{{ parceiroStore.parceiroNome }}</strong>
-            <small>PetJourney</small>
-          </span>
-        </RouterLink>
+      <!--
+        Recolher/expandir: uma alça redonda na borda entre a barra e a folha, no mesmo lugar nos
+        dois estados — a barra encolhe e cresce por baixo dela. Na gaveta do celular, vira o "fechar".
+      -->
+      <button
+        type="button"
+        class="barra__recolher"
+        :aria-label="
+          compacto
+            ? t('shell.drawer.close')
+            : barraRecolhida
+              ? t('shell.drawer.expand')
+              : t('shell.drawer.collapse')
+        "
+        :aria-expanded="compacto ? undefined : !barraRecolhida"
+        aria-controls="barra-do-portal"
+        :title="barraRecolhida ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
+        @click="alternarBarra"
+      >
+        <i :class="compacto ? 'ph ph-x' : 'ph ph-caret-left'" aria-hidden="true" />
+      </button>
 
-        <button
-          type="button"
-          class="barra__recolher"
-          :aria-label="
-            compacto
-              ? t('shell.drawer.close')
-              : barraRecolhida
-                ? t('shell.drawer.expand')
-                : t('shell.drawer.collapse')
-          "
-          :title="barraRecolhida ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
-          @click="alternarBarra"
-        >
-          <i
-            :class="compacto ? 'ph ph-x' : barraRecolhida ? 'ph ph-caret-double-right' : 'ph ph-caret-double-left'"
-            aria-hidden="true"
-          />
-        </button>
-      </div>
+      <div class="barra__miolo">
+        <div class="barra__topo">
+          <RouterLink class="barra__marca" to="/inicio" :title="parceiroStore.parceiroNome">
+            <span class="barra__pata" aria-hidden="true">
+              <img src="/pata-escura.png" alt="" />
+            </span>
+            <span class="barra__empresa shell-rotulo">
+              <strong>{{ parceiroStore.parceiroNome }}</strong>
+              <small>PetJourney</small>
+            </span>
+          </RouterLink>
+        </div>
 
-      <div class="barra__ferramentas">
-        <button
-          v-if="hasClinicalProfile"
-          type="button"
-          class="barra__busca"
-          :title="t('clinico.busca.abrir')"
-          :aria-label="t('clinico.busca.abrir')"
-          @click="buscaAberta = true"
-        >
-          <i class="ph ph-magnifying-glass" aria-hidden="true" />
-          <span v-if="!barraRecolhida" class="barra__busca-texto">{{ t('clinico.busca.abrirCurto') }}</span>
-          <kbd v-if="!barraRecolhida">{{ atalhoDaBusca }}</kbd>
-        </button>
-        <ShellCriar :recolhida="barraRecolhida" :clinica="hasClinicalProfile" />
-      </div>
+        <div class="barra__ferramentas">
+          <button
+            v-if="hasClinicalProfile"
+            type="button"
+            class="barra__busca"
+            :title="t('clinico.busca.abrir')"
+            :aria-label="t('clinico.busca.abrir')"
+            @click="buscaAberta = true"
+          >
+            <i class="ph ph-magnifying-glass" aria-hidden="true" />
+            <span class="barra__busca-texto shell-rotulo">{{ t('clinico.busca.abrirCurto') }}</span>
+            <kbd class="shell-rotulo">{{ atalhoDaBusca }}</kbd>
+          </button>
+          <ShellCriar :recolhida="barraRecolhida" :clinica="hasClinicalProfile" />
+        </div>
 
-      <ShellNavegacao
-        class="barra__mapa"
-        :espacos="espacos"
-        :aqui="aqui"
-        :recolhida="barraRecolhida"
-        :todos-abertos="isListNavigator"
-        @navegou="fecharGaveta"
-      />
+        <ShellNavegacao
+          class="barra__mapa"
+          :espacos="espacos"
+          :aqui="aqui"
+          :recolhida="barraRecolhida"
+          :todos-abertos="isListNavigator"
+          @navegou="fecharGaveta"
+        />
 
-      <div class="barra__pe">
-        <button
-          type="button"
-          class="barra__cupom"
-          :disabled="cupomLigado && !podeResgatar"
-          :title="!cupomLigado ? t('comingSoon.cupom.navHint') : t('shell.cupom.cta')"
-          @click="clicarCupom"
-        >
-          <i class="ph ph-ticket" aria-hidden="true" />
-          <span v-if="!barraRecolhida" class="barra__cupom-texto">{{ t('shell.cupom.cta') }}</span>
-          <span v-if="!cupomLigado && !barraRecolhida" class="barra__breve">
-            {{ t('comingSoon.cupom.badge') }}
-          </span>
-        </button>
-        <ShellConta :recolhida="barraRecolhida" />
+        <div class="barra__pe">
+          <button
+            type="button"
+            class="barra__cupom"
+            :disabled="cupomLigado && !podeResgatar"
+            :title="!cupomLigado ? t('comingSoon.cupom.navHint') : t('shell.cupom.cta')"
+            @click="clicarCupom"
+          >
+            <span class="barra__cupom-icone" aria-hidden="true"><i class="ph ph-ticket" /></span>
+            <span class="barra__cupom-texto shell-rotulo">{{ t('shell.cupom.cta') }}</span>
+            <span v-if="!cupomLigado" class="barra__breve shell-rotulo">
+              {{ t('comingSoon.cupom.badge') }}
+            </span>
+          </button>
+          <ShellConta :recolhida="barraRecolhida" />
+        </div>
       </div>
     </aside>
 
@@ -374,7 +381,7 @@ onUnmounted(() => {
 
 <style scoped>
 .shell {
-  --barra-largura: 264px;
+  --barra-largura: 272px;
   --palco-margem: 10px;
 
   display: grid;
@@ -384,6 +391,7 @@ onUnmounted(() => {
   background: var(--rail);
   color: var(--tinta);
   font-family: var(--font-texto);
+  transition: grid-template-columns 300ms var(--pj-curva-chega);
 }
 
 .shell--recolhida {
@@ -407,77 +415,150 @@ onUnmounted(() => {
   transform: none;
 }
 
-/* ------------------------------------------------------------------------------------- barra */
+/* ------------------------------------------------------------------------------------- barra
+ * A moldura verde: um degradê leve de cima para baixo e o brilho do espaço no canto. Dentro dela, o
+ * que é peça (a empresa, a busca, o painel dos destinos, a conta) mora em vidro — o mesmo cartão
+ * das telas, em versão escura.
+ */
 
 .barra {
   position: sticky;
   z-index: 40;
   top: 0;
-  display: flex;
   height: 100dvh;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--rail);
+  min-width: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--rail) 90%, var(--pets)) 0%,
+    var(--rail) 46%
+  );
   color: var(--sobre-rail);
 }
 
-/*
- * A barra é a moldura: um verde-floresta sem fio entre ela e a folha. Um brilho frio no alto dá
- * profundidade à barra sem pintá-la de outra cor.
- */
-.barra::before {
+.barra__miolo {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.barra__miolo::before {
   position: absolute;
   inset: 0 0 auto;
-  height: 320px;
+  height: 340px;
   background: radial-gradient(
     120% 100% at 0% 0%,
-    color-mix(in oklab, var(--pj-lugar-claro) 13%, transparent),
+    color-mix(in oklab, var(--pj-lugar-claro) 14%, transparent),
     transparent 70%
   );
   content: '';
   pointer-events: none;
 }
 
-.barra > * {
+.barra__miolo > * {
   position: relative;
 }
 
+/*
+ * As palavras da barra esmaecem ao recolher, em vez de sumir de uma vez: a coluna encolhe por
+ * baixo delas e os ícones ficam onde estavam.
+ */
+.barra :deep(.shell-rotulo) {
+  transition: opacity 180ms var(--pj-curva-chega);
+}
+
+.shell--recolhida .barra :deep(.shell-rotulo) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A alça de recolher, na borda entre a barra e a folha. */
+.barra__recolher {
+  position: absolute;
+  z-index: 2;
+  top: 34px;
+  inset-inline-end: -13px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid var(--linha);
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+  color: var(--tinta-2);
+  cursor: pointer;
+  font-size: 13px;
+  transition:
+    color var(--pj-tempo-curto) ease,
+    box-shadow var(--pj-tempo-curto) ease;
+}
+
+.barra__recolher i {
+  transition: transform 300ms var(--pj-curva-chega);
+}
+
+.shell--recolhida .barra__recolher i {
+  transform: rotate(180deg);
+}
+
+[dir='rtl'] .barra__recolher i {
+  scale: -1 1;
+}
+
+.barra__recolher:hover {
+  box-shadow: var(--sombra-2);
+  color: var(--tinta);
+}
+
+.barra__recolher:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: 2px;
+}
+
 .barra__topo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 18px 12px 14px 16px;
+  padding: 16px 12px 12px;
 }
 
 .barra__marca {
   display: flex;
-  flex: 1;
   min-width: 0;
   align-items: center;
   gap: 12px;
-  border-radius: 12px;
+  padding: 8px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 5%);
   color: inherit;
   text-decoration: none;
+  white-space: nowrap;
+  transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.barra__marca:hover {
+  background: rgb(255 255 255 / 8%);
 }
 
 .barra__marca:focus-visible {
   outline: 2px solid var(--sobre-rail);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 .barra__pata {
   display: grid;
   flex: none;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 11px;
   background: var(--sobre-rail);
+  box-shadow: 0 6px 14px -6px rgb(0 0 0 / 60%);
 }
 
 .barra__pata img {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
@@ -492,7 +573,6 @@ onUnmounted(() => {
   font-size: 14.5px;
   font-weight: 650;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .barra__empresa small {
@@ -500,62 +580,44 @@ onUnmounted(() => {
   font-size: 12px;
 }
 
-.barra__recolher {
-  display: grid;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  place-items: center;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--sobre-rail-2);
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.barra__recolher:hover {
-  background: rgb(255 255 255 / 8%);
-  color: var(--sobre-rail);
-}
-
-.barra__recolher:focus-visible,
-.barra__busca:focus-visible,
-.barra__cupom:focus-visible {
-  outline: 2px solid var(--sobre-rail);
-  outline-offset: 2px;
-}
-
 .barra__ferramentas {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 0 12px 16px;
 }
 
 .barra__busca {
   display: flex;
-  flex: 1;
-  min-width: 0;
+  flex: 1 1 120px;
+  min-width: 40px;
   height: 40px;
   align-items: center;
   gap: 10px;
-  padding: 0 10px 0 12px;
-  border: 1px solid rgb(255 255 255 / 12%);
-  border-radius: 10px;
+  overflow: hidden;
+  padding: 0 10px 0 11px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 11px;
   background: rgb(255 255 255 / 5%);
   color: var(--sobre-rail-2);
   cursor: pointer;
   font: inherit;
   font-size: 14px;
   text-align: left;
+  white-space: nowrap;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease;
 }
 
 .barra__busca:hover {
-  border-color: rgb(255 255 255 / 22%);
+  border-color: rgb(255 255 255 / 20%);
+  background: rgb(255 255 255 / 8%);
   color: var(--sobre-rail);
 }
 
 .barra__busca i {
+  flex: none;
   font-size: 17px;
 }
 
@@ -565,14 +627,21 @@ onUnmounted(() => {
 
 .barra__busca kbd {
   padding: 2px 6px;
-  border-radius: 5px;
+  border-radius: 6px;
   background: rgb(255 255 255 / 10%);
   font-family: var(--font-dados);
   font-size: 11px;
 }
 
+.barra__busca:focus-visible,
+.barra__cupom:focus-visible {
+  outline: 2px solid var(--sobre-rail);
+  outline-offset: 2px;
+}
+
 .barra__mapa {
   flex: 1;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-color: rgb(255 255 255 / 18%) transparent;
@@ -581,31 +650,38 @@ onUnmounted(() => {
 
 .barra__pe {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   padding: 10px 12px 14px;
-  border-top: 1px solid rgb(255 255 255 / 8%);
+  border-top: 1px solid rgb(255 255 255 / 7%);
 }
 
 .barra__cupom {
   display: flex;
-  height: 40px;
+  height: 42px;
   align-items: center;
   gap: 12px;
-  padding: 0 10px;
+  overflow: hidden;
+  padding: 0 10px 0 8px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: transparent;
   color: var(--sobre-rail-2);
   cursor: pointer;
   font: inherit;
   font-size: 13.5px;
   text-align: left;
+  white-space: nowrap;
 }
 
-.barra__cupom i {
-  width: 28px;
-  font-size: 18px;
-  text-align: center;
+.barra__cupom-icone {
+  display: grid;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 7%);
+  font-size: 17px;
 }
 
 .barra__cupom:hover:not(:disabled) {
@@ -629,34 +705,6 @@ onUnmounted(() => {
   color: var(--sobre-rail-2);
   font-size: 11px;
   font-weight: 600;
-}
-
-/* Recolhida: tudo vira coluna de ícones centrada. */
-.shell--recolhida .barra__topo {
-  flex-direction: column;
-  padding: 18px 0 12px;
-}
-
-.shell--recolhida .barra__marca {
-  flex: none;
-}
-
-.shell--recolhida .barra__ferramentas {
-  flex-direction: column;
-  align-items: center;
-  padding-inline: 0;
-}
-
-.shell--recolhida .barra__busca {
-  width: 40px;
-  flex: none;
-  justify-content: center;
-  padding: 0;
-}
-
-.shell--recolhida .barra__cupom {
-  justify-content: center;
-  padding: 0;
 }
 
 /* -------------------------------------------------------------------------------------- palco
@@ -803,9 +851,31 @@ onUnmounted(() => {
   bottom: 0;
   left: 0;
   width: min(304px, 86vw);
+  border-radius: 0 var(--raio-painel) var(--raio-painel) 0;
   box-shadow: var(--sombra-3);
   transform: translateX(-104%);
-  transition: transform var(--pj-tempo-medio) var(--pj-curva-chega);
+  transition: transform 320ms var(--pj-curva-chega);
+}
+
+.shell--compacto .barra__miolo {
+  border-radius: inherit;
+}
+
+/* Na gaveta, a alça vira o "fechar" no canto de cima, dentro da barra. */
+.shell--compacto .barra__recolher {
+  top: 22px;
+  inset-inline-end: 14px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: rgb(255 255 255 / 9%);
+  box-shadow: none;
+  color: var(--sobre-rail);
+  font-size: 17px;
+}
+
+.shell--compacto .barra__topo {
+  padding-inline-end: 60px;
 }
 
 .shell--gaveta .barra {
@@ -817,11 +887,27 @@ onUnmounted(() => {
   z-index: 39;
   inset: 0;
   background: rgb(8 18 15 / 45%);
+  backdrop-filter: blur(2px);
+}
+
+.shell-veu-enter-active,
+.shell-veu-leave-active {
+  transition: opacity 320ms var(--pj-curva-chega);
+}
+
+.shell-veu-enter-from,
+.shell-veu-leave-to {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .shell,
   .shell--compacto .barra,
-  .palco__conteudo {
+  .palco__conteudo,
+  .barra__recolher i,
+  .barra :deep(.shell-rotulo),
+  .shell-veu-enter-active,
+  .shell-veu-leave-active {
     transition: none;
   }
 }

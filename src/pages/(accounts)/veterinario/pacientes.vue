@@ -830,7 +830,7 @@ const fraseDoResumo = computed(() => {
  */
 .procura {
   display: block;
-  padding: 16px 20px;
+  padding: 16px 24px;
 }
 
 .procura :deep(.filtro__linha) {

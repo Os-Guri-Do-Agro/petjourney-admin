@@ -72,7 +72,7 @@ const itens = computed(() => {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 14px 20px;
+  padding: 14px 24px;
 }
 
 .primeira__item + .primeira__item {

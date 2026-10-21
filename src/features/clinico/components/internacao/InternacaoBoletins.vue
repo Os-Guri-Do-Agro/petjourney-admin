@@ -538,7 +538,7 @@ function compor() {
 .pronto {
   display: grid;
   gap: 10px;
-  padding: 14px 20px;
+  padding: 14px 24px;
 }
 
 .pronto__texto {

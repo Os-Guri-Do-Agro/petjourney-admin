@@ -3,15 +3,9 @@ import Select from 'primevue/select'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import flagBR from 'country-flag-icons/string/3x2/BR'
-import flagES from 'country-flag-icons/string/3x2/ES'
-import flagAE from 'country-flag-icons/string/3x2/AE'
-import flagGB from 'country-flag-icons/string/3x2/GB'
-import flagRS from 'country-flag-icons/string/3x2/RS'
-import flagUS from 'country-flag-icons/string/3x2/US'
-
 import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { changeLocale } from '@/i18n'
+import { BANDEIRA_DO_IDIOMA, NOME_NATIVO_DO_IDIOMA } from '@/i18n/idiomas'
 import { LOCALES, type Locale } from '@/i18n/locales'
 import { currentColors } from '@/theme/color-mode'
 
@@ -32,25 +26,8 @@ const authTheme = useAuthThemeVars()
 const open = ref(false)
 
 /** SVG strings exportados pelo pacote (caminho SVG direto não está no exports). */
-const FLAG_SVG: Record<Locale, string> = {
-  pt: flagBR,
-  en: flagUS,
-  'en-GB': flagGB,
-  es: flagES,
-  sr: flagRS,
-  /* O árabe atende vários países: os Emirados representam o idioma no seletor. */
-  ar: flagAE,
-}
-
-/** Nomes nativos — não dependem do locale da UI. */
-const NATIVE_NAME: Record<Locale, string> = {
-  pt: 'Português',
-  en: 'English (US)',
-  'en-GB': 'English (UK)',
-  es: 'Español',
-  sr: 'Srpski',
-  ar: 'العربية',
-}
+const FLAG_SVG = BANDEIRA_DO_IDIOMA
+const NATIVE_NAME = NOME_NATIVO_DO_IDIOMA
 
 type LocaleOption = {
   code: Locale

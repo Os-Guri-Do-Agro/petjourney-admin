@@ -266,7 +266,7 @@ function abrir(ato: AtoClinico) {
 .atos__carregando {
   display: grid;
   gap: 8px;
-  padding: 14px 20px 18px;
+  padding: 14px 24px 18px;
 }
 
 .atos__vazio {
@@ -279,7 +279,7 @@ function abrir(ato: AtoClinico) {
   align-items: start;
   gap: 12px;
   grid-template-columns: 4.6rem minmax(0, 1fr);
-  padding: 13px 20px;
+  padding: 13px 24px;
   border: 0;
   background: transparent;
   color: var(--tinta);

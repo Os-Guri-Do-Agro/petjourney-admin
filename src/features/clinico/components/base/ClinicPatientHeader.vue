@@ -188,7 +188,7 @@ const alertasOrdenados = computed(() => {
   align-items: start;
   gap: 4px 18px;
   grid-template-columns: auto minmax(0, 1fr) auto;
-  padding: 18px 20px;
+  padding: 18px 24px;
   border: 1px solid var(--linha);
   border-radius: 16px;
   background: var(--superficie);

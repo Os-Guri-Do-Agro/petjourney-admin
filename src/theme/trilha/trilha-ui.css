@@ -15,7 +15,7 @@
 
 :root.trilha {
   --ui-raio-folha: var(--raio-cartao);
-  --ui-linha-altura: 64px;
+  --ui-linha-altura: 68px;
 }
 
 :root.trilha body {
@@ -33,7 +33,7 @@
 }
 
 .trilha .ui-folha--recheio {
-  padding: 20px 22px;
+  padding: 24px 26px;
 }
 
 /*
@@ -115,7 +115,7 @@
  */
 .trilha .ui-indicadores {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
@@ -139,9 +139,9 @@
   position: relative;
   display: grid;
   align-content: start;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
-  padding: 18px 20px;
+  padding: 20px 22px 22px;
   border: 1px solid var(--linha);
   border-radius: var(--raio-cartao);
   background: var(--superficie);
@@ -171,8 +171,8 @@
 
 .trilha .ui-indicador .ui-ladrilho {
   position: absolute;
-  top: 16px;
-  inset-inline-end: 16px;
+  top: 18px;
+  inset-inline-end: 18px;
 }
 
 /*
@@ -255,7 +255,7 @@
   min-width: 0;
   align-items: center;
   gap: 12px 14px;
-  padding: 16px 20px 14px;
+  padding: 18px 24px 16px;
 }
 
 .trilha .ui-cartao__cabeca + *,
@@ -313,14 +313,14 @@
   min-width: 0;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 12px;
-  padding: 10px 20px;
+  gap: 10px 14px;
+  padding: 14px 24px;
   background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
 }
 
 .trilha .ui-cartao__corpo {
   min-width: 0;
-  padding: 16px 20px 18px;
+  padding: 20px 24px 24px;
 }
 
 .trilha .ui-cartao__pe {
@@ -328,7 +328,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  padding: 12px 20px 14px;
+  padding: 14px 24px 16px;
   border-top: 1px solid var(--linha-suave);
   border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
   background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
@@ -411,7 +411,7 @@
   min-height: var(--ui-linha-altura);
   align-items: center;
   gap: 14px;
-  padding: 12px 20px;
+  padding: 14px 24px;
   color: var(--tinta);
   text-decoration: none;
   transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
@@ -606,8 +606,8 @@
 .trilha .ui-vazio {
   display: grid;
   justify-items: start;
-  gap: 4px;
-  padding: 24px 20px;
+  gap: 6px;
+  padding: 28px 24px;
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
@@ -697,10 +697,10 @@
  */
 
 html.trilha .p-selectbutton:not(.grupo) {
-  gap: 2px;
-  padding: 3px;
+  gap: 4px;
+  padding: 4px;
   border: 0;
-  border-radius: 12px;
+  border-radius: 13px;
   background: var(--superficie-3);
 }
 
@@ -716,6 +716,8 @@ html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:last-child {
 }
 
 html.trilha .p-selectbutton:not(.grupo) .p-togglebutton .p-togglebutton-content {
+  min-height: 32px;
+  gap: 8px;
   padding: 6px 14px;
   border-radius: 9px;
   background: transparent;
@@ -758,7 +760,17 @@ html.trilha.app-dark
   background: var(--superficie-3);
 }
 
-html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:has(:focus-visible) {
-  outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 1px;
+/*
+ * O foco do teclado: um anel por dentro do trilho. O PrimeVue desenhava um fio escuro em volta da
+ * opção escolhida depois do clique, que parecia uma borda errada; o anel só aparece no teclado.
+ */
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+html.trilha .p-selectbutton:not(.grupo) .p-togglebutton:focus-visible .p-togglebutton-content {
+  box-shadow:
+    0 0 0 2px var(--superficie),
+    0 0 0 4px color-mix(in oklab, var(--pj-lugar, var(--musgo)) 70%, transparent);
 }

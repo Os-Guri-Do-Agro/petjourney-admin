@@ -538,7 +538,7 @@ function abrirLeito(leitoId: string) {
   align-items: center;
   gap: 14px;
   margin: 0;
-  padding: 16px 20px;
+  padding: 16px 24px;
   color: var(--tinta);
   font-size: 14.5px;
 }

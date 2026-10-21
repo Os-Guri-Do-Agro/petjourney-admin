@@ -22,7 +22,7 @@
   min-width: 0;
   align-items: center;
   gap: 12px 14px;
-  padding: 16px 20px 14px;
+  padding: 18px 24px 16px;
 }
 
 .trilha .ficha-cartao__cabeca + * {
@@ -77,7 +77,7 @@
 
 .trilha .ficha-cartao__corpo {
   min-width: 0;
-  padding: 16px 20px 18px;
+  padding: 20px 24px 24px;
 }
 
 /* A faixa de ferramentas logo abaixo do cabeçalho (filtro, legenda): rente, num poço. */
@@ -87,7 +87,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 12px;
-  padding: 10px 20px;
+  padding: 14px 24px;
   background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
 }
 
@@ -101,7 +101,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 16px;
-  padding: 12px 20px 14px;
+  padding: 14px 24px 16px;
   border-top: 1px solid var(--linha-suave);
   border-radius: 0 0 calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px);
   background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));

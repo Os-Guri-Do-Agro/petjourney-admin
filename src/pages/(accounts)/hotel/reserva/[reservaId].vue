@@ -1055,7 +1055,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 6px;
   margin-block-start: -1px;
   margin-inline-start: -1px;
-  padding: 18px 20px;
+  padding: 18px 24px;
   border-block-start: 1px solid var(--linha);
   border-inline-start: 1px solid var(--linha);
 }
@@ -1099,7 +1099,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .quadro__notas {
   display: grid;
   gap: 8px;
-  padding: 12px 20px 14px;
+  padding: 12px 24px 14px;
   border-top: 1px solid var(--linha);
 }
 

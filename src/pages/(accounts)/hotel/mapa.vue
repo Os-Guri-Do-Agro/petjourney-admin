@@ -587,7 +587,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   gap: 14px 16px;
   grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
-  padding: 18px 20px 0;
+  padding: 18px 24px 0;
 }
 
 .procura__frase {
@@ -627,7 +627,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   align-items: center;
   gap: 4px 8px;
   margin: 4px -20px 0;
-  padding: 12px 20px;
+  padding: 12px 24px;
   border-top: 1px solid var(--linha-suave);
   font-size: 14px;
   grid-column: 1 / -1;

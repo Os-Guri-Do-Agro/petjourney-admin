@@ -892,7 +892,7 @@ watch([busca, filtros], () => {
 
 .aplicadas__procura {
   display: block;
-  padding: 14px 20px;
+  padding: 14px 24px;
 }
 
 .aplicadas__procura :deep(.filtro__busca) {
@@ -1031,7 +1031,7 @@ watch([busca, filtros], () => {
     minmax(160px, 1fr) minmax(0, 1.5fr) minmax(150px, 0.9fr) minmax(0, 1.1fr)
     auto;
   min-height: 76px;
-  padding: 12px 20px;
+  padding: 12px 24px;
   transition: background-color var(--pj-tempo-curto) ease;
 }
 

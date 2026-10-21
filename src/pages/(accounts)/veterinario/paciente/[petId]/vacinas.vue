@@ -673,7 +673,7 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
   align-items: center;
   gap: 16px;
   min-height: 76px;
-  padding: 16px 20px;
+  padding: 16px 24px;
 }
 
 .agora__icone {

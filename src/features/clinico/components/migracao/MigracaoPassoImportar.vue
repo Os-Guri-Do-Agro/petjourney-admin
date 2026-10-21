@@ -603,7 +603,7 @@ function abrirPaciente(petId: string) {
   display: grid;
   align-content: start;
   gap: 10px;
-  padding: 18px 20px 20px;
+  padding: 18px 24px 20px;
 }
 
 .caixa + .caixa {

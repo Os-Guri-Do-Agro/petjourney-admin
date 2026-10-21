@@ -1739,7 +1739,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
   align-items: center;
   justify-content: space-between;
   gap: 12px 20px;
-  padding: 18px 20px;
+  padding: 18px 24px;
 }
 
 .estoque__convite p {
@@ -1754,7 +1754,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
   justify-content: space-between;
   gap: 16px;
   min-height: 56px;
-  padding: 10px 20px;
+  padding: 10px 24px;
 }
 
 .alvos__nome {
@@ -1836,7 +1836,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 }
 
 .grafico {
-  padding: 18px 20px 14px;
+  padding: 18px 24px 16px;
 }
 
 /* ------------------------------------------------------------------ estreito */

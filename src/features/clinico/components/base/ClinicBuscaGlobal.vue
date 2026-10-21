@@ -721,7 +721,7 @@ function aoTeclar(evento: KeyboardEvent) {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 18px;
-  padding: 10px 20px;
+  padding: 10px 24px;
   border-top: 1px solid var(--linha);
   background: var(--superficie-2);
   color: var(--tinta-2);

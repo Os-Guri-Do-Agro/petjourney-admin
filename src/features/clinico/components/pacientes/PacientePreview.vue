@@ -353,7 +353,7 @@ const contato = computed(() => [
 .quadro {
   display: grid;
   gap: 10px;
-  padding: 16px 20px 18px;
+  padding: 16px 24px 18px;
   border-top: 1px solid var(--linha);
 }
 

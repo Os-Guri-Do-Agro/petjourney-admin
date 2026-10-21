@@ -700,7 +700,7 @@ onMounted(carregar)
 .vaga {
   display: grid;
   gap: 14px;
-  padding: 18px 20px 14px;
+  padding: 18px 24px 16px;
   background: linear-gradient(
     180deg,
     color-mix(in oklab, var(--ok-fundo) 70%, var(--superficie)),
@@ -858,7 +858,7 @@ onMounted(carregar)
   min-height: 84px;
   align-items: center;
   gap: 8px 22px;
-  padding: 14px 20px 14px 18px;
+  padding: 14px 24px 14px 18px;
 }
 
 .oferta {

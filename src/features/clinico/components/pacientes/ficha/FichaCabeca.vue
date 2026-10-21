@@ -21,9 +21,8 @@
  *    contornado. Em tela estreita sobe para cima das abas.
  * 5. **A frase da vista** — logo abaixo do cartão, o estado da vista aberta numa frase.
  *
- * Com `atual: null` (o prontuário, o paciente internado), a capa vem sem abas: a tela tem a
- * navegação dela, e duas fileiras de abas se confundiriam. No pé do cartão, no lugar das abas,
- * as vistas da ficha viram saídas discretas, e as ações continuam na ponta direita.
+ * Com `atual: null` (o prontuário, o paciente internado), as mesmas abas aparecem sem nenhuma
+ * acesa — levam à vista da ficha — e as ações da tela continuam na ponta direita, como na ficha.
  *
  * A API é a de antes: `navCheia` continua aceita, mas a aba já diz com a contagem qual vista
  * pede atenção — não há mais pílula cheia para escolher.
@@ -330,44 +329,21 @@ function destino(vista: VistaDaFicha): string {
 
       <!-- O pé do cartão: as vistas da ficha à esquerda, a ação da vez na ponta direita. -->
       <div class="capa__barra">
-        <!-- As quatro vistas da ficha, com o desenho das abas de um destino. -->
-        <nav
-          v-if="atual"
-          class="capa__abas"
-          :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })"
-        >
+        <!--
+          As quatro vistas da ficha, com o desenho das abas de um destino. Fora da ficha (o
+          prontuário, o internado) elas vêm iguais, só que nenhuma acesa: a ficha tem a mesma cara
+          em todo lugar onde o paciente aparece, e as ações ficam na mesma ponta direita.
+        -->
+        <nav class="capa__abas" :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })">
           <RouterLink
             v-for="item in vistas"
             :key="item.vista"
             class="capa__aba"
-            :class="{ 'capa__aba--atual': item.vista === atual }"
+            :class="{ 'capa__aba--atual': atual !== null && item.vista === atual }"
             :to="destino(item.vista)"
             active-class=""
             exact-active-class=""
-            :aria-current="item.vista === atual ? 'page' : undefined"
-            :title="item.descricao || undefined"
-          >
-            <i :class="item.icone" aria-hidden="true" />
-            <span>{{ item.rotulo }}</span>
-            <span
-              v-if="item.contagem"
-              class="capa__selo ui-num"
-              :class="`capa__selo--${item.tom}`"
-              aria-hidden="true"
-            >
-              {{ item.contagem }}
-            </span>
-            <span v-if="item.descricao" class="sr-only">{{ item.descricao }}</span>
-          </RouterLink>
-        </nav>
-
-        <!-- Fora da ficha (o prontuário, o internado): as vistas viram saídas, numa linha só. -->
-        <nav v-else class="capa__saidas" :aria-label="t('clinico.ficha.abas.aria', { nome: pet.nome })">
-          <RouterLink
-            v-for="item in vistas"
-            :key="item.vista"
-            class="capa__saida"
-            :to="destino(item.vista)"
+            :aria-current="atual !== null && item.vista === atual ? 'page' : undefined"
             :title="item.descricao || undefined"
           >
             <i :class="item.icone" aria-hidden="true" />
@@ -503,7 +479,7 @@ function destino(vista: VistaDaFicha): string {
   min-height: 74px;
   align-content: center;
   gap: 3px;
-  padding: 12px 20px 12px 62px;
+  padding: 12px 24px 12px 62px;
 }
 
 .capa__dado--tutor {
@@ -596,24 +572,30 @@ function destino(vista: VistaDaFicha): string {
 
 /* ------------------------------------------------------------------ o pé do cartão */
 
+/*
+ * As abas embaixo à esquerda, as ações à direita, numa linha. Quando as ações não cabem ao lado
+ * das abas (duas ações longas, como na internação), elas sobem para uma linha própria acima das
+ * abas, alinhadas à direita — as abas continuam rentes à borda de baixo, inteiras.
+ */
 .capa__barra {
   display: flex;
   min-width: 0;
   min-height: 58px;
+  flex-wrap: wrap-reverse;
   align-items: center;
-  gap: 10px 16px;
+  gap: 0 16px;
   padding: 0 20px 0 12px;
   border-top: 1px solid var(--linha-suave);
 }
 
 .capa__acoes {
   display: flex;
-  flex-wrap: wrap;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
   margin-inline-start: auto;
-  padding-block: 9px;
+  padding-block: 10px;
 }
 
 /* ------------------------------------------------------------------ abas da ficha
@@ -623,7 +605,9 @@ function destino(vista: VistaDaFicha): string {
  */
 .capa__abas {
   display: flex;
+  max-width: 100%;
   min-width: 0;
+  flex: 0 0 auto;
   align-self: stretch;
   gap: 2px;
   overflow-x: auto;
@@ -743,56 +727,6 @@ function destino(vista: VistaDaFicha): string {
   font-weight: 550;
 }
 
-/*
- * As saídas: pílulas contornadas, sem o sublinhado das abas — levam a outra tela, não trocam a
- * vista. Na internação elas ficam logo acima das abas da tela, e não podem parecer outra fileira
- * de abas.
- */
-.capa__saidas {
-  display: flex;
-  min-width: 0;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding-block: 12px;
-  padding-inline-start: 8px;
-}
-
-.capa__saida {
-  display: inline-flex;
-  min-height: 34px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 14px 0 11px;
-  border: 1px solid var(--linha);
-  border-radius: 999px;
-  background: var(--superficie);
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  font-weight: 550;
-  text-decoration: none;
-  transition:
-    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
-    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
-    color var(--pj-tempo-curto) var(--pj-curva-chega);
-}
-
-.capa__saida i {
-  color: var(--pj-lugar-tinta, var(--musgo));
-  font-size: 17px;
-}
-
-.capa__saida:hover {
-  border-color: var(--linha-media);
-  background: var(--superficie-2);
-  color: var(--tinta);
-}
-
-.capa__saida:focus-visible {
-  outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 0;
-}
-
 /* ------------------------------------------------------------------ larguras */
 
 /* Com espaço, os dados vão para a direita de quem é. */
@@ -827,6 +761,7 @@ function destino(vista: VistaDaFicha): string {
   }
 
   .capa__acoes {
+    flex-wrap: wrap;
     justify-content: flex-start;
     margin-inline-start: 0;
     padding: 4px 6px 14px;
@@ -957,8 +892,7 @@ function destino(vista: VistaDaFicha): string {
 
 @media (prefers-reduced-motion: reduce) {
   .capa__aba,
-  .capa__aba i,
-  .capa__saida {
+  .capa__aba i {
     transition: none;
   }
 }

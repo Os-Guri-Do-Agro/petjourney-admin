@@ -277,7 +277,7 @@ function rotaDaEstadia(hospedagemId: string): string {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px 14px;
+  padding: 18px 24px 16px;
   border-bottom: 1px solid var(--linha-suave);
 }
 
@@ -293,7 +293,7 @@ function rotaDaEstadia(hospedagemId: string): string {
 .assunto__corpo {
   display: grid;
   gap: 16px;
-  padding: 16px 20px 20px;
+  padding: 16px 24px 20px;
 }
 
 .assunto__contagem {
@@ -304,7 +304,7 @@ function rotaDaEstadia(hospedagemId: string): string {
 
 .assunto__subtitulo {
   margin: 0;
-  padding: 14px 20px 6px;
+  padding: 14px 24px 6px;
   border-top: 1px solid var(--linha-suave);
   color: var(--tinta-2);
   font-size: 13.5px;

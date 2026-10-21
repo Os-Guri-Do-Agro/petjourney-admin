@@ -280,7 +280,7 @@ const temProposta = computed(
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 18px 20px 14px;
+  padding: 18px 24px 16px;
   border-bottom: 1px solid var(--linha-suave);
 }
 

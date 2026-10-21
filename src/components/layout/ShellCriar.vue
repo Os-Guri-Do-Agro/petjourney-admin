@@ -104,15 +104,25 @@ function escolher(opcao: Opcao) {
   height: 40px;
   place-items: center;
   border: 0;
-  border-radius: 10px;
-  background: var(--salvia);
-  color: var(--sobre-salvia);
+  border-radius: 11px;
+  background: linear-gradient(145deg, var(--pets-claro), var(--salvia));
+  box-shadow:
+    0 6px 14px -6px rgb(0 0 0 / 55%),
+    inset 0 1px 0 rgb(255 255 255 / 30%);
+  color: var(--rail);
   cursor: pointer;
   font-size: 18px;
+  transition:
+    filter var(--pj-tempo-curto) ease,
+    transform var(--pj-tempo-curto) ease;
 }
 
 .criar:hover {
-  background: color-mix(in oklab, var(--salvia) 86%, white);
+  filter: brightness(1.06);
+}
+
+.criar:active {
+  transform: translateY(1px);
 }
 
 .criar:focus-visible {

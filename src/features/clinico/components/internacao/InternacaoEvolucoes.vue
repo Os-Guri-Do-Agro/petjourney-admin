@@ -468,7 +468,7 @@ function registrar() {
 .turno {
   display: grid;
   gap: 12px;
-  padding: 16px 20px 18px 46px;
+  padding: 16px 24px 18px 46px;
   container-type: inline-size;
 }
 

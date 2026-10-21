@@ -321,7 +321,7 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
   min-height: 60px;
   align-items: center;
   gap: 14px;
-  padding: 10px 20px;
+  padding: 10px 24px;
 }
 
 .grupo__esqueleto-linha + .grupo__esqueleto-linha {
