@@ -80,6 +80,7 @@ async function sair() {
     <button
       type="button"
       class="conta__botao"
+      :class="{ 'conta__botao--recolhida': recolhida }"
       aria-haspopup="menu"
       :aria-expanded="menuAberto"
       :title="recolhida ? nome : undefined"
@@ -246,6 +247,13 @@ async function sair() {
   text-align: start;
   white-space: nowrap;
   transition: background-color var(--pj-tempo-curto) ease;
+}
+
+/* Recolhida: só o avatar, sem a moldura, no eixo dos ícones da barra. */
+.conta__botao--recolhida {
+  padding-inline-start: 6px;
+  border-color: transparent;
+  background: transparent;
 }
 
 .conta__botao:hover {

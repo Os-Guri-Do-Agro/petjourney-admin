@@ -134,11 +134,13 @@ function destinoAtivo(id: string, espaco: Espaco) {
 /*
  * A barra no acabamento novo (20/10/2026): cada espaço é uma linha com o ladrilho da cor dele; o
  * espaço aberto mostra os destinos num painel de vidro, como um cartão dentro da moldura verde, e o
- * destino atual acende na cor do espaço. Abrir e fechar desliza, e recolher a barra só esconde as
- * palavras — os ícones ficam no mesmo lugar.
+ * destino atual acende na cor do espaço. Abrir e fechar desliza, e recolher a barra deixa só os
+ * ícones, numa coluna.
  */
+/* A coluna não cresce com as palavras: recolhida, elas somem mas ainda ocupariam lugar. */
 .mapa {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: 4px;
   padding: 4px 12px 14px;
@@ -192,7 +194,10 @@ function destinoAtivo(id: string, espaco: Espaco) {
   font-weight: 650;
 }
 
-/* O ladrilho: o mesmo quadrado macio das telas, aqui em vidro sobre o verde. */
+/*
+ * O ladrilho: o mesmo quadrado macio das telas, aqui em vidro sobre o verde. Ícone de tamanho par
+ * no quadrado par: com 17 px sobrava meio pixel, e o desenho caía para baixo e para a direita.
+ */
 .mapa__ladrilho {
   display: grid;
   flex: none;
@@ -202,7 +207,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
   border-radius: 10px;
   background: rgb(255 255 255 / 7%);
   color: var(--sobre-rail);
-  font-size: 17px;
+  font-size: 18px;
   transition:
     background var(--pj-tempo-medio) var(--pj-curva-chega),
     box-shadow var(--pj-tempo-medio) var(--pj-curva-chega),
@@ -263,6 +268,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
 /* A gaveta desliza: a linha da grade vai de 0 a 1fr, e o miolo corta o que ainda não cabe. */
 .espaco__gaveta {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: 0fr;
   opacity: 0;
   transition:
@@ -283,6 +289,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
 /* O painel de vidro com os destinos: um cartão dentro da moldura. */
 .espaco__destinos {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
   margin: 4px 0 8px;
   padding: 6px;
@@ -378,8 +385,9 @@ function destinoAtivo(id: string, espaco: Espaco) {
 }
 
 /*
- * Recolhida: as palavras somem (a moldura cuida do esmaecer) e nada muda de lugar — os ícones já
- * estão na coluna de 76px. O selo vai para o canto do ladrilho.
+ * Recolhida: as palavras somem (a moldura cuida do esmaecer) e sobram os ícones, todos no eixo da
+ * coluna de 48 px — os destinos chegam o ícone para o mesmo centro dos ladrilhos. O selo vai para
+ * o canto do ícone.
  */
 .mapa--recolhida .mapa__selo {
   position: absolute;
@@ -389,6 +397,14 @@ function destinoAtivo(id: string, espaco: Espaco) {
   height: 16px;
   padding: 0 4px;
   font-size: 10px;
+}
+
+.mapa--recolhida .destino {
+  padding-inline: 7px;
+}
+
+.mapa--recolhida .destino .mapa__selo {
+  inset-inline-start: 19px;
 }
 
 .mapa--recolhida .destino--ativo::before {
@@ -409,7 +425,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
 .shell--densa .mapa__ladrilho {
   width: 28px;
   height: 28px;
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .shell--densa .espaco__destinos {

@@ -61,11 +61,6 @@ function lerRecolhida() {
 const barraRecolhida = computed(() => recolhida.value && !compacto.value)
 
 function alternarBarra() {
-  if (compacto.value) {
-    gavetaAberta.value = !gavetaAberta.value
-    return
-  }
-
   recolhida.value = !recolhida.value
   window.localStorage.setItem(CHAVE_RECOLHIDA, String(recolhida.value))
 }
@@ -249,26 +244,16 @@ onUnmounted(() => {
       :aria-hidden="compacto && !gavetaAberta ? 'true' : undefined"
       :inert="compacto && !gavetaAberta ? true : undefined"
     >
-      <!--
-        Recolher/expandir: uma alça redonda na borda entre a barra e a folha, no mesmo lugar nos
-        dois estados — a barra encolhe e cresce por baixo dela. Na gaveta do celular, vira o "fechar".
-      -->
+      <!-- Na gaveta do celular, o "fechar" no canto de cima. -->
       <button
+        v-if="compacto"
         type="button"
-        class="barra__recolher"
-        :aria-label="
-          compacto
-            ? t('shell.drawer.close')
-            : barraRecolhida
-              ? t('shell.drawer.expand')
-              : t('shell.drawer.collapse')
-        "
-        :aria-expanded="compacto ? undefined : !barraRecolhida"
+        class="barra__fechar"
+        :aria-label="t('shell.drawer.close')"
         aria-controls="barra-do-portal"
-        :title="barraRecolhida ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
-        @click="alternarBarra"
+        @click="fecharGaveta"
       >
-        <i :class="compacto ? 'ph ph-x' : 'ph ph-caret-left'" aria-hidden="true" />
+        <i class="ph ph-x" aria-hidden="true" />
       </button>
 
       <div class="barra__miolo">
@@ -282,6 +267,20 @@ onUnmounted(() => {
               <small>PetJourney</small>
             </span>
           </RouterLink>
+
+          <!-- Recolher/expandir: ao lado da empresa; recolhida, logo abaixo da pata. -->
+          <button
+            v-if="!compacto"
+            type="button"
+            class="barra__recolher"
+            :aria-label="barraRecolhida ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
+            :aria-expanded="!barraRecolhida"
+            aria-controls="barra-do-portal"
+            :title="barraRecolhida ? t('shell.drawer.expand') : t('shell.drawer.collapse')"
+            @click="alternarBarra"
+          >
+            <i class="ph ph-sidebar-simple" aria-hidden="true" />
+          </button>
         </div>
 
         <div class="barra__ferramentas">
@@ -394,8 +393,9 @@ onUnmounted(() => {
   transition: grid-template-columns 300ms var(--pj-curva-chega);
 }
 
+/* 72 px: 12 de margem de cada lado e uma coluna de 48 onde cada ícone fica no centro (x = 36). */
 .shell--recolhida {
-  --barra-largura: 76px;
+  --barra-largura: 72px;
 }
 
 .shell__pular {
@@ -473,56 +473,16 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* A alça de recolher, na borda entre a barra e a folha. */
-.barra__recolher {
-  position: absolute;
-  z-index: 2;
-  top: 34px;
-  inset-inline-end: -13px;
-  display: grid;
-  width: 26px;
-  height: 26px;
-  place-items: center;
-  border: 1px solid var(--linha);
-  border-radius: 50%;
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
-  color: var(--tinta-2);
-  cursor: pointer;
-  font-size: 13px;
-  transition:
-    color var(--pj-tempo-curto) ease,
-    box-shadow var(--pj-tempo-curto) ease;
-}
-
-.barra__recolher i {
-  transition: transform 300ms var(--pj-curva-chega);
-}
-
-.shell--recolhida .barra__recolher i {
-  transform: rotate(180deg);
-}
-
-[dir='rtl'] .barra__recolher i {
-  scale: -1 1;
-}
-
-.barra__recolher:hover {
-  box-shadow: var(--sombra-2);
-  color: var(--tinta);
-}
-
-.barra__recolher:focus-visible {
-  outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: 2px;
-}
-
 .barra__topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 16px 12px 12px;
 }
 
 .barra__marca {
   display: flex;
+  flex: 1;
   min-width: 0;
   align-items: center;
   gap: 12px;
@@ -580,6 +540,36 @@ onUnmounted(() => {
   font-size: 12px;
 }
 
+/* Recolher/expandir: o mesmo vidro da busca, num quadrado do tamanho do "criar", logo abaixo. */
+.barra__recolher {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 11px;
+  background: rgb(255 255 255 / 5%);
+  color: var(--sobre-rail-2);
+  cursor: pointer;
+  font-size: 18px;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease,
+    color var(--pj-tempo-curto) ease;
+}
+
+.barra__recolher:hover {
+  border-color: rgb(255 255 255 / 20%);
+  background: rgb(255 255 255 / 8%);
+  color: var(--sobre-rail);
+}
+
+[dir='rtl'] .barra__recolher i {
+  scale: -1 1;
+}
+
 .barra__ferramentas {
   display: flex;
   flex-wrap: wrap;
@@ -595,7 +585,7 @@ onUnmounted(() => {
   align-items: center;
   gap: 10px;
   overflow: hidden;
-  padding: 0 10px 0 11px;
+  padding: 0 10px;
   border: 1px solid rgb(255 255 255 / 10%);
   border-radius: 11px;
   background: rgb(255 255 255 / 5%);
@@ -618,7 +608,7 @@ onUnmounted(() => {
 
 .barra__busca i {
   flex: none;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .barra__busca-texto {
@@ -634,22 +624,28 @@ onUnmounted(() => {
 }
 
 .barra__busca:focus-visible,
+.barra__recolher:focus-visible,
 .barra__cupom:focus-visible {
   outline: 2px solid var(--sobre-rail);
   outline-offset: 2px;
 }
 
+/* O mapa rola, mas sem barra à vista: na coluna estreita ela comia o lugar dos ícones. */
 .barra__mapa {
   flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: rgb(255 255 255 / 18%) transparent;
-  scrollbar-width: thin;
+  scrollbar-width: none;
+}
+
+.barra__mapa::-webkit-scrollbar {
+  display: none;
 }
 
 .barra__pe {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
   padding: 10px 12px 14px;
   border-top: 1px solid rgb(255 255 255 / 7%);
@@ -681,7 +677,7 @@ onUnmounted(() => {
   place-items: center;
   border-radius: 10px;
   background: rgb(255 255 255 / 7%);
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .barra__cupom:hover:not(:disabled) {
@@ -705,6 +701,37 @@ onUnmounted(() => {
   color: var(--sobre-rail-2);
   font-size: 11px;
   font-weight: 600;
+}
+
+/*
+ * Recolhida: só os ícones, um embaixo do outro no eixo da coluna. A empresa perde a moldura e
+ * fica só a pata, com o recolher logo abaixo; a busca vira um quadrado do tamanho do "criar".
+ */
+.shell--recolhida .barra__topo {
+  flex-direction: column;
+  align-items: center;
+}
+
+.shell--recolhida .barra__marca {
+  flex: none;
+  width: 48px;
+  padding: 5px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.shell--recolhida .barra__marca:hover {
+  background: rgb(255 255 255 / 8%);
+}
+
+.shell--recolhida .barra__ferramentas {
+  flex-direction: column;
+  align-items: center;
+}
+
+.shell--recolhida .barra__busca {
+  flex: none;
+  width: 40px;
 }
 
 /* -------------------------------------------------------------------------------------- palco
@@ -861,17 +888,27 @@ onUnmounted(() => {
   border-radius: inherit;
 }
 
-/* Na gaveta, a alça vira o "fechar" no canto de cima, dentro da barra. */
-.shell--compacto .barra__recolher {
+/* O "fechar" da gaveta, no canto de cima, dentro da barra. */
+.barra__fechar {
+  position: absolute;
+  z-index: 2;
   top: 22px;
   inset-inline-end: 14px;
+  display: grid;
   width: 36px;
   height: 36px;
+  place-items: center;
   border: 0;
+  border-radius: 50%;
   background: rgb(255 255 255 / 9%);
-  box-shadow: none;
   color: var(--sobre-rail);
+  cursor: pointer;
   font-size: 17px;
+}
+
+.barra__fechar:focus-visible {
+  outline: 2px solid var(--sobre-rail);
+  outline-offset: 2px;
 }
 
 .shell--compacto .barra__topo {
@@ -904,7 +941,6 @@ onUnmounted(() => {
   .shell,
   .shell--compacto .barra,
   .palco__conteudo,
-  .barra__recolher i,
   .barra :deep(.shell-rotulo),
   .shell-veu-enter-active,
   .shell-veu-leave-active {

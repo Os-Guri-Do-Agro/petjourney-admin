@@ -18,9 +18,11 @@
  *
  * ## Largo e estreito
  *
- * Estreito (três blocos lado a lado, ou o celular), os números ficam dois a dois e o passo é o pé
- * inteiro do bloco. Largo (o bloco na linha inteira: um espaço só, ou o terceiro no tablet), os
- * números correm numa fileira e o passo vai para a direita deles — sem deixar meia tela vazia.
+ * Estreito, os números se arrumam como couberem e o passo é o pé inteiro do bloco. Largo (a partir
+ * de 960 px: um espaço só numa tela larga), os números correm numa fileira e o passo vai para a
+ * direita deles — sem deixar meia tela vazia. O largo só entra quando os quatro números cabem lado
+ * a lado: antes disso eles quebravam em duas linhas e o passo boiava no meio da coluna da direita
+ * (dois blocos lado a lado, ou um só no notebook).
  */
 import Skeleton from 'primevue/skeleton'
 import { useI18n } from 'vue-i18n'
@@ -486,11 +488,12 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 /*
  * Largo: um espaço só na linha inteira. Os números correm numa fileira à esquerda e o passo vira
- * um botão à direita deles, em vez de um pé de 1000 px com meia dúzia de palavras.
+ * um botão à direita deles, em vez de um pé de 1000 px com meia dúzia de palavras. 960 px é onde
+ * quatro números de 150 px cabem ao lado do passo (4 × 150 + 18 + 24 + 300 = 942).
  */
-@container espaco (min-width: 640px) {
+@container espaco (min-width: 960px) {
   .espaco__miolo {
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
     grid-template-rows: auto 1fr;
   }
 
