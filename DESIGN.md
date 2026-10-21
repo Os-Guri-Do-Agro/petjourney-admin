@@ -389,6 +389,30 @@ documento onde houver conflito:
   `PortalParceiroDashboard`, `usePartnerFocusSurface` e `HomeNavigationShortcuts`. Os diálogos que
   ainda levam `.hc-tema` usam só a ponte de tokens de `src/theme/hc-tema.css`.
 
+### Acabamento (20/10/2026)
+
+O redesenho total acertou a estrutura e ficou plano demais. O acabamento dá profundidade, cor de
+lugar e hierarquia, sem mexer em dados, textos ou fluxos. Vale por cima do que está acima.
+
+- **Moldura:** em tela larga a tela é uma folha de cantos 22px presa na barra verde, e quem rola é
+  `main#conteudo` (a fita do dia fica parada). Telas que acompanham a rolagem usam
+  `composables/rolagemDoConteudo.ts`. Até 900px a janela rola, como antes.
+- **Luz do espaço:** o título de cada tela leva o ladrilho do destino no degradê do lugar
+  (`--pj-lugar-degrade`), e o alto da folha um brilho suave da mesma cor. O `body` leva a classe
+  `pj-lugar--*`, então diálogos e gavetas também acendem.
+- **Abertura:** `UiAbertura`, o painel na cor do espaço com a frase do momento, a ação principal,
+  os números do agora em vidro e a trilha da marca. Só nas telas que abrem um espaço: Início, Hoje
+  da Clínica, Hoje do Hotel.
+- **Profundidade:** cartão (`ui-folha`) branco com sombra de cartão e raio 18; poço (`ui-poco`)
+  rente e tingido para o que apoia; nada de cartão dentro de cartão. Raios 10/14/18/22.
+- **Kit** (`theme/trilha/trilha-ui.css`): `ui-cartao` (cabeça com ladrilho, título, descrição,
+  total ou ações; ferramentas; corpo; pé; cabeça tingida por estado), `ui-ladrilho` (tamanhos e
+  tons), `ui-indicadores`/`ui-indicador` (também como filtro, `--escolhido`, e `--topo` para valor
+  longo), `ui-selo` em pílula, tabela com cabeçalho em poço.
+- **PrimeVue** (`theme/trilha/trilha-acabamento.css`): botão principal com volume, secundário
+  branco com sombra rente, campos com anel na cor da ação, caixas flutuantes, diálogos e gavetas
+  com raio de folha e véu esmaecido.
+
 ### Trilha (19/10/2026)
 
 O design do portal inteiro desde 19/10/2026, testado primeiro na Agenda (branch
