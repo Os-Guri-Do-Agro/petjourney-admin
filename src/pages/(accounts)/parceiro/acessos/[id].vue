@@ -37,11 +37,10 @@ import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturada
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
 import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
-import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
+import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import type { PetSpecies } from '@/features/clinico/data/types'
@@ -1145,7 +1144,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
     :carregando="loading"
     :erro="error"
     :sem-acesso-de-parceiro="store.semAcessoParceiro"
-    guia
     @tentar-de-novo="loadDetalhe()"
   >
     <template #voltar>
@@ -1155,72 +1153,146 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
       </RouterLink>
     </template>
 
-    <!-- A capa do pet: o pet é o título desta tela, e o prazo do acesso mora ao lado do nome. -->
+    <!--
+      A capa do pet, como a ficha da Clínica: um cartão com quem é (rosto, nome, espécie, o serviço
+      do acesso) e, à direita, os dois números que importam — o peso e quanto falta para o acesso
+      acabar. No pé, quando o acesso foi vinculado e de quando é o resumo.
+    -->
     <template #cabecalho>
-      <div v-if="detalhe" class="capa" :data-status="detalhe.status">
-        <div class="capa__quem">
-          <PetAvatar
-            class="capa__rosto"
-            :nome="detalhe.petNome"
-            :iniciais="iniciaisDoPet"
-            :especie="especieDoAvatar"
-            :foto-url="detalhe.petFoto ?? ''"
-            tamanho="xl"
-          />
-          <div class="capa__identidade">
-            <h1 class="capa__nome">{{ detalhe.petNome }}</h1>
-            <p v-if="metaDoPet" class="capa__meta">{{ metaDoPet }}</p>
-            <p class="capa__selos">
-              <span class="ui-selo ui-selo--lugar">
-                <i :class="iconeDoServico" aria-hidden="true" />
-                {{ servicoLabel }}
-              </span>
-            </p>
+      <section v-if="detalhe" class="capa ui-folha" :data-status="detalhe.status">
+        <div class="capa__corpo">
+          <div class="capa__quem">
+            <span class="capa__moldura">
+              <PetAvatar
+                class="capa__rosto"
+                :nome="detalhe.petNome"
+                :iniciais="iniciaisDoPet"
+                :especie="especieDoAvatar"
+                :foto-url="detalhe.petFoto ?? ''"
+                tamanho="xl"
+              />
+            </span>
+            <div class="capa__identidade">
+              <h1 class="capa__nome">{{ detalhe.petNome }}</h1>
+              <p v-if="metaDoPet" class="capa__meta">{{ metaDoPet }}</p>
+              <p class="capa__selos">
+                <span class="ui-selo ui-selo--lugar">
+                  <i :class="iconeDoServico" aria-hidden="true" />
+                  {{ servicoLabel }}
+                </span>
+                <span v-if="isAtivo && prazoPerto" class="ui-selo ui-selo--atencao">
+                  <i class="ph ph-alarm" aria-hidden="true" />
+                  {{ t('acessos.detalhe.prazo.venceHoje') }}
+                </span>
+                <span v-else-if="isAtivo" class="ui-selo ui-selo--ok">
+                  <i class="ph ph-lock-key-open" aria-hidden="true" />
+                  {{ t('acessos.list.status.ATIVO') }}
+                </span>
+                <span v-else class="ui-selo">
+                  <i
+                    :class="detalhe.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass-low'"
+                    aria-hidden="true"
+                  />
+                  {{ t(`acessos.list.status.${detalhe.status}`) }}
+                </span>
+              </p>
+            </div>
           </div>
+
+          <dl class="capa__dados" :aria-label="t('acessos.detalhe.metaAria')">
+            <div v-if="pesoKg != null" class="capa__dado">
+              <dt>
+                <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+                  <i class="ph ph-scales" />
+                </span>
+                {{ t('acessos.snapshot.peso') }}
+              </dt>
+              <dd class="capa__numero">
+                <strong class="ui-num">{{ pesoKgLegivel }}</strong>
+                <span>kg</span>
+              </dd>
+            </div>
+
+            <div
+              v-if="isAtivo"
+              class="capa__dado capa__prazo"
+              :class="{ 'capa__prazo--perto': prazoPerto }"
+            >
+              <dt>
+                <span
+                  class="ui-ladrilho ui-ladrilho--p"
+                  :class="{ 'ui-ladrilho--atencao': prazoPerto }"
+                  aria-hidden="true"
+                >
+                  <i class="ph ph-hourglass-medium" />
+                </span>
+                {{ t('acessos.detalhe.prazo.ativo') }}
+              </dt>
+              <dd>
+                <strong class="capa__contagem ui-num">{{ prazoCurto }}</strong>
+                <span class="capa__barra" aria-hidden="true">
+                  <span :style="{ inlineSize: `${fracaoRestante * 100}%` }" />
+                </span>
+                <small class="ui-num">
+                  {{ t('acessos.detalhe.prazo.ate', { data: dataEHora(detalhe.expiraEm) }) }}
+                </small>
+                <span v-if="prazoPerto" class="sr-only">{{ t('acessos.grupo.venceLogo') }}</span>
+              </dd>
+            </div>
+
+            <div v-else class="capa__dado capa__prazo capa__prazo--fim">
+              <dt>
+                <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--neutro" aria-hidden="true">
+                  <i class="ph ph-lock-simple" />
+                </span>
+                {{ t('acessos.detalhe.prazo.encerrado') }}
+              </dt>
+              <dd>
+                <strong class="capa__desfecho">{{ t(`acessos.list.status.${detalhe.status}`) }}</strong>
+                <small class="ui-num">{{ dataEHora(encerradoEm) }}</small>
+              </dd>
+            </div>
+          </dl>
         </div>
 
-        <dl class="capa__dados" :aria-label="t('acessos.detalhe.metaAria')">
-          <div v-if="pesoKg != null" class="capa__dado">
-            <dt>{{ t('acessos.snapshot.peso') }}</dt>
-            <dd class="capa__numero">
-              <strong class="ui-num">{{ pesoKgLegivel }}</strong>
-              <span>kg</span>
-            </dd>
-          </div>
-
-          <div
-            v-if="isAtivo"
-            class="capa__dado capa__prazo"
-            :class="{ 'capa__prazo--perto': prazoPerto }"
-          >
-            <dt>{{ t('acessos.detalhe.prazo.ativo') }}</dt>
-            <dd>
-              <strong class="capa__contagem ui-num">
-                <i v-if="prazoPerto" class="ph ph-alarm" aria-hidden="true" />
-                {{ prazoCurto }}
-              </strong>
-              <span class="capa__barra" aria-hidden="true">
-                <span :style="{ inlineSize: `${fracaoRestante * 100}%` }" />
-              </span>
-              <small class="ui-num">
-                {{ t('acessos.detalhe.prazo.ate', { data: dataEHora(detalhe.expiraEm) }) }}
-              </small>
-              <small>
-                {{ t('acessos.detalhe.prazo.vinculado', { quando: haQuantoTempo(detalhe.vinculadoEm) }) }}
-              </small>
-              <span v-if="prazoPerto" class="sr-only">{{ t('acessos.grupo.venceLogo') }}</span>
-            </dd>
-          </div>
-
-          <div v-else class="capa__dado capa__prazo capa__prazo--fim">
-            <dt>{{ t('acessos.detalhe.prazo.encerrado') }}</dt>
-            <dd>
-              <strong class="capa__desfecho">{{ t(`acessos.list.status.${detalhe.status}`) }}</strong>
-              <small class="ui-num">{{ dataEHora(encerradoEm) }}</small>
-            </dd>
-          </div>
-        </dl>
-      </div>
+        <footer class="capa__pe">
+          <ul class="capa__fatos">
+            <li>
+              <i class="ph ph-link-simple" aria-hidden="true" />
+              {{ t('acessos.detalhe.prazo.vinculado', { quando: haQuantoTempo(detalhe.vinculadoEm) }) }}
+            </li>
+            <!-- O responsável mexeu no resumo depois de entregar: a leitura de ontem pode não
+                 valer mais. -->
+            <li
+              v-if="isAtivo && carimbo"
+              class="carimbo"
+              :class="{ 'carimbo--atualizado': carimbo.atualizado }"
+              :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
+            >
+              <i
+                :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'"
+                aria-hidden="true"
+              />
+              {{
+                carimbo.atualizado
+                  ? t('acessos.snapshot.carimboAtualizado', { data: formatDateTime(carimbo.data) })
+                  : t('acessos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
+              }}
+            </li>
+          </ul>
+          <Button
+            type="button"
+            class="capa__guia"
+            :icon="isGuidanceVisible ? 'ph ph-eye-slash' : 'ph ph-info'"
+            :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+            severity="secondary"
+            text
+            size="small"
+            :aria-pressed="isGuidanceVisible"
+            @click="toggleGuidance"
+          />
+        </footer>
+      </section>
 
       <h1 v-else class="capa__reserva">{{ t('acessos.detalhe.title') }}</h1>
     </template>
@@ -1279,57 +1351,47 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
         <div class="mesa__grade">
           <!-- ------------------------------------------------ o que o responsável compartilhou -->
           <aside v-if="isAtivo" class="ficha" aria-labelledby="atd-ficha-titulo">
-            <header class="coluna__cab">
-              <h2 id="atd-ficha-titulo" class="coluna__titulo">
-                <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
-                  <i class="ph ph-clipboard-text" />
+            <h2 id="atd-ficha-titulo" class="sr-only">{{ t('acessos.detalhe.tabs.resumo.label') }}</h2>
+
+            <!-- O recado do responsável: a primeira coisa a ler, com as observações dele embaixo. -->
+            <section
+              v-if="mensagemTutor || showObservacoesTutor"
+              class="ui-folha ui-cartao recado"
+              aria-labelledby="atd-recado-titulo"
+            >
+              <header class="ui-cartao__cabeca ui-cartao__cabeca--lugar">
+                <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
+                  <i class="ph ph-chat-circle-text" />
                 </span>
-                {{ t('acessos.detalhe.tabs.resumo.label') }}
-              </h2>
-              <!-- O responsável mexeu no resumo depois de entregar: a leitura de ontem pode não
-                   valer mais. -->
-              <p
-                v-if="carimbo"
-                class="carimbo"
-                :class="{ 'carimbo--atualizado': carimbo.atualizado }"
-                :data-atualizado="carimbo.atualizado ? 'true' : 'false'"
-              >
-                <i
-                  :class="carimbo.atualizado ? 'ph ph-clock-counter-clockwise' : 'ph ph-clock'"
-                  aria-hidden="true"
-                />
-                <span>{{
-                  carimbo.atualizado
-                    ? t('acessos.snapshot.carimboAtualizado', {
-                        data: formatDateTime(carimbo.data),
-                      })
-                    : t('acessos.snapshot.carimbo', { data: formatDateTime(carimbo.data) })
-                }}</span>
-              </p>
-            </header>
-
-            <!-- A mensagem do responsável, como citação: é a primeira coisa a ler. -->
-            <figure v-if="mensagemTutor" class="recado">
-              <PhQuotes class="recado__aspas" weight="fill" aria-hidden="true" />
-              <blockquote class="recado__texto">{{ mensagemTutor }}</blockquote>
-              <figcaption class="recado__quem">
-                <i class="ph ph-chat-circle-text" aria-hidden="true" />
-                {{ t('acessos.detalhe.mensagemTutor') }}
-              </figcaption>
-            </figure>
-
-            <section v-if="showObservacoesTutor" class="observacao">
-              <h3 class="observacao__titulo">
-                <i class="ph ph-info" aria-hidden="true" />
-                {{ t('acessos.snapshot.observacoes') }}
-              </h3>
-              <p class="observacao__texto">{{ observacoesTutor }}</p>
+                <div class="ui-cartao__titulos">
+                  <h3 id="atd-recado-titulo" class="ui-cartao__titulo">
+                    {{
+                      mensagemTutor
+                        ? t('acessos.detalhe.mensagemTutor')
+                        : t('acessos.snapshot.observacoes')
+                    }}
+                  </h3>
+                </div>
+              </header>
+              <div class="ui-cartao__corpo recado__corpo">
+                <blockquote v-if="mensagemTutor" class="recado__texto">
+                  <PhQuotes class="recado__aspas" weight="fill" aria-hidden="true" />
+                  {{ mensagemTutor }}
+                </blockquote>
+                <div v-if="showObservacoesTutor" class="recado__obs ui-poco">
+                  <span v-if="mensagemTutor" class="recado__obs-rotulo">
+                    <i class="ph ph-info" aria-hidden="true" />
+                    {{ t('acessos.snapshot.observacoes') }}
+                  </span>
+                  <p>{{ observacoesTutor }}</p>
+                </div>
+              </div>
             </section>
 
             <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a ficha existe
                  e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
             <section v-if="resumoVazio" class="vazio-ficha ui-folha">
-              <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+              <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
                 <i class="ph ph-lock-simple-open" />
               </span>
               <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
@@ -1346,72 +1408,107 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               />
             </section>
 
-            <p v-else-if="semDadosClinicos" class="sem-dados">
+            <p v-else-if="semDadosClinicos" class="sem-dados ui-poco">
               <i class="ph ph-lock-simple" aria-hidden="true" />
               {{ t('acessos.detalhe.semDadosClinicos') }}
             </p>
 
             <!-- Tratamento contínuo (Parte 16), ACIMA das listas clínicas: é o remédio de todo
                  dia, e o item cuja falha tem dano imediato. -->
-            <UiSecao
+            <section
               v-if="tratamentosEstado !== 'OCULTO'"
-              id="atd-trat"
-              :titulo="t('acessos.tratamentos.title')"
-              icone="ph ph-heartbeat"
-              :contagem="tratamentosContinuos.length || null"
-              :descricao="isGuidanceVisible ? t('acessos.tratamentos.lede') : undefined"
-              folha
+              class="ui-folha ui-cartao"
+              aria-labelledby="atd-trat-titulo"
             >
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho ui-ladrilho--risco" aria-hidden="true">
+                  <i class="ph ph-heartbeat" />
+                </span>
+                <div class="ui-cartao__titulos">
+                  <h3 id="atd-trat-titulo" class="ui-cartao__titulo">
+                    {{ t('acessos.tratamentos.title') }}
+                  </h3>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('acessos.tratamentos.lede') }}
+                  </p>
+                </div>
+                <span v-if="tratamentosContinuos.length" class="ui-cartao__total">
+                  {{ tratamentosContinuos.length }}
+                </span>
+              </header>
+
               <p v-if="tratamentosVazioTexto" class="ui-vazio">{{ tratamentosVazioTexto }}</p>
 
-              <ul v-else class="ui-lista">
+              <ul v-else class="trats">
                 <li v-for="item in tratamentosContinuos" :key="item.key" class="trat">
-                  <PhHeart class="trat__icone" weight="fill" aria-hidden="true" />
-                  <div class="trat__corpo">
-                    <strong class="trat__nome">{{ item.titulo }}</strong>
-                    <p v-if="item.posologia" class="trat__posologia ui-num">{{ item.posologia }}</p>
-                    <dl v-if="item.campos.length" class="pares">
-                      <div v-for="campo in item.campos" :key="campo.chave">
-                        <dt>{{ campo.label }}</dt>
-                        <dd>{{ campo.valor }}</dd>
-                      </div>
-                    </dl>
-                    <p v-if="item.observacoes" class="trat__obs">
-                      <span>{{ t('acessos.tratamentos.campos.observacoes') }}:</span>
-                      {{ item.observacoes }}
-                    </p>
+                  <div class="trat__topo">
+                    <span class="trat__icone" aria-hidden="true">
+                      <PhHeart weight="fill" />
+                    </span>
+                    <div class="trat__nome-bloco">
+                      <strong class="trat__nome">{{ item.titulo }}</strong>
+                      <span v-if="item.posologia" class="trat__posologia ui-num">
+                        {{ item.posologia }}
+                      </span>
+                    </div>
                   </div>
+                  <dl v-if="item.campos.length" class="pares ui-poco">
+                    <div v-for="campo in item.campos" :key="campo.chave">
+                      <dt>{{ campo.label }}</dt>
+                      <dd>{{ campo.valor }}</dd>
+                    </div>
+                  </dl>
+                  <p v-if="item.observacoes" class="trat__obs">
+                    <i class="ph ph-note" aria-hidden="true" />
+                    <span>
+                      <span class="sr-only">{{ t('acessos.tratamentos.campos.observacoes') }}:</span>
+                      {{ item.observacoes }}
+                    </span>
+                  </p>
                 </li>
               </ul>
-            </UiSecao>
+            </section>
 
             <!-- Uma linha por categoria. Vazia: a frase do motivo é o conteúdo. Com itens:
                  recolhe e mostra os primeiros nomes, para ler sem abrir. -->
-            <UiSecao
+            <section
               v-if="snapshotListSections.length"
-              id="atd-clinical"
-              :titulo="t('acessos.snapshot.clinicalTitle')"
-              icone="ph ph-first-aid-kit"
-              folha
+              class="ui-folha ui-cartao"
+              aria-labelledby="atd-clinico-titulo"
             >
-              <ul class="ui-lista dobras">
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true">
+                  <i class="ph ph-first-aid-kit" />
+                </span>
+                <div class="ui-cartao__titulos">
+                  <h3 id="atd-clinico-titulo" class="ui-cartao__titulo">
+                    {{ t('acessos.snapshot.clinicalTitle') }}
+                  </h3>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('acessos.snapshot.clinicalLede') }}
+                  </p>
+                </div>
+              </header>
+
+              <ul class="dobras">
                 <li
                   v-for="section in snapshotListSections"
                   :key="section.id"
                   class="dobra"
                   :data-tone="section.tone"
                   :data-vazio="section.items.length ? 'false' : 'true'"
+                  :data-aberta="isSectionOpen(section.id) ? 'true' : 'false'"
                 >
                   <div v-if="!section.items.length" class="dobra__linha">
                     <span class="dobra__icone" aria-hidden="true"><i :class="section.icon" /></span>
                     <span class="dobra__texto">
-                      <h3 class="dobra__titulo">{{ section.title }}</h3>
+                      <h4 class="dobra__titulo">{{ section.title }}</h4>
                       <span class="dobra__sub">{{ section.vazioTexto }}</span>
                     </span>
                   </div>
 
                   <template v-else>
-                    <h3 class="dobra__cabeca">
+                    <h4 class="dobra__cabeca">
                       <button
                         type="button"
                         class="dobra__linha dobra__botao"
@@ -1425,19 +1522,15 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         <span class="dobra__texto">
                           <span class="dobra__titulo">
                             {{ section.title }}
-                            <span class="ui-contagem">{{ section.items.length }}</span>
+                            <span class="dobra__contagem ui-num">{{ section.items.length }}</span>
                           </span>
                           <span v-if="!isSectionOpen(section.id)" class="dobra__sub">
                             {{ section.resumo }}
                           </span>
                         </span>
-                        <i
-                          class="ph dobra__seta"
-                          :class="isSectionOpen(section.id) ? 'ph-caret-up' : 'ph-caret-down'"
-                          aria-hidden="true"
-                        />
+                        <i class="ph ph-caret-down dobra__seta" aria-hidden="true" />
                       </button>
-                    </h3>
+                    </h4>
 
                     <ul
                       v-show="isSectionOpen(section.id)"
@@ -1454,6 +1547,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       <li
                         v-for="(item, index) in section.items"
                         :key="`${section.id}-${index}`"
+                        class="dobra__item"
                         :class="{ 'dobra__item--destaque': item.destaque }"
                       >
                         <strong>{{ item.titulo }}</strong>
@@ -1463,22 +1557,33 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   </template>
                 </li>
               </ul>
-            </UiSecao>
+            </section>
 
             <!-- Documentos liberados item a item: o snapshot traz ids do cofre, a URL de
                  leitura nasce no clique e vale por poucos minutos. -->
-            <UiSecao
+            <section
               v-if="documentosEstado !== 'OCULTO'"
-              id="atd-docs"
-              :titulo="t('acessos.documentos.title')"
-              icone="ph ph-folder-simple"
-              :contagem="documentos.length || null"
-              :descricao="isGuidanceVisible ? t('acessos.documentos.lede') : undefined"
-              folha
+              class="ui-folha ui-cartao"
+              aria-labelledby="atd-docs-titulo"
             >
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true">
+                  <i class="ph ph-folder-simple" />
+                </span>
+                <div class="ui-cartao__titulos">
+                  <h3 id="atd-docs-titulo" class="ui-cartao__titulo">
+                    {{ t('acessos.documentos.title') }}
+                  </h3>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('acessos.documentos.lede') }}
+                  </p>
+                </div>
+                <span v-if="documentos.length" class="ui-cartao__total">{{ documentos.length }}</span>
+              </header>
+
               <p v-if="documentosVazioTexto" class="ui-vazio">{{ documentosVazioTexto }}</p>
 
-              <ul v-else class="ui-lista">
+              <ul v-else class="docs">
                 <li v-for="doc in documentos" :key="doc.key" class="doc">
                   <span class="doc__icone" aria-hidden="true"><i class="ph ph-file-text" /></span>
 
@@ -1496,106 +1601,120 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     <span v-if="!doc.arquivos.length" class="doc__sem">
                       {{ t('acessos.documentos.semArquivo') }}
                     </span>
-                  </span>
 
-                  <span v-if="doc.arquivos.length" class="doc__acoes">
-                    <span
-                      v-for="(arquivo, index) in doc.arquivos"
-                      :key="arquivo.id"
-                      class="doc__arquivo"
-                    >
-                      <span v-if="doc.arquivos.length > 1" class="doc__n ui-num">
-                        {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
+                    <span v-if="doc.arquivos.length" class="doc__acoes">
+                      <span
+                        v-for="(arquivo, index) in doc.arquivos"
+                        :key="arquivo.id"
+                        class="doc__arquivo"
+                      >
+                        <span v-if="doc.arquivos.length > 1" class="doc__n ui-num">
+                          {{ t('acessos.documentos.arquivoN', { n: index + 1 }) }}
+                        </span>
+                        <Button
+                          type="button"
+                          icon="ph ph-arrow-square-out"
+                          :label="t('acessos.documentos.abrir')"
+                          severity="secondary"
+                          text
+                          size="small"
+                          :loading="arquivoOcupado === `abrir:${arquivo.id}`"
+                          :aria-label="`${t('acessos.documentos.abrir')}: ${doc.nome}`"
+                          @click="abrirArquivo(arquivo.id)"
+                        />
+                        <Button
+                          type="button"
+                          icon="ph ph-download-simple"
+                          severity="secondary"
+                          text
+                          size="small"
+                          :loading="arquivoOcupado === `baixar:${arquivo.id}`"
+                          :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
+                          :title="t('acessos.documentos.baixar')"
+                          @click="baixarArquivo(arquivo.id, arquivo.nome)"
+                        />
                       </span>
-                      <Button
-                        type="button"
-                        icon="ph ph-arrow-square-out"
-                        severity="secondary"
-                        outlined
-                        size="small"
-                        :loading="arquivoOcupado === `abrir:${arquivo.id}`"
-                        :aria-label="`${t('acessos.documentos.abrir')}: ${doc.nome}`"
-                        :title="t('acessos.documentos.abrir')"
-                        @click="abrirArquivo(arquivo.id)"
-                      />
-                      <Button
-                        type="button"
-                        icon="ph ph-download-simple"
-                        severity="secondary"
-                        outlined
-                        size="small"
-                        :loading="arquivoOcupado === `baixar:${arquivo.id}`"
-                        :aria-label="`${t('acessos.documentos.baixar')}: ${doc.nome}`"
-                        :title="t('acessos.documentos.baixar')"
-                        @click="baixarArquivo(arquivo.id, arquivo.nome)"
-                      />
                     </span>
                   </span>
                 </li>
               </ul>
-            </UiSecao>
+            </section>
 
             <!-- Diário: só os dias com anormalidade, dentro da janela liberada. -->
-            <UiSecao
+            <section
               v-if="diarioEstado !== 'OCULTO'"
-              id="atd-diario"
-              :titulo="t('acessos.diario.title')"
-              icone="ph ph-notebook"
-              :contagem="diario.length || null"
-              :descricao="isGuidanceVisible ? t('acessos.diario.lede') : undefined"
-              folha
+              class="ui-folha ui-cartao"
+              aria-labelledby="atd-diario-titulo"
             >
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true">
+                  <i class="ph ph-notebook" />
+                </span>
+                <div class="ui-cartao__titulos">
+                  <h3 id="atd-diario-titulo" class="ui-cartao__titulo">
+                    {{ t('acessos.diario.title') }}
+                  </h3>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('acessos.diario.lede') }}
+                  </p>
+                </div>
+                <span v-if="diario.length" class="ui-cartao__total">{{ diario.length }}</span>
+              </header>
+
               <p v-if="diarioVazioTexto" class="ui-vazio">{{ diarioVazioTexto }}</p>
 
-              <ol v-else class="ui-lista">
+              <ol v-else class="dias">
                 <li v-for="entrada in diario" :key="entrada.key" class="dia">
-                  <strong class="dia__data ui-num">{{ entrada.data }}</strong>
+                  <span class="dia__no" aria-hidden="true" />
+                  <div class="dia__corpo">
+                    <strong class="dia__data ui-num">{{ entrada.data }}</strong>
 
-                  <div v-if="entrada.sintomas.length || entrada.doencas.length" class="dia__selos">
-                    <span
-                      v-for="(sintoma, index) in entrada.sintomas"
-                      :key="`s-${index}`"
-                      class="ui-selo ui-selo--atencao"
-                    >
-                      {{ sintoma }}
-                    </span>
-                    <span
-                      v-for="(doenca, index) in entrada.doencas"
-                      :key="`d-${index}`"
-                      class="ui-selo ui-selo--risco"
-                    >
-                      {{ doenca }}
-                    </span>
-                  </div>
-
-                  <dl v-if="entrada.campos.length" class="pares">
-                    <div v-for="campo in entrada.campos" :key="campo.chave">
-                      <dt>{{ campo.label }}</dt>
-                      <dd>{{ campo.valor }}</dd>
+                    <div v-if="entrada.sintomas.length || entrada.doencas.length" class="dia__selos">
+                      <span
+                        v-for="(sintoma, index) in entrada.sintomas"
+                        :key="`s-${index}`"
+                        class="ui-selo ui-selo--atencao"
+                      >
+                        {{ sintoma }}
+                      </span>
+                      <span
+                        v-for="(doenca, index) in entrada.doencas"
+                        :key="`d-${index}`"
+                        class="ui-selo ui-selo--risco"
+                      >
+                        {{ doenca }}
+                      </span>
                     </div>
-                  </dl>
 
-                  <p v-for="texto in entrada.textos" :key="texto.chave" class="dia__texto">
-                    <span>{{ texto.label }}:</span> {{ texto.valor }}
-                  </p>
+                    <dl v-if="entrada.campos.length" class="pares ui-poco">
+                      <div v-for="campo in entrada.campos" :key="campo.chave">
+                        <dt>{{ campo.label }}</dt>
+                        <dd>{{ campo.valor }}</dd>
+                      </div>
+                    </dl>
 
-                  <div v-if="entrada.fotoIds.length" class="dia__fotos">
-                    <Button
-                      v-for="(fotoId, index) in entrada.fotoIds"
-                      :key="fotoId"
-                      type="button"
-                      :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
-                      icon="ph ph-image"
-                      severity="secondary"
-                      outlined
-                      size="small"
-                      :loading="arquivoOcupado === `abrir:${fotoId}`"
-                      @click="abrirArquivo(fotoId)"
-                    />
+                    <p v-for="texto in entrada.textos" :key="texto.chave" class="dia__texto">
+                      <span>{{ texto.label }}</span> {{ texto.valor }}
+                    </p>
+
+                    <div v-if="entrada.fotoIds.length" class="dia__fotos">
+                      <Button
+                        v-for="(fotoId, index) in entrada.fotoIds"
+                        :key="fotoId"
+                        type="button"
+                        :label="t('acessos.diario.abrirFoto', { n: index + 1 })"
+                        icon="ph ph-image"
+                        severity="secondary"
+                        outlined
+                        size="small"
+                        :loading="arquivoOcupado === `abrir:${fotoId}`"
+                        @click="abrirArquivo(fotoId)"
+                      />
+                    </div>
                   </div>
                 </li>
               </ol>
-            </UiSecao>
+            </section>
           </aside>
 
           <!-- ------------------------------------------------ a anotação e o histórico -->
@@ -1812,16 +1931,28 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               </footer>
             </section>
 
-            <UiSecao
-              id="atd-notes"
-              class="historico"
-              :titulo="t('acessos.anotacoes.title')"
-              icone="ph ph-clock-counter-clockwise"
-              :contagem="anotacoesOrdenadas.length || null"
-              :descricao="isGuidanceVisible ? t('acessos.anotacoes.lede') : undefined"
-              folha
-            >
-              <div v-if="anotacoesOrdenadas.length === 0" class="ui-vazio">
+            <section class="ui-folha ui-cartao historico" aria-labelledby="atd-notas-titulo">
+              <header class="ui-cartao__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true">
+                  <i class="ph ph-clock-counter-clockwise" />
+                </span>
+                <div class="ui-cartao__titulos">
+                  <h2 id="atd-notas-titulo" class="ui-cartao__titulo">
+                    {{ t('acessos.anotacoes.title') }}
+                  </h2>
+                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                    {{ t('acessos.anotacoes.lede') }}
+                  </p>
+                </div>
+                <span v-if="anotacoesOrdenadas.length" class="ui-cartao__total">
+                  {{ anotacoesOrdenadas.length }}
+                </span>
+              </header>
+
+              <div v-if="anotacoesOrdenadas.length === 0" class="historico__vazio">
+                <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
+                  <i class="ph ph-note-blank" />
+                </span>
                 <strong>{{ t('acessos.anotacoes.empty') }}</strong>
                 <span>
                   {{
@@ -1832,64 +1963,76 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </span>
               </div>
 
-              <ol v-else class="ui-lista">
+              <ol v-else class="notas">
                 <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id">
                   <article class="nota">
-                    <header class="nota__cab">
-                      <div class="nota__quem">
-                        <h3 class="nota__servico">{{ anotacao.servicoRealizado }}</h3>
-                        <p class="nota__autor">
-                          <span>{{ anotacao.empresaNome }}</span>
-                          <template v-if="autorDaAnotacao(anotacao)">
-                            <span aria-hidden="true">·</span>
-                            <span>{{ autorDaAnotacao(anotacao) }}</span>
-                          </template>
-                        </p>
-                      </div>
-                      <time class="nota__quando ui-num" :datetime="anotacao.criadaEm">{{
-                        formatDateTime(anotacao.criadaEm)
-                      }}</time>
-                    </header>
+                    <span class="nota__no ui-ladrilho ui-ladrilho--p" aria-hidden="true">
+                      <i class="ph ph-note-pencil" />
+                    </span>
+                    <div class="nota__corpo">
+                      <header class="nota__cab">
+                        <div class="nota__quem">
+                          <h3 class="nota__servico">{{ anotacao.servicoRealizado }}</h3>
+                          <p class="nota__autor">
+                            <span>
+                              <i class="ph ph-buildings" aria-hidden="true" />
+                              {{ anotacao.empresaNome }}
+                            </span>
+                            <span v-if="autorDaAnotacao(anotacao)">
+                              <i class="ph ph-user" aria-hidden="true" />
+                              {{ autorDaAnotacao(anotacao) }}
+                            </span>
+                          </p>
+                        </div>
+                        <time class="nota__quando ui-num" :datetime="anotacao.criadaEm">{{
+                          formatDateTime(anotacao.criadaEm)
+                        }}</time>
+                      </header>
 
-                    <p class="nota__texto">{{ anotacao.texto }}</p>
+                      <p class="nota__texto">{{ anotacao.texto }}</p>
 
-                    <AnotacaoEstruturadaView :anotacao="anotacao" />
+                      <AnotacaoEstruturadaView :anotacao="anotacao" />
 
-                    <ul
-                      v-if="anotacao.anexos.length"
-                      class="nota__anexos"
-                      :aria-label="t('acessos.anotacoes.anexosLabel')"
-                    >
-                      <li v-for="anexo in anotacao.anexos" :key="anexo.id">
-                        <button
-                          type="button"
-                          class="nota__anexo"
-                          :disabled="abrindoAnexoId === anexo.id"
-                          :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
-                          @click="abrirAnexo(anexo.id)"
-                        >
-                          <i
-                            :class="
-                              abrindoAnexoId === anexo.id
-                                ? 'ph ph-spin ph-circle-notch'
-                                : 'ph ph-file-text'
-                            "
-                            aria-hidden="true"
-                          />
-                          <span class="nota__anexo-nome">{{ anexo.nome }}</span>
-                          <small class="ui-num">
-                            <template v-if="anexo.tipoDocumento">
-                              {{ anexo.tipoDocumento }} ·
-                            </template>
-                            {{ formatBytes(anexo.tamanhoBytes) }}
-                          </small>
-                        </button>
-                      </li>
-                    </ul>
+                      <ul
+                        v-if="anotacao.anexos.length"
+                        class="nota__anexos"
+                        :aria-label="t('acessos.anotacoes.anexosLabel')"
+                      >
+                        <li v-for="anexo in anotacao.anexos" :key="anexo.id">
+                          <button
+                            type="button"
+                            class="nota__anexo"
+                            :disabled="abrindoAnexoId === anexo.id"
+                            :aria-label="`${t('acessos.anotacoes.abrirAnexo')}: ${anexo.nome}`"
+                            @click="abrirAnexo(anexo.id)"
+                          >
+                            <span class="nota__anexo-icone" aria-hidden="true">
+                              <i
+                                :class="
+                                  abrindoAnexoId === anexo.id
+                                    ? 'ph ph-spin ph-circle-notch'
+                                    : 'ph ph-file-text'
+                                "
+                              />
+                            </span>
+                            <span class="nota__anexo-texto">
+                              <span class="nota__anexo-nome">{{ anexo.nome }}</span>
+                              <small class="ui-num">
+                                <template v-if="anexo.tipoDocumento">
+                                  {{ anexo.tipoDocumento }} ·
+                                </template>
+                                {{ formatBytes(anexo.tamanhoBytes) }}
+                              </small>
+                            </span>
+                            <i class="ph ph-arrow-square-out nota__anexo-abrir" aria-hidden="true" />
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
                   </article>
                 </li>
               </ol>
-            </UiSecao>
+            </section>
           </div>
         </div>
       </div>
@@ -1952,56 +2095,78 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   scale: -1 1;
 }
 
-/* ------------------------------------------------------------------ a capa */
+/* ------------------------------------------------------------------ a capa
+ * O cartão de identidade do pet, irmão da capa da ficha da Clínica: rosto com o anel na cor do
+ * Portal, nome grande, os selos do acesso e, à direita, os dados em blocos com ladrilho.
+ */
 
 .capa {
-  display: grid;
+  container: capa / inline-size;
+  flex: 1;
   min-width: 0;
-  flex: 1 1 640px;
+  overflow: hidden;
+}
+
+.capa__corpo {
+  display: grid;
   align-items: center;
-  gap: 18px 36px;
+  gap: 20px 32px;
   grid-template-columns: minmax(0, 1fr) auto;
+  padding: 24px 24px 22px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--pj-lugar-fundo) 45%, var(--superficie)) 0%,
+    var(--superficie) 100%
+  );
 }
 
 .capa__quem {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
+}
+
+/* O anel do lugar em volta do rosto, como na ficha da Clínica. */
+.capa__moldura {
+  display: grid;
+  flex: none;
+  padding: 4px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--superficie);
+  box-shadow:
+    0 0 0 2px color-mix(in oklab, var(--pj-lugar) 45%, transparent),
+    0 10px 24px -12px color-mix(in oklab, var(--pj-lugar) 70%, transparent);
 }
 
 .capa .capa__rosto {
-  box-shadow:
-    0 0 0 3px var(--fundo),
-    0 0 0 4px var(--linha);
-}
-
-.capa[data-status='EXPIRADO'] .capa__rosto,
-.capa[data-status='REVOGADO'] .capa__rosto {
-  filter: grayscale(0.7);
-  opacity: 0.85;
+  width: 84px;
+  height: 84px;
+  font-size: 1.6rem;
 }
 
 .capa__identidade {
   display: grid;
   min-width: 0;
-  gap: 4px;
+  gap: 6px;
 }
 
 .capa__nome {
+  overflow: hidden;
   margin: 0;
   color: var(--tinta);
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  overflow-wrap: anywhere;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  text-overflow: ellipsis;
 }
 
 .capa__meta {
   margin: 0;
   color: var(--tinta-2);
-  font-size: 14.5px;
+  font-size: 15px;
 }
 
 .capa__selos {
@@ -2011,55 +2176,37 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 4px 0 0;
 }
 
-.capa__selos .ui-selo {
-  height: 26px;
-  font-size: 13px;
-}
-
-.capa__reserva {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 30px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-
-/* O peso e o prazo: os dois números da capa, separados por um fio, como na ficha da Clínica. */
-/* O peso e o prazo num cartão pequeno ao lado do nome, com fio entre os dois. */
+/* Os dados: blocos rentes na luz do cartão, cada um com o ladrilho do assunto. */
 .capa__dados {
   display: flex;
   flex-wrap: wrap;
-  align-items: stretch;
+  gap: 12px;
   margin: 0;
-  padding: 16px 0;
-  border: 1px solid var(--linha);
-  border-radius: var(--raio-cartao);
-  background: var(--superficie);
-  box-shadow: var(--sombra-cartao);
 }
 
 .capa__dado {
   display: grid;
-  min-width: 0;
+  min-width: 150px;
   align-content: start;
-  gap: 4px;
-  padding-inline: 22px;
-}
-
-.capa__dado + .capa__dado {
-  border-inline-start: 1px solid var(--linha-suave);
+  gap: 8px;
+  padding: 14px 18px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: color-mix(in oklab, var(--superficie) 80%, transparent);
 }
 
 .capa__dado dt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 550;
 }
 
 .capa__dado dd {
   display: grid;
-  min-width: 0;
-  gap: 4px;
+  gap: 6px;
   margin: 0;
 }
 
@@ -2067,8 +2214,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   display: flex !important;
   align-items: baseline;
   gap: 4px;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .capa__numero strong,
@@ -2076,60 +2221,156 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   color: var(--tinta);
   font-size: 28px;
   font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  letter-spacing: -0.025em;
+  line-height: 1;
 }
 
-.capa__contagem {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
+.capa__numero span {
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 550;
 }
 
-.capa__contagem i {
-  font-size: 24px;
+.capa__prazo {
+  min-width: 220px;
 }
 
 .capa__barra {
   display: block;
-  overflow: hidden;
-  width: 11rem;
-  max-width: 100%;
   height: 6px;
-  margin-block: 2px;
+  overflow: hidden;
   border-radius: 999px;
   background: var(--superficie-3);
 }
 
-.capa__barra > span {
+.capa__barra span {
   display: block;
   height: 100%;
-  min-inline-size: 4px;
   border-radius: inherit;
-  background: var(--pj-lugar);
+  background: var(--pj-lugar-degrade);
 }
 
 .capa__prazo small {
   color: var(--tinta-2);
-  font-size: 13px;
-  line-height: 1.35;
+  font-size: 12.5px;
 }
 
-.capa__prazo--perto .capa__contagem,
-.capa__prazo--perto dt {
+.capa__prazo--perto {
+  border-color: color-mix(in oklab, var(--atencao) 35%, var(--linha));
+  background: color-mix(in oklab, var(--atencao-fundo) 55%, var(--superficie));
+}
+
+.capa__prazo--perto .capa__contagem {
   color: var(--atencao-tinta);
 }
 
-.capa__prazo--perto .capa__barra > span {
+.capa__prazo--perto .capa__barra span {
   background: var(--atencao);
 }
 
 .capa__desfecho {
+  color: var(--tinta);
+  font-size: 20px;
+  font-weight: 650;
+}
+
+/* O pé: quando foi vinculado, de quando é o resumo, e o botão das explicações. */
+.capa__pe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 16px;
+  padding: 10px 16px 10px 24px;
+  border-top: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+}
+
+.capa__fatos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 0;
   color: var(--tinta-2);
-  font-size: 22px;
+  font-size: 13px;
+  list-style: none;
+}
+
+.capa__fatos li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.capa__fatos i {
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+.carimbo--atualizado,
+.carimbo--atualizado i {
+  color: var(--atencao-tinta);
   font-weight: 600;
-  line-height: 1.15;
+}
+
+.capa__reserva {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 28px;
+  font-weight: 650;
+}
+
+@container capa (max-width: 860px) {
+  .capa__corpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .capa__dado {
+    flex: 1 1 160px;
+  }
+}
+
+@container capa (max-width: 520px) {
+  .capa__corpo {
+    padding: 20px 16px 18px;
+  }
+
+  .capa__quem {
+    gap: 14px;
+  }
+
+  .capa .capa__rosto {
+    width: 60px;
+    height: 60px;
+    font-size: 1.15rem;
+  }
+
+  .capa__nome {
+    font-size: 23px;
+  }
+
+  .capa__numero strong,
+  .capa__contagem {
+    font-size: 24px;
+  }
+
+  /* Peso e prazo lado a lado: um embaixo do outro empurrava o recado para longe. */
+  .capa__dado,
+  .capa__prazo {
+    min-width: 0;
+    flex: 1 1 120px;
+    padding: 12px 14px 14px;
+  }
+
+  .capa__dado dt {
+    gap: 8px;
+    font-size: 12.5px;
+  }
+
+  .capa__pe {
+    padding-inline: 16px 8px;
+  }
 }
 
 /* ------------------------------------------------------------------ faixas */
@@ -2196,8 +2437,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   --faixa-fundo: var(--neutro-fundo);
   --faixa-linha: var(--linha);
   --faixa-tinta: var(--neutro-tinta);
-
-  max-width: 860px;
 }
 
 /* ------------------------------------------------------------------ a mesa */
@@ -2226,12 +2465,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .mesa__grade {
   display: grid;
   align-items: start;
-  gap: 28px;
-  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+  gap: 24px;
+  grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
 }
 
 .mesa[data-ficha='nao'] .mesa__grade {
-  max-width: 860px;
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -2250,134 +2488,88 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   }
 }
 
-/* ------------------------------------------------------------------ o que foi compartilhado */
+/* ------------------------------------------------------------------ o que foi compartilhado
+ * Uma pilha de cartões com cabeçalho, na ordem em que se lê antes de atender: o recado, o
+ * remédio de todo dia, os dados clínicos, os documentos e o diário.
+ */
 
 .ficha {
   display: grid;
   min-width: 0;
-  gap: 22px;
+  align-content: start;
+  gap: 18px;
 }
 
-.coluna__cab {
+/* -------- o recado */
+
+.recado__corpo {
   display: grid;
-  gap: 6px;
+  gap: 14px;
 }
 
-.coluna__titulo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  color: var(--tinta);
-  font-size: 17px;
-  font-weight: 650;
-  letter-spacing: -0.015em;
-}
-
-.coluna__cab:has(.coluna__titulo .ui-ladrilho) .carimbo {
-  padding-inline-start: 42px;
-}
-
-.coluna__cab:has(.coluna__titulo .ui-ladrilho) .carimbo--atualizado {
-  margin-inline-start: 42px;
-  padding-inline-start: 10px;
-}
-
-.carimbo {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-.carimbo i {
-  margin-top: 1px;
-  font-size: 15px;
-}
-
-.carimbo--atualizado {
-  justify-self: start;
-  padding: 5px 10px;
-  border-radius: 8px;
-  background: var(--atencao-fundo);
-  color: var(--atencao-tinta);
-  font-weight: 550;
-}
-
-/* A mensagem do responsável, como citação: aspas grandes na cor do lugar, texto em corpo de leitura. */
-.recado {
+.recado__texto {
   position: relative;
-  display: grid;
-  gap: 10px;
   margin: 0;
-  padding: 18px 20px 16px 52px;
-  border: 1px solid color-mix(in oklab, var(--pj-lugar) 28%, var(--linha));
-  border-radius: var(--raio-cartao);
-  box-shadow: var(--sombra-xs);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
+  padding: 2px 0 2px 34px;
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 450;
+  line-height: 1.6;
 }
 
 .recado__aspas {
   position: absolute;
-  top: 18px;
-  left: 18px;
+  top: 3px;
+  inset-inline-start: 0;
   width: 22px;
   height: 22px;
-  color: var(--pj-lugar);
+  color: color-mix(in oklab, var(--pj-lugar) 70%, transparent);
 }
 
-[dir='rtl'] .recado {
-  padding: 18px 52px 16px 20px;
+.recado__obs {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
 }
 
-[dir='rtl'] .recado__aspas {
-  right: 18px;
-  left: auto;
-  scale: -1 1;
-}
-
-.recado__texto {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 16px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-
-.recado__quem {
+.recado__obs-rotulo {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--pj-lugar-tinta);
-  font-size: 13px;
-  font-weight: 550;
-}
-
-.observacao {
-  display: grid;
-  gap: 4px;
-  padding: 12px 16px;
-  border-inline-start: 3px solid var(--linha-forte);
-}
-
-.observacao__titulo {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
   color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 550;
+  font-size: 12.5px;
+  font-weight: 600;
 }
 
-.observacao__texto {
+.recado__obs p {
   margin: 0;
   color: var(--tinta);
-  font-size: 14.5px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* -------- nada compartilhado */
+
+.vazio-ficha {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.vazio-ficha strong {
+  margin-top: 6px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.vazio-ficha p {
+  max-width: 40ch;
+  margin: 0 0 6px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .sem-dados {
@@ -2386,106 +2578,129 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   gap: 10px;
   margin: 0;
   padding: 14px 16px;
-  border: 1px solid var(--linha-suave);
-  border-radius: var(--raio-cartao-pequeno);
-  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .sem-dados i {
   margin-top: 2px;
-  font-size: 15px;
+  font-size: 16px;
 }
 
-.vazio-ficha {
-  display: grid;
-  justify-items: start;
-  gap: 8px;
-  padding: 20px;
-}
+/* -------- pares rótulo/valor (tratamento e diário) */
 
-.vazio-ficha strong {
-  color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.vazio-ficha p {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* Pares rótulo e valor (tratamento, diário): rótulo pequeno em cima, valor embaixo. */
 .pares {
   display: grid;
-  gap: 8px 16px;
-  margin: 4px 0 0;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px 18px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin: 0;
+  padding: 12px 14px;
+}
+
+.pares div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
 }
 
 .pares dt {
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 550;
 }
 
 .pares dd {
-  margin: 1px 0 0;
+  margin: 0;
   color: var(--tinta);
   font-size: 14px;
-  line-height: 1.4;
+  font-weight: 550;
+  overflow-wrap: anywhere;
 }
 
-/* Tratamento contínuo */
+/* -------- tratamento contínuo */
+
+.trats {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .trat {
-  display: flex;
+  display: grid;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 18px 24px 20px;
+}
+
+.trat + .trat {
+  border-top: 1px solid var(--linha-suave);
+}
+
+.trat__topo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .trat__icone {
-  width: 20px;
-  height: 20px;
+  display: grid;
+  width: 36px;
+  height: 36px;
   flex: none;
-  margin-top: 1px;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--risco-fundo);
   color: var(--risco);
+  font-size: 18px;
 }
 
-.trat__corpo {
+.trat__nome-bloco {
   display: grid;
   min-width: 0;
-  gap: 4px;
+  gap: 2px;
 }
 
 .trat__nome {
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
 }
 
 .trat__posologia {
-  margin: 0;
   color: var(--tinta-2);
-  font-size: 14px;
+  font-size: 13.5px;
 }
 
 .trat__obs {
-  margin: 4px 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
   color: var(--tinta);
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
-.trat__obs span {
-  color: var(--tinta-2);
-  font-weight: 550;
+.trat__obs i {
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
-/* Dados clínicos: uma linha por categoria, que abre. */
+/* -------- dados clínicos: uma linha por categoria, que abre */
+
+.dobras {
+  display: grid;
+  margin: 0;
+  padding: 6px 0 8px;
+  list-style: none;
+}
+
+.dobra + .dobra {
+  border-top: 1px solid var(--linha-suave);
+}
+
 .dobra__cabeca {
   margin: 0;
   font: inherit;
@@ -2493,21 +2708,20 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
 .dobra__linha {
   display: flex;
-  min-height: 58px;
+  width: 100%;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 14px;
+  padding: 12px 20px 12px 24px;
+  border: 0;
+  background: transparent;
+  color: var(--tinta);
+  font: inherit;
+  text-align: start;
 }
 
 .dobra__botao {
-  width: 100%;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: inherit;
   cursor: pointer;
-  font: inherit;
-  text-align: start;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .dobra__botao:hover {
@@ -2515,18 +2729,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .dobra__botao:focus-visible {
-  outline: 2px solid var(--pj-lugar);
+  outline: 2px solid var(--pj-lugar, var(--musgo));
   outline-offset: -2px;
-}
-
-.ui-lista > li:first-child .dobra__botao {
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
-.ui-lista > li:last-child .dobra__botao[aria-expanded='false'] {
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
 }
 
 .dobra__icone {
@@ -2536,7 +2740,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   flex: none;
   place-items: center;
   border-radius: 10px;
-  background: var(--superficie-2);
+  background: var(--superficie-3);
   color: var(--tinta-2);
   font-size: 17px;
 }
@@ -2560,19 +2764,32 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 0;
   color: var(--tinta);
   font-size: 14.5px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
-.dobra[data-vazio='true'] .dobra__titulo {
+.dobra__contagem {
+  display: inline-grid;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--superficie-3);
   color: var(--tinta-2);
-  font-weight: 550;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+
+.dobra[data-tone='warm'] .dobra__contagem {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .dobra__sub {
   overflow: hidden;
   color: var(--tinta-2);
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.45;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2581,72 +2798,101 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   white-space: normal;
 }
 
-.dobra__seta {
-  color: var(--tinta-3);
-  font-size: 15px;
+.dobra[data-vazio='true'] .dobra__titulo {
+  color: var(--tinta-2);
 }
 
+.dobra__seta {
+  flex: none;
+  color: var(--tinta-3);
+  font-size: 15px;
+  transition: transform var(--pj-tempo-medio) var(--pj-curva-chega);
+}
+
+.dobra[data-aberta='true'] .dobra__seta {
+  transform: rotate(180deg);
+}
+
+/* Os itens abertos: pílulas com o nome e o detalhe, alinhadas ao texto da linha. */
 .dobra__itens {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin: 0;
-  padding: 2px 16px 14px 62px;
+  padding: 0 20px 16px 72px;
   list-style: none;
 }
 
-[dir='rtl'] .dobra__itens {
-  padding: 2px 62px 14px 16px;
-}
-
-.dobra__itens li {
-  display: grid;
+.dobra__item {
+  display: inline-flex;
+  max-width: 100%;
+  flex-direction: column;
   gap: 1px;
+  padding: 8px 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  background: var(--superficie-2);
   line-height: 1.35;
 }
 
-.dobra__itens strong {
+.dobra__item strong {
   color: var(--tinta);
-  font-size: 14px;
-  font-weight: 550;
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
-.dobra__itens span {
+.dobra__item span {
   color: var(--tinta-2);
-  font-size: 13px;
+  font-size: 12.5px;
 }
 
+.dobra[data-tone='warm'] .dobra__item {
+  border-color: color-mix(in oklab, var(--risco) 22%, var(--linha-suave));
+  background: color-mix(in oklab, var(--risco-fundo) 70%, var(--superficie));
+}
+
+.dobra[data-tone='warm'] .dobra__item strong,
 .dobra__item--destaque strong {
   color: var(--risco-tinta);
-  font-weight: 650;
 }
 
-/* Documentos */
+/* -------- documentos */
+
+.docs {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .doc {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px 12px;
-  padding: 12px 16px;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 24px;
+}
+
+.doc + .doc {
+  border-top: 1px solid var(--linha-suave);
 }
 
 .doc__icone {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
   border-radius: 10px;
   background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .doc__texto {
   display: grid;
   min-width: 0;
-  flex: 1 1 10rem;
+  flex: 1;
   gap: 2px;
-  line-height: 1.35;
 }
 
 .doc__texto strong {
@@ -2661,6 +2907,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .doc__texto small {
   color: var(--tinta-2);
   font-size: 12.5px;
+  line-height: 1.45;
 }
 
 .doc__sem {
@@ -2671,39 +2918,89 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .doc__acoes {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px 12px;
-  margin-inline-start: auto;
+  gap: 4px 14px;
+  margin: 6px 0 0 -10px;
 }
 
 .doc__arquivo {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-}
-
-.doc__arquivo :deep(.p-button) {
-  width: 36px;
-  height: 36px;
+  gap: 2px;
 }
 
 .doc__n {
-  margin-inline-end: 2px;
-  color: var(--tinta-2);
-  font-size: 12.5px;
+  padding-inline: 10px 2px;
+  color: var(--tinta-3);
+  font-size: 12px;
+  font-weight: 600;
 }
 
-/* Diário */
-.dia {
+/* -------- diário: linha do tempo */
+
+.dias {
   display: grid;
-  gap: 8px;
-  padding: 14px 16px;
+  margin: 0;
+  padding: 8px 24px 18px;
+  list-style: none;
+}
+
+.dia {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 14px minmax(0, 1fr);
+}
+
+.dia__no {
+  position: relative;
+}
+
+.dia__no::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 6px;
+  width: 2px;
+  background: var(--linha);
+  content: '';
+}
+
+.dia:first-child .dia__no::before {
+  top: 14px;
+}
+
+.dia:last-child .dia__no::before {
+  bottom: auto;
+  height: 14px;
+}
+
+.dia__no::after {
+  position: absolute;
+  top: 8px;
+  left: 1px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--atencao);
+  border-radius: 50%;
+  background: var(--superficie);
+  content: '';
+}
+
+.dia__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding: 4px 0 18px;
+}
+
+.dia:last-child .dia__corpo {
+  padding-bottom: 0;
 }
 
 .dia__data {
   color: var(--tinta);
-  font-size: 14.5px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 650;
 }
 
 .dia__selos {
@@ -2716,11 +3013,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   margin: 0;
   color: var(--tinta);
   font-size: 13.5px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 .dia__texto span {
+  display: block;
   color: var(--tinta-2);
+  font-size: 12px;
   font-weight: 550;
 }
 
@@ -3025,12 +3324,66 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   }
 }
 
-/* ------------------------------------------------------------------ histórico de anotações */
+/* ------------------------------------------------------------------ histórico de anotações
+ * Uma linha do tempo das anotações da empresa: o ladrilho de cada uma pendurado num fio, o
+ * serviço como título, quem atendeu e quando, e o que foi registrado.
+ */
+
+.historico__vazio {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 32px 24px 34px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.historico__vazio strong {
+  margin-top: 6px;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.notas {
+  display: grid;
+  margin: 0;
+  padding: 8px 24px 20px;
+  list-style: none;
+}
 
 .nota {
+  position: relative;
   display: grid;
-  gap: 10px;
-  padding: 16px 18px;
+  gap: 14px;
+  grid-template-columns: 30px minmax(0, 1fr);
+}
+
+.notas > li:not(:last-child) .nota::before {
+  position: absolute;
+  top: 38px;
+  bottom: -6px;
+  left: 14px;
+  width: 2px;
+  background: var(--linha);
+  content: '';
+}
+
+.nota__no {
+  margin-top: 4px;
+}
+
+.nota__corpo {
+  display: grid;
+  min-width: 0;
+  gap: 12px;
+  padding: 4px 0 22px;
+}
+
+.notas > li:last-child .nota__corpo {
+  padding-bottom: 4px;
 }
 
 .nota__cab {
@@ -3038,50 +3391,66 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 4px 16px;
+  gap: 6px 16px;
 }
 
 .nota__quem {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  flex: 1 1 240px;
+  gap: 4px;
 }
 
 .nota__servico {
   margin: 0;
   color: var(--tinta);
-  font-size: 15.5px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
 .nota__autor {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 6px;
+  gap: 4px 14px;
   margin: 0;
   color: var(--tinta-2);
   font-size: 13px;
 }
 
+.nota__autor span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nota__autor i {
+  color: var(--tinta-3);
+  font-size: 14px;
+}
+
 .nota__quando {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 12.5px;
-  white-space: nowrap;
+  font-weight: 550;
 }
 
 .nota__texto {
   margin: 0;
   color: var(--tinta);
   font-size: 14.5px;
-  line-height: 1.55;
+  line-height: 1.6;
   white-space: pre-line;
-  overflow-wrap: anywhere;
 }
 
 .nota__anexos {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -3090,87 +3459,76 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .nota__anexo {
   display: inline-flex;
   max-width: 100%;
-  min-height: 36px;
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
+  gap: 10px;
+  padding: 8px 12px 8px 8px;
   border: 1px solid var(--linha);
-  border-radius: 10px;
-  background: var(--superficie-2);
+  border-radius: 12px;
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
-  font-size: 13.5px;
+  text-align: start;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    background-color var(--pj-tempo-curto) ease;
 }
 
 .nota__anexo:hover:not(:disabled) {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
+  background: var(--superficie-2);
 }
 
 .nota__anexo:focus-visible {
-  outline: 2px solid var(--pj-lugar);
+  outline: 2px solid var(--pj-lugar, var(--musgo));
   outline-offset: 2px;
 }
 
-.nota__anexo i {
+.nota__anexo:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.nota__anexo-icone {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--pj-lugar-fundo);
   color: var(--pj-lugar-tinta);
   font-size: 16px;
 }
 
+.nota__anexo-texto {
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+
 .nota__anexo-nome {
   overflow: hidden;
-  font-weight: 550;
+  font-size: 13.5px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.nota__anexo small {
+.nota__anexo-texto small {
   color: var(--tinta-2);
   font-size: 12px;
-  white-space: nowrap;
+}
+
+.nota__anexo-abrir {
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 /* ------------------------------------------------------------------ larguras */
 
-@media (max-width: 1100px) {
-  .capa {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .capa__dados {
-    padding-inline-start: 90px;
-  }
-
-  .capa__dado:first-child {
-    padding-inline-start: 0;
-    border-inline-start: 0;
-  }
-}
-
 @media (max-width: 640px) {
-  .capa .capa__rosto {
-    width: 56px;
-    height: 56px;
-    font-size: 1.1rem;
-  }
-
-  .capa__quem {
-    gap: 14px;
-  }
-
-  .capa__nome {
-    font-size: 24px;
-  }
-
-  .capa__dados {
-    padding-inline-start: 0;
-  }
-
-  .capa__numero strong,
-  .capa__contagem {
-    font-size: 24px;
-  }
-
   .mesa__abas {
     justify-self: stretch;
   }
@@ -3179,12 +3537,22 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
     flex: 1 1 0;
   }
 
-  .recado {
-    padding-inline-start: 46px;
+  .dobra__linha {
+    padding-inline: 16px 12px;
   }
 
-  .recado__aspas {
-    left: 14px;
+  .dobra__itens {
+    padding-inline: 16px;
+  }
+
+  .trat,
+  .doc {
+    padding-inline: 16px;
+  }
+
+  .dias,
+  .notas {
+    padding-inline: 16px;
   }
 }
 </style>

@@ -1212,7 +1212,8 @@
         "ativo": "O acesso expira em",
         "ate": "até {data}",
         "vinculado": "Vinculado {quando}",
-        "encerrado": "Acesso encerrado"
+        "encerrado": "Acesso encerrado",
+        "venceHoje": "Vence em menos de um dia"
       },
       "semDadosClinicos": "O responsável não liberou dados clínicos neste acesso, só a mensagem."
     },

@@ -1212,7 +1212,8 @@
         "ativo": "Access expires in",
         "ate": "until {data}",
         "vinculado": "Linked {quando}",
-        "encerrado": "Access closed"
+        "encerrado": "Access closed",
+        "venceHoje": "Ends in less than a day"
       },
       "semDadosClinicos": "The owner did not share clinical data in this access, only the message."
     },

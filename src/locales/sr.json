@@ -1212,7 +1212,8 @@
         "ativo": "Pristup ističe za",
         "ate": "do {data}",
         "vinculado": "Povezano {quando}",
-        "encerrado": "Pristup zatvoren"
+        "encerrado": "Pristup zatvoren",
+        "venceHoje": "Ističe za manje od jednog dana"
       },
       "semDadosClinicos": "Vlasnik u ovom pristupu nije podelio kliničke podatke, samo poruku."
     },
