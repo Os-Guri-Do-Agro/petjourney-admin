@@ -235,11 +235,6 @@ watch(
   visibility: hidden;
 }
 
-/* Sem nenhuma marca à vista, o "+N" encosta: o vão seria para separá-lo de um ícone que não há. */
-.marcas__mais--so {
-  margin-inline-start: 0;
-}
-
 /* O "+N": pílula pequena em tinta fraca; com risco ou aviso escondido, no tom dele. */
 .marcas__mais {
   display: inline-flex;
@@ -255,6 +250,11 @@ watch(
   font-weight: 650;
   letter-spacing: 0.01em;
   line-height: 1;
+}
+
+/* Sem nenhuma marca à vista, o "+N" encosta: o vão seria para separá-lo de um ícone que não há. */
+.marcas__mais--so {
+  margin-inline-start: 0;
 }
 
 .marcas__mais--risco {
