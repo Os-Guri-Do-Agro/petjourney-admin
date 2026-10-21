@@ -115,11 +115,11 @@ const motivoInativo = computed(() =>
     ]"
   >
     <header class="leito__topo">
+      <span class="ui-ladrilho ui-ladrilho--p leito__desenho" aria-hidden="true">
+        <i class="ph ph-bed" />
+      </span>
       <span class="leito__nome ui-num">{{ item.leito.nome }}</span>
       <InternacaoGravidade v-if="item.internacao" :gravidade="item.internacao.gravidade" />
-      <span v-else-if="!indisponivel" class="leito__estado">
-        {{ t('clinico.internacao.leito.livre') }}
-      </span>
     </header>
 
     <template v-if="item.internacao">
@@ -149,6 +149,7 @@ const motivoInativo = computed(() =>
         </span>
       </p>
 
+      <!-- O pé do leito: os dois números que decidem a ronda, numa faixa rente. -->
       <div class="leito__numeros">
         <p class="numero">
           <strong class="ui-num">
@@ -174,8 +175,9 @@ const motivoInativo = computed(() =>
     </template>
 
     <template v-else>
-      <p class="leito__vago" aria-hidden="true">
-        <i class="ph ph-bed" />
+      <p class="leito__vago">
+        <i class="ph ph-bed" aria-hidden="true" />
+        <strong class="leito__estado">{{ t('clinico.internacao.leito.livre') }}</strong>
       </p>
 
       <Button
@@ -193,18 +195,23 @@ const motivoInativo = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * O leito é um cartão pequeno sobre o chão do setor: papel, fio, sombra baixa, raio 14. O pé dos
+ * números é uma faixa rente que vai de borda a borda, como o pé de um `ui-cartao`.
+ */
 .leito {
   /* Âncora do alvo estendido do botão do paciente e da marca de gravidade. */
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 196px;
+  min-height: 204px;
   flex-direction: column;
   gap: 12px;
-  padding: 14px 16px 14px 18px;
+  padding: 14px 16px 0 18px;
   border: 1px solid var(--linha);
-  border-radius: 14px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie);
+  box-shadow: var(--sombra-cartao);
   color: var(--tinta);
   transition:
     border-color var(--pj-tempo-curto) ease,
@@ -222,67 +229,87 @@ const motivoInativo = computed(() =>
 }
 
 .leito--clicavel:hover {
-  border-color: var(--linha-forte);
+  border-color: var(--linha-media);
   box-shadow: var(--sombra-2);
   transform: translateY(-1px);
 }
 
-/* O crítico se acha de longe: borda tingida, além da marca e do selo. */
+/*
+ * O crítico se acha de longe: a borda tingida e um véu de risco que desce do alto do cartão e se
+ * apaga antes do paciente — o mesmo degradê do cabeçalho de cartão em estado.
+ */
 .leito--critico {
-  border-color: color-mix(in oklab, var(--risco) 55%, var(--linha));
+  border-color: color-mix(in oklab, var(--risco) 50%, var(--linha));
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--risco-fundo) 75%, var(--superficie)) 0,
+      var(--superficie) 96px
+    )
+    var(--superficie);
 }
 
 .leito--critico.leito--clicavel:hover {
   border-color: var(--risco);
 }
 
-.leito--livre,
-.leito--inativo {
-  border-style: dashed;
-  border-color: var(--linha-forte);
-  background: transparent;
-}
-
+/* Livre: tracejado e sem sombra, para a vaga não disputar com quem está internado. */
 .leito--livre {
-  border-color: color-mix(in oklab, var(--linha-forte) 60%, transparent);
+  padding-bottom: 14px;
+  border-style: dashed;
+  border-color: color-mix(in oklab, var(--ok) 45%, var(--linha-media));
+  background: color-mix(in oklab, var(--superficie) 70%, transparent);
+  box-shadow: none;
 }
 
 /* Fora de operação: hachurado e calado, mas no lugar. */
 .leito--inativo {
-  border-color: var(--linha);
-  background: repeating-linear-gradient(
-    -45deg,
-    transparent 0 9px,
-    color-mix(in oklab, var(--linha) 70%, transparent) 9px 10px
-  );
+  padding-bottom: 14px;
+  border-style: dashed;
+  border-color: var(--linha-media);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 9px,
+      color-mix(in oklab, var(--linha) 75%, transparent) 9px 10px
+    ),
+    color-mix(in oklab, var(--superficie) 55%, transparent);
+  box-shadow: none;
 }
 
 /* ----------------------------------------------------------------- topo */
 
 .leito__topo {
   display: flex;
-  min-height: 24px;
+  min-height: 30px;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
+}
+
+.leito__desenho {
+  font-size: 15px;
+}
+
+.leito--livre .leito__desenho,
+.leito--inativo .leito__desenho {
+  background: var(--superficie-2);
+  color: var(--tinta-3);
 }
 
 .leito__nome {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
   color: var(--tinta);
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 650;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .leito--livre .leito__nome,
 .leito--inativo .leito__nome {
   color: var(--tinta-2);
-}
-
-.leito__estado {
-  color: var(--ok-tinta);
-  font-size: 13px;
-  font-weight: 600;
 }
 
 /* ----------------------------------------------------------------- paciente */
@@ -292,7 +319,7 @@ const motivoInativo = computed(() =>
   min-width: 0;
   align-items: flex-start;
   gap: 12px;
-  margin: 0;
+  margin: 2px 0 0;
   padding: 0;
   border: 0;
   background: none;
@@ -308,7 +335,7 @@ const motivoInativo = computed(() =>
  */
 .leito__paciente::after {
   position: absolute;
-  border-radius: 14px;
+  border-radius: var(--raio-cartao-pequeno);
   content: '';
   inset: 0;
 }
@@ -337,7 +364,8 @@ const motivoInativo = computed(() =>
   overflow-wrap: anywhere;
   color: var(--tinta);
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
+  letter-spacing: -0.005em;
   line-height: 1.3;
 }
 
@@ -349,6 +377,7 @@ const motivoInativo = computed(() =>
   line-height: 1.4;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
 /* ----------------------------------------------------------------- cobranças */
@@ -377,10 +406,12 @@ const motivoInativo = computed(() =>
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--linha);
+  gap: 10px;
+  margin: auto -16px 0 -18px;
+  padding: 12px 14px 13px 16px;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0 0 calc(var(--raio-cartao-pequeno) - 1px) calc(var(--raio-cartao-pequeno) - 1px);
+  background: color-mix(in oklab, var(--superficie-2) 60%, var(--superficie));
 }
 
 .numero {
@@ -396,7 +427,7 @@ const motivoInativo = computed(() =>
 
 .numero strong {
   color: var(--tinta);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
@@ -405,6 +436,7 @@ const motivoInativo = computed(() =>
   margin-top: 3px;
   color: var(--tinta-2);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .numero--atencao strong {
@@ -421,11 +453,28 @@ const motivoInativo = computed(() =>
 .leito__vago {
   display: grid;
   flex: 1;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
   margin: 0;
+}
+
+.leito__vago > i {
+  display: grid;
+  width: 46px;
+  height: 46px;
   place-items: center;
-  color: var(--tinta-3);
-  font-size: 30px;
-  opacity: 0.55;
+  border: 1.5px dashed color-mix(in oklab, var(--ok) 60%, var(--linha));
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--ok-fundo) 55%, transparent);
+  color: var(--ok-tinta);
+  font-size: 21px;
+}
+
+.leito__estado {
+  color: var(--ok-tinta);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .leito__internar {
@@ -437,14 +486,22 @@ const motivoInativo = computed(() =>
   flex: 1;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
   color: var(--tinta-2);
   text-align: start;
 }
 
 .leito__parado > i {
-  font-size: 20px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 17px;
 }
 
 .leito__parado span {
@@ -453,6 +510,7 @@ const motivoInativo = computed(() =>
 }
 
 .leito__parado strong {
+  color: var(--tinta);
   font-size: 14px;
   font-weight: 600;
 }
@@ -463,17 +521,25 @@ const motivoInativo = computed(() =>
 
 /* Estreito, um ladrilho por linha: o vazio não precisa da altura do ocupado para ser visto. */
 @media (width <= 640px) {
-  .leito--livre,
-  .leito--inativo {
-    min-height: 132px;
+  .leito {
+    min-height: 0;
   }
 
   .leito__vago {
-    display: none;
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: center;
+    gap: 12px;
   }
 
-  .leito--livre .leito__internar {
-    margin-top: auto;
+  .leito__vago > i {
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+
+  .leito__parado {
+    justify-content: flex-start;
   }
 }
 

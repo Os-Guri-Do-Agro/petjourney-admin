@@ -156,6 +156,13 @@ const prontosParaEnviar = computed(
 
 type Tom = 'risco' | 'atencao' | 'neutro'
 
+/** O ladrilho do estado do paciente, no tom da gravidade — o mesmo do selo ao lado. */
+const TOM_DA_GRAVIDADE: Record<GravidadeClinica, 'ok' | 'atencao' | 'risco'> = {
+  estavel: 'ok',
+  atencao: 'atencao',
+  critico: 'risco',
+}
+
 const opcoesDeAba = computed(() =>
   ABAS.map((valor) => {
     let contagem = 0
@@ -486,7 +493,6 @@ async function encerrar(entrada: {
 
 <template>
   <UiPagina
-    class="tela"
     :titulo="t('clinico.internacao.paciente.titulo')"
     :carregando="internacao.carregando && !paciente"
     :erro="internacao.erro ? t(internacao.erro) : ''"
@@ -552,8 +558,10 @@ async function encerrar(entrada: {
         esta faixa, a tela de um animal que foi para casa é indistinguível da de um animal que
         está no leito — e alguém marca uma dose numa internação que acabou ontem.
       -->
-      <p v-if="desfechoRegistrado" class="aviso aviso--encerrada" role="status">
-        <i class="ph ph-check-circle" aria-hidden="true" />
+      <p v-if="desfechoRegistrado" class="aviso aviso--encerrada ui-folha" role="status">
+        <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--neutro" aria-hidden="true">
+          <i class="ph ph-check-circle" />
+        </span>
         {{ t(`clinico.internacao.alta.encerrada.${desfechoRegistrado}`, { quando: encerradaEm }) }}
       </p>
 
@@ -561,14 +569,28 @@ async function encerrar(entrada: {
       <section class="quadro ui-folha" :aria-label="t('clinico.internacao.nova.quadro.rotulo')">
         <dl class="quadro__numeros">
           <div class="dado">
-            <dt>{{ t('clinico.internacao.nova.quadro.leito') }}</dt>
+            <dt>
+              {{ t('clinico.internacao.nova.quadro.leito') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-bed" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">{{ paciente.leito?.nome ?? '' }}</strong>
               <small v-if="tipoDoLeito">{{ tipoDoLeito }}</small>
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('clinico.internacao.evolucao.gravidade') }}</dt>
+            <dt>
+              {{ t('clinico.internacao.evolucao.gravidade') }}
+              <span
+                class="ui-ladrilho ui-ladrilho--p dado__icone"
+                :class="`ui-ladrilho--${TOM_DA_GRAVIDADE[paciente.internacao.gravidade]}`"
+                aria-hidden="true"
+              >
+                <i class="ph ph-heartbeat" />
+              </span>
+            </dt>
             <dd>
               <InternacaoGravidade
                 class="dado__gravidade"
@@ -577,7 +599,12 @@ async function encerrar(entrada: {
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('clinico.internacao.paciente.internadoHa') }}</dt>
+            <dt>
+              {{ t('clinico.internacao.paciente.internadoHa') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-clock" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__grande ui-num">
                 {{ t('clinico.internacao.leito.horas', { horas: tempo }) }}
@@ -588,7 +615,12 @@ async function encerrar(entrada: {
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('clinico.internacao.paciente.previsaoDeAlta') }}</dt>
+            <dt>
+              {{ t('clinico.internacao.paciente.previsaoDeAlta') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-calendar-check" />
+              </span>
+            </dt>
             <dd>
               <strong
                 :class="paciente.internacao.altaPrevistaEm ? 'dado__grande ui-num' : 'dado__nome'"
@@ -599,7 +631,12 @@ async function encerrar(entrada: {
             </dd>
           </div>
           <div class="dado">
-            <dt>{{ t('clinico.internacao.paciente.responsavelClinico') }}</dt>
+            <dt>
+              {{ t('clinico.internacao.paciente.responsavelClinico') }}
+              <span class="ui-ladrilho ui-ladrilho--p dado__icone" aria-hidden="true">
+                <i class="ph ph-stethoscope" />
+              </span>
+            </dt>
             <dd>
               <strong class="dado__nome">{{ responsavelClinico }}</strong>
             </dd>
@@ -627,8 +664,14 @@ async function encerrar(entrada: {
         boletim precisa saber que existe uma dose sem dono acontecendo agora, e não descobrir
         depois de trocar de aba.
       -->
-      <p v-if="internacao.naTrocaDePlantao.length > 0" class="aviso aviso--troca" role="status">
-        <i class="ph ph-arrows-left-right" aria-hidden="true" />
+      <p
+        v-if="internacao.naTrocaDePlantao.length > 0"
+        class="aviso aviso--troca ui-folha ui-marca ui-marca--atencao"
+        role="status"
+      >
+        <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--atencao" aria-hidden="true">
+          <i class="ph ph-arrows-left-right" />
+        </span>
         {{
           t(
             'clinico.internacao.paciente.naTroca',
@@ -638,8 +681,14 @@ async function encerrar(entrada: {
         }}
       </p>
 
-      <p v-if="internacao.erroDeAcao" class="aviso aviso--erro" role="alert">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
+      <p
+        v-if="internacao.erroDeAcao"
+        class="aviso aviso--erro ui-folha ui-marca ui-marca--risco"
+        role="alert"
+      >
+        <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--risco" aria-hidden="true">
+          <i class="ph ph-warning-circle" />
+        </span>
         {{ t(internacao.erroDeAcao) }}
       </p>
 
@@ -748,20 +797,6 @@ async function encerrar(entrada: {
 </template>
 
 <style scoped>
-/*
- * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
- * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
- */
-.tela {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .internado {
   display: grid;
   gap: 20px;
@@ -798,7 +833,10 @@ async function encerrar(entrada: {
   text-align: start;
 }
 
-/* ------------------------------------------------------------------ quadro */
+/* ------------------------------------------------------------------ quadro
+ * Os números da internação numa faixa, lidos da esquerda para a direita, cada um com o ladrilho do
+ * assunto no canto — o mesmo quadro da estadia do Hotel. Embaixo, numa faixa rente, os textos.
+ */
 
 .quadro {
   display: grid;
@@ -818,6 +856,7 @@ async function encerrar(entrada: {
 }
 
 .dado {
+  position: relative;
   display: grid;
   min-width: 0;
   flex: 1 1 170px;
@@ -825,47 +864,60 @@ async function encerrar(entrada: {
   gap: 6px;
   margin-block-start: -1px;
   margin-inline-start: -1px;
-  padding: 16px 20px;
+  padding: 18px 20px;
   border-block-start: 1px solid var(--linha);
   border-inline-start: 1px solid var(--linha);
 }
 
 .dado dt {
+  padding-inline-end: 34px;
   color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dado__icone {
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 14px;
 }
 
 .dado dd {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  gap: 3px;
   margin: 0;
 }
 
 .dado__grande {
+  overflow: hidden;
   color: var(--tinta);
-  font-size: 24px;
+  font-family: var(--font-dados);
+  font-size: 26px;
   font-weight: 650;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dado__nome {
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
   line-height: 1.35;
 }
 
 .dado dd small {
   color: var(--tinta-2);
   font-size: 12.5px;
+  line-height: 1.35;
 }
 
 .dado__gravidade.ui-selo {
   justify-self: start;
   height: 30px;
+  margin-top: 2px;
   padding-inline: 11px;
   font-size: 14px;
 }
@@ -875,7 +927,7 @@ async function encerrar(entrada: {
   margin: 0;
   padding: 14px 20px 16px;
   gap: 12px 28px;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
   background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
@@ -890,7 +942,7 @@ async function encerrar(entrada: {
 .texto dt {
   color: var(--tinta-2);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
 }
 
 .texto dd {
@@ -901,44 +953,25 @@ async function encerrar(entrada: {
 }
 
 /* ------------------------------------------------------------------ avisos
- * Uma linha com ícone e frase. O encerramento é neutro de propósito, e não verde de sucesso nem
- * vermelho de alarme: cobre alta, transferência e óbito com a mesma marcação.
+ * Uma linha em folha, com o ladrilho do tom e a frase. O encerramento é neutro de propósito, e não
+ * verde de sucesso nem vermelho de alarme: cobre alta, transferência e óbito com a mesma marcação.
  */
 .aviso {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin: 0;
+  padding: 12px 18px;
+  color: var(--tinta);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 550;
   line-height: 1.45;
 }
 
-.aviso i {
-  flex: none;
-  font-size: 18px;
-}
-
-.aviso--encerrada {
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--neutro-fundo);
-  color: var(--tinta);
-}
-
-.aviso--troca {
-  color: var(--tinta);
-}
-
-.aviso--troca i {
-  color: var(--atencao-tinta);
-}
-
 .aviso--erro {
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: var(--risco-fundo);
   color: var(--risco-tinta);
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ abas */
@@ -1060,7 +1093,11 @@ async function encerrar(entrada: {
 @media (max-width: 900px) {
   .dado {
     flex-basis: 140px;
-    padding: 12px 16px;
+    padding: 14px 16px;
+  }
+
+  .dado__grande {
+    font-size: 22px;
   }
 }
 </style>

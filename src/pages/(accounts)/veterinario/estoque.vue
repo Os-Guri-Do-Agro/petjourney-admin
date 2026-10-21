@@ -27,7 +27,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import type { AcaoDeLinha, ColunaTabela } from '@/features/clinico/components/base/table-types'
@@ -388,6 +387,79 @@ function prazoDoLote(lote: LoteNoEstoque): string {
 }
 
 /** A frase dos lotes: o que vence na janela e quanto dinheiro está nele. */
+type IndicadorDoEstoque = {
+  id: string
+  valor: string
+  rotulo: string
+  nota: string
+  icone: string
+  tom: '' | 'atencao' | 'risco'
+}
+
+/**
+ * Os números do alto, os mesmos em todas as vistas: o que há na geladeira, o que comprar, o que
+ * vence logo e — havendo metas — como vai o mês. A frase de estado diz isso em prosa; os números
+ * deixam a conta à vista e ficam no lugar quando se troca de vista.
+ */
+const indicadoresDoTopo = computed<IndicadorDoEstoque[]>(() => {
+  const indicadores = estoque.value?.indicadores
+
+  if (!indicadores) {
+    return []
+  }
+
+  const aComprar = (estoque.value?.saldos ?? [])
+    .filter((linha) => linha.situacao !== 'ok')
+    .map((linha) => linha.nome)
+
+  const lista: IndicadorDoEstoque[] = [
+    {
+      id: 'doses',
+      valor: formato.numero(indicadores.dosesEmEstoque, 0),
+      rotulo: t('clinico.vacinas.estoque.dosesEmEstoque'),
+      nota: t('clinico.vacinas.estoque.valorParadoDetalhe', {
+        valor: formato.moeda(indicadores.valorParado),
+      }),
+      icone: 'ph ph-snowflake',
+      tom: '',
+    },
+    {
+      id: 'comprar',
+      valor: String(indicadores.vacinasAbaixoDoMinimo),
+      rotulo: t('clinico.vacinas.estoque.abaixoDoMinimo'),
+      nota: aComprar.length > 0 ? aComprar.join(', ') : t('clinico.estoque.saudacao.nadaAComprar'),
+      icone: 'ph ph-shopping-cart',
+      tom: indicadores.vacinasAbaixoDoMinimo > 0 ? 'atencao' : '',
+    },
+    {
+      id: 'vencendo',
+      valor: String(indicadores.dosesVencendo),
+      rotulo: t('clinico.vacinas.estoque.vencendo', { dias: JANELA_DE_VALIDADE_EM_DIAS }),
+      nota: t('clinico.vacinas.estoque.emRisco', {
+        valor: formato.moeda(indicadores.valorEmRisco),
+      }),
+      icone: 'ph ph-hourglass-medium',
+      tom: indicadores.dosesVencendo > 0 ? 'atencao' : '',
+    },
+  ]
+
+  if (placarDoMes.value.total > 0) {
+    lista.push({
+      id: 'metas',
+      valor: String(placarDoMes.value.bem),
+      rotulo: t('clinico.estoque.metas.doMes', { mes: formato.mesPorExtenso(mesAtual.value) }),
+      nota: t('clinico.estoque.metas.placar', {
+        bem: placarDoMes.value.bem,
+        total: placarDoMes.value.total,
+      }),
+      icone: 'ph ph-target',
+      tom: '',
+    })
+  }
+
+  return lista
+})
+
 const fraseDosLotes = computed(() => {
   const indicadores = estoque.value?.indicadores
 
@@ -604,7 +676,6 @@ const fatiasDePerda = computed<Fatia[]>(() => {
       <Button
         v-if="painel && !painel.proximo.plano && aba !== 'metas'"
         type="button"
-        class="estoque__secundaria"
         icon="ph ph-target"
         severity="secondary"
         outlined
@@ -620,6 +691,30 @@ const fatiasDePerda = computed<Fatia[]>(() => {
     </template>
 
     <div class="estoque clinic-scope">
+      <ul
+        v-if="indicadoresDoTopo.length"
+        class="ui-indicadores indicadores"
+        :aria-label="t('clinico.estoque.titulo')"
+      >
+        <li
+          v-for="item in indicadoresDoTopo"
+          :key="item.id"
+          class="ui-indicador"
+          :class="item.tom ? `ui-indicador--${item.tom}` : ''"
+        >
+          <span
+            class="ui-ladrilho"
+            :class="item.tom ? `ui-ladrilho--${item.tom}` : ''"
+            aria-hidden="true"
+          >
+            <i :class="item.icone" />
+          </span>
+          <span class="ui-indicador__valor">{{ item.valor }}</span>
+          <span class="ui-indicador__rotulo">{{ item.rotulo }}</span>
+          <span class="ui-indicador__nota">{{ item.nota }}</span>
+        </li>
+      </ul>
+
       <div class="estoque__barra">
         <ClinicToggleGroup
           v-model="aba"
@@ -630,17 +725,25 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 
       <!-- ============================================================== geladeira -->
       <template v-if="aba === 'geladeira' && estoque">
-        <UiSecao
-          id="estoque-por-vacina"
-          :titulo="t('clinico.estoque.porVacina')"
-          :contagem="estoque.saldos.length"
-          :descricao="
-            t('clinico.vacinas.estoque.valorParadoDetalhe', {
-              valor: formato.moeda(estoque.indicadores.valorParado),
-            })
-          "
-        >
-          <div class="ui-folha geladeira">
+        <section class="ui-folha ui-cartao geladeira" aria-labelledby="estoque-por-vacina-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-snowflake" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="estoque-por-vacina-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.estoque.porVacina') }}
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{
+                  t('clinico.vacinas.estoque.valorParadoDetalhe', {
+                    valor: formato.moeda(estoque.indicadores.valorParado),
+                  })
+                }}
+              </p>
+            </span>
+            <span class="ui-cartao__total">{{ estoque.saldos.length }}</span>
+          </header>
+
+          <div>
             <div class="geladeira__cabeca" aria-hidden="true">
               <span>{{ t('clinico.vacinas.colunaVacina') }}</span>
               <span>{{ t('clinico.vacinas.estoque.saldo') }}</span>
@@ -736,14 +839,26 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               </li>
             </ul>
           </div>
-        </UiSecao>
+        </section>
 
-        <UiSecao
-          id="estoque-lotes"
-          :titulo="t('clinico.estoque.lotes')"
-          :contagem="estoque.lotes.length"
-          :descricao="fraseDosLotes"
-        >
+        <section class="ui-folha ui-cartao lotes" aria-labelledby="estoque-lotes-titulo">
+          <header class="ui-cartao__cabeca">
+            <span
+              class="ui-ladrilho"
+              :class="{ 'ui-ladrilho--atencao': estoque.indicadores.dosesVencendo > 0 }"
+              aria-hidden="true"
+            >
+              <i class="ph ph-package" />
+            </span>
+            <span class="ui-cartao__titulos">
+              <h2 id="estoque-lotes-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.estoque.lotes') }}
+              </h2>
+              <p class="ui-cartao__descricao">{{ fraseDosLotes }}</p>
+            </span>
+            <span class="ui-cartao__total">{{ estoque.lotes.length }}</span>
+          </header>
+
           <!--
             Todos os lotes, o esgotado inclusive: é o código antigo que a farmacovigilância procura
             quando liga, e um lote que some quando acaba deixa a pergunta sem resposta.
@@ -812,53 +927,61 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               </span>
             </template>
           </ClinicDataTable>
-        </UiSecao>
+        </section>
       </template>
 
       <!-- ============================================================== metas -->
       <template v-else-if="aba === 'metas' && painel">
         <!-- O mês em curso: o combinado contra o ritmo de hoje. -->
-        <UiSecao
-          id="metas-atual"
-          :titulo="t('clinico.estoque.metas.doMes', { mes: formato.mesPorExtenso(painel.atual.mes) })"
-          :descricao="
-            placarDoMes.total > 0
-              ? t('clinico.estoque.par', {
-                  a: t(
-                    'clinico.estoque.metas.emCurso',
-                    { n: diasRestantes(painel.atual.mes, painel.hoje) },
-                    diasRestantes(painel.atual.mes, painel.hoje),
-                  ),
-                  b: t('clinico.estoque.metas.placar', {
-                    bem: placarDoMes.bem,
-                    total: placarDoMes.total,
-                  }),
-                })
-              : t(
-                  'clinico.estoque.metas.emCurso',
-                  { n: diasRestantes(painel.atual.mes, painel.hoje) },
-                  diasRestantes(painel.atual.mes, painel.hoje),
-                )
-          "
-        >
-          <template #acoes>
-            <Button
-              v-if="painel.atual.plano"
-              type="button"
-              :label="t('clinico.estoque.metas.editar')"
-              icon="ph ph-pencil-simple"
-              severity="secondary"
-              outlined
-              size="small"
-              @click="abrirPlano(painel.atual.mes)"
-            />
-          </template>
+        <section class="ui-folha ui-cartao" aria-labelledby="metas-atual-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-target" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="metas-atual-titulo" class="ui-cartao__titulo">
+                {{
+                  t('clinico.estoque.metas.doMes', { mes: formato.mesPorExtenso(painel.atual.mes) })
+                }}
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{
+                  placarDoMes.total > 0
+                    ? t('clinico.estoque.par', {
+                        a: t(
+                          'clinico.estoque.metas.emCurso',
+                          { n: diasRestantes(painel.atual.mes, painel.hoje) },
+                          diasRestantes(painel.atual.mes, painel.hoje),
+                        ),
+                        b: t('clinico.estoque.metas.placar', {
+                          bem: placarDoMes.bem,
+                          total: placarDoMes.total,
+                        }),
+                      })
+                    : t(
+                        'clinico.estoque.metas.emCurso',
+                        { n: diasRestantes(painel.atual.mes, painel.hoje) },
+                        diasRestantes(painel.atual.mes, painel.hoje),
+                      )
+                }}
+              </p>
+            </span>
+            <span v-if="painel.atual.plano" class="ui-cartao__acoes">
+              <Button
+                type="button"
+                :label="t('clinico.estoque.metas.editar')"
+                icon="ph ph-pencil-simple"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="abrirPlano(painel.atual.mes)"
+              />
+            </span>
+          </header>
 
-          <div v-if="painel.atual.plano" class="ui-folha metas-folha">
+          <div v-if="painel.atual.plano" class="metas-folha">
             <MetasDoMes :progresso="painel.atual.progresso" :vacinas="catalogo" em-curso />
           </div>
 
-          <div v-else class="ui-folha estoque__convite">
+          <div v-else class="estoque__convite">
             <p>{{ t('clinico.estoque.metas.semPlanoAtual') }}</p>
             <Button
               type="button"
@@ -873,53 +996,62 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               @click="abrirPlano(painel.atual.mes)"
             />
           </div>
-        </UiSecao>
+        </section>
 
         <!-- O próximo mês: o plano, ou o convite para fazê-lo com os números deste. -->
-        <UiSecao
-          id="metas-proximo"
-          :titulo="
-            t('clinico.estoque.metas.doMes', { mes: formato.mesPorExtenso(painel.proximo.mes) })
-          "
-          :descricao="
-            painel.proximo.plano
-              ? t('clinico.estoque.metas.planejadoEm', {
-                  data: formato.dataCurta(painel.proximo.plano.atualizadoEm.slice(0, 10)),
-                  quem: clinico.profissional(painel.proximo.plano.criadoPor)?.nome ?? '',
-                })
-              : t('clinico.estoque.metas.semPlanoProximo', {
-                  base: formato.mesPorExtenso(painel.sugestao.mesBase),
-                })
-          "
-        >
-          <template #acoes>
-            <Button
-              v-if="painel.proximo.plano"
-              type="button"
-              :label="t('clinico.estoque.metas.editar')"
-              icon="ph ph-pencil-simple"
-              severity="secondary"
-              outlined
-              size="small"
-              @click="abrirPlano(painel.proximo.mes)"
-            />
-            <Button
-              v-else
-              type="button"
-              :label="
-                t('clinico.estoque.metas.planejar', {
-                  mes: formato.mesPorExtenso(painel.proximo.mes),
-                })
-              "
-              icon="ph ph-flag"
-              severity="secondary"
-              outlined
-              size="small"
-              @click="abrirPlano(painel.proximo.mes)"
-            />
-          </template>
+        <section class="ui-folha ui-cartao" aria-labelledby="metas-proximo-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-flag" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="metas-proximo-titulo" class="ui-cartao__titulo">
+                {{
+                  t('clinico.estoque.metas.doMes', {
+                    mes: formato.mesPorExtenso(painel.proximo.mes),
+                  })
+                }}
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{
+                  painel.proximo.plano
+                    ? t('clinico.estoque.metas.planejadoEm', {
+                        data: formato.dataCurta(painel.proximo.plano.atualizadoEm.slice(0, 10)),
+                        quem: clinico.profissional(painel.proximo.plano.criadoPor)?.nome ?? '',
+                      })
+                    : t('clinico.estoque.metas.semPlanoProximo', {
+                        base: formato.mesPorExtenso(painel.sugestao.mesBase),
+                      })
+                }}
+              </p>
+            </span>
+            <span class="ui-cartao__acoes">
+              <Button
+                v-if="painel.proximo.plano"
+                type="button"
+                :label="t('clinico.estoque.metas.editar')"
+                icon="ph ph-pencil-simple"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="abrirPlano(painel.proximo.mes)"
+              />
+              <Button
+                v-else
+                type="button"
+                :label="
+                  t('clinico.estoque.metas.planejar', {
+                    mes: formato.mesPorExtenso(painel.proximo.mes),
+                  })
+                "
+                icon="ph ph-flag"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="abrirPlano(painel.proximo.mes)"
+              />
+            </span>
+          </header>
 
-          <ul v-if="painel.proximo.plano" class="ui-folha ui-lista alvos">
+          <ul v-if="painel.proximo.plano" class="ui-lista alvos">
             <li v-for="meta in painel.proximo.plano.metas" :key="meta.id" class="alvos__linha">
               <span class="alvos__nome">
                 <strong>{{ rotulos.nomeDaMeta(meta, catalogo) }}</strong>
@@ -928,116 +1060,136 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               <strong class="alvos__valor ui-num">{{ rotulos.valor(meta.tipo, meta.alvo) }}</strong>
             </li>
           </ul>
-        </UiSecao>
+        </section>
 
         <!--
           O pedido mora junto do mês que ele abastece. Sem plano, ele sai da sugestão — e o texto diz
           isso, para ninguém comprar por uma meta que ainda não foi combinada sem saber.
         -->
-        <UiSecao
-          id="metas-pedido"
-          :titulo="
-            t('clinico.estoque.pedido.titulo', { mes: formato.mesPorExtenso(painel.proximo.mes) })
-          "
-          :contagem="pedidoAComprar.length || null"
-          :descricao="
-            painel.proximo.plano
-              ? t('clinico.estoque.pedido.peloPlano')
-              : t('clinico.estoque.pedido.pelaSugestao')
-          "
-        >
-          <template #acoes>
-            <Button
-              v-if="pedidoAComprar.length > 0"
-              type="button"
-              :label="
-                copiado ? t('clinico.estoque.pedido.copiado') : t('clinico.estoque.pedido.copiar')
-              "
-              :icon="copiado ? 'ph ph-check' : 'ph ph-copy'"
-              severity="secondary"
-              outlined
-              size="small"
-              @click="copiarPedido"
-            />
-          </template>
-
-          <div class="pedido">
-            <ClinicDataTable
-              class="tabela-rola"
-              :colunas="colunasPedido"
-              :linhas="pedidoAComprar"
-              :chave="(linha) => linha.vacinaId"
-              :acoes="acoesPedido"
-              :vazio-titulo="
-                t('clinico.estoque.pedido.vazio', {
-                  mes: formato.mesPorExtenso(painel.proximo.mes),
-                })
-              "
-              :rotulo="
-                t('clinico.estoque.pedido.titulo', {
-                  mes: formato.mesPorExtenso(painel.proximo.mes),
-                })
-              "
-              @acao="acaoNoPedido"
-            >
-              <template #celula-vacina="{ linha }">
-                <span class="celula__forte">{{ linha.nome }}</span>
-                <span class="celula__meta">{{ linha.fornecedor }}</span>
-              </template>
-
-              <!-- A conta escrita: é ela que se defende quando o pedido parece grande. -->
-              <template #celula-conta="{ linha }">
-                <span class="celula__meta celula__conta ui-num">
-                  {{
-                    t('clinico.estoque.pedido.contaTexto', {
-                      meta: linha.meta,
-                      minimo: linha.minimo,
-                      sobra: linha.sobra,
-                    })
-                  }}
-                </span>
-              </template>
-
-              <template #celula-comprar="{ linha }">
-                <span class="celula__numero ui-num">{{ linha.comprar }}</span>
-              </template>
-
-              <template #celula-custo="{ linha }">
-                <span class="celula__texto ui-num">{{ formato.moeda(linha.custoEstimado) }}</span>
-                <span class="celula__meta">
-                  {{
-                    t('clinico.vacinas.estoque.custoUnitario', {
-                      valor: formato.moeda(linha.custoUnitario),
-                    })
-                  }}
-                </span>
-              </template>
-            </ClinicDataTable>
-
-            <p v-if="pedidoAComprar.length > 0" class="pedido__total">
-              <i class="ph ph-shopping-cart" aria-hidden="true" />
-              <span class="ui-num">
+        <section class="ui-folha ui-cartao pedido" aria-labelledby="metas-pedido-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-shopping-cart" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="metas-pedido-titulo" class="ui-cartao__titulo">
                 {{
-                  t('clinico.estoque.pedido.total', {
-                    doses: rotulos.doses(
-                      pedidoAComprar.reduce((soma, linha) => soma + linha.comprar, 0),
-                    ),
-                    valor: formato.moeda(custoDoProximoPedido),
+                  t('clinico.estoque.pedido.titulo', {
+                    mes: formato.mesPorExtenso(painel.proximo.mes),
+                  })
+                }}
+                <span v-if="pedidoAComprar.length" class="ui-contagem">
+                  {{ pedidoAComprar.length }}
+                </span>
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{
+                  painel.proximo.plano
+                    ? t('clinico.estoque.pedido.peloPlano')
+                    : t('clinico.estoque.pedido.pelaSugestao')
+                }}
+              </p>
+            </span>
+            <span v-if="pedidoAComprar.length > 0" class="ui-cartao__acoes">
+              <Button
+                v-if="pedidoAComprar.length > 0"
+                type="button"
+                :label="
+                  copiado ? t('clinico.estoque.pedido.copiado') : t('clinico.estoque.pedido.copiar')
+                "
+                :icon="copiado ? 'ph ph-check' : 'ph ph-copy'"
+                severity="secondary"
+                outlined
+                size="small"
+                @click="copiarPedido"
+              />
+            </span>
+          </header>
+
+          <ClinicDataTable
+            class="tabela-rola"
+            :colunas="colunasPedido"
+            :linhas="pedidoAComprar"
+            :chave="(linha) => linha.vacinaId"
+            :acoes="acoesPedido"
+            :vazio-titulo="
+              t('clinico.estoque.pedido.vazio', {
+                mes: formato.mesPorExtenso(painel.proximo.mes),
+              })
+            "
+            :rotulo="
+              t('clinico.estoque.pedido.titulo', {
+                mes: formato.mesPorExtenso(painel.proximo.mes),
+              })
+            "
+            @acao="acaoNoPedido"
+          >
+            <template #celula-vacina="{ linha }">
+              <span class="celula__forte">{{ linha.nome }}</span>
+              <span class="celula__meta">{{ linha.fornecedor }}</span>
+            </template>
+
+            <!-- A conta escrita: é ela que se defende quando o pedido parece grande. -->
+            <template #celula-conta="{ linha }">
+              <span class="celula__meta celula__conta ui-num">
+                {{
+                  t('clinico.estoque.pedido.contaTexto', {
+                    meta: linha.meta,
+                    minimo: linha.minimo,
+                    sobra: linha.sobra,
                   })
                 }}
               </span>
-            </p>
-          </div>
-        </UiSecao>
+            </template>
+
+            <template #celula-comprar="{ linha }">
+              <span class="celula__numero ui-num">{{ linha.comprar }}</span>
+            </template>
+
+            <template #celula-custo="{ linha }">
+              <span class="celula__texto ui-num">{{ formato.moeda(linha.custoEstimado) }}</span>
+              <span class="celula__meta">
+                {{
+                  t('clinico.vacinas.estoque.custoUnitario', {
+                    valor: formato.moeda(linha.custoUnitario),
+                  })
+                }}
+              </span>
+            </template>
+          </ClinicDataTable>
+
+          <p v-if="pedidoAComprar.length > 0" class="ui-cartao__pe pedido__total">
+            <i class="ph ph-shopping-cart" aria-hidden="true" />
+            <span class="ui-num">
+              {{
+                t('clinico.estoque.pedido.total', {
+                  doses: rotulos.doses(
+                    pedidoAComprar.reduce((soma, linha) => soma + linha.comprar, 0),
+                  ),
+                  valor: formato.moeda(custoDoProximoPedido),
+                })
+              }}
+            </span>
+          </p>
+        </section>
 
         <!-- Meses fechados: recolhidos, abertos um de cada vez. -->
-        <UiSecao
+        <section
           v-if="painel.historico.length > 0"
-          id="metas-historico"
-          :titulo="t('clinico.estoque.metas.historico')"
-          :contagem="painel.historico.length"
+          class="ui-folha ui-cartao"
+          aria-labelledby="metas-historico-titulo"
         >
-          <ul class="ui-folha ui-lista historico">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+              <i class="ph ph-clock-counter-clockwise" />
+            </span>
+            <span class="ui-cartao__titulos">
+              <h2 id="metas-historico-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.estoque.metas.historico') }}
+              </h2>
+            </span>
+            <span class="ui-cartao__total">{{ painel.historico.length }}</span>
+          </header>
+
+          <ul class="ui-lista historico">
             <li v-for="mes in painel.historico" :key="mes.mes">
               <button
                 type="button"
@@ -1077,13 +1229,26 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               </div>
             </li>
           </ul>
-        </UiSecao>
+        </section>
       </template>
 
       <!-- ============================================================== movimentos -->
-      <div v-else-if="aba === 'movimentos'" class="movimentos">
-        <div class="estoque__filtro">
-          <p>{{ t('clinico.estoque.movimentos.descricao') }}</p>
+      <section
+        v-else-if="aba === 'movimentos'"
+        class="ui-folha ui-cartao movimentos"
+        aria-labelledby="estoque-movimentos-titulo"
+      >
+        <header class="ui-cartao__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-arrows-down-up" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="estoque-movimentos-titulo" class="ui-cartao__titulo">
+              {{ t('clinico.estoque.aba.movimentos') }}
+            </h2>
+            <p class="ui-cartao__descricao">{{ t('clinico.estoque.movimentos.descricao') }}</p>
+          </span>
+        </header>
+
+        <div class="ui-cartao__ferramentas">
           <ClinicToggleGroup
             v-model="filtroDeMovimento"
             :opcoes="opcoesDeMovimento"
@@ -1151,17 +1316,24 @@ const fatiasDePerda = computed<Fatia[]>(() => {
             </span>
           </template>
         </ClinicDataTable>
-      </div>
+      </section>
 
       <!-- ============================================================== análise -->
       <template v-else-if="aba === 'analise' && estoque">
-        <UiSecao
-          id="analise-consumo"
-          icone="ph ph-chart-bar"
-          :titulo="t('clinico.vacinas.estoque.grafico.consumo')"
-          :descricao="t('clinico.vacinas.estoque.grafico.consumoAjuda')"
-        >
-          <div class="ui-folha grafico">
+        <section class="ui-folha ui-cartao" aria-labelledby="analise-consumo-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="analise-consumo-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.vacinas.estoque.grafico.consumo') }}
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{ t('clinico.vacinas.estoque.grafico.consumoAjuda') }}
+              </p>
+            </span>
+          </header>
+
+          <div class="ui-cartao__corpo grafico">
             <EstoqueChartConsumo
               :meses="estoque.consumo"
               :vacinas="catalogo"
@@ -1170,16 +1342,23 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               :vazio="t('clinico.vacinas.estoque.semConsumo')"
             />
           </div>
-        </UiSecao>
+        </section>
 
         <div class="estoque__par">
-          <UiSecao
-            id="analise-saldo"
-            icone="ph ph-shopping-cart"
-            :titulo="t('clinico.vacinas.estoque.grafico.saldo')"
-            :descricao="t('clinico.vacinas.estoque.grafico.saldoAjuda')"
-          >
-            <div class="ui-folha grafico">
+          <section class="ui-folha ui-cartao" aria-labelledby="analise-saldo-titulo">
+            <header class="ui-cartao__cabeca">
+              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-shopping-cart" /></span>
+              <span class="ui-cartao__titulos">
+                <h2 id="analise-saldo-titulo" class="ui-cartao__titulo">
+                  {{ t('clinico.vacinas.estoque.grafico.saldo') }}
+                </h2>
+                <p class="ui-cartao__descricao">
+                  {{ t('clinico.vacinas.estoque.grafico.saldoAjuda') }}
+                </p>
+              </span>
+            </header>
+
+            <div class="ui-cartao__corpo grafico">
               <EstoqueChartSaldo
                 :saldos="estoque.saldos"
                 :legenda="{
@@ -1193,15 +1372,24 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                 :vazio="t('clinico.vacinas.estoque.semLotes')"
               />
             </div>
-          </UiSecao>
+          </section>
 
-          <UiSecao
-            id="analise-perdas"
-            icone="ph ph-warning"
-            :titulo="t('clinico.vacinas.estoque.grafico.perdas')"
-            :descricao="t('clinico.vacinas.estoque.grafico.perdasAjuda')"
-          >
-            <div class="ui-folha grafico">
+          <section class="ui-folha ui-cartao" aria-labelledby="analise-perdas-titulo">
+            <header class="ui-cartao__cabeca">
+              <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true"
+                ><i class="ph ph-warning"
+              /></span>
+              <span class="ui-cartao__titulos">
+                <h2 id="analise-perdas-titulo" class="ui-cartao__titulo">
+                  {{ t('clinico.vacinas.estoque.grafico.perdas') }}
+                </h2>
+                <p class="ui-cartao__descricao">
+                  {{ t('clinico.vacinas.estoque.grafico.perdasAjuda') }}
+                </p>
+              </span>
+            </header>
+
+            <div class="ui-cartao__corpo grafico">
               <ClinicChartRanking
                 tom="atencao"
                 :fatias="fatiasDePerda"
@@ -1209,16 +1397,23 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                 :vazio="t('clinico.vacinas.estoque.semPerdas')"
               />
             </div>
-          </UiSecao>
+          </section>
         </div>
 
-        <UiSecao
-          id="analise-validade"
-          icone="ph ph-calendar-blank"
-          :titulo="t('clinico.vacinas.estoque.grafico.validade')"
-          :descricao="t('clinico.vacinas.estoque.grafico.validadeAjuda')"
-        >
-          <div class="ui-folha grafico">
+        <section class="ui-folha ui-cartao" aria-labelledby="analise-validade-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="analise-validade-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.vacinas.estoque.grafico.validade') }}
+              </h2>
+              <p class="ui-cartao__descricao">
+                {{ t('clinico.vacinas.estoque.grafico.validadeAjuda') }}
+              </p>
+            </span>
+          </header>
+
+          <div class="ui-cartao__corpo grafico">
             <EstoqueChartValidade
               :lotes="estoque.lotes"
               :hoje="clinicClock.today()"
@@ -1235,7 +1430,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               :vazio="t('clinico.vacinas.estoque.semLotes')"
             />
           </div>
-        </UiSecao>
+        </section>
       </template>
     </div>
 
@@ -1277,18 +1472,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 <style scoped>
 .estoque {
   display: grid;
-  gap: 32px;
-}
-
-/*
- * O contorno secundário do Trilha só vale dentro de `.hc-tema`; fora dele o PrimeVue desenha o botão
- * com tinta e borda de desabilitado. Local até a ponte valer para a moldura nova.
- */
-.estoque__secundaria.p-button {
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
+  gap: 24px;
 }
 
 .estoque__barra {
@@ -1296,7 +1480,25 @@ const fatiasDePerda = computed<Fatia[]>(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-bottom: -8px;
+}
+
+/* A nota do "a comprar" lista as vacinas: duas linhas no máximo, o resto na frase do alto. */
+.indicadores .ui-indicador__nota {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* As tabelas da casa encostam nas bordas do cartão, com o mesmo recuo do cabeçalho. */
+.lotes :deep(.tabela__cabecalho),
+.lotes :deep(.tabela__linha),
+.pedido :deep(.tabela__cabecalho),
+.pedido :deep(.tabela__linha),
+.movimentos :deep(.tabela__cabecalho),
+.movimentos :deep(.tabela__linha) {
+  padding-inline: 20px;
 }
 
 /* ------------------------------------------------------------------ geladeira
@@ -1317,18 +1519,31 @@ const fatiasDePerda = computed<Fatia[]>(() => {
   padding-inline: 20px 14px;
 }
 
+/* O cabeçalho das colunas num poço, como o das tabelas. */
 .geladeira__cabeca {
-  min-height: 40px;
+  min-height: 42px;
   border-bottom: 1px solid var(--linha);
-  color: var(--tinta-2);
+  background: var(--superficie-2);
+  color: var(--tinta-3);
   font-size: 12.5px;
-  font-weight: 550;
+  font-weight: 600;
+}
+
+/* A última linha acompanha o canto do cartão, para o realce do hover não vazar. */
+.geladeira__linha:last-child {
+  border-bottom-left-radius: calc(var(--raio-cartao) - 1px);
+  border-bottom-right-radius: calc(var(--raio-cartao) - 1px);
 }
 
 .geladeira__linha {
   position: relative;
-  min-height: 72px;
+  min-height: 76px;
   padding-block: 12px;
+  transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.geladeira__linha:hover {
+  background: var(--superficie-2);
 }
 
 .geladeira__vacina {
@@ -1361,6 +1576,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 
 .geladeira__saldo strong {
   color: var(--tinta);
+  font-family: var(--font-dados);
   font-size: 26px;
   font-weight: 650;
   letter-spacing: -0.02em;
@@ -1514,7 +1730,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 /* ------------------------------------------------------------------ metas */
 
 .metas-folha {
-  padding: 4px 20px;
+  padding: 4px 20px 6px;
 }
 
 .estoque__convite {
@@ -1561,18 +1777,12 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 .alvos__valor {
   flex: none;
   color: var(--tinta);
+  font-family: var(--font-dados);
   font-size: 18px;
   font-weight: 650;
 }
 
-.pedido {
-  display: grid;
-  gap: 12px;
-}
-
 .pedido__total {
-  display: flex;
-  align-items: center;
   justify-content: flex-end;
   gap: 8px;
   margin: 0;
@@ -1606,36 +1816,22 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 
 .historico__corpo {
   padding: 0 20px 8px 48px;
-  border-top: 1px solid var(--linha);
+  border-top: 1px solid var(--linha-suave);
+  background: color-mix(in oklab, var(--superficie-2) 45%, var(--superficie));
 }
 
-/* ------------------------------------------------------------------ movimentos */
-
-.movimentos {
-  display: grid;
-  gap: 14px;
-}
-
-.estoque__filtro {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-}
-
-.estoque__filtro p {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
+/* Embaixo do cabeçalho, a primeira linha do histórico não leva o raio de cima. */
+.historico > li:first-child > .ui-linha {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 /* ------------------------------------------------------------------ análise */
 
 .estoque__par {
   display: grid;
-  align-items: start;
-  gap: 32px 24px;
+  align-items: stretch;
+  gap: 24px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
 }
 
@@ -1669,6 +1865,28 @@ const fatiasDePerda = computed<Fatia[]>(() => {
 }
 
 @media (max-width: 760px) {
+  .indicadores.ui-indicadores {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .indicadores .ui-indicador {
+    padding: 14px 16px;
+  }
+
+  .indicadores .ui-indicador__valor {
+    font-size: 24px;
+  }
+
+  .lotes :deep(.tabela__cabecalho),
+  .lotes :deep(.tabela__linha),
+  .pedido :deep(.tabela__cabecalho),
+  .pedido :deep(.tabela__linha),
+  .movimentos :deep(.tabela__cabecalho),
+  .movimentos :deep(.tabela__linha) {
+    padding-inline: 14px;
+  }
+
   .geladeira__cabeca {
     display: none;
   }

@@ -19,8 +19,6 @@ import Select from 'primevue/select'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
 import ClinicField from '../base/ClinicField.vue'
 import type {
   AdministracaoAgendada,
@@ -224,23 +222,27 @@ function aoEscolherMedicamento(medicamentoId: string) {
 
 <template>
   <div class="prescricoes">
-    <UiSecao
-      id="prescricao-ativas"
-      :titulo="t('clinico.internacao.prescricao.ativasTitulo')"
-      :contagem="ativas.length || null"
-      folha
-    >
-      <template v-if="!encerrada" #acoes>
-        <Button
-          type="button"
-          :label="t('clinico.internacao.prescricao.nova')"
-          icon="ph ph-plus"
-          size="small"
-          severity="secondary"
-          outlined
-          @click="abrindo = true"
-        />
-      </template>
+    <section class="ui-folha ui-cartao" aria-labelledby="prescricao-ativas-titulo">
+      <header class="ui-cartao__cabeca">
+        <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-prescription" /></span>
+        <span class="ui-cartao__titulos">
+          <h2 id="prescricao-ativas-titulo" class="ui-cartao__titulo">
+            {{ t('clinico.internacao.prescricao.ativasTitulo') }}
+            <span v-if="ativas.length" class="ui-contagem">{{ ativas.length }}</span>
+          </h2>
+        </span>
+        <span v-if="!encerrada" class="ui-cartao__acoes">
+          <Button
+            type="button"
+            :label="t('clinico.internacao.prescricao.nova')"
+            icon="ph ph-plus"
+            size="small"
+            severity="secondary"
+            outlined
+            @click="abrindo = true"
+          />
+        </span>
+      </header>
 
       <p v-if="ativas.length === 0" class="ui-vazio">
         {{ t('clinico.internacao.prescricao.semAtivas') }}
@@ -364,7 +366,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
           </div>
         </li>
       </ul>
-    </UiSecao>
+    </section>
 
     <!--
       Prescrever é uma tarefa à parte, não um trecho a mais da lista: em diálogo, a tarefa tem
@@ -375,9 +377,17 @@ function aoEscolherMedicamento(medicamentoId: string) {
       modal
       class="clinic-dialog hc-tema"
       :style="{ width: 'min(42rem, 96vw)' }"
-      :header="t('clinico.internacao.prescricao.novaTitulo')"
       dismissable-mask
     >
+      <template #header>
+        <h2 class="clinic-dialog__titulo">
+          <span class="clinic-dialog__marca" aria-hidden="true"
+            ><i class="ph ph-prescription"
+          /></span>
+          {{ t('clinico.internacao.prescricao.novaTitulo') }}
+        </h2>
+      </template>
+
       <div class="formulario clinic-scope">
         <ClinicField :rotulo="t('clinico.internacao.prescricao.tipo')">
           <template #default="{ id }">
@@ -499,13 +509,23 @@ function aoEscolherMedicamento(medicamentoId: string) {
       </template>
     </Dialog>
 
-    <UiSecao
+    <section
       v-if="suspensas.length > 0"
-      id="prescricao-suspensas"
-      :titulo="t('clinico.internacao.prescricao.suspensasTitulo')"
-      :contagem="suspensas.length"
-      folha
+      class="ui-folha ui-cartao"
+      aria-labelledby="prescricao-suspensas-titulo"
     >
+      <header class="ui-cartao__cabeca">
+        <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
+          <i class="ph ph-prohibit" />
+        </span>
+        <span class="ui-cartao__titulos">
+          <h2 id="prescricao-suspensas-titulo" class="ui-cartao__titulo">
+            {{ t('clinico.internacao.prescricao.suspensasTitulo') }}
+            <span class="ui-contagem">{{ suspensas.length }}</span>
+          </h2>
+        </span>
+      </header>
+
       <ul class="ui-lista">
         <li v-for="prescricao in suspensas" :key="prescricao.id" class="item item--suspensa">
           <div class="item__linha">
@@ -537,14 +557,14 @@ function aoEscolherMedicamento(medicamentoId: string) {
           </div>
         </li>
       </ul>
-    </UiSecao>
+    </section>
   </div>
 </template>
 
 <style scoped>
 .prescricoes {
   display: grid;
-  gap: 28px;
+  gap: 24px;
 }
 
 .item {
@@ -555,19 +575,19 @@ function aoEscolherMedicamento(medicamentoId: string) {
   display: flex;
   align-items: flex-start;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 16px 20px;
 }
 
 .item__icone {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 18px;
+  border-radius: 12px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 19px;
 }
 
 .item__corpo {
@@ -635,13 +655,18 @@ function aoEscolherMedicamento(medicamentoId: string) {
   gap: 6px 10px;
 }
 
+/* A próxima dose, numa pílula na cor do lugar: é o horário que o plantão procura na linha. */
 .item__proxima {
   display: inline-flex;
+  height: 30px;
   align-items: center;
   gap: 6px;
-  color: var(--musgo);
-  font-size: 14px;
-  font-weight: 600;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+  font-size: 13.5px;
+  font-weight: 650;
   white-space: nowrap;
 }
 
@@ -651,7 +676,8 @@ function aoEscolherMedicamento(medicamentoId: string) {
 }
 
 .item--suspensa .item__icone {
-  opacity: 0.6;
+  background: var(--superficie-2);
+  color: var(--tinta-3);
 }
 
 /* ----------------------------------------------------------------- suspender */
@@ -659,9 +685,10 @@ function aoEscolherMedicamento(medicamentoId: string) {
 .suspender {
   display: grid;
   gap: 12px;
-  margin: 0 18px 16px 68px;
+  margin: 0 20px 16px 74px;
   padding: 14px 16px;
-  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--risco) 25%, transparent);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--risco-fundo);
 }
 

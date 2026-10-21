@@ -181,21 +181,27 @@ function compor() {
       <section
         v-for="boletim in retidos"
         :key="boletim.id"
-        class="retido ui-folha ui-marca ui-marca--risco"
+        class="retido ui-folha ui-cartao"
         role="alert"
       >
-        <header class="retido__topo">
-          <span class="retido__icone" aria-hidden="true"><i class="ph ph-lock-simple" /></span>
-          <div class="retido__titulos">
-            <h3 class="retido__titulo">{{ t('clinico.internacao.boletim.retidoTitulo') }}</h3>
-            <p class="retido__regra">{{ t('clinico.internacao.boletim.retidoRegra') }}</p>
+        <header class="ui-cartao__cabeca ui-cartao__cabeca--risco retido__topo">
+          <span class="ui-ladrilho ui-ladrilho--risco" aria-hidden="true">
+            <i class="ph ph-lock-simple" />
+          </span>
+          <div class="ui-cartao__titulos">
+            <h3 class="ui-cartao__titulo retido__titulo">
+              {{ t('clinico.internacao.boletim.retidoTitulo') }}
+            </h3>
+            <p class="ui-cartao__descricao">{{ t('clinico.internacao.boletim.retidoRegra') }}</p>
           </div>
           <InternacaoGravidade :gravidade="boletim.gravidade" />
         </header>
 
-        <blockquote class="retido__texto">{{ boletim.texto }}</blockquote>
+        <div class="ui-cartao__corpo">
+          <blockquote class="retido__texto">{{ boletim.texto }}</blockquote>
+        </div>
 
-        <footer class="retido__pe">
+        <footer class="ui-cartao__pe retido__pe">
           <p class="retido__passo" :class="{ 'retido__passo--feito': boletim.ligacaoEm }">
             <i
               :class="boletim.ligacaoEm ? 'ph ph-check-circle' : 'ph ph-phone-call'"
@@ -236,13 +242,21 @@ function compor() {
         </footer>
       </section>
 
-      <UiSecao
+      <section
         v-if="prontos.length > 0"
-        id="boletim-prontos"
-        :titulo="t('clinico.internacao.boletim.prontosTitulo')"
-        :contagem="prontos.length"
-        folha
+        class="ui-folha ui-cartao"
+        aria-labelledby="boletim-prontos-titulo"
       >
+        <header class="ui-cartao__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-paper-plane-tilt" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="boletim-prontos-titulo" class="ui-cartao__titulo">
+              {{ t('clinico.internacao.boletim.prontosTitulo') }}
+            </h2>
+          </span>
+          <span class="ui-cartao__total">{{ prontos.length }}</span>
+        </header>
+
         <ul class="ui-lista">
           <li v-for="boletim in prontos" :key="boletim.id" class="pronto">
             <p class="pronto__texto">{{ boletim.texto }}</p>
@@ -262,15 +276,20 @@ function compor() {
             </footer>
           </li>
         </ul>
-      </UiSecao>
+      </section>
 
-      <UiSecao
-        id="boletim-compor"
-        :titulo="t('clinico.internacao.boletim.composerTitulo')"
-        :descricao="t('clinico.internacao.boletim.composerAjuda')"
-        folha
-      >
-        <div class="compor">
+      <section class="ui-folha ui-cartao" aria-labelledby="boletim-compor-titulo">
+        <header class="ui-cartao__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-pencil-simple-line" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="boletim-compor-titulo" class="ui-cartao__titulo">
+              {{ t('clinico.internacao.boletim.composerTitulo') }}
+            </h2>
+            <p class="ui-cartao__descricao">{{ t('clinico.internacao.boletim.composerAjuda') }}</p>
+          </span>
+        </header>
+
+        <div class="compor ui-cartao__corpo">
           <!--
             Os modelos ficam **acima** do campo, e não dentro de um menu: escolhe-se a situação e
             depois se ajusta o texto. Escondidos atrás de um "inserir modelo", eles viram um
@@ -318,40 +337,47 @@ function compor() {
               />
             </template>
           </ClinicField>
+        </div>
 
-          <div class="compor__acoes">
-            <!--
+        <footer class="ui-cartao__pe compor__acoes">
+          <!--
               Limpar só aparece com algo escrito. Um botão que não faz nada em metade das visitas
               ensina a ignorá-lo justamente na metade em que ele faria.
             -->
-            <Button
-              v-if="rascunho.trim()"
-              type="button"
-              :label="t('clinico.internacao.boletim.limpar')"
-              severity="secondary"
-              text
-              :disabled="salvando"
-              @click="limpar"
-            />
-            <Button
-              type="button"
-              :label="t('clinico.internacao.boletim.compor')"
-              icon="ph ph-pencil-simple"
-              :disabled="!rascunho.trim() || salvando"
-              :loading="salvando"
-              @click="compor"
-            />
-          </div>
-        </div>
-      </UiSecao>
+          <Button
+            v-if="rascunho.trim()"
+            type="button"
+            :label="t('clinico.internacao.boletim.limpar')"
+            severity="secondary"
+            text
+            :disabled="salvando"
+            @click="limpar"
+          />
+          <Button
+            type="button"
+            :label="t('clinico.internacao.boletim.compor')"
+            icon="ph ph-pencil-simple"
+            :disabled="!rascunho.trim() || salvando"
+            :loading="salvando"
+            @click="compor"
+          />
+        </footer>
+      </section>
 
-      <UiSecao
-        id="boletim-frequencia"
-        :titulo="t('clinico.internacao.boletim.frequenciaTitulo')"
-        :descricao="t('clinico.internacao.boletim.frequenciaAjuda')"
-        folha
-      >
-        <div class="frequencia">
+      <section class="ui-folha ui-cartao" aria-labelledby="boletim-frequencia-titulo">
+        <header class="ui-cartao__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-bell-simple" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="boletim-frequencia-titulo" class="ui-cartao__titulo">
+              {{ t('clinico.internacao.boletim.frequenciaTitulo') }}
+            </h2>
+            <p class="ui-cartao__descricao">
+              {{ t('clinico.internacao.boletim.frequenciaAjuda') }}
+            </p>
+          </span>
+        </header>
+
+        <div class="frequencia ui-cartao__corpo">
           <div class="frequencia__linha">
             <ClinicField :rotulo="t('clinico.internacao.boletim.frequencia')">
               <template #default="{ id }">
@@ -406,13 +432,13 @@ function compor() {
             :rotulo="t('clinico.internacao.boletim.foto')"
             @update:model-value="mudarFoto"
           />
-
-          <p v-if="proximo" class="proximo">
-            <i class="ph ph-clock" aria-hidden="true" />
-            {{ t('clinico.internacao.boletim.proximo', { hora: formato.hora(proximo) }) }}
-          </p>
         </div>
-      </UiSecao>
+
+        <footer v-if="proximo" class="ui-cartao__pe proximo">
+          <i class="ph ph-clock" aria-hidden="true" />
+          {{ t('clinico.internacao.boletim.proximo', { hora: formato.hora(proximo) }) }}
+        </footer>
+      </section>
     </div>
 
     <div class="boletins__coluna boletins__coluna--app">
@@ -420,6 +446,7 @@ function compor() {
         id="boletim-app"
         :titulo="t('clinico.internacao.boletim.appTitulo')"
         :descricao="t('clinico.internacao.boletim.appAjuda')"
+        icone="ph ph-device-mobile"
       >
         <BoletimNoApp
           :boletins="boletins"
@@ -452,53 +479,19 @@ function compor() {
 }
 
 /* ----------------------------------------------------------------- retido
- * O único bloco de risco da aba — e só há um por vez, quase sempre nenhum.
+ * O único bloco de risco da aba — e só há um por vez, quase sempre nenhum. Cartão com cabeçalho
+ * tingido de risco: a regra mora no cabeçalho, a mensagem no corpo, o passo e as ações no pé.
  */
 .retido {
-  position: relative;
-  display: grid;
-  gap: 14px;
-  padding: 18px 20px 18px 22px;
   border-color: color-mix(in oklab, var(--risco) 45%, var(--linha));
 }
 
 .retido__topo {
-  display: flex;
   align-items: flex-start;
-  gap: 12px;
-}
-
-.retido__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
-  font-size: 18px;
-}
-
-.retido__titulos {
-  display: grid;
-  min-width: 0;
-  flex: 1;
-  gap: 2px;
 }
 
 .retido__titulo {
-  margin: 0;
   color: var(--risco-tinta);
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.retido__regra {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  line-height: 1.5;
 }
 
 /* O que o responsável vai ler: citação, não caixa — o fio separa a mensagem do aviso. */
@@ -513,13 +506,7 @@ function compor() {
 }
 
 .retido__pe {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding-top: 14px;
-  border-top: 1px solid var(--linha);
 }
 
 .retido__passo {
@@ -551,7 +538,7 @@ function compor() {
 .pronto {
   display: grid;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 14px 20px;
 }
 
 .pronto__texto {
@@ -587,7 +574,6 @@ function compor() {
 .compor {
   display: grid;
   gap: 16px;
-  padding: 18px;
 }
 
 .modelos {
@@ -617,9 +603,10 @@ function compor() {
   align-items: center;
   gap: 6px;
   padding: 0 12px;
-  border: 1px solid var(--linha-forte);
-  border-radius: 10px;
+  border: 1px solid var(--linha-media);
+  border-radius: var(--raio-controle);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
@@ -650,11 +637,7 @@ function compor() {
 }
 
 .compor__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
   justify-content: flex-end;
-  gap: 8px;
 }
 
 /* ----------------------------------------------------------------- frequência */
@@ -662,7 +645,6 @@ function compor() {
 .frequencia {
   display: grid;
   gap: 16px;
-  padding: 18px;
 }
 
 .frequencia__linha {
@@ -709,12 +691,7 @@ function compor() {
 }
 
 .proximo {
-  display: flex;
-  align-items: center;
   gap: 8px;
-  margin: 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--linha);
   color: var(--tinta-2);
   font-size: 13.5px;
 }

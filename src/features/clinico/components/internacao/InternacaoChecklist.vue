@@ -473,13 +473,17 @@ function registrarAntes(administracaoId: string) {
   padding: 22px 0;
 }
 
+/* O que já foi registrado recolhe numa faixa rente no alto do cartão, de borda a borda. */
 .checklist__recolhido {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--linha);
+  margin: -6px -18px 0;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--linha-suave);
+  border-radius: calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px) 0 0;
+  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
   color: var(--tinta-2);
   font-size: 14px;
 }
@@ -663,11 +667,11 @@ function registrarAntes(administracaoId: string) {
 
 .item__icone {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
+  border-radius: 11px;
   background: var(--superficie-2);
   color: var(--tinta-2);
   font-size: 17px;
@@ -813,6 +817,10 @@ function registrarAntes(administracaoId: string) {
     padding-inline: 12px;
   }
 
+  .checklist__recolhido {
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
 
   /* Estreito, o rótulo não cabe na coluna da hora: ele vem primeiro e o fio segue. */
   .checklist__agora {

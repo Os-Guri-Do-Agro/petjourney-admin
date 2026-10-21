@@ -177,7 +177,6 @@ function hrefDoTelefone(telefone: string) {
 
 <template>
   <UiPagina
-    class="tela-tratamentos"
     :resumo="fraseDoResumo"
     :carregando="carregando && linhas.length === 0"
     :erro="erro"
@@ -195,20 +194,29 @@ function hrefDoTelefone(telefone: string) {
           :opcoes="opcoesDoRecorte"
           :rotulo="t('clinico.adesao.titulo')"
         />
-        <LegendaDaFaixa class="tratamentos__legenda" />
+        <!-- A legenda num poço: lê-se uma vez e vale para todas as faixas da lista. -->
+        <div class="tratamentos__legenda ui-poco">
+          <LegendaDaFaixa />
+        </div>
       </div>
 
-      <p v-if="pacientes.length === 0" class="ui-folha ui-vazio">
+      <div v-if="pacientes.length === 0" class="ui-folha vazio-centro">
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true"><i class="ph ph-pill" /></span>
         <strong>{{ t(`clinico.adesao.lista.vazioRecorte.${recorte}`) }}</strong>
-      </p>
+      </div>
 
       <ul v-else class="tratamentos__lista">
         <li v-for="paciente in pacientes" :key="paciente.petId">
           <article
-            class="paciente ui-folha"
+            class="paciente ui-folha ui-cartao"
+            :class="{ 'paciente--alerta': paciente.alerta }"
             :aria-labelledby="`tratamentos-${paciente.petId}`"
           >
-            <header class="paciente__cabeca">
+            <!-- Quem tem a adesão em queda leva o cabeçalho tingido de risco: é a ligação de hoje. -->
+            <header
+              class="ui-cartao__cabeca paciente__cabeca"
+              :class="{ 'ui-cartao__cabeca--risco': paciente.alerta }"
+            >
               <PetAvatar
                 :nome="paciente.primeira.petNome"
                 :iniciais="paciente.primeira.petIniciais"
@@ -262,6 +270,17 @@ function hrefDoTelefone(telefone: string) {
                 class="tratamento"
                 :class="{ 'ui-marca ui-marca--risco': linha.alerta }"
               >
+                <span
+                  class="ui-ladrilho tratamento__icone"
+                  :class="{
+                    'ui-ladrilho--risco': linha.alerta,
+                    'ui-ladrilho--neutro': !linha.emCurso,
+                  }"
+                  aria-hidden="true"
+                >
+                  <i class="ph ph-pill" />
+                </span>
+
                 <div class="tratamento__remedio">
                   <span class="tratamento__titulo">
                     <strong>{{ rotulos.nome(linha.tratamento) }}</strong>
@@ -289,7 +308,7 @@ function hrefDoTelefone(telefone: string) {
                   </p>
                 </div>
 
-                <div class="tratamento__janela">
+                <div class="tratamento__janela ui-poco">
                   <template v-if="linha.compartilhado && janelas.get(linha.tratamento.id)">
                     <span class="tratamento__rotulo">
                       {{ t('clinico.adesao.lista.coluna.janela', { dias: JANELA_DIAS }) }}
@@ -320,20 +339,6 @@ function hrefDoTelefone(telefone: string) {
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como na Internação.
- */
-.tela-tratamentos {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .tratamentos {
   display: grid;
   gap: 20px;
@@ -348,26 +353,43 @@ function hrefDoTelefone(telefone: string) {
 }
 
 .tratamentos__legenda {
-  max-width: 34rem;
+  max-width: 36rem;
+  padding: 10px 16px;
 }
 
 .tratamentos__lista {
   display: grid;
-  gap: 16px;
+  gap: 18px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.vazio-centro {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 36px 20px 40px;
+  color: var(--tinta);
+  font-size: 15px;
+  text-align: center;
+}
+
+.vazio-centro strong {
+  font-weight: 650;
+}
+
 /* ------------------------------------------------------------------------------ o paciente */
 
+/* O cartão do paciente com adesão em queda: contorno no tom do risco, além do cabeçalho tingido. */
+.paciente--alerta {
+  border-color: color-mix(in oklab, var(--risco) 40%, var(--linha));
+}
+
 .paciente__cabeca {
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
   gap: 12px 16px;
-  padding: 16px 18px;
-  border-bottom: 1px solid var(--linha);
+  padding: 18px 20px 16px;
 }
 
 .paciente__quem {
@@ -380,9 +402,9 @@ function hrefDoTelefone(telefone: string) {
 .paciente__nome {
   margin: 0;
   color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
 }
 
 .paciente__meta {
@@ -404,14 +426,21 @@ function hrefDoTelefone(telefone: string) {
 
 /* --------------------------------------------------------------------------- o remédio */
 
-/* A faixa numa trilha de largura fixa: de um paciente para o outro, os dias caem no mesmo lugar. */
+/*
+ * O remédio à esquerda, com o ladrilho do assunto; a faixa à direita, num poço de largura fixa —
+ * de um paciente para o outro, os dias caem no mesmo lugar.
+ */
 .tratamento {
   position: relative;
   display: grid;
   align-items: start;
-  gap: 16px 32px;
-  grid-template-columns: minmax(0, 1fr) 312px;
-  padding: 16px 18px 18px;
+  gap: 16px 18px;
+  grid-template-columns: auto minmax(0, 1fr) 340px;
+  padding: 18px 20px 20px;
+}
+
+.tratamento__icone {
+  margin-top: 1px;
 }
 
 .tratamento__remedio {
@@ -429,8 +458,9 @@ function hrefDoTelefone(telefone: string) {
 }
 
 .tratamento__titulo strong {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.005em;
 }
 
 .tratamento__posologia {
@@ -451,12 +481,13 @@ function hrefDoTelefone(telefone: string) {
   font-weight: 600;
 }
 
-/* A faixa em tamanho de leitura: horários à esquerda, datas embaixo, a conta logo abaixo. */
+/* A faixa em tamanho de leitura, num poço: horários à esquerda, datas embaixo, a conta abaixo. */
 .tratamento__janela {
   display: grid;
   min-width: 0;
   justify-items: start;
   gap: 6px;
+  padding: 12px 14px 14px;
 }
 
 /*
@@ -476,9 +507,9 @@ function hrefDoTelefone(telefone: string) {
 }
 
 .tratamento__rotulo {
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  font-weight: 550;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .tratamento__contagem {
@@ -503,9 +534,32 @@ function hrefDoTelefone(telefone: string) {
   font-size: 15px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
+  .tratamento {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .tratamento__janela {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 520px) {
   .tratamento {
     grid-template-columns: minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+
+  .tratamento__icone {
+    display: none;
+  }
+
+  .tratamento__janela {
+    grid-column: 1;
+  }
+
+  .paciente__cabeca {
+    padding-inline: 16px;
   }
 }
 </style>

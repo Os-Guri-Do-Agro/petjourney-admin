@@ -169,20 +169,30 @@ function confirmar() {
     v-model:visible="visivel"
     modal
     class="clinic-dialog hc-tema"
-    :style="{ width: 'min(34rem, 96vw)' }"
-    :header="t('clinico.internacao.internar.titulo')"
+    :style="{ width: 'min(40rem, 96vw)' }"
     dismissable-mask
   >
+    <template #header>
+      <h2 class="clinic-dialog__titulo">
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-bed" /></span>
+        {{ t('clinico.internacao.internar.titulo') }}
+      </h2>
+    </template>
+
     <div v-if="leito" class="internar clinic-scope">
-      <p class="internar__leito">
-        <span class="internar__icone" aria-hidden="true"><i class="ph ph-bed" /></span>
+      <p class="internar__leito ui-poco">
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true"><i class="ph ph-bed" /></span>
         <span class="internar__leito-texto">
           <strong class="ui-num">{{ leito.nome }}</strong>
           <span>{{ t(`clinico.internacao.leitoKind.${leito.kind}`) }}</span>
         </span>
       </p>
 
-      <ClinicField :rotulo="t('clinico.internacao.internar.paciente')" obrigatorio>
+      <ClinicField
+        class="internar__largo"
+        :rotulo="t('clinico.internacao.internar.paciente')"
+        obrigatorio
+      >
         <template #default="{ id }">
           <Select
             :id="id"
@@ -254,11 +264,12 @@ function confirmar() {
 
       <ClinicToggleGroup
         v-model="gravidade"
+        class="internar__largo"
         :opcoes="opcoesDeGravidade"
         :rotulo="t('clinico.internacao.internar.gravidade')"
       />
 
-      <p v-if="aviso" class="internar__aviso" role="status">
+      <p v-if="aviso" class="internar__aviso internar__largo" role="status">
         <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ aviso }}
       </p>
@@ -283,32 +294,25 @@ function confirmar() {
 </template>
 
 <style scoped>
+/* Dois campos por linha em tela larga; o leito, o paciente, o estado e o aviso atravessam as duas. */
 .internar {
   display: grid;
-  gap: 16px;
+  gap: 16px 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.internar__largo,
+.internar__leito {
+  grid-column: 1 / -1;
 }
 
 /* O leito já vem escolhido: ele abre o formulário como o lugar para onde o paciente vai. */
 .internar__leito {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--superficie-2);
-}
-
-.internar__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-  font-size: 20px;
 }
 
 .internar__leito-texto {
@@ -320,6 +324,7 @@ function confirmar() {
   color: var(--tinta);
   font-size: 20px;
   font-weight: 650;
+  letter-spacing: -0.015em;
   line-height: 1.1;
 }
 
@@ -334,7 +339,8 @@ function confirmar() {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--atencao) 25%, transparent);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--atencao-fundo);
   color: var(--atencao-tinta);
   font-size: 13.5px;
@@ -344,5 +350,11 @@ function confirmar() {
 .internar__aviso i {
   margin-top: 2px;
   font-size: 16px;
+}
+
+@media (width <= 560px) {
+  .internar {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

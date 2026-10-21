@@ -121,13 +121,23 @@ function entregar() {
     class="clinic-dialog hc-tema"
     :style="{ width: 'min(46rem, 96vw)' }"
     :content-style="{ maxHeight: '68vh', overflowY: 'auto' }"
-    :header="t('clinico.internacao.passagem.titulo')"
     dismissable-mask
   >
+    <template #header>
+      <h2 class="clinic-dialog__titulo">
+        <span class="clinic-dialog__marca" aria-hidden="true"
+          ><i class="ph ph-arrows-left-right"
+        /></span>
+        {{ t('clinico.internacao.passagem.titulo') }}
+      </h2>
+    </template>
+
     <div v-if="passagem" class="passagem clinic-scope">
       <!-- Quem entrega e para quem: o turno que sai, a hora, e o turno que entra. -->
-      <p class="passagem__turno">
-        <span class="passagem__icone" aria-hidden="true"><i class="ph ph-arrows-left-right" /></span>
+      <p class="passagem__turno ui-poco">
+        <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
+          <i class="ph ph-arrows-left-right" />
+        </span>
         <span class="passagem__turno-texto">
           <strong>
             {{ t(`clinico.internacao.plantao.${passagem.plantao.kind}`) }}
@@ -147,7 +157,9 @@ function entregar() {
       <!-- A lista que trava a entrega vem primeiro, e diz por que trava. -->
       <section v-if="naTroca.length > 0" class="lista lista--troca">
         <h4 class="lista__titulo">
-          <i class="ph ph-arrows-left-right" aria-hidden="true" />
+          <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--atencao" aria-hidden="true">
+            <i class="ph ph-arrows-left-right" />
+          </span>
           {{ t('clinico.internacao.passagem.emCimaDaTroca') }}
           <span class="ui-contagem">{{ naTroca.length }}</span>
         </h4>
@@ -190,7 +202,9 @@ function entregar() {
 
       <section v-if="atrasadas.length > 0" class="lista">
         <h4 class="lista__titulo">
-          <i class="ph ph-clock-countdown" aria-hidden="true" />
+          <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--risco" aria-hidden="true">
+            <i class="ph ph-clock-countdown" />
+          </span>
           {{ t('clinico.internacao.passagem.atrasadas') }}
           <span class="ui-contagem">{{ atrasadas.length }}</span>
         </h4>
@@ -219,7 +233,9 @@ function entregar() {
 
       <section v-if="semEvolucao.length > 0" class="lista">
         <h4 class="lista__titulo">
-          <i class="ph ph-note-pencil" aria-hidden="true" />
+          <span class="ui-ladrilho ui-ladrilho--p ui-ladrilho--neutro" aria-hidden="true">
+            <i class="ph ph-note-pencil" />
+          </span>
           {{ t('clinico.internacao.passagem.semEvolucao') }}
           <span class="ui-contagem">{{ semEvolucao.length }}</span>
         </h4>
@@ -321,23 +337,9 @@ function entregar() {
 .passagem__turno {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--superficie-2);
-}
-
-.passagem__icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  flex: none;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-  font-size: 20px;
 }
 
 .passagem__turno-texto {
@@ -375,25 +377,16 @@ function entregar() {
 .lista__titulo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   color: var(--tinta);
   font-size: 15px;
-  font-weight: 600;
-}
-
-.lista__titulo i {
-  color: var(--tinta-2);
-  font-size: 18px;
-}
-
-/* A lista que trava a entrega é a única com tratamento de atenção. */
-.lista--troca .lista__titulo i {
-  color: var(--atencao-tinta);
+  font-weight: 650;
 }
 
 .lista__ajuda {
   margin: 0;
+  padding-inline-start: 40px;
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;
@@ -401,7 +394,9 @@ function entregar() {
 
 .lista__itens {
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
 }
 
 .lista--troca .lista__itens {
@@ -422,15 +417,15 @@ function entregar() {
 }
 
 .lista--troca .linha:first-child {
-  border-radius: 11px 11px 0 0;
+  border-radius: 13px 13px 0 0;
 }
 
 .lista--troca .linha:last-child {
-  border-radius: 0 0 11px 11px;
+  border-radius: 0 0 13px 13px;
 }
 
 .lista--troca .linha:only-child {
-  border-radius: 11px;
+  border-radius: 13px;
 }
 
 .linha__decisao {
@@ -477,7 +472,7 @@ function entregar() {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--ok-fundo);
   color: var(--ok-tinta);
   font-size: 14px;

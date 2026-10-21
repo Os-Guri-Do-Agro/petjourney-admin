@@ -21,8 +21,6 @@ import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiSecao from '@/components/ui/UiSecao.vue'
-
 import InternacaoGravidade from './InternacaoGravidade.vue'
 import ClinicField from '../base/ClinicField.vue'
 import ClinicRefValue from '../base/ClinicRefValue.vue'
@@ -182,19 +180,23 @@ function registrar() {
 
 <template>
   <div class="evolucoes">
-    <UiSecao
-      id="evolucao-registro"
-      :titulo="t('clinico.internacao.evolucao.registrarTitulo')"
-      folha
-    >
-      <template v-if="jaRegistrouNoTurno" #acoes>
-        <span class="ui-selo ui-selo--ok">
-          <i class="ph ph-check-circle" aria-hidden="true" />
-          {{ t('clinico.internacao.evolucao.jaRegistrada') }}
+    <section class="ui-folha ui-cartao" aria-labelledby="evolucao-registro-titulo">
+      <header class="ui-cartao__cabeca">
+        <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-note-pencil" /></span>
+        <span class="ui-cartao__titulos">
+          <h2 id="evolucao-registro-titulo" class="ui-cartao__titulo">
+            {{ t('clinico.internacao.evolucao.registrarTitulo') }}
+          </h2>
         </span>
-      </template>
+        <span v-if="jaRegistrouNoTurno" class="ui-cartao__acoes">
+          <span class="ui-selo ui-selo--ok">
+            <i class="ph ph-check-circle" aria-hidden="true" />
+            {{ t('clinico.internacao.evolucao.jaRegistrada') }}
+          </span>
+        </span>
+      </header>
 
-      <div class="registro">
+      <div class="registro ui-cartao__corpo">
         <!--
           O turno anterior fica **embaixo de cada campo**, enquanto se digita o atual. É comparação,
           não histórico: sem ela, cada número é lido como se fosse o primeiro.
@@ -285,26 +287,33 @@ function registrar() {
           <i class="ph ph-phone" aria-hidden="true" />
           {{ t('clinico.internacao.evolucao.avisoPiora') }}
         </p>
-
-        <div class="registro__acoes">
-          <Button
-            type="button"
-            :label="t('clinico.internacao.evolucao.registrar')"
-            icon="ph ph-floppy-disk"
-            :disabled="!podeRegistrar || salvando"
-            :loading="salvando"
-            @click="registrar"
-          />
-        </div>
       </div>
-    </UiSecao>
 
-    <UiSecao
-      id="evolucao-historico"
-      :titulo="t('clinico.internacao.evolucao.historicoTitulo')"
-      :contagem="evolucoes.length || null"
-      folha
-    >
+      <footer class="ui-cartao__pe registro__acoes">
+        <Button
+          type="button"
+          :label="t('clinico.internacao.evolucao.registrar')"
+          icon="ph ph-floppy-disk"
+          :disabled="!podeRegistrar || salvando"
+          :loading="salvando"
+          @click="registrar"
+        />
+      </footer>
+    </section>
+
+    <section class="ui-folha ui-cartao" aria-labelledby="evolucao-historico-titulo">
+      <header class="ui-cartao__cabeca">
+        <span class="ui-ladrilho" aria-hidden="true">
+          <i class="ph ph-clock-counter-clockwise" />
+        </span>
+        <span class="ui-cartao__titulos">
+          <h2 id="evolucao-historico-titulo" class="ui-cartao__titulo">
+            {{ t('clinico.internacao.evolucao.historicoTitulo') }}
+          </h2>
+        </span>
+        <span v-if="evolucoes.length" class="ui-cartao__total">{{ evolucoes.length }}</span>
+      </header>
+
       <p v-if="evolucoes.length === 0" class="ui-vazio">
         {{ t('clinico.internacao.evolucao.semEvolucao') }}
       </p>
@@ -312,6 +321,7 @@ function registrar() {
       <ol v-else class="ui-lista historico">
         <li v-for="evolucao in evolucoes" :key="evolucao.id" class="turno">
           <header class="turno__topo">
+            <span class="turno__no" aria-hidden="true" />
             <div class="turno__quem">
               <strong>{{ nomeDoPlantao(evolucao) }}</strong>
               <span class="ui-num">
@@ -350,7 +360,7 @@ function registrar() {
           </dl>
         </li>
       </ol>
-    </UiSecao>
+    </section>
   </div>
 </template>
 
@@ -367,7 +377,7 @@ function registrar() {
 .registro {
   display: grid;
   gap: 16px;
-  padding: 18px;
+  padding-top: 18px;
 }
 
 /*
@@ -402,7 +412,8 @@ function registrar() {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border: 1px solid color-mix(in oklab, var(--atencao) 25%, transparent);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--atencao-fundo);
   color: var(--atencao-tinta);
   font-size: 13.5px;
@@ -415,26 +426,75 @@ function registrar() {
 }
 
 .registro__acoes {
-  display: flex;
   justify-content: flex-end;
-  padding-top: 4px;
 }
 
 /* ----------------------------------------------------------------- histórico */
 
+/*
+ * Cada turno é um nó numa linha do tempo, da mais recente para a mais antiga: o fio corre pela
+ * esquerda, o nó fica na altura do nome do plantão.
+ */
+.historico > li {
+  position: relative;
+}
+
+.historico > li + li {
+  border-top: 0;
+}
+
+.historico > li::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 25px;
+  width: 2px;
+  background: var(--linha);
+  content: '';
+}
+
+.historico > li:first-child::before {
+  top: 24px;
+}
+
+.historico > li:last-child::before {
+  bottom: calc(100% - 24px);
+}
+
+.historico > li:only-child::before {
+  display: none;
+}
+
 .turno {
   display: grid;
   gap: 12px;
-  padding: 16px 18px;
+  padding: 16px 20px 18px 46px;
   container-type: inline-size;
 }
 
 .turno__topo {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+}
+
+.turno__no {
+  position: absolute;
+  top: 5px;
+  inset-inline-start: -26px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--pj-lugar, var(--musgo));
+  border-radius: 50%;
+  background: var(--superficie);
+}
+
+.historico > li:first-child .turno__no {
+  background: var(--pj-lugar, var(--musgo));
+  box-shadow: 0 0 0 4px var(--pj-lugar-fundo, var(--musgo-fundo));
 }
 
 .turno__quem {
@@ -468,8 +528,16 @@ function registrar() {
 
 .turno__notas {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie-2);
+}
+
+.turno__notas:empty {
+  display: none;
 }
 
 .turno__notas div {

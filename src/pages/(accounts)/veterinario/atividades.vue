@@ -22,7 +22,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
@@ -260,16 +259,34 @@ onMounted(carregar)
     @tentar-de-novo="carregar"
   >
     <div class="atividades">
-      <UiSecao
+      <!--
+        Cada pilha é um cartão com cabeçalho: o ladrilho do assunto, o nome, o porquê e, à direita,
+        quantos esperam. A pilha que tem item envelhecido acende o ladrilho em atenção.
+      -->
+      <section
         v-for="pilha in pilhas"
-        :id="`atividades-${pilha.id}`"
         :key="pilha.id"
-        :titulo="pilha.titulo"
-        :contagem="pilha.linhas.length"
-        :descricao="pilha.porque"
-        :icone="pilha.icone"
+        class="pilha ui-folha ui-cartao"
+        :aria-labelledby="`atividades-${pilha.id}-titulo`"
       >
-        <ul class="ui-folha ui-lista">
+        <header class="ui-cartao__cabeca">
+          <span
+            class="ui-ladrilho"
+            :class="{ 'ui-ladrilho--atencao': pilha.linhas.some((linha) => linha.pesa) }"
+            aria-hidden="true"
+          >
+            <i :class="pilha.icone" />
+          </span>
+          <span class="ui-cartao__titulos">
+            <h2 :id="`atividades-${pilha.id}-titulo`" class="ui-cartao__titulo">
+              {{ pilha.titulo }}
+            </h2>
+            <p class="ui-cartao__descricao">{{ pilha.porque }}</p>
+          </span>
+          <span class="ui-cartao__total">{{ pilha.linhas.length }}</span>
+        </header>
+
+        <ul class="ui-lista">
           <li v-for="linha in pilha.linhas" :key="linha.id">
             <RouterLink
               class="ui-linha atividade"
@@ -307,7 +324,7 @@ onMounted(carregar)
             </RouterLink>
           </li>
         </ul>
-      </UiSecao>
+      </section>
     </div>
   </UiPagina>
 </template>
@@ -315,11 +332,17 @@ onMounted(carregar)
 <style scoped>
 .atividades {
   display: grid;
-  gap: 32px;
+  gap: 24px;
 }
 
 .atividade {
   padding-block: 12px;
+}
+
+/* Embaixo do cabeçalho, a primeira linha não leva o raio de cima: só a última, o de baixo. */
+.pilha .ui-lista > li:first-child > .ui-linha {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }
 
 .atividade__meta {
@@ -349,6 +372,7 @@ onMounted(carregar)
   white-space: nowrap;
 }
 
+/* O desenho do botão secundário do acabamento: papel, fio médio e sombra rente. */
 .atividade__acao {
   display: inline-flex;
   min-width: 200px;
@@ -357,12 +381,13 @@ onMounted(carregar)
   justify-content: center;
   gap: 8px;
   padding: 0 14px;
-  border: 1px solid var(--linha-forte);
-  border-radius: 10px;
+  border: 1px solid var(--linha-media);
+  border-radius: var(--raio-controle);
   background: var(--superficie);
+  box-shadow: var(--sombra-xs);
   color: var(--tinta);
   font-size: 13.5px;
-  font-weight: 550;
+  font-weight: 600;
   white-space: nowrap;
   transition:
     background-color var(--pj-tempo-curto) ease,
@@ -375,8 +400,8 @@ onMounted(carregar)
 }
 
 .atividade:hover .atividade__acao {
-  border-color: var(--tinta-3);
-  background: var(--superficie-3);
+  border-color: color-mix(in oklab, var(--linha-media) 60%, var(--tinta-3));
+  background: var(--superficie-2);
 }
 
 /* Em tela estreita o tempo e a ação descem para baixo do nome, alinhados ao texto. */

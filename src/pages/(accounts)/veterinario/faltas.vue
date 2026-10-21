@@ -539,7 +539,6 @@ onMounted(carregar)
 
 <template>
   <UiPagina
-    class="tela-faltas"
     :resumo="fraseDoResumo"
     :carregando="carregando && linhas.length === 0"
     :erro="erro"
@@ -563,129 +562,158 @@ onMounted(carregar)
 
     <div class="faltas">
       <!-- Os três números do período: a fila de trabalho, com quem conversar, e quanto custou. -->
-      <section class="numeros ui-folha" :aria-label="t('clinico.faltas.numeros.rotulo')">
-        <div class="numero" :class="{ 'numero--atencao': totalPendentes > 0 }">
-          <strong class="ui-num">{{ totalPendentes }}</strong>
-          <span class="numero__rotulo">
+      <ul class="ui-indicadores numeros" :aria-label="t('clinico.faltas.numeros.rotulo')">
+        <li class="ui-indicador" :class="{ 'ui-indicador--atencao': totalPendentes > 0 }">
+          <span
+            class="ui-ladrilho"
+            :class="{ 'ui-ladrilho--atencao': totalPendentes > 0 }"
+            aria-hidden="true"
+          >
+            <i class="ph ph-phone-x" />
+          </span>
+          <strong class="ui-indicador__valor">{{ totalPendentes }}</strong>
+          <span class="ui-indicador__rotulo">
             {{ t('clinico.faltas.numeros.pendentes', totalPendentes) }}
           </span>
-          <small>
-            {{ t('clinico.faltas.frase.dePacientes', { total: pendentes.length }, pendentes.length) }}
-          </small>
-        </div>
+          <span class="ui-indicador__nota">
+            {{
+              t('clinico.faltas.frase.dePacientes', { total: pendentes.length }, pendentes.length)
+            }}
+          </span>
+        </li>
 
-        <div class="numero">
-          <strong class="ui-num">{{ reincidentes.length }}</strong>
-          <span class="numero__rotulo">
+        <li class="ui-indicador">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-repeat" /></span>
+          <strong class="ui-indicador__valor">{{ reincidentes.length }}</strong>
+          <span class="ui-indicador__rotulo">
             {{ t('clinico.faltas.numeros.reincidentes', reincidentes.length) }}
           </span>
-          <small>
+          <span class="ui-indicador__nota">
             {{
               t('clinico.faltas.numeros.limite', { total: LIMITE_REINCIDENCIA }, LIMITE_REINCIDENCIA)
             }}
-          </small>
-        </div>
+          </span>
+        </li>
 
-        <div class="numero">
-          <strong class="ui-num">{{ formato.duracao(totalMinutos) }}</strong>
-          <span class="numero__rotulo">{{ t('clinico.faltas.numeros.agenda') }}</span>
-          <small>
+        <li class="ui-indicador">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-hourglass-medium" /></span>
+          <strong class="ui-indicador__valor">{{ formato.duracao(totalMinutos) }}</strong>
+          <span class="ui-indicador__rotulo">{{ t('clinico.faltas.numeros.agenda') }}</span>
+          <span class="ui-indicador__nota">
             {{ t('clinico.faltas.numeros.emFaltas', { total: totalFaltas }, totalFaltas) }}
-          </small>
-        </div>
-      </section>
-
-      <div class="faltas__barra">
-        <ClinicToggleGroup
-          v-model="recorte"
-          :opcoes="opcoesRecorte"
-          :rotulo="t('clinico.agenda.filtros')"
-        />
-
-        <!-- A política mora ao lado do recorte: é dela que sai quem conta como reincidente. -->
-        <Button
-          type="button"
-          class="faltas__politica"
-          icon="ph ph-sliders-horizontal"
-          :label="t('clinico.faltas.politica.titulo')"
-          severity="secondary"
-          text
-          aria-haspopup="dialog"
-          @click="politica?.toggle($event)"
-        />
-      </div>
+          </span>
+        </li>
+      </ul>
 
       <div ref="area" class="faltas__area">
         <div class="faltas__lado" :class="{ 'faltas__lado--aberto': responsavelAberto }">
-          <ClinicDataTable
-            class="faltas__tabela"
-            :colunas="colunas"
-            :linhas="visiveis"
-            :chave="(linha) => `${linha.tutorId}-${linha.petId}`"
-            :selecionada-id="chaveSelecionada"
-            :vazio-titulo="t('clinico.faltas.vazioTitulo')"
-            :rotulo="t('clinico.faltas.titulo')"
-            @selecionar="alternarDetalhe"
-            @ativar="abrirDetalhe"
-          >
-            <template #celula-paciente="{ linha }">
-              <ClinicPacienteCelula :pet="linha.pet ?? null">
-                <template #selo>
-                  <!--
+          <!--
+            A lista é um cartão com cabeçalho: o ladrilho, o nome, quantos aparecem e, à direita, a
+            política (configuração, discreta). O recorte mora rente no alto, como filtro do cartão.
+          -->
+          <section class="ui-folha ui-cartao lista" aria-labelledby="faltas-lista-titulo">
+            <header class="ui-cartao__cabeca">
+              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-user-minus" /></span>
+              <span class="ui-cartao__titulos">
+                <h2 id="faltas-lista-titulo" class="ui-cartao__titulo">
+                  {{ t('clinico.faltas.titulo') }}
+                  <span class="ui-contagem">{{ visiveis.length }}</span>
+                </h2>
+              </span>
+              <span class="ui-cartao__acoes">
+                <!-- A política mora ao lado do recorte: é dela que sai quem conta como reincidente. -->
+                <Button
+                  type="button"
+                  class="faltas__politica"
+                  icon="ph ph-sliders-horizontal"
+                  :label="t('clinico.faltas.politica.titulo')"
+                  severity="secondary"
+                  text
+                  size="small"
+                  aria-haspopup="dialog"
+                  @click="politica?.toggle($event)"
+                />
+              </span>
+            </header>
+
+            <div class="ui-cartao__ferramentas">
+              <ClinicToggleGroup
+                v-model="recorte"
+                :opcoes="opcoesRecorte"
+                :rotulo="t('clinico.agenda.filtros')"
+              />
+            </div>
+
+            <ClinicDataTable
+              class="faltas__tabela"
+              :colunas="colunas"
+              :linhas="visiveis"
+              :chave="(linha) => `${linha.tutorId}-${linha.petId}`"
+              :selecionada-id="chaveSelecionada"
+              :vazio-titulo="t('clinico.faltas.vazioTitulo')"
+              :rotulo="t('clinico.faltas.titulo')"
+              @selecionar="alternarDetalhe"
+              @ativar="abrirDetalhe"
+            >
+              <template #celula-paciente="{ linha }">
+                <ClinicPacienteCelula :pet="linha.pet ?? null">
+                  <template #selo>
+                    <!--
                     O rótulo de reincidência mora aqui, e não na coluna de contagem: ali só cabia o
                     ícone, e ícone sozinho não diz "reincidente". Na aba Reincidentes ele some: ali
                     toda linha é reincidente, e o selo repetido dez vezes vira textura.
                   -->
-                  <span
-                    v-if="linha.reincidente && recorte !== 'reincidentes'"
-                    class="ui-selo ui-selo--contorno faltas__selo"
-                  >
-                    <i class="ph ph-repeat" aria-hidden="true" />
-                    {{ t('clinico.faltas.reincidente') }}
-                  </span>
-                </template>
-                {{
-                  [
-                    linha.pet ? formato.especie(linha.pet.especie) : '',
-                    ladoALado ? (linha.tutor?.nome ?? '') : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')
-                }}
-              </ClinicPacienteCelula>
-            </template>
+                    <span
+                      v-if="linha.reincidente && recorte !== 'reincidentes'"
+                      class="ui-selo ui-selo--contorno faltas__selo"
+                    >
+                      <i class="ph ph-repeat" aria-hidden="true" />
+                      {{ t('clinico.faltas.reincidente') }}
+                    </span>
+                  </template>
+                  {{
+                    [
+                      linha.pet ? formato.especie(linha.pet.especie) : '',
+                      ladoALado ? (linha.tutor?.nome ?? '') : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')
+                  }}
+                </ClinicPacienteCelula>
+              </template>
 
-            <template #celula-responsavel="{ linha }">
-              <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
-              <span class="faltas__meta ui-num"
-                ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
-              >
-            </template>
+              <template #celula-responsavel="{ linha }">
+                <span class="faltas__nome">{{ linha.tutor?.nome }}</span>
+                <span class="faltas__meta ui-num"
+                  ><bdi dir="ltr">{{ linha.tutor?.telefone }}</bdi></span
+                >
+              </template>
 
-            <template #celula-faltas="{ linha }">
-              <strong class="faltas__contagem ui-num">{{ linha.faltas }}</strong>
-              <span v-if="linha.semJustificativa > 0" class="faltas__sem-motivo">
-                {{
-                  t(
-                    'clinico.faltas.detalhe.semMotivo',
-                    { total: linha.semJustificativa },
-                    linha.semJustificativa,
-                  )
-                }}
-              </span>
-            </template>
+              <template #celula-faltas="{ linha }">
+                <strong class="faltas__contagem ui-num">{{ linha.faltas }}</strong>
+                <span v-if="linha.semJustificativa > 0" class="faltas__sem-motivo">
+                  {{
+                    t(
+                      'clinico.faltas.detalhe.semMotivo',
+                      { total: linha.semJustificativa },
+                      linha.semJustificativa,
+                    )
+                  }}
+                </span>
+              </template>
 
-            <template #celula-minutos="{ linha }">
-              <span class="ui-num">{{ formato.duracao(linha.minutosPerdidos) }}</span>
-            </template>
+              <template #celula-minutos="{ linha }">
+                <span class="ui-num">{{ formato.duracao(linha.minutosPerdidos) }}</span>
+              </template>
 
-            <template #celula-ultima="{ linha }">
-              <span v-if="linha.ultimaFaltaEm" class="ui-num">
-                {{ formato.relativo(linha.ultimaFaltaEm) }}
-              </span>
-              <span v-else class="faltas__meta">{{ t('clinico.formato.semvalor') }}</span>
-            </template>
-          </ClinicDataTable>
+              <template #celula-ultima="{ linha }">
+                <span v-if="linha.ultimaFaltaEm" class="ui-num">
+                  {{ formato.relativo(linha.ultimaFaltaEm) }}
+                </span>
+                <span v-else class="faltas__meta">{{ t('clinico.formato.semvalor') }}</span>
+              </template>
+            </ClinicDataTable>
+          </section>
 
           <!--
             O detalhe do responsável escolhido. Fica **fora** da tabela, e não como linha
@@ -694,14 +722,15 @@ onMounted(carregar)
           -->
           <section
             ref="painel"
-            class="detalhe ui-folha"
+            class="detalhe ui-folha ui-cartao"
             :class="{ 'detalhe--convite': !responsavelAberto }"
             :aria-labelledby="responsavelAberto ? idDetalhe : undefined"
           >
             <template v-if="responsavelAberto">
-              <header class="detalhe__topo">
+              <header class="ui-cartao__cabeca detalhe__topo">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-user" /></span>
                 <div class="detalhe__quem">
-                  <h2 :id="idDetalhe" class="detalhe__titulo">
+                  <h2 :id="idDetalhe" class="ui-cartao__titulo detalhe__titulo">
                     {{ t('clinico.faltas.historico.titulo', { nome: nomeDoResponsavelAberto }) }}
                   </h2>
                   <a
@@ -727,7 +756,7 @@ onMounted(carregar)
                 />
               </header>
 
-              <p class="detalhe__contas">
+              <p class="ui-cartao__ferramentas detalhe__contas">
                 <span class="ui-num">{{
                   t(
                     'clinico.faltas.detalhe.contagem',
@@ -878,7 +907,7 @@ onMounted(carregar)
             </template>
 
             <div v-else class="detalhe__convite">
-              <span class="detalhe__convite-icone" aria-hidden="true">
+              <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
                 <i class="ph ph-cursor-click" />
               </span>
               <strong>{{ t('clinico.faltas.detalhe.convite') }}</strong>
@@ -943,75 +972,35 @@ onMounted(carregar)
 </template>
 
 <style scoped>
-/*
- * Botões secundários (contorno e texto) nas cores do Trilha. Fora do antigo `.hc-tema`, o PrimeVue
- * usa o cinza do preset, que no escuro parece botão desabilitado. Local, como na Internação.
- */
-.tela-faltas {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .faltas {
   display: grid;
   gap: 20px;
 }
 
-/* ----------------------------------------------------------------------------- os três números */
-
-.numeros {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.numero {
-  display: grid;
-  align-content: start;
-  gap: 2px;
-  padding: 18px 22px 20px;
-}
-
-.numero + .numero {
-  border-inline-start: 1px solid var(--linha);
-}
-
-.numero strong {
-  color: var(--tinta);
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-}
-
-.numero--atencao strong {
-  color: var(--atencao-tinta);
-}
-
-.numero__rotulo {
-  margin-top: 2px;
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 550;
-}
-
-.numero small {
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
 /* ------------------------------------------------------------------------- lista e detalhe */
 
-.faltas__barra {
-  display: flex;
+.numeros {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lista {
+  min-width: 0;
+}
+
+/* Estreito, a política desce para baixo do título em vez de encostar na contagem. */
+.lista > .ui-cartao__cabeca {
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+}
+
+.lista > .ui-cartao__cabeca > .ui-cartao__titulos {
+  flex: 1 0 auto;
+}
+
+.lista :deep(.tabela__cabecalho),
+.lista :deep(.tabela__linha) {
+  padding-inline: 20px;
 }
 
 .faltas__area {
@@ -1071,25 +1060,18 @@ onMounted(carregar)
 }
 
 .detalhe__topo {
-  display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 12px 4px 18px;
+  padding-inline-end: 12px;
 }
 
 .detalhe__quem {
   display: grid;
   min-width: 0;
+  flex: 1;
   gap: 4px;
 }
 
 .detalhe__titulo {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
   line-height: 1.3;
 }
 
@@ -1106,12 +1088,8 @@ onMounted(carregar)
 }
 
 .detalhe__contas {
-  display: flex;
-  flex-wrap: wrap;
   gap: 4px 8px;
   margin: 0;
-  padding: 6px 18px 14px;
-  border-bottom: 1px solid var(--linha);
   color: var(--tinta-2);
   font-size: 13px;
 }
@@ -1136,7 +1114,7 @@ onMounted(carregar)
   align-items: start;
   gap: 14px;
   grid-template-columns: 56px minmax(0, 1fr);
-  padding: 14px 18px;
+  padding: 14px 20px;
 }
 
 .falta__quando {
@@ -1244,16 +1222,20 @@ onMounted(carregar)
   margin-top: 8px;
 }
 
-/* Lado a lado quando cabe: a tabela à esquerda, o detalhe preso ao lado enquanto a lista rola. */
+/*
+ * Lado a lado quando cabe: a tabela à esquerda, o detalhe preso ao lado enquanto a lista rola.
+ * Só acontece em tela larga, onde quem rola é o `main#conteudo` (a fita do dia fica fora dele): o
+ * `top` é a folga dentro da folha, e a altura desconta a fita e o respiro da moldura.
+ */
 @container faltas (min-width: 1040px) {
   .faltas__lado {
-    grid-template-columns: minmax(0, 1fr) 330px;
+    grid-template-columns: minmax(0, 1fr) 340px;
   }
 
   .detalhe {
     position: sticky;
-    top: 80px;
-    max-height: calc(100vh - 100px);
+    top: 16px;
+    max-height: calc(100vh - 140px);
     overflow-y: auto;
   }
 
@@ -1262,28 +1244,22 @@ onMounted(carregar)
   }
 }
 
+/* O convite, no padrão do vazio: centrado, o ladrilho grande, uma frase. */
 .detalhe__convite {
   display: grid;
-  justify-items: start;
+  justify-items: center;
   gap: 6px;
-  padding: 22px 20px 24px;
+  padding: 32px 24px 34px;
+  text-align: center;
 }
 
-.detalhe__convite-icone {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  margin-bottom: 6px;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 20px;
+.detalhe__convite .ui-ladrilho {
+  margin-bottom: 8px;
 }
 
 .detalhe__convite strong {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .detalhe__convite p {
@@ -1339,17 +1315,26 @@ onMounted(carregar)
 }
 
 @media (max-width: 760px) {
-  .numeros {
-    grid-template-columns: minmax(0, 1fr);
+  .numeros.ui-indicadores {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .numero + .numero {
-    border-top: 1px solid var(--linha);
-    border-inline-start: 0;
+  .numeros .ui-indicador {
+    padding: 14px 16px;
   }
 
-  .numero {
-    padding: 14px 18px;
+  .numeros .ui-indicador__valor {
+    font-size: 24px;
+  }
+
+  .lista :deep(.tabela__cabecalho),
+  .lista :deep(.tabela__linha) {
+    padding-inline: 14px;
+  }
+
+  .falta {
+    padding-inline: 16px;
   }
 }
 </style>

@@ -263,6 +263,15 @@ function vagasDo(setor: Setor) {
   return Math.max(0, setor.ativos - setor.ocupados)
 }
 
+/** O ponto de cada leito no cabeçalho do setor: ocupado na cor da gravidade, livre, ou parado. */
+function pontoDo(item: LeitoNoMapa) {
+  if (item.internacao) {
+    return `ponto--${item.internacao.gravidade}`
+  }
+
+  return item.leito.ativo ? 'ponto--livre' : 'ponto--parado'
+}
+
 // ---------------------------------------------------------------------------- ações
 
 function abrir(internacaoId: string) {
@@ -330,7 +339,6 @@ function abrirLeito(leitoId: string) {
 
 <template>
   <UiPagina
-    class="tela"
     :carregando="internacao.carregando && !mapa"
     :erro="internacao.erro ? t(internacao.erro) : ''"
     :vazio="vazio"
@@ -370,10 +378,13 @@ function abrirLeito(leitoId: string) {
         id="internacao-pauta"
         :titulo="t('clinico.internacao.pauta.titulo')"
         :contagem="linhasDaPauta.length || null"
+        icone="ph ph-bell-ringing"
       >
         <UiPauta v-if="linhasDaPauta.length" :linhas="linhasDaPauta" />
-        <p v-else class="ui-folha ui-vazio calma">
-          <i class="ph ph-check-circle" aria-hidden="true" />
+        <p v-else class="ui-folha calma">
+          <span class="ui-ladrilho ui-ladrilho--ok" aria-hidden="true">
+            <i class="ph ph-check-circle" />
+          </span>
           <strong>{{ t('clinico.internacao.pauta.vazio') }}</strong>
         </p>
       </UiSecao>
@@ -383,6 +394,7 @@ function abrirLeito(leitoId: string) {
         id="internacao-planta"
         :titulo="t('clinico.internacao.leitos.titulo')"
         :descricao="t('clinico.internacao.nova.planta.descricao')"
+        icone="ph ph-bed"
       >
         <div class="planta">
           <section
@@ -394,13 +406,31 @@ function abrirLeito(leitoId: string) {
             :aria-labelledby="`internacao-setor-${setor.kind}`"
           >
             <header class="setor__cabeca">
-              <span class="setor__icone" aria-hidden="true">
+              <span
+                class="ui-ladrilho setor__icone"
+                :class="{ 'ui-ladrilho--risco': setor.kind === 'uti' }"
+                aria-hidden="true"
+              >
                 <i :class="ICONE_DO_SETOR[setor.kind]" />
               </span>
-              <span class="setor__titulos">
-                <h3 :id="`internacao-setor-${setor.kind}`" class="setor__nome">
-                  {{ t(`clinico.internacao.leitoKind.${setor.kind}`) }}
-                </h3>
+              <div class="setor__titulos">
+                <div class="setor__linha">
+                  <h3 :id="`internacao-setor-${setor.kind}`" class="setor__nome">
+                    {{ t(`clinico.internacao.leitoKind.${setor.kind}`) }}
+                  </h3>
+                  <!--
+                    A lotação de relance: um ponto por leito, na cor da gravidade de quem está nele.
+                    É a mesma conta da frase de baixo, desenhada — por isso fica fora do leitor.
+                  -->
+                  <span class="setor__pontos" aria-hidden="true">
+                    <i
+                      v-for="item in setor.leitos"
+                      :key="item.leito.id"
+                      class="ponto"
+                      :class="pontoDo(item)"
+                    />
+                  </span>
+                </div>
                 <span class="setor__conta ui-num">
                   {{
                     t('clinico.internacao.grupo', {
@@ -409,11 +439,15 @@ function abrirLeito(leitoId: string) {
                     })
                   }}
                 </span>
-              </span>
+              </div>
               <span
                 class="ui-selo setor__vagas"
                 :class="vagasDo(setor) > 0 ? 'ui-selo--ok' : 'ui-selo--contorno'"
               >
+                <i
+                  :class="vagasDo(setor) > 0 ? 'ph ph-check-circle' : 'ph ph-prohibit'"
+                  aria-hidden="true"
+                />
                 {{
                   vagasDo(setor) > 0
                     ? t(
@@ -493,40 +527,30 @@ function abrirLeito(leitoId: string) {
 </template>
 
 <style scoped>
-/*
- * Os botões contornado e de texto no padrão do Trilha (contorno forte, tinta cheia). Fora do
- * `.hc-tema` o PrimeVue usa o cinza do preset, que some sobre o fundo — no escuro, quase some.
- */
-.tela {
-  --p-button-outlined-secondary-border-color: var(--linha-forte);
-  --p-button-outlined-secondary-color: var(--tinta);
-  --p-button-outlined-secondary-hover-background: var(--superficie-2);
-  --p-button-outlined-secondary-active-background: var(--superficie-3);
-  --p-button-text-secondary-color: var(--tinta-2);
-  --p-button-text-secondary-hover-background: var(--superficie-2);
-  --p-button-text-secondary-active-background: var(--superficie-3);
-}
-
 .internacao {
   display: grid;
   gap: 36px;
 }
 
+/* Nada atrasado: uma folha calma, com o ladrilho do ok e a frase. */
 .calma {
-  grid-auto-flow: column;
-  justify-content: start;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
+  margin: 0;
+  padding: 16px 20px;
+  color: var(--tinta);
+  font-size: 14.5px;
 }
 
-.calma i {
-  color: var(--ok-tinta);
-  font-size: 20px;
+.calma strong {
+  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ a planta da ala
- * Cada setor é um cômodo: chão levemente mais claro que o fundo, parede fina, o nome na porta. Os
- * leitos são os únicos objetos com papel — o cômodo não é cartão, é lugar.
+ * Cada setor é um cômodo: chão rente e tingido, parede fina, o nome na porta — o mesmo desenho dos
+ * corredores da casa do Hotel. Os leitos são os únicos objetos com papel: o cômodo não é cartão,
+ * é lugar, e assim não há cartão dentro de cartão.
  *
  * Os setores correm lado a lado, cada um tão largo quanto os próprios leitos pedem
  * (`--setor-leitos`), e quebram de linha quando não cabem.
@@ -539,24 +563,29 @@ function abrirLeito(leitoId: string) {
 }
 
 .setor {
-  --ladrilho: 216px;
+  --ladrilho: 220px;
   --vao: 12px;
 
   display: grid;
-  min-width: min(100%, 260px);
-  flex: var(--setor-leitos) 1 calc(var(--setor-leitos) * (var(--ladrilho) + var(--vao)) + 20px);
+  min-width: min(100%, 290px);
+  flex: var(--setor-leitos) 1 calc(var(--setor-leitos) * (var(--ladrilho) + var(--vao)) + 24px);
   align-content: start;
-  gap: 14px;
-  padding: 14px 14px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 20px;
-  background: color-mix(in oklab, var(--superficie) 45%, transparent);
+  gap: 16px;
+  padding: 16px 16px 18px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-painel);
+  background: color-mix(in oklab, var(--superficie-3) 50%, transparent);
+}
+
+/* No escuro o chão afunda pelo outro lado: um pouco mais claro que o fundo, mais escuro que o papel. */
+.app-dark .setor {
+  background: color-mix(in oklab, var(--superficie-2) 40%, transparent);
 }
 
 .setor__cabeca {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   padding-inline: 2px;
 }
 
@@ -564,37 +593,72 @@ function abrirLeito(leitoId: string) {
   display: grid;
   min-width: 0;
   flex: 1;
-  gap: 1px;
-}
-
-.setor__icone {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  place-items: center;
-  border-radius: 9px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 17px;
-}
-
-/* A UTI leva a cor do risco no ícone: é onde está quem pode piorar a qualquer minuto. */
-.setor--uti .setor__icone {
-  background: var(--risco-fundo);
-  color: var(--risco-tinta);
+  gap: 3px;
 }
 
 .setor__nome {
   margin: 0;
+  overflow: hidden;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 15.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setor__linha {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
 }
 
 .setor__conta {
   color: var(--tinta-2);
   font-size: 12.5px;
+  white-space: nowrap;
+}
+
+/* Os pontos da lotação: cheios na cor da gravidade, vazados quando livres, riscados quando parados. */
+.setor__pontos {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--linha-forte);
+}
+
+.ponto--estavel {
+  background: var(--ok);
+}
+
+.ponto--atencao {
+  background: var(--atencao);
+}
+
+.ponto--critico {
+  background: var(--risco);
+  box-shadow: 0 0 0 2px var(--risco-fundo);
+}
+
+.ponto--livre {
+  border: 1.5px solid color-mix(in oklab, var(--ok) 70%, var(--linha-forte));
+  background: transparent;
+}
+
+.ponto--parado {
+  border: 1.5px dashed var(--linha-forte);
+  background: transparent;
+}
+
+.setor__vagas {
+  flex: none;
 }
 
 
@@ -607,6 +671,16 @@ function abrirLeito(leitoId: string) {
 @media (max-width: 900px) {
   .setor {
     flex-basis: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .setor {
+    padding: 14px 12px 14px;
+  }
+
+  .setor__cabeca {
+    flex-wrap: wrap;
   }
 }
 </style>

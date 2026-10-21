@@ -27,7 +27,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import ClinicDataTable from '@/features/clinico/components/base/ClinicDataTable.vue'
 import ClinicFilterBar from '@/features/clinico/components/base/ClinicFilterBar.vue'
 import ClinicPacienteCelula from '@/features/clinico/components/base/ClinicPacienteCelula.vue'
@@ -149,6 +148,14 @@ const TOM: Record<Situacao, 'risco' | 'atencao' | 'neutro' | 'ok'> = {
   proximo: 'atencao',
   'serie-incompleta': 'neutro',
   'em-dia': 'ok',
+}
+
+/** O ladrilho de cada número do placar: o tom do estado que ele conta, e o ícone do assunto. */
+const LADRILHO_DO_RECORTE: Record<Recorte, { tom: string; icone: string }> = {
+  vencido: { tom: 'ui-ladrilho--risco', icone: 'ph ph-warning' },
+  proximo: { tom: 'ui-ladrilho--atencao', icone: 'ph ph-clock' },
+  'serie-incompleta': { tom: 'ui-ladrilho--neutro', icone: 'ph ph-stack' },
+  todos: { tom: '', icone: 'ph ph-list-bullets' },
 }
 
 const ICONE: Record<Situacao, string> = {
@@ -602,7 +609,7 @@ watch([busca, filtros], () => {
       <template v-if="aba === 'atraso'">
         <div
           ref="placar"
-          class="placar ui-folha"
+          class="placar ui-indicadores"
           role="radiogroup"
           :aria-label="t('clinico.agenda.filtros')"
           @keydown="aoTeclarNoPlacar"
@@ -612,35 +619,47 @@ watch([busca, filtros], () => {
             :key="opcao.valor"
             type="button"
             role="radio"
-            class="placar__opcao"
-            :class="[
-              `placar__opcao--${opcao.tom}`,
-              { 'placar__opcao--zero': opcao.total === 0 },
-            ]"
+            class="placar__opcao ui-indicador"
+            :class="[`placar__opcao--${opcao.tom}`, { 'placar__opcao--zero': opcao.total === 0 }]"
             :aria-checked="recorte === opcao.valor"
             :tabindex="indice === indiceDoRecorte ? 0 : -1"
             @click="escolherRecorte(indice)"
           >
-            <strong class="placar__numero ui-num">{{ opcao.total }}</strong>
-            <span class="placar__rotulo">{{ opcao.rotulo }}</span>
-            <span class="placar__dica">{{ opcao.dica }}</span>
+            <span
+              class="ui-ladrilho"
+              :class="LADRILHO_DO_RECORTE[opcao.valor].tom"
+              aria-hidden="true"
+            >
+              <i :class="LADRILHO_DO_RECORTE[opcao.valor].icone" />
+            </span>
+            <strong class="placar__numero ui-indicador__valor ui-num">{{ opcao.total }}</strong>
+            <span class="placar__rotulo ui-indicador__rotulo">{{ opcao.rotulo }}</span>
+            <span class="placar__dica ui-indicador__nota">{{ opcao.dica }}</span>
           </button>
         </div>
 
-        <UiSecao
-          id="vacinas-chamada"
-          :titulo="t('clinico.vacinas.chamada.titulo')"
-          :contagem="chamadasPorPet.length"
-          :descricao="
-            linhas.length > 0
-              ? t('clinico.vacinas.potencialFrase', { duracao: formato.duracao(potencial) })
-              : ''
-          "
-        >
+        <!--
+          A lista de chamada é um cartão com cabeçalho: quem chamar, quanto de agenda isso devolve e,
+          à direita, quantos pets — uma ligação por pet.
+        -->
+        <section class="ui-folha ui-cartao chamada-cartao" aria-labelledby="vacinas-chamada-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-phone-call" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="vacinas-chamada-titulo" class="ui-cartao__titulo">
+                {{ t('clinico.vacinas.chamada.titulo') }}
+              </h2>
+              <p v-if="linhas.length > 0" class="ui-cartao__descricao">
+                {{ t('clinico.vacinas.potencialFrase', { duracao: formato.duracao(potencial) }) }}
+              </p>
+            </span>
+            <span class="ui-cartao__total">{{ chamadasPorPet.length }}</span>
+          </header>
+
           <ul
             v-if="chamadasPorPet.length"
             ref="listaDeChamada"
-            class="ui-folha ui-lista chamada"
+            class="ui-lista chamada"
             @keydown="aoTeclarNaLista"
           >
             <li
@@ -716,22 +735,40 @@ watch([busca, filtros], () => {
             </li>
           </ul>
 
-          <p v-else class="ui-folha ui-vazio">
+          <div v-else class="vazio-centro">
+            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--ok" aria-hidden="true">
+              <i class="ph ph-syringe" />
+            </span>
             <strong>{{ t('clinico.vacinas.vazioTitulo') }}</strong>
-            {{ t('clinico.vacinas.vazioDescricao') }}
-          </p>
-        </UiSecao>
+            <p>{{ t('clinico.vacinas.vazioDescricao') }}</p>
+          </div>
+        </section>
       </template>
 
       <!-- ============================================================ aplicadas -->
-      <template v-else>
-        <ClinicFilterBar
-          v-model:busca="busca"
-          v-model:selecionados="filtros"
-          :grupos="gruposDeFiltro"
-          :placeholder-busca="t('clinico.vacinas.buscar')"
-          :resultado="aplicadasVisiveis.length"
-        />
+      <section
+        v-else
+        class="ui-folha ui-cartao aplicadas"
+        aria-labelledby="vacinas-aplicadas-titulo"
+      >
+        <header class="ui-cartao__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-syringe" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="vacinas-aplicadas-titulo" class="ui-cartao__titulo">
+              {{ t('clinico.vacinas.aba.aplicadas') }}
+            </h2>
+          </span>
+        </header>
+
+        <div class="ui-cartao__ferramentas aplicadas__procura" role="search">
+          <ClinicFilterBar
+            v-model:busca="busca"
+            v-model:selecionados="filtros"
+            :grupos="gruposDeFiltro"
+            :placeholder-busca="t('clinico.vacinas.buscar')"
+            :resultado="aplicadasVisiveis.length"
+          />
+        </div>
 
         <ClinicDataTable
           class="tabela-rola"
@@ -810,7 +847,7 @@ watch([busca, filtros], () => {
           </template>
         </ClinicDataTable>
 
-        <div v-if="restamNoHistorico > 0" class="vacinas__mais">
+        <footer v-if="restamNoHistorico > 0" class="ui-cartao__pe vacinas__mais">
           <Button
             type="button"
             severity="secondary"
@@ -824,8 +861,8 @@ watch([busca, filtros], () => {
             "
             @click="limiteDoHistorico += PASSO_DO_HISTORICO"
           />
-        </div>
-      </template>
+        </footer>
+      </section>
     </div>
   </UiPagina>
 </template>
@@ -845,117 +882,141 @@ watch([busca, filtros], () => {
 }
 
 .vacinas__mais {
-  display: flex;
   justify-content: center;
 }
 
+/* A busca das aplicadas, rente no alto do cartão: o campo largo, os filtros e quantos sobraram. */
+.aplicadas {
+  overflow: clip;
+}
+
+.aplicadas__procura {
+  display: block;
+  padding: 14px 20px;
+}
+
+.aplicadas__procura :deep(.filtro__busca) {
+  flex: 1 1 24rem;
+  max-width: 40rem;
+}
+
+.aplicadas :deep(.tabela__cabecalho),
+.aplicadas :deep(.tabela__linha) {
+  padding-inline: 20px;
+}
+
+.vazio-centro {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 36px 20px 40px;
+  text-align: center;
+}
+
+.vazio-centro .ui-ladrilho {
+  margin-bottom: 6px;
+}
+
+.vazio-centro strong {
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.vazio-centro p {
+  max-width: 44ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
 /* ------------------------------------------------------------------ placar
- * Os três números grandes, que são também o recorte da lista. Uma folha só, dividida em
- * colunas: um placar, e não quatro cartões iguais lado a lado.
+ * Os números grandes, que são também o recorte da lista: quatro indicadores lado a lado, cada um
+ * com o ladrilho do estado que conta. O escolhido acende o contorno no tom dele e ganha um véu
+ * suave que desce do alto — três sinais (contorno, véu, rótulo em peso), nenhum só de cor.
  */
 .placar {
-  display: grid;
-  overflow: hidden;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 0.8fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .placar__opcao {
-  --placar-tinta: var(--tinta);
   --placar-cor: var(--linha-forte);
   --placar-fundo: var(--superficie-2);
 
-  position: relative;
-  display: grid;
-  align-content: start;
-  gap: 2px;
-  min-height: 112px;
-  padding: 18px 20px 20px;
-  border: 0;
-  border-inline-start: 1px solid var(--linha);
-  background: transparent;
+  min-height: 124px;
   color: var(--tinta);
   cursor: pointer;
   font: inherit;
   text-align: start;
-  transition: background-color var(--pj-tempo-curto) ease;
-}
-
-.placar__opcao:first-child {
-  border-inline-start: 0;
+  transition:
+    border-color var(--pj-tempo-curto) ease,
+    box-shadow var(--pj-tempo-curto) ease,
+    transform var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .placar__opcao--risco {
-  --placar-tinta: var(--risco-tinta);
   --placar-cor: var(--risco);
-  --placar-fundo: color-mix(in oklab, var(--risco-fundo) 70%, var(--superficie));
+  --placar-fundo: var(--risco-fundo);
 }
 
 .placar__opcao--atencao {
-  --placar-tinta: var(--atencao-tinta);
   --placar-cor: var(--atencao);
-  --placar-fundo: color-mix(in oklab, var(--atencao-fundo) 70%, var(--superficie));
+  --placar-fundo: var(--atencao-fundo);
 }
 
 .placar__opcao--neutro {
-  --placar-tinta: var(--tinta);
   --placar-cor: var(--tinta-3);
   --placar-fundo: var(--superficie-2);
 }
 
 .placar__opcao--todos {
-  --placar-tinta: var(--tinta-2);
   --placar-cor: var(--pj-lugar, var(--musgo));
-  --placar-fundo: var(--superficie-2);
+  --placar-fundo: var(--pj-lugar-fundo);
 }
 
 .placar__opcao:hover {
-  background: var(--superficie-2);
+  border-color: var(--linha-media);
+  box-shadow: var(--sombra-2);
+  transform: translateY(-1px);
 }
 
-/* Escolhido: fundo no tom, traço embaixo e o número cheio — três sinais, nenhum só de cor. */
 .placar__opcao[aria-checked='true'] {
-  background: var(--placar-fundo);
-  box-shadow: inset 0 -3px 0 var(--placar-cor);
+  border-color: var(--placar-cor);
+  background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--placar-fundo) 70%, var(--superficie)) 0,
+      var(--superficie) 100%
+    )
+    var(--superficie);
+  box-shadow:
+    inset 0 0 0 1px var(--placar-cor),
+    var(--sombra-cartao);
 }
 
 .placar__opcao[aria-checked='true'] .placar__rotulo {
-  color: var(--tinta);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .placar__opcao:focus-visible {
-  z-index: 1;
   outline: 2px solid var(--pj-lugar, var(--musgo));
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
-.placar__numero {
-  color: var(--placar-tinta);
-  font-size: 30px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.placar__opcao--risco .placar__numero {
+  color: var(--risco-tinta);
 }
 
-.placar__opcao--todos .placar__numero {
-  font-size: 24px;
-  line-height: 1.35;
+.placar__opcao--atencao .placar__numero {
+  color: var(--atencao-tinta);
 }
 
 .placar__opcao--zero .placar__numero {
   color: var(--tinta-3);
 }
 
-.placar__rotulo {
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.35;
-}
-
 .placar__dica {
-  margin-top: 4px;
-  color: var(--tinta-3);
-  font-size: 12.5px;
+  margin-top: 2px;
   line-height: 1.35;
 }
 
@@ -969,8 +1030,8 @@ watch([busca, filtros], () => {
   grid-template-columns:
     minmax(160px, 1fr) minmax(0, 1.5fr) minmax(150px, 0.9fr) minmax(0, 1.1fr)
     auto;
-  min-height: 72px;
-  padding: 12px 18px 12px 20px;
+  min-height: 76px;
+  padding: 12px 20px;
   transition: background-color var(--pj-tempo-curto) ease;
 }
 
@@ -978,14 +1039,9 @@ watch([busca, filtros], () => {
   background: var(--superficie-2);
 }
 
-.chamada__linha:first-child {
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
-}
-
 .chamada__linha:last-child {
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
+  border-bottom-left-radius: calc(var(--raio-cartao) - 1px);
+  border-bottom-right-radius: calc(var(--raio-cartao) - 1px);
 }
 
 .chamada__quem {
@@ -1161,26 +1217,42 @@ watch([busca, filtros], () => {
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
   .placar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .placar {
+    gap: 10px;
   }
 
   .placar__opcao {
     min-height: 0;
-    padding: 14px 16px 16px;
+    padding: 14px 16px;
   }
 
-  .placar__opcao:nth-child(3) {
-    border-inline-start: 0;
+  .placar__numero.ui-indicador__valor {
+    font-size: 24px;
   }
 
-  .placar__opcao:nth-child(n + 3) {
-    border-top: 1px solid var(--linha);
+  .placar__opcao .ui-ladrilho {
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 16px;
   }
 
-  .placar__numero {
-    font-size: 26px;
+  .aplicadas__procura {
+    padding: 12px 14px;
+  }
+
+  .aplicadas :deep(.tabela__cabecalho),
+  .aplicadas :deep(.tabela__linha) {
+    padding-inline: 14px;
   }
 
   .chamada__linha {

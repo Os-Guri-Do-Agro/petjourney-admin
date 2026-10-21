@@ -332,9 +332,15 @@ defineExpose({ voltarParaLista })
     class="clinic-dialog hc-tema"
     :style="{ width: 'min(46rem, 96vw)' }"
     :content-style="{ maxHeight: '68vh', overflowY: 'auto' }"
-    :header="t('clinico.internacao.leitos.titulo')"
     dismissable-mask
   >
+    <template #header>
+      <h2 class="clinic-dialog__titulo">
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-gear-six" /></span>
+        {{ t('clinico.internacao.leitos.titulo') }}
+      </h2>
+    </template>
+
     <div class="leitos clinic-scope">
       <header class="leitos__topo">
         <p class="leitos__conta">
@@ -699,7 +705,7 @@ defineExpose({ voltarParaLista })
 .leitos__erro {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--risco-fundo);
   color: var(--risco-tinta);
   font-size: 14px;
@@ -710,7 +716,8 @@ defineExpose({ voltarParaLista })
   display: grid;
   gap: 14px;
   padding: 16px;
-  border-radius: 12px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
 }
 
@@ -749,7 +756,7 @@ defineExpose({ voltarParaLista })
   margin: 0;
   padding: 20px;
   border: 1px dashed var(--linha-forte);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   color: var(--tinta-2);
   font-size: 14px;
   text-align: center;
@@ -771,7 +778,9 @@ defineExpose({ voltarParaLista })
 /* A lista dos leitos: uma folha com divisórias, uma linha por leito. */
 .lista {
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
 }
 
 .linha {
@@ -785,14 +794,14 @@ defineExpose({ voltarParaLista })
 
 .linha__icone {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   flex: none;
   place-items: center;
-  border-radius: 10px;
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-  font-size: 17px;
+  border-radius: 11px;
+  background: var(--pj-lugar-fundo, var(--clinica-fundo));
+  color: var(--pj-lugar-tinta, var(--clinica-tinta));
+  font-size: 18px;
 }
 
 .linha__icone--parado {

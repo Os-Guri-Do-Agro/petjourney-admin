@@ -163,9 +163,15 @@ function confirmar() {
     modal
     class="clinic-dialog hc-tema"
     :style="{ width: 'min(36rem, 96vw)' }"
-    :header="t('clinico.internacao.alta.titulo')"
     dismissable-mask
   >
+    <template #header>
+      <h2 class="clinic-dialog__titulo">
+        <span class="clinic-dialog__marca" aria-hidden="true"><i class="ph ph-sign-out" /></span>
+        {{ t('clinico.internacao.alta.titulo') }}
+      </h2>
+    </template>
+
     <div class="alta clinic-scope">
       <p class="alta__quem">
         {{ t('clinico.internacao.alta.sobre', { nome: pet?.nome ?? '' }) }}
@@ -290,8 +296,9 @@ function confirmar() {
 .alta__resumo {
   display: grid;
   gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
+  padding: 14px 16px 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--superficie-2);
 }
 
@@ -322,7 +329,8 @@ function confirmar() {
 .alta__numeros dd {
   margin: 0;
   color: var(--tinta);
-  font-size: 22px;
+  font-family: var(--font-dados);
+  font-size: 24px;
   font-weight: 650;
   letter-spacing: -0.02em;
 }
@@ -333,7 +341,7 @@ function confirmar() {
   gap: 10px;
   margin: 0;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--raio-controle);
   background: var(--atencao-fundo);
   color: var(--atencao-tinta);
   font-size: 13.5px;
@@ -356,7 +364,7 @@ function confirmar() {
   margin: 0;
   padding: 12px 14px;
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   color: var(--tinta-2);
   font-size: 13.5px;
   line-height: 1.5;
@@ -387,7 +395,7 @@ function confirmar() {
 .alta__erro {
   margin: 0;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--raio-cartao-pequeno);
   background: var(--risco-fundo);
   color: var(--risco-tinta);
   font-size: 14px;
