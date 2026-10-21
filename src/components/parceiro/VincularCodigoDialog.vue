@@ -17,6 +17,14 @@ import type { CompartilhamentoDetalhe } from '@/service/parceiro/types'
 
 const visible = defineModel<boolean>('visible', { default: false })
 
+const props = defineProps<{
+  /**
+   * Código que chegou pelo link do portal do prestador (`?vincular=` da tela de acessos). O modal
+   * abre com ele nas caixas e falta só confirmar: quem já tem o código na mão não precisa redigitar.
+   */
+  codigoInicial?: string
+}>()
+
 const emit = defineEmits<{
   vinculado: [detalhe: CompartilhamentoDetalhe]
 }>()
@@ -33,6 +41,7 @@ const submitting = ref(false)
 const errorMessage = ref('')
 const throttledSeconds = ref(0)
 const otpWrapper = ref<HTMLElement | null>(null)
+const shell = ref<HTMLElement | null>(null)
 let throttleTimer: ReturnType<typeof setInterval> | null = null
 
 const codigo = computed(() => normalizarCodigoVinculo(codigoInput.value))
@@ -63,7 +72,8 @@ function startThrottle() {
 
 watch(visible, (open) => {
   if (open) {
-    codigoInput.value = ''
+    const inicial = normalizarCodigoVinculo(props.codigoInicial ?? '')
+    codigoInput.value = isCodigoVinculoValido(inicial) ? inicial : ''
     errorMessage.value = ''
   }
 })
@@ -72,8 +82,18 @@ onBeforeUnmount(() => {
   clearThrottle()
 })
 
-/** O Dialog só monta o conteúdo ao abrir; o foco tem que esperar o `show`. */
-function focusPrimeiroDigito() {
+/**
+ * O Dialog só monta o conteúdo ao abrir; o foco tem que esperar o `show`.
+ *
+ * Código já preenchido pelo link: o foco vai para o botão, e o Enter confirma. Focar a primeira
+ * caixa abriria o teclado do celular por cima do botão, para um código que não precisa ser digitado.
+ */
+function focarAoAbrir() {
+  if (isCodigoVinculoValido(codigo.value)) {
+    shell.value?.querySelector<HTMLButtonElement>('.vincular-dialog__enviar')?.focus()
+    return
+  }
+
   otpWrapper.value?.querySelector('input')?.focus()
 }
 
@@ -130,10 +150,15 @@ async function handleVincular() {
     :draggable="false"
     class="vincular-dialog"
     :pt="{ root: { class: 'vincular-dialog' } }"
-    @show="focusPrimeiroDigito"
+    @show="focarAoAbrir"
   >
     <template #container="{ closeCallback }">
-      <div class="vincular-dialog__shell" role="document" aria-labelledby="vinculo-title">
+      <div
+        ref="shell"
+        class="vincular-dialog__shell"
+        role="document"
+        aria-labelledby="vinculo-title"
+      >
         <Button
           class="vincular-dialog__close"
           type="button"

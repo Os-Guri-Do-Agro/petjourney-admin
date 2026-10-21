@@ -41,7 +41,11 @@ import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import type { PetSpecies } from '@/features/clinico/data/types'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { getCompartilhamentos } from '@/service/parceiro/compartilhamentos-service'
+import {
+  getCompartilhamentos,
+  isCodigoVinculoValido,
+  normalizarCodigoVinculo,
+} from '@/service/parceiro/compartilhamentos-service'
 import {
   MAX_BUSCA_PACIENTES,
   type CompartilhamentoDetalhe,
@@ -55,6 +59,12 @@ import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
 type AtendimentoTab = (typeof ATENDIMENTO_TABS)[number]
+
+/**
+ * `?vincular=123456`: o código que chega pelo "Entrar no portal" da página do acesso, no site.
+ * O nome é contrato com o petjourney-web (`portalVincularCodigoUrl` em `src/lib/parcerias-cta.ts`).
+ */
+const PARAMETRO_VINCULAR = 'vincular'
 
 const PAGE_SIZE = 20
 /** Espera entre teclas antes de ir à rede: a busca dispara a cada digitação. */
@@ -105,6 +115,8 @@ const loadingMore = ref(false)
 const error = ref('')
 
 const vincularVisible = ref(false)
+/** O código que veio pelo link; vale só para a abertura que ele mesmo provocou. */
+const codigoDoLink = ref('')
 
 const filtros = reactive({
   q: '',
@@ -770,6 +782,50 @@ function onVinculado(detalhe: CompartilhamentoDetalhe) {
   void router.push(`/parceiro/acessos/${detalhe.id}`)
 }
 
+/**
+ * Lê o `?vincular=` e o tira da URL na hora: recarregar a página não pode reabrir o modal, e o
+ * código não fica no histórico do navegador. Devolve o código só quando ele tem o formato certo.
+ */
+function tirarCodigoDaUrl() {
+  const bruto = route.query[PARAMETRO_VINCULAR]
+
+  if (bruto === undefined) {
+    return ''
+  }
+
+  const query = { ...route.query }
+  delete query[PARAMETRO_VINCULAR]
+  void router.replace({ query, hash: route.hash })
+
+  const codigo = typeof bruto === 'string' ? normalizarCodigoVinculo(bruto) : ''
+
+  return isCodigoVinculoValido(codigo) ? codigo : ''
+}
+
+/**
+ * Quem chegou pelo link do acesso já está com o código na mão: o modal abre preenchido e falta só
+ * confirmar, em vez de a pessoa cair no Início sem saber o que fazer com ele.
+ *
+ * Roda depois da primeira página porque é o contexto do parceiro, carregado ali, que diz se o
+ * cadastro opera — chamar o `ensureContext` em paralelo dobraria a ida à rede. Em análise,
+ * recusado ou suspenso, a API recusaria o vínculo: o modal não abre, e a faixa do alto explica.
+ */
+function abrirVinculoDoLink(codigo: string) {
+  if (!codigo || !store.podeOperar) {
+    return
+  }
+
+  codigoDoLink.value = codigo
+  vincularVisible.value = true
+}
+
+/** Fechou (vinculando ou não): o próximo "Vincular código" abre com as caixas vazias. */
+watch(vincularVisible, (aberto) => {
+  if (!aberto) {
+    codigoDoLink.value = ''
+  }
+})
+
 watch(activeTab, () => {
   void loadFirstPage()
 })
@@ -805,7 +861,9 @@ onMounted(() => {
     return
   }
 
-  void loadFirstPage()
+  const codigoLido = tirarCodigoDaUrl()
+
+  void loadFirstPage().then(() => abrirVinculoDoLink(codigoLido))
 })
 
 /**
@@ -1495,7 +1553,11 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
     </div>
 
     <template #sempre>
-      <VincularCodigoDialog v-model:visible="vincularVisible" @vinculado="onVinculado" />
+      <VincularCodigoDialog
+        v-model:visible="vincularVisible"
+        :codigo-inicial="codigoDoLink"
+        @vinculado="onVinculado"
+      />
     </template>
   </UiPagina>
 </template>
