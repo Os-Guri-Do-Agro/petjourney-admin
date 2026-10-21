@@ -119,6 +119,22 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
 }
 
+/* No celular, dois por fileira: um embaixo do outro empurrava a lista para longe. */
+@media (max-width: 600px) {
+  .trilha .ui-indicadores {
+    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .trilha .ui-indicador {
+    padding: 14px 14px 15px;
+  }
+
+  .trilha .ui-indicador__valor {
+    font-size: 24px;
+  }
+}
+
 .trilha .ui-indicador {
   position: relative;
   display: grid;
@@ -250,7 +266,7 @@
 .trilha .ui-cartao__titulos {
   display: grid;
   min-width: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
   gap: 2px;
 }
 
