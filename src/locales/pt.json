@@ -440,7 +440,8 @@
       "ctaPrograms": "Cadastrar minha empresa",
       "ctaSettings": "Ir para configurações",
       "retry": "Verificar novamente",
-      "contactLabel": "Dúvidas:"
+      "contactLabel": "Dúvidas:",
+      "ctaConvites": "Ver meus convites"
     },
     "accessRevoked": {
       "title": "Seu acesso ao portal foi encerrado",
@@ -2021,25 +2022,116 @@
       }
     },
     "convite": {
-      "subtitle": "Equipe",
-      "title": "Aceitar convite",
-      "body": "Você foi convidado para integrar a equipe de uma empresa parceira PetJourney. Informe o identificador recebido no e-mail ou abra o link completo do convite.",
-      "idLabel": "ID do parceiro",
-      "idHint": "Obrigatório. Vem no link como ?parceiroId=...",
-      "idPlaceholder": "cuid-da-empresa",
-      "accept": "Aceitar convite",
-      "footnote": "Após aceitar, você passa a operar no portal com o papel definido pelo dono da empresa.",
-      "toast": {
-        "warnTitle": "Informe a empresa",
-        "warnDetail": "O link de convite deve incluir o identificador do parceiro.",
-        "success": "Convite aceito",
-        "successDetail": "Você já pode acessar o portal da empresa.",
-        "error": "Não foi possível aceitar",
-        "errorDetail": "Verifique o link ou tente novamente."
+      "title": "Convite para a equipe",
+      "link": {
+        "corpo": "Você recebeu um convite para a equipe de uma empresa parceira do PetJourney. Aceitando, você passa a usar o portal dela.",
+        "aceitar": "Aceitar convite",
+        "recusar": "Recusar",
+        "semSessao": "Entre na sua conta para aceitar. Se ainda não tem conta, crie uma: o convite continua esperando por você."
+      },
+      "recusado": {
+        "titulo": "Convite recusado",
+        "corpo": "Se mudar de ideia, peça um convite novo a quem convidou você."
+      },
+      "aceito": "Convite aceito",
+      "aceitoDetalhe": "Você já faz parte da equipe.",
+      "naoVale": "Este convite não vale mais",
+      "irParaPortal": "Ir para o portal",
+      "caixa": {
+        "titulo": "Seus convites",
+        "vazio": "Nenhum convite pendente",
+        "vazioDica": "O convite chega por e-mail, com o link para aceitar.",
+        "deQuem": "{nome} convidou você como {papel}.",
+        "semNome": "Convite como {papel}.",
+        "abraOEmail": "Para aceitar, abra o link que enviamos para o seu e-mail.",
+        "validoAte": "Vale até {data}",
+        "aceitar": "Aceitar",
+        "recusar": "Recusar",
+        "erroCarregar": "Não foi possível carregar seus convites."
       }
     },
     "equipe": {
-      "titulo": "Equipe"
+      "titulo": "Equipe",
+      "resumo": "Quem opera a parceria com você e o que cada pessoa pode fazer.",
+      "convidar": "Convidar pessoa",
+      "pessoas": "Pessoas",
+      "voce": "Você",
+      "desde": "Na equipe desde {data}",
+      "convidadoPor": "convite de {nome}",
+      "papel": {
+        "DONO": "Dono",
+        "OPERADOR": "Operador"
+      },
+      "papelDica": {
+        "DONO": "Faz tudo: convida e remove pessoas, cuida da carteira, da chave PIX e dos saques.",
+        "OPERADOR": "Acompanha a parceria e opera o dia a dia. Não mexe na equipe nem na carteira."
+      },
+      "maisAcoes": "Ações para {nome}",
+      "tornarDono": "Tornar dono",
+      "tornarOperador": "Tornar operador",
+      "remover": "Remover da equipe",
+      "sair": "Sair da equipe",
+      "soDono": "Só quem é dono convida pessoas, troca papéis e remove alguém da equipe.",
+      "erroCarregar": "Não foi possível carregar a equipe.",
+      "convites": {
+        "titulo": "Convites pendentes",
+        "validoAte": "Vale até {data}",
+        "antigo": "Convite antigo, sem prazo",
+        "enviadoEm": "Enviado em {data}",
+        "reenviar": "Reenviar",
+        "cancelar": "Cancelar"
+      },
+      "confirmar": {
+        "voltar": "Voltar",
+        "remover": {
+          "titulo": "Remover {nome} da equipe?",
+          "mensagem": "{nome} deixa de acessar o portal desta empresa na hora. Para voltar, só com um convite novo.",
+          "botao": "Remover"
+        },
+        "sair": {
+          "titulo": "Sair da equipe?",
+          "mensagem": "Você deixa de acessar o portal desta empresa na hora. Para voltar, só com um convite novo.",
+          "botao": "Sair da equipe"
+        },
+        "dono": {
+          "titulo": "Tornar {nome} dono?",
+          "mensagem": "Quem é dono convida e remove pessoas, cuida da carteira e da chave PIX e pede saques.",
+          "botao": "Tornar dono"
+        },
+        "operador": {
+          "titulo": "Tornar {nome} operador?",
+          "mensagem": "{nome} continua acompanhando a parceria, mas deixa de mexer na equipe e na carteira.",
+          "botao": "Tornar operador"
+        },
+        "cancelarConvite": {
+          "titulo": "Cancelar o convite para {email}?",
+          "mensagem": "O link enviado para esse e-mail para de funcionar.",
+          "botao": "Cancelar convite"
+        }
+      },
+      "toast": {
+        "convidado": "Convite enviado",
+        "convidadoDetalhe": "O link foi para {email} e vale por 14 dias.",
+        "reenviado": "Convite reenviado",
+        "reenviadoDetalhe": "O link anterior parou de valer.",
+        "cancelado": "Convite cancelado",
+        "papelTrocado": "Papel atualizado",
+        "papelTrocadoDetalhe": "{nome} agora é {papel}.",
+        "removido": "Pessoa removida da equipe",
+        "saiu": "Você saiu da equipe",
+        "erro": "Não deu certo"
+      },
+      "gaveta": {
+        "titulo": "Convidar para a equipe",
+        "email": "E-mail",
+        "emailDica": "Pode ser de quem ainda não tem conta no PetJourney.",
+        "emailInvalido": "Confira o e-mail.",
+        "papel": "Papel",
+        "comoFunciona": "A pessoa recebe um link por e-mail e aceita por ele. O link vale por 14 dias.",
+        "enviar": "Enviar convite",
+        "cancelar": "Cancelar",
+        "reenviarPendente": "Reenviar o convite pendente"
+      }
     }
   },
   "settings": {

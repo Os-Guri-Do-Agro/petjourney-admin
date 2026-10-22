@@ -440,7 +440,8 @@
       "ctaPrograms": "Registrar mi empresa",
       "ctaSettings": "Ir a configuración",
       "retry": "Verificar de nuevo",
-      "contactLabel": "Consultas:"
+      "contactLabel": "Consultas:",
+      "ctaConvites": "Ver mis invitaciones"
     },
     "accessRevoked": {
       "title": "Su acceso al portal ha finalizado",
@@ -2021,25 +2022,116 @@
       }
     },
     "convite": {
-      "subtitle": "Equipo",
-      "title": "Aceptar invitación",
-      "body": "Fue invitado a integrar el equipo de una empresa socia PetJourney. Indique el identificador recibido en el correo o abra el enlace completo de la invitación.",
-      "idLabel": "ID del socio",
-      "idHint": "Obligatorio. Viene en el enlace como ?parceiroId=...",
-      "idPlaceholder": "cuid-de-la-empresa",
-      "accept": "Aceptar invitación",
-      "footnote": "Después de aceptar, opera en el portal con el rol definido por el dueño de la empresa.",
-      "toast": {
-        "warnTitle": "Indique la empresa",
-        "warnDetail": "El enlace de invitación debe incluir el identificador del socio.",
-        "success": "Invitación aceptada",
-        "successDetail": "Ya puede acceder al portal de la empresa.",
-        "error": "No fue posible aceptar",
-        "errorDetail": "Verifique el enlace o inténtelo de nuevo."
+      "title": "Invitación al equipo",
+      "link": {
+        "corpo": "Usted recibió una invitación al equipo de una empresa socia de PetJourney. Al aceptar, podrá usar su portal.",
+        "aceitar": "Aceptar invitación",
+        "recusar": "Rechazar",
+        "semSessao": "Inicie sesión para aceptar. Si aún no tiene cuenta, cree una: la invitación lo seguirá esperando."
+      },
+      "recusado": {
+        "titulo": "Invitación rechazada",
+        "corpo": "Si cambia de idea, pida una invitación nueva a quien lo invitó."
+      },
+      "aceito": "Invitación aceptada",
+      "aceitoDetalhe": "Ya forma parte del equipo.",
+      "naoVale": "Esta invitación ya no vale",
+      "irParaPortal": "Ir al portal",
+      "caixa": {
+        "titulo": "Sus invitaciones",
+        "vazio": "Ninguna invitación pendiente",
+        "vazioDica": "La invitación llega por correo, con el enlace para aceptar.",
+        "deQuem": "{nome} lo invitó como {papel}.",
+        "semNome": "Invitación como {papel}.",
+        "abraOEmail": "Para aceptar, abra el enlace que le enviamos por correo.",
+        "validoAte": "Válida hasta el {data}",
+        "aceitar": "Aceptar",
+        "recusar": "Rechazar",
+        "erroCarregar": "No fue posible cargar sus invitaciones."
       }
     },
     "equipe": {
-      "titulo": "Equipo"
+      "titulo": "Equipo",
+      "resumo": "Quién opera la alianza con usted y qué puede hacer cada persona.",
+      "convidar": "Invitar a alguien",
+      "pessoas": "Personas",
+      "voce": "Usted",
+      "desde": "En el equipo desde {data}",
+      "convidadoPor": "invitación de {nome}",
+      "papel": {
+        "DONO": "Dueño",
+        "OPERADOR": "Operador"
+      },
+      "papelDica": {
+        "DONO": "Hace todo: invita y quita personas, administra la billetera, la clave PIX y los retiros.",
+        "OPERADOR": "Acompaña la alianza y opera el día a día. No cambia el equipo ni la billetera."
+      },
+      "maisAcoes": "Acciones para {nome}",
+      "tornarDono": "Hacer dueño",
+      "tornarOperador": "Hacer operador",
+      "remover": "Quitar del equipo",
+      "sair": "Salir del equipo",
+      "soDono": "Solo quien es dueño invita personas, cambia roles y quita a alguien del equipo.",
+      "erroCarregar": "No fue posible cargar el equipo.",
+      "convites": {
+        "titulo": "Invitaciones pendientes",
+        "validoAte": "Válida hasta el {data}",
+        "antigo": "Invitación antigua, sin plazo",
+        "enviadoEm": "Enviada el {data}",
+        "reenviar": "Reenviar",
+        "cancelar": "Cancelar"
+      },
+      "confirmar": {
+        "voltar": "Volver",
+        "remover": {
+          "titulo": "¿Quitar a {nome} del equipo?",
+          "mensagem": "{nome} deja de acceder al portal de esta empresa de inmediato. Para volver, necesitará una invitación nueva.",
+          "botao": "Quitar"
+        },
+        "sair": {
+          "titulo": "¿Salir del equipo?",
+          "mensagem": "Usted deja de acceder al portal de esta empresa de inmediato. Para volver, necesitará una invitación nueva.",
+          "botao": "Salir del equipo"
+        },
+        "dono": {
+          "titulo": "¿Hacer dueño a {nome}?",
+          "mensagem": "Quien es dueño invita y quita personas, administra la billetera y la clave PIX y pide retiros.",
+          "botao": "Hacer dueño"
+        },
+        "operador": {
+          "titulo": "¿Hacer operador a {nome}?",
+          "mensagem": "{nome} sigue acompañando la alianza, pero deja de cambiar el equipo y la billetera.",
+          "botao": "Hacer operador"
+        },
+        "cancelarConvite": {
+          "titulo": "¿Cancelar la invitación para {email}?",
+          "mensagem": "El enlace enviado a ese correo deja de funcionar.",
+          "botao": "Cancelar invitación"
+        }
+      },
+      "toast": {
+        "convidado": "Invitación enviada",
+        "convidadoDetalhe": "El enlace se envió a {email} y vale por 14 días.",
+        "reenviado": "Invitación reenviada",
+        "reenviadoDetalhe": "El enlace anterior dejó de valer.",
+        "cancelado": "Invitación cancelada",
+        "papelTrocado": "Rol actualizado",
+        "papelTrocadoDetalhe": "{nome} ahora es {papel}.",
+        "removido": "Persona quitada del equipo",
+        "saiu": "Usted salió del equipo",
+        "erro": "No funcionó"
+      },
+      "gaveta": {
+        "titulo": "Invitar al equipo",
+        "email": "Correo electrónico",
+        "emailDica": "Puede ser de alguien que aún no tiene cuenta en PetJourney.",
+        "emailInvalido": "Revise el correo electrónico.",
+        "papel": "Rol",
+        "comoFunciona": "La persona recibe un enlace por correo y acepta desde él. El enlace vale por 14 días.",
+        "enviar": "Enviar invitación",
+        "cancelar": "Cancelar",
+        "reenviarPendente": "Reenviar la invitación pendiente"
+      }
     }
   },
   "settings": {

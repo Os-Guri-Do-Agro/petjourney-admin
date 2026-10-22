@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import {
   aplicarParametroDaUrl,
   PARAMETRO_DO_MODULO,
@@ -17,6 +16,7 @@ import { isAuthenticated } from '@/service/auth/auth-session'
 
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
+import { tirarTokenDoConvite } from './convite-da-equipe'
 import { routes } from './file-routes'
 import { moduloDaPaginaAberta } from './paginas-abertas'
 
@@ -32,9 +32,6 @@ const partnerLegacyRedirects: RouteRecordRaw[] = [
    * Redireciona em vez de sumir porque quem tem o link salvo merece cair na tela que funciona.
    */
   { path: '/veterinario/compartilhamentos', redirect: '/parceiro/acessos' },
-  ...(EQUIPE_MENU_ENABLED
-    ? []
-    : [{ path: '/parceiro/equipe', redirect: '/inicio' } satisfies RouteRecordRaw]),
   {
     path: '/parceiro/status',
     redirect: { path: '/settings', query: { aba: 'empresa' } },
@@ -68,6 +65,7 @@ const router = createRouter({
 
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
 
+
 function getSafeRedirectPath(redirect: unknown) {
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
     if (redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario') {
@@ -83,6 +81,13 @@ function getSafeRedirectPath(redirect: unknown) {
 router.beforeEach((to) => {
   const hasActiveSession = isAuthenticated()
   const isPublicRoute = publicRoutes.has(to.path)
+
+  /* O token do convite para a equipe sai da URL antes de qualquer outra decisão. */
+  const semToken = tirarTokenDoConvite(to)
+
+  if (semToken) {
+    return semToken
+  }
 
   /*
    * O interruptor oculto do módulo clínico.

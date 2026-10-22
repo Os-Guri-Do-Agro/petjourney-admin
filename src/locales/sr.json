@@ -440,7 +440,8 @@
       "ctaPrograms": "Registrujte firmu",
       "ctaSettings": "Idite na podešavanja",
       "retry": "Proverite ponovo",
-      "contactLabel": "Pitanja:"
+      "contactLabel": "Pitanja:",
+      "ctaConvites": "Pogledajte svoje pozive"
     },
     "accessRevoked": {
       "title": "Vaš pristup portalu je okončan",
@@ -2021,25 +2022,116 @@
       }
     },
     "convite": {
-      "subtitle": "Tim",
-      "title": "Prihvatite poziv",
-      "body": "Pozvani ste u tim partnerske firme portala PetJourney. Unesite identifikator iz imejla ili otvorite kompletan link poziva.",
-      "idLabel": "ID partnera",
-      "idHint": "Obavezno. Nalazi se u linku kao ?parceiroId=...",
-      "idPlaceholder": "cuid-firme",
-      "accept": "Prihvatite poziv",
-      "footnote": "Nakon prihvatanja radite na portalu sa ulogom koju je odredio vlasnik firme.",
-      "toast": {
-        "warnTitle": "Navedite firmu",
-        "warnDetail": "Link poziva mora da sadrži identifikator partnera.",
-        "success": "Poziv je prihvaćen",
-        "successDetail": "Sada možete da pristupite portalu firme.",
-        "error": "Prihvatanje nije uspelo",
-        "errorDetail": "Proverite link ili pokušajte ponovo."
+      "title": "Poziv u tim",
+      "link": {
+        "corpo": "Dobili ste poziv u tim partnerske firme PetJourney. Kada prihvatite, možete da koristite njen portal.",
+        "aceitar": "Prihvatite poziv",
+        "recusar": "Odbijte",
+        "semSessao": "Prijavite se da biste prihvatili. Ako još nemate nalog, napravite ga: poziv vas čeka."
+      },
+      "recusado": {
+        "titulo": "Poziv je odbijen",
+        "corpo": "Ako se predomislite, zatražite novi poziv od osobe koja vas je pozvala."
+      },
+      "aceito": "Poziv je prihvaćen",
+      "aceitoDetalhe": "Sada ste deo tima.",
+      "naoVale": "Ovaj poziv više ne važi",
+      "irParaPortal": "Idite na portal",
+      "caixa": {
+        "titulo": "Vaši pozivi",
+        "vazio": "Nema poziva na čekanju",
+        "vazioDica": "Poziv stiže e-poštom, sa linkom za prihvatanje.",
+        "deQuem": "Osoba {nome} vas je pozvala u ulozi: {papel}.",
+        "semNome": "Poziv u ulozi: {papel}.",
+        "abraOEmail": "Da biste prihvatili, otvorite link koji smo vam poslali e-poštom.",
+        "validoAte": "Važi do {data}",
+        "aceitar": "Prihvatite",
+        "recusar": "Odbijte",
+        "erroCarregar": "Vaše pozive nije moguće učitati."
       }
     },
     "equipe": {
-      "titulo": "Tim"
+      "titulo": "Tim",
+      "resumo": "Ko sa vama vodi partnerstvo i šta svaka osoba može da radi.",
+      "convidar": "Pozovite osobu",
+      "pessoas": "Osobe",
+      "voce": "Vi",
+      "desde": "U timu od {data}",
+      "convidadoPor": "poziv od: {nome}",
+      "papel": {
+        "DONO": "Vlasnik",
+        "OPERADOR": "Operater"
+      },
+      "papelDica": {
+        "DONO": "Radi sve: poziva i uklanja osobe, upravlja novčanikom, PIX ključem i isplatama.",
+        "OPERADOR": "Prati partnerstvo i obavlja svakodnevni rad. Ne menja tim ni novčanik."
+      },
+      "maisAcoes": "Radnje za: {nome}",
+      "tornarDono": "Postavite za vlasnika",
+      "tornarOperador": "Postavite za operatera",
+      "remover": "Uklonite iz tima",
+      "sair": "Napustite tim",
+      "soDono": "Samo vlasnik poziva osobe, menja uloge i uklanja nekoga iz tima.",
+      "erroCarregar": "Tim nije moguće učitati.",
+      "convites": {
+        "titulo": "Pozivi na čekanju",
+        "validoAte": "Važi do {data}",
+        "antigo": "Stari poziv, bez roka",
+        "enviadoEm": "Poslato {data}",
+        "reenviar": "Pošaljite ponovo",
+        "cancelar": "Otkažite"
+      },
+      "confirmar": {
+        "voltar": "Nazad",
+        "remover": {
+          "titulo": "Ukloniti osobu {nome} iz tima?",
+          "mensagem": "Osoba {nome} odmah gubi pristup portalu ove firme. Za povratak je potreban novi poziv.",
+          "botao": "Uklonite"
+        },
+        "sair": {
+          "titulo": "Napustiti tim?",
+          "mensagem": "Odmah gubite pristup portalu ove firme. Za povratak je potreban novi poziv.",
+          "botao": "Napustite tim"
+        },
+        "dono": {
+          "titulo": "Postaviti osobu {nome} za vlasnika?",
+          "mensagem": "Vlasnik poziva i uklanja osobe, upravlja novčanikom i PIX ključem i traži isplate.",
+          "botao": "Postavite za vlasnika"
+        },
+        "operador": {
+          "titulo": "Postaviti osobu {nome} za operatera?",
+          "mensagem": "Osoba {nome} i dalje prati partnerstvo, ali više ne menja tim ni novčanik.",
+          "botao": "Postavite za operatera"
+        },
+        "cancelarConvite": {
+          "titulo": "Otkazati poziv za {email}?",
+          "mensagem": "Link poslat na tu adresu prestaje da radi.",
+          "botao": "Otkažite poziv"
+        }
+      },
+      "toast": {
+        "convidado": "Poziv je poslat",
+        "convidadoDetalhe": "Link je poslat na {email} i važi 14 dana.",
+        "reenviado": "Poziv je ponovo poslat",
+        "reenviadoDetalhe": "Prethodni link više ne važi.",
+        "cancelado": "Poziv je otkazan",
+        "papelTrocado": "Uloga je ažurirana",
+        "papelTrocadoDetalhe": "Uloga osobe {nome} sada je: {papel}.",
+        "removido": "Osoba je uklonjena iz tima",
+        "saiu": "Napustili ste tim",
+        "erro": "Nije uspelo"
+      },
+      "gaveta": {
+        "titulo": "Pozovite u tim",
+        "email": "E-adresa",
+        "emailDica": "Može biti adresa nekoga ko još nema PetJourney nalog.",
+        "emailInvalido": "Proverite e-adresu.",
+        "papel": "Uloga",
+        "comoFunciona": "Osoba dobija link e-poštom i prihvata poziv preko njega. Link važi 14 dana.",
+        "enviar": "Pošaljite poziv",
+        "cancelar": "Otkažite",
+        "reenviarPendente": "Ponovo pošaljite poziv na čekanju"
+      }
     }
   },
   "settings": {

@@ -50,3 +50,4 @@ Ondas 0, 1 e 2 commitadas no `develop` da API (`32da074`, `6a234fc`, `6dd3f7e`).
 - `epicos/`: o guarda-chuva e um épico por área, com as decisões de cada uma.
 - `specs/`: uma spec por parte da API, na mesma árvore de `docs/specs/2026/q4/q4-1/portal-parceiro/` da API.
 - [cronograma-de-execucao.md](cronograma-de-execucao.md): janelas previstas de cada spec e dos gates.
+- [lacunas-da-api.md](lacunas-da-api.md): o que faltou ou divergiu na API, achado durante a integração.
