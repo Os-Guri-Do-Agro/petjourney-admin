@@ -97,7 +97,7 @@ const retorno = computed(() => props.encounter.conduta.retorno.emDias)
         <li v-for="item in medicacoes" :key="item.id">
           <span class="marca" aria-hidden="true" />
           <span>
-            <strong>{{ item.nome }}</strong> — {{ item.quantidade }}, {{ item.frequencia }}
+            <strong>{{ item.nome }}:</strong> {{ item.quantidade }}, {{ item.frequencia }}
             <template v-if="item.duracao !== null">
               , {{ t('clinico.prontuario.conduta.porDias', { dias: item.duracao }, item.duracao) }}
             </template>

@@ -111,7 +111,7 @@ const itens = computed(() => {
 
     <section class="bloco">
       <h2>{{ t('clinico.documentos.relatorioPlano.quadro') }}</h2>
-      <p>{{ encounter.anamnese.queixaPrincipal || '—' }}</p>
+      <p>{{ encounter.anamnese.queixaPrincipal || '-' }}</p>
       <p v-if="encounter.anamnese.duracaoSintomas">
         {{ t('clinico.prontuario.anamnese.duracaoSintomas') }}:
         {{ encounter.anamnese.duracaoSintomas }}
@@ -131,7 +131,7 @@ const itens = computed(() => {
       <h2>{{ t('clinico.prontuario.diagnostico.titulo') }}</h2>
       <ul class="lista">
         <li v-for="item in diagnosticos" :key="item.id">
-          <strong>{{ item.codigo }}</strong> — {{ item.texto }}
+          <strong>{{ item.codigo }}:</strong> {{ item.texto }}
         </li>
       </ul>
     </section>

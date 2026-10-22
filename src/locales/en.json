@@ -2529,7 +2529,7 @@
       "anos": "{valor} year | {valor} years",
       "meses": "{valor} month | {valor} months",
       "anosMeses": "{anos}y {meses}m",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} day | {valor} days",
       "idadeDesconhecida": "age unknown",
       "kg": "kg"
@@ -2595,7 +2595,7 @@
       "risco": "Risk"
     },
     "conflitos": {
-      "professional-overlap": "Overlaps {paciente}, from {hora} — {minutos} min in common.",
+      "professional-overlap": "Overlaps {paciente}, from {hora}: {minutos} min in common.",
       "room-overlap": "Room {sala} is already taken by {paciente} at that time.",
       "pet-double-book": "{paciente} already has an appointment at {hora}.",
       "block-invasion": "Runs into a {motivo} block for {minutos} min.",
@@ -2630,7 +2630,7 @@
         "email": "Email (optional)",
         "salvar": "Register and use",
         "erro": "The patient could not be registered.",
-        "ajudaCompleta": "The full record. Only name and owner are required — the rest goes in when it exists.",
+        "ajudaCompleta": "The full record. Only name and owner are required. The rest goes in when it exists.",
         "pesoDica": "From the scale. Dosing is calculated from it.",
         "identificacao": "Identification",
         "microchip": "Microchip",
@@ -2660,7 +2660,7 @@
           "nome": "same name"
         },
         "telefoneSecundario": "Secondary phone (optional)",
-        "telefoneSecundarioDica": "For when the first one does not answer — hospitalization depends on it.",
+        "telefoneSecundarioDica": "For when the first one does not answer. Hospitalization depends on it.",
         "canalPreferido": "Contact by",
         "canalDica": "How the clinic sends notices and status updates.",
         "canal": {
@@ -2772,7 +2772,7 @@
           "dose": "Dose",
           "doseDica": "As it was administered.",
           "quando": "When it happened",
-          "quandoDica": "Not the time it was entered — the time of the act.",
+          "quandoDica": "Not the time it was entered, but the time of the act.",
           "quem": "Who performed it",
           "quemDica": "Left blank: the clinic did not witness it, and the record will say so.",
           "quemNinguem": "Nobody from the clinic",
@@ -3179,10 +3179,10 @@
         "alergia": "Recorded allergy: {detalhe}"
       },
       "cuidado": {
-        "gestante": "Pregnant patient — this active ingredient needs caution.",
-        "lactante": "Nursing patient — this active ingredient needs caution.",
-        "filhote": "Young patient — this active ingredient needs caution.",
-        "idoso": "Senior patient — this active ingredient needs caution.",
+        "gestante": "Pregnant patient: this active ingredient needs caution.",
+        "lactante": "Nursing patient: this active ingredient needs caution.",
+        "filhote": "Young patient: this active ingredient needs caution.",
+        "idoso": "Senior patient: this active ingredient needs caution.",
         "renal": "Recorded kidney condition: {detalhe}",
         "hepatico": "Recorded liver condition: {detalhe}",
         "cardiaco": "Recorded heart condition: {detalhe}",
@@ -3288,8 +3288,8 @@
         "usoRotulo": "Use:",
         "quantidadeTotal": "Amount to dispense: {valor} {unidade}",
         "via": {
-          "primeira": "Copy 1 — retained by the pharmacy",
-          "segunda": "Copy 2 — owner instructions"
+          "primeira": "Copy 1: retained by the pharmacy",
+          "segunda": "Copy 2: owner instructions"
         },
         "avisoControle": "Controlled-substance prescription in duplicate, per applicable regulation.",
         "comprador": "Buyer identification",
@@ -3317,8 +3317,8 @@
         "viagem": {
           "titulo": "Health certificate for travel",
           "corpo": "I certify that the animal {paciente}, species {especie}, was examined on this date ({data}) and showed no clinical signs of infectious disease, being fit for transport.",
-          "antirrabica": "Rabies vaccine — date and batch",
-          "vermifugacao": "Deworming — date and product",
+          "antirrabica": "Rabies vaccine: date and batch",
+          "vermifugacao": "Deworming: date and product",
           "validade": "Validity required by destination"
         }
       },
@@ -3374,7 +3374,7 @@
         },
         "eutanasia": {
           "titulo": "Euthanasia authorisation form",
-          "carimbo": "Authorisation document — requires the owner’s signature",
+          "carimbo": "Authorisation document: requires the owner’s signature",
           "declaracao": "I, {responsavel}, responsible for the animal {paciente}, declare that I have been informed about the clinical condition of {objeto}, about the prognosis presented and about the treatment and palliative care alternatives, and I authorise euthanasia.",
           "itensTitulo": "I declare that I understand that",
           "itens": "Euthanasia is an irreversible act.|I was informed of the available alternatives, including palliative care.|The decision was made by me, without coercion, after being informed.|I am the legal guardian of the animal identified in this document.",
@@ -3411,7 +3411,7 @@
       },
       "orcamento": {
         "titulo": "Estimate",
-        "carimbo": "Estimate — not an authorisation to proceed",
+        "carimbo": "Estimate: not an authorisation to proceed",
         "consulta": "Consultation",
         "item": "Item",
         "grupoColuna": "Type",
@@ -3537,7 +3537,7 @@
         "titulo": "Reschedule",
         "confirmar": "Reschedule and notify",
         "faltouEm": "No-show on {data} at {hora}",
-        "mensagemPadrao": "Hello! We missed {paciente} today. We have a new slot on {data} at {hora} — shall we confirm?"
+        "mensagemPadrao": "Hello! We missed {paciente} today. We have a new slot on {data} at {hora}. Shall we confirm?"
       },
       "historico": {
         "titulo": "No-shows for {nome}",
@@ -3782,7 +3782,7 @@
         "frequencia": "Frequency (h)",
         "duracao": "Duration (days)",
         "observacao": "Note",
-        "resumoDose": "{quantidade} {unidade} ({mg} mg) every {frequencia} h for {duracao} days — {total} doses.",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) every {frequencia} h for {duracao} days, {total} doses.",
         "semPeso": "Without the patient's weight the dose is not calculated.",
         "avisoDose": {
           "abaixo-da-usual": "Below the usual dose ({min}–{max} mg/kg).",
@@ -3877,7 +3877,7 @@
       "imprimir": "Save as PDF",
       "impressao": {
         "titulo": "Clinical record",
-        "dica": "Opens the browser print dialog — choose \"Save as PDF\" as the destination.",
+        "dica": "Opens the browser print dialog. Choose \"Save as PDF\" as the destination.",
         "paciente": "Patient",
         "documento": "ID",
         "valor": "Value",
@@ -3904,7 +3904,7 @@
         "titulo": "Answered in the app",
         "origem": "By the owner, {quando}",
         "aplicar": "Use answers",
-        "pesoInformado": "Weight reported at home: {valor} — confirm on the scale"
+        "pesoInformado": "Weight reported at home: {valor}. Confirm on the scale"
       },
       "teclado": {
         "titulo": "Record shortcuts",
@@ -4669,7 +4669,7 @@
         "por": "by {nome} at {hora}",
         "atrasoMinutos": "{minutos} min late",
         "conferencia": "pump check",
-        "naTroca": "Falls on the shift handover — agree who gives it before handing over.",
+        "naTroca": "Falls on the shift handover. Agree who gives it before handing over.",
         "checar": "Record",
         "antesDaHora": "Due at {hora}. Record it now anyway?",
         "registrarAgora": "Record now",
@@ -4682,7 +4682,7 @@
         "jaRegistrada": "Already recorded this shift",
         "turnoAnterior": "Previous shift",
         "observado": "What was observed",
-        "observadoDica": "Ate, urinated, slept — this is what the owner wants to hear.",
+        "observadoDica": "Ate, urinated, slept: this is what the owner wants to hear.",
         "avaliacao": "Clinical assessment",
         "plano": "Plan",
         "planoDica": "What the next shift needs to do.",
@@ -4698,7 +4698,7 @@
       "boletim": {
         "retidoTitulo": "Update on hold",
         "retidoRegra": "The patient has deteriorated. This update is only sent after someone from the clinic speaks to the owner by phone.",
-        "ligacaoPendente": "Call {nome} — {telefone}",
+        "ligacaoPendente": "Call {nome}, {telefone}",
         "ligacaoFeita": "Called by {nome} at {hora}",
         "registrarLigacao": "Record the call",
         "enviar": "Send to owner",
@@ -4740,7 +4740,7 @@
       "passagem": {
         "titulo": "Shift handover",
         "emCimaDaTroca": "On the handover",
-        "emCimaDaTrocaAjuda": "These doses fall on the minute of the handover. Tick each one after agreeing who gives it — the outgoing or the incoming nurse.",
+        "emCimaDaTrocaAjuda": "These doses fall on the minute of the handover. Tick each one after agreeing who gives it: the outgoing or the incoming nurse.",
         "atrasadas": "Not closed this shift",
         "semEvolucao": "No progress note recorded",
         "abrir": "Open",
@@ -4840,7 +4840,7 @@
         "via": "Route",
         "frequencia": "Frequency",
         "aCada": "Every {horas} h",
-        "continuo": "Continuous — check every {horas} h",
+        "continuo": "Continuous: check every {horas} h",
         "primeira": "First administration in",
         "primeiraDica": "How many hours from now.",
         "criar": "Prescribe",
@@ -4853,9 +4853,9 @@
         "confirmarSuspensao": "Stop",
         "cancelar": "Cancel",
         "suspensasTitulo": "Stopped",
-        "suspensaEm": "Stopped at {hora} — {motivo}",
+        "suspensaEm": "Stopped at {hora}, {motivo}",
         "descricaoExemplo": "Check temperature, HR and RR",
-        "doseExemplo": "25 mg/kg — 1.6 mL",
+        "doseExemplo": "25 mg/kg, 1.6 mL",
         "motivoExemplo": "Switching to the intravenous route.",
         "escolhaMedicamento": "Pick from the formulary",
         "buscarMedicamento": "Search by name"
@@ -4911,7 +4911,7 @@
         },
         "recusa": {
           "ocupado": "There is a patient in this bed. Transfer or discharge before taking it out of service.",
-          "tem-historico": "This bed has already held patients and cannot be deleted — take it out of service.",
+          "tem-historico": "This bed has already held patients and cannot be deleted. Take it out of service.",
           "nome-repetido": "A bed with that name already exists.",
           "sem-nome": "Give the bed a name."
         },
@@ -6020,7 +6020,7 @@
         "vazio": "Nothing to buy for {mes}: the fridge covers the targets and the minimum.",
         "total": "{doses} · {valor} estimated",
         "semFornecedor": "No supplier",
-        "cabecalhoTexto": "Vaccine order — {mes}",
+        "cabecalhoTexto": "Vaccine order: {mes}",
         "linhaTexto": "• {vacina}: {doses}",
         "totalTexto": "Estimated total: {valor}"
       },
@@ -6151,7 +6151,7 @@
       "respondido": {
         "aceito": "Booked: {quando} with {profissional}",
         "automatico": "Auto-accepted: {quando} with {profissional}",
-        "recusado": "Declined — {motivo}",
+        "recusado": "Declined: {motivo}",
         "desistiu": "The pet parent withdrew",
         "expirado": "Deadline passed with no reply",
         "pendente": "Awaiting a reply"
@@ -6178,7 +6178,7 @@
           "outro": "Other"
         },
         "mensagem": {
-          "sem-horario": "Hi, {nome}! We don't have a slot in that period for {pets}. If another day works for you, request again — or call {telefone} and we'll fit you in.",
+          "sem-horario": "Hi, {nome}! We don't have a slot in that period for {pets}. If another day works for you, request again, or call {telefone} and we'll fit you in.",
           "precisa-avaliar": "Hi, {nome}! For {pets}, we need to talk before booking. Could you call {telefone}? It'll only take a minute.",
           "servico-indisponivel": "Hi, {nome}! That service isn't available right now. Call {telefone} and we'll suggest the best option for {pets}.",
           "emergencia": "Hi, {nome}! From what you told us, {pets} needs to be seen now. Come straight in or call {telefone} on the way.",
@@ -6391,7 +6391,7 @@
         "seguidosPara": "back-to-back slots for {nomes}",
         "dias": "Days",
         "procurando": "Looking for times…",
-        "horarioSumiu": "Someone requested the {hora} slot before you. It's been removed from the list — pick another one.",
+        "horarioSumiu": "Someone requested the {hora} slot before you. It's been removed from the list. Pick another one.",
         "reservaVenceu": "We held the slot for 5 minutes and the time ran out. Please choose again.",
         "fechadaFeriado": "The clinic is closed on this day ({feriado}).",
         "fechadaNoDia": "The clinic is closed on this day.",
@@ -6636,11 +6636,11 @@
       "viaAjuste": "Adjust house times",
       "viaAjusteDica": "change or suspend for this guest only",
       "viaCuidado": "Guest care",
-      "viaCuidadoDica": "dressing, compress, coat — no dose",
+      "viaCuidadoDica": "no dose: dressing, compress, coat",
       "viaMedicacao": "Medication",
       "viaMedicacaoDica": "a drug with dose and prescription",
       "viaServico": "Extra service",
-      "viaServicoDica": "bath, grooming, walk — it gets charged"
+      "viaServicoDica": "goes on the bill: bath, grooming, walk"
     },
     "adaptacao": {
       "em-adaptacao": "Settling in",
@@ -7003,7 +7003,7 @@
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "House routine",
@@ -7333,8 +7333,8 @@
       "porqueMedicacao": "from the recorded prescription: {valor}",
       "porquePlano": "from the meal times on the record",
       "proponhoMudar": "I propose changing",
-      "recusaMedicacao": "Medication — I do not propose medicine or dose. The hotel does not prescribe.",
-      "recusaRefeicao": "Meals — changing a meal time is agreed with the owner.",
+      "recusaMedicacao": "Medication: I do not propose medicine or dose. The hotel does not prescribe.",
+      "recusaRefeicao": "Meals: changing a meal time is agreed with the owner.",
       "semMudancas": "Nothing to propose for this guest: the house routine already covers it.",
       "titulo": "Routine proposal",
       "transcrita": "transcribed"
@@ -7857,7 +7857,7 @@
           "titulo": "Ticking costs one tap"
         },
         "passagem": {
-          "texto": "At the foot of the clipboard: how many tasks stay for the next shift and what blocks handover. It shows from the start of the shift, not just at handover time — an incident without contact at 10pm can no longer be fixed.",
+          "texto": "At the foot of the clipboard: how many tasks stay for the next shift and what blocks handover. It shows from the start of the shift, not just at handover time. An incident without contact at 10pm can no longer be fixed.",
           "titulo": "The shift ends here"
         },
         "pergunta": {
@@ -7869,11 +7869,11 @@
           "titulo": "How much is done"
         },
         "ronda": {
-          "texto": "Tasks of the same service at the same hour become a round — \"Meal, 20 animals\". Short rounds open by default; long ones open with a tap. A whole round can be marked at once, except medication: that one is marked animal by animal.",
+          "texto": "Tasks of the same service at the same hour become a round: \"Meal, 20 animals\". Short rounds open by default; long ones open with a tap. A whole round can be marked at once, except medication: that one is marked animal by animal.",
           "titulo": "One round, not twenty lines"
         },
         "tempo": {
-          "texto": "Tasks group into rounds, and each round leads with its time. Anything overdue moves up to \"For now\", with the time in red — it never gets lost mid-list.",
+          "texto": "Tasks group into rounds, and each round leads with its time. Anything overdue moves up to \"For now\", with the time in red. It never gets lost mid-list.",
           "titulo": "Now, later, and what has passed"
         }
       },
@@ -7912,7 +7912,7 @@
         },
         "celular": {
           "titulo": "The other side",
-          "texto": "Open the phone and request the way a pet parent does — then watch the row arrive here, or the notification arrive there."
+          "texto": "Open the phone and request the way a pet parent does. Then watch the row arrive here, or the notification arrive there."
         }
       }
     },
@@ -8000,7 +8000,7 @@
       "escolheuTipo": "Chose: {tipo}",
       "hotelEscolhe": "Asked the hotel to choose the room",
       "aceitaMudar": "open to shifting a day",
-      "mesmaAcomodacao": "In the same room — they live together",
+      "mesmaAcomodacao": "In the same room: they live together",
       "semVagaNoTipo": "No {tipo} left after earlier requests",
       "semSugestao": "No suitable room free",
       "prazo": {
@@ -8020,7 +8020,7 @@
       },
       "respondido": {
         "aceito": "Booked: {acomodacao} · {valor}",
-        "recusado": "Declined — {motivo}",
+        "recusado": "Declined: {motivo}",
         "desistiu": "The pet parent withdrew",
         "expirado": "Deadline passed with no reply",
         "pendente": "Awaiting a reply"
@@ -8044,7 +8044,7 @@
           "outro": "Other"
         },
         "mensagem": {
-          "sem-vaga": "Hi, {nome}! We're fully booked on those dates for {nomes}. If you can change the dates, request again — or call {telefone} and we'll put you on the waiting list.",
+          "sem-vaga": "Hi, {nome}! We're fully booked on those dates for {nomes}. If you can change the dates, request again, or call {telefone} and we'll put you on the waiting list.",
           "exigencias": "Hi, {nome}! To welcome {nomes}, the vaccination card must be up to date at check-in. Once the doses are up to date, just request again. Questions: {telefone}.",
           "perfil": "Hi, {nome}! From what you told us, we're not the best place for {nomes}. Call {telefone} and we'll point you in the right direction.",
           "outro": "Hi, {nome}! We couldn't book a stay for {nomes}."
@@ -8088,7 +8088,7 @@
         "outroPedido": "Make another request",
         "situacao": {
           "AGUARDANDO_HOTEL": "Waiting for the hotel to reply",
-          "ACEITO": "Booked — deposit still due",
+          "ACEITO": "Booked, deposit still due",
           "RECUSADO": "The hotel couldn't book it",
           "CANCELADO_PELO_RESPONSAVEL": "You withdrew this request",
           "EXPIRADO": "The request expired"
@@ -8156,7 +8156,7 @@
         "pedirDeNovo": "Request other dates",
         "pedirHospedagem": "Request a stay",
         "paraHoje": "Is it for today or tomorrow?",
-        "petsAjuda": "Choose one, or two from the same home — they stay together in the same room.",
+        "petsAjuda": "Choose one, or two from the same home: they stay together in the same room.",
         "faltaPorte": "Size missing",
         "hospedadoAgora": "Staying here now",
         "primeiraEstadia": "First stay here",

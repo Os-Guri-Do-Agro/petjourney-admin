@@ -211,8 +211,8 @@ const mudancas = computed(() => {
     linhas.push({
       chave: 'tipo',
       rotulo: t('clinico.agenda.criar.tipo'),
-      de: clinico.tipo(appointment.typeId)?.nome ?? '—',
-      para: tipo.value?.nome ?? '—',
+      de: clinico.tipo(appointment.typeId)?.nome ?? '-',
+      para: tipo.value?.nome ?? '-',
     })
   }
 
@@ -229,10 +229,10 @@ const mudancas = computed(() => {
     linhas.push({
       chave: 'profissional',
       rotulo: t('clinico.agenda.mover.profissional'),
-      de: clinico.profissional(appointment.professionalId)?.nome ?? '—',
+      de: clinico.profissional(appointment.professionalId)?.nome ?? '-',
       para: professionalId.value
-        ? (clinico.profissional(professionalId.value)?.nome ?? '—')
-        : '—',
+        ? (clinico.profissional(professionalId.value)?.nome ?? '-')
+        : '-',
     })
   }
 
@@ -250,8 +250,8 @@ const mudancas = computed(() => {
     linhas.push({
       chave: 'observacao',
       rotulo: t('clinico.prontuario.conduta.observacao'),
-      de: appointment.observacao?.trim() || '—',
-      para: observacao.value.trim() || '—',
+      de: appointment.observacao?.trim() || '-',
+      para: observacao.value.trim() || '-',
     })
   }
 

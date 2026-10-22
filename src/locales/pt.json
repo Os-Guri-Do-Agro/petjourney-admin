@@ -2529,7 +2529,7 @@
       "anos": "{valor} ano | {valor} anos",
       "meses": "{valor} mês | {valor} meses",
       "anosMeses": "{anos}a {meses}m",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} dia | {valor} dias",
       "idadeDesconhecida": "idade não informada",
       "kg": "kg"
@@ -2595,7 +2595,7 @@
       "risco": "Risco"
     },
     "conflitos": {
-      "professional-overlap": "Sobrepõe {paciente}, das {hora} — {minutos} min em comum.",
+      "professional-overlap": "Sobrepõe {paciente}, das {hora}: {minutos} min em comum.",
       "room-overlap": "A sala {sala} já está ocupada por {paciente} neste horário.",
       "pet-double-book": "{paciente} já tem atendimento marcado às {hora}.",
       "block-invasion": "Invade um bloqueio de {motivo} por {minutos} min.",
@@ -2630,7 +2630,7 @@
         "email": "E-mail (opcional)",
         "salvar": "Cadastrar e usar",
         "erro": "Não foi possível cadastrar o paciente.",
-        "ajudaCompleta": "A ficha inteira. Só nome e responsável são obrigatórios — o resto entra quando existe.",
+        "ajudaCompleta": "A ficha inteira. Só nome e responsável são obrigatórios. O resto entra quando existe.",
         "pesoDica": "O da balança. A dose do bulário sai daqui.",
         "identificacao": "Identificação",
         "microchip": "Microchip",
@@ -2660,7 +2660,7 @@
           "nome": "mesmo nome"
         },
         "telefoneSecundario": "Telefone secundário (opcional)",
-        "telefoneSecundarioDica": "Para quando o primeiro não atende — a internação depende disso.",
+        "telefoneSecundarioDica": "Para quando o primeiro não atende. A internação depende disso.",
         "canalPreferido": "Falar por",
         "canalDica": "Por onde a clínica avisa e manda boletim.",
         "canal": {
@@ -2772,7 +2772,7 @@
           "dose": "Dose",
           "doseDica": "Como foi administrada.",
           "quando": "Quando aconteceu",
-          "quandoDica": "Não é a hora do lançamento — é a hora do ato.",
+          "quandoDica": "Não é a hora do lançamento, é a hora do ato.",
           "quem": "Quem executou",
           "quemDica": "Em branco: a clínica não presenciou, e o registro dirá isso.",
           "quemNinguem": "Ninguém da clínica",
@@ -3179,10 +3179,10 @@
         "alergia": "Alergia registrada: {detalhe}"
       },
       "cuidado": {
-        "gestante": "Paciente gestante — este princípio ativo pede cautela.",
-        "lactante": "Paciente lactante — este princípio ativo pede cautela.",
-        "filhote": "Paciente filhote — este princípio ativo pede cautela.",
-        "idoso": "Paciente idoso — este princípio ativo pede cautela.",
+        "gestante": "Paciente gestante: este princípio ativo pede cautela.",
+        "lactante": "Paciente lactante: este princípio ativo pede cautela.",
+        "filhote": "Paciente filhote: este princípio ativo pede cautela.",
+        "idoso": "Paciente idoso: este princípio ativo pede cautela.",
         "renal": "Condição renal registrada: {detalhe}",
         "hepatico": "Condição hepática registrada: {detalhe}",
         "cardiaco": "Condição cardíaca registrada: {detalhe}",
@@ -3288,8 +3288,8 @@
         "usoRotulo": "Uso:",
         "quantidadeTotal": "Quantidade a dispensar: {valor} {unidade}",
         "via": {
-          "primeira": "1ª via — retenção da farmácia",
-          "segunda": "2ª via — orientação ao responsável"
+          "primeira": "1ª via: retenção da farmácia",
+          "segunda": "2ª via: orientação ao responsável"
         },
         "avisoControle": "Receituário de controle especial em duas vias, conforme Portaria SVS/MS 344/98.",
         "comprador": "Identificação do comprador",
@@ -3317,8 +3317,8 @@
         "viagem": {
           "titulo": "Atestado de saúde para viagem",
           "corpo": "Atesto que o animal {paciente}, da espécie {especie}, foi examinado nesta data ({data}) e não apresentou sinais clínicos de doença infectocontagiosa, encontrando-se apto ao transporte.",
-          "antirrabica": "Vacina antirrábica — data e lote",
-          "vermifugacao": "Vermifugação — data e produto",
+          "antirrabica": "Vacina antirrábica: data e lote",
+          "vermifugacao": "Vermifugação: data e produto",
           "validade": "Validade exigida pelo destino"
         }
       },
@@ -3374,7 +3374,7 @@
         },
         "eutanasia": {
           "titulo": "Termo de autorização para eutanásia",
-          "carimbo": "Documento de autorização — exige assinatura do responsável",
+          "carimbo": "Documento de autorização: exige assinatura do responsável",
           "declaracao": "Eu, {responsavel}, responsável pelo animal {paciente}, declaro que fui esclarecido(a) sobre o quadro clínico de {objeto}, sobre o prognóstico apresentado e sobre as alternativas de tratamento e de cuidados paliativos, e autorizo a realização da eutanásia.",
           "itensTitulo": "Declaro estar ciente de que",
           "itens": "A eutanásia é ato irreversível.|Fui informado(a) das alternativas existentes, incluindo cuidados paliativos.|A decisão foi tomada por mim, sem coação, após esclarecimento.|Sou o(a) responsável legal pelo animal identificado neste documento.",
@@ -3411,7 +3411,7 @@
       },
       "orcamento": {
         "titulo": "Orçamento",
-        "carimbo": "Orçamento — não é autorização de procedimento",
+        "carimbo": "Orçamento: não é autorização de procedimento",
         "consulta": "Consulta",
         "item": "Item",
         "grupoColuna": "Tipo",
@@ -3537,7 +3537,7 @@
         "titulo": "Reagendar",
         "confirmar": "Reagendar e avisar",
         "faltouEm": "Faltou em {data} às {hora}",
-        "mensagemPadrao": "Olá! Sentimos falta de {paciente} hoje. Conseguimos um novo horário em {data} às {hora} — podemos confirmar?"
+        "mensagemPadrao": "Olá! Sentimos falta de {paciente} hoje. Conseguimos um novo horário em {data} às {hora}. Podemos confirmar?"
       },
       "historico": {
         "titulo": "Faltas de {nome}",
@@ -3782,7 +3782,7 @@
         "frequencia": "Frequência (h)",
         "duracao": "Duração (dias)",
         "observacao": "Observação",
-        "resumoDose": "{quantidade} {unidade} ({mg} mg) a cada {frequencia} h por {duracao} dias — {total} administrações.",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) a cada {frequencia} h por {duracao} dias, {total} administrações.",
         "semPeso": "Sem o peso do paciente a dose não é calculada.",
         "avisoDose": {
           "abaixo-da-usual": "Abaixo da dose usual ({min}–{max} mg/kg).",
@@ -3877,7 +3877,7 @@
       "imprimir": "Salvar em PDF",
       "impressao": {
         "titulo": "Prontuário clínico",
-        "dica": "Abre a impressão do navegador — escolha \"Salvar como PDF\" no destino.",
+        "dica": "Abre a impressão do navegador. Escolha \"Salvar como PDF\" no destino.",
         "paciente": "Paciente",
         "documento": "Documento",
         "valor": "Valor",
@@ -3904,7 +3904,7 @@
         "titulo": "Respondido no app",
         "origem": "Pelo responsável, {quando}",
         "aplicar": "Usar respostas",
-        "pesoInformado": "Peso informado em casa: {valor} — confirme na balança"
+        "pesoInformado": "Peso informado em casa: {valor}. Confirme na balança"
       },
       "teclado": {
         "titulo": "Teclas do prontuário",
@@ -4669,7 +4669,7 @@
         "por": "por {nome} às {hora}",
         "atrasoMinutos": "{minutos} min de atraso",
         "conferencia": "conferência da bomba",
-        "naTroca": "Cai na troca de plantão — combine quem dá antes de passar o turno.",
+        "naTroca": "Cai na troca de plantão. Combine quem dá antes de passar o turno.",
         "checar": "Checar",
         "antesDaHora": "Prevista para {hora}. Registrar agora mesmo assim?",
         "registrarAgora": "Registrar agora",
@@ -4682,7 +4682,7 @@
         "jaRegistrada": "Já registrada neste turno",
         "turnoAnterior": "Turno anterior",
         "observado": "O que foi observado",
-        "observadoDica": "Comeu, urinou, dormiu — é isto que o responsável quer ouvir.",
+        "observadoDica": "Comeu, urinou, dormiu: é isto que o responsável quer ouvir.",
         "avaliacao": "Avaliação clínica",
         "plano": "Plano",
         "planoDica": "O que o próximo plantão precisa fazer.",
@@ -4698,7 +4698,7 @@
       "boletim": {
         "retidoTitulo": "Boletim retido",
         "retidoRegra": "O quadro piorou. Este boletim só é enviado depois que alguém da clínica falar com o responsável por telefone.",
-        "ligacaoPendente": "Ligar para {nome} — {telefone}",
+        "ligacaoPendente": "Ligar para {nome}, {telefone}",
         "ligacaoFeita": "Ligação feita por {nome} às {hora}",
         "registrarLigacao": "Registrar ligação",
         "enviar": "Enviar ao responsável",
@@ -4740,7 +4740,7 @@
       "passagem": {
         "titulo": "Passagem de plantão",
         "emCimaDaTroca": "Em cima da troca",
-        "emCimaDaTrocaAjuda": "Estas doses caem no minuto da passagem. Marque cada uma depois de combinar quem dá — quem sai ou quem entra.",
+        "emCimaDaTrocaAjuda": "Estas doses caem no minuto da passagem. Marque cada uma depois de combinar quem dá: quem sai ou quem entra.",
         "atrasadas": "Não fechadas neste turno",
         "semEvolucao": "Sem evolução registrada",
         "abrir": "Abrir",
@@ -4840,7 +4840,7 @@
         "via": "Via",
         "frequencia": "Frequência",
         "aCada": "A cada {horas} h",
-        "continuo": "Contínuo — conferir a cada {horas} h",
+        "continuo": "Contínuo: conferir a cada {horas} h",
         "primeira": "Primeira administração em",
         "primeiraDica": "Em quantas horas, a partir de agora.",
         "criar": "Prescrever",
@@ -4853,9 +4853,9 @@
         "confirmarSuspensao": "Suspender",
         "cancelar": "Cancelar",
         "suspensasTitulo": "Suspensas",
-        "suspensaEm": "Suspensa às {hora} — {motivo}",
+        "suspensaEm": "Suspensa às {hora}, {motivo}",
         "descricaoExemplo": "Aferir temperatura, FC e FR",
-        "doseExemplo": "25 mg/kg — 1,6 mL",
+        "doseExemplo": "25 mg/kg, 1,6 mL",
         "motivoExemplo": "Troca para via intravenosa.",
         "escolhaMedicamento": "Escolha no bulário",
         "buscarMedicamento": "Buscar por nome"
@@ -4911,7 +4911,7 @@
         },
         "recusa": {
           "ocupado": "Há um paciente neste leito. Transfira ou dê alta antes de tirá-lo de operação.",
-          "tem-historico": "Este leito já recebeu pacientes e não pode ser apagado — tire de operação.",
+          "tem-historico": "Este leito já recebeu pacientes e não pode ser apagado. Tire de operação.",
           "nome-repetido": "Já existe um leito com esse nome.",
           "sem-nome": "Dê um nome ao leito."
         },
@@ -6020,7 +6020,7 @@
         "vazio": "Nada a comprar para {mes}: a geladeira cobre as metas e o mínimo.",
         "total": "{doses} · {valor} estimados",
         "semFornecedor": "Sem fornecedor",
-        "cabecalhoTexto": "Pedido de vacinas — {mes}",
+        "cabecalhoTexto": "Pedido de vacinas: {mes}",
         "linhaTexto": "• {vacina}: {doses}",
         "totalTexto": "Total estimado: {valor}"
       },
@@ -6151,7 +6151,7 @@
       "respondido": {
         "aceito": "Marcado: {quando} com {profissional}",
         "automatico": "Aceito sozinho: {quando} com {profissional}",
-        "recusado": "Recusado — {motivo}",
+        "recusado": "Recusado: {motivo}",
         "desistiu": "O responsável desistiu",
         "expirado": "Perdeu o prazo sem resposta",
         "pendente": "Esperando resposta"
@@ -6178,7 +6178,7 @@
           "outro": "Outro"
         },
         "mensagem": {
-          "sem-horario": "Oi, {nome}! Não temos horário nesse período para {pets}. Se puder outro dia, peça de novo — ou ligue {telefone} que a gente encaixa.",
+          "sem-horario": "Oi, {nome}! Não temos horário nesse período para {pets}. Se puder outro dia, peça de novo, ou ligue {telefone} que a gente encaixa.",
           "precisa-avaliar": "Oi, {nome}! Para {pets}, precisamos conversar antes de marcar. Pode ligar {telefone}? É rapidinho.",
           "servico-indisponivel": "Oi, {nome}! Esse serviço está indisponível no momento. Ligue {telefone} que indicamos o melhor caminho para {pets}.",
           "emergencia": "Oi, {nome}! Pelo que você contou, {pets} precisa ser visto agora. Venha direto ou ligue {telefone} no caminho.",
@@ -6391,7 +6391,7 @@
         "seguidosPara": "horários seguidos para {nomes}",
         "dias": "Dias",
         "procurando": "Procurando horários…",
-        "horarioSumiu": "Alguém pediu o horário das {hora} antes de você. Ele saiu da lista — escolha outro.",
+        "horarioSumiu": "Alguém pediu o horário das {hora} antes de você. Ele saiu da lista. Escolha outro.",
         "reservaVenceu": "Seguramos o horário por 5 minutos e o tempo acabou. Escolha de novo.",
         "fechadaFeriado": "A clínica não abre neste dia ({feriado}).",
         "fechadaNoDia": "A clínica não abre neste dia.",
@@ -6636,11 +6636,11 @@
       "viaAjuste": "Ajustar horários da casa",
       "viaAjusteDica": "mudar ou suspender só para este hóspede",
       "viaCuidado": "Cuidado do hóspede",
-      "viaCuidadoDica": "curativo, compressa, casaco — sem dose",
+      "viaCuidadoDica": "sem dose: curativo, compressa, casaco",
       "viaMedicacao": "Medicação",
       "viaMedicacaoDica": "remédio com dose e receita",
       "viaServico": "Serviço extra",
-      "viaServicoDica": "banho, tosa, passeio — entra na conta"
+      "viaServicoDica": "entra na conta: banho, tosa, passeio"
     },
     "adaptacao": {
       "em-adaptacao": "Em adaptação",
@@ -6691,7 +6691,7 @@
       "removerRemedio": "Remover remédio",
       "restricoes": "Restrições",
       "titulo": "Check-in de {pet}",
-      "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar — e a conta continua cobrando.",
+      "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar, e a conta continua cobrando.",
       "veterinario": "Veterinário do pet",
       "via": "Via",
       "quemBusca": "Quem pode buscar {pet}",
@@ -7003,7 +7003,7 @@
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "Rotina padrão da casa",
@@ -7333,8 +7333,8 @@
       "porqueMedicacao": "da receita registrada: {valor}",
       "porquePlano": "dos horários de refeição da ficha",
       "proponhoMudar": "Proponho mudar",
-      "recusaMedicacao": "Medicação — não proponho remédio nem dose. O hotel não prescreve.",
-      "recusaRefeicao": "Refeição — mudar horário de refeição se combina com o responsável.",
+      "recusaMedicacao": "Medicação: não proponho remédio nem dose. O hotel não prescreve.",
+      "recusaRefeicao": "Refeição: mudar horário de refeição se combina com o responsável.",
       "semMudancas": "Nada a propor para este hóspede: a rotina da casa já dá conta.",
       "titulo": "Proposta de rotina",
       "transcrita": "transcrita"
@@ -7709,7 +7709,7 @@
           "titulo": "A ficha da estadia"
         },
         "ocorrencias": {
-          "texto": "Notícia ruim não vai por aplicativo. Uma ocorrência grave segura o boletim do responsável até alguém da casa ligar — e o botão de registrar a ligação está ali do lado.",
+          "texto": "Notícia ruim não vai por aplicativo. Uma ocorrência grave segura o boletim do responsável até alguém da casa ligar, e o botão de registrar a ligação está ali do lado.",
           "titulo": "Ocorrências e o boletim"
         },
         "pergunta": {
@@ -7799,13 +7799,13 @@
           "titulo": "A pergunta desta tela"
         },
         "periodo": {
-          "texto": "Entrada, saída, quantas diárias e em qual acomodação. Se a saída prevista passar do horário da casa, a meia diária já aparece no orçamento — não vira surpresa no balcão.",
+          "texto": "Entrada, saída, quantas diárias e em qual acomodação. Se a saída prevista passar do horário da casa, a meia diária já aparece no orçamento. Não vira surpresa no balcão.",
           "titulo": "O período e a conta"
         }
       },
       "reservas": {
         "espera": {
-          "texto": "A lista de espera fica no rodapé porque só é consultada quando uma reserva cai — e nesse momento você já está nesta tela.",
+          "texto": "A lista de espera fica no rodapé porque só é consultada quando uma reserva cai, e nesse momento você já está nesta tela.",
           "titulo": "Quem ficou sem vaga"
         },
         "horizonte": {
@@ -7827,7 +7827,7 @@
       },
       "resumo": {
         "cartoes": {
-          "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso — deu para revender; não comparecer é vaga queimada.",
+          "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso: deu para revender. Não comparecer é vaga queimada.",
           "titulo": "De onde vem, e o que se perde"
         },
         "grafico": {
@@ -7835,7 +7835,7 @@
           "titulo": "Ocupação dia a dia"
         },
         "numeros": {
-          "texto": "Ocupação média, receita, diária média e retorno. O retorno conta responsáveis que já tinham vindo antes — é fidelidade, não volume.",
+          "texto": "Ocupação média, receita, diária média e retorno. O retorno conta responsáveis que já tinham vindo antes: é fidelidade, não volume.",
           "titulo": "Os quatro números"
         },
         "pergunta": {
@@ -7857,7 +7857,7 @@
           "titulo": "Marcar custa um toque"
         },
         "passagem": {
-          "texto": "No pé da prancheta: quantas tarefas ficam para quem assume e o que impede a entrega. Aparece desde o começo do turno, e não só na hora de passar — ocorrência sem contato às 22h já não dá para resolver.",
+          "texto": "No pé da prancheta: quantas tarefas ficam para quem assume e o que impede a entrega. Aparece desde o começo do turno, e não só na hora de passar. Ocorrência sem contato às 22h já não dá para resolver.",
           "titulo": "O turno acaba aqui"
         },
         "pergunta": {
@@ -7869,11 +7869,11 @@
           "titulo": "Quanto já foi feito"
         },
         "ronda": {
-          "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda — \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um.",
+          "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda: \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um.",
           "titulo": "Uma ronda, não vinte linhas"
         },
         "tempo": {
-          "texto": "As tarefas se agrupam em rondas, e cada ronda traz a hora na frente. O que está atrasado sobe para \"Para agora\", com a hora em vermelho — não some no meio da lista.",
+          "texto": "As tarefas se agrupam em rondas, e cada ronda traz a hora na frente. O que está atrasado sobe para \"Para agora\", com a hora em vermelho. Não some no meio da lista.",
           "titulo": "Agora, mais tarde, e o que passou"
         }
       },
@@ -7912,7 +7912,7 @@
         },
         "celular": {
           "titulo": "O outro lado",
-          "texto": "Abra o celular para pedir como o responsável pede — e veja a linha chegar aqui, ou o aviso chegar lá."
+          "texto": "Abra o celular para pedir como o responsável pede. Veja a linha chegar aqui, ou o aviso chegar lá."
         }
       }
     },
@@ -8000,7 +8000,7 @@
       "escolheuTipo": "Escolheu: {tipo}",
       "hotelEscolhe": "Pediu que o hotel escolha a acomodação",
       "aceitaMudar": "aceita mudar um dia",
-      "mesmaAcomodacao": "Na mesma acomodação — são da mesma casa",
+      "mesmaAcomodacao": "Na mesma acomodação: são da mesma casa",
       "semVagaNoTipo": "Sem {tipo} livre para quem pediu antes",
       "semSugestao": "Nenhuma acomodação livre que sirva",
       "prazo": {
@@ -8020,7 +8020,7 @@
       },
       "respondido": {
         "aceito": "Reservado: {acomodacao} · {valor}",
-        "recusado": "Recusado — {motivo}",
+        "recusado": "Recusado: {motivo}",
         "desistiu": "O responsável desistiu",
         "expirado": "Perdeu o prazo sem resposta",
         "pendente": "Esperando resposta"
@@ -8044,7 +8044,7 @@
           "outro": "Outro"
         },
         "mensagem": {
-          "sem-vaga": "Oi, {nome}! Estamos lotados nessas datas para {nomes}. Se puder mudar a data, peça de novo — ou ligue {telefone} que colocamos na lista de espera.",
+          "sem-vaga": "Oi, {nome}! Estamos lotados nessas datas para {nomes}. Se puder mudar a data, peça de novo, ou ligue {telefone} que colocamos na lista de espera.",
           "exigencias": "Oi, {nome}! Para receber {nomes}, a carteira de vacinação precisa estar em dia na entrada. Com a dose em dia, é só pedir de novo. Dúvidas: {telefone}.",
           "perfil": "Oi, {nome}! Pelo que você contou, a nossa casa não é a melhor para {nomes}. Ligue {telefone} que indicamos um caminho.",
           "outro": "Oi, {nome}! Não conseguimos reservar para {nomes}."
@@ -8088,7 +8088,7 @@
         "outroPedido": "Fazer outro pedido",
         "situacao": {
           "AGUARDANDO_HOTEL": "Esperando o hotel responder",
-          "ACEITO": "Reservado — falta o sinal",
+          "ACEITO": "Reservado, falta o sinal",
           "RECUSADO": "O hotel não conseguiu reservar",
           "CANCELADO_PELO_RESPONSAVEL": "Você desistiu deste pedido",
           "EXPIRADO": "O pedido perdeu o prazo"
@@ -8156,7 +8156,7 @@
         "pedirDeNovo": "Pedir outra data",
         "pedirHospedagem": "Pedir hospedagem",
         "paraHoje": "É para hoje ou amanhã?",
-        "petsAjuda": "Escolha um, ou dois da mesma casa — eles ficam juntos na mesma acomodação.",
+        "petsAjuda": "Escolha um, ou dois da mesma casa: eles ficam juntos na mesma acomodação.",
         "faltaPorte": "Falta o porte",
         "hospedadoAgora": "Hospedado agora",
         "primeiraEstadia": "Primeira estadia aqui",

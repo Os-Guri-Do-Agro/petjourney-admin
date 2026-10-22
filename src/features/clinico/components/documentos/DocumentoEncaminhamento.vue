@@ -101,7 +101,7 @@ const medicacoes = computed(() =>
 
     <section class="bloco">
       <h2>{{ t('clinico.documentos.encaminhamento.motivo') }}</h2>
-      <p>{{ encounter.anamnese.queixaPrincipal || '—' }}</p>
+      <p>{{ encounter.anamnese.queixaPrincipal || '-' }}</p>
       <p v-if="encounter.anamnese.duracaoSintomas">
         {{ t('clinico.prontuario.anamnese.duracaoSintomas') }}:
         {{ encounter.anamnese.duracaoSintomas }}
@@ -135,7 +135,7 @@ const medicacoes = computed(() =>
       <ul v-if="alterados.length > 0" class="lista">
         <li v-for="item in alterados" :key="item.sistema">
           <strong>{{ item.rotulo }}</strong>
-          <template v-if="item.nota"> — {{ item.nota }}</template>
+          <template v-if="item.nota">: {{ item.nota }}</template>
         </li>
       </ul>
     </section>

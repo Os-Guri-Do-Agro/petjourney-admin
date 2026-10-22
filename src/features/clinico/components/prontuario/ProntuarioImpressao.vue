@@ -246,7 +246,7 @@ function nomeDoExame(id: string) {
 
       <p class="campo">
         <span class="campo__rotulo">{{ t('clinico.prontuario.anamnese.queixaPrincipal') }}</span>
-        <span>{{ encounter.anamnese.queixaPrincipal || '—' }}</span>
+        <span>{{ encounter.anamnese.queixaPrincipal || '-' }}</span>
       </p>
 
       <p v-if="encounter.anamnese.duracaoSintomas" class="campo">
@@ -309,7 +309,7 @@ function nomeDoExame(id: string) {
               }}
             </td>
             <td class="tabela__numero">
-              {{ faixaDe(vital) ? formato.faixaDeReferencia(faixaDe(vital)) : '—' }}
+              {{ faixaDe(vital) ? formato.faixaDeReferencia(faixaDe(vital)) : '-' }}
             </td>
             <!--
               Sem faixa cadastrada, a coluna de situação fica vazia em vez de repetir "sem

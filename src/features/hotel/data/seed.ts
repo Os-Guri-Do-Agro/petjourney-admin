@@ -563,7 +563,7 @@ const ROTEIRO: RoteiroDeReserva[] = [
     status: 'confirmada',
     origem: 'indicacao',
     servicos: [{ servicoId: 'servico-adestramento', quantidade: 1 }],
-    observacao: 'Contenção dupla na saída para passeio. Cardiopata — sem esforço prolongado.',
+    observacao: 'Contenção dupla na saída para passeio. Cardiopata: sem esforço prolongado.',
     pagoPercentual: 30,
   },
   {
@@ -1627,7 +1627,7 @@ export const CASOS: CasoDoHotel[] = [
     id: 'c1',
     titulo: 'Saída tardia com pertence pendente e sem pesagem',
     descricao:
-      'O Bento sai hoje às 16h30 — depois do horário de saída, meia diária na conta. E o check-out não fecha: falta conferir um pertence e falta a pesagem de saída.',
+      'O Bento sai hoje às 16h30, depois do horário de saída: meia diária na conta. E o check-out não fecha: falta conferir um pertence e falta a pesagem de saída.',
     rota: '/hotel/hospedes',
   },
   {
@@ -1641,7 +1641,7 @@ export const CASOS: CasoDoHotel[] = [
     id: 'c3',
     titulo: 'Chega hoje sem tosse dos canis',
     descricao:
-      'O Zeus chega às 15h e não tem comprovante de tosse dos canis. O check-in está bloqueado — ou alguém dispensa a exigência, com nome e motivo.',
+      'O Zeus chega às 15h e não tem comprovante de tosse dos canis. O check-in está bloqueado. Ou alguém dispensa a exigência, com nome e motivo.',
     rota: '/hotel/reservas',
   },
   {

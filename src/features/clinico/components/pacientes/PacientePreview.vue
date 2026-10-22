@@ -37,7 +37,7 @@ const formato = useClinicFormat()
 const pet = computed(() => props.rascunho?.pet ?? null)
 const tutor = computed(() => props.rascunho?.tutor ?? null)
 
-const TRACO = '—'
+const TRACO = '-'
 
 /** Duas letras, ou um ícone quando ainda não há nome. O círculo nunca some. */
 const iniciais = computed(() => pet.value?.iniciais ?? '')

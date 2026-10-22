@@ -80,7 +80,7 @@ const opcoesDePaciente = computed(() =>
     .filter((pet) => !props.jaInternados.includes(pet.id))
     .map((pet) => ({
       valor: pet.id,
-      rotulo: `${pet.nome} — ${clinico.tutor(pet.tutorId)?.nome ?? ''}`,
+      rotulo: `${pet.nome}, ${clinico.tutor(pet.tutorId)?.nome ?? ''}`,
     })),
 )
 

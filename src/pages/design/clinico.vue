@@ -468,7 +468,7 @@ const opcoesRisco = computed(() =>
           <template #celula-responsavel="{ linha }">{{ linha.tutor?.nome }}</template>
           <template #celula-peso="{ linha }">{{ formato.peso(linha.pet.pesoKg) }}</template>
           <template #celula-alertas="{ linha }">
-            <span v-if="linha.pet.alertas.length === 0" class="cansaco__meta">—</span>
+            <span v-if="linha.pet.alertas.length === 0" class="cansaco__meta">-</span>
             <ClinicAlertChip
               v-for="alerta in linha.pet.alertas"
               :key="alerta.id"

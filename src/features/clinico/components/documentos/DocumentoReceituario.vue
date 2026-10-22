@@ -163,7 +163,7 @@ const orientacoes = computed(() => props.encounter.conduta.orientacoes.trim())
           <p class="item__quantidade">{{ item.quantidade }}</p>
           <p class="item__posologia">
             <strong>{{ t('clinico.documentos.receita.usoRotulo') }}</strong>
-            {{ item.via }} — {{ item.posologia }}
+            {{ item.via }}, {{ item.posologia }}
           </p>
           <p v-if="item.observacao" class="item__observacao">{{ item.observacao }}</p>
         </li>

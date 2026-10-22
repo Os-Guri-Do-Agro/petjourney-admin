@@ -169,7 +169,7 @@ function primeiroNome(nome: string) {
                 v-for="opcao in grupo.horarios"
                 :key="`${opcao.profissional.id}|${opcao.inicio}`"
                 class="fx-horario"
-                :aria-label="`${rotuloDoHorario(opcao)} — ${opcao.profissional.nome}`"
+                :aria-label="`${rotuloDoHorario(opcao)}, ${opcao.profissional.nome}`"
                 @click="fluxo.escolherHorario(opcao)"
               >
                 <span class="fx-horario__hora">{{ rotuloDoHorario(opcao) }}</span>

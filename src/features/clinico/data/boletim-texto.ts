@@ -73,7 +73,7 @@ function fraseDaTemperatura(temperatura: number | null): string {
         ? 'abaixo do normal, sob aquecimento'
         : 'dentro do normal'
 
-  return `Temperatura ${temperatura.toFixed(1).replace('.', ',')} °C — ${leitura}.`
+  return `Temperatura ${temperatura.toFixed(1).replace('.', ',')} °C, ${leitura}.`
 }
 
 /** Junta o que existe e descarta o que veio vazio, sem deixar espaço duplo no meio. */

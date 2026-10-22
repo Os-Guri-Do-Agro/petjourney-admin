@@ -5,7 +5,7 @@ export const diagnosisCatalogFixture: DiagnosisCatalogItem[] = [
   { codigo: 'DR-04', descricao: 'Dermatite alérgica a pulgas', sistema: 'tegumentar' },
   { codigo: 'DR-09', descricao: 'Otite externa bacteriana', sistema: 'tegumentar' },
   { codigo: 'CV-02', descricao: 'Doença mixomatosa da valva mitral', sistema: 'cardiovascular' },
-  { codigo: 'UR-03', descricao: 'Doença renal crônica — estágio 2', sistema: 'urinario' },
+  { codigo: 'UR-03', descricao: 'Doença renal crônica, estágio 2', sistema: 'urinario' },
   { codigo: 'UR-07', descricao: 'Cistite idiopática felina', sistema: 'urinario' },
   { codigo: 'LO-05', descricao: 'Displasia coxofemoral', sistema: 'locomotor' },
   { codigo: 'LO-11', descricao: 'Doença do disco intervertebral', sistema: 'locomotor' },

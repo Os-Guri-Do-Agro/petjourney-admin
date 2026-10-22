@@ -363,7 +363,7 @@ const opcoes = computed<ApexOptions>(() => {
             { formatter: (valor: number) => String(valor ?? 0) },
             { formatter: (valor: number) => String(valor ?? 0) },
             { formatter: (valor: number) => String(valor ?? 0) },
-            { formatter: (valor: number) => (valor === null ? '—' : `${valor}%`) },
+            { formatter: (valor: number) => (valor === null ? '-' : `${valor}%`) },
           ]
         : { formatter: (valor: number) => String(valor ?? 0) },
     },

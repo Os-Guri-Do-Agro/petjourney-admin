@@ -151,7 +151,7 @@ const dataDaAnterior = computed(() =>
       </header>
 
       <p class="anterior__titulo">
-        {{ clinico.diagnosticoPrincipal(anterior) || anterior.anamnese.queixaPrincipal || '—' }}
+        {{ clinico.diagnosticoPrincipal(anterior) || anterior.anamnese.queixaPrincipal || '-' }}
       </p>
 
       <p v-if="anterior.conduta.orientacoes" class="anterior__texto">

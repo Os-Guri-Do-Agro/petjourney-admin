@@ -166,7 +166,7 @@ export const medicationsFixture: Medication[] = [
     ],
     efeitosAdversos: ['Vômito', 'Melena', 'Elevação de ureia e creatinina'],
     interacoes: [
-      'Corticoides — risco alto de úlcera',
+      'Corticoides: risco alto de úlcera',
       'Outros AINEs',
       'Aminoglicosídeos e diuréticos aumentam a nefrotoxicidade',
     ],
@@ -232,7 +232,7 @@ export const medicationsFixture: Medication[] = [
     indicacoes: ['Dor de intensidade leve a moderada', 'Febre', 'Cólica'],
     contraindicacoes: ['Discrasias sanguíneas', 'Hipersensibilidade a pirazolonas'],
     efeitosAdversos: ['Agranulocitose (rara)', 'Hipotensão em aplicação intravenosa rápida'],
-    interacoes: ['Clorpromazina — risco de hipotermia grave'],
+    interacoes: ['Clorpromazina: risco de hipotermia grave'],
     cuidados: ['renal', 'gestante'],
     doses: [
       { especie: 'canina', mgPorKg: { min: 15, max: 25 }, frequenciaHoras: 8, duracaoUsualDias: 5 },
@@ -260,7 +260,7 @@ export const medicationsFixture: Medication[] = [
     indicacoes: ['Dor moderada a intensa', 'Analgesia pós-operatória', 'Dor crônica oncológica'],
     contraindicacoes: ['Epilepsia', 'Uso concomitante de inibidores da MAO'],
     efeitosAdversos: ['Sedação', 'Disforia', 'Náusea', 'Midríase em felinos'],
-    interacoes: ['Fluoxetina e trazodona — risco de síndrome serotoninérgica'],
+    interacoes: ['Fluoxetina e trazodona: risco de síndrome serotoninérgica'],
     cuidados: ['hepatico', 'renal', 'idoso'],
     doses: [
       { especie: 'canina', mgPorKg: { min: 2, max: 4 }, frequenciaHoras: 8, duracaoUsualDias: 5 },
@@ -297,7 +297,7 @@ export const medicationsFixture: Medication[] = [
       'Imunossupressão',
       'Atrofia muscular em uso prolongado',
     ],
-    interacoes: ['AINEs — risco alto de úlcera', 'Insulina tem o efeito reduzido'],
+    interacoes: ['AINEs: risco alto de úlcera', 'Insulina tem o efeito reduzido'],
     cuidados: ['gestante', 'lactante', 'gastrico', 'cardiaco'],
     doses: [
       {
@@ -372,7 +372,7 @@ export const medicationsFixture: Medication[] = [
     indicacoes: ['Vômito refratário', 'Êmese por quimioterapia', 'Náusea pós-anestésica'],
     contraindicacoes: ['Hipersensibilidade ao princípio ativo'],
     efeitosAdversos: ['Sedação leve', 'Constipação'],
-    interacoes: ['Tramadol — pode reduzir o efeito analgésico'],
+    interacoes: ['Tramadol: pode reduzir o efeito analgésico'],
     cuidados: ['hepatico'],
     doses: [
       { especie: 'canina', mgPorKg: { min: 0.1, max: 0.5 }, frequenciaHoras: 12, duracaoUsualDias: 3 },
@@ -425,7 +425,7 @@ export const medicationsFixture: Medication[] = [
     interacoes: [
       'AINEs reduzem o efeito diurético',
       'Aminoglicosídeos aumentam a ototoxicidade',
-      'Digoxina — a hipocalemia potencializa a toxicidade',
+      'Digoxina: a hipocalemia potencializa a toxicidade',
     ],
     cuidados: ['renal', 'cardiaco', 'idoso'],
     doses: [
@@ -457,7 +457,7 @@ export const medicationsFixture: Medication[] = [
       'Prolapso de terceira pálpebra',
       'Priapismo em equinos',
     ],
-    interacoes: ['Dipirona — risco de hipotermia grave', 'Potencializa anestésicos gerais'],
+    interacoes: ['Dipirona: risco de hipotermia grave', 'Potencializa anestésicos gerais'],
     cuidados: ['cardiaco', 'idoso', 'filhote'],
     doses: [
       { especie: 'canina', mgPorKg: { min: 0.01, max: 0.05 }, frequenciaHoras: 8, duracaoUsualDias: 1 },
@@ -485,7 +485,7 @@ export const medicationsFixture: Medication[] = [
     apresentacao: 'Solução injetável 1% (10 mg/mL)',
     indicacoes: ['Sarna sarcóptica', 'Sarna demodécica', 'Endoparasitoses'],
     contraindicacoes: [
-      'Raças com mutação MDR1 — Collie, Border Collie, Pastor Australiano, Sheepdog',
+      'Raças com mutação MDR1: Collie, Border Collie, Pastor Australiano, Sheepdog',
       'Filhotes com menos de 6 semanas',
       'Cardiopatas com microfilaremia',
     ],

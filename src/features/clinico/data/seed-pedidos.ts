@@ -454,7 +454,7 @@ export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
       recusa: {
         motivo: 'sem-horario',
         mensagem:
-          'Oi, Heitor! O banho de sábado está lotado até o fim do mês. Terça à tarde tem horário — se servir, é só pedir de novo.',
+          'Oi, Heitor! O banho de sábado está lotado até o fim do mês. Terça à tarde tem horário. Se servir, é só pedir de novo.',
       },
     }),
   )

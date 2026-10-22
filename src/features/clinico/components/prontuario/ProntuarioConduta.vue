@@ -550,7 +550,7 @@ function resumoDaDose(prescricao: Prescription) {
                   class="numero"
                   :model-value="prescricao.calculo.duracaoDias"
                   :disabled="somenteLeitura || ehContinuo(prescricao)"
-                  :placeholder="ehContinuo(prescricao) ? '—' : undefined"
+                  :placeholder="ehContinuo(prescricao) ? '-' : undefined"
                   fluid
                   @update:model-value="recalcular(prescricao, { duracaoDias: $event ?? 1 })"
                 />

@@ -202,7 +202,7 @@ function historiaDoDiario(dados: ResumoDoPaciente): string {
 
     if (sinal.tipo === 'alarme') {
       const achados = rotulos.lista(sinal.achados.map(rotulos.achado)).toLocaleLowerCase()
-      const relato = [sinal.relato, sinal.texto].filter(Boolean).join(' — ')
+      const relato = [sinal.relato, sinal.texto].filter(Boolean).join('. ')
 
       linhas.push(
         relato

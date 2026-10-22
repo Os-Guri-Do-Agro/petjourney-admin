@@ -1788,7 +1788,7 @@ function atosPlantados(encounters: Encounter[], hoje: ISODate): AtoClinico[] {
       kind: 'medicamento',
       origem: 'clinica',
       medicamentoId: 'med-furosemida',
-      descricao: 'Furosemida — primeira dose supervisionada',
+      descricao: 'Furosemida: primeira dose supervisionada',
       via: 'oral',
       doseTexto: '35 mg',
       diasAtras: 60,

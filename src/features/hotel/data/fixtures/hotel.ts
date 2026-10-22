@@ -29,7 +29,7 @@ export const HOTEL_UTC_OFFSET = CLINIC_UTC_OFFSET
 export const hotelFixture: Hotel = {
   id: 'hotel-petjourney',
   nome: 'PetJourney Hotel',
-  endereco: 'Estrada do Campo Limpo, 2.140 — São Paulo/SP · CEP 05777-001',
+  endereco: 'Estrada do Campo Limpo, 2.140, São Paulo/SP · CEP 05777-001',
   telefone: '(11) 3555-0188',
   utcOffset: HOTEL_UTC_OFFSET,
   politica: {
