@@ -456,9 +456,9 @@ export function useAppNavigation() {
     items.push({ label: t('parceiro.equipe.titulo'), to: '/parceiro/equipe', icon: 'ph ph-users' })
 
     /*
-     * As fichas de profissional (E1-03) só fazem sentido para quem tem ou pode ter Clínica ou Hotel:
-     * módulo ligado ou pedido, categoria elegível, ou a ficha do próprio login. Pet shop sem nada
-     * disso não ganha a aba.
+     * As fichas de profissional (E1-03) e o estabelecimento (E1-01: horários, fuso, página pública)
+     * só fazem sentido para quem tem ou pode ter Clínica ou Hotel: módulo ligado ou pedido, categoria
+     * elegível, ou a ficha do próprio login. Pet shop sem nada disso não ganha nenhum dos dois.
      */
     const eu = parceiroStore.eu
 
@@ -468,11 +468,18 @@ export function useAppNavigation() {
         eu.modulos.some((modulo) => modulo.podeLer || modulo.status !== null) ||
         eu.profissional)
     ) {
-      items.push({
-        label: t('parceiro.profissionais.titulo'),
-        to: '/parceiro/profissionais',
-        icon: 'ph ph-stethoscope',
-      })
+      items.push(
+        {
+          label: t('parceiro.profissionais.titulo'),
+          to: '/parceiro/profissionais',
+          icon: 'ph ph-stethoscope',
+        },
+        {
+          label: t('parceiro.estabelecimento.titulo'),
+          to: '/parceiro/estabelecimento',
+          icon: 'ph ph-buildings',
+        },
+      )
     }
 
     if (parceiroStore.cadastroSuspenso) {

@@ -2277,6 +2277,209 @@
         "perdeSeloLogin": "Povezivanje ove kartice sa nalogom uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
         "salvar": "Sačuvajte karticu"
       }
+    },
+    "estabelecimento": {
+      "titulo": "Objekat",
+      "erroCarregar": "Objekat nije mogao da se učita.",
+      "publicar": "Objavi stranicu",
+      "publicarFalta": "Pre objavljivanja popunite ono što javna stranica navodi kao nedostajuće.",
+      "despublicar": "Skloni sa mreže",
+      "editar": "Izmeni",
+      "naoInformado": "Nije navedeno",
+      "consulta": {
+        "soDono": "Samo vlasnik menja podatke o objektu. Ovde vidite kako trenutno izgleda.",
+        "suspenso": "Dok je registracija suspendovana, objekat je samo za pregled. Vlasnik i dalje može da skloni stranicu sa mreže."
+      },
+      "situacao": {
+        "noAr": "Stranica je na mreži",
+        "foraDoAr": "Objavljena, ali van mreže",
+        "naoPublicada": "Stranica još nije objavljena"
+      },
+      "pagina": {
+        "titulo": "Javna stranica",
+        "desde": "Objavljena {data}",
+        "foraDoArDica": "Vraća se sama kada registracija bude odobrena i aktivna.",
+        "falta": "Za objavljivanje nedostaje:"
+      },
+      "pendencia": {
+        "APROVACAO": "odobrenje registracije od strane tima PetJourney",
+        "nomePublico": "javni naziv",
+        "fusoHorario": "vremenska zona",
+        "telefone": "jedan telefon (javni, WhatsApp ili dežurni)"
+      },
+      "slug": {
+        "rotulo": "Adresa stranice",
+        "trocar": "Promeni adresu",
+        "depoisDaAprovacao": "Adresa stranice postaje dostupna kada registracija bude odobrena.",
+        "nasceDoNome": "Adresa nastaje od javnog naziva pri prvom čuvanju.",
+        "invalido": "Koristite od 3 do 60 malih slova, brojeva i crtica, bez crtice na početku, na kraju ili dve zaredom.",
+        "regras": "Mala slova, brojevi i crtice, od 3 do 60 znakova.",
+        "antigoContinua": "Stara adresa i dalje vodi do stranice. Čuvamo poslednjih 5."
+      },
+      "perfil": {
+        "titulo": "Profil i kontakti",
+        "comecoTitulo": "Počnite ovde",
+        "comeco": "Naziv koji se prikazuje na stranici i vremenska zona po kojoj objekat računa vreme.",
+        "preencher": "Popuni profil"
+      },
+      "endereco": {
+        "titulo": "Adresa",
+        "vazio": "Nema unete adrese.",
+        "mostraRua": "Stranica prikazuje ulicu i broj.",
+        "soBairro": "Stranica prikazuje samo naselje, grad i državu.",
+        "semCoordenadas": "Bez lokacije na mapi.",
+        "mapaDesligado": "Mapa se ne prikazuje na stranici.",
+        "mapaLigado": "Mapa se prikazuje na stranici."
+      },
+      "horario": {
+        "titulo": "Radno vreme",
+        "noFuso": "Radno vreme u zoni {fuso}.",
+        "vazio": "Nema unetog radnog vremena. Bez njega stranica ne može da kaže da li je objekat otvoren.",
+        "aberto": "Otvoreno",
+        "fechado": "Zatvoreno",
+        "abertoAgora": "Sada otvoreno",
+        "abertoFechaAs": "Sada otvoreno, zatvara se u {hora}",
+        "fechadoAgora": "Sada zatvoreno",
+        "fechadoAbreAs": "Sada zatvoreno, otvara se u {hora}",
+        "fechadoAbreEm": "Sada zatvoreno, otvara se {dia} u {hora}",
+        "regras": "Otvoreno 24 sata: od 00:00 do 24:00. Ako prelazi ponoć, podelite na dva dana.",
+        "ate": "do",
+        "abreAs": "{dia}: otvara se u",
+        "fechaAs": "{dia}: zatvara se u",
+        "copiar": "Primeni radno vreme za {dia} na ostale otvorene dane",
+        "intervalo": "Pauza",
+        "intervaloDe": "{dia}: pauza počinje u",
+        "intervaloAte": "{dia}: pauza se završava u",
+        "comIntervalo": "Pauza",
+        "semIntervalo": "Bez pauze",
+        "problema": {
+          "HORA_INVALIDA": "Neispravno vreme. Koristite od 00:00 do 23:59; 24:00 samo za zatvaranje.",
+          "ABRE_E_FECHA_OBRIGATORIOS": "Unesite vreme otvaranja i zatvaranja.",
+          "ABRE_DEPOIS_DE_FECHA": "Početak mora biti pre kraja.",
+          "INTERVALO_INCOMPLETO": "Pauzi su potrebni početak i kraj.",
+          "INTERVALO_FORA_DO_EXPEDIENTE": "Pauza mora da stane u radno vreme.",
+          "SEMANA_INCOMPLETA": "Nedelji je potrebno svih 7 dana."
+        }
+      },
+      "dia": {
+        "titulo": "Posebni dani",
+        "feriados": "Državni praznici",
+        "feriadosDe": "Kopiraj praznike za {ano}",
+        "adicionar": "Dodaj dan",
+        "vazio": "Nema posebnih dana. Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme.",
+        "remover": "Ukloni {nome}",
+        "data": "Datum",
+        "faltaData": "Izaberite datum u kalendaru.",
+        "nome": "Naziv",
+        "nomeExemplo": "Badnje veče",
+        "faltaNome": "Dajte naziv danu.",
+        "fechado": "Zatvoreno ceo dan",
+        "abre": "Otvara se u",
+        "fecha": "Zatvara se u",
+        "fechadoDica": "Isključite da biste tog dana zadali drugačije radno vreme.",
+        "abertoDica": "Tog dana važi ovo radno vreme, a ne nedeljno."
+      },
+      "mensagens": {
+        "titulo": "Poruke staratelju"
+      },
+      "confirmar": {
+        "voltar": "Nazad",
+        "despublicar": {
+          "titulo": "Skloniti stranicu sa mreže?",
+          "mensagem": "Ko otvori adresu videće da stranica nije dostupna. Možete je ponovo objaviti kad god želite.",
+          "botao": "Skloni sa mreže"
+        },
+        "remover": {
+          "titulo": "Ukloniti poseban dan?",
+          "mensagem": "{nome} izlazi sa liste i za taj datum ponovo važi nedeljno radno vreme.",
+          "botao": "Ukloni"
+        }
+      },
+      "toast": {
+        "erro": "Nije uspelo",
+        "publicada": "Stranica je objavljena",
+        "despublicada": "Stranica je van mreže",
+        "salvo": {
+          "perfil": "Profil je sačuvan",
+          "endereco": "Adresa je sačuvana",
+          "mensagens": "Poruke su sačuvane",
+          "horarios": "Radno vreme je sačuvano"
+        },
+        "diaAdicionado": "Poseban dan je dodat",
+        "diaRemovido": "Poseban dan je uklonjen",
+        "feriadosCopiados": "Praznici su kopirani",
+        "slugTrocado": "Adresa je promenjena",
+        "feriadosNovos": "Nema novih praznika. | {total} novi praznik. | {total} nova praznika. | {total} novih praznika.",
+        "feriadosJaExistiam": "{total} je već bio na listi. | {total} su već bila na listi. | {total} je već bilo na listi."
+      },
+      "campo": {
+        "nomePublico": "Javni naziv",
+        "descricao": "Opis",
+        "fusoHorario": "Vremenska zona",
+        "idiomaDosTextos": "Jezik tekstova",
+        "telefonePublico": "Telefon",
+        "whatsappPublico": "WhatsApp",
+        "telefonePlantao": "Dežurni telefon",
+        "emailPublico": "Kontakt e-pošta",
+        "site": "Veb-sajt",
+        "cep": "Poštanski broj",
+        "logradouro": "Ulica",
+        "numero": "Broj",
+        "complemento": "Dodatak adresi",
+        "bairro": "Naselje",
+        "cidade": "Grad",
+        "uf": "Država",
+        "mostrarEndereco": "Prikaži ulicu i broj na javnoj stranici",
+        "mostrarMapa": "Prikaži mapu",
+        "latitude": "Geografska širina",
+        "longitude": "Geografska dužina",
+        "mensagemForaDoHorario": "Poruka van radnog vremena",
+        "orientacaoEmergencia": "Uputstvo za hitne slučajeve"
+      },
+      "idioma": {
+        "ptBR": "Portugalski (Brazil)",
+        "enUS": "Engleski (SAD)",
+        "enGB": "Engleski (UK)",
+        "es419": "Španski (Latinska Amerika)",
+        "srLatn": "Srpski",
+        "ar": "Arapski"
+      },
+      "gaveta": {
+        "titulo": {
+          "perfil": "Profil i kontakti",
+          "endereco": "Adresa",
+          "mensagens": "Poruke staratelju",
+          "horarios": "Nedeljno radno vreme",
+          "dia": "Novi poseban dan",
+          "slug": "Adresa stranice"
+        },
+        "opcional": "(opciono)",
+        "buscarFuso": "Pretraži grad ili region",
+        "fusoDica": "Radno vreme, raspored i \"sada otvoreno\" računaju se u ovoj zoni.",
+        "idiomaDica": "Jezik na kome pišete opis i poruke. Stranica ne prevodi ove tekstove.",
+        "contatos": "Kontakti na stranici",
+        "contatosDica": "Za objavljivanje je dovoljan jedan od tri telefona.",
+        "plantaoDica": "Za vreme van radnog vremena. Prazno znači bez dežurstva.",
+        "emailDica": "Prikazuje se na stranici; nije e-pošta vašeg naloga.",
+        "naPagina": "Na javnoj stranici",
+        "mostrarEnderecoDica": "Kada je isključeno, stranica prikazuje samo naselje, grad i državu, bez mape.",
+        "mostrarMapaDica": "Prikazuje se samo uz vidljivu ulicu i uz geografsku širinu i dužinu.",
+        "coordenadasDica": "Kopirajte ih sa mape koju koristite: obe, sa decimalnom tačkom.",
+        "foraDoHorarioDica": "Prikazuje se kada je objekat zatvoren.",
+        "emergenciaDica": "Šta uraditi u hitnom slučaju van radnog vremena: druga adresa, drugi telefon.",
+        "semTraducao": "Ovi tekstovi se prikazuju onako kako ih napišete, na jeziku izabranom u profilu.",
+        "cancelar": "Otkaži",
+        "salvar": "Sačuvaj",
+        "invalido": {
+          "nome": "Koristite od 2 do 120 znakova.",
+          "fuso": "Izaberite vremensku zonu objekta.",
+          "telefone": "Telefon sa pozivnim brojem, ili sa + i kodom zemlje.",
+          "email": "Proverite e-poštu.",
+          "site": "Počnite sa https://",
+          "cep": "Poštanski broj sa 8 cifara.",
+          "coordenadas": "Popunite oba: širinu od -90 do 90 i dužinu od -180 do 180."
+        }
+      }
     }
   },
   "settings": {

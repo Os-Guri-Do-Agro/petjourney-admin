@@ -174,6 +174,7 @@ const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/carteira': 'ph ph-wallet',
   '/parceiro/equipe': 'ph ph-users-three',
   '/parceiro/profissionais': 'ph ph-stethoscope',
+  '/parceiro/estabelecimento': 'ph ph-buildings',
 }
 
 /**

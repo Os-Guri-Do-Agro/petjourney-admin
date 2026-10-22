@@ -2277,6 +2277,209 @@
         "perdeSeloLogin": "Linking this record to a login removes the verified seal: the CRMV goes back to PetJourney for verification.",
         "salvar": "Save record"
       }
+    },
+    "estabelecimento": {
+      "titulo": "Establishment",
+      "erroCarregar": "Couldn't load the establishment.",
+      "publicar": "Publish page",
+      "publicarFalta": "Before publishing, fill in what the public page lists as missing.",
+      "despublicar": "Take offline",
+      "editar": "Edit",
+      "naoInformado": "Not provided",
+      "consulta": {
+        "soDono": "Only the owner edits the establishment. Here you can see how it stands.",
+        "suspenso": "While the registration is suspended, the establishment is view-only. The owner can still take the page offline."
+      },
+      "situacao": {
+        "noAr": "The page is live",
+        "foraDoAr": "Published, but offline",
+        "naoPublicada": "The page hasn't been published yet"
+      },
+      "pagina": {
+        "titulo": "Public page",
+        "desde": "Published on {data}",
+        "foraDoArDica": "It comes back on its own once the registration is approved and active.",
+        "falta": "Still missing before publishing:"
+      },
+      "pendencia": {
+        "APROVACAO": "approval of the registration by the PetJourney team",
+        "nomePublico": "the public name",
+        "fusoHorario": "the time zone",
+        "telefone": "a phone number (public, WhatsApp or on-call)"
+      },
+      "slug": {
+        "rotulo": "Page address",
+        "trocar": "Change address",
+        "depoisDaAprovacao": "The page address becomes available once the registration is approved.",
+        "nasceDoNome": "The address is created from the public name the first time you save.",
+        "invalido": "Use 3 to 60 lowercase letters, numbers and hyphens, with no hyphen at the start, at the end or twice in a row.",
+        "regras": "Lowercase letters, numbers and hyphens, 3 to 60 characters.",
+        "antigoContinua": "The old address keeps leading to the page. We keep the last 5."
+      },
+      "perfil": {
+        "titulo": "Profile and contacts",
+        "comecoTitulo": "Start here",
+        "comeco": "The name shown on the page and the time zone your business keeps time in.",
+        "preencher": "Fill in the profile"
+      },
+      "endereco": {
+        "titulo": "Address",
+        "vazio": "No address on file.",
+        "mostraRua": "The page shows the street and number.",
+        "soBairro": "The page shows only the neighborhood, city and state.",
+        "semCoordenadas": "No map location.",
+        "mapaDesligado": "The map doesn't appear on the page.",
+        "mapaLigado": "The map appears on the page."
+      },
+      "horario": {
+        "titulo": "Opening hours",
+        "noFuso": "Hours in the {fuso} time zone.",
+        "vazio": "No opening hours on file. Without them, the page can't say whether you're open.",
+        "aberto": "Open",
+        "fechado": "Closed",
+        "abertoAgora": "Open now",
+        "abertoFechaAs": "Open now, closes at {hora}",
+        "fechadoAgora": "Closed now",
+        "fechadoAbreAs": "Closed now, opens at {hora}",
+        "fechadoAbreEm": "Closed now, opens {dia} at {hora}",
+        "regras": "Open 24 hours: from 00:00 to 24:00. If it runs past midnight, split it into two days.",
+        "ate": "to",
+        "abreAs": "{dia}: opens at",
+        "fechaAs": "{dia}: closes at",
+        "copiar": "Use {dia}'s hours on the other open days",
+        "intervalo": "Break",
+        "intervaloDe": "{dia}: break starts at",
+        "intervaloAte": "{dia}: break ends at",
+        "comIntervalo": "Break",
+        "semIntervalo": "No break",
+        "problema": {
+          "HORA_INVALIDA": "Invalid time. Use 00:00 to 23:59; 24:00 only for closing.",
+          "ABRE_E_FECHA_OBRIGATORIOS": "Enter the opening and closing times.",
+          "ABRE_DEPOIS_DE_FECHA": "The start must come before the end.",
+          "INTERVALO_INCOMPLETO": "The break needs a start and an end.",
+          "INTERVALO_FORA_DO_EXPEDIENTE": "The break must fit within opening hours.",
+          "SEMANA_INCOMPLETA": "The week needs all 7 days."
+        }
+      },
+      "dia": {
+        "titulo": "Special days",
+        "feriados": "National holidays",
+        "feriadosDe": "Copy the {ano} holidays",
+        "adicionar": "Add day",
+        "vazio": "No special days. Holidays and days with different hours go here and replace the weekly hours.",
+        "remover": "Remove {nome}",
+        "data": "Date",
+        "faltaData": "Pick the date on the calendar.",
+        "nome": "Name",
+        "nomeExemplo": "Christmas Eve",
+        "faltaNome": "Give the day a name.",
+        "fechado": "Closed all day",
+        "abre": "Opens at",
+        "fecha": "Closes at",
+        "fechadoDica": "Turn off to set different hours for that day.",
+        "abertoDica": "On that day these hours apply instead of the weekly ones."
+      },
+      "mensagens": {
+        "titulo": "Messages to pet parents"
+      },
+      "confirmar": {
+        "voltar": "Back",
+        "despublicar": {
+          "titulo": "Take the page offline?",
+          "mensagem": "Anyone opening the address will see the page isn't available. You can publish it again whenever you like.",
+          "botao": "Take offline"
+        },
+        "remover": {
+          "titulo": "Remove the special day?",
+          "mensagem": "{nome} leaves the list and the weekly hours apply again on that date.",
+          "botao": "Remove"
+        }
+      },
+      "toast": {
+        "erro": "That didn't work",
+        "publicada": "Page published",
+        "despublicada": "The page is offline",
+        "salvo": {
+          "perfil": "Profile saved",
+          "endereco": "Address saved",
+          "mensagens": "Messages saved",
+          "horarios": "Hours saved"
+        },
+        "diaAdicionado": "Special day added",
+        "diaRemovido": "Special day removed",
+        "feriadosCopiados": "Holidays copied",
+        "slugTrocado": "Address changed",
+        "feriadosNovos": "No new holidays. | {total} new holiday. | {total} new holidays.",
+        "feriadosJaExistiam": "{total} was already on the list. | {total} were already on the list."
+      },
+      "campo": {
+        "nomePublico": "Public name",
+        "descricao": "Description",
+        "fusoHorario": "Time zone",
+        "idiomaDosTextos": "Language of the texts",
+        "telefonePublico": "Phone",
+        "whatsappPublico": "WhatsApp",
+        "telefonePlantao": "On-call phone",
+        "emailPublico": "Contact email",
+        "site": "Website",
+        "cep": "Postal code",
+        "logradouro": "Street",
+        "numero": "Number",
+        "complemento": "Address line 2",
+        "bairro": "Neighborhood",
+        "cidade": "City",
+        "uf": "State",
+        "mostrarEndereco": "Show street and number on the public page",
+        "mostrarMapa": "Show the map",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "mensagemForaDoHorario": "Message outside opening hours",
+        "orientacaoEmergencia": "Emergency guidance"
+      },
+      "idioma": {
+        "ptBR": "Portuguese (Brazil)",
+        "enUS": "English (US)",
+        "enGB": "English (UK)",
+        "es419": "Spanish (Latin America)",
+        "srLatn": "Serbian",
+        "ar": "Arabic"
+      },
+      "gaveta": {
+        "titulo": {
+          "perfil": "Profile and contacts",
+          "endereco": "Address",
+          "mensagens": "Messages to pet parents",
+          "horarios": "Weekly hours",
+          "dia": "New special day",
+          "slug": "Page address"
+        },
+        "opcional": "(optional)",
+        "buscarFuso": "Search city or region",
+        "fusoDica": "Your opening hours, the schedule and \"open now\" all use this time zone.",
+        "idiomaDica": "The language you write the description and messages in. The page doesn't translate these texts.",
+        "contatos": "Contacts on the page",
+        "contatosDica": "To publish, one of the three phone numbers is enough.",
+        "plantaoDica": "For outside opening hours. Empty means no on-call service.",
+        "emailDica": "Shown on the page; it's not your account email.",
+        "naPagina": "On the public page",
+        "mostrarEnderecoDica": "When off, the page shows only neighborhood, city and state, with no map.",
+        "mostrarMapaDica": "Only appears with the street shown and with latitude and longitude.",
+        "coordenadasDica": "Copy them from the map you use: both, with a decimal point.",
+        "foraDoHorarioDica": "Shown when you're closed.",
+        "emergenciaDica": "What to do in an emergency outside opening hours: another address, another phone.",
+        "semTraducao": "These texts appear as you write them, in the language chosen in the profile.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "invalido": {
+          "nome": "Use 2 to 120 characters.",
+          "fuso": "Choose your time zone.",
+          "telefone": "Phone with area code, or with + and the country code.",
+          "email": "Check the email.",
+          "site": "Start with https://",
+          "cep": "Postal code with 8 digits.",
+          "coordenadas": "Fill in both: latitude from -90 to 90 and longitude from -180 to 180."
+        }
+      }
     }
   },
   "settings": {

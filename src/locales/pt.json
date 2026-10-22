@@ -2277,6 +2277,209 @@
         "perdeSeloLogin": "Ligar esta ficha a um login tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
         "salvar": "Salvar ficha"
       }
+    },
+    "estabelecimento": {
+      "titulo": "Estabelecimento",
+      "erroCarregar": "Não foi possível carregar o estabelecimento.",
+      "publicar": "Publicar página",
+      "publicarFalta": "Antes de publicar, preencha o que a página pública lista como faltando.",
+      "despublicar": "Tirar do ar",
+      "editar": "Editar",
+      "naoInformado": "Não informado",
+      "consulta": {
+        "soDono": "Só o dono edita o estabelecimento. Aqui você vê como ele está.",
+        "suspenso": "Com o cadastro suspenso, o estabelecimento fica só para consulta. O dono ainda pode tirar a página do ar."
+      },
+      "situacao": {
+        "noAr": "A página está no ar",
+        "foraDoAr": "Publicada, mas fora do ar",
+        "naoPublicada": "A página ainda não foi publicada"
+      },
+      "pagina": {
+        "titulo": "Página pública",
+        "desde": "Publicada em {data}",
+        "foraDoArDica": "Ela volta sozinha quando o cadastro estiver aprovado e ativo.",
+        "falta": "Para publicar, falta:"
+      },
+      "pendencia": {
+        "APROVACAO": "a aprovação do cadastro pela equipe PetJourney",
+        "nomePublico": "o nome público",
+        "fusoHorario": "o fuso horário",
+        "telefone": "um telefone (público, WhatsApp ou plantão)"
+      },
+      "slug": {
+        "rotulo": "Endereço da página",
+        "trocar": "Trocar endereço",
+        "depoisDaAprovacao": "O endereço da página fica disponível depois que o cadastro for aprovado.",
+        "nasceDoNome": "O endereço nasce do nome público no primeiro salvamento.",
+        "invalido": "Use de 3 a 60 letras minúsculas, números e hífen, sem hífen no começo, no fim ou dois seguidos.",
+        "regras": "Letras minúsculas, números e hífen, de 3 a 60 caracteres.",
+        "antigoContinua": "O endereço antigo continua levando à página. Guardamos os 5 últimos."
+      },
+      "perfil": {
+        "titulo": "Perfil e contatos",
+        "comecoTitulo": "Comece por aqui",
+        "comeco": "O nome que aparece na página e o fuso em que a casa conta as horas.",
+        "preencher": "Preencher o perfil"
+      },
+      "endereco": {
+        "titulo": "Endereço",
+        "vazio": "Nenhum endereço cadastrado.",
+        "mostraRua": "A página mostra a rua e o número.",
+        "soBairro": "A página mostra só o bairro, a cidade e a UF.",
+        "semCoordenadas": "Sem localização no mapa.",
+        "mapaDesligado": "O mapa não aparece na página.",
+        "mapaLigado": "O mapa aparece na página."
+      },
+      "horario": {
+        "titulo": "Horários",
+        "noFuso": "Horários no fuso {fuso}.",
+        "vazio": "Nenhum horário cadastrado. Sem horário, a página não diz se a casa está aberta.",
+        "aberto": "Aberto",
+        "fechado": "Fechado",
+        "abertoAgora": "Aberto agora",
+        "abertoFechaAs": "Aberto agora, fecha às {hora}",
+        "fechadoAgora": "Fechado agora",
+        "fechadoAbreAs": "Fechado agora, abre às {hora}",
+        "fechadoAbreEm": "Fechado agora, abre {dia} às {hora}",
+        "regras": "Aberto 24 horas: das 00:00 às 24:00. Se passa da meia-noite, divida em dois dias.",
+        "ate": "até",
+        "abreAs": "{dia}: abre às",
+        "fechaAs": "{dia}: fecha às",
+        "copiar": "Usar o horário de {dia} nos outros dias abertos",
+        "intervalo": "Intervalo",
+        "intervaloDe": "{dia}: o intervalo começa às",
+        "intervaloAte": "{dia}: o intervalo termina às",
+        "comIntervalo": "Intervalo",
+        "semIntervalo": "Sem intervalo",
+        "problema": {
+          "HORA_INVALIDA": "Hora inválida. Use de 00:00 a 23:59; 24:00 só para fechar.",
+          "ABRE_E_FECHA_OBRIGATORIOS": "Diga a hora de abrir e a de fechar.",
+          "ABRE_DEPOIS_DE_FECHA": "O começo precisa vir antes do fim.",
+          "INTERVALO_INCOMPLETO": "O intervalo precisa de começo e fim.",
+          "INTERVALO_FORA_DO_EXPEDIENTE": "O intervalo precisa caber dentro do expediente.",
+          "SEMANA_INCOMPLETA": "A semana precisa dos 7 dias."
+        }
+      },
+      "dia": {
+        "titulo": "Dias especiais",
+        "feriados": "Feriados nacionais",
+        "feriadosDe": "Copiar os feriados de {ano}",
+        "adicionar": "Adicionar dia",
+        "vazio": "Nenhum dia especial. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
+        "remover": "Remover {nome}",
+        "data": "Data",
+        "faltaData": "Escolha a data no calendário.",
+        "nome": "Nome",
+        "nomeExemplo": "Véspera de Natal",
+        "faltaNome": "Dê um nome ao dia.",
+        "fechado": "Fechado o dia inteiro",
+        "abre": "Abre às",
+        "fecha": "Fecha às",
+        "fechadoDica": "Desligue para dar um horário diferente nesse dia.",
+        "abertoDica": "Nesse dia vale este horário, e não o da semana."
+      },
+      "mensagens": {
+        "titulo": "Mensagens ao responsável"
+      },
+      "confirmar": {
+        "voltar": "Voltar",
+        "despublicar": {
+          "titulo": "Tirar a página do ar?",
+          "mensagem": "Quem abrir o endereço verá que a página não está disponível. Dá para publicar de novo quando quiser.",
+          "botao": "Tirar do ar"
+        },
+        "remover": {
+          "titulo": "Remover o dia especial?",
+          "mensagem": "{nome} sai da lista e o horário da semana volta a valer nessa data.",
+          "botao": "Remover"
+        }
+      },
+      "toast": {
+        "erro": "Não deu certo",
+        "publicada": "Página publicada",
+        "despublicada": "A página saiu do ar",
+        "salvo": {
+          "perfil": "Perfil salvo",
+          "endereco": "Endereço salvo",
+          "mensagens": "Mensagens salvas",
+          "horarios": "Horários salvos"
+        },
+        "diaAdicionado": "Dia especial adicionado",
+        "diaRemovido": "Dia especial removido",
+        "feriadosCopiados": "Feriados copiados",
+        "slugTrocado": "Endereço trocado",
+        "feriadosNovos": "Nenhum feriado novo. | {total} feriado novo. | {total} feriados novos.",
+        "feriadosJaExistiam": "{total} já estava na lista. | {total} já estavam na lista."
+      },
+      "campo": {
+        "nomePublico": "Nome público",
+        "descricao": "Descrição",
+        "fusoHorario": "Fuso horário",
+        "idiomaDosTextos": "Idioma dos textos",
+        "telefonePublico": "Telefone",
+        "whatsappPublico": "WhatsApp",
+        "telefonePlantao": "Telefone de plantão",
+        "emailPublico": "E-mail de contato",
+        "site": "Site",
+        "cep": "CEP",
+        "logradouro": "Rua",
+        "numero": "Número",
+        "complemento": "Complemento",
+        "bairro": "Bairro",
+        "cidade": "Cidade",
+        "uf": "UF",
+        "mostrarEndereco": "Mostrar rua e número na página pública",
+        "mostrarMapa": "Mostrar o mapa",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "mensagemForaDoHorario": "Mensagem fora do horário",
+        "orientacaoEmergencia": "Orientação para emergência"
+      },
+      "idioma": {
+        "ptBR": "Português (Brasil)",
+        "enUS": "Inglês (EUA)",
+        "enGB": "Inglês (Reino Unido)",
+        "es419": "Espanhol (América Latina)",
+        "srLatn": "Sérvio",
+        "ar": "Árabe"
+      },
+      "gaveta": {
+        "titulo": {
+          "perfil": "Perfil e contatos",
+          "endereco": "Endereço",
+          "mensagens": "Mensagens ao responsável",
+          "horarios": "Horários da semana",
+          "dia": "Novo dia especial",
+          "slug": "Endereço da página"
+        },
+        "opcional": "(opcional)",
+        "buscarFuso": "Buscar cidade ou região",
+        "fusoDica": "Os horários da casa, a agenda e o \"aberto agora\" contam neste fuso.",
+        "idiomaDica": "O idioma em que você escreve a descrição e as mensagens. A página não traduz esses textos.",
+        "contatos": "Contatos na página",
+        "contatosDica": "Para publicar, basta um dos três telefones.",
+        "plantaoDica": "Para fora do expediente. Vazio quer dizer sem plantão.",
+        "emailDica": "Aparece na página; não é o e-mail da sua conta.",
+        "naPagina": "Na página pública",
+        "mostrarEnderecoDica": "Desligado, a página mostra só bairro, cidade e UF, sem mapa.",
+        "mostrarMapaDica": "Só aparece com a rua à mostra e com latitude e longitude.",
+        "coordenadasDica": "Copie do mapa que você usa: as duas, com ponto decimal.",
+        "foraDoHorarioDica": "Aparece quando a casa está fechada.",
+        "emergenciaDica": "O que fazer numa emergência fora do horário: outro endereço, outro telefone.",
+        "semTraducao": "Estes textos aparecem como você escrever, no idioma escolhido no perfil.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "invalido": {
+          "nome": "Use de 2 a 120 caracteres.",
+          "fuso": "Escolha o fuso da casa.",
+          "telefone": "Telefone com DDD, ou com + e o código do país.",
+          "email": "Confira o e-mail.",
+          "site": "Comece com https://",
+          "cep": "CEP com 8 números.",
+          "coordenadas": "Preencha as duas: latitude de -90 a 90 e longitude de -180 a 180."
+        }
+      }
     }
   },
   "settings": {
