@@ -33,12 +33,8 @@ function pontoDo(total: number, tom: TomDePendencia): IndicadorDaAbertura['tom']
 
 export function useAberturaDoInicio(dia: DiaDaCasa) {
   const { t } = useI18n()
-  const {
-    clinicaNaDemonstracao: hasClinicalProfile,
-    hotelNaDemonstracao: hasHotelProfile,
-    pendenciasClinicas,
-    pendenciasDoHotel,
-  } = useEspacos()
+  const { hasClinicalProfile, hasHotelProfile, pendenciasClinicas, pendenciasDoHotel } =
+    useEspacos()
 
   const daClinica = computed<IndicadorDaAbertura[]>(() => {
     const agenda = dia.clinica.value
@@ -56,7 +52,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, contagem.esperando),
         rotulo: t('inicio.espacos.clinica.recepcao'),
         icone: 'ph ph-door-open',
-        to: '/clinica/meu-dia',
+        to: '/veterinario/meu-dia',
         tom: contagem.esperando > 0 ? 'atencao' : undefined,
       },
       {
@@ -64,14 +60,14 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, contagem.agora),
         rotulo: t('inicio.espacos.clinica.consulta'),
         icone: 'ph ph-stethoscope',
-        to: '/clinica/meu-dia',
+        to: '/veterinario/meu-dia',
       },
       {
         id: 'pedidos',
         valor: pendenciasClinicas.carregado.value ? pedidos.total : null,
         rotulo: t('inicio.espacos.clinica.pedidos', { total: pedidos.total }, pedidos.total),
         icone: 'ph ph-calendar-plus',
-        to: '/clinica/pedidos',
+        to: '/veterinario/pedidos',
         tom: pontoDo(pedidos.total, pedidos.tom),
       },
       {
@@ -79,7 +75,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, porVir),
         rotulo: t('inicio.espacos.clinica.aSeguir'),
         icone: 'ph ph-clock',
-        to: '/clinica/agenda',
+        to: '/veterinario/agenda',
       },
     ]
   })

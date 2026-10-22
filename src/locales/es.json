@@ -421,22 +421,6 @@
         "fila": "Espera de vacante",
         "filaDica": "Añadir a alguien a la lista de espera"
       }
-    },
-    "demonstracao": {
-      "rotulo": "Demostración (datos locales)"
-    },
-    "avisos": {
-      "titulo": "Avisos",
-      "rotuloComNaoLidas": "Avisos, {total} sin leer | Avisos, {total} sin leer",
-      "de": "Los avisos de {parceiro}",
-      "marcarLidos": "Marcar como leídos",
-      "carregando": "Cargando los avisos",
-      "erro": "No se pudieron cargar los avisos.",
-      "tentar": "Intentar de nuevo",
-      "vazioTitulo": "Ningún aviso por aquí",
-      "vazio": "Cuando algo aquí requiera su atención, como un módulo por vencer, el aviso aparece en esta lista.",
-      "naoLido": "Sin leer",
-      "mais": "Ver avisos anteriores"
     }
   },
   "frame": {
@@ -691,8 +675,7 @@
       "emDia": "Todo al día por aquí.",
       "em": {
         "clinica": "{total} en la Clínica",
-        "hotel": "{total} en el Hotel",
-        "portal": "{total} en el Portal"
+        "hotel": "{total} en el Hotel"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -789,40 +772,14 @@
     },
     "modulos": {
       "titulo": "Módulos",
-      "rotulo": "Módulos de Clínica y Hotel",
+      "rotulo": "Acceso rápido",
       "novoAgendamento": "Nueva cita",
       "novoAgendamentoDetalhe": "Agendar en la clínica",
       "atendimentosHoje": "Ninguna consulta hoy | {total} consulta hoy | {total} consultas hoy",
       "hospedes": "Ningún huésped | {total} huésped | {total} huéspedes",
       "divulgacaoDetalhe": "Código, QR y materiales",
       "programasDetalhe": "Afiliado: {status}",
-      "acessosDetalhe": "Mascotas compartidas",
-      "CLINICA": {
-        "nome": "Clínica",
-        "descricao": "Agenda, historia clínica, recetas y vacunas, conectadas a la app del tutor."
-      },
-      "HOTEL": {
-        "nome": "Hotel",
-        "descricao": "Reservas, check-in, rutina de la casa y boletín al tutor."
-      },
-      "pedir": "Solicitar el módulo",
-      "sugerido": "Coincide con su registro",
-      "solicitado": "La solicitud está con el equipo PetJourney.",
-      "teste": "En prueba hasta el {data}.",
-      "selo": {
-        "solicitado": "En análisis",
-        "teste": "En prueba",
-        "somenteLeitura": "Solo consulta"
-      },
-      "somenteLeitura": {
-        "MODULO_SUSPENSO": "Módulo suspendido: puede consultar lo que ya se registró, pero no crear ni modificar.",
-        "MODULO_DESLIGADO": "Módulo desactivado: puede consultar lo que ya se registró, pero no crear ni modificar.",
-        "PRAZO_VENCIDO": "El período del módulo terminó: puede consultar lo que ya se registró, pero no crear ni modificar.",
-        "PARCEIRO_NAO_OPERACIONAL": "El registro de la empresa no está habilitado: puede consultar lo que ya se registró, pero no crear ni modificar."
-      },
-      "pedidoEnviado": "Solicitud enviada",
-      "pedidoEnviadoDetalhe": "El equipo PetJourney analizará la solicitud.",
-      "erro": "No funcionó"
+      "acessosDetalhe": "Mascotas compartidas"
     },
     "agenda": {
       "titulo": "Agenda",
@@ -2172,9 +2129,7 @@
         "papelTrocadoDetalhe": "{nome} ahora es {papel}.",
         "removido": "Persona quitada del equipo",
         "saiu": "Usted salió del equipo",
-        "erro": "No funcionó",
-        "funcoesSalvas": "Funciones guardadas",
-        "funcoesSalvasDetalhe": "{nome} ahora ve lo que esas funciones habilitan."
+        "erro": "No funcionó"
       },
       "gaveta": {
         "titulo": "Invitar al equipo",
@@ -2186,372 +2141,6 @@
         "enviar": "Enviar invitación",
         "cancelar": "Cancelar",
         "reenviarPendente": "Reenviar la invitación pendiente"
-      },
-      "definirFuncoes": "Definir funciones",
-      "funcao": {
-        "RECEPCAO": "Recepción",
-        "VETERINARIO": "Veterinario",
-        "ENFERMAGEM": "Enfermería",
-        "CUIDADOR": "Cuidador",
-        "BANHISTA": "Bañista",
-        "ADESTRADOR": "Adiestrador",
-        "GESTOR": "Gestión",
-        "FINANCEIRO": "Finanzas"
-      },
-      "funcaoDica": {
-        "RECEPCAO": "Agenda, solicitudes de turno, lista de espera y registro de pacientes; en el hotel, reservas y check-in.",
-        "VETERINARIO": "Agenda, historia clínica, vacunas e internación. Firmar recetas y cerrar historias requiere matrícula (CRMV).",
-        "ENFERMAGEM": "Vacunas, internación y consulta de la historia clínica y la agenda.",
-        "CUIDADOR": "La rutina y los huéspedes del hotel.",
-        "BANHISTA": "Los servicios y la rutina del hotel, como el cuidador.",
-        "ADESTRADOR": "Los servicios y la rutina del hotel, como el cuidador.",
-        "GESTOR": "Configura la clínica y el hotel, planifica el stock, importa la base y ve la auditoría.",
-        "FINANCEIRO": "Consulta el stock y se ocupa de las finanzas."
-      },
-      "funcoes": {
-        "titulo": "Funciones en la clínica y el hotel",
-        "lede": "Lo que hace la persona decide lo que ve en el menú. Puede marcar más de una.",
-        "nenhuma": "Sin función, la persona ve solo el portal comercial: programas, divulgación y accesos.",
-        "salvar": "Guardar funciones"
-      }
-    },
-    "profissionais": {
-      "titulo": "Profesionales",
-      "resumo": "Las fichas de quien atiende, vacuna, receta o cuida, con o sin usuario en el portal.",
-      "cadastrar": "Registrar profesional",
-      "erroCarregar": "No fue posible cargar los profesionales.",
-      "conselho": {
-        "CRMV": "CRMV",
-        "OUTRO": "Otro colegio",
-        "NENHUM": "Sin colegio"
-      },
-      "conselhoCurto": "Colegio",
-      "comLogin": "usuario de {nome}",
-      "semLogin": "sin usuario",
-      "foraDaAgenda": "fuera de la agenda",
-      "selo": {
-        "conferido": "CRMV verificado",
-        "aConferir": "CRMV por verificar"
-      },
-      "editar": "Editar ficha",
-      "desativar": "Desactivar ficha",
-      "reativar": "Reactivar ficha",
-      "desativadas": "Fichas desactivadas ({n})",
-      "vazio": "Ningún profesional registrado",
-      "vazioDica": "La ficha es lo que citan la agenda y la historia clínica: registre a quien atiende, aunque no tenga usuario.",
-      "crmv": {
-        "titulo": "Falta su ficha con CRMV",
-        "corpo": "Escribir la historia clínica, liberar el resumen al tutor y firmar recetas requieren una ficha activa con CRMV, número y estado.",
-        "peca": "Escribir la historia clínica, liberar el resumen y firmar recetas requieren una ficha con CRMV. Pida al dueño de la cuenta que registre la suya.",
-        "cadastrar": "Registrar mi ficha",
-        "completar": "Completar mi CRMV"
-      },
-      "confirmarDesativar": {
-        "titulo": "¿Desactivar la ficha de {nome}?",
-        "mensagem": "La ficha sale de la agenda y de las listas, pero sigue en los registros que ya citan a esta persona. Puede reactivarla después."
-      },
-      "toast": {
-        "salvo": "Ficha guardada",
-        "desativado": "Ficha desactivada",
-        "reativado": "Ficha reactivada"
-      },
-      "gaveta": {
-        "tituloNovo": "Nuevo profesional",
-        "tituloEditar": "Ficha del profesional",
-        "nome": "Nombre",
-        "nomeInvalido": "Indique el nombre, con al menos 2 letras.",
-        "conselho": "Colegio profesional",
-        "registro": "Número de matrícula",
-        "uf": "Estado",
-        "registroInvalido": "Indique el número y el estado de la matrícula.",
-        "perdeSeloRegistro": "Cambiar el número o el estado quita el sello de verificado: el CRMV vuelve a la verificación de PetJourney.",
-        "especialidades": "Especialidades",
-        "especialidadesDica": "Hasta 5. Escriba cada una y presione Enter.",
-        "cor": "Color en la agenda",
-        "corN": "Color {n}",
-        "atendeNaAgenda": "Atiende en la agenda",
-        "atendeNaAgendaDica": "Se convierte en columna de la agenda y entra en las sugerencias de horario.",
-        "login": "Usuario del portal",
-        "loginDica": "Vincule la ficha al usuario de quien atiende. Quien no usa el portal queda sin usuario.",
-        "semLogin": "Sin usuario",
-        "perdeSeloLogin": "Vincular esta ficha a un usuario quita el sello de verificado: el CRMV vuelve a la verificación de PetJourney.",
-        "salvar": "Guardar ficha"
-      }
-    },
-    "estabelecimento": {
-      "titulo": "Establecimiento",
-      "erroCarregar": "No se pudo cargar el establecimiento.",
-      "publicar": "Publicar página",
-      "publicarFalta": "Antes de publicar, complete lo que la página pública indica como faltante.",
-      "despublicar": "Quitar de línea",
-      "editar": "Editar",
-      "naoInformado": "Sin informar",
-      "consulta": {
-        "soDono": "Solo el dueño edita el establecimiento. Aquí ve cómo está.",
-        "suspenso": "Con el registro suspendido, el establecimiento queda solo para consulta. El dueño aún puede quitar la página de línea."
-      },
-      "situacao": {
-        "noAr": "La página está en línea",
-        "foraDoAr": "Publicada, pero fuera de línea",
-        "naoPublicada": "La página aún no se publicó"
-      },
-      "pagina": {
-        "titulo": "Página pública",
-        "desde": "Publicada el {data}",
-        "foraDoArDica": "Vuelve sola cuando el registro esté aprobado y activo.",
-        "falta": "Para publicar, falta:"
-      },
-      "pendencia": {
-        "APROVACAO": "la aprobación del registro por el equipo PetJourney",
-        "nomePublico": "el nombre público",
-        "fusoHorario": "la zona horaria",
-        "telefone": "un teléfono (público, WhatsApp o de guardia)"
-      },
-      "slug": {
-        "rotulo": "Dirección de la página",
-        "trocar": "Cambiar dirección",
-        "depoisDaAprovacao": "La dirección de la página queda disponible cuando el registro sea aprobado.",
-        "nasceDoNome": "La dirección se crea a partir del nombre público la primera vez que guarde.",
-        "invalido": "Use de 3 a 60 letras minúsculas, números y guiones, sin guion al inicio, al final ni dos seguidos.",
-        "regras": "Letras minúsculas, números y guiones, de 3 a 60 caracteres.",
-        "antigoContinua": "La dirección anterior sigue llevando a la página. Guardamos las 5 últimas."
-      },
-      "perfil": {
-        "titulo": "Perfil y contactos",
-        "comecoTitulo": "Empiece aquí",
-        "comeco": "El nombre que aparece en la página y la zona horaria en que el negocio cuenta las horas.",
-        "preencher": "Completar el perfil"
-      },
-      "endereco": {
-        "titulo": "Dirección",
-        "vazio": "No hay dirección registrada.",
-        "mostraRua": "La página muestra la calle y el número.",
-        "soBairro": "La página muestra solo el barrio, la ciudad y el estado.",
-        "semCoordenadas": "Sin ubicación en el mapa.",
-        "mapaDesligado": "El mapa no aparece en la página.",
-        "mapaLigado": "El mapa aparece en la página."
-      },
-      "horario": {
-        "titulo": "Horarios",
-        "noFuso": "Horarios en la zona {fuso}.",
-        "vazio": "No hay horarios registrados. Sin ellos, la página no dice si el negocio está abierto.",
-        "aberto": "Abierto",
-        "fechado": "Cerrado",
-        "abertoAgora": "Abierto ahora",
-        "abertoFechaAs": "Abierto ahora, cierra a las {hora}",
-        "fechadoAgora": "Cerrado ahora",
-        "fechadoAbreAs": "Cerrado ahora, abre a las {hora}",
-        "fechadoAbreEm": "Cerrado ahora, abre el {dia} a las {hora}",
-        "regras": "Abierto 24 horas: de 00:00 a 24:00. Si pasa de la medianoche, divídalo en dos días.",
-        "ate": "a",
-        "abreAs": "{dia}: abre a las",
-        "fechaAs": "{dia}: cierra a las",
-        "copiar": "Usar el horario del {dia} en los otros días abiertos",
-        "intervalo": "Pausa",
-        "intervaloDe": "{dia}: la pausa empieza a las",
-        "intervaloAte": "{dia}: la pausa termina a las",
-        "comIntervalo": "Pausa",
-        "semIntervalo": "Sin pausa",
-        "problema": {
-          "HORA_INVALIDA": "Hora no válida. Use de 00:00 a 23:59; 24:00 solo para cerrar.",
-          "ABRE_E_FECHA_OBRIGATORIOS": "Indique la hora de apertura y la de cierre.",
-          "ABRE_DEPOIS_DE_FECHA": "El inicio debe ser antes del fin.",
-          "INTERVALO_INCOMPLETO": "La pausa necesita inicio y fin.",
-          "INTERVALO_FORA_DO_EXPEDIENTE": "La pausa debe caber dentro del horario de atención.",
-          "SEMANA_INCOMPLETA": "La semana necesita los 7 días."
-        }
-      },
-      "dia": {
-        "titulo": "Días especiales",
-        "feriados": "Feriados nacionales",
-        "feriadosDe": "Copiar los feriados de {ano}",
-        "adicionar": "Agregar día",
-        "vazio": "No hay días especiales. Los feriados y los días con otro horario van aquí y reemplazan al de la semana.",
-        "remover": "Quitar {nome}",
-        "data": "Fecha",
-        "faltaData": "Elija la fecha en el calendario.",
-        "nome": "Nombre",
-        "nomeExemplo": "Nochebuena",
-        "faltaNome": "Póngale un nombre al día.",
-        "fechado": "Cerrado todo el día",
-        "abre": "Abre a las",
-        "fecha": "Cierra a las",
-        "fechadoDica": "Desactívelo para dar un horario distinto ese día.",
-        "abertoDica": "Ese día vale este horario y no el de la semana."
-      },
-      "mensagens": {
-        "titulo": "Mensajes al tutor"
-      },
-      "confirmar": {
-        "voltar": "Volver",
-        "despublicar": {
-          "titulo": "¿Quitar la página de línea?",
-          "mensagem": "Quien abra la dirección verá que la página no está disponible. Puede publicarla de nuevo cuando quiera.",
-          "botao": "Quitar de línea"
-        },
-        "remover": {
-          "titulo": "¿Quitar el día especial?",
-          "mensagem": "{nome} sale de la lista y el horario de la semana vuelve a valer en esa fecha.",
-          "botao": "Quitar"
-        }
-      },
-      "toast": {
-        "erro": "No funcionó",
-        "publicada": "Página publicada",
-        "despublicada": "La página quedó fuera de línea",
-        "salvo": {
-          "perfil": "Perfil guardado",
-          "endereco": "Dirección guardada",
-          "mensagens": "Mensajes guardados",
-          "horarios": "Horarios guardados"
-        },
-        "diaAdicionado": "Día especial agregado",
-        "diaRemovido": "Día especial quitado",
-        "feriadosCopiados": "Feriados copiados",
-        "slugTrocado": "Dirección cambiada",
-        "feriadosNovos": "Ningún feriado nuevo. | {total} feriado nuevo. | {total} feriados nuevos.",
-        "feriadosJaExistiam": "{total} ya estaba en la lista. | {total} ya estaban en la lista."
-      },
-      "campo": {
-        "nomePublico": "Nombre público",
-        "descricao": "Descripción",
-        "fusoHorario": "Zona horaria",
-        "idiomaDosTextos": "Idioma de los textos",
-        "telefonePublico": "Teléfono",
-        "whatsappPublico": "WhatsApp",
-        "telefonePlantao": "Teléfono de guardia",
-        "emailPublico": "Correo de contacto",
-        "site": "Sitio web",
-        "cep": "Código postal",
-        "logradouro": "Calle",
-        "numero": "Número",
-        "complemento": "Complemento",
-        "bairro": "Barrio",
-        "cidade": "Ciudad",
-        "uf": "Estado",
-        "mostrarEndereco": "Mostrar calle y número en la página pública",
-        "mostrarMapa": "Mostrar el mapa",
-        "latitude": "Latitud",
-        "longitude": "Longitud",
-        "mensagemForaDoHorario": "Mensaje fuera del horario",
-        "orientacaoEmergencia": "Indicaciones para emergencias"
-      },
-      "idioma": {
-        "ptBR": "Portugués (Brasil)",
-        "enUS": "Inglés (EE. UU.)",
-        "enGB": "Inglés (Reino Unido)",
-        "es419": "Español (Latinoamérica)",
-        "srLatn": "Serbio",
-        "ar": "Árabe"
-      },
-      "gaveta": {
-        "titulo": {
-          "perfil": "Perfil y contactos",
-          "endereco": "Dirección",
-          "mensagens": "Mensajes al tutor",
-          "horarios": "Horarios de la semana",
-          "dia": "Nuevo día especial",
-          "slug": "Dirección de la página"
-        },
-        "opcional": "(opcional)",
-        "buscarFuso": "Buscar ciudad o región",
-        "fusoDica": "Los horarios del negocio, la agenda y el \"abierto ahora\" se cuentan en esta zona.",
-        "idiomaDica": "El idioma en que escribe la descripción y los mensajes. La página no traduce estos textos.",
-        "contatos": "Contactos en la página",
-        "contatosDica": "Para publicar, basta uno de los tres teléfonos.",
-        "plantaoDica": "Para fuera del horario. Vacío significa sin guardia.",
-        "emailDica": "Aparece en la página; no es el correo de su cuenta.",
-        "naPagina": "En la página pública",
-        "mostrarEnderecoDica": "Desactivado, la página muestra solo barrio, ciudad y estado, sin mapa.",
-        "mostrarMapaDica": "Solo aparece con la calle visible y con latitud y longitud.",
-        "coordenadasDica": "Cópielas del mapa que usa: las dos, con punto decimal.",
-        "foraDoHorarioDica": "Aparece cuando el negocio está cerrado.",
-        "emergenciaDica": "Qué hacer en una emergencia fuera del horario: otra dirección, otro teléfono.",
-        "semTraducao": "Estos textos aparecen tal como los escriba, en el idioma elegido en el perfil.",
-        "cancelar": "Cancelar",
-        "salvar": "Guardar",
-        "invalido": {
-          "nome": "Use de 2 a 120 caracteres.",
-          "fuso": "Elija la zona horaria del negocio.",
-          "telefone": "Teléfono con código de área, o con + y el código del país.",
-          "email": "Revise el correo.",
-          "site": "Empiece con https://",
-          "cep": "Código postal con 8 números.",
-          "coordenadas": "Complete las dos: latitud de -90 a 90 y longitud de -180 a 180."
-        }
-      }
-    },
-    "auditoria": {
-      "titulo": "Auditoría",
-      "resumo": "Quién leyó, escribió, publicó o exportó datos clínicos, y cuándo. Sin el contenido, solo la acción.",
-      "erro": "No se pudo cargar la auditoría.",
-      "tentar": "Intentar de nuevo",
-      "carregando": "Cargando la auditoría",
-      "mais": "Ver eventos anteriores",
-      "emNomeDe": "en nombre de {nome}",
-      "campos": "campos: {campos}",
-      "protocolo": "protocolo {protocolo}",
-      "filtros": {
-        "rotulo": "Filtrar la auditoría",
-        "acao": "Acción",
-        "todas": "Todas",
-        "pessoa": "Persona",
-        "todos": "Todas",
-        "periodo": "Período",
-        "qualquerData": "Cualquier fecha",
-        "limpar": "Quitar filtros"
-      },
-      "vazio": {
-        "titulo": "Nada registrado todavía",
-        "texto": "Cuando alguien del equipo abra, escriba, publique o exporte un dato clínico, la acción aparece aquí.",
-        "filtrado": "Nada con estos filtros."
-      },
-      "dia": {
-        "hoje": "Hoy, {data}",
-        "ontem": "Ayer, {data}"
-      },
-      "ator": {
-        "suporte": "Soporte PetJourney",
-        "sistema": "El sistema",
-        "semNome": "Alguien que salió del equipo",
-        "selo": {
-          "SUPORTE": "Soporte",
-          "SISTEMA": "Automático"
-        }
-      },
-      "acao": {
-        "LER": "Lectura",
-        "CRIAR": "Creación",
-        "ALTERAR": "Modificación",
-        "FINALIZAR": "Finalización",
-        "ANULAR": "Anulación",
-        "PUBLICAR": "Publicación en la app",
-        "IMPRIMIR": "Impresión",
-        "EXPORTAR": "Exportación",
-        "LER_DADO_DO_APP": "Lectura de datos de la app"
-      },
-      "frase": {
-        "LER": "abrió {recurso}",
-        "CRIAR": "creó {recurso}",
-        "ALTERAR": "modificó {recurso}",
-        "FINALIZAR": "finalizó {recurso}",
-        "ANULAR": "anuló {recurso}",
-        "PUBLICAR": "publicó {recurso}",
-        "IMPRIMIR": "imprimió {recurso}",
-        "EXPORTAR": "exportó {recurso}",
-        "LER_DADO_DO_APP": "abrió {recurso}"
-      },
-      "recurso": {
-        "atendimento": "una atención",
-        "paciente_do_parceiro": "la ficha de un paciente",
-        "cliente_do_parceiro": "el registro de un tutor",
-        "alerta_do_paciente": "una alerta de paciente",
-        "aplicacao_vacina": "una aplicación de vacuna",
-        "consulta_do_app": "una consulta para la app",
-        "vacina_do_app": "una vacuna para la app",
-        "diario_do_app": "el diario de la app",
-        "trilha_clinica": "la auditoría",
-        "outro": "un registro ({tipo})"
       }
     }
   },
@@ -2894,6 +2483,10 @@
     "resumoEmpresa": "Entró como {email}, en {empresa}."
   },
   "clinico": {
+    "modulo": {
+      "visivel": "Módulo clínico visible",
+      "oculto": "Módulo clínico oculto"
+    },
     "navegacao": {
       "secao": "Clínica",
       "agora": "Ahora",
@@ -7568,6 +7161,10 @@
       "titulo": "Registrar medicación",
       "via": "Vía"
     },
+    "modulo": {
+      "oculto": "Módulo hotel oculto",
+      "visivel": "Módulo hotel visible"
+    },
     "motivoCancelamento": {
       "animal-doente": "Animal enfermo",
       "hotel-indisponivel": "Hotel sin plaza",
@@ -8879,16 +8476,5 @@
       "rotinaPadrao": "Rutina estándar"
     },
     "abasAria": "Pantallas de {destino}"
-  },
-  "captcha": {
-    "erro": "No se pudo cargar la verificación de seguridad. Recargue la página e intente de nuevo."
-  },
-  "pendencias": {
-    "contador": {
-      "convitesPendentes": "{total} invitación esperando respuesta | {total} invitaciones esperando respuesta",
-      "acessosTemporariosAtivos": "{total} acceso temporal activo | {total} accesos temporales activos",
-      "agendamentosSemConfirmacao": "{total} cita sin confirmar | {total} citas sin confirmar",
-      "outra": "{total} pendiente | {total} pendientes"
-    }
   }
 }

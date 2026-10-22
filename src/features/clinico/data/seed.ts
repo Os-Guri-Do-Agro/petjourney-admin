@@ -828,7 +828,7 @@ function casosDoDiaAncora(ancora: ISODate): {
   blocks: Block[]
   casos: CasoDificil[]
 } {
-  const rotaAgenda = (foco: string) => `/clinica/agenda?data=${ancora}&foco=${foco}`
+  const rotaAgenda = (foco: string) => `/veterinario/agenda?data=${ancora}&foco=${foco}`
   const appointments: Appointment[] = []
 
   // 1. Sobreposição: dois pacientes na mesma profissional, no mesmo horário.
@@ -1149,7 +1149,7 @@ function casosDoDiaAncora(ancora: ISODate): {
     },
     {
       id: 'duas-salas',
-      rota: `/clinica/agenda?data=${ancora}&agrupar=sala&foco=apt-cirurgia-centro`,
+      rota: `/veterinario/agenda?data=${ancora}&agrupar=sala&foco=apt-cirurgia-centro`,
       appointmentId: 'apt-cirurgia-centro',
       encounterId: null,
     },
@@ -1161,19 +1161,19 @@ function casosDoDiaAncora(ancora: ISODate): {
     },
     {
       id: 'bloqueio-recorrente',
-      rota: `/clinica/agenda?data=${proximoDiaDaSemana(ancora, 2)}`,
+      rota: `/veterinario/agenda?data=${proximoDiaDaSemana(ancora, 2)}`,
       appointmentId: null,
       encounterId: null,
     },
     {
       id: 'dia-fechado',
-      rota: `/clinica/agenda?data=${addDays(ancora, 9)}`,
+      rota: `/veterinario/agenda?data=${addDays(ancora, 9)}`,
       appointmentId: null,
       encounterId: null,
     },
     {
       id: 'falta-reincidente',
-      rota: '/clinica/faltas',
+      rota: '/veterinario/faltas',
       appointmentId: null,
       encounterId: null,
     },
@@ -1183,10 +1183,10 @@ function casosDoDiaAncora(ancora: ISODate): {
       appointmentId: 'apt-cancelado',
       encounterId: null,
     },
-    { id: 'fila-expirando', rota: '/clinica/fila', appointmentId: null, encounterId: null },
+    { id: 'fila-expirando', rota: '/veterinario/fila', appointmentId: null, encounterId: null },
     {
       id: 'alergia-prescricao',
-      rota: '/clinica/atendimento/enc-apt-alergia',
+      rota: '/veterinario/atendimento/enc-apt-alergia',
       appointmentId: 'apt-alergia',
       encounterId: 'enc-apt-alergia',
     },
@@ -1198,7 +1198,7 @@ function casosDoDiaAncora(ancora: ISODate): {
     },
     {
       id: 'retorno-sem-horario',
-      rota: '/clinica/meu-dia',
+      rota: '/veterinario/meu-dia',
       appointmentId: 'apt-retorno-pendente',
       encounterId: null,
     },
@@ -1210,7 +1210,7 @@ function casosDoDiaAncora(ancora: ISODate): {
       ] as const
     ).map(([id, petId, appointmentId]) => ({
       id,
-      rota: `/clinica/paciente/${petId}/resumo`,
+      rota: `/veterinario/paciente/${petId}/resumo`,
       appointmentId,
       encounterId: null,
     })),
@@ -2453,7 +2453,7 @@ function casosDaInternacao(internacao: DatasetDeInternacao): CasoDificil[] {
       ? [
           {
             id: 'internacao-piora' as const,
-            rota: `/clinica/internacao/${tofu.id}?aba=boletim`,
+            rota: `/veterinario/internacao/${tofu.id}?aba=boletim`,
             appointmentId: null,
             encounterId: null,
           },
@@ -2461,7 +2461,7 @@ function casosDaInternacao(internacao: DatasetDeInternacao): CasoDificil[] {
       : []),
     {
       id: 'internacao-troca-plantao' as const,
-      rota: '/clinica/internacao?passagem=1',
+      rota: '/veterinario/internacao?passagem=1',
       appointmentId: null,
       encounterId: null,
     },
@@ -2469,7 +2469,7 @@ function casosDaInternacao(internacao: DatasetDeInternacao): CasoDificil[] {
       ? [
           {
             id: 'internacao-boletim-horario' as const,
-            rota: `/clinica/internacao/${cacau.id}?aba=boletim`,
+            rota: `/veterinario/internacao/${cacau.id}?aba=boletim`,
             appointmentId: null,
             encounterId: null,
           },

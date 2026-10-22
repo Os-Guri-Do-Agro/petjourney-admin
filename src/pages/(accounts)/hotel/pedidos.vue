@@ -8,7 +8,7 @@
  * por quê. O aceite cria a reserva `pendente` no mapa, com a origem do pedido, e avisa quem pediu
  * — falta o sinal, como em toda reserva da casa.
  *
- * Irmã da caixa de pedidos da clínica (`/clinica/pedidos`): a mesma ordem pelo prazo, a
+ * Irmã da caixa de pedidos da clínica (`/veterinario/pedidos`): a mesma ordem pelo prazo, a
  * contagem regressiva com tom em cada linha, a resposta numa gaveta ao lado da caixa (a linha
  * aberta fica tingida e a lista continua à vista), o histórico recolhido embaixo e o celular de
  * quem pede numa gaveta que empurra a página. As ações do alto são só a configuração e a prévia do

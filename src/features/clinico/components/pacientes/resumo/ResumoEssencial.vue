@@ -135,7 +135,7 @@ const ultima = computed(() => {
     </dl>
 
     <footer v-if="ultima" class="ficha-cartao__pe">
-      <RouterLink class="ui-mais" :to="`/clinica/atendimento/${ultima.encounterId}`">
+      <RouterLink class="ui-mais" :to="`/veterinario/atendimento/${ultima.encounterId}`">
         {{ t('clinico.resumoDoPaciente.essencial.abrirProntuario') }}
         <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>

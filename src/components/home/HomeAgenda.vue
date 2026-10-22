@@ -319,8 +319,8 @@ const ICONE_DO_LUGAR = { clinica: 'ph ph-stethoscope', hotel: 'ph ph-bed' } as c
 
 const rotaDaAgenda = computed<RouteLocationRaw>(() =>
   ehHoje.value || !selecionado.value
-    ? '/clinica/agenda'
-    : { path: '/clinica/agenda', query: { data: selecionado.value } },
+    ? '/veterinario/agenda'
+    : { path: '/veterinario/agenda', query: { data: selecionado.value } },
 )
 </script>
 

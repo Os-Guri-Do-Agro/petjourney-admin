@@ -107,7 +107,7 @@ function nomeDaVacina(id: string) {
 
 function abrirCarteira() {
   if (props.pet) {
-    void router.push(`/clinica/paciente/${props.pet.id}/vacinas`)
+    void router.push(`/veterinario/paciente/${props.pet.id}/vacinas`)
   }
 }
 </script>

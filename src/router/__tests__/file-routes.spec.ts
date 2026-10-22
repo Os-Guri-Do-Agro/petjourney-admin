@@ -3,7 +3,7 @@
  *
  * O arquivo monta rota a partir de caminho, e há uma regra que não é óbvia lendo a pasta:
  * `paciente/novo.vue` e `paciente/[petId]/historico.vue` moram lado a lado, e é a ordenação por
- * `routePriority` que garante que `/clinica/paciente/novo` caia na página de cadastro em vez
+ * `routePriority` que garante que `/veterinario/paciente/novo` caia na página de cadastro em vez
  * de ser lida como um `petId` chamado "novo". Sem esta prova, mover um arquivo de lugar quebraria
  * o cadastro de paciente de um jeito silencioso: a tela abriria, e mostraria o histórico de um
  * paciente que não existe.
@@ -21,15 +21,15 @@ function resolver(caminho: string) {
 }
 
 describe('rotas por arquivo', () => {
-  it('leva /clinica/paciente/novo ao cadastro, e não ao histórico', () => {
-    const resolvida = resolver('/clinica/paciente/novo')
+  it('leva /veterinario/paciente/novo ao cadastro, e não ao histórico', () => {
+    const resolvida = resolver('/veterinario/paciente/novo')
 
-    expect(resolvida.name).toBe('clinica-paciente-novo')
+    expect(resolvida.name).toBe('veterinario-paciente-novo')
     expect(resolvida.params.petId).toBeUndefined()
   })
 
   it('continua resolvendo o histórico de um paciente de verdade', () => {
-    const resolvida = resolver('/clinica/paciente/pet-luna/historico')
+    const resolvida = resolver('/veterinario/paciente/pet-luna/historico')
 
     expect(resolvida.params.petId).toBe('pet-luna')
   })
@@ -38,8 +38,8 @@ describe('rotas por arquivo', () => {
     /* É esta ordem que o teste acima depende; afirmá-la aqui explica por que ele passa. */
     const posicaoDe = (caminho: string) => routes.findIndex((rota) => rota.path === caminho)
 
-    expect(posicaoDe('/clinica/paciente/novo')).toBeLessThan(
-      posicaoDe('/clinica/paciente/:petId/historico'),
+    expect(posicaoDe('/veterinario/paciente/novo')).toBeLessThan(
+      posicaoDe('/veterinario/paciente/:petId/historico'),
     )
   })
 })

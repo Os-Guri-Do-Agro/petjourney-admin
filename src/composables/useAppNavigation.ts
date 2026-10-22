@@ -4,11 +4,10 @@ import { useI18n } from 'vue-i18n'
 import {
   useClinicoPendencias,
   type ContagemDePendencia,
-  type TomDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
 import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
-import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
-import { usePendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useModuloClinico } from '@/composables/useModuloClinico'
+import { useModuloHotel } from '@/composables/useModuloHotel'
 import { useParceiroStore } from '@/stores/parceiro'
 
 export type AppNavigationItem = {
@@ -62,6 +61,47 @@ export type AppNavigationSection = {
   items: AppNavigationItem[]
   blocos?: AppNavigationBloco[]
 }
+
+/**
+ * Menu clínico. Ligado com a entrada do módulo `src/features/clinico`, que substituiu os
+ * stubs de `/veterinario/*` por telas com camada de dados própria.
+ *
+ * A camada é mocada e determinística (`features/clinico/data`), com a mesma forma da API
+ * futura — nenhum dado fictício vaza para fora do módulo.
+ */
+export const CLINICAL_MENU_ENABLED = true
+
+/**
+ * Modo demonstração do módulo clínico.
+ *
+ * Com `true`, o menu clínico aparece para **qualquer conta do portal**, mesmo sem perfil
+ * veterinário — é o que permite apresentar o módulo a partir de uma conta de parceiro enquanto
+ * a API clínica não existe.
+ *
+ * O interruptor é uma constante e não uma variável de ambiente de propósito: ele precisa ser
+ * revisto por quem lê o código, não esquecido ligado num painel de deploy. **Vire para `false`
+ * junto com a primeira entrega da API clínica** — a partir daí o que está atrás do menu é
+ * prontuário de paciente real
+ */
+export const CLINICAL_MENU_DEMO = true
+
+/**
+ * Menu do hotel. Ligado com a entrada do módulo `src/features/hotel`.
+ *
+ * A camada é mocada e determinística (`features/hotel/data`), com a mesma forma da API futura —
+ * nenhum dado fictício vaza para fora do módulo.
+ */
+export const HOTEL_MENU_ENABLED = true
+
+/**
+ * Modo demonstração do módulo hotel.
+ *
+ * Mesma constante e mesma razão do clínico: enquanto o módulo roda sobre dados de demonstração,
+ * ele é apresentável a partir de qualquer conta do portal. **Vire para `false` junto com a
+ * primeira entrega da API de hospedagem** — a partir daí o que está atrás do menu é a rotina de um
+ * animal de verdade, com o telefone de um responsável de verdade.
+ */
+export const HOTEL_MENU_DEMO = true
 
 /**
  * Rotas do hotel, agrupadas pela pergunta que respondem.
@@ -163,18 +203,18 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     id: 'agora',
     key: 'clinico.navegacao.agora',
     rotas: [
-      { key: 'clinico.meuDia.titulo', to: '/clinica/meu-dia', icon: 'ph ph-sun' },
-      { key: 'clinico.agenda.titulo', to: '/clinica/agenda', icon: 'ph ph-calendar-blank' },
+      { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+      { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'ph ph-calendar-blank' },
       /*
        * Logo depois da agenda: o pedido do app e do link é horário esperando alguém da recepção
        * dizer sim — trabalho de agora, com prazo prometido a quem pediu.
        */
       {
         key: 'clinico.pedidos.titulo',
-        to: '/clinica/pedidos',
+        to: '/veterinario/pedidos',
         icon: 'ph ph-calendar-plus',
       },
-      { key: 'clinico.fila.titulo', to: '/clinica/fila', icon: 'ph ph-hourglass' },
+      { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
     ],
   },
   {
@@ -188,29 +228,29 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     rotas: [
       {
         key: 'clinico.atendimentos.titulo',
-        to: '/clinica/atendimentos',
+        to: '/veterinario/atendimentos',
         icon: 'ph ph-note-pencil',
       },
-      { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
+      { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'ph ph-building' },
     ],
   },
   {
     id: 'pendencias',
     key: 'clinico.navegacao.pendencias',
     rotas: [
-      { key: 'clinico.atividades.titulo', to: '/clinica/atividades', icon: 'ph ph-list-bullets' },
-      { key: 'clinico.faltas.titulo', to: '/clinica/faltas', icon: 'ph ph-user-minus' },
+      { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'ph ph-list-bullets' },
+      { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'ph ph-user-minus' },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
-      { key: 'clinico.vacinas.titulo', to: '/clinica/vacinas', icon: 'ph ph-shield' },
+      { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'ph ph-shield' },
       /*
        * Logo abaixo de Vacinas: é a geladeira das mesmas vacinas, e o selo é o que falta comprar —
        * pendência de verdade, que cancela a consulta que a lista de chamada trouxe de volta.
        */
-      { key: 'clinico.estoque.titulo', to: '/clinica/estoque', icon: 'ph ph-package' },
+      { key: 'clinico.estoque.titulo', to: '/veterinario/estoque', icon: 'ph ph-package' },
       /* Pelo mesmo motivo: é onde mora o alerta de adesão — para quem a clínica precisa ligar. */
       {
         key: 'clinico.adesao.titulo',
-        to: '/clinica/tratamentos',
+        to: '/veterinario/tratamentos',
         icon: 'ph ph-calendar-check',
       },
     ],
@@ -218,56 +258,66 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
   {
     id: 'analise',
     key: 'clinico.navegacao.analise',
-    rotas: [{ key: 'clinico.resumo.titulo', to: '/clinica/resumo', icon: 'ph ph-chart-bar' }],
+    rotas: [{ key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'ph ph-chart-bar' }],
   },
 ]
 
 const PATIENT_ROUTES = [
-  { key: 'clinico.pacientes.titulo', to: '/clinica/pacientes', icon: 'ph ph-users' },
-  { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
+  { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'ph ph-users' },
+  { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'ph ph-book-open' },
 ] as const
 
 export function useAppNavigation() {
-  const { t, te, locale } = useI18n()
+  const { t, locale } = useI18n()
   const parceiroStore = useParceiroStore()
 
   /**
-   * Quem vê cada tela da Clínica e do Hotel: o módulo ligado no servidor, a permissão da conta e a
-   * tela já integrada à API, ou tudo no modo demonstração (`navegacao/rotas-dos-modulos.ts`).
-   * Uma casa pode ter os dois módulos, um só, ou nenhum: os portões são independentes.
+   * Quem vê o módulo clínico.
+   *
+   * Exigia `hasVeterinarioProfile()` — o claim `veterinarioId` no token. Conta de parceiro não
+   * traz esse claim, então o menu não montava para ninguém do portal, e o módulo só era
+   * alcançável digitando `/veterinario/...` na barra de endereço (a rota nunca exigiu o perfil;
+   * o guard só pede sessão).
+   *
+   * Enquanto o módulo roda sobre a camada mocada, o menu está aberto a qualquer conta do portal,
+   * para poder ser demonstrado. **Quando a API clínica existir, isto volta a exigir o perfil** —
+   * aí o que está atrás do menu é prontuário de paciente real, e prontuário não se mostra a quem
+   * não é do corpo clínico.
    */
-  const { podeAbrir, demonstracao } = useAcessoAosModulos()
+  const { ativo: moduloClinicoAtivo } = useModuloClinico()
+  const { ativo: moduloHotelAtivo } = useModuloHotel()
 
-  /** Os blocos de um módulo só com os destinos que esta conta abre; bloco vazio sai. */
-  function blocosVisiveis(blocos: readonly BlocoDeModulo[]): AppNavigationBloco[] {
-    return blocos
-      .map((bloco) => ({
-        id: bloco.id,
-        label: t(bloco.key),
-        items: bloco.rotas.filter((rota) => podeAbrir(rota.to)).map(decorarRota),
-      }))
-      .filter((bloco) => bloco.items.length > 0)
-  }
+  const hasClinicalProfile = computed(
+    () =>
+      /*
+       * O interruptor oculto vem **antes** de tudo: enquanto as telas rodam sobre dados
+       * mocados, elas não aparecem para quem abriu o portal para trabalhar. Um menu
+       * "Pacientes" com bichos que não existem é indistinguível de um defeito.
+       *
+       * Ligar é decisão de quem vai demonstrar — ver `useModuloClinico`.
+       */
+      moduloClinicoAtivo.value && CLINICAL_MENU_ENABLED && CLINICAL_MENU_DEMO,
+  )
+
+  /**
+   * Quem vê o módulo hotel.
+   *
+   * Mesma regra e mesma ordem do clínico: o interruptor oculto vem antes de tudo. Uma casa pode
+   * ter os dois módulos, um só, ou nenhum — e por isso os dois portões são independentes.
+   */
+  const hasHotelProfile = computed(
+    () => moduloHotelAtivo.value && HOTEL_MENU_ENABLED && HOTEL_MENU_DEMO,
+  )
 
   const hotelBlocos = computed<AppNavigationBloco[]>(() => {
     void locale.value
 
-    return blocosVisiveis(HOTEL_BLOCKS)
+    return HOTEL_BLOCKS.map((bloco) => ({
+      id: bloco.id,
+      label: t(bloco.key),
+      items: bloco.rotas.map(decorarRota),
+    }))
   })
-
-  /*
-   * Se o módulo aparece decide-se pelas rotas, e não pelos itens já decorados: os itens levam os
-   * selos, os selos vêm das pendências, e as pendências perguntam se o módulo aparece.
-   */
-  const hasClinicalProfile = computed(
-    () =>
-      CLINICAL_BLOCKS.some((bloco) => bloco.rotas.some((rota) => podeAbrir(rota.to))) ||
-      PATIENT_ROUTES.some((rota) => podeAbrir(rota.to)),
-  )
-
-  const hasHotelProfile = computed(() =>
-    HOTEL_BLOCKS.some((bloco) => bloco.rotas.some((rota) => podeAbrir(rota.to))),
-  )
 
   const hotelItems = computed<AppNavigationItem[]>(() =>
     hotelBlocos.value.flatMap((bloco) => bloco.items),
@@ -279,46 +329,15 @@ export function useAppNavigation() {
   })
 
   /**
-   * Trabalho parado atrás de cada tela, contado sobre os dados locais: só no modo demonstração.
-   * Fora dela os selos vêm da API (`GET /parceiro/portal/pendencias`, E1-06).
+   * Trabalho parado atrás de cada tela clínica.
+   *
+   * Carrega sozinho quando o módulo está ligado para esta conta, e fica zerado quando não está —
+   * ver `useClinicoPendencias`.
    */
-  const pendencias = useClinicoPendencias(() => demonstracao.value && hasClinicalProfile.value)
+  const pendencias = useClinicoPendencias(() => hasClinicalProfile.value)
 
   /** O mesmo para o hotel: rotina atrasada e véspera travada. Ver `useHotelPendencias`. */
-  const pendenciasDoHotel = useHotelPendencias(() => demonstracao.value && hasHotelProfile.value)
-
-  /**
-   * Clínica e Hotel nos painéis que ainda contam sobre os dados locais: as fitas do dia, a busca
-   * global, o menu de criar, a pauta e a agenda do Início. Fora da demonstração eles somem até a
-   * rota da API de cada um chegar, em vez de mostrar números de mentira ao lado dos de verdade.
-   */
-  const clinicaNaDemonstracao = computed(() => demonstracao.value && hasClinicalProfile.value)
-  const hotelNaDemonstracao = computed(() => demonstracao.value && hasHotelProfile.value)
-
-  /**
-   * Os contadores do servidor (`GET /parceiro/portal/pendencias`, E1-06), fora da demonstração. A
-   * API já filtra pelo que a conta pode ver; o portal só omite o zero.
-   */
-  const pendenciasDoPortal = usePendenciasDoPortal(
-    () =>
-      !demonstracao.value &&
-      parceiroStore.loadState === 'ready' &&
-      !parceiroStore.semAcessoParceiro &&
-      !parceiroStore.cadastroSuspenso,
-  )
-
-  /**
-   * A frase de um contador do servidor: "2 convites esperando resposta". A `chave` é a do contador;
-   * um contador que a API registrar antes de o portal ganhar a frase dele cai na genérica, em vez
-   * de mostrar o nome cru.
-   */
-  function fraseDaPendencia(chave: string, total: number) {
-    const caminho = te(`pendencias.contador.${chave}`)
-      ? `pendencias.contador.${chave}`
-      : 'pendencias.contador.outra'
-
-    return t(caminho, { total }, total)
-  }
+  const pendenciasDoHotel = useHotelPendencias(() => hasHotelProfile.value)
 
   /**
    * Contadores por rota, com a frase que explica o número.
@@ -330,63 +349,31 @@ export function useAppNavigation() {
    *
    * Rota sem entrada aqui simplesmente não ganha selo.
    */
-  const seloPorRota = computed<Map<string, { total: number; tom: TomDePendencia; titulo: string }>>(
-    () => {
-      const selos = new Map<string, { total: number; tom: TomDePendencia; titulo: string }>()
-
-      if (!demonstracao.value) {
-        for (const [rota, selo] of pendenciasDoPortal.selos.value) {
-          selos.set(rota, {
-            total: selo.total,
-            tom: selo.tom,
-            /* O separador não é traduzido porque não é texto. */
-            titulo: selo.partes.map((parte) => fraseDaPendencia(parte.chave, parte.total)).join(' · '),
-          })
-        }
-
-        return selos
-      }
-
-      for (const [rota, { contagem, frase }] of Object.entries(contagemDaDemonstracao.value)) {
-        if (contagem.total > 0) {
-          selos.set(rota, {
-            total: contagem.total,
-            tom: contagem.tom,
-            titulo: t(frase, { total: contagem.total }, contagem.total),
-          })
-        }
-      }
-
-      return selos
-    },
-  )
-
-  /** Os contadores sobre os dados locais, na demonstração. */
-  const contagemDaDemonstracao = computed<
-    Record<string, { contagem: ContagemDePendencia; frase: string }>
+  const contagemPorRota = computed<
+    Record<string, { contagem: ContagemDePendencia; frase: string } | undefined>
   >(() => ({
-    '/clinica/pedidos': {
+    '/veterinario/pedidos': {
       contagem: pendencias.pedidos.value,
       frase: 'clinico.navegacao.selo.pedidos',
     },
-    '/clinica/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
-    '/clinica/internacao': {
+    '/veterinario/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
+    '/veterinario/internacao': {
       contagem: pendencias.internacao.value,
       frase: 'clinico.navegacao.selo.internacao',
     },
-    '/clinica/atividades': {
+    '/veterinario/atividades': {
       contagem: pendencias.atividades.value,
       frase: 'clinico.navegacao.selo.atividades',
     },
-    '/clinica/vacinas': {
+    '/veterinario/vacinas': {
       contagem: pendencias.vacinas.value,
       frase: 'clinico.navegacao.selo.vacinas',
     },
-    '/clinica/estoque': {
+    '/veterinario/estoque': {
       contagem: pendencias.estoque.value,
       frase: 'clinico.navegacao.selo.estoque',
     },
-    '/clinica/tratamentos': {
+    '/veterinario/tratamentos': {
       contagem: pendencias.tratamentos.value,
       frase: 'clinico.navegacao.selo.tratamentos',
     },
@@ -404,23 +391,28 @@ export function useAppNavigation() {
     },
   }))
 
-  /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
-  function comSelo(item: AppNavigationItem): AppNavigationItem {
-    const selo = seloPorRota.value.get(item.to)
-
-    return selo
-      ? { ...item, badge: selo.total, badgeTom: selo.tom, badgeTitulo: selo.titulo }
-      : item
-  }
-
   function decorarRota(rota: { key: string; to: string; icon: string }): AppNavigationItem {
-    return comSelo({ label: t(rota.key), to: rota.to, icon: rota.icon })
+    const selo = contagemPorRota.value[rota.to]
+    const item: AppNavigationItem = { label: t(rota.key), to: rota.to, icon: rota.icon }
+
+    /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
+    if (selo && selo.contagem.total > 0) {
+      item.badge = selo.contagem.total
+      item.badgeTom = selo.contagem.tom
+      item.badgeTitulo = t(selo.frase, { total: selo.contagem.total }, selo.contagem.total)
+    }
+
+    return item
   }
 
   const clinicalBlocos = computed<AppNavigationBloco[]>(() => {
     void locale.value
 
-    return blocosVisiveis(CLINICAL_BLOCKS)
+    return CLINICAL_BLOCKS.map((bloco) => ({
+      id: bloco.id,
+      label: t(bloco.key),
+      items: bloco.rotas.map(decorarRota),
+    }))
   })
 
   const clinicalItems = computed<AppNavigationItem[]>(() =>
@@ -430,7 +422,7 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map(decorarRota)
+    return PATIENT_ROUTES.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon }))
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {
@@ -455,46 +447,11 @@ export function useAppNavigation() {
 
     items.push({ label: t('parceiro.equipe.titulo'), to: '/parceiro/equipe', icon: 'ph ph-users' })
 
-    /*
-     * As fichas de profissional (E1-03) e o estabelecimento (E1-01: horários, fuso, página pública)
-     * só fazem sentido para quem tem ou pode ter Clínica ou Hotel: módulo ligado ou pedido, categoria
-     * elegível, ou a ficha do próprio login. Pet shop sem nada disso não ganha nenhum dos dois.
-     */
-    const eu = parceiroStore.eu
-
-    if (
-      eu &&
-      (eu.elegiveis.length > 0 ||
-        eu.modulos.some((modulo) => modulo.podeLer || modulo.status !== null) ||
-        eu.profissional)
-    ) {
-      items.push({
-        label: t('parceiro.profissionais.titulo'),
-        to: '/parceiro/profissionais',
-        icon: 'ph ph-stethoscope',
-      })
-
-      /* A trilha de auditoria (E1-05) é de quem responde pela casa: dono e gestão. */
-      if (parceiroStore.temPermissao('auditoria.ler')) {
-        items.push({
-          label: t('parceiro.auditoria.titulo'),
-          to: '/parceiro/auditoria',
-          icon: 'ph ph-list-magnifying-glass',
-        })
-      }
-
-      items.push({
-        label: t('parceiro.estabelecimento.titulo'),
-        to: '/parceiro/estabelecimento',
-        icon: 'ph ph-buildings',
-      })
-    }
-
     if (parceiroStore.cadastroSuspenso) {
       return items.map((item) => ({ ...item, locked: true }))
     }
 
-    return items.map(comSelo)
+    return items
   })
 
   /** A visão geral não é seção: é um destino só, e aparece como link no topo do trilho. */
@@ -576,13 +533,8 @@ export function useAppNavigation() {
     overviewItem,
     hasClinicalProfile,
     hasHotelProfile,
-    modoDemonstracao: demonstracao,
-    clinicaNaDemonstracao,
-    hotelNaDemonstracao,
     pendenciasClinicas: pendencias,
     pendenciasDoHotel,
-    pendenciasDoPortal,
-    fraseDaPendencia,
   }
 }
 
@@ -607,13 +559,13 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
   /*
    * As rotas de "Pets" precisam estar listadas aqui uma a uma.
    *
-   * Tudo em `/clinica` que não caia neste teste vira "Clínica" no último `if`, e o bulário
+   * Tudo em `/veterinario` que não caia neste teste vira "Clínica" no último `if`, e o bulário
    * — que mora na seção Pets — marcava "Clínica" no trilho enquanto o painel mostrava Pets.
    */
   if (
-    path.startsWith('/clinica/pacientes') ||
-    path.startsWith('/clinica/paciente/') ||
-    path.startsWith('/clinica/bulario')
+    path.startsWith('/veterinario/pacientes') ||
+    path.startsWith('/veterinario/paciente/') ||
+    path.startsWith('/veterinario/bulario')
   ) {
     return 'patients'
   }
@@ -622,7 +574,7 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
     return 'account'
   }
 
-  if (hasClinical && path.startsWith('/clinica')) {
+  if (hasClinical && path.startsWith('/veterinario')) {
     return 'clinical'
   }
 

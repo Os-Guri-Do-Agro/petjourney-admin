@@ -1,13 +1,8 @@
 # 14 · Carteirinha conectada — visão do responsável (para o `petjourney-app`)
 
-**Para:** quem trabalha no `petjourney-app`.
-**De:** o `petjourney-admin`, onde o lado da clínica existiu primeiro como protótipo
+**Para:** o agente que trabalha no `petjourney-app` (`D:\PROJETOS\petjourney-app`).
+**De:** o `petjourney-admin`, onde o lado da clínica já existe como protótipo
 ([13-vacinas-e-carteirinha.md](./13-vacinas-e-carteirinha.md)).
-
-> **Atualização (22/10/2026): o contrato agora é o OpenAPI da API.** Como no doc 09: os tipos saem
-> do `contrato/openapi.json` do `develop` do `petjourney-api`, e a referência de cada tela é o guia
-> de handoff da onda (vacinação conectada: guia da E4). Onde este texto e o guia divergirem, vale o
-> guia.
 
 A clínica aplica uma vacina e a carteirinha que o responsável **já usa** no app muda na mesma
 hora — com o selo da clínica, o lote, a dose da série e a próxima dose já marcada. Mesma entidade,
@@ -24,14 +19,15 @@ carteirinha ao lado da tela da clínica (`CarteirinhaNoApp.vue`) — use-a como 
 comportamento, não do estilo: o estilo é o do app.
 
 Onde está escrito **Decisão**, é um padrão escolhido aqui para você não precisar perguntar. Dá para
-mudar, mas a mudança começa na API (a spec e o `contrato/openapi.json`), não no admin nem só no app.
+mudar — mas a mudança começa no contrato do admin, não só no app.
 
 ---
 
 ## 0. Antes de começar
 
-1. **Gere os tipos do contrato da API**, como no doc 09. Os nomes abaixo eram do contrato escrito
-   à mão no admin e ficam como registro do que o protótipo pedia; no OpenAPI, valem os da API:
+1. **Recopie o contrato.** Fonte:
+   `D:\PROJETOS\petjourney-admin\src\features\clinico\contrato\responsavel.ts` →
+   `src/features/clinica/contrato.ts`, sem editar, como no doc 09. Duas partes mudaram:
    - **"Vacinas aplicadas na clínica"** — `VacinaAplicadaNaClinica` cresceu (seção 2.1) e três
      campos ficaram anuláveis: `lote`, `validadeLote` e `profissional`.
    - **"Carteirinha conectada"**, a última seção — o plano do protocolo e a notificação nova.

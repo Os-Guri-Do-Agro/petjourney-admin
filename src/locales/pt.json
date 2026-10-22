@@ -421,22 +421,6 @@
         "fila": "Espera por vaga",
         "filaDica": "Pôr alguém na fila de espera"
       }
-    },
-    "demonstracao": {
-      "rotulo": "Demonstração (dados locais)"
-    },
-    "avisos": {
-      "titulo": "Avisos",
-      "rotuloComNaoLidas": "Avisos, {total} não lido | Avisos, {total} não lidos",
-      "de": "Os avisos de {parceiro}",
-      "marcarLidos": "Marcar como lidos",
-      "carregando": "Carregando os avisos",
-      "erro": "Não foi possível carregar os avisos.",
-      "tentar": "Tentar de novo",
-      "vazioTitulo": "Nenhum aviso por aqui",
-      "vazio": "Quando algo aqui pedir sua atenção, como um módulo perto de vencer, o aviso aparece nesta lista.",
-      "naoLido": "Não lido",
-      "mais": "Ver avisos anteriores"
     }
   },
   "frame": {
@@ -691,8 +675,7 @@
       "emDia": "Tudo em dia por aqui.",
       "em": {
         "clinica": "{total} na Clínica",
-        "hotel": "{total} no Hotel",
-        "portal": "{total} no Portal"
+        "hotel": "{total} no Hotel"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -789,40 +772,14 @@
     },
     "modulos": {
       "titulo": "Módulos",
-      "rotulo": "Módulos da Clínica e do Hotel",
+      "rotulo": "Acesso rápido",
       "novoAgendamento": "Novo agendamento",
       "novoAgendamentoDetalhe": "Marcar na agenda da clínica",
       "atendimentosHoje": "Nenhum atendimento hoje | {total} atendimento hoje | {total} atendimentos hoje",
       "hospedes": "Nenhum hóspede | {total} hóspede | {total} hóspedes",
       "divulgacaoDetalhe": "Código, QR e materiais",
       "programasDetalhe": "Afiliados: {status}",
-      "acessosDetalhe": "Pets compartilhados",
-      "CLINICA": {
-        "nome": "Clínica",
-        "descricao": "Agenda, prontuário, receitas e vacinas, ligados ao app do responsável."
-      },
-      "HOTEL": {
-        "nome": "Hotel",
-        "descricao": "Reservas, check-in, rotina da casa e boletim ao responsável."
-      },
-      "pedir": "Pedir o módulo",
-      "sugerido": "Combina com o seu cadastro",
-      "solicitado": "O pedido está com a equipe PetJourney.",
-      "teste": "Em teste até {data}.",
-      "selo": {
-        "solicitado": "Em análise",
-        "teste": "Em teste",
-        "somenteLeitura": "Só consulta"
-      },
-      "somenteLeitura": {
-        "MODULO_SUSPENSO": "Módulo suspenso: dá para consultar o que já foi registrado, mas não criar nem alterar.",
-        "MODULO_DESLIGADO": "Módulo desligado: dá para consultar o que já foi registrado, mas não criar nem alterar.",
-        "PRAZO_VENCIDO": "O período do módulo terminou: dá para consultar o que já foi registrado, mas não criar nem alterar.",
-        "PARCEIRO_NAO_OPERACIONAL": "O cadastro da empresa não está liberado: dá para consultar o que já foi registrado, mas não criar nem alterar."
-      },
-      "pedidoEnviado": "Pedido enviado",
-      "pedidoEnviadoDetalhe": "A equipe PetJourney analisa o pedido.",
-      "erro": "Não deu certo"
+      "acessosDetalhe": "Pets compartilhados"
     },
     "agenda": {
       "titulo": "Agenda",
@@ -2172,9 +2129,7 @@
         "papelTrocadoDetalhe": "{nome} agora é {papel}.",
         "removido": "Pessoa removida da equipe",
         "saiu": "Você saiu da equipe",
-        "erro": "Não deu certo",
-        "funcoesSalvas": "Funções salvas",
-        "funcoesSalvasDetalhe": "{nome} passa a ver o que essas funções abrem."
+        "erro": "Não deu certo"
       },
       "gaveta": {
         "titulo": "Convidar para a equipe",
@@ -2186,372 +2141,6 @@
         "enviar": "Enviar convite",
         "cancelar": "Cancelar",
         "reenviarPendente": "Reenviar o convite pendente"
-      },
-      "definirFuncoes": "Definir funções",
-      "funcao": {
-        "RECEPCAO": "Recepção",
-        "VETERINARIO": "Veterinário",
-        "ENFERMAGEM": "Enfermagem",
-        "CUIDADOR": "Cuidador",
-        "BANHISTA": "Banhista",
-        "ADESTRADOR": "Adestrador",
-        "GESTOR": "Gestão",
-        "FINANCEIRO": "Financeiro"
-      },
-      "funcaoDica": {
-        "RECEPCAO": "Agenda, pedidos de horário, fila e cadastro de pacientes; no hotel, reservas e check-in.",
-        "VETERINARIO": "Agenda, prontuário, vacinas e internação. Assinar receita e finalizar prontuário pedem CRMV.",
-        "ENFERMAGEM": "Vacinas, internação e consulta ao prontuário e à agenda.",
-        "CUIDADOR": "A rotina e os hóspedes do hotel.",
-        "BANHISTA": "Os serviços e a rotina do hotel, como o cuidador.",
-        "ADESTRADOR": "Os serviços e a rotina do hotel, como o cuidador.",
-        "GESTOR": "Configura a clínica e o hotel, planeja o estoque, importa a base e vê a auditoria.",
-        "FINANCEIRO": "Consulta o estoque e cuida do financeiro."
-      },
-      "funcoes": {
-        "titulo": "Funções na clínica e no hotel",
-        "lede": "O que a pessoa faz decide o que ela vê no menu. Dá para marcar mais de uma.",
-        "nenhuma": "Sem função, a pessoa vê só o portal comercial: programas, divulgação e acessos.",
-        "salvar": "Salvar funções"
-      }
-    },
-    "profissionais": {
-      "titulo": "Profissionais",
-      "resumo": "As fichas de quem atende, aplica, prescreve ou cuida, com ou sem login no portal.",
-      "cadastrar": "Cadastrar profissional",
-      "erroCarregar": "Não foi possível carregar os profissionais.",
-      "conselho": {
-        "CRMV": "CRMV",
-        "OUTRO": "Outro conselho",
-        "NENHUM": "Sem conselho"
-      },
-      "conselhoCurto": "Conselho",
-      "comLogin": "login de {nome}",
-      "semLogin": "sem login",
-      "foraDaAgenda": "fora da agenda",
-      "selo": {
-        "conferido": "CRMV conferido",
-        "aConferir": "CRMV a conferir"
-      },
-      "editar": "Editar ficha",
-      "desativar": "Desativar ficha",
-      "reativar": "Reativar ficha",
-      "desativadas": "Fichas desativadas ({n})",
-      "vazio": "Nenhum profissional cadastrado",
-      "vazioDica": "A ficha é o que a agenda e o prontuário citam: cadastre quem atende, mesmo sem login.",
-      "crmv": {
-        "titulo": "Falta a sua ficha com CRMV",
-        "corpo": "Escrever prontuário, liberar o resumo ao responsável e assinar receita pedem uma ficha ativa com CRMV, número e UF.",
-        "peca": "Escrever prontuário, liberar o resumo e assinar receita pedem uma ficha com CRMV. Peça ao dono da conta para cadastrar a sua.",
-        "cadastrar": "Cadastrar minha ficha",
-        "completar": "Completar meu CRMV"
-      },
-      "confirmarDesativar": {
-        "titulo": "Desativar a ficha de {nome}?",
-        "mensagem": "A ficha sai da agenda e das listas, mas continua nos registros que já citam essa pessoa. Dá para reativar depois."
-      },
-      "toast": {
-        "salvo": "Ficha salva",
-        "desativado": "Ficha desativada",
-        "reativado": "Ficha reativada"
-      },
-      "gaveta": {
-        "tituloNovo": "Novo profissional",
-        "tituloEditar": "Ficha do profissional",
-        "nome": "Nome",
-        "nomeInvalido": "Informe o nome, com pelo menos 2 letras.",
-        "conselho": "Conselho",
-        "registro": "Número do registro",
-        "uf": "UF",
-        "registroInvalido": "Informe o número e a UF do registro.",
-        "perdeSeloRegistro": "Trocar o número ou a UF tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
-        "especialidades": "Especialidades",
-        "especialidadesDica": "Até 5. Digite e tecle Enter a cada uma.",
-        "cor": "Cor na agenda",
-        "corN": "Cor {n}",
-        "atendeNaAgenda": "Atende na agenda",
-        "atendeNaAgendaDica": "Vira coluna na agenda e entra nas sugestões de horário.",
-        "login": "Login no portal",
-        "loginDica": "Ligue a ficha ao login de quem atende. Quem não usa o portal fica sem login.",
-        "semLogin": "Sem login",
-        "perdeSeloLogin": "Ligar esta ficha a um login tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
-        "salvar": "Salvar ficha"
-      }
-    },
-    "estabelecimento": {
-      "titulo": "Estabelecimento",
-      "erroCarregar": "Não foi possível carregar o estabelecimento.",
-      "publicar": "Publicar página",
-      "publicarFalta": "Antes de publicar, preencha o que a página pública lista como faltando.",
-      "despublicar": "Tirar do ar",
-      "editar": "Editar",
-      "naoInformado": "Não informado",
-      "consulta": {
-        "soDono": "Só o dono edita o estabelecimento. Aqui você vê como ele está.",
-        "suspenso": "Com o cadastro suspenso, o estabelecimento fica só para consulta. O dono ainda pode tirar a página do ar."
-      },
-      "situacao": {
-        "noAr": "A página está no ar",
-        "foraDoAr": "Publicada, mas fora do ar",
-        "naoPublicada": "A página ainda não foi publicada"
-      },
-      "pagina": {
-        "titulo": "Página pública",
-        "desde": "Publicada em {data}",
-        "foraDoArDica": "Ela volta sozinha quando o cadastro estiver aprovado e ativo.",
-        "falta": "Para publicar, falta:"
-      },
-      "pendencia": {
-        "APROVACAO": "a aprovação do cadastro pela equipe PetJourney",
-        "nomePublico": "o nome público",
-        "fusoHorario": "o fuso horário",
-        "telefone": "um telefone (público, WhatsApp ou plantão)"
-      },
-      "slug": {
-        "rotulo": "Endereço da página",
-        "trocar": "Trocar endereço",
-        "depoisDaAprovacao": "O endereço da página fica disponível depois que o cadastro for aprovado.",
-        "nasceDoNome": "O endereço nasce do nome público no primeiro salvamento.",
-        "invalido": "Use de 3 a 60 letras minúsculas, números e hífen, sem hífen no começo, no fim ou dois seguidos.",
-        "regras": "Letras minúsculas, números e hífen, de 3 a 60 caracteres.",
-        "antigoContinua": "O endereço antigo continua levando à página. Guardamos os 5 últimos."
-      },
-      "perfil": {
-        "titulo": "Perfil e contatos",
-        "comecoTitulo": "Comece por aqui",
-        "comeco": "O nome que aparece na página e o fuso em que a casa conta as horas.",
-        "preencher": "Preencher o perfil"
-      },
-      "endereco": {
-        "titulo": "Endereço",
-        "vazio": "Nenhum endereço cadastrado.",
-        "mostraRua": "A página mostra a rua e o número.",
-        "soBairro": "A página mostra só o bairro, a cidade e a UF.",
-        "semCoordenadas": "Sem localização no mapa.",
-        "mapaDesligado": "O mapa não aparece na página.",
-        "mapaLigado": "O mapa aparece na página."
-      },
-      "horario": {
-        "titulo": "Horários",
-        "noFuso": "Horários no fuso {fuso}.",
-        "vazio": "Nenhum horário cadastrado. Sem horário, a página não diz se a casa está aberta.",
-        "aberto": "Aberto",
-        "fechado": "Fechado",
-        "abertoAgora": "Aberto agora",
-        "abertoFechaAs": "Aberto agora, fecha às {hora}",
-        "fechadoAgora": "Fechado agora",
-        "fechadoAbreAs": "Fechado agora, abre às {hora}",
-        "fechadoAbreEm": "Fechado agora, abre {dia} às {hora}",
-        "regras": "Aberto 24 horas: das 00:00 às 24:00. Se passa da meia-noite, divida em dois dias.",
-        "ate": "até",
-        "abreAs": "{dia}: abre às",
-        "fechaAs": "{dia}: fecha às",
-        "copiar": "Usar o horário de {dia} nos outros dias abertos",
-        "intervalo": "Intervalo",
-        "intervaloDe": "{dia}: o intervalo começa às",
-        "intervaloAte": "{dia}: o intervalo termina às",
-        "comIntervalo": "Intervalo",
-        "semIntervalo": "Sem intervalo",
-        "problema": {
-          "HORA_INVALIDA": "Hora inválida. Use de 00:00 a 23:59; 24:00 só para fechar.",
-          "ABRE_E_FECHA_OBRIGATORIOS": "Diga a hora de abrir e a de fechar.",
-          "ABRE_DEPOIS_DE_FECHA": "O começo precisa vir antes do fim.",
-          "INTERVALO_INCOMPLETO": "O intervalo precisa de começo e fim.",
-          "INTERVALO_FORA_DO_EXPEDIENTE": "O intervalo precisa caber dentro do expediente.",
-          "SEMANA_INCOMPLETA": "A semana precisa dos 7 dias."
-        }
-      },
-      "dia": {
-        "titulo": "Dias especiais",
-        "feriados": "Feriados nacionais",
-        "feriadosDe": "Copiar os feriados de {ano}",
-        "adicionar": "Adicionar dia",
-        "vazio": "Nenhum dia especial. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
-        "remover": "Remover {nome}",
-        "data": "Data",
-        "faltaData": "Escolha a data no calendário.",
-        "nome": "Nome",
-        "nomeExemplo": "Véspera de Natal",
-        "faltaNome": "Dê um nome ao dia.",
-        "fechado": "Fechado o dia inteiro",
-        "abre": "Abre às",
-        "fecha": "Fecha às",
-        "fechadoDica": "Desligue para dar um horário diferente nesse dia.",
-        "abertoDica": "Nesse dia vale este horário, e não o da semana."
-      },
-      "mensagens": {
-        "titulo": "Mensagens ao responsável"
-      },
-      "confirmar": {
-        "voltar": "Voltar",
-        "despublicar": {
-          "titulo": "Tirar a página do ar?",
-          "mensagem": "Quem abrir o endereço verá que a página não está disponível. Dá para publicar de novo quando quiser.",
-          "botao": "Tirar do ar"
-        },
-        "remover": {
-          "titulo": "Remover o dia especial?",
-          "mensagem": "{nome} sai da lista e o horário da semana volta a valer nessa data.",
-          "botao": "Remover"
-        }
-      },
-      "toast": {
-        "erro": "Não deu certo",
-        "publicada": "Página publicada",
-        "despublicada": "A página saiu do ar",
-        "salvo": {
-          "perfil": "Perfil salvo",
-          "endereco": "Endereço salvo",
-          "mensagens": "Mensagens salvas",
-          "horarios": "Horários salvos"
-        },
-        "diaAdicionado": "Dia especial adicionado",
-        "diaRemovido": "Dia especial removido",
-        "feriadosCopiados": "Feriados copiados",
-        "slugTrocado": "Endereço trocado",
-        "feriadosNovos": "Nenhum feriado novo. | {total} feriado novo. | {total} feriados novos.",
-        "feriadosJaExistiam": "{total} já estava na lista. | {total} já estavam na lista."
-      },
-      "campo": {
-        "nomePublico": "Nome público",
-        "descricao": "Descrição",
-        "fusoHorario": "Fuso horário",
-        "idiomaDosTextos": "Idioma dos textos",
-        "telefonePublico": "Telefone",
-        "whatsappPublico": "WhatsApp",
-        "telefonePlantao": "Telefone de plantão",
-        "emailPublico": "E-mail de contato",
-        "site": "Site",
-        "cep": "CEP",
-        "logradouro": "Rua",
-        "numero": "Número",
-        "complemento": "Complemento",
-        "bairro": "Bairro",
-        "cidade": "Cidade",
-        "uf": "UF",
-        "mostrarEndereco": "Mostrar rua e número na página pública",
-        "mostrarMapa": "Mostrar o mapa",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "mensagemForaDoHorario": "Mensagem fora do horário",
-        "orientacaoEmergencia": "Orientação para emergência"
-      },
-      "idioma": {
-        "ptBR": "Português (Brasil)",
-        "enUS": "Inglês (EUA)",
-        "enGB": "Inglês (Reino Unido)",
-        "es419": "Espanhol (América Latina)",
-        "srLatn": "Sérvio",
-        "ar": "Árabe"
-      },
-      "gaveta": {
-        "titulo": {
-          "perfil": "Perfil e contatos",
-          "endereco": "Endereço",
-          "mensagens": "Mensagens ao responsável",
-          "horarios": "Horários da semana",
-          "dia": "Novo dia especial",
-          "slug": "Endereço da página"
-        },
-        "opcional": "(opcional)",
-        "buscarFuso": "Buscar cidade ou região",
-        "fusoDica": "Os horários da casa, a agenda e o \"aberto agora\" contam neste fuso.",
-        "idiomaDica": "O idioma em que você escreve a descrição e as mensagens. A página não traduz esses textos.",
-        "contatos": "Contatos na página",
-        "contatosDica": "Para publicar, basta um dos três telefones.",
-        "plantaoDica": "Para fora do expediente. Vazio quer dizer sem plantão.",
-        "emailDica": "Aparece na página; não é o e-mail da sua conta.",
-        "naPagina": "Na página pública",
-        "mostrarEnderecoDica": "Desligado, a página mostra só bairro, cidade e UF, sem mapa.",
-        "mostrarMapaDica": "Só aparece com a rua à mostra e com latitude e longitude.",
-        "coordenadasDica": "Copie do mapa que você usa: as duas, com ponto decimal.",
-        "foraDoHorarioDica": "Aparece quando a casa está fechada.",
-        "emergenciaDica": "O que fazer numa emergência fora do horário: outro endereço, outro telefone.",
-        "semTraducao": "Estes textos aparecem como você escrever, no idioma escolhido no perfil.",
-        "cancelar": "Cancelar",
-        "salvar": "Salvar",
-        "invalido": {
-          "nome": "Use de 2 a 120 caracteres.",
-          "fuso": "Escolha o fuso da casa.",
-          "telefone": "Telefone com DDD, ou com + e o código do país.",
-          "email": "Confira o e-mail.",
-          "site": "Comece com https://",
-          "cep": "CEP com 8 números.",
-          "coordenadas": "Preencha as duas: latitude de -90 a 90 e longitude de -180 a 180."
-        }
-      }
-    },
-    "auditoria": {
-      "titulo": "Auditoria",
-      "resumo": "Quem leu, escreveu, publicou ou exportou dado clínico, e quando. Sem o conteúdo, só a ação.",
-      "erro": "Não foi possível carregar a auditoria.",
-      "tentar": "Tentar de novo",
-      "carregando": "Carregando a auditoria",
-      "mais": "Ver eventos anteriores",
-      "emNomeDe": "em nome de {nome}",
-      "campos": "campos: {campos}",
-      "protocolo": "protocolo {protocolo}",
-      "filtros": {
-        "rotulo": "Filtrar a auditoria",
-        "acao": "Ação",
-        "todas": "Todas",
-        "pessoa": "Pessoa",
-        "todos": "Todas",
-        "periodo": "Período",
-        "qualquerData": "Qualquer data",
-        "limpar": "Limpar filtros"
-      },
-      "vazio": {
-        "titulo": "Nada registrado ainda",
-        "texto": "Quando alguém da equipe abrir, escrever, publicar ou exportar um dado clínico, a ação aparece aqui.",
-        "filtrado": "Nada com esses filtros."
-      },
-      "dia": {
-        "hoje": "Hoje, {data}",
-        "ontem": "Ontem, {data}"
-      },
-      "ator": {
-        "suporte": "Suporte PetJourney",
-        "sistema": "O sistema",
-        "semNome": "Alguém que saiu da equipe",
-        "selo": {
-          "SUPORTE": "Suporte",
-          "SISTEMA": "Automático"
-        }
-      },
-      "acao": {
-        "LER": "Leitura",
-        "CRIAR": "Criação",
-        "ALTERAR": "Alteração",
-        "FINALIZAR": "Finalização",
-        "ANULAR": "Anulação",
-        "PUBLICAR": "Publicação no app",
-        "IMPRIMIR": "Impressão",
-        "EXPORTAR": "Exportação",
-        "LER_DADO_DO_APP": "Leitura de dado do app"
-      },
-      "frase": {
-        "LER": "abriu {recurso}",
-        "CRIAR": "criou {recurso}",
-        "ALTERAR": "alterou {recurso}",
-        "FINALIZAR": "finalizou {recurso}",
-        "ANULAR": "anulou {recurso}",
-        "PUBLICAR": "publicou {recurso}",
-        "IMPRIMIR": "imprimiu {recurso}",
-        "EXPORTAR": "exportou {recurso}",
-        "LER_DADO_DO_APP": "abriu {recurso}"
-      },
-      "recurso": {
-        "atendimento": "um atendimento",
-        "paciente_do_parceiro": "a ficha de um paciente",
-        "cliente_do_parceiro": "o cadastro de um responsável",
-        "alerta_do_paciente": "um alerta de paciente",
-        "aplicacao_vacina": "uma aplicação de vacina",
-        "consulta_do_app": "uma consulta para o app",
-        "vacina_do_app": "uma vacina para o app",
-        "diario_do_app": "o diário do app",
-        "trilha_clinica": "a auditoria",
-        "outro": "um registro ({tipo})"
       }
     }
   },
@@ -2894,6 +2483,10 @@
     "resumoEmpresa": "Você entrou como {email}, em {empresa}."
   },
   "clinico": {
+    "modulo": {
+      "visivel": "Módulo clínico visível",
+      "oculto": "Módulo clínico oculto"
+    },
     "navegacao": {
       "secao": "Clínica",
       "agora": "Agora",
@@ -7568,6 +7161,10 @@
       "titulo": "Registrar medicação",
       "via": "Via"
     },
+    "modulo": {
+      "oculto": "Módulo hotel oculto",
+      "visivel": "Módulo hotel visível"
+    },
     "motivoCancelamento": {
       "animal-doente": "Animal doente",
       "hotel-indisponivel": "Hotel sem vaga",
@@ -8879,16 +8476,5 @@
       "rotinaPadrao": "Rotina padrão"
     },
     "abasAria": "Telas de {destino}"
-  },
-  "captcha": {
-    "erro": "Não deu para carregar a verificação de segurança. Recarregue a página e tente de novo."
-  },
-  "pendencias": {
-    "contador": {
-      "convitesPendentes": "{total} convite esperando resposta | {total} convites esperando resposta",
-      "acessosTemporariosAtivos": "{total} acesso temporário ativo | {total} acessos temporários ativos",
-      "agendamentosSemConfirmacao": "{total} agendamento sem confirmação | {total} agendamentos sem confirmação",
-      "outra": "{total} pendência | {total} pendências"
-    }
   }
 }

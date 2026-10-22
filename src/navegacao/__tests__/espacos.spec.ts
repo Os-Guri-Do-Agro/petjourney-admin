@@ -25,25 +25,25 @@ const secoes: AppNavigationSection[] = [
     label: 'Clínica',
     icon: 'ph ph-calendar-blank',
     items: [
-      item('/clinica/meu-dia'),
-      item('/clinica/agenda'),
-      item('/clinica/pedidos', { badge: 4, badgeTom: 'atencao' }),
-      item('/clinica/fila', { badge: 2, badgeTom: 'neutro' }),
-      item('/clinica/atendimentos'),
-      item('/clinica/internacao', { badge: 2, badgeTom: 'risco' }),
-      item('/clinica/atividades'),
-      item('/clinica/faltas'),
-      item('/clinica/vacinas'),
-      item('/clinica/estoque'),
-      item('/clinica/tratamentos'),
-      item('/clinica/resumo'),
+      item('/veterinario/meu-dia'),
+      item('/veterinario/agenda'),
+      item('/veterinario/pedidos', { badge: 4, badgeTom: 'atencao' }),
+      item('/veterinario/fila', { badge: 2, badgeTom: 'neutro' }),
+      item('/veterinario/atendimentos'),
+      item('/veterinario/internacao', { badge: 2, badgeTom: 'risco' }),
+      item('/veterinario/atividades'),
+      item('/veterinario/faltas'),
+      item('/veterinario/vacinas'),
+      item('/veterinario/estoque'),
+      item('/veterinario/tratamentos'),
+      item('/veterinario/resumo'),
     ],
   },
   {
     id: 'patients',
     label: 'Pets',
     icon: 'ph ph-heart',
-    items: [item('/clinica/pacientes'), item('/clinica/bulario')],
+    items: [item('/veterinario/pacientes'), item('/veterinario/bulario')],
   },
   { id: 'account', label: 'Conta', icon: 'ph ph-user', items: [item('/settings')] },
 ]
@@ -67,9 +67,9 @@ describe('montarEspacos', () => {
       'relatorios',
     ])
     expect(clinica.destinos[1]!.abas.map((aba) => aba.to)).toEqual([
-      '/clinica/agenda',
-      '/clinica/pedidos',
-      '/clinica/fila',
+      '/veterinario/agenda',
+      '/veterinario/pedidos',
+      '/veterinario/fila',
     ])
   })
 
@@ -88,47 +88,22 @@ describe('montarEspacos', () => {
 
     expect(semHotel.some((espaco) => espaco.id === 'hotel')).toBe(false)
   })
-
-  it('dá ao destino a frase do selo quando só uma aba tem selo', () => {
-    const comEquipe: AppNavigationSection[] = [
-      {
-        ...secoes[0]!,
-        items: [
-          item('/parceiro/equipe', {
-            badge: 1,
-            badgeTom: 'neutro',
-            badgeTitulo: '1 convite esperando resposta',
-          }),
-          item('/parceiro/profissionais'),
-        ],
-      },
-    ]
-    const equipe = montarEspacos(comEquipe, t)[0]!.destinos.find(
-      (destino) => destino.id === '/parceiro/equipe',
-    )!
-
-    expect(equipe.abas).toHaveLength(2)
-    expect(equipe.tituloDoSelo).toBe('1 convite esperando resposta')
-
-    const agenda = espacos[0]!.destinos.find((destino) => destino.id === 'agenda')!
-    expect(agenda.tituloDoSelo).toBeUndefined()
-  })
 })
 
 describe('localizar', () => {
   const espacos = montarEspacos(secoes, t)
 
   it('acha o destino e a aba de uma rota de aba', () => {
-    const aqui = localizar(espacos, '/clinica/pedidos')
+    const aqui = localizar(espacos, '/veterinario/pedidos')
 
     expect(aqui.espaco?.id).toBe('clinica')
     expect(aqui.destino?.id).toBe('agenda')
-    expect(aqui.aba?.to).toBe('/clinica/pedidos')
+    expect(aqui.aba?.to).toBe('/veterinario/pedidos')
   })
 
   it('põe as telas de detalhe no destino delas, sem aba acesa', () => {
-    const ficha = localizar(espacos, '/clinica/paciente/pet-mel/resumo')
-    const leito = localizar(espacos, '/clinica/internacao/int-bento')
+    const ficha = localizar(espacos, '/veterinario/paciente/pet-mel/resumo')
+    const leito = localizar(espacos, '/veterinario/internacao/int-bento')
 
     expect(ficha.destino?.id).toBe('pacientes')
     expect(ficha.aba).toBeNull()
@@ -147,7 +122,7 @@ describe('tomMaisGrave e lugarDaRota', () => {
   })
 
   it('dá a cor do lugar pela rota', () => {
-    expect(lugarDaRota('/clinica/agenda')).toBe('clinica')
+    expect(lugarDaRota('/veterinario/agenda')).toBe('clinica')
     expect(lugarDaRota('/hotel/mapa')).toBe('hotel')
     expect(lugarDaRota('/parceiro/carteira')).toBe('portal')
     expect(lugarDaRota('/settings')).toBe('conta')

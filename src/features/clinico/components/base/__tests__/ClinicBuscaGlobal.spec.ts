@@ -31,20 +31,20 @@ const SECOES: AppNavigationSection[] = [
     label: 'Clínica',
     icon: 'ph ph-calendar-blank',
     items: [
-      { label: 'Meu dia', to: '/clinica/meu-dia', icon: 'ph ph-sun' },
-      { label: 'Internação', to: '/clinica/internacao', icon: 'ph ph-building' },
+      { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
+      { label: 'Internação', to: '/veterinario/internacao', icon: 'ph ph-building' },
     ],
     blocos: [
       {
         id: 'agora',
         label: 'Agora',
-        items: [{ label: 'Meu dia', to: '/clinica/meu-dia', icon: 'ph ph-sun' }],
+        items: [{ label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' }],
       },
       {
         id: 'em-curso',
         label: 'Em curso',
         items: [
-          { label: 'Internação', to: '/clinica/internacao', icon: 'ph ph-building' },
+          { label: 'Internação', to: '/veterinario/internacao', icon: 'ph ph-building' },
         ],
       },
     ],
@@ -128,7 +128,7 @@ describe('busca global do módulo clínico', () => {
     corpo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
     await nextTick()
 
-    expect(empurrar).toHaveBeenCalledWith('/clinica/internacao')
+    expect(empurrar).toHaveBeenCalledWith('/veterinario/internacao')
     expect(wrapper.emitted('fechar')).toHaveLength(1)
 
     wrapper.unmount()

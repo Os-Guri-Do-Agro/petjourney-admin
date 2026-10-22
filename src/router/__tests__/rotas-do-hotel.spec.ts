@@ -70,7 +70,7 @@ describe('rotas do hotel', () => {
   })
 
   it('e nenhuma outra seção rouba as rotas do hotel', () => {
-    expect(resolveActiveSectionId('/clinica/agenda', true)).toBe('clinical')
+    expect(resolveActiveSectionId('/veterinario/agenda', true)).toBe('clinical')
     expect(resolveActiveSectionId('/parceiro/carteira', true)).toBe('portal')
     expect(resolveActiveSectionId('/inicio', true)).toBe('overview')
   })

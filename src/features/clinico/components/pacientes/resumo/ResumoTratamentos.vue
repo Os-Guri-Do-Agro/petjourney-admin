@@ -45,7 +45,7 @@ const rotulos = useRotulosDoTratamento()
         <p class="ficha-cartao__descricao">{{ t('clinico.resumoDoPaciente.tratamentos.ajuda') }}</p>
       </div>
       <div class="ficha-cartao__acoes">
-        <RouterLink class="ui-mais" :to="`/clinica/paciente/${petId}/tratamento`">
+        <RouterLink class="ui-mais" :to="`/veterinario/paciente/${petId}/tratamento`">
           {{ t('clinico.resumoDoPaciente.tratamentos.abrir') }}
           <i class="ph ph-arrow-right" aria-hidden="true" />
         </RouterLink>

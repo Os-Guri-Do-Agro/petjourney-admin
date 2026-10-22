@@ -2,8 +2,7 @@
 /**
  * A equipe pela lista (E0-01): uma pessoa por linha, com o papel em selo, e os convites que ainda
  * não foram aceitos logo abaixo. Nada de digitar ID: trocar papel, remover e sair saem do menu da
- * própria linha; convidar abre a gaveta ao lado. As funções na clínica e no hotel (E1-03) aparecem
- * na linha e o dono as define pelo mesmo menu.
+ * própria linha; convidar abre a gaveta ao lado.
  *
  * Quem é OPERADOR vê nomes e papéis (a API não manda o e-mail para ele) e só pode sair. As regras
  * (último dono, limite de convites, link expirado) são da API; aqui se decide a reação pelo
@@ -20,8 +19,6 @@ import { useRouter } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EquipeConviteGaveta from '@/components/parceiro/EquipeConviteGaveta.vue'
-import EquipeFuncoesGaveta from '@/components/parceiro/EquipeFuncoesGaveta.vue'
-import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -34,13 +31,11 @@ import type {
 import {
   cancelarConvite,
   convidarParaEquipe,
-  definirFuncoesDoMembro,
   listarEquipe,
   reenviarConvite,
   removerDaEquipe,
   sairDaEquipe,
   trocarPapelDoMembro,
-  type PapelOperacional,
 } from '@/service/parceiro/equipe-service'
 import type { PapelParceiro } from '@/service/parceiro/types'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
@@ -80,12 +75,6 @@ async function carregar() {
   } finally {
     carregando.value = false
   }
-}
-
-/** Depois de convidar, cancelar ou mexer em alguém: a lista e o selo de convites do menu mudam juntos. */
-async function recarregarDepoisDeMudar() {
-  invalidarPendenciasDoPortal()
-  await carregar()
 }
 
 function formatarData(iso: string) {
@@ -158,7 +147,7 @@ async function enviarConvite(payload: { email: string; papel: PapelParceiro }) {
       detail: t('parceiro.equipe.toast.convidadoDetalhe', { email: payload.email }),
       life: 4000,
     })
-    await recarregarDepoisDeMudar()
+    await carregar()
   } catch (err) {
     erroDoEnvio.value = err instanceof Error ? err : new Error(String(err))
   } finally {
@@ -190,7 +179,7 @@ async function reenviarPendente(email: string) {
       detail: t('parceiro.equipe.toast.reenviadoDetalhe'),
       life: 4000,
     })
-    await recarregarDepoisDeMudar()
+    await carregar()
   } catch (err) {
     erroDoEnvio.value = err instanceof Error ? err : new Error(String(err))
   } finally {
@@ -207,7 +196,7 @@ function reenviar(convite: ConvitePendenteDto) {
       detail: t('parceiro.equipe.toast.reenviadoDetalhe'),
       life: 4000,
     })
-    await recarregarDepoisDeMudar()
+    await carregar()
   })
 }
 
@@ -273,7 +262,7 @@ function confirmar() {
     void comLinhaOcupada(pedido.convite.id, async () => {
       await cancelarConvite(pedido.convite.id, parceiroQuery())
       toast.add({ severity: 'success', summary: t('parceiro.equipe.toast.cancelado'), life: 3000 })
-      await recarregarDepoisDeMudar()
+      await carregar()
     })
     return
   }
@@ -284,7 +273,7 @@ function confirmar() {
     void comLinhaOcupada(membro.usuarioId, async () => {
       await removerDaEquipe(membro.usuarioId, parceiroQuery())
       toast.add({ severity: 'success', summary: t('parceiro.equipe.toast.removido'), life: 3000 })
-      await recarregarDepoisDeMudar()
+      await carregar()
     })
     return
   }
@@ -302,57 +291,8 @@ function confirmar() {
       }),
       life: 4000,
     })
-    await recarregarDepoisDeMudar()
+    await carregar()
   })
-}
-
-/* ------------------------------------------------------------------------- funções */
-
-const membroDasFuncoes = ref<MembroEquipeDto | null>(null)
-const funcoesAbertas = ref(false)
-const salvandoFuncoes = ref(false)
-const erroDasFuncoes = ref<Error | null>(null)
-
-function abrirFuncoes(membro: MembroEquipeDto) {
-  membroDasFuncoes.value = membro
-  erroDasFuncoes.value = null
-  funcoesAbertas.value = true
-}
-
-function nomesDasFuncoes(papeis: PapelOperacional[]) {
-  return papeis.map((papel) => t(`parceiro.equipe.funcao.${papel}`)).join(', ')
-}
-
-async function salvarFuncoes(papeis: PapelOperacional[]) {
-  const membro = membroDasFuncoes.value
-
-  if (!membro) {
-    return
-  }
-
-  salvandoFuncoes.value = true
-  erroDasFuncoes.value = null
-
-  try {
-    await definirFuncoesDoMembro(membro.usuarioId, papeis, parceiroQuery())
-    funcoesAbertas.value = false
-    toast.add({
-      severity: 'success',
-      summary: t('parceiro.equipe.toast.funcoesSalvas'),
-      detail: t('parceiro.equipe.toast.funcoesSalvasDetalhe', { nome: membro.nome }),
-      life: 4000,
-    })
-    await recarregarDepoisDeMudar()
-
-    /* As funções de quem está logado mudam o menu dele: o /eu volta junto. */
-    if (membro.usuarioId === meuId.value) {
-      await ensureContext(true)
-    }
-  } catch (err) {
-    erroDasFuncoes.value = err instanceof Error ? err : new Error(String(err))
-  } finally {
-    salvandoFuncoes.value = false
-  }
 }
 
 /* ------------------------------------------------------------------------- menu da linha */
@@ -361,24 +301,12 @@ const menu = ref<InstanceType<typeof Menu> | null>(null)
 const membroDoMenu = ref<MembroEquipeDto | null>(null)
 
 function acoesDe(membro: MembroEquipeDto): MenuItem[] {
-  const funcoes: MenuItem[] = souDono.value
-    ? [
-        {
-          label: t('parceiro.equipe.definirFuncoes'),
-          icon: 'ph ph-identification-badge',
-          command: () => abrirFuncoes(membro),
-        },
-      ]
-    : []
-
   if (membro.usuarioId === meuId.value) {
     return [
-      ...funcoes,
-      ...(funcoes.length ? [{ separator: true }] : []),
       {
         label: t('parceiro.equipe.sair'),
         icon: 'ph ph-sign-out',
-        class: 'menu-item--risco',
+        class: 'equipe-menu__risco',
         command: () => pedirConfirmacao({ tipo: 'sair' }),
       },
     ]
@@ -389,7 +317,6 @@ function acoesDe(membro: MembroEquipeDto): MenuItem[] {
   }
 
   return [
-    ...funcoes,
     membro.papel === 'OPERADOR'
       ? {
           label: t('parceiro.equipe.tornarDono'),
@@ -405,7 +332,7 @@ function acoesDe(membro: MembroEquipeDto): MenuItem[] {
     {
       label: t('parceiro.equipe.remover'),
       icon: 'ph ph-user-minus',
-      class: 'menu-item--risco',
+      class: 'equipe-menu__risco',
       command: () => pedirConfirmacao({ tipo: 'remover', membro }),
     },
   ]
@@ -474,10 +401,6 @@ onMounted(async () => {
               <template v-if="membro.convidadoPor">
                 · {{ t('parceiro.equipe.convidadoPor', { nome: membro.convidadoPor }) }}
               </template>
-            </span>
-            <span v-if="membro.papeisOperacionais.length" class="ui-linha__meta pessoa__funcoes">
-              <i class="ph ph-identification-badge" aria-hidden="true" />
-              {{ nomesDasFuncoes(membro.papeisOperacionais) }}
             </span>
           </span>
 
@@ -572,15 +495,6 @@ onMounted(async () => {
 
     <Menu ref="menu" :model="itensDoMenu" popup />
 
-    <EquipeFuncoesGaveta
-      v-model:visible="funcoesAbertas"
-      :nome="membroDasFuncoes?.nome ?? ''"
-      :atuais="membroDasFuncoes?.papeisOperacionais ?? []"
-      :salvando="salvandoFuncoes"
-      :erro="erroDasFuncoes"
-      @salvar="salvarFuncoes"
-    />
-
     <EquipeConviteGaveta
       v-model:visible="gavetaAberta"
       :enviando="enviando"
@@ -649,12 +563,6 @@ onMounted(async () => {
   font-size: 18px;
 }
 
-.pessoa__funcoes {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .pessoa__nome {
   display: inline-flex;
   flex-wrap: wrap;
@@ -705,5 +613,13 @@ onMounted(async () => {
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+}
+</style>
+
+<style>
+/* O menu é teleportado: a ação de risco leva a tinta do estado na palavra e no ícone. */
+.equipe-menu__risco .p-menu-item-label,
+.equipe-menu__risco .p-menu-item-icon {
+  color: var(--risco-tinta);
 }
 </style>

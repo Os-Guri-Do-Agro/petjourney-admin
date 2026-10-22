@@ -364,7 +364,7 @@ const demo = computed(() =>
     :assinatura="t('clinico.pedidos.link.rodape')"
     :demo="demo"
     :com-pe="encontrada"
-    @voltar="router.push('/clinica/pedidos')"
+    @voltar="router.push('/veterinario/pedidos')"
   >
     <div v-if="!encontrada" class="publica__vazio">
       <i class="ph ph-magnifying-glass" aria-hidden="true" />

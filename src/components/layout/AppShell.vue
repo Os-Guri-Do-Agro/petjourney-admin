@@ -16,7 +16,6 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
-import ShellAvisos from '@/components/layout/ShellAvisos.vue'
 import ShellConta from '@/components/layout/ShellConta.vue'
 import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
@@ -38,7 +37,7 @@ const { t } = useI18n()
 const route = useRoute()
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
-const { espacos, aqui, lugar, navigationSections, clinicaNaDemonstracao, hotelNaDemonstracao } =
+const { espacos, aqui, lugar, navigationSections, hasClinicalProfile, hasHotelProfile } =
   oferecerEspacos()
 const { open: abrirResgate, canOpen: podeResgatar } = useCupomResgateModal()
 const { visible: cupomEmBreveVisivel, open: abrirCupomEmBreve } = useCupomComingSoon()
@@ -48,7 +47,6 @@ const recolhida = ref(lerRecolhida())
 const compacto = ref(casaCompacto())
 const gavetaAberta = ref(false)
 const buscaAberta = ref(false)
-const avisosAbertos = ref(false)
 let consulta: MediaQueryList | undefined
 
 function casaCompacto() {
@@ -71,11 +69,6 @@ function fecharGaveta() {
   gavetaAberta.value = false
 }
 
-/* Na gaveta do tablet, a lista de avisos abre no lugar da barra, e não por cima dela. */
-watch(avisosAbertos, (aberta) => {
-  if (aberta) fecharGaveta()
-})
-
 function aoMudarTela(evento: MediaQueryListEvent) {
   compacto.value = evento.matches
 
@@ -90,7 +83,7 @@ function aoTeclar(evento: KeyboardEvent) {
    * anamnese e precisa conferir o histórico do paciente não vai clicar fora antes.
    */
   if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'k') {
-    if (!clinicaNaDemonstracao.value) {
+    if (!hasClinicalProfile.value) {
       return
     }
 
@@ -124,15 +117,15 @@ const atalhoDaBusca = computed(() =>
  */
 const mostrarFita = computed(
   () =>
-    clinicaNaDemonstracao.value &&
+    hasClinicalProfile.value &&
     lugar.value === 'clinica' &&
-    !route.path.startsWith('/clinica/agenda'),
+    !route.path.startsWith('/veterinario/agenda'),
 )
 
 /** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
 const mostrarFitaDaCasa = computed(
   () =>
-    hotelNaDemonstracao.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
+    hasHotelProfile.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
@@ -292,7 +285,7 @@ onUnmounted(() => {
 
         <div class="barra__ferramentas">
           <button
-            v-if="clinicaNaDemonstracao"
+            v-if="hasClinicalProfile"
             type="button"
             class="barra__busca"
             :title="t('clinico.busca.abrir')"
@@ -303,7 +296,7 @@ onUnmounted(() => {
             <span class="barra__busca-texto shell-rotulo">{{ t('clinico.busca.abrirCurto') }}</span>
             <kbd class="shell-rotulo">{{ atalhoDaBusca }}</kbd>
           </button>
-          <ShellCriar :recolhida="barraRecolhida" :clinica="clinicaNaDemonstracao" />
+          <ShellCriar :recolhida="barraRecolhida" :clinica="hasClinicalProfile" />
         </div>
 
         <ShellNavegacao
@@ -316,7 +309,6 @@ onUnmounted(() => {
         />
 
         <div class="barra__pe">
-          <ShellAvisos v-model:aberta="avisosAbertos" :recolhida="barraRecolhida" />
           <button
             type="button"
             class="barra__cupom"
@@ -350,7 +342,7 @@ onUnmounted(() => {
         <span class="topo__lugar" aria-hidden="true"><i :class="aqui.espaco?.icone ?? 'ph ph-house-simple'" /></span>
         <strong class="topo__titulo">{{ tituloNoTopo }}</strong>
         <button
-          v-if="clinicaNaDemonstracao"
+          v-if="hasClinicalProfile"
           type="button"
           class="topo__menu"
           :aria-label="t('clinico.busca.abrir')"
@@ -378,7 +370,7 @@ onUnmounted(() => {
     <FeedbackSaqueDialog />
 
     <ClinicBuscaGlobal
-      v-if="clinicaNaDemonstracao"
+      v-if="hasClinicalProfile"
       :aberto="buscaAberta"
       :secoes="navigationSections"
       @fechar="buscaAberta = false"

@@ -35,7 +35,6 @@ import HomeAgenda from '@/components/home/HomeAgenda.vue'
 import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
 import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
 import HomeEspacoPortal from '@/components/home/HomeEspacoPortal.vue'
-import HomeModulos from '@/components/home/HomeModulos.vue'
 import HomeIndique from '@/components/home/HomeIndique.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
 import HomePauta from '@/components/home/HomePauta.vue'
@@ -54,13 +53,13 @@ import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
-const { espacos, clinicaNaDemonstracao, hotelNaDemonstracao } = useEspacos()
+const { espacos, hasClinicalProfile, hasHotelProfile } = useEspacos()
 const perfil = useUsuarioPerfilStore()
 const { resumo, modulos } = usePautaDaHome()
 
 const dia = useLinhaDoDia({
-  clinica: () => clinicaNaDemonstracao.value,
-  hotel: () => hotelNaDemonstracao.value,
+  clinica: () => hasClinicalProfile.value,
+  hotel: () => hasHotelProfile.value,
 })
 
 provide(CHAVE_DO_DIA, dia)
@@ -76,16 +75,12 @@ let clockId: ReturnType<typeof setInterval> | undefined
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
 /** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
-const temModulos = computed(() => clinicaNaDemonstracao.value || hotelNaDemonstracao.value)
+const temModulos = computed(() => hasClinicalProfile.value || hasHotelProfile.value)
 
 /** Os blocos são os espaços da barra, na mesma ordem: Clínica, Hotel, Portal. */
 const blocos = computed(() =>
   espacos.value.filter(
-    (espaco) =>
-      espaco.id === 'portal' ||
-      /* O "Hoje" de Clínica e Hotel ainda conta sobre os dados locais: só na demonstração. */
-      (espaco.id === 'clinica' && clinicaNaDemonstracao.value) ||
-      (espaco.id === 'hotel' && hotelNaDemonstracao.value),
+    (espaco) => espaco.id === 'clinica' || espaco.id === 'hotel' || espaco.id === 'portal',
   ),
 )
 
@@ -245,11 +240,7 @@ onUnmounted(() => {
         </div>
       </section>
 
-      <HomeModulos />
-
-      <!-- A pauta decide sozinha se aparece: na demonstração, com Clínica ou Hotel; fora, com o
-           que o servidor devolver de pendência. -->
-      <HomePauta />
+      <HomePauta v-if="temModulos" />
 
       <div
         class="calma"
@@ -261,8 +252,8 @@ onUnmounted(() => {
         <HomeAgenda
           v-if="temModulos"
           class="calma__agenda"
-          :clinica="clinicaNaDemonstracao"
-          :hotel="hotelNaDemonstracao"
+          :clinica="hasClinicalProfile"
+          :hotel="hasHotelProfile"
         />
         <div class="calma__lado">
           <HomeIndique ref="indique" />

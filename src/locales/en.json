@@ -421,22 +421,6 @@
         "fila": "Waitlist entry",
         "filaDica": "Add someone to the waitlist"
       }
-    },
-    "demonstracao": {
-      "rotulo": "Demo (local data)"
-    },
-    "avisos": {
-      "titulo": "Notifications",
-      "rotuloComNaoLidas": "Notifications, {total} unread | Notifications, {total} unread",
-      "de": "Notifications for {parceiro}",
-      "marcarLidos": "Mark as read",
-      "carregando": "Loading notifications",
-      "erro": "Couldn't load the notifications.",
-      "tentar": "Try again",
-      "vazioTitulo": "No notifications yet",
-      "vazio": "When something here needs your attention, such as a module about to expire, it shows up in this list.",
-      "naoLido": "Unread",
-      "mais": "Show earlier notifications"
     }
   },
   "frame": {
@@ -691,8 +675,7 @@
       "emDia": "All caught up here.",
       "em": {
         "clinica": "{total} in the Clinic",
-        "hotel": "{total} in the Hotel",
-        "portal": "{total} in the Portal"
+        "hotel": "{total} in the Hotel"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -789,40 +772,14 @@
     },
     "modulos": {
       "titulo": "Modules",
-      "rotulo": "Clinic and Hotel modules",
+      "rotulo": "Quick access",
       "novoAgendamento": "New appointment",
       "novoAgendamentoDetalhe": "Book on the clinic schedule",
       "atendimentosHoje": "No appointments today | {total} appointment today | {total} appointments today",
       "hospedes": "No guests | {total} guest | {total} guests",
       "divulgacaoDetalhe": "Code, QR and materials",
       "programasDetalhe": "Affiliate: {status}",
-      "acessosDetalhe": "Shared pets",
-      "CLINICA": {
-        "nome": "Clinic",
-        "descricao": "Schedule, medical records, prescriptions and vaccines, connected to the pet parent's app."
-      },
-      "HOTEL": {
-        "nome": "Hotel",
-        "descricao": "Bookings, check-in, house routine and updates to the pet parent."
-      },
-      "pedir": "Request the module",
-      "sugerido": "Fits your registration",
-      "solicitado": "The request is with the PetJourney team.",
-      "teste": "On trial until {data}.",
-      "selo": {
-        "solicitado": "Under review",
-        "teste": "On trial",
-        "somenteLeitura": "Read only"
-      },
-      "somenteLeitura": {
-        "MODULO_SUSPENSO": "Module suspended: you can view what was already recorded, but not create or change anything.",
-        "MODULO_DESLIGADO": "Module turned off: you can view what was already recorded, but not create or change anything.",
-        "PRAZO_VENCIDO": "The module period has ended: you can view what was already recorded, but not create or change anything.",
-        "PARCEIRO_NAO_OPERACIONAL": "The company registration is not cleared: you can view what was already recorded, but not create or change anything."
-      },
-      "pedidoEnviado": "Request sent",
-      "pedidoEnviadoDetalhe": "The PetJourney team will review it.",
-      "erro": "That did not work"
+      "acessosDetalhe": "Shared pets"
     },
     "agenda": {
       "titulo": "Schedule",
@@ -2172,9 +2129,7 @@
         "papelTrocadoDetalhe": "{nome} is now {papel}.",
         "removido": "Person removed from the team",
         "saiu": "You left the team",
-        "erro": "That did not work",
-        "funcoesSalvas": "Roles saved",
-        "funcoesSalvasDetalhe": "{nome} now sees what these roles open."
+        "erro": "That did not work"
       },
       "gaveta": {
         "titulo": "Invite to the team",
@@ -2186,372 +2141,6 @@
         "enviar": "Send invite",
         "cancelar": "Cancel",
         "reenviarPendente": "Resend the pending invite"
-      },
-      "definirFuncoes": "Set roles",
-      "funcao": {
-        "RECEPCAO": "Front desk",
-        "VETERINARIO": "Veterinarian",
-        "ENFERMAGEM": "Nursing",
-        "CUIDADOR": "Caregiver",
-        "BANHISTA": "Bather",
-        "ADESTRADOR": "Trainer",
-        "GESTOR": "Management",
-        "FINANCEIRO": "Finance"
-      },
-      "funcaoDica": {
-        "RECEPCAO": "Schedule, appointment requests, waitlist and patient records; at the hotel, bookings and check-in.",
-        "VETERINARIO": "Schedule, medical records, vaccines and inpatient care. Signing prescriptions and closing records require a CRMV.",
-        "ENFERMAGEM": "Vaccines, inpatient care and read access to records and the schedule.",
-        "CUIDADOR": "The hotel routine and guests.",
-        "BANHISTA": "Hotel services and routine, like a caregiver.",
-        "ADESTRADOR": "Hotel services and routine, like a caregiver.",
-        "GESTOR": "Sets up the clinic and the hotel, plans stock, imports the database and sees the audit trail.",
-        "FINANCEIRO": "Views stock and handles finance."
-      },
-      "funcoes": {
-        "titulo": "Roles at the clinic and hotel",
-        "lede": "What the person does decides what they see in the menu. You can pick more than one.",
-        "nenhuma": "With no role, the person only sees the business portal: programs, promotion and accesses.",
-        "salvar": "Save roles"
-      }
-    },
-    "profissionais": {
-      "titulo": "Professionals",
-      "resumo": "Records of who treats, vaccinates, prescribes or cares, with or without a portal login.",
-      "cadastrar": "Add professional",
-      "erroCarregar": "Could not load the professionals.",
-      "conselho": {
-        "CRMV": "CRMV",
-        "OUTRO": "Other board",
-        "NENHUM": "No board"
-      },
-      "conselhoCurto": "Board",
-      "comLogin": "{nome}'s login",
-      "semLogin": "no login",
-      "foraDaAgenda": "not on the schedule",
-      "selo": {
-        "conferido": "CRMV verified",
-        "aConferir": "CRMV to verify"
-      },
-      "editar": "Edit record",
-      "desativar": "Deactivate record",
-      "reativar": "Reactivate record",
-      "desativadas": "Deactivated records ({n})",
-      "vazio": "No professionals yet",
-      "vazioDica": "The record is what the schedule and medical records cite: add whoever treats, even without a login.",
-      "crmv": {
-        "titulo": "Your CRMV record is missing",
-        "corpo": "Writing medical records, sharing the summary with the pet parent and signing prescriptions require an active record with CRMV, number and state.",
-        "peca": "Writing medical records, sharing the summary and signing prescriptions require a record with a CRMV. Ask the account owner to add yours.",
-        "cadastrar": "Add my record",
-        "completar": "Complete my CRMV"
-      },
-      "confirmarDesativar": {
-        "titulo": "Deactivate {nome}'s record?",
-        "mensagem": "The record leaves the schedule and lists, but stays on the records that already cite this person. You can reactivate it later."
-      },
-      "toast": {
-        "salvo": "Record saved",
-        "desativado": "Record deactivated",
-        "reativado": "Record reactivated"
-      },
-      "gaveta": {
-        "tituloNovo": "New professional",
-        "tituloEditar": "Professional record",
-        "nome": "Name",
-        "nomeInvalido": "Enter the name, with at least 2 letters.",
-        "conselho": "Professional board",
-        "registro": "Registration number",
-        "uf": "State",
-        "registroInvalido": "Enter the registration number and state.",
-        "perdeSeloRegistro": "Changing the number or state removes the verified seal: the CRMV goes back to PetJourney for verification.",
-        "especialidades": "Specialties",
-        "especialidadesDica": "Up to 5. Type each one and press Enter.",
-        "cor": "Schedule color",
-        "corN": "Color {n}",
-        "atendeNaAgenda": "On the schedule",
-        "atendeNaAgendaDica": "Gets a column on the schedule and shows up in time suggestions.",
-        "login": "Portal login",
-        "loginDica": "Link the record to the login of who treats. People who do not use the portal stay without a login.",
-        "semLogin": "No login",
-        "perdeSeloLogin": "Linking this record to a login removes the verified seal: the CRMV goes back to PetJourney for verification.",
-        "salvar": "Save record"
-      }
-    },
-    "estabelecimento": {
-      "titulo": "Establishment",
-      "erroCarregar": "Couldn't load the establishment.",
-      "publicar": "Publish page",
-      "publicarFalta": "Before publishing, fill in what the public page lists as missing.",
-      "despublicar": "Take offline",
-      "editar": "Edit",
-      "naoInformado": "Not provided",
-      "consulta": {
-        "soDono": "Only the owner edits the establishment. Here you can see how it stands.",
-        "suspenso": "While the registration is suspended, the establishment is view-only. The owner can still take the page offline."
-      },
-      "situacao": {
-        "noAr": "The page is live",
-        "foraDoAr": "Published, but offline",
-        "naoPublicada": "The page hasn't been published yet"
-      },
-      "pagina": {
-        "titulo": "Public page",
-        "desde": "Published on {data}",
-        "foraDoArDica": "It comes back on its own once the registration is approved and active.",
-        "falta": "Still missing before publishing:"
-      },
-      "pendencia": {
-        "APROVACAO": "approval of the registration by the PetJourney team",
-        "nomePublico": "the public name",
-        "fusoHorario": "the time zone",
-        "telefone": "a phone number (public, WhatsApp or on-call)"
-      },
-      "slug": {
-        "rotulo": "Page address",
-        "trocar": "Change address",
-        "depoisDaAprovacao": "The page address becomes available once the registration is approved.",
-        "nasceDoNome": "The address is created from the public name the first time you save.",
-        "invalido": "Use 3 to 60 lowercase letters, numbers and hyphens, with no hyphen at the start, at the end or twice in a row.",
-        "regras": "Lowercase letters, numbers and hyphens, 3 to 60 characters.",
-        "antigoContinua": "The old address keeps leading to the page. We keep the last 5."
-      },
-      "perfil": {
-        "titulo": "Profile and contacts",
-        "comecoTitulo": "Start here",
-        "comeco": "The name shown on the page and the time zone your business keeps time in.",
-        "preencher": "Fill in the profile"
-      },
-      "endereco": {
-        "titulo": "Address",
-        "vazio": "No address on file.",
-        "mostraRua": "The page shows the street and number.",
-        "soBairro": "The page shows only the neighborhood, city and state.",
-        "semCoordenadas": "No map location.",
-        "mapaDesligado": "The map doesn't appear on the page.",
-        "mapaLigado": "The map appears on the page."
-      },
-      "horario": {
-        "titulo": "Opening hours",
-        "noFuso": "Hours in the {fuso} time zone.",
-        "vazio": "No opening hours on file. Without them, the page can't say whether you're open.",
-        "aberto": "Open",
-        "fechado": "Closed",
-        "abertoAgora": "Open now",
-        "abertoFechaAs": "Open now, closes at {hora}",
-        "fechadoAgora": "Closed now",
-        "fechadoAbreAs": "Closed now, opens at {hora}",
-        "fechadoAbreEm": "Closed now, opens {dia} at {hora}",
-        "regras": "Open 24 hours: from 00:00 to 24:00. If it runs past midnight, split it into two days.",
-        "ate": "to",
-        "abreAs": "{dia}: opens at",
-        "fechaAs": "{dia}: closes at",
-        "copiar": "Use {dia}'s hours on the other open days",
-        "intervalo": "Break",
-        "intervaloDe": "{dia}: break starts at",
-        "intervaloAte": "{dia}: break ends at",
-        "comIntervalo": "Break",
-        "semIntervalo": "No break",
-        "problema": {
-          "HORA_INVALIDA": "Invalid time. Use 00:00 to 23:59; 24:00 only for closing.",
-          "ABRE_E_FECHA_OBRIGATORIOS": "Enter the opening and closing times.",
-          "ABRE_DEPOIS_DE_FECHA": "The start must come before the end.",
-          "INTERVALO_INCOMPLETO": "The break needs a start and an end.",
-          "INTERVALO_FORA_DO_EXPEDIENTE": "The break must fit within opening hours.",
-          "SEMANA_INCOMPLETA": "The week needs all 7 days."
-        }
-      },
-      "dia": {
-        "titulo": "Special days",
-        "feriados": "National holidays",
-        "feriadosDe": "Copy the {ano} holidays",
-        "adicionar": "Add day",
-        "vazio": "No special days. Holidays and days with different hours go here and replace the weekly hours.",
-        "remover": "Remove {nome}",
-        "data": "Date",
-        "faltaData": "Pick the date on the calendar.",
-        "nome": "Name",
-        "nomeExemplo": "Christmas Eve",
-        "faltaNome": "Give the day a name.",
-        "fechado": "Closed all day",
-        "abre": "Opens at",
-        "fecha": "Closes at",
-        "fechadoDica": "Turn off to set different hours for that day.",
-        "abertoDica": "On that day these hours apply instead of the weekly ones."
-      },
-      "mensagens": {
-        "titulo": "Messages to pet parents"
-      },
-      "confirmar": {
-        "voltar": "Back",
-        "despublicar": {
-          "titulo": "Take the page offline?",
-          "mensagem": "Anyone opening the address will see the page isn't available. You can publish it again whenever you like.",
-          "botao": "Take offline"
-        },
-        "remover": {
-          "titulo": "Remove the special day?",
-          "mensagem": "{nome} leaves the list and the weekly hours apply again on that date.",
-          "botao": "Remove"
-        }
-      },
-      "toast": {
-        "erro": "That didn't work",
-        "publicada": "Page published",
-        "despublicada": "The page is offline",
-        "salvo": {
-          "perfil": "Profile saved",
-          "endereco": "Address saved",
-          "mensagens": "Messages saved",
-          "horarios": "Hours saved"
-        },
-        "diaAdicionado": "Special day added",
-        "diaRemovido": "Special day removed",
-        "feriadosCopiados": "Holidays copied",
-        "slugTrocado": "Address changed",
-        "feriadosNovos": "No new holidays. | {total} new holiday. | {total} new holidays.",
-        "feriadosJaExistiam": "{total} was already on the list. | {total} were already on the list."
-      },
-      "campo": {
-        "nomePublico": "Public name",
-        "descricao": "Description",
-        "fusoHorario": "Time zone",
-        "idiomaDosTextos": "Language of the texts",
-        "telefonePublico": "Phone",
-        "whatsappPublico": "WhatsApp",
-        "telefonePlantao": "On-call phone",
-        "emailPublico": "Contact email",
-        "site": "Website",
-        "cep": "Postal code",
-        "logradouro": "Street",
-        "numero": "Number",
-        "complemento": "Address line 2",
-        "bairro": "Neighborhood",
-        "cidade": "City",
-        "uf": "State",
-        "mostrarEndereco": "Show street and number on the public page",
-        "mostrarMapa": "Show the map",
-        "latitude": "Latitude",
-        "longitude": "Longitude",
-        "mensagemForaDoHorario": "Message outside opening hours",
-        "orientacaoEmergencia": "Emergency guidance"
-      },
-      "idioma": {
-        "ptBR": "Portuguese (Brazil)",
-        "enUS": "English (US)",
-        "enGB": "English (UK)",
-        "es419": "Spanish (Latin America)",
-        "srLatn": "Serbian",
-        "ar": "Arabic"
-      },
-      "gaveta": {
-        "titulo": {
-          "perfil": "Profile and contacts",
-          "endereco": "Address",
-          "mensagens": "Messages to pet parents",
-          "horarios": "Weekly hours",
-          "dia": "New special day",
-          "slug": "Page address"
-        },
-        "opcional": "(optional)",
-        "buscarFuso": "Search city or region",
-        "fusoDica": "Your opening hours, the schedule and \"open now\" all use this time zone.",
-        "idiomaDica": "The language you write the description and messages in. The page doesn't translate these texts.",
-        "contatos": "Contacts on the page",
-        "contatosDica": "To publish, one of the three phone numbers is enough.",
-        "plantaoDica": "For outside opening hours. Empty means no on-call service.",
-        "emailDica": "Shown on the page; it's not your account email.",
-        "naPagina": "On the public page",
-        "mostrarEnderecoDica": "When off, the page shows only neighborhood, city and state, with no map.",
-        "mostrarMapaDica": "Only appears with the street shown and with latitude and longitude.",
-        "coordenadasDica": "Copy them from the map you use: both, with a decimal point.",
-        "foraDoHorarioDica": "Shown when you're closed.",
-        "emergenciaDica": "What to do in an emergency outside opening hours: another address, another phone.",
-        "semTraducao": "These texts appear as you write them, in the language chosen in the profile.",
-        "cancelar": "Cancel",
-        "salvar": "Save",
-        "invalido": {
-          "nome": "Use 2 to 120 characters.",
-          "fuso": "Choose your time zone.",
-          "telefone": "Phone with area code, or with + and the country code.",
-          "email": "Check the email.",
-          "site": "Start with https://",
-          "cep": "Postal code with 8 digits.",
-          "coordenadas": "Fill in both: latitude from -90 to 90 and longitude from -180 to 180."
-        }
-      }
-    },
-    "auditoria": {
-      "titulo": "Audit log",
-      "resumo": "Who read, wrote, published or exported clinical data, and when. No content, only the action.",
-      "erro": "Couldn't load the audit log.",
-      "tentar": "Try again",
-      "carregando": "Loading the audit log",
-      "mais": "Show earlier events",
-      "emNomeDe": "on behalf of {nome}",
-      "campos": "fields: {campos}",
-      "protocolo": "protocol {protocolo}",
-      "filtros": {
-        "rotulo": "Filter the audit log",
-        "acao": "Action",
-        "todas": "All",
-        "pessoa": "Person",
-        "todos": "Everyone",
-        "periodo": "Period",
-        "qualquerData": "Any date",
-        "limpar": "Clear filters"
-      },
-      "vazio": {
-        "titulo": "Nothing logged yet",
-        "texto": "When someone on the team opens, writes, publishes or exports clinical data, the action shows up here.",
-        "filtrado": "Nothing matches these filters."
-      },
-      "dia": {
-        "hoje": "Today, {data}",
-        "ontem": "Yesterday, {data}"
-      },
-      "ator": {
-        "suporte": "PetJourney Support",
-        "sistema": "The system",
-        "semNome": "Someone who left the team",
-        "selo": {
-          "SUPORTE": "Support",
-          "SISTEMA": "Automatic"
-        }
-      },
-      "acao": {
-        "LER": "Viewing",
-        "CRIAR": "Creation",
-        "ALTERAR": "Change",
-        "FINALIZAR": "Finalization",
-        "ANULAR": "Voiding",
-        "PUBLICAR": "Publishing to the app",
-        "IMPRIMIR": "Printing",
-        "EXPORTAR": "Export",
-        "LER_DADO_DO_APP": "Viewing app data"
-      },
-      "frase": {
-        "LER": "opened {recurso}",
-        "CRIAR": "created {recurso}",
-        "ALTERAR": "changed {recurso}",
-        "FINALIZAR": "finalized {recurso}",
-        "ANULAR": "voided {recurso}",
-        "PUBLICAR": "published {recurso}",
-        "IMPRIMIR": "printed {recurso}",
-        "EXPORTAR": "exported {recurso}",
-        "LER_DADO_DO_APP": "opened {recurso}"
-      },
-      "recurso": {
-        "atendimento": "a visit",
-        "paciente_do_parceiro": "a patient's record",
-        "cliente_do_parceiro": "a pet parent's record",
-        "alerta_do_paciente": "a patient alert",
-        "aplicacao_vacina": "a vaccine administration",
-        "consulta_do_app": "a visit for the app",
-        "vacina_do_app": "a vaccine for the app",
-        "diario_do_app": "the app diary",
-        "trilha_clinica": "the audit log",
-        "outro": "a record ({tipo})"
       }
     }
   },
@@ -2894,6 +2483,10 @@
     "resumoEmpresa": "You are signed in as {email}, at {empresa}."
   },
   "clinico": {
+    "modulo": {
+      "visivel": "Clinical module visible",
+      "oculto": "Clinical module hidden"
+    },
     "navegacao": {
       "secao": "Clinic",
       "agora": "Now",
@@ -7568,6 +7161,10 @@
       "titulo": "Record medication",
       "via": "Route"
     },
+    "modulo": {
+      "oculto": "Hotel module hidden",
+      "visivel": "Hotel module visible"
+    },
     "motivoCancelamento": {
       "animal-doente": "Animal unwell",
       "hotel-indisponivel": "Hotel fully booked",
@@ -8879,16 +8476,5 @@
       "rotinaPadrao": "Standard routine"
     },
     "abasAria": "{destino} screens"
-  },
-  "captcha": {
-    "erro": "The security check did not load. Reload the page and try again."
-  },
-  "pendencias": {
-    "contador": {
-      "convitesPendentes": "{total} invitation awaiting a reply | {total} invitations awaiting a reply",
-      "acessosTemporariosAtivos": "{total} temporary access active | {total} temporary accesses active",
-      "agendamentosSemConfirmacao": "{total} appointment not confirmed | {total} appointments not confirmed",
-      "outra": "{total} item to handle | {total} items to handle"
-    }
   }
 }

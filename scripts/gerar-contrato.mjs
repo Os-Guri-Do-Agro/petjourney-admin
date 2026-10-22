@@ -86,8 +86,6 @@ execSync(
     '--output',
     `"${saida}"`,
     '--root-types --root-types-no-schema-prefix',
-    // Campo com `default` continua opcional: no Nest, @ApiPropertyOptional({ default }) é opcional.
-    '--default-non-nullable false',
   ].join(' '),
   { stdio: 'inherit' },
 )

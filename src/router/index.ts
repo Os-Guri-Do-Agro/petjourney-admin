@@ -1,9 +1,18 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
-import { podeAbrirCaminho, rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
+import {
+  aplicarParametroDaUrl,
+  PARAMETRO_DO_MODULO,
+  rotaPertenceAoModulo,
+  useModuloClinico,
+} from '@/composables/useModuloClinico'
+import {
+  aplicarParametroDoHotel,
+  PARAMETRO_DO_HOTEL,
+  rotaPertenceAoHotel,
+  useModuloHotel,
+} from '@/composables/useModuloHotel'
 import { isAuthenticated } from '@/service/auth/auth-session'
-import { useParceiroStore } from '@/stores/parceiro'
 
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -13,7 +22,6 @@ import { moduloDaPaginaAberta } from './paginas-abertas'
 
 const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
-  { path: '/clinica', redirect: '/inicio' },
   { path: '/veterinario', redirect: '/inicio' },
   /*
    * Compartilhamentos do menu Pets era uma segunda porta para o mesmo cômodo.
@@ -24,19 +32,6 @@ const partnerLegacyRedirects: RouteRecordRaw[] = [
    * Redireciona em vez de sumir porque quem tem o link salvo merece cair na tela que funciona.
    */
   { path: '/veterinario/compartilhamentos', redirect: '/parceiro/acessos' },
-  /*
-   * O módulo da clínica morava em `/veterinario`, mas quem o usa é a recepção, a enfermagem e o
-   * veterinário: o endereço passou a ser `/clinica` (M2 da análise do portal). Link salvo, favorito e
-   * deep link antigo continuam chegando à mesma tela, com a query e o hash.
-   */
-  {
-    path: '/veterinario/:caminho(.*)*',
-    redirect: (to) => ({
-      path: `/clinica/${([] as string[]).concat(to.params.caminho ?? []).join('/')}`,
-      query: to.query,
-      hash: to.hash,
-    }),
-  },
   {
     path: '/parceiro/status',
     redirect: { path: '/settings', query: { aba: 'empresa' } },
@@ -73,13 +68,7 @@ const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-pas
 
 function getSafeRedirectPath(redirect: unknown) {
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    if (
-      redirect === '/tutor' ||
-      redirect === '/inicio' ||
-      redirect === '/parceiro' ||
-      redirect === '/clinica' ||
-      redirect === '/veterinario'
-    ) {
+    if (redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario') {
       return getDefaultLandingPath()
     }
 
@@ -89,7 +78,7 @@ function getSafeRedirectPath(redirect: unknown) {
   return getDefaultLandingPath()
 }
 
-router.beforeEach(async (to) => {
+router.beforeEach((to) => {
   const hasActiveSession = isAuthenticated()
   const isPublicRoute = publicRoutes.has(to.path)
 
@@ -100,42 +89,64 @@ router.beforeEach(async (to) => {
     return semToken
   }
 
-  const { ativo: demonstracao } = useModoDemonstracao()
+  /*
+   * O interruptor oculto do módulo clínico.
+   *
+   * O parâmetro é lido em **qualquer** rota, não só nas clínicas: é assim que o link de
+   * demonstração funciona a partir de onde a pessoa já estiver. Depois de aplicado, ele sai da
+   * URL — `?clinico=on` colado na barra de endereço transforma o caminho oculto numa placa, e
+   * qualquer captura de tela o entregaria.
+   */
+  const clinicoDecidiu = aplicarParametroDaUrl(to.query[PARAMETRO_DO_MODULO])
+  const hotelDecidiu = aplicarParametroDoHotel(to.query[PARAMETRO_DO_HOTEL])
+
+  if (clinicoDecidiu || hotelDecidiu) {
+    const query = { ...to.query }
+
+    /*
+     * Os dois são aplicados antes de qualquer redirecionamento, e só então a query é limpa: um
+     * link com `?clinico=on&hotel=on` precisa ligar os dois, e sair cedo no primeiro deixaria o
+     * segundo para uma navegação que nunca acontece.
+     */
+    if (clinicoDecidiu) {
+      delete query[PARAMETRO_DO_MODULO]
+    }
+
+    if (hotelDecidiu) {
+      delete query[PARAMETRO_DO_HOTEL]
+    }
+
+    return { path: to.path, query, hash: to.hash, replace: true }
+  }
 
   /*
-   * A página de agendamento da clínica e a de reserva do hotel, de quem não tem conta. Ainda rodam
-   * sobre os dados locais: só abrem na demonstração, até a E3-05 e a E7-03 ligarem as páginas às
-   * rotas `/public` da API. Ver `paginas-abertas.ts`.
+   * Menu escondido não basta: sem esta guarda, quem tem `/veterinario/agenda` no histórico do
+   * navegador continuaria entrando. Redireciona para o início em vez de mostrar "não
+   * encontrado" — a rota existe, só não é para ser alcançada assim.
    */
-  if (moduloDaPaginaAberta(to.path)) {
-    if (demonstracao.value) {
+  if (hasActiveSession && rotaPertenceAoModulo(to.path) && !useModuloClinico().ativo.value) {
+    return getDefaultLandingPath()
+  }
+
+  if (hasActiveSession && rotaPertenceAoHotel(to.path) && !useModuloHotel().ativo.value) {
+    return getDefaultLandingPath()
+  }
+
+  /*
+   * A página de agendamento da clínica e a de reserva do hotel: de quem não tem conta. Abrem com e
+   * sem sessão, desde que o módulo esteja ligado — ver `paginas-abertas.ts`.
+   */
+  const moduloAberto = moduloDaPaginaAberta(to.path)
+
+  if (moduloAberto) {
+    const ligado =
+      moduloAberto === 'clinico' ? useModuloClinico().ativo.value : useModuloHotel().ativo.value
+
+    if (ligado) {
       return true
     }
 
     return hasActiveSession ? getDefaultLandingPath() : { path: '/auth/login' }
-  }
-
-  /*
-   * Tela de Clínica ou Hotel: abre com o módulo ligado no servidor, a permissão da conta e a tela
-   * já integrada, ou na demonstração (`navegacao/rotas-dos-modulos.ts`). Menu escondido não basta:
-   * sem esta guarda, quem tem `/clinica/agenda` no histórico continuaria entrando.
-   */
-  if (hasActiveSession && rotaDoModulo(to.path) && !demonstracao.value) {
-    const store = useParceiroStore()
-
-    if (store.loadState !== 'ready') {
-      await store.bootstrap().catch(() => undefined)
-    }
-
-    const liberada = podeAbrirCaminho(to.path, {
-      demonstracao: false,
-      podeLer: (modulo) => store.modulo(modulo)?.podeLer ?? false,
-      temPermissao: (permissao) => store.temPermissao(permissao),
-    })
-
-    if (!liberada) {
-      return getDefaultLandingPath()
-    }
   }
 
   if (to.path === '/' || to.path === '/tutor') {

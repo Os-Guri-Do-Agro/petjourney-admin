@@ -13,16 +13,12 @@ import type {
   EquipeParceiroDto,
   MembroAtualizadoDto,
   MeuConviteDto,
-  PapeisDoMembroDto,
 } from '../contrato/openapi'
 import type { PapelParceiro } from './types'
 
 type ParceiroQuery = {
   parceiroId?: string | null
 }
-
-/** As funções operacionais da matriz de permissão (recepção, veterinário, enfermagem...). */
-export type PapelOperacional = PapeisDoMembroDto['papeisOperacionais'][number]
 
 const BASE = '/parceiro/portal/equipe'
 
@@ -134,21 +130,4 @@ export function recusarConvitePorLink(token: string) {
     method: 'POST',
     body: JSON.stringify({ token }),
   })
-}
-
-/**
- * As funções do membro na clínica ou no hotel (E1-03): substitui a lista inteira. Só DONO.
- * OPERADOR sem função continua vendo só o portal comercial.
- */
-export function definirFuncoesDoMembro(
-  usuarioId: string,
-  papeisOperacionais: PapelOperacional[],
-  params?: ParceiroQuery,
-) {
-  return unwrap(
-    apiFetch<ApiEnvelope<PapeisDoMembroDto>>(
-      `${BASE}/${idNoCaminho(usuarioId)}/papeis${buildParceiroQuery(params)}`,
-      { method: 'PUT', body: JSON.stringify({ papeisOperacionais }) },
-    ),
-  )
 }

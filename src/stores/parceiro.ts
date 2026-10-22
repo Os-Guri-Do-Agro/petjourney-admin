@@ -4,13 +4,6 @@ import { computed, ref } from 'vue'
 import i18n from '@/i18n'
 import { ApiError } from '@/service/api'
 import {
-  obterEuNoParceiro,
-  type EuNoParceiro,
-  type ModuloDoPortal,
-  type NomeDoModulo,
-  type Permissao,
-} from '@/service/parceiro/acesso-service'
-import {
   getPortalDashboard,
   getPortalStatus,
 } from '@/service/parceiro/parceiro-portal-service'
@@ -32,13 +25,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const parceiroId = ref<string | null>(readStoredParceiroId())
   const dashboard = ref<PortalDashboard | null>(null)
   const status = ref<PortalStatus | null>(null)
-  /**
-   * Módulos, papéis e permissões desta conta neste parceiro (`GET /parceiro/portal/eu`).
-   *
-   * Nulo quando a rota falha: o portal comercial segue funcionando e Clínica e Hotel somem do
-   * menu, em vez de a falha de uma rota nova derrubar a tela inteira.
-   */
-  const eu = ref<EuNoParceiro | null>(null)
   const loadState = ref<LoadState>('idle')
   const errorMessage = ref('')
   const needsParceiroSelection = ref(false)
@@ -55,24 +41,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const cadastroSuspenso = computed(() => statusAuditoria.value === 'SUSPENSO')
   const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
   const parceiroNome = computed(() => dashboard.value?.parceiro.nome ?? 'Parceiro')
-
-  const permissoes = computed(() => new Set<Permissao>(eu.value?.permissoes ?? []))
-  const permissoesAguardandoCrmv = computed(
-    () => new Set<Permissao>(eu.value?.aguardandoCrmv ?? []),
-  )
-
-  function temPermissao(permissao: Permissao) {
-    return permissoes.value.has(permissao)
-  }
-
-  /** A permissão existe para o papel, mas a API ainda recusa com `CRMV_OBRIGATORIO`. */
-  function aguardaCrmv(permissao: Permissao) {
-    return permissoesAguardandoCrmv.value.has(permissao)
-  }
-
-  function modulo(nome: NomeDoModulo): ModuloDoPortal | null {
-    return eu.value?.modulos.find((item) => item.modulo === nome) ?? null
-  }
 
   function modoBloco(modo: ModoParticipacao): ModoStatusBloco {
     const bloco = modo === 'afiliado' ? status.value?.afiliado : status.value?.participativo
@@ -123,15 +91,13 @@ export const useParceiroStore = defineStore('parceiro', () => {
 
     try {
       const query = idAlvo ? { parceiroId: idAlvo } : undefined
-      const [dashboardData, statusData, euData] = await Promise.all([
+      const [dashboardData, statusData] = await Promise.all([
         getPortalDashboard(query),
         getPortalStatus(query),
-        obterEuNoParceiro(query).catch(() => null),
       ])
 
       dashboard.value = dashboardData
       status.value = statusData
-      eu.value = euData
       setParceiroId(dashboardData.parceiro.id)
       loadState.value = 'ready'
     } catch (error) {
@@ -155,7 +121,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
         acessoEncerrado.value = decisao === 'acesso-encerrado'
         dashboard.value = null
         status.value = null
-        eu.value = null
         setParceiroId(null)
         errorMessage.value = String(
           i18n.global.t(
@@ -238,7 +203,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
   function reset() {
     dashboard.value = null
     status.value = null
-    eu.value = null
     loadState.value = 'idle'
     errorMessage.value = ''
     needsParceiroSelection.value = false
@@ -251,7 +215,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
     parceiroId,
     dashboard,
     status,
-    eu,
     loadState,
     errorMessage,
     needsParceiroSelection,
@@ -264,9 +227,6 @@ export const useParceiroStore = defineStore('parceiro', () => {
     cadastroSuspenso,
     statusAfiliadoAtivo,
     parceiroNome,
-    temPermissao,
-    aguardaCrmv,
-    modulo,
     modoBloco,
     setParceiroId,
     bootstrap,
