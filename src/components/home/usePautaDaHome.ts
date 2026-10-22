@@ -77,8 +77,12 @@ function porGravidade(linhas: LinhaDaPauta[]) {
 
 export function usePautaDaHome() {
   const { t, locale } = useI18n()
-  const { hasClinicalProfile, hasHotelProfile, pendenciasClinicas, pendenciasDoHotel } =
-    useAppNavigation()
+  const {
+    clinicaNaDemonstracao: hasClinicalProfile,
+    hotelNaDemonstracao: hasHotelProfile,
+    pendenciasClinicas,
+    pendenciasDoHotel,
+  } = useAppNavigation()
 
   function linha(
     id: string,

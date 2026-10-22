@@ -421,6 +421,9 @@
         "fila": "Waitlist entry",
         "filaDica": "Add someone to the waitlist"
       }
+    },
+    "demonstracao": {
+      "rotulo": "Demo (local data)"
     }
   },
   "frame": {
@@ -772,14 +775,40 @@
     },
     "modulos": {
       "titulo": "Modules",
-      "rotulo": "Quick access",
+      "rotulo": "Clinic and Hotel modules",
       "novoAgendamento": "New appointment",
       "novoAgendamentoDetalhe": "Book on the clinic schedule",
       "atendimentosHoje": "No appointments today | {total} appointment today | {total} appointments today",
       "hospedes": "No guests | {total} guest | {total} guests",
       "divulgacaoDetalhe": "Code, QR and materials",
       "programasDetalhe": "Affiliate: {status}",
-      "acessosDetalhe": "Shared pets"
+      "acessosDetalhe": "Shared pets",
+      "CLINICA": {
+        "nome": "Clinic",
+        "descricao": "Schedule, medical records, prescriptions and vaccines, connected to the pet parent's app."
+      },
+      "HOTEL": {
+        "nome": "Hotel",
+        "descricao": "Bookings, check-in, house routine and updates to the pet parent."
+      },
+      "pedir": "Request the module",
+      "sugerido": "Fits your registration",
+      "solicitado": "The request is with the PetJourney team.",
+      "teste": "On trial until {data}.",
+      "selo": {
+        "solicitado": "Under review",
+        "teste": "On trial",
+        "somenteLeitura": "Read only"
+      },
+      "somenteLeitura": {
+        "MODULO_SUSPENSO": "Module suspended: you can view what was already recorded, but not create or change anything.",
+        "MODULO_DESLIGADO": "Module turned off: you can view what was already recorded, but not create or change anything.",
+        "PRAZO_VENCIDO": "The module period has ended: you can view what was already recorded, but not create or change anything.",
+        "PARCEIRO_NAO_OPERACIONAL": "The company registration is not cleared: you can view what was already recorded, but not create or change anything."
+      },
+      "pedidoEnviado": "Request sent",
+      "pedidoEnviadoDetalhe": "The PetJourney team will review it.",
+      "erro": "That did not work"
     },
     "agenda": {
       "titulo": "Schedule",
@@ -2483,10 +2512,6 @@
     "resumoEmpresa": "You are signed in as {email}, at {empresa}."
   },
   "clinico": {
-    "modulo": {
-      "visivel": "Clinical module visible",
-      "oculto": "Clinical module hidden"
-    },
     "navegacao": {
       "secao": "Clinic",
       "agora": "Now",
@@ -7160,10 +7185,6 @@
       "soDaquiParaFrente": "Doses start from now. Today's dose that has already passed is not created: a dose born late is a false record of a missed dose.",
       "titulo": "Record medication",
       "via": "Route"
-    },
-    "modulo": {
-      "oculto": "Hotel module hidden",
-      "visivel": "Hotel module visible"
     },
     "motivoCancelamento": {
       "animal-doente": "Animal unwell",

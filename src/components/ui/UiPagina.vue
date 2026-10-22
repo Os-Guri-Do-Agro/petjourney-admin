@@ -15,12 +15,15 @@
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 import UiAbas from '@/components/ui/UiAbas.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { useEspacos } from '@/navegacao/espacos'
+import { rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
+import type { NomeDoModulo } from '@/service/parceiro/acesso-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
@@ -140,6 +143,37 @@ const canais = [
 ] as const
 
 const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.value)
+
+const rotaAtual = useRoute()
+const { ativo: demonstracao } = useModoDemonstracao()
+
+/**
+ * Tela de módulo com o módulo só para consulta (suspenso, desligado, prazo vencido, parceiro não
+ * operável): uma linha dizendo por quê, embaixo do título. A API já recusa a escrita com
+ * `MODULO_SOMENTE_LEITURA`; a linha evita que a pessoa descubra isso tentando.
+ */
+const avisoDeConsulta = computed(() => {
+  const rota = demonstracao.value ? null : rotaDoModulo(rotaAtual.path)
+
+  if (!rota) {
+    return ''
+  }
+
+  const nomes: NomeDoModulo[] = rota.modulo === 'QUALQUER' ? ['CLINICA', 'HOTEL'] : [rota.modulo]
+  const legiveis = nomes.flatMap((nome) => {
+    const modulo = parceiroStore.modulo(nome)
+
+    return modulo?.podeLer ? [modulo] : []
+  })
+
+  if (!legiveis.length || legiveis.some((modulo) => modulo.podeEscrever)) {
+    return ''
+  }
+
+  const motivo = legiveis[0]?.motivoSomenteLeitura
+
+  return motivo ? t(`inicio.modulos.somenteLeitura.${motivo}`) : ''
+})
 </script>
 
 <template>
@@ -200,6 +234,10 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
         :atual="aqui.aba?.to ?? null"
         :rotulo="tituloDaTela"
       />
+      <p v-if="avisoDeConsulta" class="pagina__consulta" role="status">
+        <i class="ph ph-eye" aria-hidden="true" />
+        {{ avisoDeConsulta }}
+      </p>
     </header>
 
     <div v-if="carregando" class="pagina__estado" role="status" aria-live="polite">
@@ -399,6 +437,23 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
 .pagina__abas {
   margin-top: 4px;
+}
+
+/* Só consulta: linha com o ícone na tinta do estado, sem faixa pintada. */
+.pagina__consulta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pagina__consulta i {
+  margin-top: 2px;
+  color: var(--atencao-tinta);
+  font-size: 17px;
 }
 
 /* Estados: uma folha só, centrada, com o ícone num disco e no máximo duas ações. */

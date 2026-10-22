@@ -33,8 +33,12 @@ function pontoDo(total: number, tom: TomDePendencia): IndicadorDaAbertura['tom']
 
 export function useAberturaDoInicio(dia: DiaDaCasa) {
   const { t } = useI18n()
-  const { hasClinicalProfile, hasHotelProfile, pendenciasClinicas, pendenciasDoHotel } =
-    useEspacos()
+  const {
+    clinicaNaDemonstracao: hasClinicalProfile,
+    hotelNaDemonstracao: hasHotelProfile,
+    pendenciasClinicas,
+    pendenciasDoHotel,
+  } = useEspacos()
 
   const daClinica = computed<IndicadorDaAbertura[]>(() => {
     const agenda = dia.clinica.value

@@ -6,8 +6,7 @@ import {
   type ContagemDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
 import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
-import { useModuloClinico } from '@/composables/useModuloClinico'
-import { useModuloHotel } from '@/composables/useModuloHotel'
+import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
 import { useParceiroStore } from '@/stores/parceiro'
 
 export type AppNavigationItem = {
@@ -61,47 +60,6 @@ export type AppNavigationSection = {
   items: AppNavigationItem[]
   blocos?: AppNavigationBloco[]
 }
-
-/**
- * Menu clínico. Ligado com a entrada do módulo `src/features/clinico`, que substituiu os
- * stubs de `/veterinario/*` por telas com camada de dados própria.
- *
- * A camada é mocada e determinística (`features/clinico/data`), com a mesma forma da API
- * futura — nenhum dado fictício vaza para fora do módulo.
- */
-export const CLINICAL_MENU_ENABLED = true
-
-/**
- * Modo demonstração do módulo clínico.
- *
- * Com `true`, o menu clínico aparece para **qualquer conta do portal**, mesmo sem perfil
- * veterinário — é o que permite apresentar o módulo a partir de uma conta de parceiro enquanto
- * a API clínica não existe.
- *
- * O interruptor é uma constante e não uma variável de ambiente de propósito: ele precisa ser
- * revisto por quem lê o código, não esquecido ligado num painel de deploy. **Vire para `false`
- * junto com a primeira entrega da API clínica** — a partir daí o que está atrás do menu é
- * prontuário de paciente real
- */
-export const CLINICAL_MENU_DEMO = true
-
-/**
- * Menu do hotel. Ligado com a entrada do módulo `src/features/hotel`.
- *
- * A camada é mocada e determinística (`features/hotel/data`), com a mesma forma da API futura —
- * nenhum dado fictício vaza para fora do módulo.
- */
-export const HOTEL_MENU_ENABLED = true
-
-/**
- * Modo demonstração do módulo hotel.
- *
- * Mesma constante e mesma razão do clínico: enquanto o módulo roda sobre dados de demonstração,
- * ele é apresentável a partir de qualquer conta do portal. **Vire para `false` junto com a
- * primeira entrega da API de hospedagem** — a partir daí o que está atrás do menu é a rotina de um
- * animal de verdade, com o telefone de um responsável de verdade.
- */
-export const HOTEL_MENU_DEMO = true
 
 /**
  * Rotas do hotel, agrupadas pela pergunta que respondem.
@@ -272,52 +230,42 @@ export function useAppNavigation() {
   const parceiroStore = useParceiroStore()
 
   /**
-   * Quem vê o módulo clínico.
-   *
-   * Exigia `hasVeterinarioProfile()` — o claim `veterinarioId` no token. Conta de parceiro não
-   * traz esse claim, então o menu não montava para ninguém do portal, e o módulo só era
-   * alcançável digitando `/veterinario/...` na barra de endereço (a rota nunca exigiu o perfil;
-   * o guard só pede sessão).
-   *
-   * Enquanto o módulo roda sobre a camada mocada, o menu está aberto a qualquer conta do portal,
-   * para poder ser demonstrado. **Quando a API clínica existir, isto volta a exigir o perfil** —
-   * aí o que está atrás do menu é prontuário de paciente real, e prontuário não se mostra a quem
-   * não é do corpo clínico.
+   * Quem vê cada tela da Clínica e do Hotel: o módulo ligado no servidor, a permissão da conta e a
+   * tela já integrada à API, ou tudo no modo demonstração (`navegacao/rotas-dos-modulos.ts`).
+   * Uma casa pode ter os dois módulos, um só, ou nenhum: os portões são independentes.
    */
-  const { ativo: moduloClinicoAtivo } = useModuloClinico()
-  const { ativo: moduloHotelAtivo } = useModuloHotel()
+  const { podeAbrir, demonstracao } = useAcessoAosModulos()
 
-  const hasClinicalProfile = computed(
-    () =>
-      /*
-       * O interruptor oculto vem **antes** de tudo: enquanto as telas rodam sobre dados
-       * mocados, elas não aparecem para quem abriu o portal para trabalhar. Um menu
-       * "Pacientes" com bichos que não existem é indistinguível de um defeito.
-       *
-       * Ligar é decisão de quem vai demonstrar — ver `useModuloClinico`.
-       */
-      moduloClinicoAtivo.value && CLINICAL_MENU_ENABLED && CLINICAL_MENU_DEMO,
-  )
-
-  /**
-   * Quem vê o módulo hotel.
-   *
-   * Mesma regra e mesma ordem do clínico: o interruptor oculto vem antes de tudo. Uma casa pode
-   * ter os dois módulos, um só, ou nenhum — e por isso os dois portões são independentes.
-   */
-  const hasHotelProfile = computed(
-    () => moduloHotelAtivo.value && HOTEL_MENU_ENABLED && HOTEL_MENU_DEMO,
-  )
+  /** Os blocos de um módulo só com os destinos que esta conta abre; bloco vazio sai. */
+  function blocosVisiveis(blocos: readonly BlocoDeModulo[]): AppNavigationBloco[] {
+    return blocos
+      .map((bloco) => ({
+        id: bloco.id,
+        label: t(bloco.key),
+        items: bloco.rotas.filter((rota) => podeAbrir(rota.to)).map(decorarRota),
+      }))
+      .filter((bloco) => bloco.items.length > 0)
+  }
 
   const hotelBlocos = computed<AppNavigationBloco[]>(() => {
     void locale.value
 
-    return HOTEL_BLOCKS.map((bloco) => ({
-      id: bloco.id,
-      label: t(bloco.key),
-      items: bloco.rotas.map(decorarRota),
-    }))
+    return blocosVisiveis(HOTEL_BLOCKS)
   })
+
+  /*
+   * Se o módulo aparece decide-se pelas rotas, e não pelos itens já decorados: os itens levam os
+   * selos, os selos vêm das pendências, e as pendências perguntam se o módulo aparece.
+   */
+  const hasClinicalProfile = computed(
+    () =>
+      CLINICAL_BLOCKS.some((bloco) => bloco.rotas.some((rota) => podeAbrir(rota.to))) ||
+      PATIENT_ROUTES.some((rota) => podeAbrir(rota.to)),
+  )
+
+  const hasHotelProfile = computed(() =>
+    HOTEL_BLOCKS.some((bloco) => bloco.rotas.some((rota) => podeAbrir(rota.to))),
+  )
 
   const hotelItems = computed<AppNavigationItem[]>(() =>
     hotelBlocos.value.flatMap((bloco) => bloco.items),
@@ -329,15 +277,21 @@ export function useAppNavigation() {
   })
 
   /**
-   * Trabalho parado atrás de cada tela clínica.
-   *
-   * Carrega sozinho quando o módulo está ligado para esta conta, e fica zerado quando não está —
-   * ver `useClinicoPendencias`.
+   * Trabalho parado atrás de cada tela, contado sobre os dados locais: só no modo demonstração.
+   * Fora dela os selos vêm da API (`GET /parceiro/portal/pendencias`, E1-06).
    */
-  const pendencias = useClinicoPendencias(() => hasClinicalProfile.value)
+  const pendencias = useClinicoPendencias(() => demonstracao.value && hasClinicalProfile.value)
 
   /** O mesmo para o hotel: rotina atrasada e véspera travada. Ver `useHotelPendencias`. */
-  const pendenciasDoHotel = useHotelPendencias(() => hasHotelProfile.value)
+  const pendenciasDoHotel = useHotelPendencias(() => demonstracao.value && hasHotelProfile.value)
+
+  /**
+   * Clínica e Hotel nos painéis que ainda contam sobre os dados locais: as fitas do dia, a busca
+   * global, o menu de criar, a pauta e a agenda do Início. Fora da demonstração eles somem até a
+   * rota da API de cada um chegar, em vez de mostrar números de mentira ao lado dos de verdade.
+   */
+  const clinicaNaDemonstracao = computed(() => demonstracao.value && hasClinicalProfile.value)
+  const hotelNaDemonstracao = computed(() => demonstracao.value && hasHotelProfile.value)
 
   /**
    * Contadores por rota, com a frase que explica o número.
@@ -408,11 +362,7 @@ export function useAppNavigation() {
   const clinicalBlocos = computed<AppNavigationBloco[]>(() => {
     void locale.value
 
-    return CLINICAL_BLOCKS.map((bloco) => ({
-      id: bloco.id,
-      label: t(bloco.key),
-      items: bloco.rotas.map(decorarRota),
-    }))
+    return blocosVisiveis(CLINICAL_BLOCKS)
   })
 
   const clinicalItems = computed<AppNavigationItem[]>(() =>
@@ -422,7 +372,11 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return PATIENT_ROUTES.map((rota) => ({ label: t(rota.key), to: rota.to, icon: rota.icon }))
+    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map((rota) => ({
+      label: t(rota.key),
+      to: rota.to,
+      icon: rota.icon,
+    }))
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {
@@ -533,6 +487,9 @@ export function useAppNavigation() {
     overviewItem,
     hasClinicalProfile,
     hasHotelProfile,
+    modoDemonstracao: demonstracao,
+    clinicaNaDemonstracao,
+    hotelNaDemonstracao,
     pendenciasClinicas: pendencias,
     pendenciasDoHotel,
   }

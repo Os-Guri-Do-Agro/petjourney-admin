@@ -30,7 +30,7 @@ import { computed, onUnmounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import { useModuloClinico } from '@/composables/useModuloClinico'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 
 import {
   getMockConfig,
@@ -45,9 +45,8 @@ import { useAgendaStore } from '../../stores/agenda'
 import { useClinicoStore } from '../../stores/clinico'
 import { useProntuarioStore } from '../../stores/prontuario'
 
-const { ativo: moduloClinicoAtivo } = useModuloClinico()
-
-const habilitado = computed(() => import.meta.env.DEV || moduloClinicoAtivo.value)
+/* O painel mexe nos dados locais: só existe na demonstração (build de desenvolvimento). */
+const { ativo: habilitado } = useModoDemonstracao()
 
 const { t } = useI18n()
 const router = useRouter()

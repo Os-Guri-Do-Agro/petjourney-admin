@@ -421,6 +421,9 @@
         "fila": "Espera de vacante",
         "filaDica": "Añadir a alguien a la lista de espera"
       }
+    },
+    "demonstracao": {
+      "rotulo": "Demostración (datos locales)"
     }
   },
   "frame": {
@@ -772,14 +775,40 @@
     },
     "modulos": {
       "titulo": "Módulos",
-      "rotulo": "Acceso rápido",
+      "rotulo": "Módulos de Clínica y Hotel",
       "novoAgendamento": "Nueva cita",
       "novoAgendamentoDetalhe": "Agendar en la clínica",
       "atendimentosHoje": "Ninguna consulta hoy | {total} consulta hoy | {total} consultas hoy",
       "hospedes": "Ningún huésped | {total} huésped | {total} huéspedes",
       "divulgacaoDetalhe": "Código, QR y materiales",
       "programasDetalhe": "Afiliado: {status}",
-      "acessosDetalhe": "Mascotas compartidas"
+      "acessosDetalhe": "Mascotas compartidas",
+      "CLINICA": {
+        "nome": "Clínica",
+        "descricao": "Agenda, historia clínica, recetas y vacunas, conectadas a la app del tutor."
+      },
+      "HOTEL": {
+        "nome": "Hotel",
+        "descricao": "Reservas, check-in, rutina de la casa y boletín al tutor."
+      },
+      "pedir": "Solicitar el módulo",
+      "sugerido": "Coincide con su registro",
+      "solicitado": "La solicitud está con el equipo PetJourney.",
+      "teste": "En prueba hasta el {data}.",
+      "selo": {
+        "solicitado": "En análisis",
+        "teste": "En prueba",
+        "somenteLeitura": "Solo consulta"
+      },
+      "somenteLeitura": {
+        "MODULO_SUSPENSO": "Módulo suspendido: puede consultar lo que ya se registró, pero no crear ni modificar.",
+        "MODULO_DESLIGADO": "Módulo desactivado: puede consultar lo que ya se registró, pero no crear ni modificar.",
+        "PRAZO_VENCIDO": "El período del módulo terminó: puede consultar lo que ya se registró, pero no crear ni modificar.",
+        "PARCEIRO_NAO_OPERACIONAL": "El registro de la empresa no está habilitado: puede consultar lo que ya se registró, pero no crear ni modificar."
+      },
+      "pedidoEnviado": "Solicitud enviada",
+      "pedidoEnviadoDetalhe": "El equipo PetJourney analizará la solicitud.",
+      "erro": "No funcionó"
     },
     "agenda": {
       "titulo": "Agenda",
@@ -2483,10 +2512,6 @@
     "resumoEmpresa": "Entró como {email}, en {empresa}."
   },
   "clinico": {
-    "modulo": {
-      "visivel": "Módulo clínico visible",
-      "oculto": "Módulo clínico oculto"
-    },
     "navegacao": {
       "secao": "Clínica",
       "agora": "Ahora",
@@ -7160,10 +7185,6 @@
       "soDaquiParaFrente": "Las dosis nacen a partir de ahora. La de hoy que ya pasó no se crea: una dosis que nace atrasada es un registro falso de dosis perdida.",
       "titulo": "Registrar medicación",
       "via": "Vía"
-    },
-    "modulo": {
-      "oculto": "Módulo hotel oculto",
-      "visivel": "Módulo hotel visible"
     },
     "motivoCancelamento": {
       "animal-doente": "Animal enfermo",

@@ -28,7 +28,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import { getMockConfig, setMockConfig } from '@/features/clinico/data/mock-runtime'
-import { useModuloHotel } from '@/composables/useModuloHotel'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 
 import { definirFalha, limparFalhas, type HotelOperation } from '../../data/mock-runtime'
 import { getDataset, getSemente, resetDataset } from '../../data/store'
@@ -36,9 +36,8 @@ import { useHospedagemStore } from '../../stores/hospedagem'
 import { useHotelStore } from '../../stores/hotel'
 import { useReservasStore } from '../../stores/reservas'
 
-const { ativo: moduloAtivo } = useModuloHotel()
-
-const habilitado = computed(() => import.meta.env.DEV || moduloAtivo.value)
+/* O painel mexe nos dados locais: só existe na demonstração (build de desenvolvimento). */
+const { ativo: habilitado } = useModoDemonstracao()
 
 const { t } = useI18n()
 const router = useRouter()

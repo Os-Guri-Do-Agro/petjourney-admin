@@ -421,6 +421,9 @@
         "fila": "Čekanje na termin",
         "filaDica": "Dodaj nekoga na listu čekanja"
       }
+    },
+    "demonstracao": {
+      "rotulo": "Demonstracija (lokalni podaci)"
     }
   },
   "frame": {
@@ -772,14 +775,40 @@
     },
     "modulos": {
       "titulo": "Moduli",
-      "rotulo": "Brzi pristup",
+      "rotulo": "Moduli Klinika i Hotel",
       "novoAgendamento": "Novi termin",
       "novoAgendamentoDetalhe": "Zakažite u rasporedu klinike",
       "atendimentosHoje": "Danas nema pregleda | {total} pregled danas | {total} pregleda danas | {total} pregleda danas",
       "hospedes": "Nema gostiju | {total} gost | {total} gosta | {total} gostiju",
       "divulgacaoDetalhe": "Kod, QR i materijali",
       "programasDetalhe": "Afilijejt: {status}",
-      "acessosDetalhe": "Deljeni ljubimci"
+      "acessosDetalhe": "Deljeni ljubimci",
+      "CLINICA": {
+        "nome": "Klinika",
+        "descricao": "Raspored, medicinski karton, recepti i vakcine, povezani sa aplikacijom staratelja."
+      },
+      "HOTEL": {
+        "nome": "Hotel",
+        "descricao": "Rezervacije, prijem, dnevna rutina i izveštaji staratelju."
+      },
+      "pedir": "Zatražite modul",
+      "sugerido": "Odgovara vašoj registraciji",
+      "solicitado": "Zahtev je kod tima PetJourney.",
+      "teste": "Probni period do {data}.",
+      "selo": {
+        "solicitado": "Na proveri",
+        "teste": "Probni period",
+        "somenteLeitura": "Samo pregled"
+      },
+      "somenteLeitura": {
+        "MODULO_SUSPENSO": "Modul je suspendovan: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
+        "MODULO_DESLIGADO": "Modul je isključen: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
+        "PRAZO_VENCIDO": "Period modula je istekao: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
+        "PARCEIRO_NAO_OPERACIONAL": "Registracija firme nije odobrena: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate."
+      },
+      "pedidoEnviado": "Zahtev je poslat",
+      "pedidoEnviadoDetalhe": "Tim PetJourney će razmotriti zahtev.",
+      "erro": "Nije uspelo"
     },
     "agenda": {
       "titulo": "Raspored",
@@ -2483,10 +2512,6 @@
     "resumoEmpresa": "Prijavljeni ste kao {email}, u firmi {empresa}."
   },
   "clinico": {
-    "modulo": {
-      "visivel": "Klinički modul je prikazan",
-      "oculto": "Klinički modul je sakriven"
-    },
     "navegacao": {
       "secao": "Klinika",
       "agora": "Sada",
@@ -7160,10 +7185,6 @@
       "soDaquiParaFrente": "Doze nastaju od sada. Današnja koja je već prošla se ne pravi: doza koja nastane zakasnelo je lažan zapis o propuštenoj dozi.",
       "titulo": "Upiši terapiju",
       "via": "Način"
-    },
-    "modulo": {
-      "oculto": "Modul hotela je sakriven",
-      "visivel": "Modul hotela je vidljiv"
     },
     "motivoCancelamento": {
       "animal-doente": "Životinja je bolesna",
