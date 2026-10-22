@@ -2158,7 +2158,9 @@
         "papelTrocadoDetalhe": "Uloga osobe {nome} sada je: {papel}.",
         "removido": "Osoba je uklonjena iz tima",
         "saiu": "Napustili ste tim",
-        "erro": "Nije uspelo"
+        "erro": "Nije uspelo",
+        "funcoesSalvas": "Uloge su sačuvane",
+        "funcoesSalvasDetalhe": "Osoba {nome} sada vidi ono što te uloge otvaraju."
       },
       "gaveta": {
         "titulo": "Pozovite u tim",
@@ -2170,6 +2172,96 @@
         "enviar": "Pošaljite poziv",
         "cancelar": "Otkažite",
         "reenviarPendente": "Ponovo pošaljite poziv na čekanju"
+      },
+      "definirFuncoes": "Odredite uloge",
+      "funcao": {
+        "RECEPCAO": "Recepcija",
+        "VETERINARIO": "Veterinar",
+        "ENFERMAGEM": "Nega",
+        "CUIDADOR": "Negovatelj",
+        "BANHISTA": "Kupanje",
+        "ADESTRADOR": "Dreser",
+        "GESTOR": "Upravljanje",
+        "FINANCEIRO": "Finansije"
+      },
+      "funcaoDica": {
+        "RECEPCAO": "Raspored, zahtevi za termin, lista čekanja i kartoteka pacijenata; u hotelu rezervacije i prijem.",
+        "VETERINARIO": "Raspored, karton, vakcine i hospitalizacija. Potpisivanje recepta i zatvaranje kartona traže CRMV.",
+        "ENFERMAGEM": "Vakcine, hospitalizacija i pregled kartona i rasporeda.",
+        "CUIDADOR": "Dnevna rutina i gosti hotela.",
+        "BANHISTA": "Usluge i rutina hotela, kao negovatelj.",
+        "ADESTRADOR": "Usluge i rutina hotela, kao negovatelj.",
+        "GESTOR": "Podešava kliniku i hotel, planira zalihe, uvozi bazu i vidi trag izmena.",
+        "FINANCEIRO": "Pregleda zalihe i vodi finansije."
+      },
+      "funcoes": {
+        "titulo": "Uloge u klinici i hotelu",
+        "lede": "Ono što osoba radi određuje šta vidi u meniju. Možete označiti više od jedne.",
+        "nenhuma": "Bez uloge osoba vidi samo poslovni portal: programe, promociju i pristupe.",
+        "salvar": "Sačuvajte uloge"
+      }
+    },
+    "profissionais": {
+      "titulo": "Stručnjaci",
+      "resumo": "Kartice onih koji leče, vakcinišu, propisuju ili neguju, sa ili bez naloga na portalu.",
+      "cadastrar": "Dodajte stručnjaka",
+      "erroCarregar": "Stručnjake nije moguće učitati.",
+      "conselho": {
+        "CRMV": "CRMV",
+        "OUTRO": "Druga komora",
+        "NENHUM": "Bez komore"
+      },
+      "conselhoCurto": "Komora",
+      "comLogin": "nalog: {nome}",
+      "semLogin": "bez naloga",
+      "foraDaAgenda": "van rasporeda",
+      "selo": {
+        "conferido": "CRMV proveren",
+        "aConferir": "CRMV za proveru"
+      },
+      "editar": "Izmenite karticu",
+      "desativar": "Deaktivirajte karticu",
+      "reativar": "Ponovo aktivirajte karticu",
+      "desativadas": "Deaktivirane kartice ({n})",
+      "vazio": "Nema dodatih stručnjaka",
+      "vazioDica": "Kartica je ono što raspored i karton navode: dodajte svakoga ko leči, i bez naloga.",
+      "crmv": {
+        "titulo": "Nedostaje vaša kartica sa CRMV",
+        "corpo": "Pisanje kartona, slanje rezimea staratelju i potpisivanje recepta traže aktivnu karticu sa CRMV, brojem i saveznom državom.",
+        "peca": "Pisanje kartona, slanje rezimea i potpisivanje recepta traže karticu sa CRMV. Zamolite vlasnika naloga da doda vašu.",
+        "cadastrar": "Dodajte moju karticu",
+        "completar": "Dopunite moj CRMV"
+      },
+      "confirmarDesativar": {
+        "titulo": "Deaktivirati karticu osobe {nome}?",
+        "mensagem": "Kartica izlazi iz rasporeda i lista, ali ostaje u zapisima koji već navode tu osobu. Kasnije je možete ponovo aktivirati."
+      },
+      "toast": {
+        "salvo": "Kartica je sačuvana",
+        "desativado": "Kartica je deaktivirana",
+        "reativado": "Kartica je ponovo aktivirana"
+      },
+      "gaveta": {
+        "tituloNovo": "Novi stručnjak",
+        "tituloEditar": "Kartica stručnjaka",
+        "nome": "Ime",
+        "nomeInvalido": "Unesite ime, sa najmanje 2 slova.",
+        "conselho": "Strukovna komora",
+        "registro": "Broj registracije",
+        "uf": "Savezna država",
+        "registroInvalido": "Unesite broj i saveznu državu registracije.",
+        "perdeSeloRegistro": "Promena broja ili savezne države uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
+        "especialidades": "Specijalnosti",
+        "especialidadesDica": "Do 5. Unesite svaku i pritisnite Enter.",
+        "cor": "Boja u rasporedu",
+        "corN": "Boja {n}",
+        "atendeNaAgenda": "Radi po rasporedu",
+        "atendeNaAgendaDica": "Dobija kolonu u rasporedu i ulazi u predloge termina.",
+        "login": "Nalog na portalu",
+        "loginDica": "Povežite karticu sa nalogom osobe koja leči. Ko ne koristi portal ostaje bez naloga.",
+        "semLogin": "Bez naloga",
+        "perdeSeloLogin": "Povezivanje ove kartice sa nalogom uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
+        "salvar": "Sačuvajte karticu"
       }
     }
   },

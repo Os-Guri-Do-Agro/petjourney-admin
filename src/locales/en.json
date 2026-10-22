@@ -2158,7 +2158,9 @@
         "papelTrocadoDetalhe": "{nome} is now {papel}.",
         "removido": "Person removed from the team",
         "saiu": "You left the team",
-        "erro": "That did not work"
+        "erro": "That did not work",
+        "funcoesSalvas": "Roles saved",
+        "funcoesSalvasDetalhe": "{nome} now sees what these roles open."
       },
       "gaveta": {
         "titulo": "Invite to the team",
@@ -2170,6 +2172,96 @@
         "enviar": "Send invite",
         "cancelar": "Cancel",
         "reenviarPendente": "Resend the pending invite"
+      },
+      "definirFuncoes": "Set roles",
+      "funcao": {
+        "RECEPCAO": "Front desk",
+        "VETERINARIO": "Veterinarian",
+        "ENFERMAGEM": "Nursing",
+        "CUIDADOR": "Caregiver",
+        "BANHISTA": "Bather",
+        "ADESTRADOR": "Trainer",
+        "GESTOR": "Management",
+        "FINANCEIRO": "Finance"
+      },
+      "funcaoDica": {
+        "RECEPCAO": "Schedule, appointment requests, waitlist and patient records; at the hotel, bookings and check-in.",
+        "VETERINARIO": "Schedule, medical records, vaccines and inpatient care. Signing prescriptions and closing records require a CRMV.",
+        "ENFERMAGEM": "Vaccines, inpatient care and read access to records and the schedule.",
+        "CUIDADOR": "The hotel routine and guests.",
+        "BANHISTA": "Hotel services and routine, like a caregiver.",
+        "ADESTRADOR": "Hotel services and routine, like a caregiver.",
+        "GESTOR": "Sets up the clinic and the hotel, plans stock, imports the database and sees the audit trail.",
+        "FINANCEIRO": "Views stock and handles finance."
+      },
+      "funcoes": {
+        "titulo": "Roles at the clinic and hotel",
+        "lede": "What the person does decides what they see in the menu. You can pick more than one.",
+        "nenhuma": "With no role, the person only sees the business portal: programs, promotion and accesses.",
+        "salvar": "Save roles"
+      }
+    },
+    "profissionais": {
+      "titulo": "Professionals",
+      "resumo": "Records of who treats, vaccinates, prescribes or cares, with or without a portal login.",
+      "cadastrar": "Add professional",
+      "erroCarregar": "Could not load the professionals.",
+      "conselho": {
+        "CRMV": "CRMV",
+        "OUTRO": "Other board",
+        "NENHUM": "No board"
+      },
+      "conselhoCurto": "Board",
+      "comLogin": "{nome}'s login",
+      "semLogin": "no login",
+      "foraDaAgenda": "not on the schedule",
+      "selo": {
+        "conferido": "CRMV verified",
+        "aConferir": "CRMV to verify"
+      },
+      "editar": "Edit record",
+      "desativar": "Deactivate record",
+      "reativar": "Reactivate record",
+      "desativadas": "Deactivated records ({n})",
+      "vazio": "No professionals yet",
+      "vazioDica": "The record is what the schedule and medical records cite: add whoever treats, even without a login.",
+      "crmv": {
+        "titulo": "Your CRMV record is missing",
+        "corpo": "Writing medical records, sharing the summary with the pet parent and signing prescriptions require an active record with CRMV, number and state.",
+        "peca": "Writing medical records, sharing the summary and signing prescriptions require a record with a CRMV. Ask the account owner to add yours.",
+        "cadastrar": "Add my record",
+        "completar": "Complete my CRMV"
+      },
+      "confirmarDesativar": {
+        "titulo": "Deactivate {nome}'s record?",
+        "mensagem": "The record leaves the schedule and lists, but stays on the records that already cite this person. You can reactivate it later."
+      },
+      "toast": {
+        "salvo": "Record saved",
+        "desativado": "Record deactivated",
+        "reativado": "Record reactivated"
+      },
+      "gaveta": {
+        "tituloNovo": "New professional",
+        "tituloEditar": "Professional record",
+        "nome": "Name",
+        "nomeInvalido": "Enter the name, with at least 2 letters.",
+        "conselho": "Professional board",
+        "registro": "Registration number",
+        "uf": "State",
+        "registroInvalido": "Enter the registration number and state.",
+        "perdeSeloRegistro": "Changing the number or state removes the verified seal: the CRMV goes back to PetJourney for verification.",
+        "especialidades": "Specialties",
+        "especialidadesDica": "Up to 5. Type each one and press Enter.",
+        "cor": "Schedule color",
+        "corN": "Color {n}",
+        "atendeNaAgenda": "On the schedule",
+        "atendeNaAgendaDica": "Gets a column on the schedule and shows up in time suggestions.",
+        "login": "Portal login",
+        "loginDica": "Link the record to the login of who treats. People who do not use the portal stay without a login.",
+        "semLogin": "No login",
+        "perdeSeloLogin": "Linking this record to a login removes the verified seal: the CRMV goes back to PetJourney for verification.",
+        "salvar": "Save record"
       }
     }
   },

@@ -2158,7 +2158,9 @@
         "papelTrocadoDetalhe": "{nome} agora é {papel}.",
         "removido": "Pessoa removida da equipe",
         "saiu": "Você saiu da equipe",
-        "erro": "Não deu certo"
+        "erro": "Não deu certo",
+        "funcoesSalvas": "Funções salvas",
+        "funcoesSalvasDetalhe": "{nome} passa a ver o que essas funções abrem."
       },
       "gaveta": {
         "titulo": "Convidar para a equipe",
@@ -2170,6 +2172,96 @@
         "enviar": "Enviar convite",
         "cancelar": "Cancelar",
         "reenviarPendente": "Reenviar o convite pendente"
+      },
+      "definirFuncoes": "Definir funções",
+      "funcao": {
+        "RECEPCAO": "Recepção",
+        "VETERINARIO": "Veterinário",
+        "ENFERMAGEM": "Enfermagem",
+        "CUIDADOR": "Cuidador",
+        "BANHISTA": "Banhista",
+        "ADESTRADOR": "Adestrador",
+        "GESTOR": "Gestão",
+        "FINANCEIRO": "Financeiro"
+      },
+      "funcaoDica": {
+        "RECEPCAO": "Agenda, pedidos de horário, fila e cadastro de pacientes; no hotel, reservas e check-in.",
+        "VETERINARIO": "Agenda, prontuário, vacinas e internação. Assinar receita e finalizar prontuário pedem CRMV.",
+        "ENFERMAGEM": "Vacinas, internação e consulta ao prontuário e à agenda.",
+        "CUIDADOR": "A rotina e os hóspedes do hotel.",
+        "BANHISTA": "Os serviços e a rotina do hotel, como o cuidador.",
+        "ADESTRADOR": "Os serviços e a rotina do hotel, como o cuidador.",
+        "GESTOR": "Configura a clínica e o hotel, planeja o estoque, importa a base e vê a auditoria.",
+        "FINANCEIRO": "Consulta o estoque e cuida do financeiro."
+      },
+      "funcoes": {
+        "titulo": "Funções na clínica e no hotel",
+        "lede": "O que a pessoa faz decide o que ela vê no menu. Dá para marcar mais de uma.",
+        "nenhuma": "Sem função, a pessoa vê só o portal comercial: programas, divulgação e acessos.",
+        "salvar": "Salvar funções"
+      }
+    },
+    "profissionais": {
+      "titulo": "Profissionais",
+      "resumo": "As fichas de quem atende, aplica, prescreve ou cuida, com ou sem login no portal.",
+      "cadastrar": "Cadastrar profissional",
+      "erroCarregar": "Não foi possível carregar os profissionais.",
+      "conselho": {
+        "CRMV": "CRMV",
+        "OUTRO": "Outro conselho",
+        "NENHUM": "Sem conselho"
+      },
+      "conselhoCurto": "Conselho",
+      "comLogin": "login de {nome}",
+      "semLogin": "sem login",
+      "foraDaAgenda": "fora da agenda",
+      "selo": {
+        "conferido": "CRMV conferido",
+        "aConferir": "CRMV a conferir"
+      },
+      "editar": "Editar ficha",
+      "desativar": "Desativar ficha",
+      "reativar": "Reativar ficha",
+      "desativadas": "Fichas desativadas ({n})",
+      "vazio": "Nenhum profissional cadastrado",
+      "vazioDica": "A ficha é o que a agenda e o prontuário citam: cadastre quem atende, mesmo sem login.",
+      "crmv": {
+        "titulo": "Falta a sua ficha com CRMV",
+        "corpo": "Escrever prontuário, liberar o resumo ao responsável e assinar receita pedem uma ficha ativa com CRMV, número e UF.",
+        "peca": "Escrever prontuário, liberar o resumo e assinar receita pedem uma ficha com CRMV. Peça ao dono da conta para cadastrar a sua.",
+        "cadastrar": "Cadastrar minha ficha",
+        "completar": "Completar meu CRMV"
+      },
+      "confirmarDesativar": {
+        "titulo": "Desativar a ficha de {nome}?",
+        "mensagem": "A ficha sai da agenda e das listas, mas continua nos registros que já citam essa pessoa. Dá para reativar depois."
+      },
+      "toast": {
+        "salvo": "Ficha salva",
+        "desativado": "Ficha desativada",
+        "reativado": "Ficha reativada"
+      },
+      "gaveta": {
+        "tituloNovo": "Novo profissional",
+        "tituloEditar": "Ficha do profissional",
+        "nome": "Nome",
+        "nomeInvalido": "Informe o nome, com pelo menos 2 letras.",
+        "conselho": "Conselho",
+        "registro": "Número do registro",
+        "uf": "UF",
+        "registroInvalido": "Informe o número e a UF do registro.",
+        "perdeSeloRegistro": "Trocar o número ou a UF tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
+        "especialidades": "Especialidades",
+        "especialidadesDica": "Até 5. Digite e tecle Enter a cada uma.",
+        "cor": "Cor na agenda",
+        "corN": "Cor {n}",
+        "atendeNaAgenda": "Atende na agenda",
+        "atendeNaAgendaDica": "Vira coluna na agenda e entra nas sugestões de horário.",
+        "login": "Login no portal",
+        "loginDica": "Ligue a ficha ao login de quem atende. Quem não usa o portal fica sem login.",
+        "semLogin": "Sem login",
+        "perdeSeloLogin": "Ligar esta ficha a um login tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
+        "salvar": "Salvar ficha"
       }
     }
   },

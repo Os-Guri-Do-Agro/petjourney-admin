@@ -238,6 +238,12 @@ html.trilha .p-menu-list {
   padding: 6px;
 }
 
+/* Item de menu que tira ou desfaz (remover, sair, desativar): a tinta do risco na palavra e no ícone. */
+html.trilha .p-menu-item.menu-item--risco .p-menu-item-label,
+html.trilha .p-menu-item.menu-item--risco .p-menu-item-icon {
+  color: var(--risco-tinta);
+}
+
 /* -------------------------------------------------------------------------------- diálogos */
 
 html.trilha .p-dialog {

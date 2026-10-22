@@ -173,6 +173,35 @@ const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/acessos': 'ph ph-key',
   '/parceiro/carteira': 'ph ph-wallet',
   '/parceiro/equipe': 'ph ph-users-three',
+  '/parceiro/profissionais': 'ph ph-stethoscope',
+}
+
+/**
+ * Telas do portal que moram como aba de outra: Profissionais é a segunda aba de Equipe. Pessoas são
+ * os logins da empresa; Profissionais, as fichas que a agenda e o prontuário citam (E1-03).
+ */
+const ABA_DE: Record<string, { pai: string; rotuloDoPai: string }> = {
+  '/parceiro/profissionais': { pai: '/parceiro/equipe', rotuloDoPai: 'parceiro.equipe.pessoas' },
+}
+
+function destinosDoPortal(itens: AppNavigationItem[], t: (chave: string) => string): Destino[] {
+  return itens
+    .filter((item) => !ABA_DE[item.to])
+    .map((item) => {
+      const filhas = itens.filter((outro) => ABA_DE[outro.to]?.pai === item.to)
+      const rotuloDaPrimeira = filhas.length
+        ? t(ABA_DE[filhas[0]!.to]!.rotuloDoPai)
+        : item.label
+      const abas = [abaDoItem(item, rotuloDaPrimeira), ...filhas.map((filha) => abaDoItem(filha, filha.label))]
+
+      return destinoDe(
+        item.to,
+        item.label,
+        ICONE_DO_PORTAL[item.to] ?? item.icon,
+        abas,
+        abas.map((aba) => `${aba.to}/`),
+      )
+    })
 }
 
 const PESO_DO_TOM: Record<TomDoSelo, number> = { neutro: 0, atencao: 1, risco: 2 }
@@ -314,13 +343,7 @@ export function montarEspacos(
         t('espacos.portal.rotulo'),
         'ph ph-storefront',
         'portal',
-        portal.items.map((item) => {
-          const aba = abaDoItem(item, item.label)
-
-          return destinoDe(item.to, item.label, ICONE_DO_PORTAL[item.to] ?? item.icon, [aba], [
-            `${item.to}/`,
-          ])
-        }),
+        destinosDoPortal(portal.items, t),
       ),
     )
   }

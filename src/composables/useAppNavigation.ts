@@ -401,6 +401,26 @@ export function useAppNavigation() {
 
     items.push({ label: t('parceiro.equipe.titulo'), to: '/parceiro/equipe', icon: 'ph ph-users' })
 
+    /*
+     * As fichas de profissional (E1-03) só fazem sentido para quem tem ou pode ter Clínica ou Hotel:
+     * módulo ligado ou pedido, categoria elegível, ou a ficha do próprio login. Pet shop sem nada
+     * disso não ganha a aba.
+     */
+    const eu = parceiroStore.eu
+
+    if (
+      eu &&
+      (eu.elegiveis.length > 0 ||
+        eu.modulos.some((modulo) => modulo.podeLer || modulo.status !== null) ||
+        eu.profissional)
+    ) {
+      items.push({
+        label: t('parceiro.profissionais.titulo'),
+        to: '/parceiro/profissionais',
+        icon: 'ph ph-stethoscope',
+      })
+    }
+
     if (parceiroStore.cadastroSuspenso) {
       return items.map((item) => ({ ...item, locked: true }))
     }
