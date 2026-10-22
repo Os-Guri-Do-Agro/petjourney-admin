@@ -8476,5 +8476,8 @@
       "rotinaPadrao": "Rutina estándar"
     },
     "abasAria": "Pantallas de {destino}"
+  },
+  "captcha": {
+    "erro": "No se pudo cargar la verificación de seguridad. Recargue la página e intente de nuevo."
   }
 }

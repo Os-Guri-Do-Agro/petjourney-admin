@@ -8476,5 +8476,8 @@
       "rotinaPadrao": "Standard routine"
     },
     "abasAria": "{destino} screens"
+  },
+  "captcha": {
+    "erro": "The security check did not load. Reload the page and try again."
   }
 }

@@ -8476,5 +8476,8 @@
       "rotinaPadrao": "Standardna rutina"
     },
     "abasAria": "Ekrani: {destino}"
+  },
+  "captcha": {
+    "erro": "Bezbednosna provera nije učitana. Osvežite stranicu i pokušajte ponovo."
   }
 }

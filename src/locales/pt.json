@@ -8476,5 +8476,8 @@
       "rotinaPadrao": "Rotina padrão"
     },
     "abasAria": "Telas de {destino}"
+  },
+  "captcha": {
+    "erro": "Não deu para carregar a verificação de segurança. Recarregue a página e tente de novo."
   }
 }
