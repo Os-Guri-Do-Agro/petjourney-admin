@@ -1,8 +1,15 @@
 # 09 · Módulo clínico — visão do responsável (protótipo no app)
 
-**Para:** o agente que trabalha no `petjourney-app` (`D:\PROJETOS\petjourney-app`).
-**De:** o `petjourney-admin` (`D:\PROJETOS\petjourney-admin`), onde o lado da clínica deste módulo
-já existe como protótipo mocado.
+**Para:** quem trabalha no `petjourney-app`.
+**De:** o `petjourney-admin`, onde o lado da clínica deste módulo existiu primeiro como protótipo
+mocado.
+
+> **Atualização (22/10/2026): o contrato agora é o OpenAPI da API.** Este documento nasceu quando
+> não havia API e o contrato era escrito à mão no admin. Agora a fonte é o `contrato/openapi.json`
+> do `develop` do `petjourney-api`: gere os tipos dele (no admin, `npm run contrato:gerar`). A
+> referência de cada tela são os guias de handoff da API por onda (anexos dos cards no Nevo; cópia
+> em `docs/integracao-portal-parceiro/guias/` no admin). Onde este texto e o guia divergirem, vale
+> o guia. O que segue continua valendo como **comportamento** do lado do responsável.
 
 O portal da clínica tem agenda, fila de espera, pré-consulta, prontuário, receita, vacinação,
 internação com boletins e o resumo "Este pet em 30 segundos". Tudo isso tem um outro lado — o do
@@ -14,19 +21,19 @@ A regra que manda em tudo: **o mock do app e o mock do portal falam o mesmo cont
 mesma história**. O dia da integração é trocar a fonte, não a forma.
 
 Onde está escrito **Decisão**, é um padrão escolhido aqui para você não precisar perguntar. Dá
-para mudar — mas a mudança começa no contrato do admin, não só no app.
+para mudar, mas a mudança começa na API (a spec e o `contrato/openapi.json`), não no admin nem só no
+app.
 
 ---
 
 ## 0. Antes de começar
 
-1. **Copie o contrato como está.** Fonte:
-   `D:\PROJETOS\petjourney-admin\src\features\clinico\contrato\responsavel.ts` → destino
-   `src/features/clinica/contrato.ts` no app, sem editar. Não há pacote compartilhado entre os
-   repositórios: se o contrato precisar mudar, a mudança começa no admin e é recopiada. Quando
-   divergir, avise — não conserte só de um lado.
-2. **Copie os dados de demonstração.** Fonte:
-   `D:\PROJETOS\petjourney-admin\docs\clinico\contrato\demo-responsavel.json` → destino
+1. **Gere os tipos do contrato da API.** Fonte: `contrato/openapi.json` do `develop` do
+   `petjourney-api`. Não copie mais `src/features/clinico/contrato/responsavel.ts` do admin: ele
+   ficou como registro do protótipo. Se o contrato precisar mudar, a mudança começa na API e chega
+   aos dois lados pelo OpenAPI. Quando divergir, avise; não conserte só de um lado.
+2. **Copie os dados de demonstração.** Fonte, no admin:
+   `docs/clinico/contrato/demo-responsavel.json` → destino
    `src/features/clinica/demo-responsavel.json`. É o dataset do portal projetado para a
    responsável da demonstração, exatamente como a API projetaria (seção 16). Para gerar de novo:
    `npm run contrato:demo` no admin.

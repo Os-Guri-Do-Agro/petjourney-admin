@@ -1,8 +1,13 @@
 # 16 · Adesão ao tratamento — visão do responsável (para o `petjourney-app`)
 
-**Para:** o agente que trabalha no `petjourney-app` (`D:\PROJETOS\petjourney-app`).
-**De:** o `petjourney-admin`, onde o lado da clínica já existe como protótipo
+**Para:** quem trabalha no `petjourney-app`.
+**De:** o `petjourney-admin`, onde o lado da clínica existiu primeiro como protótipo
 ([15-adesao-ao-tratamento.md](./15-adesao-ao-tratamento.md)).
+
+> **Atualização (22/10/2026): o contrato agora é o OpenAPI da API.** Como no doc 09: os tipos saem
+> do `contrato/openapi.json` do `develop` do `petjourney-api`, e a referência de cada tela é o guia
+> de handoff da onda (adesão ao tratamento: guia da E4). Onde este texto e o guia divergirem, vale o
+> guia.
 
 O vet prescreve; o app lembra na hora da dose; alguém da casa toca **Dei**; e o vet vê, no retorno,
 se o tratamento foi feito. O app já faz metade disso: o "Criar lembretes" da receita (doc 09, seção
@@ -22,15 +27,14 @@ da tela do app, interativa, ao lado da ficha da clínica (`TratamentoNoApp.vue`)
 referência de **comportamento**, não de estilo: o estilo é o do app.
 
 Onde está escrito **Decisão**, é um padrão escolhido aqui para você não precisar perguntar. Dá para
-mudar — mas a mudança começa no contrato do admin, não só no app.
+mudar, mas a mudança começa na API (a spec e o `contrato/openapi.json`), não no admin nem só no app.
 
 ---
 
 ## 0. Antes de começar
 
-1. **Recopie o contrato.** Fonte:
-   `D:\PROJETOS\petjourney-admin\src\features\clinico\contrato\responsavel.ts` →
-   `src/features/clinica/contrato.ts`, sem editar, como no doc 09. O que mudou:
+1. **Gere os tipos do contrato da API**, como no doc 09. Os nomes abaixo eram do contrato escrito
+   à mão no admin e ficam como registro do que o protótipo pedia; no OpenAPI, valem os da API:
    - **"Depois da consulta"** — `ItemDaReceita.tratamentoId` (o item que já virou lembrete),
      `CriarLembretesDaReceita.compartilharComAClinica` e `LembreteCriadoDaReceita.tratamentoId`.
    - **"Adesão ao tratamento"**, a última seção — tudo o que este documento usa.
