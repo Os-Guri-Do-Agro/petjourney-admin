@@ -10,7 +10,8 @@
  *
  * 1. **A saudação e uma frase de estado.** "Boa tarde, Carla" e, embaixo, a data e o que pede
  *    atenção em todos os espaços — "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1
- *    no Hotel."
+ *    no Hotel." À direita, os números de cada espaço — o mesmo painel do Hoje da Clínica e do
+ *    Hoje do Hotel (`useAberturaDoInicio`).
  * 2. **Um bloco por espaço que a empresa tem**, na cor dele (Clínica maré, Hotel lavanda, Portal
  *    mel), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo. Quem
  *    não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
@@ -38,6 +39,7 @@ import HomeIndique from '@/components/home/HomeIndique.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
 import HomePauta from '@/components/home/HomePauta.vue'
 import type { IndicacaoNoBloco } from '@/components/home/espaco-da-home'
+import { useAberturaDoInicio } from '@/components/home/useAberturaDoInicio'
 import { CHAVE_DO_DIA, useLinhaDoDia } from '@/components/home/useLinhaDoDia'
 import { usePautaDaHome } from '@/components/home/usePautaDaHome'
 import PartnerOperabilityBanner from '@/components/parceiro/PartnerOperabilityBanner.vue'
@@ -55,13 +57,15 @@ const { espacos, hasClinicalProfile, hasHotelProfile } = useEspacos()
 const perfil = useUsuarioPerfilStore()
 const { resumo, modulos } = usePautaDaHome()
 
-provide(
-  CHAVE_DO_DIA,
-  useLinhaDoDia({
-    clinica: () => hasClinicalProfile.value,
-    hotel: () => hasHotelProfile.value,
-  }),
-)
+const dia = useLinhaDoDia({
+  clinica: () => hasClinicalProfile.value,
+  hotel: () => hasHotelProfile.value,
+})
+
+provide(CHAVE_DO_DIA, dia)
+
+/** Os números à direita da abertura, como no Hoje de cada espaço. */
+const indicadores = useAberturaDoInicio(dia)
 
 const indique = ref<InstanceType<typeof HomeIndique> | null>(null)
 
@@ -205,7 +209,13 @@ onUnmounted(() => {
     @tentar-de-novo="ensureContext(true)"
   >
     <template #cabecalho>
-      <UiAbertura class="inicio__abertura pj-lugar--inicio" :sobre="dataDeHoje" :titulo="saudacao">
+      <UiAbertura
+        class="inicio__abertura pj-lugar--inicio"
+        :sobre="dataDeHoje"
+        :titulo="saudacao"
+        :indicadores="indicadores"
+        :rotulo-dos-indicadores="t('clinico.meuDia.abertura.indicadores')"
+      >
         <template #resumo>
           <span aria-live="polite">{{ fraseDoResumo }}</span>
         </template>

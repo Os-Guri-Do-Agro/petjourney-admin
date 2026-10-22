@@ -9,11 +9,13 @@
  *
  * Não é cabeçalho de toda tela: só das que abrem um espaço. As outras usam o título do `UiPagina`.
  */
+import Skeleton from 'primevue/skeleton'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 export type IndicadorDaAbertura = {
   id: string
-  valor: string | number
+  /** `null` enquanto o número carrega: o quadro fica no lugar, com o esqueleto. */
+  valor: string | number | null
   rotulo: string
   icone: string
   to?: RouteLocationRaw
@@ -88,7 +90,14 @@ withDefaults(
               aria-hidden="true"
             />
           </span>
-          <strong class="abertura__valor">{{ item.valor }}</strong>
+          <Skeleton
+            v-if="item.valor === null"
+            class="abertura__esqueleto"
+            width="2.5rem"
+            height="2.1rem"
+            border-radius="8px"
+          />
+          <strong v-else class="abertura__valor">{{ item.valor }}</strong>
           <span class="abertura__rotulo">{{ item.rotulo }}</span>
         </component>
       </li>
@@ -124,6 +133,7 @@ withDefaults(
     0 18px 40px -22px color-mix(in oklab, var(--pj-lugar) 75%, transparent),
     inset 0 1px 0 rgb(255 255 255 / 14%);
   color: #fff;
+  container: abertura / inline-size;
   isolation: isolate;
 }
 
@@ -312,6 +322,11 @@ withDefaults(
   line-height: 1.05;
 }
 
+/* O esqueleto em vidro, da cor do número que vai entrar no lugar. */
+.abertura__esqueleto {
+  background: rgb(255 255 255 / 16%);
+}
+
 .abertura__rotulo {
   color: rgb(255 255 255 / 86%);
   font-size: 13.5px;
@@ -324,9 +339,18 @@ withDefaults(
     grid-template-columns: minmax(0, 1fr);
   }
 
+  /* Embaixo da frase, os números numa fileira só, do mesmo tamanho: o encaixe automático
+     deixava 3 + 1, com o último sozinho na linha. */
+  .abertura__indicadores {
+    grid-auto-columns: minmax(0, 1fr);
+  }
+}
+
+/* Onde a fileira não cabe, dois por linha. */
+@container abertura (max-width: 540px) {
   .abertura__indicadores {
     grid-auto-flow: row;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
