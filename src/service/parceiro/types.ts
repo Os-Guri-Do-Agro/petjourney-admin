@@ -571,6 +571,40 @@ export type CompartilhamentoDetalhe = {
   anotacoes: Anotacao[]
 }
 
+/**
+ * `POST /compartilhamentos/reivindicar`. Cadastro em análise: o código fica guardado e vira vínculo
+ * na aprovação. Cadastro aprovado (ou aprovado no meio do caminho): vincula na hora, como o
+ * `vincular`, e devolve o acesso.
+ */
+export type ResultadoReivindicacao =
+  | { reivindicado: true; vinculado: false; vinculaNaAprovacao: true }
+  | {
+      reivindicado: true
+      vinculado: true
+      vinculaNaAprovacao: false
+      compartilhamento: CompartilhamentoDetalhe
+    }
+
+/**
+ * O que aconteceu com um código guardado. `AGUARDANDO_APROVACAO` ainda pode virar vínculo;
+ * os outros são o desfecho (na aprovação ou antes dela, quando o acesso venceu ou foi encerrado).
+ */
+export type SituacaoReivindicacao =
+  | 'AGUARDANDO_APROVACAO'
+  | 'VINCULADO'
+  | 'VENCIDO'
+  | 'ENCERRADO'
+  | 'JA_VINCULADO'
+
+/** Item de `GET /compartilhamentos/reivindicacoes`: as abertas e as fechadas nos últimos 30 dias. */
+export type ReivindicacaoAcesso = {
+  id: string
+  petNome: string
+  situacao: SituacaoReivindicacao
+  criadaEm: string
+  resolvidaEm: string | null
+}
+
 export type AnotacaoPrescricaoItemInput = {
   nome: string
   dose?: string

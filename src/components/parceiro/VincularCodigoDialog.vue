@@ -11,9 +11,11 @@ import { ApiError } from '@/service/api'
 import {
   isCodigoVinculoValido,
   normalizarCodigoVinculo,
+  reivindicarCompartilhamento,
   vincularCompartilhamento,
 } from '@/service/parceiro/compartilhamentos-service'
 import type { CompartilhamentoDetalhe } from '@/service/parceiro/types'
+import { modoDoVinculo } from '@/utils/parceiro/reivindicacoes'
 
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -27,10 +29,20 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   vinculado: [detalhe: CompartilhamentoDetalhe]
+  /** Cadastro em análise: o código ficou guardado e vira acesso na aprovação. */
+  guardado: []
 }>()
 
 const { t } = useI18n()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
+
+/**
+ * Cadastro em análise reivindica (guarda o código para a aprovação); aprovado vincula. Quem abre
+ * o modal já barrou o recusado e o suspenso; se o status mudar com ele aberto, a rota de vincular
+ * responde 403 e a mensagem diz por quê.
+ */
+const modo = computed(() => modoDoVinculo(store.status) ?? 'vincular')
+const emAnalise = computed(() => modo.value === 'reivindicar')
 
 /** 6 caixas, separadas visualmente em dois grupos de 3. */
 const TAMANHO_CODIGO = 6
@@ -58,8 +70,13 @@ function clearThrottle() {
   throttledSeconds.value = 0
 }
 
-/** 429: throttle de 10 tentativas/min; desabilita por 60s. */
+/**
+ * 429 do limite por origem (10 tentativas por minuto, depois um bloqueio de alguns minutos que
+ * vale para vincular e para guardar). O botão descansa um minuto para não empilhar recusas; o
+ * tempo exato do bloqueio a API não informa, então nenhum número aparece na tela.
+ */
 function startThrottle() {
+  clearThrottle()
   throttledSeconds.value = 60
   throttleTimer = setInterval(() => {
     throttledSeconds.value -= 1
@@ -70,11 +87,19 @@ function startThrottle() {
   }, 1000)
 }
 
+/**
+ * Enquanto o botão descansa depois do 429, o motivo continua escrito: reabrir o modal ou mexer no
+ * código não pode deixar um botão travado sem explicação.
+ */
+function mensagemDoDescanso() {
+  return throttledSeconds.value > 0 ? t('acessos.vincular.muitasTentativas') : ''
+}
+
 watch(visible, (open) => {
   if (open) {
     const inicial = normalizarCodigoVinculo(props.codigoInicial ?? '')
     codigoInput.value = isCodigoVinculoValido(inicial) ? inicial : ''
-    errorMessage.value = ''
+    errorMessage.value = mensagemDoDescanso()
   }
 })
 
@@ -99,7 +124,7 @@ function focarAoAbrir() {
 
 function onCodigoModel(value: string | undefined) {
   codigoInput.value = value ?? ''
-  errorMessage.value = ''
+  errorMessage.value = mensagemDoDescanso()
 }
 
 async function handleVincular() {
@@ -114,14 +139,24 @@ async function handleVincular() {
   errorMessage.value = ''
 
   try {
+    if (emAnalise.value) {
+      await guardarCodigo()
+      return
+    }
+
     const detalhe = await vincularCompartilhamento(codigo.value, parceiroQuery())
     visible.value = false
     emit('vinculado', detalhe)
   } catch (err) {
     if (err instanceof ApiError) {
       if (err.statusCode === 429) {
-        errorMessage.value = t('acessos.vincular.throttle')
-        startThrottle()
+        // Teto de códigos guardados: esperar alguns minutos não resolve, só a análise do cadastro.
+        if (err.reason === 'COMPARTILHAMENTO_REIVINDICACOES_LIMITE') {
+          errorMessage.value = t('acessos.vincular.muitosGuardados')
+        } else {
+          errorMessage.value = t('acessos.vincular.muitasTentativas')
+          startThrottle()
+        }
       } else if (err.statusCode === 404) {
         errorMessage.value = t('acessos.vincular.naoEncontrado')
       } else if (err.statusCode === 409) {
@@ -140,6 +175,24 @@ async function handleVincular() {
   } finally {
     submitting.value = false
   }
+}
+
+/**
+ * Cadastro em análise: a API guarda o código e vincula na aprovação. Se o cadastro foi aprovado
+ * enquanto o modal estava aberto, ela vincula na hora e devolve o acesso; aí o status do portal
+ * também ficou velho, e sem relê-lo a tela do acesso abriria em "somente leitura".
+ */
+async function guardarCodigo() {
+  const resultado = await reivindicarCompartilhamento(codigo.value, parceiroQuery())
+  visible.value = false
+
+  if (resultado.vinculado) {
+    void store.refreshStatus().catch(() => undefined)
+    emit('vinculado', resultado.compartilhamento)
+    return
+  }
+
+  emit('guardado')
 }
 </script>
 
@@ -177,7 +230,9 @@ async function handleVincular() {
         <h2 id="vinculo-title" class="vincular-dialog__title">
           {{ t('acessos.vincular.title') }}
         </h2>
-        <p class="vincular-dialog__lede">{{ t('acessos.vincular.lede') }}</p>
+        <p class="vincular-dialog__lede">
+          {{ emAnalise ? t('acessos.vincular.ledeEmAnalise') : t('acessos.vincular.lede') }}
+        </p>
 
         <div class="vincular-dialog__field">
           <label id="vinculo-codigo-label">{{ t('acessos.vincular.codigoLabel') }}</label>
@@ -235,12 +290,8 @@ async function handleVincular() {
 
         <Button
           class="vincular-dialog__enviar"
-          :label="
-            throttledSeconds > 0
-              ? t('acessos.vincular.aguarde', { s: throttledSeconds })
-              : t('acessos.vincular.submit')
-          "
-          icon="ph ph-link"
+          :label="emAnalise ? t('acessos.vincular.submitEmAnalise') : t('acessos.vincular.submit')"
+          :icon="emAnalise ? 'ph ph-bookmark-simple' : 'ph ph-link'"
           :loading="submitting"
           :disabled="!canSubmit"
           @click="handleVincular"

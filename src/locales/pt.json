@@ -1186,7 +1186,19 @@
       "outraEmpresa": "Este acesso já está vinculado a outra empresa.",
       "naoOperacional": "Seu cadastro de parceiro ainda não está aprovado para operar.",
       "throttle": "Muitas tentativas. Aguarde um minuto e tente de novo.",
-      "erroGenerico": "Não foi possível vincular o código."
+      "erroGenerico": "Não foi possível vincular o código.",
+      "ledeEmAnalise": "Digite o código de 6 dígitos que o responsável gerou no app. Como o seu cadastro está em análise, o código fica guardado e o acesso aparece na sua lista quando o cadastro for aprovado.",
+      "submitEmAnalise": "Guardar código",
+      "muitasTentativas": "Muitas tentativas. Tente de novo em alguns minutos.",
+      "muitosGuardados": "Você já guardou muitos códigos. Aguarde a análise do seu cadastro."
+    },
+    "reivindicacoes": {
+      "aria": "Códigos guardados",
+      "aguardandoAprovacao": "O acesso de {pet} aparece aqui quando o seu cadastro for aprovado.",
+      "vencido": "O acesso de {pet} venceu antes da aprovação do seu cadastro. Peça um novo código ao responsável.",
+      "encerrado": "O responsável encerrou o acesso de {pet} antes da aprovação do seu cadastro.",
+      "jaVinculado": "O acesso de {pet} já foi aberto por outro estabelecimento.",
+      "guardado": "Código guardado. O acesso aparece aqui quando o seu cadastro for aprovado."
     },
     "detalhe": {
       "subtitle": "Atendimento",

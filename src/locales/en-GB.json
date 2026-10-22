@@ -1186,7 +1186,19 @@
       "outraEmpresa": "This access is already linked to another company.",
       "naoOperacional": "Your partner registration is not yet approved to operate.",
       "throttle": "Too many attempts. Wait a minute and try again.",
-      "erroGenerico": "Could not link the code."
+      "erroGenerico": "Could not link the code.",
+      "ledeEmAnalise": "Enter the 6-digit code the pet parent generated in the app. Your registration is still under review, so the code is saved and the access shows up in your list once the registration is approved.",
+      "submitEmAnalise": "Save code",
+      "muitasTentativas": "Too many attempts. Try again in a few minutes.",
+      "muitosGuardados": "You have already saved too many codes. Please wait for your registration review."
+    },
+    "reivindicacoes": {
+      "aria": "Saved codes",
+      "aguardandoAprovacao": "The access for {pet} will show up here once your registration is approved.",
+      "vencido": "The access for {pet} expired before your registration was approved. Ask the pet parent for a new code.",
+      "encerrado": "The pet parent ended the access for {pet} before your registration was approved.",
+      "jaVinculado": "The access for {pet} has already been opened by another business.",
+      "guardado": "Code saved. The access will show up here once your registration is approved."
     },
     "detalhe": {
       "subtitle": "Appointment",

@@ -10,6 +10,8 @@ import type {
   LeituraReceitaCriada,
   LeituraReceitaParceiro,
   NovaAnotacaoPayload,
+  ReivindicacaoAcesso,
+  ResultadoReivindicacao,
 } from './types'
 
 type ParceiroQuery = {
@@ -56,6 +58,33 @@ export function vincularCompartilhamento(codigo: string, params?: ParceiroQuery)
         method: 'POST',
         body: JSON.stringify({ codigo }),
       },
+    ),
+  )
+}
+
+/**
+ * O "Vincular código" do cadastro em análise: o código fica guardado e vira vínculo na aprovação.
+ * Com o cadastro já aprovado, vincula na hora (`vinculado: true`, com o acesso). Divide com o
+ * `vincular` o limite de tentativas por origem (429 com bloqueio de alguns minutos); o 429 com
+ * `reason: COMPARTILHAMENTO_REIVINDICACOES_LIMITE` é outro: códigos guardados demais.
+ */
+export function reivindicarCompartilhamento(codigo: string, params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ResultadoReivindicacao>>(
+      `${BASE}/reivindicar${buildQuery({ parceiroId: params?.parceiroId })}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ codigo }),
+      },
+    ),
+  )
+}
+
+/** Os códigos guardados: os que esperam a aprovação e os resolvidos nos últimos 30 dias. */
+export function getReivindicacoes(params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<{ itens: ReivindicacaoAcesso[] }>>(
+      `${BASE}/reivindicacoes${buildQuery({ parceiroId: params?.parceiroId })}`,
     ),
   )
 }

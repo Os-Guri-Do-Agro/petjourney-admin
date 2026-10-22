@@ -1186,7 +1186,19 @@
       "outraEmpresa": "Ovaj pristup je već povezan sa drugom firmom.",
       "naoOperacional": "Vaša partnerska registracija još nije odobrena za rad.",
       "throttle": "Previše pokušaja. Sačekajte minut i pokušajte ponovo.",
-      "erroGenerico": "Povezivanje koda nije uspelo."
+      "erroGenerico": "Povezivanje koda nije uspelo.",
+      "ledeEmAnalise": "Unesite šestocifreni kod koji je staratelj generisao u aplikaciji. Vaša registracija je još na proveri, pa se kod čuva, a pristup će se pojaviti na Vašoj listi kada registracija bude odobrena.",
+      "submitEmAnalise": "Sačuvajte kod",
+      "muitasTentativas": "Previše pokušaja. Pokušajte ponovo za nekoliko minuta.",
+      "muitosGuardados": "Već ste sačuvali previše kodova. Sačekajte proveru Vaše registracije."
+    },
+    "reivindicacoes": {
+      "aria": "Sačuvani kodovi",
+      "aguardandoAprovacao": "Pristup za {pet} će se pojaviti ovde kada Vaša registracija bude odobrena.",
+      "vencido": "Pristup za {pet} je istekao pre odobrenja Vaše registracije. Zatražite novi kod od staratelja.",
+      "encerrado": "Staratelj je zatvorio pristup za {pet} pre odobrenja Vaše registracije.",
+      "jaVinculado": "Pristup za {pet} je već otvorila druga firma.",
+      "guardado": "Kod je sačuvan. Pristup će se pojaviti ovde kada Vaša registracija bude odobrena."
     },
     "detalhe": {
       "subtitle": "Poseta",

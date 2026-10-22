@@ -252,3 +252,76 @@ describe('locale da sessão no detalhe do acesso', () => {
     i18n.global.locale.value = 'pt'
   })
 })
+
+/**
+ * O código guardado com o cadastro em análise. A rota é outra e o `parceiroId` do contexto vai
+ * junto, como nas demais: com mais de um parceiro, sem ele a API não sabe de quem é o código.
+ */
+describe('reivindicar e reivindicações', () => {
+  it('guarda o código na rota de reivindicar, com o parceiro do contexto', async () => {
+    const { reivindicarCompartilhamento } = await loadService()
+    const fetchMock = mockFetch()
+
+    await reivindicarCompartilhamento('123456', { parceiroId: 'p1' })
+
+    const [url, init] = fetchMock.mock.calls[0] ?? []
+
+    expect(url).toBe(
+      'https://api.exemplo.test/parceiro/portal/compartilhamentos/reivindicar?parceiroId=p1',
+    )
+    expect(init?.method).toBe('POST')
+    expect(init?.body).toBe(JSON.stringify({ codigo: '123456' }))
+  })
+
+  it('lê os avisos com o parceiro do contexto e devolve os itens', async () => {
+    const { getReivindicacoes } = await loadService()
+    const itens = [
+      {
+        id: 'r1',
+        petNome: 'Thor',
+        situacao: 'AGUARDANDO_APROVACAO',
+        criadaEm: '2026-10-20T12:00:00.000Z',
+        resolvidaEm: null,
+      },
+    ]
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(JSON.stringify({ statusCode: 200, message: 'ok', data: { itens } }), {
+        headers: JSON_HEADERS,
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const resposta = await getReivindicacoes({ parceiroId: 'p1' })
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      'https://api.exemplo.test/parceiro/portal/compartilhamentos/reivindicacoes?parceiroId=p1',
+    )
+    expect(resposta.itens).toEqual(itens)
+  })
+
+  it('o 429 do teto de códigos guardados chega com o reason, para o modal separar do limite por origem', async () => {
+    const { reivindicarCompartilhamento } = await loadService()
+    const { ApiError } = await import('@/service/api')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            statusCode: 429,
+            message: 'Você já guardou muitos códigos para vincular na aprovação.',
+            reason: 'COMPARTILHAMENTO_REIVINDICACOES_LIMITE',
+          }),
+          { status: 429, headers: JSON_HEADERS },
+        ),
+      ),
+    )
+
+    const erro = await reivindicarCompartilhamento('123456').catch((e: unknown) => e)
+
+    expect(erro).toBeInstanceOf(ApiError)
+    expect(erro).toMatchObject({
+      statusCode: 429,
+      reason: 'COMPARTILHAMENTO_REIVINDICACOES_LIMITE',
+    })
+  })
+})

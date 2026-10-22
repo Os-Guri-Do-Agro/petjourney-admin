@@ -17,6 +17,9 @@
  * Pet com mais de um acesso continua numa linha só, que abre a lista dele embaixo (o Marsh com
  * onze acessos não vira onze linhas iguais). Com "Mostrar explicações" ligado — e sempre na lista
  * vazia — aparecem os três passos de como um acesso funciona (`AcessosPassos`, uma trilha).
+ *
+ * Com o cadastro em análise, "Vincular código" guarda o código para a aprovação (`reivindicar`),
+ * e os avisos dos códigos guardados (`ReivindicacoesAvisos`) ficam em cima da lista.
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
@@ -31,6 +34,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AcessosPassos from '@/components/parceiro/AcessosPassos.vue'
+import ReivindicacoesAvisos from '@/components/parceiro/ReivindicacoesAvisos.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useAgora } from '@/composables/useAgora'
@@ -43,6 +47,7 @@ import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   getCompartilhamentos,
+  getReivindicacoes,
   isCodigoVinculoValido,
   normalizarCodigoVinculo,
 } from '@/service/parceiro/compartilhamentos-service'
@@ -52,9 +57,11 @@ import {
   type CompartilhamentoResumo,
   type EspeciePet,
   type OrdenacaoPacientes,
+  type ReivindicacaoAcesso,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
 import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
+import { modoDoVinculo } from '@/utils/parceiro/reivindicacoes'
 import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
 
 const ATENDIMENTO_TABS = ['ativos', 'historico'] as const
@@ -117,6 +124,11 @@ const error = ref('')
 const vincularVisible = ref(false)
 /** O código que veio pelo link; vale só para a abertura que ele mesmo provocou. */
 const codigoDoLink = ref('')
+
+/** Os códigos guardados com o cadastro em análise e o que aconteceu com eles. */
+const reivindicacoes = ref<ReivindicacaoAcesso[]>([])
+/** Guardou um código e a releitura falhou: o aviso sem o nome do pet segura o lugar. */
+const codigoGuardadoSemLista = ref(false)
 
 const filtros = reactive({
   q: '',
@@ -257,6 +269,12 @@ const avisoDoCadastro = computed(() => {
 })
 
 /**
+ * "Vincular código" abre para o cadastro operando (vincula na hora) e para o em análise (guarda o
+ * código e vincula na aprovação). Recusado e suspenso continuam sem o modal: a API recusaria.
+ */
+const podeAbrirVinculo = computed(() => modoDoVinculo(store.status) !== null)
+
+/**
  * Digitar rápido dispara várias buscas; a resposta lenta de uma tecla antiga pode
  * chegar depois da nova e sobrescrever a lista. Só a requisição mais recente
  * escreve no estado.
@@ -373,6 +391,34 @@ async function loadMore() {
     }
   } finally {
     loadingMore.value = false
+  }
+}
+
+let reivindicacoesRequestId = 0
+
+/**
+ * Os avisos dos códigos guardados. São recado, não a tela: falhou, o aviso some e a lista segue,
+ * sem erro nenhum. Na releitura de fundo (`silencioso`), a falha deixa os avisos que já estavam.
+ * Devolve se a leitura deu certo.
+ */
+async function carregarReivindicacoes(silencioso = false) {
+  const id = ++reivindicacoesRequestId
+
+  try {
+    const resposta = await getReivindicacoes(parceiroQuery())
+
+    if (id === reivindicacoesRequestId) {
+      reivindicacoes.value = Array.isArray(resposta?.itens) ? resposta.itens : []
+      codigoGuardadoSemLista.value = false
+    }
+
+    return true
+  } catch {
+    if (id === reivindicacoesRequestId && !silencioso) {
+      reivindicacoes.value = []
+    }
+
+    return false
   }
 }
 
@@ -779,7 +825,15 @@ const fraseDoResumo = computed(() => {
 })
 
 function onVinculado(detalhe: CompartilhamentoDetalhe) {
+  // Vincular pode fechar um código guardado do mesmo pet: o aviso dele não pode sobrar.
+  void carregarReivindicacoes()
   void router.push(`/parceiro/acessos/${detalhe.id}`)
+}
+
+/** Código guardado com o cadastro em análise: o aviso de espera aparece em cima da lista. */
+async function onGuardado() {
+  const leu = await carregarReivindicacoes()
+  codigoGuardadoSemLista.value = !leu
 }
 
 /**
@@ -807,11 +861,13 @@ function tirarCodigoDaUrl() {
  * confirmar, em vez de a pessoa cair no Início sem saber o que fazer com ele.
  *
  * Roda depois da primeira página porque é o contexto do parceiro, carregado ali, que diz se o
- * cadastro opera — chamar o `ensureContext` em paralelo dobraria a ida à rede. Em análise,
- * recusado ou suspenso, a API recusaria o vínculo: o modal não abre, e a faixa do alto explica.
+ * cadastro opera — chamar o `ensureContext` em paralelo dobraria a ida à rede. Em análise, o
+ * modal abre do mesmo jeito e guarda o código para a aprovação (quem cria a conta pela página do
+ * acesso chega aqui ainda em análise). Recusado ou suspenso, a API recusaria: o modal não abre,
+ * e a faixa do alto explica.
  */
 function abrirVinculoDoLink(codigo: string) {
-  if (!codigo || !store.podeOperar) {
+  if (!codigo || !podeAbrirVinculo.value) {
     return
   }
 
@@ -863,14 +919,22 @@ onMounted(() => {
 
   const codigoLido = tirarCodigoDaUrl()
 
-  void loadFirstPage().then(() => abrirVinculoDoLink(codigoLido))
+  // Os avisos esperam o contexto do parceiro pelo mesmo motivo do link: o `parceiroId` vem dele.
+  void loadFirstPage().then(() => {
+    abrirVinculoDoLink(codigoLido)
+    void carregarReivindicacoes()
+  })
 })
 
 /**
  * Mesma razão do detalhe: a validade de um acesso pode ter encurtado sem aviso, e esta lista
- * mostra contagem regressiva. Relendo na volta, o número volta a valer.
+ * mostra contagem regressiva. Relendo na volta, o número volta a valer. Os avisos voltam junto:
+ * a aprovação do cadastro pode ter acontecido com a aba fechada.
  */
-useRevalidarAoVoltar(() => void loadFirstPage(true))
+useRevalidarAoVoltar(() => {
+  void loadFirstPage(true)
+  void carregarReivindicacoes(true)
+})
 </script>
 
 <template>
@@ -890,8 +954,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         type="button"
         icon="ph ph-link"
         :label="t('acessos.vincular.cta')"
-        :disabled="!store.podeOperar"
-        :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
+        :disabled="!podeAbrirVinculo"
+        :title="!podeAbrirVinculo ? t('acessos.vincular.bloqueado') : undefined"
         @click="vincularVisible = true"
       />
     </template>
@@ -916,6 +980,10 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
           {{ t(`frame.operability.${avisoDoCadastro}.link`) }}
         </RouterLink>
       </section>
+
+      <!-- Os códigos guardados com o cadastro em análise: o que espera a aprovação e o que não
+           virou acesso. Falha na leitura só some com os avisos; a lista segue. -->
+      <ReivindicacoesAvisos :itens="reivindicacoes" :codigo-guardado="codigoGuardadoSemLista" />
 
       <!-- As explicações: o que é um acesso, em três passos numa trilha. -->
       <section v-if="isGuidanceVisible" class="guia" aria-labelledby="acessos-guia-titulo">
@@ -1155,8 +1223,8 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
             type="button"
             icon="ph ph-link"
             :label="t('acessos.vincular.cta')"
-            :disabled="!store.podeOperar"
-            :title="!store.podeOperar ? t('acessos.vincular.bloqueado') : undefined"
+            :disabled="!podeAbrirVinculo"
+            :title="!podeAbrirVinculo ? t('acessos.vincular.bloqueado') : undefined"
             @click="vincularVisible = true"
           />
         </div>
@@ -1557,6 +1625,7 @@ useRevalidarAoVoltar(() => void loadFirstPage(true))
         v-model:visible="vincularVisible"
         :codigo-inicial="codigoDoLink"
         @vinculado="onVinculado"
+        @guardado="onGuardado"
       />
     </template>
   </UiPagina>

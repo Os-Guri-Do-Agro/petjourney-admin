@@ -1186,7 +1186,19 @@
       "outraEmpresa": "Este acceso ya está vinculado a otra empresa.",
       "naoOperacional": "Su registro de socio aún no está aprobado para operar.",
       "throttle": "Demasiados intentos. Espere un minuto e intente de nuevo.",
-      "erroGenerico": "No fue posible vincular el código."
+      "erroGenerico": "No fue posible vincular el código.",
+      "ledeEmAnalise": "Ingrese el código de 6 dígitos que el tutor generó en la app. Como su registro está en análisis, el código queda guardado y el acceso aparece en su lista cuando se apruebe el registro.",
+      "submitEmAnalise": "Guardar código",
+      "muitasTentativas": "Demasiados intentos. Intente de nuevo en unos minutos.",
+      "muitosGuardados": "Ya guardó demasiados códigos. Espere la revisión de su registro."
+    },
+    "reivindicacoes": {
+      "aria": "Códigos guardados",
+      "aguardandoAprovacao": "El acceso de {pet} aparecerá aquí cuando se apruebe su registro.",
+      "vencido": "El acceso de {pet} venció antes de la aprobación de su registro. Pida un nuevo código al tutor.",
+      "encerrado": "El tutor cerró el acceso de {pet} antes de la aprobación de su registro.",
+      "jaVinculado": "Otro establecimiento ya abrió el acceso de {pet}.",
+      "guardado": "Código guardado. El acceso aparecerá aquí cuando se apruebe su registro."
     },
     "detalhe": {
       "subtitle": "Atención",
