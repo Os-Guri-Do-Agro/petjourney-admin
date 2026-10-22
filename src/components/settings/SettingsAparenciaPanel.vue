@@ -337,6 +337,9 @@ function alternarExplicacoes(ligado: boolean) {
  */
 .opcao {
   display: grid;
+  /* O cartão estica até a altura do vizinho; a sobra vai para o fim, não para entre as linhas,
+     senão o rádio do cartão de texto mais curto desce e as duas opções desalinham. */
+  align-content: start;
   gap: 12px;
   padding: 10px 10px 14px;
   border: 1px solid var(--linha);

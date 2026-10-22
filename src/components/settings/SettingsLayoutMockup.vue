@@ -35,7 +35,7 @@ const ESPACOS = [
 <template>
   <span
     class="maquete"
-    :class="[`maquete--${tema}`, { 'maquete--densa': densa }]"
+    :class="[`maquete--${tema}`, { 'maquete--todos': todos, 'maquete--densa': densa }]"
     aria-hidden="true"
   >
     <span class="maquete__barra">
@@ -110,6 +110,7 @@ const ESPACOS = [
   --m-hotel: var(--hotel-claro);
   --m-portal: var(--portal-claro);
 
+  position: relative;
   display: grid;
   overflow: hidden;
   width: 100%;
@@ -119,6 +120,21 @@ const ESPACOS = [
   background: var(--m-fundo);
   container-type: inline-size;
   grid-template-columns: 31% minmax(0, 1fr);
+}
+
+/*
+ * Com todos os espaços abertos a barra é mais alta que a miniatura, e o corte cairia no meio de
+ * uma linha. O pé da barra se apaga no verde dela: lê como "a barra continua", não como defeito.
+ */
+.maquete--todos::after {
+  position: absolute;
+  bottom: 0;
+  width: 31%;
+  height: 22%;
+  background: linear-gradient(to bottom, transparent, var(--m-rail) 85%);
+  content: '';
+  inset-inline-start: 0;
+  pointer-events: none;
 }
 
 /* A escala vem da largura da própria miniatura: a peça inteira cresce e encolhe junto. */

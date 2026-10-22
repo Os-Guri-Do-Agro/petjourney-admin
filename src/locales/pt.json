@@ -574,8 +574,8 @@
       "tentar": "Tentar de novo",
       "carregandoAria": "Carregando o saldo",
       "verExtrato": "Ver extrato",
-      "liberado": "liberado",
-      "bloqueadoRotulo": "bloqueado para saque",
+      "liberado": "Liberado",
+      "bloqueadoRotulo": "Bloqueado para saque",
       "capacidade": {
         "liberado": "Pronto para sacar.",
         "abaixoDoMinimo": "O saque começa em {minimo}.",
@@ -811,29 +811,29 @@
     "espacos": {
       "rotulo": "Seus espaços agora",
       "clinica": {
-        "recepcao": "na recepção",
-        "consulta": "em consulta",
-        "pedidos": "pedido esperando resposta | pedidos esperando resposta",
-        "aSeguir": "por vir hoje",
-        "proximo": "o próximo às {hora}",
+        "recepcao": "Na recepção",
+        "consulta": "Em consulta",
+        "pedidos": "Pedido esperando resposta | Pedidos esperando resposta",
+        "aSeguir": "Por vir hoje",
+        "proximo": "O próximo às {hora}",
         "andamento": "{feitos} de {total} atendimento feito hoje | {feitos} de {total} atendimentos feitos hoje"
       },
       "hotel": {
-        "naCasa": "na casa",
-        "chegam": "chega hoje | chegam hoje",
-        "saem": "sai hoje | saem hoje",
-        "rotina": "tarefa atrasada | tarefas atrasadas",
+        "naCasa": "Na casa",
+        "chegam": "Chega hoje | Chegam hoje",
+        "saem": "Sai hoje | Saem hoje",
+        "rotina": "Tarefa atrasada | Tarefas atrasadas",
         "ocupacao": "{ocupadas} de {total} acomodação ocupada | {ocupadas} de {total} acomodações ocupadas",
         "semDocumento": "{total} sem documento",
         "atrasadas": "{total} atrasada | {total} atrasadas",
-        "proximaAs": "a próxima às {hora}",
+        "proximaAs": "A próxima às {hora}",
         "andamento": "{feitas} de {total} tarefa da rotina feita | {feitas} de {total} tarefas da rotina feitas"
       },
       "portal": {
-        "retido": "na janela de segurança",
-        "leituras": "leitura do QR em 7 dias | leituras do QR em 7 dias",
+        "retido": "Na janela de segurança",
+        "leituras": "Leitura do QR em 7 dias | Leituras do QR em 7 dias",
         "leiturasTotal": "{total} no total",
-        "leiturasIndisponiveis": "indisponível agora"
+        "leiturasIndisponiveis": "Indisponível agora"
       }
     },
     "passo": {
@@ -2940,7 +2940,7 @@
         "ondeAgenda": "Agenda"
       },
       "abertura": {
-        "internados": "internado | internados",
+        "internados": "Internado | Internados",
         "indicadores": "Como está o dia"
       }
     },

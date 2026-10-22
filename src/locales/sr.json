@@ -574,8 +574,8 @@
       "tentar": "Pokušaj ponovo",
       "carregandoAria": "Učitavanje stanja",
       "verExtrato": "Pogledaj izvod",
-      "liberado": "oslobođeno",
-      "bloqueadoRotulo": "blokirano za isplatu",
+      "liberado": "Oslobođeno",
+      "bloqueadoRotulo": "Blokirano za isplatu",
       "capacidade": {
         "liberado": "Spremno za isplatu.",
         "abaixoDoMinimo": "Isplata počinje od {minimo}.",
@@ -811,29 +811,29 @@
     "espacos": {
       "rotulo": "Vaši prostori sada",
       "clinica": {
-        "recepcao": "u čekaonici",
-        "consulta": "na pregledu",
-        "pedidos": "zahtev čeka odgovor | zahteva čekaju odgovor | zahteva čeka odgovor",
-        "aSeguir": "još danas",
-        "proximo": "sledeći u {hora}",
+        "recepcao": "U čekaonici",
+        "consulta": "Na pregledu",
+        "pedidos": "Zahtev čeka odgovor | Zahteva čekaju odgovor | Zahteva čeka odgovor",
+        "aSeguir": "Još danas",
+        "proximo": "Sledeći u {hora}",
         "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda"
       },
       "hotel": {
-        "naCasa": "u objektu",
-        "chegam": "dolazi danas | dolaze danas | dolazi danas",
-        "saem": "odlazi danas | odlaze danas | odlazi danas",
-        "rotina": "zadatak kasni | zadatka kasne | zadataka kasni",
-        "ocupacao": "zauzeto {ocupadas} od {total} smeštaja | zauzeto {ocupadas} od {total} smeštaja | zauzeto {ocupadas} od {total} smeštaja",
-        "semDocumento": "bez dokumenata: {total}",
+        "naCasa": "U objektu",
+        "chegam": "Dolazi danas | Dolaze danas | Dolazi danas",
+        "saem": "Odlazi danas | Odlaze danas | Odlazi danas",
+        "rotina": "Zadatak kasni | Zadatka kasne | Zadataka kasni",
+        "ocupacao": "Zauzeto {ocupadas} od {total} smeštaja | Zauzeto {ocupadas} od {total} smeštaja | Zauzeto {ocupadas} od {total} smeštaja",
+        "semDocumento": "Bez dokumenata: {total}",
         "atrasadas": "{total} kasni | {total} kasne | {total} kasni",
-        "proximaAs": "sledeće u {hora}",
+        "proximaAs": "Sledeće u {hora}",
         "andamento": "Urađeno {feitas} od {total} zadatka rutine | Urađeno {feitas} od {total} zadatka rutine | Urađeno {feitas} od {total} zadataka rutine"
       },
       "portal": {
-        "retido": "u sigurnosnom periodu",
-        "leituras": "skeniranje QR koda za 7 dana | skeniranja QR koda za 7 dana | skeniranja QR koda za 7 dana",
-        "leiturasTotal": "ukupno {total}",
-        "leiturasIndisponiveis": "trenutno nedostupno"
+        "retido": "U sigurnosnom periodu",
+        "leituras": "Skeniranje QR koda za 7 dana | Skeniranja QR koda za 7 dana | Skeniranja QR koda za 7 dana",
+        "leiturasTotal": "Ukupno {total}",
+        "leiturasIndisponiveis": "Trenutno nedostupno"
       }
     },
     "passo": {
@@ -2940,7 +2940,7 @@
         "ondeAgenda": "Raspored"
       },
       "abertura": {
-        "internados": "hospitalizovan | hospitalizovana | hospitalizovanih",
+        "internados": "Hospitalizovan | Hospitalizovana | Hospitalizovanih",
         "indicadores": "Kako teče dan"
       }
     },

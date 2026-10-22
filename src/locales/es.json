@@ -574,8 +574,8 @@
       "tentar": "Intentar de nuevo",
       "carregandoAria": "Cargando el saldo",
       "verExtrato": "Ver extracto",
-      "liberado": "liberado",
-      "bloqueadoRotulo": "bloqueado para retiro",
+      "liberado": "Liberado",
+      "bloqueadoRotulo": "Bloqueado para retiro",
       "capacidade": {
         "liberado": "Listo para retirar.",
         "abaixoDoMinimo": "El retiro mínimo es {minimo}.",
@@ -811,29 +811,29 @@
     "espacos": {
       "rotulo": "Sus espacios ahora",
       "clinica": {
-        "recepcao": "en recepción",
-        "consulta": "en consulta",
-        "pedidos": "solicitud esperando respuesta | solicitudes esperando respuesta",
-        "aSeguir": "por venir hoy",
-        "proximo": "el próximo a las {hora}",
+        "recepcao": "En recepción",
+        "consulta": "En consulta",
+        "pedidos": "Solicitud esperando respuesta | Solicitudes esperando respuesta",
+        "aSeguir": "Por venir hoy",
+        "proximo": "El próximo a las {hora}",
         "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy"
       },
       "hotel": {
-        "naCasa": "en la casa",
-        "chegam": "llega hoy | llegan hoy",
-        "saem": "sale hoy | salen hoy",
-        "rotina": "tarea atrasada | tareas atrasadas",
+        "naCasa": "En la casa",
+        "chegam": "Llega hoy | Llegan hoy",
+        "saem": "Sale hoy | Salen hoy",
+        "rotina": "Tarea atrasada | Tareas atrasadas",
         "ocupacao": "{ocupadas} de {total} alojamiento ocupado | {ocupadas} de {total} alojamientos ocupados",
         "semDocumento": "{total} sin documentos",
         "atrasadas": "{total} atrasada | {total} atrasadas",
-        "proximaAs": "la próxima a las {hora}",
+        "proximaAs": "La próxima a las {hora}",
         "andamento": "{feitas} de {total} tarea de la rutina hecha | {feitas} de {total} tareas de la rutina hechas"
       },
       "portal": {
-        "retido": "en la ventana de seguridad",
-        "leituras": "lectura del QR en 7 días | lecturas del QR en 7 días",
+        "retido": "En la ventana de seguridad",
+        "leituras": "Lectura del QR en 7 días | Lecturas del QR en 7 días",
         "leiturasTotal": "{total} en total",
-        "leiturasIndisponiveis": "no disponible ahora"
+        "leiturasIndisponiveis": "No disponible ahora"
       }
     },
     "passo": {
@@ -2940,7 +2940,7 @@
         "ondeAgenda": "Agenda"
       },
       "abertura": {
-        "internados": "internado | internados",
+        "internados": "Internado | Internados",
         "indicadores": "Cómo va el día"
       }
     },

@@ -574,8 +574,8 @@
       "tentar": "Try again",
       "carregandoAria": "Loading balance",
       "verExtrato": "View statement",
-      "liberado": "released",
-      "bloqueadoRotulo": "blocked for payout",
+      "liberado": "Released",
+      "bloqueadoRotulo": "Blocked for payout",
       "capacidade": {
         "liberado": "Ready for payout.",
         "abaixoDoMinimo": "Payouts start at {minimo}.",
@@ -811,29 +811,29 @@
     "espacos": {
       "rotulo": "Your spaces right now",
       "clinica": {
-        "recepcao": "in reception",
-        "consulta": "in consult",
-        "pedidos": "request awaiting a reply | requests awaiting a reply",
-        "aSeguir": "still to come today",
-        "proximo": "next at {hora}",
+        "recepcao": "In reception",
+        "consulta": "In consult",
+        "pedidos": "Request awaiting a reply | Requests awaiting a reply",
+        "aSeguir": "Still to come today",
+        "proximo": "Next at {hora}",
         "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today"
       },
       "hotel": {
-        "naCasa": "in the house",
-        "chegam": "arriving today | arriving today",
-        "saem": "leaving today | leaving today",
-        "rotina": "overdue task | overdue tasks",
+        "naCasa": "In the house",
+        "chegam": "Arriving today | Arriving today",
+        "saem": "Leaving today | Leaving today",
+        "rotina": "Overdue task | Overdue tasks",
         "ocupacao": "{ocupadas} of {total} room taken | {ocupadas} of {total} rooms taken",
         "semDocumento": "{total} missing documents",
         "atrasadas": "{total} late | {total} late",
-        "proximaAs": "next at {hora}",
+        "proximaAs": "Next at {hora}",
         "andamento": "{feitas} of {total} routine task done | {feitas} of {total} routine tasks done"
       },
       "portal": {
-        "retido": "in the security window",
+        "retido": "In the security window",
         "leituras": "QR scan in 7 days | QR scans in 7 days",
         "leiturasTotal": "{total} in total",
-        "leiturasIndisponiveis": "unavailable right now"
+        "leiturasIndisponiveis": "Unavailable right now"
       }
     },
     "passo": {
@@ -2940,7 +2940,7 @@
         "ondeAgenda": "Schedule"
       },
       "abertura": {
-        "internados": "inpatient | inpatients",
+        "internados": "Inpatient | Inpatients",
         "indicadores": "How the day is going"
       }
     },
