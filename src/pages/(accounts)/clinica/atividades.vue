@@ -88,7 +88,7 @@ function linhaDoRascunho(encounter: Encounter): LinhaDeAtividade {
 
   return {
     id: `rascunho-${encounter.id}`,
-    to: `/veterinario/atendimento/${encounter.id}`,
+    to: `/clinica/atendimento/${encounter.id}`,
     pet: clinico.pet(encounter.petId),
     meta: juntar([
       encounter.anamnese.queixaPrincipal || t('clinico.atividades.semQueixa'),
@@ -114,7 +114,7 @@ function linhaDoRetorno(item: RetornoPendente): LinhaDeAtividade {
   return {
     id: `retorno-${item.encounter.id}`,
     to: {
-      path: '/veterinario/agenda',
+      path: '/clinica/agenda',
       query: { novo: '1', paciente: item.encounter.petId, tipo: 'retorno' },
     },
     pet: clinico.pet(item.encounter.petId),
@@ -146,7 +146,7 @@ function linhaDaOferta(entrada: WaitlistEntry): LinhaDeAtividade {
 
   return {
     id: `oferta-${entrada.id}`,
-    to: '/veterinario/fila',
+    to: '/clinica/fila',
     pet: clinico.pet(entrada.petId),
     meta: juntar([
       clinico.tipo(entrada.typeId)?.nome,

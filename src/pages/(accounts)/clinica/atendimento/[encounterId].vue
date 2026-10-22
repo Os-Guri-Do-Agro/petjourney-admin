@@ -342,18 +342,18 @@ const voltouDe =
     : String((window.history.state as { back?: unknown } | null)?.back ?? '')
 
 const ORIGENS: Array<{ prefixo: string; chave: string }> = [
-  { prefixo: '/veterinario/meu-dia', chave: 'espacos.clinica.hoje' },
-  { prefixo: '/veterinario/agenda', chave: 'espacos.clinica.agenda' },
-  { prefixo: '/veterinario/fila', chave: 'espacos.abas.fila' },
-  { prefixo: '/veterinario/pedidos', chave: 'espacos.abas.pedidos' },
-  { prefixo: '/veterinario/atendimentos', chave: 'espacos.abas.atendimentos' },
-  { prefixo: '/veterinario/internacao', chave: 'espacos.clinica.internacao' },
-  { prefixo: '/veterinario/atividades', chave: 'espacos.abas.atividades' },
-  { prefixo: '/veterinario/pacientes', chave: 'espacos.clinica.pacientes' },
+  { prefixo: '/clinica/meu-dia', chave: 'espacos.clinica.hoje' },
+  { prefixo: '/clinica/agenda', chave: 'espacos.clinica.agenda' },
+  { prefixo: '/clinica/fila', chave: 'espacos.abas.fila' },
+  { prefixo: '/clinica/pedidos', chave: 'espacos.abas.pedidos' },
+  { prefixo: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
+  { prefixo: '/clinica/internacao', chave: 'espacos.clinica.internacao' },
+  { prefixo: '/clinica/atividades', chave: 'espacos.abas.atividades' },
+  { prefixo: '/clinica/pacientes', chave: 'espacos.clinica.pacientes' },
 ]
 
 const voltar = computed(() => {
-  if (voltouDe.startsWith('/veterinario/paciente/')) {
+  if (voltouDe.startsWith('/clinica/paciente/')) {
     return {
       rota: voltouDe,
       rotulo: prontuario.pet
@@ -366,7 +366,7 @@ const voltar = computed(() => {
 
   return origem
     ? { rota: voltouDe, rotulo: t(origem.chave) }
-    : { rota: '/veterinario/pacientes', rotulo: t('espacos.clinica.pacientes') }
+    : { rota: '/clinica/pacientes', rotulo: t('espacos.clinica.pacientes') }
 })
 
 const profissional = computed(() =>
@@ -595,7 +595,7 @@ async function carregar() {
 
     /** Normaliza a URL para o id real, senão recarregar criaria outro caminho de entrada. */
     if (prontuario.encounter) {
-      void router.replace(`/veterinario/atendimento/${prontuario.encounter.id}`)
+      void router.replace(`/clinica/atendimento/${prontuario.encounter.id}`)
     }
   } else {
     await prontuario.abrirPorId(idDaRota.value)
@@ -644,7 +644,7 @@ async function finalizar() {
    * seguinte do dia — o próximo paciente — exigia achar o menu. O atendimento acabou; o lugar
    * de quem acabou de atender é a grade.
    */
-  void router.push('/veterinario/agenda')
+  void router.push('/clinica/agenda')
 }
 
 /** "Ir para o diagnóstico", de dentro do diálogo de finalizar: fecha e leva à etapa. */
@@ -1243,7 +1243,7 @@ onBeforeUnmount(() => {
           class="contexto"
           :eventos="prontuario.timeline"
           :anterior="prontuario.consultaAnterior"
-          :rota-completa="`/veterinario/paciente/${encounter.petId}/historico`"
+          :rota-completa="`/clinica/paciente/${encounter.petId}/historico`"
           :compacto="!telaLarga"
           @fechar="historicoAberto = false"
         />

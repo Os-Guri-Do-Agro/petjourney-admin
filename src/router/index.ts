@@ -13,6 +13,7 @@ import { moduloDaPaginaAberta } from './paginas-abertas'
 
 const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
+  { path: '/clinica', redirect: '/inicio' },
   { path: '/veterinario', redirect: '/inicio' },
   /*
    * Compartilhamentos do menu Pets era uma segunda porta para o mesmo cômodo.
@@ -23,6 +24,19 @@ const partnerLegacyRedirects: RouteRecordRaw[] = [
    * Redireciona em vez de sumir porque quem tem o link salvo merece cair na tela que funciona.
    */
   { path: '/veterinario/compartilhamentos', redirect: '/parceiro/acessos' },
+  /*
+   * O módulo da clínica morava em `/veterinario`, mas quem o usa é a recepção, a enfermagem e o
+   * veterinário: o endereço passou a ser `/clinica` (M2 da análise do portal). Link salvo, favorito e
+   * deep link antigo continuam chegando à mesma tela, com a query e o hash.
+   */
+  {
+    path: '/veterinario/:caminho(.*)*',
+    redirect: (to) => ({
+      path: `/clinica/${([] as string[]).concat(to.params.caminho ?? []).join('/')}`,
+      query: to.query,
+      hash: to.hash,
+    }),
+  },
   {
     path: '/parceiro/status',
     redirect: { path: '/settings', query: { aba: 'empresa' } },
@@ -59,7 +73,13 @@ const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-pas
 
 function getSafeRedirectPath(redirect: unknown) {
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
-    if (redirect === '/tutor' || redirect === '/inicio' || redirect === '/parceiro' || redirect === '/veterinario') {
+    if (
+      redirect === '/tutor' ||
+      redirect === '/inicio' ||
+      redirect === '/parceiro' ||
+      redirect === '/clinica' ||
+      redirect === '/veterinario'
+    ) {
       return getDefaultLandingPath()
     }
 
@@ -98,7 +118,7 @@ router.beforeEach(async (to) => {
   /*
    * Tela de Clínica ou Hotel: abre com o módulo ligado no servidor, a permissão da conta e a tela
    * já integrada, ou na demonstração (`navegacao/rotas-dos-modulos.ts`). Menu escondido não basta:
-   * sem esta guarda, quem tem `/veterinario/agenda` no histórico continuaria entrando.
+   * sem esta guarda, quem tem `/clinica/agenda` no histórico continuaria entrando.
    */
   if (hasActiveSession && rotaDoModulo(to.path) && !demonstracao.value) {
     const store = useParceiroStore()

@@ -199,7 +199,7 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
     <RouterLink
       v-if="dia && !dia.clinicaFechada"
       class="fita__regua"
-      to="/veterinario/agenda"
+      to="/clinica/agenda"
       :aria-label="resumoParaLeitor"
     >
       <span class="fita__passado" :style="{ width: `${agoraX}%` }" aria-hidden="true" />
@@ -243,15 +243,15 @@ const dataCurta = computed(() => formato.dataLonga(clinicClock.today()))
     <span v-else class="fita__regua fita__regua--vazia" aria-hidden="true" />
 
     <nav class="fita__contas" :aria-label="t('clinico.fita.contas')">
-      <RouterLink class="fita__conta fita__conta--recepcao" to="/veterinario/meu-dia">
+      <RouterLink class="fita__conta fita__conta--recepcao" to="/clinica/meu-dia">
         <span class="fita__ponto" aria-hidden="true" />
         {{ t('clinico.fita.recepcao', { n: naRecepcao }, naRecepcao) }}
       </RouterLink>
-      <RouterLink class="fita__conta fita__conta--sala" to="/veterinario/meu-dia">
+      <RouterLink class="fita__conta fita__conta--sala" to="/clinica/meu-dia">
         <span class="fita__ponto" aria-hidden="true" />
         {{ t('clinico.fita.sala', { n: naSala }, naSala) }}
       </RouterLink>
-      <RouterLink class="fita__conta fita__conta--internados" to="/veterinario/internacao">
+      <RouterLink class="fita__conta fita__conta--internados" to="/clinica/internacao">
         <span class="fita__ponto" aria-hidden="true" />
         {{ t('clinico.fita.internados', { n: internados }, internados) }}
       </RouterLink>

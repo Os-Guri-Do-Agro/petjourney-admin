@@ -2,7 +2,7 @@
  * Do atendimento clínico para a anotação do prestador.
  *
  * É a ponte entre as duas implementações que este repositório tem dos mesmos conceitos: o
- * módulo clínico (`/veterinario/*`), que inventou o formato porque não havia contrato, e
+ * módulo clínico (`/clinica/*`), que inventou o formato porque não havia contrato, e
  * `/parceiro/acessos`, que fala o contrato real e já está no ar.
  *
  * **A regra deste arquivo é não repetir o contrato.** Limites, campos por tipo de serviço,

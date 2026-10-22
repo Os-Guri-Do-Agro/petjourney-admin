@@ -166,13 +166,13 @@ const internadosComPendencia = computed(() =>
 )
 
 function focoNaAgenda(appointmentId: string): RouteLocationRaw {
-  return { path: '/veterinario/agenda', query: { foco: appointmentId } }
+  return { path: '/clinica/agenda', query: { foco: appointmentId } }
 }
 
 function rotaDoProntuario(appointment: Appointment) {
   return appointment.encounterId
-    ? `/veterinario/atendimento/${appointment.encounterId}`
-    : `/veterinario/atendimento/novo-${appointment.id}`
+    ? `/clinica/atendimento/${appointment.encounterId}`
+    : `/clinica/atendimento/novo-${appointment.id}`
 }
 
 function abrirProntuario(appointment: Appointment) {
@@ -199,7 +199,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   const ondeAgenda = t('clinico.meuDia.pauta.ondeAgenda')
 
   for (const item of internadosComPendencia.value) {
-    const to = `/veterinario/internacao/${item.internacao!.id}`
+    const to = `/clinica/internacao/${item.internacao!.id}`
     const doses = t('clinico.meuDia.pauta.doses', { total: item.atrasadas }, item.atrasadas)
 
     linhas.push(
@@ -266,7 +266,7 @@ const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
   if (retornos > 0) {
     linhas.push({
       id: 'retornos',
-      to: '/veterinario/atividades',
+      to: '/clinica/atividades',
       frase: t('clinico.meuDia.pauta.retornos', { total: retornos }, retornos),
       detalhe: nomesComResto(
         retornosPendentes.value.map((item) => clinico.pet(item.encounter.petId)?.nome ?? ''),
@@ -366,7 +366,7 @@ const indicadores = computed<IndicadorDaAbertura[]>(() => [
     valor: naRecepcao.value.length,
     rotulo: t('inicio.espacos.clinica.recepcao'),
     icone: 'ph ph-door-open',
-    to: '/veterinario/agenda',
+    to: '/clinica/agenda',
     tom: naRecepcao.value.length ? 'atencao' : undefined,
   },
   {
@@ -374,14 +374,14 @@ const indicadores = computed<IndicadorDaAbertura[]>(() => [
     valor: emConsulta.value.length,
     rotulo: t('inicio.espacos.clinica.consulta'),
     icone: 'ph ph-stethoscope',
-    to: '/veterinario/agenda',
+    to: '/clinica/agenda',
   },
   {
     id: 'internados',
     valor: internados.value,
     rotulo: t('clinico.meuDia.abertura.internados', internados.value),
     icone: 'ph ph-bed',
-    to: '/veterinario/internacao',
+    to: '/clinica/internacao',
     tom: internadosComPendencia.value.length ? 'risco' : undefined,
   },
   {
@@ -389,7 +389,7 @@ const indicadores = computed<IndicadorDaAbertura[]>(() => [
     valor: aSeguir.value.length,
     rotulo: t('inicio.espacos.clinica.aSeguir'),
     icone: 'ph ph-clock',
-    to: '/veterinario/agenda',
+    to: '/clinica/agenda',
   },
 ])
 
@@ -442,7 +442,7 @@ onMounted(carregar)
             :label="acaoPrincipal.rotulo"
             @click="abrirProntuario(acaoPrincipal.item)"
           />
-          <RouterLink class="p-button p-component p-button-secondary" to="/veterinario/agenda">
+          <RouterLink class="p-button p-component p-button-secondary" to="/clinica/agenda">
             <i class="ph ph-calendar-blank" aria-hidden="true" />
             {{ t('clinico.meuDia.agendaCompleta') }}
           </RouterLink>
@@ -506,7 +506,7 @@ onMounted(carregar)
                   :label="t('clinico.hoje.chamar')"
                   @click="abrirProntuario(item)"
                 />
-                <RouterLink class="ui-mais" :to="`/veterinario/paciente/${item.petId}/resumo`">
+                <RouterLink class="ui-mais" :to="`/clinica/paciente/${item.petId}/resumo`">
                   {{ t('clinico.resumoDoPaciente.verResumo') }}
                 </RouterLink>
               </div>
@@ -580,7 +580,7 @@ onMounted(carregar)
           <p v-else class="ui-vazio">{{ t('clinico.meuDia.semProximo') }}</p>
 
           <footer class="posto__pe">
-            <RouterLink class="ui-mais" to="/veterinario/agenda">
+            <RouterLink class="ui-mais" to="/clinica/agenda">
               {{ t('clinico.meuDia.agendaCompleta') }}
               <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>

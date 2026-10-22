@@ -78,16 +78,16 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     id: 'hoje',
     chave: 'espacos.clinica.hoje',
     icone: 'ph ph-sun-horizon',
-    abas: [{ rota: '/veterinario/meu-dia', chave: 'espacos.clinica.hoje' }],
+    abas: [{ rota: '/clinica/meu-dia', chave: 'espacos.clinica.hoje' }],
   },
   {
     id: 'agenda',
     chave: 'espacos.clinica.agenda',
     icone: 'ph ph-calendar-dots',
     abas: [
-      { rota: '/veterinario/agenda', chave: 'espacos.abas.agenda' },
-      { rota: '/veterinario/pedidos', chave: 'espacos.abas.pedidos' },
-      { rota: '/veterinario/fila', chave: 'espacos.abas.fila' },
+      { rota: '/clinica/agenda', chave: 'espacos.abas.agenda' },
+      { rota: '/clinica/pedidos', chave: 'espacos.abas.pedidos' },
+      { rota: '/clinica/fila', chave: 'espacos.abas.fila' },
     ],
   },
   {
@@ -95,35 +95,35 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     chave: 'espacos.clinica.pacientes',
     icone: 'ph ph-paw-print',
     abas: [
-      { rota: '/veterinario/pacientes', chave: 'espacos.abas.pacientes' },
-      { rota: '/veterinario/atendimentos', chave: 'espacos.abas.atendimentos' },
-      { rota: '/veterinario/bulario', chave: 'espacos.abas.bulario' },
+      { rota: '/clinica/pacientes', chave: 'espacos.abas.pacientes' },
+      { rota: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
+      { rota: '/clinica/bulario', chave: 'espacos.abas.bulario' },
     ],
-    prefixos: ['/veterinario/paciente/', '/veterinario/atendimento/'],
+    prefixos: ['/clinica/paciente/', '/clinica/atendimento/'],
   },
   {
     id: 'internacao',
     chave: 'espacos.clinica.internacao',
     icone: 'ph ph-bed',
-    abas: [{ rota: '/veterinario/internacao', chave: 'espacos.clinica.internacao' }],
+    abas: [{ rota: '/clinica/internacao', chave: 'espacos.clinica.internacao' }],
   },
   {
     id: 'pendencias',
     chave: 'espacos.clinica.pendencias',
     icone: 'ph ph-list-checks',
     abas: [
-      { rota: '/veterinario/atividades', chave: 'espacos.abas.atividades' },
-      { rota: '/veterinario/faltas', chave: 'espacos.abas.faltas' },
-      { rota: '/veterinario/vacinas', chave: 'espacos.abas.vacinas' },
-      { rota: '/veterinario/tratamentos', chave: 'espacos.abas.tratamentos' },
-      { rota: '/veterinario/estoque', chave: 'espacos.abas.estoque' },
+      { rota: '/clinica/atividades', chave: 'espacos.abas.atividades' },
+      { rota: '/clinica/faltas', chave: 'espacos.abas.faltas' },
+      { rota: '/clinica/vacinas', chave: 'espacos.abas.vacinas' },
+      { rota: '/clinica/tratamentos', chave: 'espacos.abas.tratamentos' },
+      { rota: '/clinica/estoque', chave: 'espacos.abas.estoque' },
     ],
   },
   {
     id: 'relatorios',
     chave: 'espacos.clinica.relatorios',
     icone: 'ph ph-chart-line-up',
-    abas: [{ rota: '/veterinario/resumo', chave: 'espacos.clinica.relatorios' }],
+    abas: [{ rota: '/clinica/resumo', chave: 'espacos.clinica.relatorios' }],
   },
 ]
 
@@ -393,7 +393,7 @@ export function localizar(espacos: Espaco[], caminho: string): Localizacao {
 
 /** O lugar (cor) de uma rota que não está no mapa: Início e Conta são neutros. */
 export function lugarDaRota(caminho: string): LugarDoTrilha {
-  if (caminho.startsWith('/veterinario')) {
+  if (caminho.startsWith('/clinica')) {
     return 'clinica'
   }
 

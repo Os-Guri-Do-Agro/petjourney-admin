@@ -126,7 +126,7 @@ const mostrarFita = computed(
   () =>
     clinicaNaDemonstracao.value &&
     lugar.value === 'clinica' &&
-    !route.path.startsWith('/veterinario/agenda'),
+    !route.path.startsWith('/clinica/agenda'),
 )
 
 /** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */

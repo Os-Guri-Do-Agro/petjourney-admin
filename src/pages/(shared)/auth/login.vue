@@ -66,7 +66,7 @@ function getSafeRedirectPath() {
     return redirect === '/tutor' ||
       redirect === '/inicio' ||
       redirect === '/parceiro' ||
-      redirect === '/veterinario'
+      redirect === '/clinica'
       ? getDefaultLandingPath()
       : redirect
   }

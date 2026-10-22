@@ -137,7 +137,7 @@ export function useAgendaUrlState() {
     () => route.fullPath,
     () => {
       /** Navegação externa (link colado, botão voltar) reabastece o store. */
-      if (route.path.startsWith('/veterinario/agenda')) {
+      if (route.path.startsWith('/clinica/agenda')) {
         lerDaUrl()
       }
     },

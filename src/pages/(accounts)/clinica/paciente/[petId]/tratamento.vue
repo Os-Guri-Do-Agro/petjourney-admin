@@ -401,7 +401,7 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
     @tentar-de-novo="carregar"
   >
     <template #voltar>
-      <RouterLink to="/veterinario/pacientes">
+      <RouterLink to="/clinica/pacientes">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.pacientes.titulo') }}
       </RouterLink>

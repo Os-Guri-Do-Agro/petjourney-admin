@@ -56,7 +56,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, contagem.esperando),
         rotulo: t('inicio.espacos.clinica.recepcao'),
         icone: 'ph ph-door-open',
-        to: '/veterinario/meu-dia',
+        to: '/clinica/meu-dia',
         tom: contagem.esperando > 0 ? 'atencao' : undefined,
       },
       {
@@ -64,14 +64,14 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, contagem.agora),
         rotulo: t('inicio.espacos.clinica.consulta'),
         icone: 'ph ph-stethoscope',
-        to: '/veterinario/meu-dia',
+        to: '/clinica/meu-dia',
       },
       {
         id: 'pedidos',
         valor: pendenciasClinicas.carregado.value ? pedidos.total : null,
         rotulo: t('inicio.espacos.clinica.pedidos', { total: pedidos.total }, pedidos.total),
         icone: 'ph ph-calendar-plus',
-        to: '/veterinario/pedidos',
+        to: '/clinica/pedidos',
         tom: pontoDo(pedidos.total, pedidos.tom),
       },
       {
@@ -79,7 +79,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
         valor: doDia(agenda.carga, porVir),
         rotulo: t('inicio.espacos.clinica.aSeguir'),
         icone: 'ph ph-clock',
-        to: '/veterinario/agenda',
+        to: '/clinica/agenda',
       },
     ]
   })

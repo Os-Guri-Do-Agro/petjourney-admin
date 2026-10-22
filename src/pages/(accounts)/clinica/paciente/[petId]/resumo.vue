@@ -387,7 +387,7 @@ async function abrirAtendimento() {
   }
 
   void router.push({
-    path: `/veterinario/atendimento/${encounterId}`,
+    path: `/clinica/atendimento/${encounterId}`,
     query: { etapa: 'anamnese' },
   })
 }
@@ -408,7 +408,7 @@ watch(petId, carregar)
     @tentar-de-novo="carregar"
   >
     <template #voltar>
-      <RouterLink to="/veterinario/pacientes" class="voltar">
+      <RouterLink to="/clinica/pacientes" class="voltar">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.pacientes.titulo') }}
       </RouterLink>

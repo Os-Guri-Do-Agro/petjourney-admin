@@ -215,7 +215,7 @@ function baixarCompletar() {
 }
 
 function abrirPaciente(petId: string) {
-  void router.push(`/veterinario/paciente/${petId}/historico`)
+  void router.push(`/clinica/paciente/${petId}/historico`)
 }
 </script>
 
@@ -529,7 +529,7 @@ function abrirPaciente(petId: string) {
             class="mg-adiante"
             icon="ph ph-users"
             :label="t('clinico.migracao.relatorio.verPacientes')"
-            @click="router.push('/veterinario/pacientes')"
+            @click="router.push('/clinica/pacientes')"
           />
         </div>
       </template>

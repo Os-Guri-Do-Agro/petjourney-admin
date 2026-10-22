@@ -243,7 +243,7 @@ const vistas = computed<Vista[]>(() => {
 })
 
 function destino(vista: VistaDaFicha): string {
-  return `/veterinario/paciente/${props.pet.id}/${vista}`
+  return `/clinica/paciente/${props.pet.id}/${vista}`
 }
 </script>
 

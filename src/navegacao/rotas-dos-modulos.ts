@@ -31,46 +31,46 @@ export type RotaDeModulo = {
 
 export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   /* Clínica: a recepção e o dia (E3). */
-  { prefixo: '/veterinario/meu-dia', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
-  { prefixo: '/veterinario/agenda', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  { prefixo: '/clinica/meu-dia', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  { prefixo: '/clinica/agenda', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
   {
-    prefixo: '/veterinario/pedidos',
+    prefixo: '/clinica/pedidos',
     modulo: 'CLINICA',
     permissao: 'pedido.responder',
     integrada: false,
   },
-  { prefixo: '/veterinario/fila', modulo: 'CLINICA', permissao: 'fila.gerir', integrada: false },
-  { prefixo: '/veterinario/faltas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  { prefixo: '/clinica/fila', modulo: 'CLINICA', permissao: 'fila.gerir', integrada: false },
+  { prefixo: '/clinica/faltas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
   {
-    prefixo: '/veterinario/atividades',
+    prefixo: '/clinica/atividades',
     modulo: 'CLINICA',
     permissao: 'agenda.ler',
     integrada: false,
   },
-  { prefixo: '/veterinario/resumo', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  { prefixo: '/clinica/resumo', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
 
   /* Clínica: prontuário, receita, vacinas e adesão (E4). */
   {
-    prefixo: '/veterinario/atendimentos',
+    prefixo: '/clinica/atendimentos',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
     integrada: false,
   },
   {
-    prefixo: '/veterinario/atendimento',
+    prefixo: '/clinica/atendimento',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
     integrada: false,
   },
   {
-    prefixo: '/veterinario/bulario',
+    prefixo: '/clinica/bulario',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
     integrada: false,
   },
-  { prefixo: '/veterinario/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  { prefixo: '/clinica/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
   {
-    prefixo: '/veterinario/tratamentos',
+    prefixo: '/clinica/tratamentos',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
     integrada: false,
@@ -78,13 +78,13 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
 
   /* Clínica: internação e estoque (E5, E6). */
   {
-    prefixo: '/veterinario/internacao',
+    prefixo: '/clinica/internacao',
     modulo: 'CLINICA',
     permissao: 'internacao.executar',
     integrada: false,
   },
   {
-    prefixo: '/veterinario/estoque',
+    prefixo: '/clinica/estoque',
     modulo: 'CLINICA',
     permissao: 'estoque.ler',
     integrada: false,
@@ -92,19 +92,19 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
 
   /* O cadastro de clientes e pacientes é dos dois módulos (E2-01). */
   {
-    prefixo: '/veterinario/pacientes',
+    prefixo: '/clinica/pacientes',
     modulo: 'QUALQUER',
     permissao: 'paciente.ler',
     integrada: false,
   },
   {
-    prefixo: '/veterinario/paciente',
+    prefixo: '/clinica/paciente',
     modulo: 'QUALQUER',
     permissao: 'paciente.ler',
     integrada: false,
   },
   {
-    prefixo: '/veterinario/paciente/importar',
+    prefixo: '/clinica/paciente/importar',
     modulo: 'QUALQUER',
     permissao: 'importacao.executar',
     integrada: false,
@@ -125,7 +125,7 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
 
 /** Caminhos de módulo que não têm entrada própria caem no prefixo do módulo. */
 const PREFIXOS_DO_MODULO: ReadonlyArray<[string, NomeDoModulo]> = [
-  ['/veterinario', 'CLINICA'],
+  ['/clinica', 'CLINICA'],
   ['/hotel', 'HOTEL'],
 ]
 

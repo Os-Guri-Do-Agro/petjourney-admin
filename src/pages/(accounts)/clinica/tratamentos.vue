@@ -167,7 +167,7 @@ const janelas = computed(
 )
 
 function rotaDaFicha(petId: string) {
-  return `/veterinario/paciente/${petId}/tratamento`
+  return `/clinica/paciente/${petId}/tratamento`
 }
 
 function hrefDoTelefone(telefone: string) {

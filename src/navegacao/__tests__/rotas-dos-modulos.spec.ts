@@ -31,8 +31,8 @@ const integrada = (prefixo: string) => ({
 
 describe('rotaDoModulo', () => {
   it('o prefixo mais longo vence', () => {
-    expect(rotaDoModulo('/veterinario/paciente/importar')?.permissao).toBe('importacao.executar')
-    expect(rotaDoModulo('/veterinario/paciente/p1/vacinas')?.permissao).toBe('paciente.ler')
+    expect(rotaDoModulo('/clinica/paciente/importar')?.permissao).toBe('importacao.executar')
+    expect(rotaDoModulo('/clinica/paciente/p1/vacinas')?.permissao).toBe('paciente.ler')
   })
 
   it('rota fora dos módulos não tem entrada', () => {
@@ -49,12 +49,12 @@ describe('rotaDoModulo', () => {
     ).toBe(false)
   })
 
-  it('toda tela de /veterinario e /hotel que existe no roteador tem entrada', () => {
+  it('toda tela de /clinica e /hotel que existe no roteador tem entrada', () => {
     const router = createRouter({ history: createMemoryHistory(), routes })
     const caminhos = router
       .getRoutes()
       .map((rota) => rota.path)
-      .filter((caminho) => caminho.startsWith('/veterinario/') || caminho.startsWith('/hotel/'))
+      .filter((caminho) => caminho.startsWith('/clinica/') || caminho.startsWith('/hotel/'))
 
     const semEntrada = caminhos.filter((caminho) => {
       const concreto = caminho.replace(/:[^/]+/g, 'x')
@@ -71,15 +71,15 @@ describe('rotaDoModulo', () => {
 
 describe('podeAbrirRotaDeModulo', () => {
   it('na demonstração tudo abre', () => {
-    expect(podeAbrirCaminho('/veterinario/agenda', acesso([], [], true))).toBe(true)
+    expect(podeAbrirCaminho('/clinica/agenda', acesso([], [], true))).toBe(true)
   })
 
   it('tela ainda não integrada não abre fora da demonstração, mesmo com módulo e permissão', () => {
-    expect(podeAbrirCaminho('/veterinario/agenda', acesso(['CLINICA'], ['agenda.ler']))).toBe(false)
+    expect(podeAbrirCaminho('/clinica/agenda', acesso(['CLINICA'], ['agenda.ler']))).toBe(false)
   })
 
   it('integrada: precisa do módulo e da permissão', () => {
-    const agenda = integrada('/veterinario/agenda')
+    const agenda = integrada('/clinica/agenda')
 
     expect(podeAbrirRotaDeModulo(agenda, acesso(['CLINICA'], ['agenda.ler']))).toBe(true)
     expect(podeAbrirRotaDeModulo(agenda, acesso([], ['agenda.ler']))).toBe(false)
@@ -87,7 +87,7 @@ describe('podeAbrirRotaDeModulo', () => {
   })
 
   it('o cadastro de pacientes abre com qualquer um dos dois módulos', () => {
-    const pacientes = integrada('/veterinario/pacientes')
+    const pacientes = integrada('/clinica/pacientes')
 
     expect(podeAbrirRotaDeModulo(pacientes, acesso(['HOTEL'], ['paciente.ler']))).toBe(true)
     expect(podeAbrirRotaDeModulo(pacientes, acesso([], ['paciente.ler']))).toBe(false)

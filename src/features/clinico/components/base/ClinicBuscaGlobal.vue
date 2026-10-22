@@ -163,7 +163,7 @@ const pacientesEncontrados = computed<Destino[]>(() =>
     rotulo: linha.pet.nome,
     detalhe: [linha.tutor?.nome, linha.tutor?.telefone].filter(Boolean).join(' · '),
     icone: linha.pet.especie === 'felina' ? 'ph ph-heart' : 'ph ph-user',
-    para: `/veterinario/paciente/${linha.pet.id}/historico`,
+    para: `/clinica/paciente/${linha.pet.id}/historico`,
     pet: {
       nome: linha.pet.nome,
       iniciais: linha.pet.iniciais,
@@ -269,7 +269,7 @@ function ir(destino: Destino) {
  */
 function cadastrarPaciente() {
   emit('fechar')
-  void router.push('/veterinario/paciente/novo')
+  void router.push('/clinica/paciente/novo')
 }
 
 /**

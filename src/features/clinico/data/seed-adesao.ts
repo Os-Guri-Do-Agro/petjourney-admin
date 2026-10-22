@@ -411,7 +411,7 @@ export function casosDaAdesao(): CasoDificil[] {
     ] as const
   ).map(([id, petId]) => ({
     id,
-    rota: `/veterinario/paciente/${petId}/tratamento`,
+    rota: `/clinica/paciente/${petId}/tratamento`,
     appointmentId: null,
     encounterId: null,
   }))

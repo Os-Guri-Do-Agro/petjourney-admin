@@ -62,6 +62,15 @@ export function pendenciasComValor(lista: readonly Pendencia[]) {
   return lista.filter((item): item is Pendencia & { valor: number } => (item.valor ?? 0) > 0)
 }
 
+/**
+ * A rota do contador, no endereço atual do portal. O módulo da clínica saiu de `/veterinario` para
+ * `/clinica`, e a API registrou os contadores com o endereço antigo (`docs/integracao-portal-parceiro/
+ * lacunas-da-api.md`, L7): sem esta tradução, o selo não acharia a tela no menu.
+ */
+export function rotaNoPortal(rota: string) {
+  return rota.replace(/^\/veterinario(?=\/|$)/, '/clinica')
+}
+
 /** Os contadores somados por rota: dois números que abrem a mesma tela viram um selo só. */
 export function selosPorRota(lista: readonly Pendencia[]): Map<string, SeloDaRota> {
   const selos = new Map<string, SeloDaRota>()
@@ -113,7 +122,7 @@ async function apurar() {
     /* A resposta chegou depois de uma troca de parceiro: é de quem já não está na tela. */
     if (parceiroAtual() !== parceiroId) return
 
-    lista.value = resposta
+    lista.value = resposta.map((item) => ({ ...item, rota: rotaNoPortal(item.rota) }))
     conferidoPara.value = parceiroId
     /* Contador que falhou no servidor vem com `valor: null`; os outros valem. */
     situacao.value = resposta.some((item) => item.valor === null) ? 'parcial' : 'ok'

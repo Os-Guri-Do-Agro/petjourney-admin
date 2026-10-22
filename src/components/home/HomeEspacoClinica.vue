@@ -102,7 +102,7 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
       rotulo: t('inicio.espacos.clinica.recepcao'),
       meta: nomes(naRecepcao.value),
       tom: recepcao > 0 ? 'atencao' : 'apagado',
-      to: '/veterinario/meu-dia',
+      to: '/clinica/meu-dia',
     },
     {
       id: 'consulta',
@@ -110,7 +110,7 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
       rotulo: t('inicio.espacos.clinica.consulta'),
       meta: nomes(emConsulta.value),
       tom: consulta > 0 ? 'lugar' : 'apagado',
-      to: '/veterinario/meu-dia',
+      to: '/clinica/meu-dia',
     },
     {
       id: 'pedidos',
@@ -120,7 +120,7 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
         .map((item) => t(`inicio.pauta.parte.${item.chave}`, { total: item.total }, item.total))
         .join(' · '),
       tom: esperando > 0 ? pedidos.value.tom : 'apagado',
-      to: '/veterinario/pedidos',
+      to: '/clinica/pedidos',
     },
     {
       id: 'aSeguir',
@@ -130,7 +130,7 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
         ? t('inicio.espacos.clinica.proximo', { hora: horaDaParede(proximo.inicio) })
         : '',
       tom: porVir > 0 ? 'neutro' : 'apagado',
-      to: '/veterinario/agenda',
+      to: '/clinica/agenda',
     },
   ]
 })
@@ -170,7 +170,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     return {
       rotulo: t('inicio.passo.pedidosAtrasados', { total: atrasados }, atrasados),
       icone: 'ph ph-clock-countdown',
-      to: '/veterinario/pedidos',
+      to: '/clinica/pedidos',
     }
   }
 
@@ -180,7 +180,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     return {
       rotulo: t('inicio.passo.recepcao', { pet: esperando.petNome }),
       icone: 'ph ph-door-open',
-      to: '/veterinario/meu-dia',
+      to: '/clinica/meu-dia',
     }
   }
 
@@ -200,7 +200,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     return {
       rotulo: t('inicio.passo.pedidos', { total }, total),
       icone: 'ph ph-calendar-plus',
-      to: '/veterinario/pedidos',
+      to: '/clinica/pedidos',
     }
   }
 
@@ -213,7 +213,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
         hora: horaDaParede(proximo.inicio),
       }),
       icone: 'ph ph-calendar-dots',
-      to: { path: '/veterinario/agenda', query: { foco: proximo.id } },
+      to: { path: '/clinica/agenda', query: { foco: proximo.id } },
     }
   }
 
@@ -231,7 +231,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     :atalho="{
       rotulo: t('inicio.acoes.agenda'),
       icone: 'ph ph-calendar-dots',
-      to: '/veterinario/agenda',
+      to: '/clinica/agenda',
     }"
     :andamento="andamento"
     :passo="passo"

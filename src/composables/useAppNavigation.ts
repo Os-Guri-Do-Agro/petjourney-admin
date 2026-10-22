@@ -163,18 +163,18 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     id: 'agora',
     key: 'clinico.navegacao.agora',
     rotas: [
-      { key: 'clinico.meuDia.titulo', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
-      { key: 'clinico.agenda.titulo', to: '/veterinario/agenda', icon: 'ph ph-calendar-blank' },
+      { key: 'clinico.meuDia.titulo', to: '/clinica/meu-dia', icon: 'ph ph-sun' },
+      { key: 'clinico.agenda.titulo', to: '/clinica/agenda', icon: 'ph ph-calendar-blank' },
       /*
        * Logo depois da agenda: o pedido do app e do link é horário esperando alguém da recepção
        * dizer sim — trabalho de agora, com prazo prometido a quem pediu.
        */
       {
         key: 'clinico.pedidos.titulo',
-        to: '/veterinario/pedidos',
+        to: '/clinica/pedidos',
         icon: 'ph ph-calendar-plus',
       },
-      { key: 'clinico.fila.titulo', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
+      { key: 'clinico.fila.titulo', to: '/clinica/fila', icon: 'ph ph-hourglass' },
     ],
   },
   {
@@ -188,29 +188,29 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     rotas: [
       {
         key: 'clinico.atendimentos.titulo',
-        to: '/veterinario/atendimentos',
+        to: '/clinica/atendimentos',
         icon: 'ph ph-note-pencil',
       },
-      { key: 'clinico.internacao.titulo', to: '/veterinario/internacao', icon: 'ph ph-building' },
+      { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
     ],
   },
   {
     id: 'pendencias',
     key: 'clinico.navegacao.pendencias',
     rotas: [
-      { key: 'clinico.atividades.titulo', to: '/veterinario/atividades', icon: 'ph ph-list-bullets' },
-      { key: 'clinico.faltas.titulo', to: '/veterinario/faltas', icon: 'ph ph-user-minus' },
+      { key: 'clinico.atividades.titulo', to: '/clinica/atividades', icon: 'ph ph-list-bullets' },
+      { key: 'clinico.faltas.titulo', to: '/clinica/faltas', icon: 'ph ph-user-minus' },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
-      { key: 'clinico.vacinas.titulo', to: '/veterinario/vacinas', icon: 'ph ph-shield' },
+      { key: 'clinico.vacinas.titulo', to: '/clinica/vacinas', icon: 'ph ph-shield' },
       /*
        * Logo abaixo de Vacinas: é a geladeira das mesmas vacinas, e o selo é o que falta comprar —
        * pendência de verdade, que cancela a consulta que a lista de chamada trouxe de volta.
        */
-      { key: 'clinico.estoque.titulo', to: '/veterinario/estoque', icon: 'ph ph-package' },
+      { key: 'clinico.estoque.titulo', to: '/clinica/estoque', icon: 'ph ph-package' },
       /* Pelo mesmo motivo: é onde mora o alerta de adesão — para quem a clínica precisa ligar. */
       {
         key: 'clinico.adesao.titulo',
-        to: '/veterinario/tratamentos',
+        to: '/clinica/tratamentos',
         icon: 'ph ph-calendar-check',
       },
     ],
@@ -218,13 +218,13 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
   {
     id: 'analise',
     key: 'clinico.navegacao.analise',
-    rotas: [{ key: 'clinico.resumo.titulo', to: '/veterinario/resumo', icon: 'ph ph-chart-bar' }],
+    rotas: [{ key: 'clinico.resumo.titulo', to: '/clinica/resumo', icon: 'ph ph-chart-bar' }],
   },
 ]
 
 const PATIENT_ROUTES = [
-  { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'ph ph-users' },
-  { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'ph ph-book-open' },
+  { key: 'clinico.pacientes.titulo', to: '/clinica/pacientes', icon: 'ph ph-users' },
+  { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
 ] as const
 
 export function useAppNavigation() {
@@ -365,28 +365,28 @@ export function useAppNavigation() {
   const contagemDaDemonstracao = computed<
     Record<string, { contagem: ContagemDePendencia; frase: string }>
   >(() => ({
-    '/veterinario/pedidos': {
+    '/clinica/pedidos': {
       contagem: pendencias.pedidos.value,
       frase: 'clinico.navegacao.selo.pedidos',
     },
-    '/veterinario/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
-    '/veterinario/internacao': {
+    '/clinica/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
+    '/clinica/internacao': {
       contagem: pendencias.internacao.value,
       frase: 'clinico.navegacao.selo.internacao',
     },
-    '/veterinario/atividades': {
+    '/clinica/atividades': {
       contagem: pendencias.atividades.value,
       frase: 'clinico.navegacao.selo.atividades',
     },
-    '/veterinario/vacinas': {
+    '/clinica/vacinas': {
       contagem: pendencias.vacinas.value,
       frase: 'clinico.navegacao.selo.vacinas',
     },
-    '/veterinario/estoque': {
+    '/clinica/estoque': {
       contagem: pendencias.estoque.value,
       frase: 'clinico.navegacao.selo.estoque',
     },
-    '/veterinario/tratamentos': {
+    '/clinica/tratamentos': {
       contagem: pendencias.tratamentos.value,
       frase: 'clinico.navegacao.selo.tratamentos',
     },
@@ -607,13 +607,13 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
   /*
    * As rotas de "Pets" precisam estar listadas aqui uma a uma.
    *
-   * Tudo em `/veterinario` que não caia neste teste vira "Clínica" no último `if`, e o bulário
+   * Tudo em `/clinica` que não caia neste teste vira "Clínica" no último `if`, e o bulário
    * — que mora na seção Pets — marcava "Clínica" no trilho enquanto o painel mostrava Pets.
    */
   if (
-    path.startsWith('/veterinario/pacientes') ||
-    path.startsWith('/veterinario/paciente/') ||
-    path.startsWith('/veterinario/bulario')
+    path.startsWith('/clinica/pacientes') ||
+    path.startsWith('/clinica/paciente/') ||
+    path.startsWith('/clinica/bulario')
   ) {
     return 'patients'
   }
@@ -622,7 +622,7 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
     return 'account'
   }
 
-  if (hasClinical && path.startsWith('/veterinario')) {
+  if (hasClinical && path.startsWith('/clinica')) {
     return 'clinical'
   }
 

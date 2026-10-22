@@ -114,7 +114,7 @@ const vazio = computed(
 // ---------------------------------------------------------------------------- o que pede ação
 
 function paraOPaciente(item: LeitoNoMapa) {
-  return `/veterinario/internacao/${item.internacao!.id}`
+  return `/clinica/internacao/${item.internacao!.id}`
 }
 
 /**
@@ -275,7 +275,7 @@ function pontoDo(item: LeitoNoMapa) {
 // ---------------------------------------------------------------------------- ações
 
 function abrir(internacaoId: string) {
-  void router.push(`/veterinario/internacao/${internacaoId}`)
+  void router.push(`/clinica/internacao/${internacaoId}`)
 }
 
 async function internarPaciente(entrada: {

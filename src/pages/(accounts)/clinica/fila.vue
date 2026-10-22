@@ -71,7 +71,7 @@ const aceite = computed(() => {
         hora: formato.hora(atendimento.inicio),
         profissional: clinico.profissional(atendimento.professionalId)?.nome ?? '',
       }),
-      rota: `/veterinario/agenda?data=${clinicClock.dateOf(atendimento.inicio)}&foco=${atendimento.id}`,
+      rota: `/clinica/agenda?data=${clinicClock.dateOf(atendimento.inicio)}&foco=${atendimento.id}`,
     }
   }
 

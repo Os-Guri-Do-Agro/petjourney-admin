@@ -136,7 +136,7 @@ async function carregar() {
 function vindoDoResumo(): boolean {
   const anterior = String(router.options.history.state.back ?? '')
 
-  return anterior.startsWith(`/veterinario/paciente/${petId.value}/resumo`)
+  return anterior.startsWith(`/clinica/paciente/${petId.value}/resumo`)
 }
 
 /**
@@ -226,14 +226,14 @@ async function registrarAto(
 }
 
 function abrirAtendimento(encounterId: string) {
-  void router.push(`/veterinario/atendimento/${encounterId}`)
+  void router.push(`/clinica/atendimento/${encounterId}`)
 }
 
 function abrirInternacao() {
   const id = internacaoAberta.value?.internacao?.id
 
   if (id) {
-    void router.push(`/veterinario/internacao/${id}`)
+    void router.push(`/clinica/internacao/${id}`)
   }
 }
 
@@ -253,7 +253,7 @@ watch(petId, carregar)
     @tentar-de-novo="carregar"
   >
     <template #voltar>
-      <RouterLink to="/veterinario/pacientes" class="voltar">
+      <RouterLink to="/clinica/pacientes" class="voltar">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.pacientes.titulo') }}
       </RouterLink>
@@ -294,7 +294,7 @@ watch(petId, carregar)
           <strong>{{ t('clinico.ficha.historico.emTrintaSegundos') }}</strong>
           {{ veredito.texto }}
         </span>
-        <RouterLink class="ui-mais" :to="`/veterinario/paciente/${pet.id}/resumo`">
+        <RouterLink class="ui-mais" :to="`/clinica/paciente/${pet.id}/resumo`">
           {{ t('clinico.resumoDoPaciente.sugestao.ver') }}
         </RouterLink>
       </p>

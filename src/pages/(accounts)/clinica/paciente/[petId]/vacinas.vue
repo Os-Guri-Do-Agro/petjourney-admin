@@ -358,7 +358,7 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
     @tentar-de-novo="carregar"
   >
     <template #voltar>
-      <RouterLink to="/veterinario/pacientes">
+      <RouterLink to="/clinica/pacientes">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.pacientes.titulo') }}
       </RouterLink>
