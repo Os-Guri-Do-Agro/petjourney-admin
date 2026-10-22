@@ -175,14 +175,17 @@ const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/equipe': 'ph ph-users-three',
   '/parceiro/profissionais': 'ph ph-stethoscope',
   '/parceiro/estabelecimento': 'ph ph-buildings',
+  '/parceiro/auditoria': 'ph ph-list-magnifying-glass',
 }
 
 /**
- * Telas do portal que moram como aba de outra: Profissionais é a segunda aba de Equipe. Pessoas são
- * os logins da empresa; Profissionais, as fichas que a agenda e o prontuário citam (E1-03).
+ * Telas do portal que moram como aba de outra: Profissionais e Auditoria são abas de Equipe. Pessoas
+ * são os logins da empresa; Profissionais, as fichas que a agenda e o prontuário citam (E1-03);
+ * Auditoria, o que cada um fez com dado clínico (E1-05).
  */
 const ABA_DE: Record<string, { pai: string; rotuloDoPai: string }> = {
   '/parceiro/profissionais': { pai: '/parceiro/equipe', rotuloDoPai: 'parceiro.equipe.pessoas' },
+  '/parceiro/auditoria': { pai: '/parceiro/equipe', rotuloDoPai: 'parceiro.equipe.pessoas' },
 }
 
 function destinosDoPortal(itens: AppNavigationItem[], t: (chave: string) => string): Destino[] {

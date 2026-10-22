@@ -2480,6 +2480,79 @@
           "coordenadas": "Popunite oba: širinu od -90 do 90 i dužinu od -180 do 180."
         }
       }
+    },
+    "auditoria": {
+      "titulo": "Revizija",
+      "resumo": "Ko je čitao, pisao, objavio ili izvezao kliničke podatke, i kada. Bez sadržaja, samo radnja.",
+      "erro": "Revizija nije mogla da se učita.",
+      "tentar": "Pokušaj ponovo",
+      "carregando": "Učitavanje revizije",
+      "mais": "Prikaži ranije događaje",
+      "emNomeDe": "u ime: {nome}",
+      "campos": "polja: {campos}",
+      "protocolo": "protokol {protocolo}",
+      "filtros": {
+        "rotulo": "Filtriraj reviziju",
+        "acao": "Radnja",
+        "todas": "Sve",
+        "pessoa": "Osoba",
+        "todos": "Svi",
+        "periodo": "Period",
+        "qualquerData": "Bilo koji datum",
+        "limpar": "Obriši filtere"
+      },
+      "vazio": {
+        "titulo": "Još ništa nije zabeleženo",
+        "texto": "Kada neko iz tima otvori, upiše, objavi ili izveze klinički podatak, radnja se pojavljuje ovde.",
+        "filtrado": "Ništa sa ovim filterima."
+      },
+      "dia": {
+        "hoje": "Danas, {data}",
+        "ontem": "Juče, {data}"
+      },
+      "ator": {
+        "suporte": "PetJourney podrška",
+        "sistema": "Sistem",
+        "semNome": "Neko ko je napustio tim",
+        "selo": {
+          "SUPORTE": "Podrška",
+          "SISTEMA": "Automatski"
+        }
+      },
+      "acao": {
+        "LER": "Čitanje",
+        "CRIAR": "Kreiranje",
+        "ALTERAR": "Izmena",
+        "FINALIZAR": "Završavanje",
+        "ANULAR": "Poništavanje",
+        "PUBLICAR": "Objavljivanje u aplikaciji",
+        "IMPRIMIR": "Štampanje",
+        "EXPORTAR": "Izvoz",
+        "LER_DADO_DO_APP": "Čitanje podataka iz aplikacije"
+      },
+      "frase": {
+        "LER": "je otvorio/la {recurso}",
+        "CRIAR": "je kreirao/la {recurso}",
+        "ALTERAR": "je izmenio/la {recurso}",
+        "FINALIZAR": "je završio/la {recurso}",
+        "ANULAR": "je poništio/la {recurso}",
+        "PUBLICAR": "je objavio/la {recurso}",
+        "IMPRIMIR": "je odštampao/la {recurso}",
+        "EXPORTAR": "je izvezao/la {recurso}",
+        "LER_DADO_DO_APP": "je otvorio/la {recurso}"
+      },
+      "recurso": {
+        "atendimento": "jedan pregled",
+        "paciente_do_parceiro": "karton pacijenta",
+        "cliente_do_parceiro": "podatke staratelja",
+        "alerta_do_paciente": "upozorenje o pacijentu",
+        "aplicacao_vacina": "primenu vakcine",
+        "consulta_do_app": "pregled za aplikaciju",
+        "vacina_do_app": "vakcinu za aplikaciju",
+        "diario_do_app": "dnevnik iz aplikacije",
+        "trilha_clinica": "reviziju",
+        "outro": "zapis ({tipo})"
+      }
     }
   },
   "settings": {

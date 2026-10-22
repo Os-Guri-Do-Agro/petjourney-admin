@@ -2480,6 +2480,79 @@
           "coordenadas": "Complete las dos: latitud de -90 a 90 y longitud de -180 a 180."
         }
       }
+    },
+    "auditoria": {
+      "titulo": "Auditoría",
+      "resumo": "Quién leyó, escribió, publicó o exportó datos clínicos, y cuándo. Sin el contenido, solo la acción.",
+      "erro": "No se pudo cargar la auditoría.",
+      "tentar": "Intentar de nuevo",
+      "carregando": "Cargando la auditoría",
+      "mais": "Ver eventos anteriores",
+      "emNomeDe": "en nombre de {nome}",
+      "campos": "campos: {campos}",
+      "protocolo": "protocolo {protocolo}",
+      "filtros": {
+        "rotulo": "Filtrar la auditoría",
+        "acao": "Acción",
+        "todas": "Todas",
+        "pessoa": "Persona",
+        "todos": "Todas",
+        "periodo": "Período",
+        "qualquerData": "Cualquier fecha",
+        "limpar": "Quitar filtros"
+      },
+      "vazio": {
+        "titulo": "Nada registrado todavía",
+        "texto": "Cuando alguien del equipo abra, escriba, publique o exporte un dato clínico, la acción aparece aquí.",
+        "filtrado": "Nada con estos filtros."
+      },
+      "dia": {
+        "hoje": "Hoy, {data}",
+        "ontem": "Ayer, {data}"
+      },
+      "ator": {
+        "suporte": "Soporte PetJourney",
+        "sistema": "El sistema",
+        "semNome": "Alguien que salió del equipo",
+        "selo": {
+          "SUPORTE": "Soporte",
+          "SISTEMA": "Automático"
+        }
+      },
+      "acao": {
+        "LER": "Lectura",
+        "CRIAR": "Creación",
+        "ALTERAR": "Modificación",
+        "FINALIZAR": "Finalización",
+        "ANULAR": "Anulación",
+        "PUBLICAR": "Publicación en la app",
+        "IMPRIMIR": "Impresión",
+        "EXPORTAR": "Exportación",
+        "LER_DADO_DO_APP": "Lectura de datos de la app"
+      },
+      "frase": {
+        "LER": "abrió {recurso}",
+        "CRIAR": "creó {recurso}",
+        "ALTERAR": "modificó {recurso}",
+        "FINALIZAR": "finalizó {recurso}",
+        "ANULAR": "anuló {recurso}",
+        "PUBLICAR": "publicó {recurso}",
+        "IMPRIMIR": "imprimió {recurso}",
+        "EXPORTAR": "exportó {recurso}",
+        "LER_DADO_DO_APP": "abrió {recurso}"
+      },
+      "recurso": {
+        "atendimento": "una atención",
+        "paciente_do_parceiro": "la ficha de un paciente",
+        "cliente_do_parceiro": "el registro de un tutor",
+        "alerta_do_paciente": "una alerta de paciente",
+        "aplicacao_vacina": "una aplicación de vacuna",
+        "consulta_do_app": "una consulta para la app",
+        "vacina_do_app": "una vacuna para la app",
+        "diario_do_app": "el diario de la app",
+        "trilha_clinica": "la auditoría",
+        "outro": "un registro ({tipo})"
+      }
     }
   },
   "settings": {

@@ -468,18 +468,26 @@ export function useAppNavigation() {
         eu.modulos.some((modulo) => modulo.podeLer || modulo.status !== null) ||
         eu.profissional)
     ) {
-      items.push(
-        {
-          label: t('parceiro.profissionais.titulo'),
-          to: '/parceiro/profissionais',
-          icon: 'ph ph-stethoscope',
-        },
-        {
-          label: t('parceiro.estabelecimento.titulo'),
-          to: '/parceiro/estabelecimento',
-          icon: 'ph ph-buildings',
-        },
-      )
+      items.push({
+        label: t('parceiro.profissionais.titulo'),
+        to: '/parceiro/profissionais',
+        icon: 'ph ph-stethoscope',
+      })
+
+      /* A trilha de auditoria (E1-05) é de quem responde pela casa: dono e gestão. */
+      if (parceiroStore.temPermissao('auditoria.ler')) {
+        items.push({
+          label: t('parceiro.auditoria.titulo'),
+          to: '/parceiro/auditoria',
+          icon: 'ph ph-list-magnifying-glass',
+        })
+      }
+
+      items.push({
+        label: t('parceiro.estabelecimento.titulo'),
+        to: '/parceiro/estabelecimento',
+        icon: 'ph ph-buildings',
+      })
     }
 
     if (parceiroStore.cadastroSuspenso) {

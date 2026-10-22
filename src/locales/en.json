@@ -2480,6 +2480,79 @@
           "coordenadas": "Fill in both: latitude from -90 to 90 and longitude from -180 to 180."
         }
       }
+    },
+    "auditoria": {
+      "titulo": "Audit log",
+      "resumo": "Who read, wrote, published or exported clinical data, and when. No content, only the action.",
+      "erro": "Couldn't load the audit log.",
+      "tentar": "Try again",
+      "carregando": "Loading the audit log",
+      "mais": "Show earlier events",
+      "emNomeDe": "on behalf of {nome}",
+      "campos": "fields: {campos}",
+      "protocolo": "protocol {protocolo}",
+      "filtros": {
+        "rotulo": "Filter the audit log",
+        "acao": "Action",
+        "todas": "All",
+        "pessoa": "Person",
+        "todos": "Everyone",
+        "periodo": "Period",
+        "qualquerData": "Any date",
+        "limpar": "Clear filters"
+      },
+      "vazio": {
+        "titulo": "Nothing logged yet",
+        "texto": "When someone on the team opens, writes, publishes or exports clinical data, the action shows up here.",
+        "filtrado": "Nothing matches these filters."
+      },
+      "dia": {
+        "hoje": "Today, {data}",
+        "ontem": "Yesterday, {data}"
+      },
+      "ator": {
+        "suporte": "PetJourney Support",
+        "sistema": "The system",
+        "semNome": "Someone who left the team",
+        "selo": {
+          "SUPORTE": "Support",
+          "SISTEMA": "Automatic"
+        }
+      },
+      "acao": {
+        "LER": "Viewing",
+        "CRIAR": "Creation",
+        "ALTERAR": "Change",
+        "FINALIZAR": "Finalization",
+        "ANULAR": "Voiding",
+        "PUBLICAR": "Publishing to the app",
+        "IMPRIMIR": "Printing",
+        "EXPORTAR": "Export",
+        "LER_DADO_DO_APP": "Viewing app data"
+      },
+      "frase": {
+        "LER": "opened {recurso}",
+        "CRIAR": "created {recurso}",
+        "ALTERAR": "changed {recurso}",
+        "FINALIZAR": "finalized {recurso}",
+        "ANULAR": "voided {recurso}",
+        "PUBLICAR": "published {recurso}",
+        "IMPRIMIR": "printed {recurso}",
+        "EXPORTAR": "exported {recurso}",
+        "LER_DADO_DO_APP": "opened {recurso}"
+      },
+      "recurso": {
+        "atendimento": "a visit",
+        "paciente_do_parceiro": "a patient's record",
+        "cliente_do_parceiro": "a pet parent's record",
+        "alerta_do_paciente": "a patient alert",
+        "aplicacao_vacina": "a vaccine administration",
+        "consulta_do_app": "a visit for the app",
+        "vacina_do_app": "a vaccine for the app",
+        "diario_do_app": "the app diary",
+        "trilha_clinica": "the audit log",
+        "outro": "a record ({tipo})"
+      }
     }
   },
   "settings": {

@@ -2480,6 +2480,79 @@
           "coordenadas": "املأ الاثنين: خط العرض من -90 إلى 90 وخط الطول من -180 إلى 180."
         }
       }
+    },
+    "auditoria": {
+      "titulo": "سجل التدقيق",
+      "resumo": "من قرأ أو كتب أو نشر أو صدّر بيانات سريرية، ومتى. دون المحتوى، الإجراء فقط.",
+      "erro": "تعذّر تحميل سجل التدقيق.",
+      "tentar": "حاول مرة أخرى",
+      "carregando": "جارٍ تحميل سجل التدقيق",
+      "mais": "عرض الأحداث السابقة",
+      "emNomeDe": "نيابةً عن {nome}",
+      "campos": "الحقول: {campos}",
+      "protocolo": "البروتوكول {protocolo}",
+      "filtros": {
+        "rotulo": "تصفية سجل التدقيق",
+        "acao": "الإجراء",
+        "todas": "الكل",
+        "pessoa": "الشخص",
+        "todos": "الجميع",
+        "periodo": "الفترة",
+        "qualquerData": "أي تاريخ",
+        "limpar": "مسح عوامل التصفية"
+      },
+      "vazio": {
+        "titulo": "لا شيء مسجّل بعد",
+        "texto": "عندما يفتح أحد أعضاء الفريق بيانات سريرية أو يكتبها أو ينشرها أو يصدّرها، يظهر الإجراء هنا.",
+        "filtrado": "لا نتائج بهذه التصفية."
+      },
+      "dia": {
+        "hoje": "اليوم، {data}",
+        "ontem": "أمس، {data}"
+      },
+      "ator": {
+        "suporte": "دعم PetJourney",
+        "sistema": "النظام",
+        "semNome": "شخص غادر الفريق",
+        "selo": {
+          "SUPORTE": "الدعم",
+          "SISTEMA": "تلقائي"
+        }
+      },
+      "acao": {
+        "LER": "قراءة",
+        "CRIAR": "إنشاء",
+        "ALTERAR": "تعديل",
+        "FINALIZAR": "إنهاء",
+        "ANULAR": "إلغاء",
+        "PUBLICAR": "نشر في التطبيق",
+        "IMPRIMIR": "طباعة",
+        "EXPORTAR": "تصدير",
+        "LER_DADO_DO_APP": "قراءة بيانات التطبيق"
+      },
+      "frase": {
+        "LER": "فتح {recurso}",
+        "CRIAR": "أنشأ {recurso}",
+        "ALTERAR": "عدّل {recurso}",
+        "FINALIZAR": "أنهى {recurso}",
+        "ANULAR": "ألغى {recurso}",
+        "PUBLICAR": "نشر {recurso}",
+        "IMPRIMIR": "طبع {recurso}",
+        "EXPORTAR": "صدّر {recurso}",
+        "LER_DADO_DO_APP": "فتح {recurso}"
+      },
+      "recurso": {
+        "atendimento": "زيارة",
+        "paciente_do_parceiro": "ملف مريض",
+        "cliente_do_parceiro": "بيانات أحد المربين",
+        "alerta_do_paciente": "تنبيهًا لمريض",
+        "aplicacao_vacina": "إعطاء لقاح",
+        "consulta_do_app": "زيارة للتطبيق",
+        "vacina_do_app": "لقاحًا للتطبيق",
+        "diario_do_app": "يوميات التطبيق",
+        "trilha_clinica": "سجل التدقيق",
+        "outro": "سجلًا ({tipo})"
+      }
     }
   },
   "settings": {
