@@ -1829,7 +1829,7 @@
       },
       "ciclo": {
         "title": "Payment cycle",
-        "body": "Minimum payout of R$ 50.00. Cut-off on the 27th and indicative settlement by the 5th. Track it on the Payouts tab."
+        "body": "Minimum payout of {valor}. Cut-off on the 27th and indicative settlement by the 5th. Track it on the Payouts tab."
       },
       "footerPrefix": "Questions?",
       "footerOrWhatsapp": "or WhatsApp"
@@ -1840,7 +1840,7 @@
       "pixSaveError": "Error saving PIX",
       "tryAgain": "Please try again.",
       "invalidValue": "Invalid amount",
-      "minWithdraw": "The minimum payout is R$ 50.00.",
+      "minWithdraw": "The minimum payout is {valor}.",
       "insufficient": "Insufficient balance",
       "maxWithdraw": "The maximum withdrawable now is {valor}.",
       "pixRequired": "PIX required",

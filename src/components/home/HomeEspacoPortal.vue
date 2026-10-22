@@ -5,7 +5,8 @@
  * ## Os números
  *
  * - **liberado** — o que já saiu da janela de segurança. A frase embaixo diz a situação real do
- *   saque (`regras-de-saque`): pronto, falta a chave PIX, abaixo do mínimo, bloqueado. "Liberado"
+ *   saque, decidida pela API (`capacidadeDeSaque`): pronto, falta a chave PIX, abaixo do mínimo,
+ *   bloqueado. "Liberado"
  *   não é "dá para sacar", e o número não promete o que a tela de saque recusaria.
  * - **na janela de segurança** — o retido, só quando há; leva ao extrato.
  * - **leituras do QR em 7 dias** — quantas pessoas apontaram a câmera para o código, com o total.
@@ -29,10 +30,9 @@ import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { Espaco } from '@/navegacao/espacos'
 import { getCarteira } from '@/service/parceiro/parceiro-portal-service'
 import {
-  capacidadeDeSaque,
-  MIN_SAQUE_CENTAVOS,
+  capacidadeDaCarteira,
   type CapacidadeDeSaque,
-} from '@/service/parceiro/regras-de-saque'
+} from '@/service/parceiro/capacidade-de-saque'
 import type { Carteira, StatusModoParceiro } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
 
@@ -108,9 +108,9 @@ const retidoCentavos = computed(() => {
   return Math.max(0, carteira.value.saldoTotalCentavos - carteira.value.saldoSacavelCentavos)
 })
 
-/** O que impede (ou não) o saque agora — a mesma régua da tela de saque. */
+/** O que impede (ou não) o saque agora, como a API decidiu para quem está logado. */
 const capacidade = computed<CapacidadeDeSaque | null>(() =>
-  carteira.value ? capacidadeDeSaque(carteira.value, store.isDono) : null,
+  carteira.value ? capacidadeDaCarteira(carteira.value) : null,
 )
 
 const TOM_DA_CAPACIDADE: Record<CapacidadeDeSaque, TomDoNumero> = {
@@ -127,7 +127,9 @@ const TOM_DA_CAPACIDADE: Record<CapacidadeDeSaque, TomDoNumero> = {
 function fraseDaCapacidade(atual: CapacidadeDeSaque) {
   switch (atual) {
     case 'abaixoDoMinimo':
-      return t('inicio.saldo.capacidade.abaixoDoMinimo', { minimo: quantia(MIN_SAQUE_CENTAVOS) })
+      return t('inicio.saldo.capacidade.abaixoDoMinimo', {
+        minimo: quantia(carteira.value?.saqueMinimoCentavos ?? 0),
+      })
     case 'tudoRetido':
     case 'semSaldo':
       return ''

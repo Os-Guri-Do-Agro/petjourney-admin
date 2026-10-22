@@ -1,3 +1,5 @@
+import type { CarteiraPortalResponseDto } from '../contrato/openapi'
+
 export type StatusAuditoriaParceiro = 'PENDENTE' | 'APROVADO' | 'REJEITADO' | 'SUSPENSO'
 
 export type PapelParceiro = 'DONO' | 'OPERADOR'
@@ -196,13 +198,11 @@ export type ValidarCupomPayload = {
   canal: CanalResgate
 }
 
-export type Carteira = {
-  saldoTotalCentavos: number
-  saldoSacavelCentavos: number
-  chavePix: string | null
-  totalSacadoCentavos: number
-  bloqueadoParaSaque: boolean
-}
+/**
+ * A carteira como a API entrega, com `capacidadeDeSaque` e `saqueMinimoCentavos` já decididos
+ * (E0-02). Para OPERADOR a `chavePix` vem mascarada (`*******8901`).
+ */
+export type Carteira = CarteiraPortalResponseDto
 
 export type TransacaoCarteira = {
   id: string

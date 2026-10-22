@@ -27,10 +27,9 @@ import {
   updateCarteiraPix,
 } from '@/service/parceiro/parceiro-portal-service'
 import {
-  capacidadeDeSaque,
-  MIN_SAQUE_CENTAVOS,
+  capacidadeDaCarteira,
   type CapacidadeDeSaque,
-} from '@/service/parceiro/regras-de-saque'
+} from '@/service/parceiro/capacidade-de-saque'
 import type { Carteira } from '@/service/parceiro/types'
 import {
   formatCentavosToBrl,
@@ -43,6 +42,8 @@ export type EstadoDaCarteira = {
   saldoSacavelCentavos: number
   saldoTotalCentavos: number
   capacidade: CapacidadeDeSaque | null
+  /** O mínimo que a API aceita no saque; nulo enquanto a carteira não chegou. */
+  saqueMinimoCentavos: number | null
   ehDono: boolean
 }
 
@@ -79,13 +80,11 @@ const requestingSaque = ref(false)
 const saqueAberto = ref(false)
 const pixAberto = ref(false)
 
-/** A mesma regra que a visão geral usa para dizer se dá para sacar — ver `regras-de-saque`. */
-const minSaqueCentavos = MIN_SAQUE_CENTAVOS
+/** O mínimo vem da carteira: é o mesmo número que o POST de saque confere. */
+const minSaqueCentavos = computed(() => carteira.value?.saqueMinimoCentavos ?? 0)
 const comissaoIndicacaoEnabled = import.meta.env.VITE_COMISSAO_INDICACAO_ENABLED !== 'false'
 
-const capacidade = computed(() =>
-  carteira.value ? capacidadeDeSaque(carteira.value, store.isDono) : null,
-)
+const capacidade = computed(() => (carteira.value ? capacidadeDaCarteira(carteira.value) : null))
 
 /**
  * A chave na linha de fatos, com o meio escondido: "089…560" diz qual é a chave para quem a
@@ -152,6 +151,7 @@ watch(
     saldoSacavelCentavos: carteira.value?.saldoSacavelCentavos ?? 0,
     saldoTotalCentavos: carteira.value?.saldoTotalCentavos ?? 0,
     capacidade: capacidade.value,
+    saqueMinimoCentavos: carteira.value?.saqueMinimoCentavos ?? null,
     ehDono: store.isDono,
   }),
   (estado) => emit('estado', estado),
@@ -247,11 +247,11 @@ async function savePix() {
 async function requestWithdraw() {
   const centavos = parseBrlToCentavos(valorSaque.value)
 
-  if (centavos == null || centavos < minSaqueCentavos) {
+  if (centavos == null || centavos < minSaqueCentavos.value) {
     toast.add({
       severity: 'warn',
       summary: t('carteira.toast.invalidValue'),
-      detail: t('carteira.toast.minWithdraw'),
+      detail: t('carteira.toast.minWithdraw', { valor: formatBrl(minSaqueCentavos.value) }),
       life: 4000,
     })
     return

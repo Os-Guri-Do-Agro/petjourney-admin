@@ -1829,7 +1829,7 @@
       },
       "ciclo": {
         "title": "Ciklus isplate",
-        "body": "Minimalna isplata je R$ 50,00. Presek je 27. u mesecu, a okvirna isplata do 5. u mesecu. Status pratite na kartici „Isplate“."
+        "body": "Minimalna isplata je {valor}. Presek je 27. u mesecu, a okvirna isplata do 5. u mesecu. Status pratite na kartici „Isplate“."
       },
       "footerPrefix": "Imate pitanja?",
       "footerOrWhatsapp": "ili WhatsApp"
@@ -1840,7 +1840,7 @@
       "pixSaveError": "Greška pri čuvanju PIX ključa",
       "tryAgain": "Pokušajte ponovo.",
       "invalidValue": "Nevažeći iznos",
-      "minWithdraw": "Minimalna isplata je R$ 50,00.",
+      "minWithdraw": "Minimalna isplata je {valor}.",
       "insufficient": "Nedovoljno stanje",
       "maxWithdraw": "Maksimalni iznos za isplatu trenutno je {valor}.",
       "pixRequired": "PIX je obavezan",
