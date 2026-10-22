@@ -80,6 +80,48 @@ describe('apiFetch', () => {
     })
   })
 
+  it('expõe o codigo das rotas novas e o resto do corpo de erro', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(
+        JSON.stringify({
+          statusCode: 400,
+          message: 'Faltam dados para publicar',
+          codigo: 'ESTABELECIMENTO_INCOMPLETO',
+          faltando: ['nomePublico', 'telefone'],
+          timestamp: '2026-10-22T12:00:00.000Z',
+          path: '/parceiro/portal/estabelecimento/publicar',
+        }),
+        { status: 400, headers: JSON_HEADERS },
+      ),
+    )
+
+    const error = await apiFetch('/parceiro/portal/estabelecimento/publicar', {
+      method: 'POST',
+    }).catch((reason: unknown) => reason)
+
+    expect(error).toMatchObject({
+      statusCode: 400,
+      codigo: 'ESTABELECIMENTO_INCOMPLETO',
+      detalhes: { faltando: ['nomePublico', 'telefone'] },
+    })
+    expect((error as { detalhes: object }).detalhes).not.toHaveProperty('timestamp')
+  })
+
+  it('erro sem codigo (rotas antigas) fica sem codigo e sem detalhes', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(JSON.stringify({ statusCode: 404, message: 'Não encontrado' }), {
+        status: 404,
+        headers: JSON_HEADERS,
+      }),
+    )
+
+    const error = await apiFetch('/parceiro/portal/saques/x').catch((reason: unknown) => reason)
+
+    expect(error).toMatchObject({ statusCode: 404, codigo: undefined, detalhes: {} })
+  })
+
   it('não tenta parsear corpo de erro quando o gateway devolve HTML', async () => {
     const { apiFetch } = await loadApi('https://api.exemplo.test')
     mockFetch(new Response('<html>502 Bad Gateway</html>', { status: 502, headers: HTML_HEADERS }))
