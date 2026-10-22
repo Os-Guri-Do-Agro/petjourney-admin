@@ -237,6 +237,7 @@ function abaDoItem(item: AppNavigationItem, rotulo: string): Aba {
 
 function destinoDe(id: string, rotulo: string, icone: string, abas: Aba[], prefixos: string[] = []) {
   const selo = somaDosSelos(abas)
+  const comSelo = abas.filter((aba) => aba.selo)
 
   return {
     id,
@@ -247,7 +248,8 @@ function destinoDe(id: string, rotulo: string, icone: string, abas: Aba[], prefi
     prefixos,
     selo,
     tom: selo ? tomMaisGrave(abas.map((aba) => (aba.selo ? aba.tom : undefined))) : undefined,
-    tituloDoSelo: abas.length === 1 ? abas[0]?.tituloDoSelo : undefined,
+    /* Com uma aba só de selo, a frase dela explica o total inteiro; com mais de uma, não. */
+    tituloDoSelo: comSelo.length === 1 ? comSelo[0]?.tituloDoSelo : undefined,
     bloqueado: abas.every((aba) => aba.bloqueado) || undefined,
   } satisfies Destino
 }

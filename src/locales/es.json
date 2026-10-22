@@ -424,6 +424,19 @@
     },
     "demonstracao": {
       "rotulo": "Demostración (datos locales)"
+    },
+    "avisos": {
+      "titulo": "Avisos",
+      "rotuloComNaoLidas": "Avisos, {total} sin leer | Avisos, {total} sin leer",
+      "de": "Los avisos de {parceiro}",
+      "marcarLidos": "Marcar como leídos",
+      "carregando": "Cargando los avisos",
+      "erro": "No se pudieron cargar los avisos.",
+      "tentar": "Intentar de nuevo",
+      "vazioTitulo": "Ningún aviso por aquí",
+      "vazio": "Cuando algo aquí requiera su atención, como un módulo por vencer, el aviso aparece en esta lista.",
+      "naoLido": "Sin leer",
+      "mais": "Ver avisos anteriores"
     }
   },
   "frame": {
@@ -678,7 +691,8 @@
       "emDia": "Todo al día por aquí.",
       "em": {
         "clinica": "{total} en la Clínica",
-        "hotel": "{total} en el Hotel"
+        "hotel": "{total} en el Hotel",
+        "portal": "{total} en el Portal"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -8592,5 +8606,13 @@
   },
   "captcha": {
     "erro": "No se pudo cargar la verificación de seguridad. Recargue la página e intente de nuevo."
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} invitación esperando respuesta | {total} invitaciones esperando respuesta",
+      "acessosTemporariosAtivos": "{total} acceso temporal activo | {total} accesos temporales activos",
+      "agendamentosSemConfirmacao": "{total} cita sin confirmar | {total} citas sin confirmar",
+      "outra": "{total} pendiente | {total} pendientes"
+    }
   }
 }

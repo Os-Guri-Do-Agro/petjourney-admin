@@ -247,7 +247,9 @@ onUnmounted(() => {
 
       <HomeModulos />
 
-      <HomePauta v-if="temModulos" />
+      <!-- A pauta decide sozinha se aparece: na demonstração, com Clínica ou Hotel; fora, com o
+           que o servidor devolver de pendência. -->
+      <HomePauta />
 
       <div
         class="calma"

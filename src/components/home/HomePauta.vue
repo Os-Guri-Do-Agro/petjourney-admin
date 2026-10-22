@@ -60,6 +60,7 @@ const total = computed(() => modulos.value.reduce((soma, modulo) => soma + modul
 const ICONE_DO_ESPACO: Record<ModuloDaPauta['id'], string> = {
   clinica: 'ph ph-stethoscope',
   hotel: 'ph ph-bed',
+  portal: 'ph ph-storefront',
 }
 
 /** A linha do espaço no formato da lista do sistema: a tela aonde ela leva vai junto, traduzida. */
@@ -70,7 +71,7 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
     frase: linha.frase,
     detalhe: linha.detalhe,
     tom: linha.tom,
-    onde: t(`inicio.pauta.onde.${linha.id}`),
+    onde: linha.onde ?? t(`inicio.pauta.onde.${linha.id}`),
   }))
 }
 </script>

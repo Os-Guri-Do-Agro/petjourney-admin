@@ -424,6 +424,19 @@
     },
     "demonstracao": {
       "rotulo": "Demo (local data)"
+    },
+    "avisos": {
+      "titulo": "Notifications",
+      "rotuloComNaoLidas": "Notifications, {total} unread | Notifications, {total} unread",
+      "de": "Notifications for {parceiro}",
+      "marcarLidos": "Mark as read",
+      "carregando": "Loading notifications",
+      "erro": "Couldn't load the notifications.",
+      "tentar": "Try again",
+      "vazioTitulo": "No notifications yet",
+      "vazio": "When something here needs your attention, such as a module about to expire, it shows up in this list.",
+      "naoLido": "Unread",
+      "mais": "Show earlier notifications"
     }
   },
   "frame": {
@@ -678,7 +691,8 @@
       "emDia": "All caught up here.",
       "em": {
         "clinica": "{total} in the Clinic",
-        "hotel": "{total} in the Hotel"
+        "hotel": "{total} in the Hotel",
+        "portal": "{total} in the Portal"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -8592,5 +8606,13 @@
   },
   "captcha": {
     "erro": "The security check did not load. Reload the page and try again."
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} invitation awaiting a reply | {total} invitations awaiting a reply",
+      "acessosTemporariosAtivos": "{total} temporary access active | {total} temporary accesses active",
+      "agendamentosSemConfirmacao": "{total} appointment not confirmed | {total} appointments not confirmed",
+      "outra": "{total} item to handle | {total} items to handle"
+    }
   }
 }

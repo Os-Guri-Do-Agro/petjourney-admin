@@ -424,6 +424,19 @@
     },
     "demonstracao": {
       "rotulo": "Demonstracija (lokalni podaci)"
+    },
+    "avisos": {
+      "titulo": "Obaveštenja",
+      "rotuloComNaoLidas": "Obaveštenja, {total} nepročitano | Obaveštenja, {total} nepročitana | Obaveštenja, {total} nepročitanih",
+      "de": "Obaveštenja za {parceiro}",
+      "marcarLidos": "Označi kao pročitano",
+      "carregando": "Učitavanje obaveštenja",
+      "erro": "Obaveštenja nisu mogla da se učitaju.",
+      "tentar": "Pokušaj ponovo",
+      "vazioTitulo": "Još nema obaveštenja",
+      "vazio": "Kada nešto ovde zatraži vašu pažnju, na primer modul kome uskoro ističe rok, obaveštenje se pojavljuje na ovoj listi.",
+      "naoLido": "Nepročitano",
+      "mais": "Prikaži ranija obaveštenja"
     }
   },
   "frame": {
@@ -678,7 +691,8 @@
       "emDia": "Ovde je sve ažurno.",
       "em": {
         "clinica": "{total} u Klinici",
-        "hotel": "{total} u Hotelu"
+        "hotel": "{total} u Hotelu",
+        "portal": "{total} u Portalu"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -8592,5 +8606,13 @@
   },
   "captcha": {
     "erro": "Bezbednosna provera nije učitana. Osvežite stranicu i pokušajte ponovo."
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} pozivnica čeka odgovor | {total} pozivnice čekaju odgovor | {total} pozivnica čeka odgovor",
+      "acessosTemporariosAtivos": "{total} privremeni pristup je aktivan | {total} privremena pristupa su aktivna | {total} privremenih pristupa je aktivno",
+      "agendamentosSemConfirmacao": "{total} termin nije potvrđen | {total} termina nisu potvrđena | {total} termina nije potvrđeno",
+      "outra": "{total} stavka na čekanju | {total} stavke na čekanju | {total} stavki na čekanju"
+    }
   }
 }

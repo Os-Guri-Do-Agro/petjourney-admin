@@ -88,6 +88,31 @@ describe('montarEspacos', () => {
 
     expect(semHotel.some((espaco) => espaco.id === 'hotel')).toBe(false)
   })
+
+  it('dá ao destino a frase do selo quando só uma aba tem selo', () => {
+    const comEquipe: AppNavigationSection[] = [
+      {
+        ...secoes[0]!,
+        items: [
+          item('/parceiro/equipe', {
+            badge: 1,
+            badgeTom: 'neutro',
+            badgeTitulo: '1 convite esperando resposta',
+          }),
+          item('/parceiro/profissionais'),
+        ],
+      },
+    ]
+    const equipe = montarEspacos(comEquipe, t)[0]!.destinos.find(
+      (destino) => destino.id === '/parceiro/equipe',
+    )!
+
+    expect(equipe.abas).toHaveLength(2)
+    expect(equipe.tituloDoSelo).toBe('1 convite esperando resposta')
+
+    const agenda = espacos[0]!.destinos.find((destino) => destino.id === 'agenda')!
+    expect(agenda.tituloDoSelo).toBeUndefined()
+  })
 })
 
 describe('localizar', () => {

@@ -4,9 +4,11 @@ import { useI18n } from 'vue-i18n'
 import {
   useClinicoPendencias,
   type ContagemDePendencia,
+  type TomDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
 import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
 import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
+import { usePendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { useParceiroStore } from '@/stores/parceiro'
 
 export type AppNavigationItem = {
@@ -226,7 +228,7 @@ const PATIENT_ROUTES = [
 ] as const
 
 export function useAppNavigation() {
-  const { t, locale } = useI18n()
+  const { t, te, locale } = useI18n()
   const parceiroStore = useParceiroStore()
 
   /**
@@ -294,6 +296,31 @@ export function useAppNavigation() {
   const hotelNaDemonstracao = computed(() => demonstracao.value && hasHotelProfile.value)
 
   /**
+   * Os contadores do servidor (`GET /parceiro/portal/pendencias`, E1-06), fora da demonstração. A
+   * API já filtra pelo que a conta pode ver; o portal só omite o zero.
+   */
+  const pendenciasDoPortal = usePendenciasDoPortal(
+    () =>
+      !demonstracao.value &&
+      parceiroStore.loadState === 'ready' &&
+      !parceiroStore.semAcessoParceiro &&
+      !parceiroStore.cadastroSuspenso,
+  )
+
+  /**
+   * A frase de um contador do servidor: "2 convites esperando resposta". A `chave` é a do contador;
+   * um contador que a API registrar antes de o portal ganhar a frase dele cai na genérica, em vez
+   * de mostrar o nome cru.
+   */
+  function fraseDaPendencia(chave: string, total: number) {
+    const caminho = te(`pendencias.contador.${chave}`)
+      ? `pendencias.contador.${chave}`
+      : 'pendencias.contador.outra'
+
+    return t(caminho, { total }, total)
+  }
+
+  /**
    * Contadores por rota, com a frase que explica o número.
    *
    * A frase é por rota e não uma só para todas: "3" ao lado de Fila e "3" ao lado de Vacinas
@@ -303,8 +330,40 @@ export function useAppNavigation() {
    *
    * Rota sem entrada aqui simplesmente não ganha selo.
    */
-  const contagemPorRota = computed<
-    Record<string, { contagem: ContagemDePendencia; frase: string } | undefined>
+  const seloPorRota = computed<Map<string, { total: number; tom: TomDePendencia; titulo: string }>>(
+    () => {
+      const selos = new Map<string, { total: number; tom: TomDePendencia; titulo: string }>()
+
+      if (!demonstracao.value) {
+        for (const [rota, selo] of pendenciasDoPortal.selos.value) {
+          selos.set(rota, {
+            total: selo.total,
+            tom: selo.tom,
+            /* O separador não é traduzido porque não é texto. */
+            titulo: selo.partes.map((parte) => fraseDaPendencia(parte.chave, parte.total)).join(' · '),
+          })
+        }
+
+        return selos
+      }
+
+      for (const [rota, { contagem, frase }] of Object.entries(contagemDaDemonstracao.value)) {
+        if (contagem.total > 0) {
+          selos.set(rota, {
+            total: contagem.total,
+            tom: contagem.tom,
+            titulo: t(frase, { total: contagem.total }, contagem.total),
+          })
+        }
+      }
+
+      return selos
+    },
+  )
+
+  /** Os contadores sobre os dados locais, na demonstração. */
+  const contagemDaDemonstracao = computed<
+    Record<string, { contagem: ContagemDePendencia; frase: string }>
   >(() => ({
     '/veterinario/pedidos': {
       contagem: pendencias.pedidos.value,
@@ -345,18 +404,17 @@ export function useAppNavigation() {
     },
   }))
 
+  /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
+  function comSelo(item: AppNavigationItem): AppNavigationItem {
+    const selo = seloPorRota.value.get(item.to)
+
+    return selo
+      ? { ...item, badge: selo.total, badgeTom: selo.tom, badgeTitulo: selo.titulo }
+      : item
+  }
+
   function decorarRota(rota: { key: string; to: string; icon: string }): AppNavigationItem {
-    const selo = contagemPorRota.value[rota.to]
-    const item: AppNavigationItem = { label: t(rota.key), to: rota.to, icon: rota.icon }
-
-    /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
-    if (selo && selo.contagem.total > 0) {
-      item.badge = selo.contagem.total
-      item.badgeTom = selo.contagem.tom
-      item.badgeTitulo = t(selo.frase, { total: selo.contagem.total }, selo.contagem.total)
-    }
-
-    return item
+    return comSelo({ label: t(rota.key), to: rota.to, icon: rota.icon })
   }
 
   const clinicalBlocos = computed<AppNavigationBloco[]>(() => {
@@ -372,11 +430,7 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map((rota) => ({
-      label: t(rota.key),
-      to: rota.to,
-      icon: rota.icon,
-    }))
+    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map(decorarRota)
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {
@@ -425,7 +479,7 @@ export function useAppNavigation() {
       return items.map((item) => ({ ...item, locked: true }))
     }
 
-    return items
+    return items.map(comSelo)
   })
 
   /** A visão geral não é seção: é um destino só, e aparece como link no topo do trilho. */
@@ -512,6 +566,8 @@ export function useAppNavigation() {
     hotelNaDemonstracao,
     pendenciasClinicas: pendencias,
     pendenciasDoHotel,
+    pendenciasDoPortal,
+    fraseDaPendencia,
   }
 }
 
