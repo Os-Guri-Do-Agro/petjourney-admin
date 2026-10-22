@@ -438,7 +438,6 @@
       "body": "Your account is not yet linked to a partner company. Register your company in Settings, under the Company tab: the registration starts under review and the PetJourney team approves it.",
       "hint": "If you already submitted the registration, wait for review or check again shortly. You can also accept a team invite.",
       "ctaPrograms": "Register my company",
-      "ctaSettings": "Go to settings",
       "retry": "Check again",
       "contactLabel": "Questions:",
       "ctaConvites": "See my invites"
@@ -973,7 +972,8 @@
       "ADESTRAMENTO": "Training",
       "HOTEL_CRECHE": "Hotel and daycare",
       "FARMACIA": "Pharmacy",
-      "OUTRO": "Other"
+      "OUTRO": "Other",
+      "VETERINARIO": "Independent veterinarian"
     },
     "form": {
       "nome": "Company name",
@@ -1144,7 +1144,8 @@
       "ROEDOR": "Rodent",
       "COELHO": "Rabbit",
       "PEIXE": "Fish",
-      "REPTIL": "Reptile"
+      "REPTIL": "Reptile",
+      "OUTRO": "Other"
     },
     "filtros": {
       "aria": "Appointment list filters",
@@ -1268,7 +1269,10 @@
       },
       "emptyTitle": "Nothing shared in this access",
       "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
-      "emptyCta": "Go to notes"
+      "emptyCta": "Go to notes",
+      "omitidos": {
+        "medicamentos": "Older medicines that did not fit in the access: {n}."
+      }
     },
     "tratamentos": {
       "title": "Ongoing treatment",
@@ -1308,7 +1312,13 @@
         "remedios": "Medicines",
         "observacoes": "Remarks",
         "nota": "Pet parent's note"
-      }
+      },
+      "recorte": {
+        "periodo": "Every entry from {de} to {ate}, as the pet parent chose.",
+        "entradas": "The entries the pet parent picked, one by one."
+      },
+      "omitidas": "Older entries in this period that did not fit in the access: {n}.",
+      "fotosOmitidas": "Photos from this day that did not fit in the access: {n}."
     },
     "anotacoes": {
       "title": "Notes history",
@@ -2229,7 +2239,6 @@
         "roles": "Account roles"
       },
       "roles": {
-        "veterinario": "Veterinarian",
         "donoParceiro": "Partner owner",
         "operadorParceiro": "Partner operator",
         "admin": "Admin"
@@ -2393,7 +2402,6 @@
         "roles": "Roles"
       },
       "roles": {
-        "veterinario": "Veterinarian",
         "dono": "Owner",
         "operador": "Operator",
         "admin": "Admin"

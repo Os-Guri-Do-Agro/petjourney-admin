@@ -21,7 +21,6 @@ import UiAbas from '@/components/ui/UiAbas.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { useEspacos } from '@/navegacao/espacos'
-import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
@@ -238,15 +237,11 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
         <RouterLink class="p-button p-component" to="/settings?aba=empresa">
           {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
-        <RouterLink class="p-button p-component p-button-secondary p-button-outlined" to="/parceiro/convite">
-          {{ t('frame.noAccess.ctaConvites') }}
-        </RouterLink>
         <RouterLink
-          v-if="hasVeterinarioProfile()"
-          class="p-button p-component p-button-secondary"
-          to="/settings?aba=perfil"
+          class="p-button p-component p-button-secondary p-button-outlined"
+          to="/parceiro/convite"
         >
-          {{ t('frame.noAccess.ctaSettings') }}
+          {{ t('frame.noAccess.ctaConvites') }}
         </RouterLink>
         <Button
           :label="t('frame.noAccess.retry')"

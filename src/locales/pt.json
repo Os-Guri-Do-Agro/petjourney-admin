@@ -438,7 +438,6 @@
       "body": "Sua conta ainda não está vinculada a uma empresa parceira. Cadastre sua empresa em Configurações, na aba Empresa: o cadastro nasce em análise e a equipe PetJourney aprova.",
       "hint": "Se você já enviou o cadastro, aguarde a análise ou verifique novamente em instantes. Também é possível aceitar um convite de equipe.",
       "ctaPrograms": "Cadastrar minha empresa",
-      "ctaSettings": "Ir para configurações",
       "retry": "Verificar novamente",
       "contactLabel": "Dúvidas:",
       "ctaConvites": "Ver meus convites"
@@ -973,7 +972,8 @@
       "ADESTRAMENTO": "Adestramento",
       "HOTEL_CRECHE": "Hotel e creche",
       "FARMACIA": "Farmácia",
-      "OUTRO": "Outro"
+      "OUTRO": "Outro",
+      "VETERINARIO": "Veterinário autônomo"
     },
     "form": {
       "nome": "Nome da empresa",
@@ -1144,7 +1144,8 @@
       "ROEDOR": "Roedor",
       "COELHO": "Coelho",
       "PEIXE": "Peixe",
-      "REPTIL": "Réptil"
+      "REPTIL": "Réptil",
+      "OUTRO": "Outro"
     },
     "filtros": {
       "aria": "Filtros da lista de atendimentos",
@@ -1268,7 +1269,10 @@
       },
       "emptyTitle": "Nada compartilhado neste acesso",
       "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
-      "emptyCta": "Ir para anotações"
+      "emptyCta": "Ir para anotações",
+      "omitidos": {
+        "medicamentos": "Remédios mais antigos que não couberam no acesso: {n}."
+      }
     },
     "tratamentos": {
       "title": "Tratamento contínuo",
@@ -1308,7 +1312,13 @@
         "remedios": "Remédios",
         "observacoes": "Observações",
         "nota": "Nota do responsável"
-      }
+      },
+      "recorte": {
+        "periodo": "Todos os registros de {de} a {ate}, como o responsável escolheu.",
+        "entradas": "Os registros que o responsável escolheu, um a um."
+      },
+      "omitidas": "Registros mais antigos do período que não couberam no acesso: {n}.",
+      "fotosOmitidas": "Fotos deste dia que não couberam no acesso: {n}."
     },
     "anotacoes": {
       "title": "Histórico de anotações",
@@ -2229,7 +2239,6 @@
         "roles": "Papéis da conta"
       },
       "roles": {
-        "veterinario": "Veterinário",
         "donoParceiro": "Dono do parceiro",
         "operadorParceiro": "Operador parceiro",
         "admin": "Admin"
@@ -2393,7 +2402,6 @@
         "roles": "Papéis"
       },
       "roles": {
-        "veterinario": "Veterinário",
         "dono": "Dono",
         "operador": "Operador",
         "admin": "Admin"

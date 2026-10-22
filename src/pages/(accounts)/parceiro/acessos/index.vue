@@ -77,7 +77,16 @@ const PAGE_SIZE = 20
 /** Espera entre teclas antes de ir à rede: a busca dispara a cada digitação. */
 const BUSCA_DEBOUNCE_MS = 350
 
-const ESPECIES: EspeciePet[] = ['CACHORRO', 'GATO', 'AVE', 'ROEDOR', 'COELHO', 'PEIXE', 'REPTIL']
+const ESPECIES: EspeciePet[] = [
+  'CACHORRO',
+  'GATO',
+  'AVE',
+  'ROEDOR',
+  'COELHO',
+  'PEIXE',
+  'REPTIL',
+  'OUTRO',
+]
 const TIPOS_SERVICO: TipoServicoPrestador[] = [
   'BANHO',
   'TOSA',

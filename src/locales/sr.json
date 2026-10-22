@@ -438,7 +438,6 @@
       "body": "Vaš nalog još nije povezan sa partnerskom firmom. Registrujte firmu na kartici „Firma“ u odeljku „Podešavanja“: registracija prvo ide na proveru, a zatim je tim PetJourney odobrava.",
       "hint": "Ako ste već poslali registraciju, sačekajte proveru ili proverite ponovo za nekoliko trenutaka. Možete i da prihvatite poziv u tim.",
       "ctaPrograms": "Registrujte firmu",
-      "ctaSettings": "Idite na podešavanja",
       "retry": "Proverite ponovo",
       "contactLabel": "Pitanja:",
       "ctaConvites": "Pogledajte svoje pozive"
@@ -973,7 +972,8 @@
       "ADESTRAMENTO": "Dresura",
       "HOTEL_CRECHE": "Hotel i dnevni boravak",
       "FARMACIA": "Apoteka",
-      "OUTRO": "Ostalo"
+      "OUTRO": "Ostalo",
+      "VETERINARIO": "Samostalni veterinar"
     },
     "form": {
       "nome": "Naziv firme",
@@ -1144,7 +1144,8 @@
       "ROEDOR": "Glodar",
       "COELHO": "Zec",
       "PEIXE": "Riba",
-      "REPTIL": "Gmizavac"
+      "REPTIL": "Gmizavac",
+      "OUTRO": "Ostalo"
     },
     "filtros": {
       "aria": "Filteri liste poseta",
@@ -1268,7 +1269,10 @@
       },
       "emptyTitle": "Ništa nije podeljeno u ovom pristupu",
       "emptyBody": "Staratelj je odobrio posetu, ali nije uključio nijedan klinički podatak za ljubimca {pet}. Ipak, sve što unesete u beleške stiže do staratelja.",
-      "emptyCta": "Idite na beleške"
+      "emptyCta": "Idite na beleške",
+      "omitidos": {
+        "medicamentos": "Stariji lekovi koji nisu stali u pristup: {n}."
+      }
     },
     "tratamentos": {
       "title": "Stalna terapija",
@@ -1308,7 +1312,13 @@
         "remedios": "Lekovi",
         "observacoes": "Napomene",
         "nota": "Beleška staratelja"
-      }
+      },
+      "recorte": {
+        "periodo": "Svi unosi od {de} do {ate}, kako je staratelj izabrao.",
+        "entradas": "Unosi koje je staratelj izabrao, jedan po jedan."
+      },
+      "omitidas": "Stariji unosi iz perioda koji nisu stali u pristup: {n}.",
+      "fotosOmitidas": "Fotografije iz ovog dana koje nisu stale u pristup: {n}."
     },
     "anotacoes": {
       "title": "Istorija beleški",
@@ -2229,7 +2239,6 @@
         "roles": "Uloge naloga"
       },
       "roles": {
-        "veterinario": "Veterinar",
         "donoParceiro": "Vlasnik partnerske firme",
         "operadorParceiro": "Operater partnerske firme",
         "admin": "Admin"
@@ -2393,7 +2402,6 @@
         "roles": "Uloge"
       },
       "roles": {
-        "veterinario": "Veterinar",
         "dono": "Vlasnik",
         "operador": "Operater",
         "admin": "Admin"

@@ -18,7 +18,7 @@ import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { login, refreshAuthSession } from '@/service/auth/auth-service'
-import { clearAuthSession, getAuthUser, getVeterinarioId } from '@/service/auth/auth-session'
+import { clearAuthSession, getAuthUser } from '@/service/auth/auth-session'
 import {
   postUsersMeReactivate,
   type ReactivateProfile,
@@ -92,9 +92,9 @@ function collectInactiveProfiles(flags: {
 }
 
 /**
- * Parte 9: conta sem perfil veterinário (prestador/parceiro) também entra.
- * O shell degrada sozinho (menus clínicos só com veterinarioId) e o funil
- * de credenciamento cobre quem ainda não tem parceiro.
+ * Parte 9: toda conta entra; o que cada uma vê no portal é decidido pelo parceiro e pelos
+ * módulos dele, nunca por um perfil "veterinário" (que não existe no produto). O funil de
+ * credenciamento cobre quem ainda não tem parceiro.
  */
 async function enterPanelAfterAuth() {
   usuarioPerfilStore.syncFromAuth()
@@ -168,7 +168,7 @@ async function handleReactivate(profile: ReactivateProfile = 'veterinario') {
 
     pendingReactivate.value = pendingReactivate.value.filter((item) => item !== profile)
 
-    if (profile === 'veterinario' || getVeterinarioId()) {
+    if (profile === 'veterinario') {
       pendingReactivate.value = []
       toast.add({
         severity: 'success',

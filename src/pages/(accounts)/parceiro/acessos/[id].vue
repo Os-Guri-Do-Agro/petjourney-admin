@@ -370,6 +370,8 @@ const snapshotListSections = computed(() =>
       /** Linha recolhida mostra os primeiros nomes: dá para ler sem abrir. */
       resumo: items.map((item) => item.titulo).join(', '),
       vazioTexto: bloco.motivo ? textoMotivo(bloco.id, bloco.motivo) : '',
+      /* Só remédios têm teto (20): os de dose mais antiga que ficaram de fora do acesso. */
+      omitidos: bloco.id === 'medicamentos' ? (detalhe.value?.snapshot?.medicamentosOmitidos ?? 0) : 0,
     }
   }),
 )
@@ -447,9 +449,45 @@ const documentosVazioTexto = computed(() =>
     : textoMotivo('documentos', documentosEstado.value),
 )
 
-/** Um dia do diário com anormalidade. Labels já chegam localizados do backend. */
+/** O recorte que o responsável escolheu; nulo em acesso com a regra antiga (dias com anormalidade). */
+const diarioSelecao = computed(() => detalhe.value?.snapshot?.diarioSelecao ?? null)
+
+/** Dia do calendário do responsável (`AAAA-MM-DD`), mostrado sem passar por fuso nenhum. */
+function formatarDiaDoCalendario(dia: string) {
+  return new Date(`${dia}T12:00:00Z`).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
+    dateStyle: 'medium',
+    timeZone: 'UTC',
+  })
+}
+
+const recorteDoDiario = computed(() => {
+  const selecao = diarioSelecao.value
+
+  if (!selecao) {
+    return ''
+  }
+
+  if (selecao.modo === 'ENTRADAS') {
+    return t('acessos.diario.recorte.entradas')
+  }
+
+  const de = selecao.deDia ? formatarDiaDoCalendario(selecao.deDia) : formatDate(selecao.de ?? '')
+  const ate = selecao.ateDia ? formatarDiaDoCalendario(selecao.ateDia) : formatDate(selecao.ate ?? '')
+
+  return t('acessos.diario.recorte.periodo', { de, ate })
+})
+
+/**
+ * Os dias do diário. Labels já chegam localizados do backend.
+ *
+ * Com a escolha do responsável o diário é linha do tempo e chega em qualquer ordem: aqui ele
+ * sai do mais recente para o mais antigo. Na regra antiga, a ordem é a que a API mandou.
+ */
 const diario = computed(() => {
-  const entradas = detalhe.value?.snapshot?.diario ?? []
+  const brutas = detalhe.value?.snapshot?.diario ?? []
+  const entradas = diarioSelecao.value
+    ? [...brutas].sort((a, b) => Date.parse(b.data) - Date.parse(a.data))
+    : brutas
 
   return entradas.map((entrada, index) => {
     const campos = (
@@ -491,6 +529,7 @@ const diario = computed(() => {
       campos,
       textos,
       fotoIds: entrada.fotoIds ?? [],
+      fotosOmitidas: entrada.fotosOmitidas ?? 0,
     }
   })
 })
@@ -1554,6 +1593,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         <span v-if="item.detalhe">{{ item.detalhe }}</span>
                       </li>
                     </ul>
+                    <p
+                      v-if="section.omitidos && isSectionOpen(section.id)"
+                      class="omitidos"
+                    >
+                      <i class="ph ph-info" aria-hidden="true" />
+                      {{ t('acessos.snapshot.omitidos.medicamentos', { n: section.omitidos }) }}
+                    </p>
                   </template>
                 </li>
               </ul>
@@ -1654,7 +1700,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   <h3 id="atd-diario-titulo" class="ui-cartao__titulo">
                     {{ t('acessos.diario.title') }}
                   </h3>
-                  <p v-if="isGuidanceVisible" class="ui-cartao__descricao">
+                  <p v-if="recorteDoDiario" class="ui-cartao__descricao">
+                    {{ recorteDoDiario }}
+                  </p>
+                  <p v-else-if="isGuidanceVisible" class="ui-cartao__descricao">
                     {{ t('acessos.diario.lede') }}
                   </p>
                 </div>
@@ -1711,9 +1760,19 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                         @click="abrirArquivo(fotoId)"
                       />
                     </div>
+
+                    <p v-if="entrada.fotosOmitidas" class="omitidos">
+                      <i class="ph ph-info" aria-hidden="true" />
+                      {{ t('acessos.diario.fotosOmitidas', { n: entrada.fotosOmitidas }) }}
+                    </p>
                   </div>
                 </li>
               </ol>
+
+              <p v-if="!diarioVazioTexto && diarioSelecao?.entradasOmitidas" class="omitidos">
+                <i class="ph ph-info" aria-hidden="true" />
+                {{ t('acessos.diario.omitidas', { n: diarioSelecao.entradasOmitidas }) }}
+              </p>
             </section>
           </aside>
 
@@ -3027,6 +3086,23 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* O que o teto do acesso deixou de fora: dito em voz baixa, para a lista não parecer completa. */
+.omitidos {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.omitidos i {
+  margin-top: 1px;
+  color: var(--tinta-3);
+  font-size: 15px;
 }
 
 /* ------------------------------------------------------------------ a folha da anotação */

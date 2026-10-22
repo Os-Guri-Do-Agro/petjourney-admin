@@ -65,9 +65,6 @@ const empresa = computed(() =>
 
 const roleHints = computed(() => {
   const hints: string[] = []
-  if (sessionUser.value?.veterinarioId) {
-    hints.push(t('settings.conta.roles.veterinario'))
-  }
   if (store.loadState === 'ready' && store.parceiroNome) {
     hints.push(store.isDono ? t('settings.conta.roles.dono') : t('settings.conta.roles.operador'))
   }

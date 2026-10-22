@@ -6,7 +6,6 @@ import {
   type ContagemDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
 import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
-import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useModuloClinico } from '@/composables/useModuloClinico'
 import { useModuloHotel } from '@/composables/useModuloHotel'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -297,9 +296,7 @@ export function useAppNavigation() {
        *
        * Ligar é decisão de quem vai demonstrar — ver `useModuloClinico`.
        */
-      moduloClinicoAtivo.value &&
-      CLINICAL_MENU_ENABLED &&
-      (CLINICAL_MENU_DEMO || hasVeterinarioProfile()),
+      moduloClinicoAtivo.value && CLINICAL_MENU_ENABLED && CLINICAL_MENU_DEMO,
   )
 
   /**

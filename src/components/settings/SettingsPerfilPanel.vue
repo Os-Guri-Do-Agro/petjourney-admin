@@ -69,9 +69,9 @@ const sessionUser = computed(() => {
 
 const cpfLocked = computed(() => Boolean(profile.value?.cpf?.trim()))
 
-const hasVetPerfil = computed(
-  () => Boolean(sessionUser.value?.veterinarioId) || Boolean(profile.value?.veterinarioPerfil),
-)
+/* O perfil veterinário antigo do usuário (CRMV e especialidade), como a API o devolve; o claim do
+   token não decide mais nada na tela. Some com a E1-07, quando o CRMV morar no Profissional. */
+const hasVetPerfil = computed(() => Boolean(profile.value?.veterinarioPerfil))
 
 /** CRMV/especialidade são opcionais no produto: preencher um exige o par (cria o perfil clínico). */
 const vetFieldsFilled = computed(() => Boolean(crmv.value.trim() || especialidade.value.trim()))
@@ -97,10 +97,6 @@ const avatarUrl = computed(() => {
 
 const roleChips = computed(() => {
   const chips: string[] = []
-
-  if (sessionUser.value?.veterinarioId) {
-    chips.push(t('settings.perfil.roles.veterinario'))
-  }
 
   if (store.loadState === 'ready' && store.parceiroNome) {
     chips.push(
@@ -244,7 +240,7 @@ function buildUpdatePayload(extraFoto?: string): UpdateUsuarioPayload {
 
   const trimmedFoto = (extraFoto ?? fotoUrl.value).trim()
 
-  if (hasVetPerfil.value || vetFieldsFilled.value || (trimmedFoto && sessionUser.value?.veterinarioId)) {
+  if (hasVetPerfil.value || vetFieldsFilled.value) {
     payload.veterinario = {}
 
     const crmvValue = crmv.value.trim() || profile.value?.veterinarioPerfil?.crmv || ''

@@ -52,6 +52,7 @@ const { t } = useI18n()
 
 const CATEGORIAS: CategoriaParceiro[] = [
   'CLINICA_VETERINARIA',
+  'VETERINARIO',
   'PET_SHOP',
   'BANHO_TOSA',
   'ADESTRAMENTO',
