@@ -133,7 +133,6 @@ withDefaults(
     0 18px 40px -22px color-mix(in oklab, var(--pj-lugar) 75%, transparent),
     inset 0 1px 0 rgb(255 255 255 / 14%);
   color: #fff;
-  container: abertura / inline-size;
   isolation: isolate;
 }
 
@@ -239,12 +238,11 @@ withDefaults(
   box-shadow: 0 0 0 2px var(--abertura-fundo), 0 0 0 4px #fff;
 }
 
-/* Os números: vidro sobre a cor, um ao lado do outro. */
+/* Os números: vidro sobre a cor, dois por linha. Em fileira, quatro quadros espremiam a frase. */
 .abertura__indicadores {
   display: grid;
   gap: 12px;
-  grid-auto-columns: minmax(148px, 1fr);
-  grid-auto-flow: column;
+  grid-template-columns: repeat(2, minmax(148px, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -339,17 +337,8 @@ withDefaults(
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* Embaixo da frase, os números numa fileira só, do mesmo tamanho: o encaixe automático
-     deixava 3 + 1, com o último sozinho na linha. */
+  /* Embaixo da frase, a grade 2 x 2 ocupa a largura toda. */
   .abertura__indicadores {
-    grid-auto-columns: minmax(0, 1fr);
-  }
-}
-
-/* Onde a fileira não cabe, dois por linha. */
-@container abertura (max-width: 540px) {
-  .abertura__indicadores {
-    grid-auto-flow: row;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -369,7 +358,6 @@ withDefaults(
   }
 
   .abertura__indicadores {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 
