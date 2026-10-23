@@ -61,6 +61,7 @@ import {
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
 import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
+import { rotuloDaEspecie } from '@/utils/parceiro/especie-do-acesso'
 import { modoDoVinculo } from '@/utils/parceiro/reivindicacoes'
 import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
 
@@ -647,7 +648,7 @@ const grupos = computed<GrupoDoPet[]>(() => {
         chave,
         petNome: item.petNome,
         especie: item.especie,
-        especieLabel: item.especieLabel,
+        especieLabel: rotuloDaEspecie(item),
         petFoto: item.petFoto,
         acessos: [item],
       })

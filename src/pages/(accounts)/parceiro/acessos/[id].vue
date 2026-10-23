@@ -62,6 +62,7 @@ import type {
 } from '@/service/parceiro/types'
 import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
 import { classificarFalhaArquivo } from '@/utils/parceiro/arquivo-compartilhado'
+import { rotuloDaEspecie } from '@/utils/parceiro/especie-do-acesso'
 import {
   ESPECIALIDADES,
   ESPECIALIDADE_OUTRA,
@@ -668,7 +669,7 @@ const metaDoPet = computed(() => {
         : t('acessos.pet.naoCastrado')
       : ''
 
-  return [detalhe.value.especieLabel, castrado].filter(Boolean).join(' · ')
+  return [rotuloDaEspecie(detalhe.value), castrado].filter(Boolean).join(' · ')
 })
 
 /** A contagem regressiva do acesso, curta: "3d 4h", "5h 12min", "40min". */

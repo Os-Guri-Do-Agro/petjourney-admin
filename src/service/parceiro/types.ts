@@ -559,6 +559,8 @@ export type CompartilhamentoResumo = {
   especie: string
   /** Já traduzido pelo Accept-Language. */
   especieLabel: string
+  /** Pet `OUTRO`: o que o responsável digitou. Mostrar com `rotuloDaEspecie`. */
+  tipoEspecie?: string | null
   petFoto: string | null
   tipoServico: TipoServicoPrestador
   servicoOutroLabel: string | null
@@ -584,6 +586,8 @@ export type CompartilhamentoDetalhe = {
   petNome: string
   especie: string
   especieLabel: string
+  /** Pet `OUTRO`: o que o responsável digitou. Mostrar com `rotuloDaEspecie`. */
+  tipoEspecie?: string | null
   petFoto: string | null
   petCastrado?: boolean | null
   tipoServico: TipoServicoPrestador

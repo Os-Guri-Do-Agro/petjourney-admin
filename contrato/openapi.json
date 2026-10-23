@@ -876,7 +876,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElegibilidadeFeedbackDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -916,7 +923,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackRegistradoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1099,7 +1113,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CadastroParceiroCriadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1127,7 +1148,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DadosDoCadastroParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1165,7 +1193,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DadosDoCadastroParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1195,7 +1230,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1225,7 +1267,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusParceiroPortalDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1255,7 +1304,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndicacaoParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1285,7 +1341,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricasQrIndicacaoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1348,7 +1411,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaIndicadosParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1394,7 +1464,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaCuponsParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1440,7 +1517,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaResgatesParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1480,7 +1564,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CupomValidadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1518,7 +1609,14 @@
         ],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModoSolicitadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1632,7 +1730,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConviteAceitoPorParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9276,8 +9381,25 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "description": "Mesmo arquivo neste acesso: reaproveitada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeituraReceitaParceiroCriadaDto"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Leitura nova, em PROCESSANDO.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeituraReceitaParceiroCriadaDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9323,7 +9445,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeituraReceitaParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -9653,6 +9782,37 @@
           }
         },
         "summary": "O que o tutor retirou deste acesso, e quando (trilha de consentimento)",
+        "tags": [
+          "CompartilhamentoPrestadorTutor"
+        ]
+      }
+    },
+    "/tutor/compartilhamentos-prestador/{id}/aberturas": {
+      "get": {
+        "operationId": "CompartilhamentoPrestadorTutorController_aberturas",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AberturasDoAcessoDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Quem abriu este acesso: visitas à página e arquivos pedidos (prova pedido, não leitura)",
         "tags": [
           "CompartilhamentoPrestadorTutor"
         ]
@@ -10058,7 +10218,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcessoParceiroDetalheDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10098,7 +10265,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReivindicacaoAcessoResultadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10128,7 +10302,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReivindicacoesAcessoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10263,7 +10444,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaAcessosParceiroDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10301,7 +10489,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcessoParceiroDetalheDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10339,7 +10534,14 @@
         ],
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnotacaoCriadaDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10385,7 +10587,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlAnexoPrestadorDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -10439,7 +10648,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UrlArquivoCompartilhadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11680,7 +11896,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtratoCarteiraDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11720,7 +11943,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChavePixAtualizadaDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11760,7 +11990,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaqueSolicitadoDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11788,7 +12025,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SaqueDaListaDto"
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -11824,7 +12071,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaqueDetalheDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -16737,6 +16991,134 @@
         ],
         "tags": [
           "tutor-clinica"
+        ]
+      }
+    },
+    "/parceiro/portal/emergencia/ficha": {
+      "post": {
+        "operationId": "EmergenciaParceiroController_abrir",
+        "parameters": [
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbrirFichaDeEmergenciaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FichaDeEmergenciaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abre a ficha de emergência do pet do QR (só veterinário com CRMV conferido). Grava o acesso e avisa o dono na hora",
+        "tags": [
+          "parceiro-portal"
+        ]
+      }
+    },
+    "/tutor/emergencia/pets/{petId}/acessos": {
+      "get": {
+        "operationId": "EmergenciaTutorController_acessos",
+        "parameters": [
+          {
+            "name": "petId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcessosEmergenciaDoPetDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quem abriu a ficha de emergência deste pet, quando e por quê (só o dono)",
+        "tags": [
+          "emergencia"
+        ]
+      }
+    },
+    "/tutor/emergencia/pets/{petId}/ficha": {
+      "put": {
+        "operationId": "EmergenciaTutorController_definir",
+        "parameters": [
+          {
+            "name": "petId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FichaLiberadaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FichaLiberadaRespostaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liga ou desliga a ficha de emergência deste pet (só o dono)",
+        "tags": [
+          "emergencia"
         ]
       }
     },
@@ -22564,6 +22946,18 @@
           "motivo"
         ]
       },
+      "ElegibilidadeFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "exibir": {
+            "type": "boolean",
+            "description": "Se o app deve mostrar o questionario agora. false com a feature desligada."
+          }
+        },
+        "required": [
+          "exibir"
+        ]
+      },
       "RegistrarFeedbackSaqueDto": {
         "type": "object",
         "properties": {
@@ -22627,6 +23021,30 @@
           "versaoQuestionario"
         ]
       },
+      "FeedbackRegistradoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "RESPONDIDO",
+              "DISPENSADO"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "createdAt"
+        ]
+      },
       "CadastroParceiroDto": {
         "type": "object",
         "properties": {
@@ -22684,6 +23102,107 @@
           "nome"
         ]
       },
+      "CadastroParceiroCriadoDto": {
+        "type": "object",
+        "properties": {
+          "parceiroId": {
+            "type": "string"
+          },
+          "statusAuditoria": {
+            "type": "string",
+            "enum": [
+              "PENDENTE"
+            ],
+            "description": "Sempre PENDENTE: o cadastro volta (ou entra) na fila de analise."
+          },
+          "programasSolicitados": {
+            "type": "array",
+            "description": "Modos que ficaram SOLICITADO depois de gravar (estado persistido, nao eco do body). Pode ser [].",
+            "items": {
+              "type": "string",
+              "enum": [
+                "afiliado",
+                "participativo"
+              ]
+            }
+          },
+          "access_token": {
+            "type": "string",
+            "description": "Token novo com perfilAtivo=PARCEIRO e este parceiroAtivoId; troque o token do cliente sem relogar."
+          }
+        },
+        "required": [
+          "parceiroId",
+          "statusAuditoria",
+          "programasSolicitados",
+          "access_token"
+        ]
+      },
+      "DadosDoCadastroParceiroDto": {
+        "type": "object",
+        "properties": {
+          "parceiroId": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "CLINICA_VETERINARIA",
+              "VETERINARIO",
+              "PET_SHOP",
+              "BANHO_TOSA",
+              "ADESTRAMENTO",
+              "HOTEL_CRECHE",
+              "FARMACIA",
+              "OUTRO"
+            ],
+            "nullable": true
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          },
+          "telefoneComercial": {
+            "type": "string",
+            "nullable": true
+          },
+          "crmv": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusAuditoria": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "APROVADO",
+              "REJEITADO",
+              "SUSPENSO"
+            ]
+          },
+          "motivoAuditoria": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "parceiroId",
+          "nome",
+          "categoria",
+          "cnpj",
+          "telefoneComercial",
+          "crmv",
+          "logoUrl",
+          "statusAuditoria",
+          "motivoAuditoria"
+        ]
+      },
       "AtualizarCadastroParceiroDto": {
         "type": "object",
         "properties": {
@@ -22724,9 +23243,593 @@
           }
         }
       },
+      "ParceiroDoDashboardDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusAuditoria": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "APROVADO",
+              "REJEITADO",
+              "SUSPENSO"
+            ]
+          },
+          "motivoAuditoria": {
+            "type": "string",
+            "nullable": true
+          },
+          "cnpj": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "logoUrl",
+          "statusAuditoria",
+          "motivoAuditoria",
+          "cnpj"
+        ]
+      },
+      "TotaisDashboardParceiroDto": {
+        "type": "object",
+        "properties": {
+          "cuponsAtivos": {
+            "type": "number",
+            "description": "Cupons ativos e ainda validos."
+          },
+          "resgatesTotal": {
+            "type": "number"
+          },
+          "resgatesUltimos30d": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "cuponsAtivos",
+          "resgatesTotal",
+          "resgatesUltimos30d"
+        ]
+      },
+      "DashboardParceiroDto": {
+        "type": "object",
+        "properties": {
+          "parceiro": {
+            "$ref": "#/components/schemas/ParceiroDoDashboardDto"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "DONO",
+              "OPERADOR"
+            ],
+            "description": "Papel de quem esta logado."
+          },
+          "totais": {
+            "$ref": "#/components/schemas/TotaisDashboardParceiroDto"
+          }
+        },
+        "required": [
+          "parceiro",
+          "papel",
+          "totais"
+        ]
+      },
+      "BlocoModoParceiroDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "NAO_SOLICITADO",
+              "SOLICITADO",
+              "ATIVO",
+              "REJEITADO",
+              "SUSPENSO"
+            ]
+          },
+          "motivo": {
+            "type": "string",
+            "nullable": true,
+            "description": "So quando status e REJEITADO ou SUSPENSO."
+          },
+          "decididoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "So quando status e REJEITADO ou SUSPENSO."
+          },
+          "podeSolicitar": {
+            "type": "boolean",
+            "description": "Parceiro operavel e modo em NAO_SOLICITADO ou REJEITADO."
+          }
+        },
+        "required": [
+          "status",
+          "motivo",
+          "decididoEm",
+          "podeSolicitar"
+        ]
+      },
+      "StatusParceiroPortalDto": {
+        "type": "object",
+        "properties": {
+          "statusAuditoria": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "APROVADO",
+              "REJEITADO",
+              "SUSPENSO"
+            ]
+          },
+          "statusAfiliado": {
+            "type": "string",
+            "enum": [
+              "NAO_SOLICITADO",
+              "SOLICITADO",
+              "ATIVO",
+              "REJEITADO",
+              "SUSPENSO"
+            ],
+            "description": "Legado: o mesmo que `afiliado.status`."
+          },
+          "statusParticipativo": {
+            "type": "string",
+            "enum": [
+              "NAO_SOLICITADO",
+              "SOLICITADO",
+              "ATIVO",
+              "REJEITADO",
+              "SUSPENSO"
+            ],
+            "description": "Legado: o mesmo que `participativo.status`."
+          },
+          "motivoAuditoria": {
+            "type": "string",
+            "description": "Ausente quando nao ha motivo gravado."
+          },
+          "auditadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Ausente quando nunca foi auditado."
+          },
+          "podeOperar": {
+            "type": "boolean",
+            "description": "APROVADO e ativo."
+          },
+          "afiliado": {
+            "$ref": "#/components/schemas/BlocoModoParceiroDto"
+          },
+          "participativo": {
+            "$ref": "#/components/schemas/BlocoModoParceiroDto"
+          }
+        },
+        "required": [
+          "statusAuditoria",
+          "statusAfiliado",
+          "statusParticipativo",
+          "podeOperar",
+          "afiliado",
+          "participativo"
+        ]
+      },
+      "IndicacaoParceiroDto": {
+        "type": "object",
+        "properties": {
+          "codigoIndicacao": {
+            "type": "string",
+            "nullable": true,
+            "description": "null quando podeIndicar=false."
+          },
+          "link": {
+            "type": "string",
+            "nullable": true,
+            "description": "null quando podeIndicar=false."
+          },
+          "qrCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "Codigo do QR rastreavel. null quando podeIndicar=false ou com o servico de QR fora."
+          },
+          "qrImageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Imagem do QR. null quando podeIndicar=false ou com o servico de QR fora (esconda a imagem)."
+          },
+          "podeIndicar": {
+            "type": "boolean",
+            "description": "Parceiro APROVADO, ativo e com o programa de afiliado ATIVO."
+          },
+          "aviso": {
+            "type": "string",
+            "description": "So quando podeIndicar=false: texto pronto (pt-BR) do estado de espera."
+          }
+        },
+        "required": [
+          "codigoIndicacao",
+          "link",
+          "qrCode",
+          "qrImageUrl",
+          "podeIndicar"
+        ]
+      },
+      "LeituraQrPorDiaDto": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "description": "Dia, como o servico de QR devolve."
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "day",
+          "count"
+        ]
+      },
+      "LeituraQrRecenteDto": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "type": "string",
+            "description": "Instante da leitura, como o servico de QR devolve."
+          },
+          "userAgent": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "at",
+          "userAgent"
+        ]
+      },
+      "MetricasQrIndicacaoDto": {
+        "type": "object",
+        "properties": {
+          "qrCode": {
+            "type": "string"
+          },
+          "scanCount": {
+            "type": "number"
+          },
+          "byDay": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeituraQrPorDiaDto"
+            }
+          },
+          "recent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeituraQrRecenteDto"
+            }
+          }
+        },
+        "required": [
+          "qrCode",
+          "scanCount",
+          "byDay",
+          "recent"
+        ]
+      },
+      "IndicadoDoParceiroDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nome completo; null quando vazio."
+          },
+          "cadastradoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SEM_ASSINATURA",
+              "COM_ASSINATURA",
+              "CANCELADO"
+            ],
+            "description": "SEM_ASSINATURA: nunca assinou. COM_ASSINATURA: assinou e esta ativa. CANCELADO: assinou e nao esta."
+          },
+          "assinouEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Primeira conversao em assinatura."
+          },
+          "plano": {
+            "type": "string",
+            "enum": [
+              "MENSAL",
+              "ANUAL"
+            ],
+            "nullable": true,
+            "description": "Plano da ultima assinatura; null sem assinatura, em teste gratis ou cortesia."
+          },
+          "participacaoCentavos": {
+            "type": "number",
+            "description": "Participacao liquida gerada por este indicado, em centavos (creditos menos estornos). 0 sem transacao."
+          }
+        },
+        "required": [
+          "nome",
+          "cadastradoEm",
+          "status",
+          "assinouEm",
+          "plano",
+          "participacaoCentavos"
+        ]
+      },
+      "MetaIndicadosParceiroDto": {
+        "type": "object",
+        "properties": {
+          "proximoCursor": {
+            "type": "string",
+            "description": "Cursor opaco da proxima pagina. Ausente quando nao ha mais."
+          },
+          "total": {
+            "type": "number",
+            "description": "Total do recorte (com o filtro ?status=), nao so da pagina."
+          }
+        },
+        "required": [
+          "total"
+        ]
+      },
+      "PaginaIndicadosParceiroDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Cadastro mais recente primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IndicadoDoParceiroDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaIndicadosParceiroDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "CupomDoParceiroDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "descontoPercentual": {
+            "type": "number"
+          },
+          "categoria": {
+            "type": "string",
+            "enum": [
+              "PETSHOP",
+              "VETERINARIO",
+              "FARMACIA",
+              "BANHO_TOSA",
+              "NUTRICAO"
+            ]
+          },
+          "validoAte": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "usoUnico": {
+            "type": "boolean"
+          },
+          "totalResgates": {
+            "type": "number"
+          },
+          "usosRestantes": {
+            "type": "number",
+            "description": "So em cupom de uso multiplo com estoque limitado. Ausente em uso unico ou estoque ilimitado."
+          }
+        },
+        "required": [
+          "id",
+          "codigo",
+          "titulo",
+          "descontoPercentual",
+          "categoria",
+          "validoAte",
+          "ativo",
+          "usoUnico",
+          "totalResgates"
+        ]
+      },
+      "MetaCursorPortalDto": {
+        "type": "object",
+        "properties": {
+          "proximoCursor": {
+            "type": "string",
+            "description": "Valor para `?cursor=` da proxima pagina. Ausente quando nao ha mais."
+          }
+        }
+      },
+      "PaginaCuponsParceiroDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Mais recente primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CupomDoParceiroDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaCursorPortalDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "ResgateDoParceiroDto": {
+        "type": "object",
+        "properties": {
+          "resgateId": {
+            "type": "string"
+          },
+          "cupomCodigo": {
+            "type": "string"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "QR",
+              "CODIGO_MANUAL"
+            ]
+          },
+          "descontoPercentualSnapshot": {
+            "type": "number",
+            "description": "Desconto no momento do resgate. Ausente em resgate antigo."
+          },
+          "resgatadoEm": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "resgateId",
+          "cupomCodigo",
+          "canal",
+          "resgatadoEm"
+        ]
+      },
+      "PaginaResgatesParceiroDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Mais recente primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResgateDoParceiroDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaCursorPortalDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
       "ValidarCupomDto": {
         "type": "object",
         "properties": {}
+      },
+      "CupomDoResgateValidadoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "titulo": {
+            "type": "string"
+          },
+          "descontoPercentual": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "codigo",
+          "titulo",
+          "descontoPercentual"
+        ]
+      },
+      "CupomValidadoDto": {
+        "type": "object",
+        "properties": {
+          "valido": {
+            "type": "boolean",
+            "description": "Sempre true: recusa sai como erro HTTP."
+          },
+          "resgateId": {
+            "type": "string"
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "QR",
+              "CODIGO_MANUAL"
+            ]
+          },
+          "cupom": {
+            "$ref": "#/components/schemas/CupomDoResgateValidadoDto"
+          },
+          "tutorPrimeiroNome": {
+            "type": "string",
+            "nullable": true,
+            "description": "So o primeiro nome do tutor (LGPD)."
+          }
+        },
+        "required": [
+          "valido",
+          "resgateId",
+          "canal",
+          "cupom",
+          "tutorPrimeiroNome"
+        ]
+      },
+      "ModoSolicitadoDto": {
+        "type": "object",
+        "properties": {
+          "modo": {
+            "type": "string",
+            "enum": [
+              "afiliado",
+              "participativo"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SOLICITADO"
+            ],
+            "description": "Sempre SOLICITADO; a aprovacao e do admin."
+          }
+        },
+        "required": [
+          "modo",
+          "status"
+        ]
       },
       "MembroEquipeDto": {
         "type": "object",
@@ -22894,6 +23997,25 @@
           "papel",
           "status",
           "expiraEm"
+        ]
+      },
+      "ConviteAceitoPorParceiroDto": {
+        "type": "object",
+        "properties": {
+          "parceiroId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACEITO"
+            ],
+            "description": "Sempre ACEITO."
+          }
+        },
+        "required": [
+          "parceiroId",
+          "status"
         ]
       },
       "AceitarConvitePorLinkDto": {
@@ -26328,6 +27450,232 @@
           }
         }
       },
+      "LeituraReceitaParceiroCriadaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSANDO",
+              "AGUARDANDO_CONFIRMACAO",
+              "CONFIRMADA",
+              "DESCARTADA",
+              "DESFEITA",
+              "FALHOU"
+            ],
+            "description": "PROCESSANDO na leitura nova; na reaproveitada, o status dela (PROCESSANDO ou AGUARDANDO_CONFIRMACAO)."
+          },
+          "reaproveitada": {
+            "type": "boolean",
+            "description": "So presente (e sempre true) quando o mesmo arquivo ja foi enviado neste acesso: resposta 200."
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ]
+      },
+      "ItemFormularioLeituraDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "dose": {
+            "type": "string",
+            "nullable": true
+          },
+          "unidade": {
+            "type": "string",
+            "nullable": true
+          },
+          "frequencia": {
+            "type": "string",
+            "nullable": true,
+            "description": "Forma canonica, sem a duracao."
+          },
+          "duracaoDias": {
+            "type": "number",
+            "nullable": true
+          },
+          "instrucoes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "nome",
+          "dose",
+          "unidade",
+          "frequencia",
+          "duracaoDias",
+          "instrucoes"
+        ]
+      },
+      "ConfiancaItemFormularioDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "enum": [
+              "ALTA",
+              "MEDIA",
+              "BAIXA"
+            ]
+          },
+          "dose": {
+            "type": "string",
+            "enum": [
+              "ALTA",
+              "MEDIA",
+              "BAIXA"
+            ],
+            "nullable": true
+          },
+          "frequencia": {
+            "type": "string",
+            "enum": [
+              "ALTA",
+              "MEDIA",
+              "BAIXA"
+            ],
+            "nullable": true
+          },
+          "duracaoDias": {
+            "type": "string",
+            "enum": [
+              "ALTA",
+              "MEDIA",
+              "BAIXA"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "nome",
+          "dose",
+          "frequencia",
+          "duracaoDias"
+        ]
+      },
+      "AvisoLeituraReceitaDto": {
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string",
+            "enum": [
+              "PET_NOME_DIFERENTE",
+              "RECEITA_ANTIGA",
+              "LEGIBILIDADE_RUIM",
+              "ITENS_ACIMA_DO_LIMITE",
+              "RECEITA_JA_CONFIRMADA",
+              "RECEITA_NOS_DOCUMENTOS",
+              "REMEDIO_JA_EM_USO",
+              "TRATAMENTO_JA_TERMINOU"
+            ]
+          },
+          "mensagem": {
+            "type": "string",
+            "description": "Texto pronto, no locale da request."
+          }
+        },
+        "required": [
+          "codigo",
+          "mensagem"
+        ]
+      },
+      "ArquivoLeituraReceitaDto": {
+        "type": "object",
+        "properties": {
+          "ordem": {
+            "type": "number"
+          },
+          "mimetype": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "URL assinada de curta duracao. String vazia quando o storage falhou ao assinar."
+          }
+        },
+        "required": [
+          "ordem",
+          "mimetype",
+          "url"
+        ]
+      },
+      "LeituraReceitaParceiroDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PROCESSANDO",
+              "AGUARDANDO_CONFIRMACAO",
+              "CONFIRMADA",
+              "DESCARTADA",
+              "DESFEITA",
+              "FALHOU"
+            ]
+          },
+          "anotacaoId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Anotacao que usou esta leitura; null enquanto livre."
+          },
+          "motivoFalha": {
+            "type": "string",
+            "nullable": true,
+            "description": "Codigo da falha; null quando a leitura nao falhou."
+          },
+          "mensagemFalha": {
+            "type": "string",
+            "nullable": true,
+            "description": "Texto da falha no locale da request; null sem falha."
+          },
+          "itensFormulario": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemFormularioLeituraDto"
+            }
+          },
+          "confianca": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConfiancaItemFormularioDto"
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvisoLeituraReceitaDto"
+            }
+          },
+          "arquivos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArquivoLeituraReceitaDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "anotacaoId",
+          "motivoFalha",
+          "mensagemFalha",
+          "itensFormulario",
+          "confianca",
+          "avisos",
+          "arquivos"
+        ]
+      },
       "CriarCompartilhamentoDto": {
         "type": "object",
         "properties": {}
@@ -26343,6 +27691,105 @@
         },
         "required": [
           "expiraEm"
+        ]
+      },
+      "VisitasDoAcessoDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Quantas vezes a página do acesso foi aberta por quem não é o tutor."
+          },
+          "primeiraEm": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          },
+          "ultimaEm": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "total",
+          "primeiraEm",
+          "ultimaEm"
+        ]
+      },
+      "ParceiroQueAbriuDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nome"
+        ]
+      },
+      "ArquivoPedidoDto": {
+        "type": "object",
+        "properties": {
+          "arquivoNome": {
+            "type": "string"
+          },
+          "origem": {
+            "type": "string",
+            "enum": [
+              "DOCUMENTO",
+              "DIARIO_FOTO"
+            ]
+          },
+          "canal": {
+            "type": "string",
+            "enum": [
+              "PUBLICO",
+              "TUTOR",
+              "PARCEIRO"
+            ],
+            "description": "PUBLICO = prestador sem conta, pelo código (anônimo); PARCEIRO = pelo portal."
+          },
+          "abertoEm": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Quando o arquivo foi PEDIDO (prova o pedido, não a leitura)."
+          },
+          "parceiro": {
+            "nullable": true,
+            "description": "Só no canal PARCEIRO.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ParceiroQueAbriuDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "arquivoNome",
+          "origem",
+          "canal",
+          "abertoEm",
+          "parceiro"
+        ]
+      },
+      "AberturasDoAcessoDto": {
+        "type": "object",
+        "properties": {
+          "visitas": {
+            "$ref": "#/components/schemas/VisitasDoAcessoDto"
+          },
+          "arquivos": {
+            "description": "Até 100, os mais novos primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ArquivoPedidoDto"
+            }
+          }
+        },
+        "required": [
+          "visitas",
+          "arquivos"
         ]
       },
       "SalvarAnexoDto": {
@@ -26478,7 +27925,7 @@
             "description": "Motivo traduzido no locale da request."
           },
           "descricao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Texto livre do tutor. Preenchido quando `tipo = OUTRO`."
           },
@@ -26591,7 +28038,7 @@
             }
           },
           "resumoPeso": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Serie de peso em uma linha (\"8,4 kg em 12/07/2026, 7,9 kg em 26/07/2026\"). Presente sempre que ha 2 registros datados e PESO compartilhado, mesmo sem alerta de variacao."
           }
@@ -26622,12 +28069,12 @@
         "type": "object",
         "properties": {
           "administradoEm": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "ISO8601."
           },
           "dose": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Texto livre do tutor (\"1 capsula\")."
           }
@@ -26645,6 +28092,14 @@
             "type": "string",
             "description": "Complemento, JA TRADUZIDO. Em alergias vem como \"Categoria - reacao\", com a categoria traduzida e a reacao do tutor intacta.",
             "example": "Inseto - Djjd"
+          },
+          "tituloLabel": {
+            "type": "string",
+            "description": "Em diagnosticos e comportamento: o mesmo label de `titulo`, recalculado no locale da request. O app le `tituloLabel || titulo`."
+          },
+          "detalheLabel": {
+            "type": "string",
+            "description": "Em alergias: o mesmo texto de `detalhe`, recalculado no locale da request. O app le `detalheLabel || detalhe`."
           },
           "destaque": {
             "type": "boolean",
@@ -26674,12 +28129,12 @@
             "description": "Nome do medicamento, texto livre do tutor."
           },
           "detalhe": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Posologia numa linha: dose, unidade, frequencia e via."
           },
           "detalheLabel": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Mesma linha com termos traduzidos no locale da request."
           },
@@ -26688,22 +28143,22 @@
             "description": "Sempre true: e o item cuja falha tem dano imediato."
           },
           "motivo": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Para que serve, texto livre do tutor."
           },
           "diagnostico": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Diagnostico vinculado, ja localizado. Campo PROPRIO e nao fallback de motivo: os dois preenchidos e o caso comum."
           },
           "desde": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "ISO 8601 de dataInicio. O \"desde quando\"."
           },
           "observacoes": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Observacao do tutor (ex.: \"dar junto com a comida\")."
           }
@@ -26735,47 +28190,47 @@
             }
           },
           "sintomasOutros": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "doencasOutras": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "vitalidade": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "alimentacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "hidratacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "fezes": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "urina": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cicloCio": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "observacoes": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "remedios": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "nota": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "So presente com opt-in do tutor (`incluirNotasDiario`, D11.5)."
           },
@@ -26874,11 +28329,11 @@
             "type": "string"
           },
           "dataEmissao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "dataExpiracao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "arquivoIds": {
@@ -26982,7 +28437,7 @@
         "type": "object",
         "properties": {
           "pesoKg": {
-            "type": "object",
+            "type": "number",
             "nullable": true,
             "description": "Peso mais recente. Presente se PESO foi compartilhado."
           },
@@ -27030,7 +28485,7 @@
             }
           },
           "observacoesTutor": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "medicamentosOmitidos": {
@@ -27078,6 +28533,235 @@
           "documentos"
         ]
       },
+      "PrescricaoItemDaAnotacaoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "dose": {
+            "type": "string",
+            "nullable": true
+          },
+          "unidade": {
+            "type": "string",
+            "nullable": true
+          },
+          "frequencia": {
+            "type": "string",
+            "nullable": true
+          },
+          "duracaoDias": {
+            "type": "number",
+            "nullable": true
+          },
+          "instrucoes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "dose",
+          "unidade",
+          "frequencia",
+          "duracaoDias",
+          "instrucoes"
+        ]
+      },
+      "ExameSolicitadoDaAnotacaoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "observacao": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "observacao"
+        ]
+      },
+      "AnexoPrestadorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipoDocumento": {
+            "type": "string",
+            "nullable": true
+          },
+          "nome": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "tamanhoBytes": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "tipoDocumento",
+          "nome",
+          "mimeType",
+          "tamanhoBytes"
+        ]
+      },
+      "AnotacaoDoAcessoDto": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "diagnostico": {
+            "type": "string",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "pesoKg": {
+            "type": "number",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "tipoExame": {
+            "type": "string",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "laudoTexto": {
+            "type": "string",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "dataResultado": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "produtos": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA."
+          },
+          "condicaoPele": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA."
+          },
+          "comportamento": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA/HOTEL."
+          },
+          "dataEntrada": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "dataSaida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "alimentacao": {
+            "type": "string",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "intercorrencias": {
+            "type": "string",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "prescricaoItens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrescricaoItemDaAnotacaoDto"
+            }
+          },
+          "examesSolicitados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExameSolicitadoDaAnotacaoDto"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "empresaNome": {
+            "type": "string"
+          },
+          "profissionalNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "profissionalEspecialidade": {
+            "type": "string",
+            "nullable": true,
+            "description": "Area do profissional: chave do enum do app ou texto livre."
+          },
+          "servicoRealizado": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "criadaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "anexos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnexoPrestadorDto"
+            }
+          }
+        },
+        "required": [
+          "motivo",
+          "diagnostico",
+          "pesoKg",
+          "tipoExame",
+          "laudoTexto",
+          "dataResultado",
+          "produtos",
+          "condicaoPele",
+          "comportamento",
+          "dataEntrada",
+          "dataSaida",
+          "alimentacao",
+          "intercorrencias",
+          "prescricaoItens",
+          "examesSolicitados",
+          "id",
+          "empresaNome",
+          "profissionalNome",
+          "profissionalEspecialidade",
+          "servicoRealizado",
+          "texto",
+          "criadaEm",
+          "anexos"
+        ]
+      },
       "AcessoPrestadorPublicoResponseDto": {
         "type": "object",
         "properties": {
@@ -27107,27 +28791,32 @@
             "type": "string",
             "description": "Especie traduzida no locale da request"
           },
+          "tipoEspecie": {
+            "type": "string",
+            "nullable": true,
+            "description": "Para OUTRO: o tipo que o responsável digitou; especieLabel segue o rótulo do enum"
+          },
           "petFoto": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "petCastrado": {
-            "type": "object",
+            "type": "boolean",
             "nullable": true
           },
           "tipoServico": {
             "type": "string"
           },
           "servicoOutroLabel": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "empresaNome": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "mensagemTutor": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "categorias": {
@@ -27159,12 +28848,20 @@
             "type": "string"
           },
           "snapshotAtualizadoEm": {
-            "type": "object",
+            "format": "date-time",
+            "type": "string",
             "nullable": true,
             "description": "Parte 15: quando o resumo foi regerado pela ultima vez (D11.3). `null` = nunca atualizado desde a criacao, entao vale `criadoEm`."
           },
           "snapshot": {
             "$ref": "#/components/schemas/SnapshotPetCompartilhadoDto"
+          },
+          "anotacoes": {
+            "description": "Todas as anotacoes do acesso, de qualquer prestador. Sem o rastreio de importacao, que e do tutor.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnotacaoDoAcessoDto"
+            }
           }
         },
         "required": [
@@ -27173,17 +28870,606 @@
           "petNome",
           "especie",
           "especieLabel",
+          "tipoEspecie",
+          "petFoto",
+          "petCastrado",
           "tipoServico",
+          "servicoOutroLabel",
+          "empresaNome",
+          "mensagemTutor",
           "categorias",
           "criadoEm",
           "expiraEm",
           "snapshotAtualizadoEm",
-          "snapshot"
+          "snapshot",
+          "anotacoes"
         ]
       },
       "VincularCompartilhamentoDto": {
         "type": "object",
         "properties": {}
+      },
+      "AcessoParceiroDetalheDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "codigo": {
+            "type": "string",
+            "description": "Codigo publico de 6 digitos."
+          },
+          "ficha": {
+            "description": "So no ATIVO e so quando ha alerta, motivo, evidencia ou serie de peso. Ausencia nao e vazio.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FichaEncaminhamentoDto"
+              }
+            ]
+          },
+          "petNome": {
+            "type": "string"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CACHORRO",
+              "GATO",
+              "AVE",
+              "ROEDOR",
+              "COELHO",
+              "PEIXE",
+              "REPTIL",
+              "OUTRO"
+            ]
+          },
+          "especieLabel": {
+            "type": "string",
+            "description": "Especie traduzida no locale da request."
+          },
+          "tipoEspecie": {
+            "type": "string",
+            "nullable": true,
+            "description": "Para OUTRO: o tipo que o responsável digitou; especieLabel segue o rótulo do enum"
+          },
+          "petFoto": {
+            "type": "string",
+            "nullable": true
+          },
+          "petCastrado": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "So no ATIVO."
+          },
+          "tipoServico": {
+            "type": "string",
+            "enum": [
+              "BANHO",
+              "TOSA",
+              "CONSULTA",
+              "EXAME",
+              "HOTEL",
+              "OUTRO"
+            ]
+          },
+          "servicoOutroLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Obrigatorio na criacao com tipoServico OUTRO."
+          },
+          "empresaNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "mensagemTutor": {
+            "type": "string",
+            "nullable": true,
+            "description": "So no ATIVO."
+          },
+          "categorias": {
+            "type": "array",
+            "description": "So no ATIVO. O que o tutor escolheu compartilhar.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ALERGIAS",
+                "VACINAS",
+                "MEDICAMENTOS",
+                "PESO",
+                "COMPORTAMENTO",
+                "DIAGNOSTICOS",
+                "OBSERVACOES",
+                "DIARIO",
+                "DOCUMENTOS",
+                "TRATAMENTOS"
+              ]
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ATIVO",
+              "EXPIRADO",
+              "REVOGADO"
+            ]
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Criacao do acesso."
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshotAtualizadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "So no ATIVO. Quando o resumo foi regerado; null = nunca desde a criacao."
+          },
+          "revogadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "So no encerrado."
+          },
+          "vinculadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "snapshot": {
+            "nullable": true,
+            "description": "Resumo congelado, rotulado no locale da request. null no encerrado.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SnapshotPetCompartilhadoDto"
+              }
+            ]
+          },
+          "anotacoes": {
+            "description": "Mais recente primeiro. No encerrado, so as da propria empresa.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnotacaoDoAcessoDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "codigo",
+          "petNome",
+          "especie",
+          "especieLabel",
+          "tipoEspecie",
+          "petFoto",
+          "tipoServico",
+          "servicoOutroLabel",
+          "empresaNome",
+          "status",
+          "criadoEm",
+          "expiraEm",
+          "vinculadoEm",
+          "snapshot",
+          "anotacoes"
+        ]
+      },
+      "ReivindicacaoAcessoResultadoDto": {
+        "type": "object",
+        "properties": {
+          "reivindicado": {
+            "type": "boolean",
+            "description": "Sempre true: recusa sai como erro HTTP."
+          },
+          "vinculado": {
+            "type": "boolean",
+            "description": "true quando o parceiro ja aprovado vinculou na hora."
+          },
+          "vinculaNaAprovacao": {
+            "type": "boolean",
+            "description": "true quando o parceiro em analise guardou o codigo para a aprovacao."
+          },
+          "compartilhamento": {
+            "description": "So quando vinculado=true: o mesmo detalhe do `vincular`.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AcessoParceiroDetalheDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "reivindicado",
+          "vinculado",
+          "vinculaNaAprovacao"
+        ]
+      },
+      "ReivindicacaoDaListaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "petNome": {
+            "type": "string"
+          },
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "AGUARDANDO_APROVACAO",
+              "VINCULADO",
+              "VENCIDO",
+              "ENCERRADO",
+              "JA_VINCULADO"
+            ],
+            "description": "Fechada: o resultado gravado. Aberta: AGUARDANDO_APROVACAO, ou ja a situacao provisoria (VENCIDO, ENCERRADO, JA_VINCULADO, VINCULADO) quando o acesso mudou antes da aprovacao."
+          },
+          "criadaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvidaEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "null enquanto aberta."
+          }
+        },
+        "required": [
+          "id",
+          "petNome",
+          "situacao",
+          "criadaEm",
+          "resolvidaEm"
+        ]
+      },
+      "ReivindicacoesAcessoDto": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "description": "Mais recente primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReivindicacaoDaListaDto"
+            }
+          }
+        },
+        "required": [
+          "itens"
+        ]
+      },
+      "AcessoParceiroItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "petNome": {
+            "type": "string"
+          },
+          "especie": {
+            "type": "string",
+            "enum": [
+              "CACHORRO",
+              "GATO",
+              "AVE",
+              "ROEDOR",
+              "COELHO",
+              "PEIXE",
+              "REPTIL",
+              "OUTRO"
+            ]
+          },
+          "especieLabel": {
+            "type": "string",
+            "description": "Especie traduzida no locale da request."
+          },
+          "tipoEspecie": {
+            "type": "string",
+            "nullable": true,
+            "description": "Para OUTRO: o tipo que o responsável digitou; especieLabel segue o rótulo do enum"
+          },
+          "petFoto": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoServico": {
+            "type": "string",
+            "enum": [
+              "BANHO",
+              "TOSA",
+              "CONSULTA",
+              "EXAME",
+              "HOTEL",
+              "OUTRO"
+            ]
+          },
+          "servicoOutroLabel": {
+            "type": "string",
+            "nullable": true,
+            "description": "Obrigatorio na criacao com tipoServico OUTRO."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ATIVO",
+              "EXPIRADO",
+              "REVOGADO"
+            ]
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "vinculadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Criacao do acesso."
+          },
+          "totalAnotacoes": {
+            "type": "number",
+            "description": "Todas as anotacoes do acesso."
+          },
+          "totalDocumentos": {
+            "type": "number",
+            "description": "Documentos que o tutor liberou."
+          },
+          "temDiario": {
+            "type": "boolean",
+            "description": "DIARIO esta nas categorias consentidas."
+          },
+          "snapshotAtualizadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Quando o resumo foi regerado. null = ainda e o da criacao."
+          }
+        },
+        "required": [
+          "id",
+          "petNome",
+          "especie",
+          "especieLabel",
+          "tipoEspecie",
+          "petFoto",
+          "tipoServico",
+          "servicoOutroLabel",
+          "status",
+          "expiraEm",
+          "vinculadoEm",
+          "criadoEm",
+          "totalAnotacoes",
+          "totalDocumentos",
+          "temDiario",
+          "snapshotAtualizadoEm"
+        ]
+      },
+      "MetaAcessosParceiroDto": {
+        "type": "object",
+        "properties": {
+          "proximoCursor": {
+            "type": "string",
+            "description": "Token opaco para `?cursor=` da proxima pagina. Ausente quando nao ha mais."
+          }
+        }
+      },
+      "PaginaAcessosParceiroDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcessoParceiroItemDto"
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaAcessosParceiroDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "AnotacaoCriadaDto": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "diagnostico": {
+            "type": "string",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "pesoKg": {
+            "type": "number",
+            "nullable": true,
+            "description": "CONSULTA."
+          },
+          "tipoExame": {
+            "type": "string",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "laudoTexto": {
+            "type": "string",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "dataResultado": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "EXAME."
+          },
+          "produtos": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA."
+          },
+          "condicaoPele": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA."
+          },
+          "comportamento": {
+            "type": "string",
+            "nullable": true,
+            "description": "BANHO/TOSA/HOTEL."
+          },
+          "dataEntrada": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "dataSaida": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "alimentacao": {
+            "type": "string",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "intercorrencias": {
+            "type": "string",
+            "nullable": true,
+            "description": "HOTEL."
+          },
+          "prescricaoItens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrescricaoItemDaAnotacaoDto"
+            }
+          },
+          "examesSolicitados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExameSolicitadoDaAnotacaoDto"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "compartilhamentoId": {
+            "type": "string"
+          },
+          "empresaNome": {
+            "type": "string",
+            "description": "Nome do parceiro no cadastro; o body e ignorado."
+          },
+          "profissionalNome": {
+            "type": "string",
+            "nullable": true
+          },
+          "profissionalEspecialidade": {
+            "type": "string",
+            "nullable": true,
+            "description": "Area do profissional, devolvida para o app conferir que foi salva."
+          },
+          "servicoRealizado": {
+            "type": "string"
+          },
+          "texto": {
+            "type": "string"
+          },
+          "lida": {
+            "type": "boolean",
+            "description": "Nasce false."
+          },
+          "criadaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "anexos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AnexoPrestadorDto"
+            }
+          }
+        },
+        "required": [
+          "motivo",
+          "diagnostico",
+          "pesoKg",
+          "tipoExame",
+          "laudoTexto",
+          "dataResultado",
+          "produtos",
+          "condicaoPele",
+          "comportamento",
+          "dataEntrada",
+          "dataSaida",
+          "alimentacao",
+          "intercorrencias",
+          "prescricaoItens",
+          "examesSolicitados",
+          "id",
+          "compartilhamentoId",
+          "empresaNome",
+          "profissionalNome",
+          "profissionalEspecialidade",
+          "servicoRealizado",
+          "texto",
+          "lida",
+          "criadaEm",
+          "anexos"
+        ]
+      },
+      "UrlAnexoPrestadorDto": {
+        "type": "object",
+        "properties": {
+          "signedUrl": {
+            "type": "string",
+            "description": "URL assinada do storage."
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Validade da URL, em segundos."
+          }
+        },
+        "required": [
+          "signedUrl",
+          "expiresIn"
+        ]
+      },
+      "UrlArquivoCompartilhadoDto": {
+        "type": "object",
+        "properties": {
+          "signedUrl": {
+            "type": "string",
+            "description": "URL assinada do storage. Com `?download=1`, baixa com `nomeArquivo`."
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Validade da URL, em segundos."
+          },
+          "nomeArquivo": {
+            "type": "string",
+            "description": "Nome para salvar, com extensao quando conhecida."
+          },
+          "mimeType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "signedUrl",
+          "expiresIn",
+          "nomeArquivo",
+          "mimeType"
+        ]
       },
       "RevogarAdminDto": {
         "type": "object",
@@ -27405,6 +29691,82 @@
           "capacidadeDeSaque"
         ]
       },
+      "ItemExtratoCarteiraDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string",
+            "enum": [
+              "CREDITO_COMISSAO",
+              "ESTORNO",
+              "DEBITO_SAQUE",
+              "AJUSTE"
+            ]
+          },
+          "valorCentavos": {
+            "type": "number",
+            "description": "Em centavos, com sinal: credito de comissao positivo; debito de saque e estorno por refund negativos; estorno de saque que falhou positivo; ajuste com o sinal dado pelo admin."
+          },
+          "periodicidade": {
+            "type": "string",
+            "enum": [
+              "MENSAL",
+              "ANUAL"
+            ],
+            "nullable": true,
+            "description": "So no credito de comissao."
+          },
+          "origem": {
+            "type": "string",
+            "enum": [
+              "INITIAL_PURCHASE",
+              "RENEWAL",
+              "UPGRADE",
+              "REFUND",
+              "CADASTRO",
+              "CADASTRO_RETROATIVO"
+            ],
+            "nullable": true,
+            "description": "No credito de comissao e no estorno por refund (REFUND); null no saque, no estorno de saque e no ajuste."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "tipo",
+          "valorCentavos",
+          "periodicidade",
+          "origem",
+          "createdAt"
+        ]
+      },
+      "ExtratoCarteiraDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Mais recente primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemExtratoCarteiraDto"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true,
+            "description": "Id para `?cursor=` da proxima pagina. `null` quando nao ha mais."
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ]
+      },
       "SetPixDto": {
         "type": "object",
         "properties": {
@@ -27414,6 +29776,22 @@
           }
         },
         "required": [
+          "chavePix"
+        ]
+      },
+      "ChavePixAtualizadaDto": {
+        "type": "object",
+        "properties": {
+          "parceiroId": {
+            "type": "string"
+          },
+          "chavePix": {
+            "type": "string",
+            "description": "A chave recem gravada, sem mascara (so o DONO chega aqui)."
+          }
+        },
+        "required": [
+          "parceiroId",
           "chavePix"
         ]
       },
@@ -27428,6 +29806,133 @@
         },
         "required": [
           "valorCentavos"
+        ]
+      },
+      "SaqueSolicitadoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "valorCentavos": {
+            "type": "number",
+            "description": "Em centavos."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "PAGO",
+              "FALHA"
+            ],
+            "description": "Nasce PENDENTE."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "valorCentavos",
+          "status",
+          "createdAt"
+        ]
+      },
+      "SaqueDaListaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "valorCentavos": {
+            "type": "number",
+            "description": "Em centavos."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "PAGO",
+              "FALHA"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "liquidadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Quando foi pago ou falhou."
+          },
+          "motivoFalha": {
+            "type": "string",
+            "nullable": true,
+            "description": "So em FALHA."
+          }
+        },
+        "required": [
+          "id",
+          "valorCentavos",
+          "status",
+          "createdAt",
+          "liquidadoEm",
+          "motivoFalha"
+        ]
+      },
+      "SaqueDetalheDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "valorCentavos": {
+            "type": "number",
+            "description": "Em centavos."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDENTE",
+              "PAGO",
+              "FALHA"
+            ]
+          },
+          "chavePixSnapshot": {
+            "type": "string",
+            "description": "Chave PIX copiada no momento do pedido. Inteira para o DONO; o OPERADOR recebe so os 4 ultimos."
+          },
+          "comprovante": {
+            "type": "string",
+            "nullable": true,
+            "description": "Comprovante informado pelo admin ao pagar."
+          },
+          "motivoFalha": {
+            "type": "string",
+            "nullable": true,
+            "description": "So em FALHA."
+          },
+          "liquidadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "valorCentavos",
+          "status",
+          "chavePixSnapshot",
+          "comprovante",
+          "motivoFalha",
+          "liquidadoEm",
+          "createdAt"
         ]
       },
       "PagarSaqueDto": {
@@ -28430,7 +30935,7 @@
             "description": "Nome que aparece na pagina publica"
           },
           "descricao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "idiomaDosTextos": {
@@ -28450,53 +30955,53 @@
             "description": "Fuso IANA, ex.: America/Sao_Paulo (nunca offset fixo)"
           },
           "telefonePublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "whatsappPublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "telefonePlantao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Plantao fora do expediente; null = sem plantao"
           },
           "emailPublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Contato publico; nao e o e-mail da conta"
           },
           "site": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cep": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "logradouro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "numero": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "complemento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "bairro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cidade": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "2 letras"
           },
@@ -28505,11 +31010,11 @@
             "description": "ISO 3166-1 alfa-2; padrao BR"
           },
           "latitude": {
-            "type": "object",
+            "type": "number",
             "nullable": true
           },
           "longitude": {
-            "type": "object",
+            "type": "number",
             "nullable": true
           },
           "mostrarMapa": {
@@ -28521,11 +31026,11 @@
             "description": "Logradouro, numero, complemento e CEP na pagina publica. false = so bairro, cidade e UF (e sem mapa). Omitido: mantem o que esta gravado; no primeiro salvamento, false para VETERINARIO (autonomo) e true para o resto"
           },
           "mensagemForaDoHorario": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "orientacaoEmergencia": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "publicado": {
@@ -28706,7 +31211,7 @@
             "description": "Nome que aparece na pagina publica"
           },
           "descricao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "idiomaDosTextos": {
@@ -28726,53 +31231,53 @@
             "description": "Fuso IANA, ex.: America/Sao_Paulo (nunca offset fixo)"
           },
           "telefonePublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "whatsappPublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "telefonePlantao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Plantao fora do expediente; null = sem plantao"
           },
           "emailPublico": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Contato publico; nao e o e-mail da conta"
           },
           "site": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cep": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "logradouro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "numero": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "complemento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "bairro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cidade": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "2 letras"
           },
@@ -28781,11 +31286,11 @@
             "description": "ISO 3166-1 alfa-2; padrao BR"
           },
           "latitude": {
-            "type": "object",
+            "type": "number",
             "nullable": true
           },
           "longitude": {
-            "type": "object",
+            "type": "number",
             "nullable": true
           },
           "mostrarMapa": {
@@ -28797,11 +31302,11 @@
             "description": "Logradouro, numero, complemento e CEP na pagina publica. false = so bairro, cidade e UF (e sem mapa). Omitido: mantem o que esta gravado; no primeiro salvamento, false para VETERINARIO (autonomo) e true para o resto"
           },
           "mensagemForaDoHorario": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "orientacaoEmergencia": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         },
@@ -28821,22 +31326,22 @@
             "type": "boolean"
           },
           "abre": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "08:00"
           },
           "fecha": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "18:00",
             "description": "24:00 = fim do dia"
           },
           "intervaloInicio": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "intervaloFim": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         },
@@ -28876,11 +31381,11 @@
             "type": "boolean"
           },
           "abre": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "fecha": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         },
@@ -29353,12 +31858,12 @@
             "default": "NENHUM"
           },
           "registro": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Numero do registro; a API guarda so os digitos"
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "UF do conselho, 2 letras"
           },
@@ -29379,7 +31884,7 @@
             "type": "boolean"
           },
           "usuarioId": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Membro ativo da equipe, quando o profissional tem login"
           }
@@ -29404,12 +31909,12 @@
             "default": "NENHUM"
           },
           "registro": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Numero do registro; a API guarda so os digitos"
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "UF do conselho, 2 letras"
           },
@@ -29430,7 +31935,7 @@
             "type": "boolean"
           },
           "usuarioId": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Membro ativo da equipe, quando o profissional tem login"
           },
@@ -30207,21 +32712,21 @@
             "type": "string"
           },
           "cpf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Com ou sem mascara; a API guarda so os digitos e confere o verificador"
           },
           "telefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Brasileiro com DDD (a API poe o 55) ou internacional com \"+\". Volta so digitos com DDI"
           },
           "telefoneSecundario": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "email": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "contatoPreferido": {
@@ -30234,45 +32739,45 @@
             "default": "WHATSAPP"
           },
           "cep": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "logradouro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "numero": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "complemento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "bairro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cidade": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "UF ou regiao (cliente de fora do Brasil)"
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "emergenciaNome": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Contato de emergencia (hotel)"
           },
           "emergenciaTelefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         },
@@ -30347,11 +32852,11 @@
             "description": "OUTRO exige `especieOutra` (equino, furao...)"
           },
           "especieOutra": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "raca": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "sexo": {
@@ -30364,7 +32869,7 @@
             "description": "null = nao informado"
           },
           "nascimento": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "AAAA-MM-DD"
           },
@@ -30373,7 +32878,7 @@
             "description": "true quando a data veio de \"3 anos\""
           },
           "castrado": {
-            "type": "object",
+            "type": "boolean",
             "nullable": true,
             "description": "null = nao informado (D3)"
           },
@@ -30389,19 +32894,19 @@
             "nullable": true
           },
           "pesoKg": {
-            "type": "object",
+            "type": "number",
             "nullable": true,
             "minimum": 0.01,
             "maximum": 9999.99,
             "description": "Ultimo peso aferido, em kg"
           },
           "microchip": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Guardado em maiusculas, sem espacos nem tracos"
           },
           "pelagem": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "alertas": {
@@ -30442,11 +32947,11 @@
             "description": "OUTRO exige `especieOutra` (equino, furao...)"
           },
           "especieOutra": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "raca": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "sexo": {
@@ -30459,7 +32964,7 @@
             "description": "null = nao informado"
           },
           "nascimento": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "AAAA-MM-DD"
           },
@@ -30468,7 +32973,7 @@
             "description": "true quando a data veio de \"3 anos\""
           },
           "castrado": {
-            "type": "object",
+            "type": "boolean",
             "nullable": true,
             "description": "null = nao informado (D3)"
           },
@@ -30484,19 +32989,19 @@
             "nullable": true
           },
           "pesoKg": {
-            "type": "object",
+            "type": "number",
             "nullable": true,
             "minimum": 0.01,
             "maximum": 9999.99,
             "description": "Ultimo peso aferido, em kg"
           },
           "microchip": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Guardado em maiusculas, sem espacos nem tracos"
           },
           "pelagem": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         }
@@ -30575,21 +33080,21 @@
             "type": "string"
           },
           "cpf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Com ou sem mascara; a API guarda so os digitos e confere o verificador"
           },
           "telefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Brasileiro com DDD (a API poe o 55) ou internacional com \"+\". Volta so digitos com DDI"
           },
           "telefoneSecundario": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "email": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "contatoPreferido": {
@@ -30602,45 +33107,45 @@
             "default": "WHATSAPP"
           },
           "cep": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "logradouro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "numero": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "complemento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "bairro": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "cidade": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "uf": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "UF ou regiao (cliente de fora do Brasil)"
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "emergenciaNome": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Contato de emergencia (hotel)"
           },
           "emergenciaTelefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           }
         }
@@ -30697,15 +33202,15 @@
             "type": "string"
           },
           "telefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "documento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "relacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Ex.: vizinho, filha, motorista"
           }
@@ -30721,15 +33226,15 @@
             "type": "string"
           },
           "telefone": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "documento": {
-            "type": "object",
+            "type": "string",
             "nullable": true
           },
           "relacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "description": "Ex.: vizinho, filha, motorista"
           }
@@ -31428,6 +33933,371 @@
           }
         }
       },
+      "AbrirFichaDeEmergenciaDto": {
+        "type": "object",
+        "properties": {
+          "publicSlug": {
+            "type": "string",
+            "description": "publicSlug lido no QR da coleira (carteirinha)"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 300,
+            "description": "Por que a ficha está sendo aberta (vai para o dono do pet ver)."
+          }
+        },
+        "required": [
+          "publicSlug",
+          "motivo"
+        ]
+      },
+      "Especie": {
+        "type": "string",
+        "enum": [
+          "CACHORRO",
+          "GATO",
+          "AVE",
+          "ROEDOR",
+          "COELHO",
+          "PEIXE",
+          "REPTIL",
+          "OUTRO"
+        ]
+      },
+      "Sexo": {
+        "type": "string",
+        "enum": [
+          "MACHO",
+          "FEMEA"
+        ]
+      },
+      "PesoDaFichaDto": {
+        "type": "object",
+        "properties": {
+          "kg": {
+            "type": "number"
+          },
+          "em": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kg",
+          "em"
+        ]
+      },
+      "CategoriaAlergia": {
+        "type": "string",
+        "enum": [
+          "ALIMENTAR",
+          "AMBIENTAL",
+          "MEDICAMENTOSA",
+          "INSETO",
+          "CONTATO",
+          "OUTRA"
+        ]
+      },
+      "SeveridadeAlergia": {
+        "type": "string",
+        "enum": [
+          "LEVE",
+          "MODERADA",
+          "GRAVE",
+          "ANAFILATICA"
+        ]
+      },
+      "AlergiaDaFichaDto": {
+        "type": "object",
+        "properties": {
+          "gatilho": {
+            "type": "string"
+          },
+          "categoria": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoriaAlergia"
+              }
+            ]
+          },
+          "reacao": {
+            "type": "string",
+            "nullable": true
+          },
+          "severidade": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SeveridadeAlergia"
+              }
+            ]
+          }
+        },
+        "required": [
+          "gatilho",
+          "categoria",
+          "reacao",
+          "severidade"
+        ]
+      },
+      "TratamentoDaFichaDto": {
+        "type": "object",
+        "properties": {
+          "medicamento": {
+            "type": "string"
+          },
+          "dose": {
+            "type": "string",
+            "nullable": true
+          },
+          "unidade": {
+            "type": "string",
+            "nullable": true
+          },
+          "frequencia": {
+            "type": "string"
+          },
+          "via": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "medicamento",
+          "dose",
+          "unidade",
+          "frequencia",
+          "via"
+        ]
+      },
+      "CategoriaDiagnostico": {
+        "type": "string",
+        "enum": [
+          "FELV",
+          "FIV",
+          "CANCER",
+          "DIABETES",
+          "CARDIO",
+          "RENAL",
+          "HEPATICA",
+          "ENDOCRINA",
+          "ORTOPEDICA",
+          "NEUROLOGICA",
+          "DERMATOLOGICA",
+          "AUTOIMUNE",
+          "OUTRA"
+        ]
+      },
+      "CondicaoDaFichaDto": {
+        "type": "object",
+        "properties": {
+          "categoria": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoriaDiagnostico"
+              }
+            ]
+          },
+          "subtipo": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "categoria",
+          "subtipo"
+        ]
+      },
+      "FichaDeEmergenciaDto": {
+        "type": "object",
+        "properties": {
+          "acessoId": {
+            "type": "string",
+            "description": "Id do registro desta abertura (AcessoEmergencia)."
+          },
+          "petNome": {
+            "type": "string"
+          },
+          "foto": {
+            "type": "string",
+            "nullable": true
+          },
+          "especie": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Especie"
+              }
+            ]
+          },
+          "tipoEspecie": {
+            "type": "string",
+            "nullable": true,
+            "description": "Para OUTRO: o tipo digitado pelo responsável."
+          },
+          "sexo": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Sexo"
+              }
+            ]
+          },
+          "castrado": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "nascimento": {
+            "type": "string",
+            "nullable": true,
+            "description": "Data de nascimento (YYYY-MM-DD)."
+          },
+          "peso": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PesoDaFichaDto"
+              }
+            ]
+          },
+          "alergias": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AlergiaDaFichaDto"
+            }
+          },
+          "tratamentosContinuos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TratamentoDaFichaDto"
+            }
+          },
+          "condicoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CondicaoDaFichaDto"
+            }
+          }
+        },
+        "required": [
+          "acessoId",
+          "petNome",
+          "foto",
+          "especie",
+          "tipoEspecie",
+          "sexo",
+          "castrado",
+          "nascimento",
+          "peso",
+          "alergias",
+          "tratamentosContinuos",
+          "condicoes"
+        ]
+      },
+      "ClinicaDoAcessoDto": {
+        "type": "object",
+        "properties": {
+          "parceiroId": {
+            "type": "string",
+            "description": "Para bloquear a clínica: POST/DELETE /tutor/clinica/clinicas/{parceiroId}/bloquear (D9)."
+          },
+          "nome": {
+            "type": "string",
+            "description": "Nome público no momento da abertura (gravado, não muda depois)."
+          },
+          "telefone": {
+            "type": "string",
+            "nullable": true,
+            "description": "Telefone público ou de plantão no momento da abertura (gravado, não muda depois)."
+          },
+          "bloqueada": {
+            "type": "boolean",
+            "description": "O responsável bloqueou esta clínica: ela não abre mais a ficha nem propõe vínculo."
+          }
+        },
+        "required": [
+          "parceiroId",
+          "nome",
+          "telefone",
+          "bloqueada"
+        ]
+      },
+      "AcessoEmergenciaDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "abertoEm": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "motivo": {
+            "type": "string"
+          },
+          "clinica": {
+            "$ref": "#/components/schemas/ClinicaDoAcessoDto"
+          },
+          "profissionalNome": {
+            "type": "string"
+          },
+          "profissionalCrmv": {
+            "type": "string",
+            "description": "CRMV-UF e número."
+          }
+        },
+        "required": [
+          "id",
+          "abertoEm",
+          "motivo",
+          "clinica",
+          "profissionalNome",
+          "profissionalCrmv"
+        ]
+      },
+      "AcessosEmergenciaDoPetDto": {
+        "type": "object",
+        "properties": {
+          "liberada": {
+            "type": "boolean",
+            "description": "A ficha deste pet está ligada (padrão) ou desligada pelo dono."
+          },
+          "acessos": {
+            "description": "Até 50, as mais novas primeiro.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AcessoEmergenciaDto"
+            }
+          }
+        },
+        "required": [
+          "liberada",
+          "acessos"
+        ]
+      },
+      "FichaLiberadaDto": {
+        "type": "object",
+        "properties": {
+          "liberada": {
+            "type": "boolean",
+            "description": "false desliga a ficha de emergência deste pet; true religa."
+          }
+        },
+        "required": [
+          "liberada"
+        ]
+      },
+      "FichaLiberadaRespostaDto": {
+        "type": "object",
+        "properties": {
+          "liberada": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "liberada"
+        ]
+      },
       "SalaDto": {
         "type": "object",
         "properties": {
@@ -31936,7 +34806,7 @@
             ]
           },
           "detalhe": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 200,
             "description": "Texto da clinica (\"Reuniao de equipe\")"
@@ -31956,7 +34826,7 @@
             }
           },
           "repeteAte": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "2026-12-31",
             "description": "Ultimo dia da serie (inclusive); null = sem fim"
@@ -32007,7 +34877,7 @@
             ]
           },
           "detalhe": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 200,
             "description": "Texto da clinica (\"Reuniao de equipe\")"
@@ -32027,7 +34897,7 @@
             }
           },
           "repeteAte": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "2026-12-31",
             "description": "Ultimo dia da serie (inclusive); null = sem fim"
@@ -32296,13 +35166,13 @@
             "description": "false = folga nesse dia"
           },
           "inicio": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "08:00",
             "description": "HH:mm na parede do estabelecimento"
           },
           "fim": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "example": "18:00",
             "description": "HH:mm; 24:00 = ate a meia-noite"
@@ -33116,7 +35986,7 @@
             }
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 500
           }
@@ -33178,7 +36048,7 @@
             "description": "Marcado por cima da grade (padrao: so com origem ENCAIXE)"
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 500,
             "description": "Interna da clinica: nunca vai ao app"
@@ -33354,7 +36224,7 @@
             "maxLength": 60
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "nullable": true,
             "maxLength": 500,
             "description": "`null` apaga"
@@ -35129,7 +37999,7 @@
             "description": "Intervalo entre administracoes, em horas"
           },
           "duracaoUsualDias": {
-            "type": "object",
+            "type": "number",
             "minimum": 1,
             "maximum": 3650,
             "nullable": true
@@ -35140,7 +38010,7 @@
             "description": "Contraindicado na especie"
           },
           "nota": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           },
@@ -35226,7 +38096,7 @@
             "default": "NENHUM"
           },
           "listaControle": {
-            "type": "object",
+            "type": "string",
             "maxLength": 10,
             "nullable": true,
             "example": "C1"
@@ -35309,12 +38179,12 @@
             }
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "maxLength": 1000,
             "nullable": true
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true,
             "description": "Bula, referencia, monografia"
@@ -35414,7 +38284,7 @@
             "default": "NENHUM"
           },
           "listaControle": {
-            "type": "object",
+            "type": "string",
             "maxLength": 10,
             "nullable": true,
             "example": "C1"
@@ -35497,12 +38367,12 @@
             }
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "maxLength": 1000,
             "nullable": true
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true,
             "description": "Bula, referencia, monografia"
@@ -35536,7 +38406,7 @@
             "example": "V10 (múltipla canina)"
           },
           "fabricante": {
-            "type": "object",
+            "type": "string",
             "maxLength": 120,
             "nullable": true
           },
@@ -35623,14 +38493,14 @@
             "default": "FIXA"
           },
           "idadeMinimaUltimaDoseFilhoteDias": {
-            "type": "object",
+            "type": "number",
             "minimum": 0,
             "maximum": 3650,
             "nullable": true,
             "description": "Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA"
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           },
@@ -35661,7 +38531,7 @@
             "example": "V10 (múltipla canina)"
           },
           "fabricante": {
-            "type": "object",
+            "type": "string",
             "maxLength": 120,
             "nullable": true
           },
@@ -35748,14 +38618,14 @@
             "default": "FIXA"
           },
           "idadeMinimaUltimaDoseFilhoteDias": {
-            "type": "object",
+            "type": "number",
             "minimum": 0,
             "maximum": 3650,
             "nullable": true,
             "description": "Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA"
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           },
@@ -35837,7 +38707,7 @@
             "description": "Letras, numeros, ponto e hifen"
           },
           "codigoExterno": {
-            "type": "object",
+            "type": "string",
             "maxLength": 40,
             "nullable": true,
             "description": "Codigo de nomenclatura externa (VeNom)"
@@ -35884,7 +38754,7 @@
             "description": "Letras, numeros, ponto e hifen"
           },
           "codigoExterno": {
-            "type": "object",
+            "type": "string",
             "maxLength": 40,
             "nullable": true,
             "description": "Codigo de nomenclatura externa (VeNom)"
@@ -36399,7 +39269,7 @@
             "default": 0
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           }
@@ -36481,7 +39351,7 @@
             "default": 0
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           },
@@ -36596,7 +39466,7 @@
             "default": "NENHUM"
           },
           "listaControle": {
-            "type": "object",
+            "type": "string",
             "maxLength": 10,
             "nullable": true,
             "example": "C1"
@@ -36679,12 +39549,12 @@
             }
           },
           "observacao": {
-            "type": "object",
+            "type": "string",
             "maxLength": 1000,
             "nullable": true
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true,
             "description": "Bula, referencia, monografia"
@@ -36754,7 +39624,7 @@
             "example": "V10 (múltipla canina)"
           },
           "fabricante": {
-            "type": "object",
+            "type": "string",
             "maxLength": 120,
             "nullable": true
           },
@@ -36841,14 +39711,14 @@
             "default": "FIXA"
           },
           "idadeMinimaUltimaDoseFilhoteDias": {
-            "type": "object",
+            "type": "number",
             "minimum": 0,
             "maximum": 3650,
             "nullable": true,
             "description": "Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA"
           },
           "fonte": {
-            "type": "object",
+            "type": "string",
             "maxLength": 300,
             "nullable": true
           },
@@ -36974,7 +39844,7 @@
             "description": "Letras, numeros, ponto e hifen"
           },
           "codigoExterno": {
-            "type": "object",
+            "type": "string",
             "maxLength": 40,
             "nullable": true,
             "description": "Codigo de nomenclatura externa (VeNom)"
@@ -38807,6 +41677,168 @@
       "CreateLeadTesteDto": {
         "type": "object",
         "properties": {}
+      },
+      "CodigoClinico": {
+        "type": "string",
+        "enum": [
+          "HORARIO_INDISPONIVEL",
+          "RESERVA_EXPIRADA",
+          "FORA_DO_PRAZO_DE_CANCELAMENTO",
+          "AGENDAMENTO_ENCERRADO",
+          "PRE_CONSULTA_FECHADA",
+          "OFERTA_EXPIRADA",
+          "VAGA_JA_PREENCHIDA",
+          "CLINICA_NAO_AGENDA_PELO_APP",
+          "PET_SEM_ACESSO",
+          "PET_INATIVO",
+          "SOMENTE_LEITURA",
+          "SELECAO_PETS_PENDENTE",
+          "FOTO_INVALIDA",
+          "MODULO_INATIVO",
+          "MODULO_SOMENTE_LEITURA",
+          "CHAVE_DE_IDEMPOTENCIA_REUSADA",
+          "IDEMPOTENCIA_EM_ANDAMENTO",
+          "IDEMPOTENCIA_CHAVE_INVALIDA",
+          "TAXA_PUBLICA_EXCEDIDA",
+          "CAPTCHA_INVALIDO",
+          "CAPTCHA_INDISPONIVEL",
+          "SEM_PERMISSAO",
+          "CRMV_OBRIGATORIO",
+          "CPF_INVALIDO",
+          "CPF_JA_CADASTRADO",
+          "TELEFONE_INVALIDO",
+          "ESPECIE_OUTRA_OBRIGATORIA",
+          "PACIENTE_INATIVO",
+          "CADASTRO_MESCLADO",
+          "MESCLA_INVALIDA",
+          "CLIENTE_ANONIMIZADO",
+          "CLIENTE_OBRIGATORIO",
+          "ESPECIE_IMUTAVEL",
+          "PROPOSTA_NAO_ENCONTRADA",
+          "PROPOSTA_JA_RESGATADA",
+          "VINCULO_EXPIRADO",
+          "VINCULO_INCOMPLETO",
+          "ESPECIE_DIFERENTE",
+          "CLIENTE_SEM_EMAIL",
+          "PROPOSTA_TETO_DIARIO",
+          "RESGATE_TENTATIVAS_EXCEDIDAS",
+          "VINCULO_JA_ATIVO",
+          "REGISTRO_DA_CLINICA",
+          "TIPO_NAO_OFERTAVEL_ONLINE",
+          "TIPO_NOME_EM_USO",
+          "SALA_NOME_EM_USO",
+          "SALA_INATIVA",
+          "POLITICA_FORA_DO_LIMITE",
+          "EXPEDIENTE_INVALIDO",
+          "BLOQUEIO_INVALIDO",
+          "BLOQUEIO_NAO_RECORRENTE",
+          "BLOQUEIO_SEM_OCORRENCIA",
+          "AGENDA_PERIODO_INVALIDO",
+          "BLOQUEIO_SERIES_NO_LIMITE",
+          "BLOQUEIO_OCORRENCIAS_DEMAIS",
+          "BLOQUEIO_EXCECOES_NO_LIMITE",
+          "BLOQUEIO_TAXA_EXCEDIDA",
+          "CONFLITO_BLOQUEANTE",
+          "AGENDAMENTO_ALTERADO",
+          "DESFAZER_EXPIRADO",
+          "AGENDAMENTO_STATUS_INVALIDO",
+          "AGENDAMENTO_INVALIDO",
+          "PROFISSIONAL_INDISPONIVEL",
+          "TIPO_INATIVO",
+          "AGENDAMENTO_TAXA_EXCEDIDA",
+          "AGENDA_LEITURA_EXCEDIDA",
+          "AGENDA_SUGESTOES_TAXA_EXCEDIDA",
+          "AGENDA_DATA_FORA_DO_LIMITE",
+          "CATALOGO_NOME_EM_USO",
+          "DIAGNOSTICO_CODIGO_EM_USO",
+          "DOSE_FAIXA_INVALIDA",
+          "DOSE_ESPECIE_REPETIDA",
+          "VACINA_SERIE_INVALIDA",
+          "CATALOGO_TRADUCAO_INVALIDA",
+          "CATALOGO_SINONIMOS_DEMAIS",
+          "LOTE_VENCIDO",
+          "VIA_INVALIDA",
+          "IDADE_MINIMA_NAO_ATINGIDA",
+          "VACINA_FORA_DA_ESPECIE",
+          "VACINA_INATIVA",
+          "APLICACAO_REPETIDA",
+          "APLICACAO_FORA_DE_ORDEM",
+          "APLICACAO_DATA_INVALIDA",
+          "APLICACAO_JA_ANULADA",
+          "APLICACAO_ALTERADA",
+          "PROXIMA_DOSE_FORA_DA_JANELA",
+          "MARCAR_PROXIMA_SEM_TIPO",
+          "VACINACAO_TAXA_EXCEDIDA",
+          "VACINACAO_PERIODO_INVALIDO",
+          "EQUIPE_APENAS_DONO",
+          "EQUIPE_JA_MEMBRO",
+          "EQUIPE_MEMBRO_NAO_ENCONTRADO",
+          "EQUIPE_ULTIMO_DONO",
+          "CONVITE_EXIGE_LINK",
+          "CONVITE_EXPIRADO",
+          "CONVITE_JA_PENDENTE",
+          "CONVITE_LIMITE_DESTINATARIO",
+          "CONVITE_LIMITE_DIARIO",
+          "CONVITE_NAO_ENCONTRADO",
+          "CONVITE_REENVIO_LIMITE",
+          "ESTABELECIMENTO_APENAS_DONO",
+          "ESTABELECIMENTO_DIA_ESPECIAL_JA_EXISTE",
+          "ESTABELECIMENTO_DIA_ESPECIAL_NAO_ENCONTRADO",
+          "ESTABELECIMENTO_FERIADOS_INDISPONIVEIS",
+          "ESTABELECIMENTO_FUSO_INVALIDO",
+          "ESTABELECIMENTO_HORARIO_INVALIDO",
+          "ESTABELECIMENTO_INCOMPLETO",
+          "ESTABELECIMENTO_NAO_APROVADO",
+          "ESTABELECIMENTO_SLUG_EM_USO",
+          "ESTABELECIMENTO_SLUG_INVALIDO",
+          "MODULO_APENAS_DONO",
+          "MODULO_TRANSICAO_INVALIDA",
+          "PARCEIRO_CADASTRO_SUSPENSO",
+          "PARCEIRO_NAO_ENCONTRADO",
+          "PARCEIRO_NAO_OPERACIONAL",
+          "PROFISSIONAL_DUPLICADO",
+          "PROFISSIONAL_NAO_ENCONTRADO",
+          "PROFISSIONAL_REGISTRO_INCOMPLETO",
+          "PROFISSIONAL_USUARIO_FORA_DA_EQUIPE",
+          "LIMITE_PETS_PLANO",
+          "EMERGENCIA_SEM_CRMV_CONFERIDO",
+          "EMERGENCIA_FICHA_INDISPONIVEL",
+          "EMERGENCIA_LIMITE"
+        ],
+        "description": "Para decidir a tela"
+      },
+      "ErroDaApiDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number"
+          },
+          "message": {
+            "type": "string",
+            "description": "Texto no idioma do Accept-Language; para mostrar, nunca para decidir"
+          },
+          "codigo": {
+            "description": "Para decidir a tela",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CodigoClinico"
+              }
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "statusCode",
+          "message",
+          "timestamp",
+          "path"
+        ]
       }
     }
   }
