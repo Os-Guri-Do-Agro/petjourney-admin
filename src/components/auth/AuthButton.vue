@@ -1,13 +1,9 @@
 <script setup lang="ts">
-/**
- * O botão da entrada: grande, de toque fácil, e com a ação dita por extenso.
- *
- * `primary` é o próximo passo (musgo cheio), `secondary` o caminho ao lado (contorno) e `ghost`
- * o link com corpo de botão. Com `to`, vira um link de verdade (abre em outra guia, volta).
- */
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
+
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 
 const props = withDefaults(
   defineProps<{
@@ -29,10 +25,19 @@ const props = withDefaults(
 )
 
 const buttonClasses = computed(() => ['auth-button', `auth-button--${props.variant}`])
+
+const buttonStyle = useAuthThemeVars()
 </script>
 
 <template>
-  <Button v-if="to" :as="RouterLink" :class="buttonClasses" :fluid="fullWidth" :to="to">
+  <Button
+    v-if="to"
+    :as="RouterLink"
+    :class="buttonClasses"
+    :fluid="fullWidth"
+    :style="buttonStyle"
+    :to="to"
+  >
     <slot />
   </Button>
 
@@ -42,6 +47,7 @@ const buttonClasses = computed(() => ['auth-button', `auth-button--${props.varia
     :disabled="disabled || loading"
     :fluid="fullWidth"
     :loading="loading"
+    :style="buttonStyle"
     :type="type"
   >
     <!-- O slot default substitui o conteúdo do Button; o spinner de loading vem daqui. -->
@@ -52,77 +58,63 @@ const buttonClasses = computed(() => ['auth-button', `auth-button--${props.varia
 
 <style scoped>
 .auth-button.p-button {
-  min-height: 52px;
-  gap: 8px;
-  padding: 0 22px;
+  height: 3rem;
+  gap: 0;
+  padding: 0 1.25rem;
   border: 1px solid transparent;
-  border-radius: 12px;
-  font-family: var(--font-texto);
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--auth-sage);
+  font-size: 0.875rem;
+  font-weight: 700;
   text-decoration: none;
-  transition:
-    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
-    border-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 .auth-button.p-button:focus-visible {
-  box-shadow: none;
-  outline: 2px solid var(--musgo);
-  outline-offset: 3px;
+  outline: none;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--auth-sage-soft) 70%, transparent);
 }
 
 .auth-button.p-button:disabled {
   cursor: not-allowed;
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
 .auth-button--primary.p-button,
 .auth-button--primary.p-button:not(:disabled):active {
-  border-color: var(--musgo);
-  background: var(--musgo);
-  color: var(--sobre-musgo);
+  border-color: transparent;
+  background: var(--auth-cta-bg);
+  color: var(--auth-cta-text);
 }
 
 .auth-button--primary.p-button:not(:disabled):hover {
-  border-color: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
-  background: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
-  color: var(--sobre-musgo);
+  border-color: transparent;
+  background: var(--auth-cta-bg-hover);
+  color: var(--auth-cta-text);
 }
 
 .auth-button--secondary.p-button {
-  border-color: var(--linha-forte);
-  background: var(--superficie);
-  color: var(--tinta);
+  border-color: var(--auth-line);
+  background: var(--auth-field-bg);
+  color: var(--auth-text);
 }
 
 .auth-button--secondary.p-button:not(:disabled):hover,
-.auth-button--secondary.p-button:not(:disabled):active {
-  border-color: var(--linha-forte);
-  background: var(--superficie-2);
-  color: var(--tinta);
-}
-
-.auth-button--ghost.p-button {
-  background: transparent;
-  color: var(--musgo);
+.auth-button--secondary.p-button:not(:disabled):active,
+.auth-button--ghost.p-button:not(:disabled):hover,
+.auth-button--ghost.p-button:not(:disabled):active {
+  border-color: var(--auth-sage);
+  background: color-mix(in srgb, var(--auth-sage-soft) 40%, var(--auth-field-bg));
+  color: var(--auth-link);
 }
 
 .auth-button--ghost.p-button:not(:disabled):hover,
 .auth-button--ghost.p-button:not(:disabled):active {
   border-color: transparent;
-  background: var(--musgo-fundo);
-  color: var(--musgo);
 }
 
 .auth-button__spinner {
-  font-size: 18px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .auth-button.p-button {
-    transition: none;
-  }
+  margin-inline-end: 0.5rem;
+  font-size: 1rem;
 }
 </style>
