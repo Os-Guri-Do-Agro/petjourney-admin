@@ -248,17 +248,18 @@ const authArtStyle = computed(() => ({
 }
 
 /* A pata da arte começa a ~62% da altura da imagem: em tela baixa (1600x900,
-   1366x768) ela sobe até os benefícios e o texto branco some sobre o branco dela.
-   O véu repõe o verde chapado da arte (#84C1B4, idêntico nos dois temas) atrás da
-   copy — invisível sobre a faixa verde, opaco sobre a pata. Borda difusa para não
-   marcar retângulo contra o JPEG. */
-.auth-visual-panel__center::before {
+   1366x768) ela sobe até os benefícios. No claro ela é papel, e o texto escuro lê
+   nela; no escuro ela é quase preta, e o texto some. Só ali o véu repõe o verde
+   chapado da arte (#84c0b4, idêntico nos dois temas) atrás da copy — invisível sobre
+   a faixa verde, opaco sobre a pata. Borda difusa para não marcar retângulo contra o
+   JPEG. */
+.app-dark .auth-visual-panel__center::before {
   content: '';
   position: absolute;
   z-index: -1;
   inset: -1.75rem -2.25rem;
   border-radius: 2.5rem;
-  background: var(--auth-sage);
+  background: #84c0b4;
   filter: blur(1.25rem);
 }
 

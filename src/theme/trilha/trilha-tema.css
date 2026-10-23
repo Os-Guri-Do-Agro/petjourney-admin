@@ -647,25 +647,15 @@ html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
   --auth-sage: var(--musgo);
   --auth-sage-strong: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
   --auth-sage-tint: var(--musgo-fundo);
-  --auth-on-brand: var(--sobre-rail);
+  --auth-on-brand: var(--sobre-salvia);
   --auth-shadow-rgb: 16 40 32;
 }
 
 /*
- * A arte da marca continua; o texto do lado dela ganha um cartão nítido em `rail`, no lugar do
- * véu desfocado — legível sobre a sálvia e sobre a pata.
+ * A mensagem da marca fica direto sobre a sálvia da arte, sem cartão, na tinta escura (7,6:1):
+ * branco sobre a sálvia não lê. O véu do `AuthLayout`, na cor exata da arte, só aparece quando a
+ * pata sobe atrás do texto, em tela baixa.
  */
-:root.trilha .auth-visual-panel__center::before {
-  inset: -2rem -2.25rem;
-  border-radius: var(--raio-painel);
-  background: var(--rail);
-  filter: none;
-}
-
-:root.trilha .auth-visual-panel__content {
-  --auth-on-brand: var(--sobre-rail);
-}
-
 :root.trilha .auth-visual-panel h2 {
   font-weight: 600;
   letter-spacing: -0.03em;
