@@ -3021,47 +3021,6 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
    */
   const feriados = [...feriadosDoAno(ancora), diaFechadoProximo(ancora)]
   const duracaoDaConsulta = tipoPorId('tipo-consulta').duracaoMinutos
-  let vagaDaBrunilda: { inicio: string; professionalId: string } | null = null
-
-  for (let offset = 1; offset <= 14 && !vagaDaBrunilda; offset += 1) {
-    const dia = addDays(ancora, offset)
-    const horario = clinicFixture.horarios.find((item) => item.weekday === weekdayOf(dia))
-    const cabe = JANELAS_DA_BRUNILDA.some((janela) => janela.weekday === weekdayOf(dia))
-
-    if (!cabe || !horario || horario.fechado || feriados.some((item) => item.date === dia)) {
-      continue
-    }
-
-    for (let minuto = 15 * 60; minuto <= 17 * 60 + 30 && !vagaDaBrunilda; minuto += 15) {
-      for (const professional of professionalsFixture.filter((item) => item.ativo)) {
-        const vaga = {
-          professionalId: professional.id,
-          petId: PET_DA_FILA,
-          inicio: iso(dia, minuto),
-          fim: iso(dia, minuto + duracaoDaConsulta),
-        }
-
-        if (vagaLivre(comStatus, vaga)) {
-          vagaDaBrunilda = { inicio: vaga.inicio, professionalId: vaga.professionalId }
-          break
-        }
-      }
-    }
-  }
-
-  const agoraDaClinica = clock.now()
-  const fila = montarFila(ancora)
-
-  if (vagaDaBrunilda) {
-    fila.push(
-      filaDaBrunilda(
-        vagaDaBrunilda,
-        iso(addDays(hoje, -6), 10 * 60 + 12),
-        clock.toIso(agoraDaClinica.date, agoraDaClinica.minutes + 25),
-      ),
-    )
-  }
-
   const internacao = gerarInternacoes(semente)
 
   const clinic: Clinic = { ...clinicFixture, feriados }
@@ -3101,6 +3060,54 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     pets,
     configuracao: agendamentoOnline,
   })
+
+  /*
+   * A vaga da Brunilda vem depois dos pedidos, conferida contra a agenda com eles. Antes ela era
+   * escolhida primeiro, e o telefonema que tomou o horário da Luna (15:00, no primeiro dia útil
+   * depois do âncora) caía em cima dela quando o âncora era sexta: o aceite da demonstração dava
+   * "vaga já preenchida".
+   */
+  const agendaComPedidos = [...comStatus, ...dosPedidos.atendimentos]
+  let vagaDaBrunilda: { inicio: string; professionalId: string } | null = null
+
+  for (let offset = 1; offset <= 14 && !vagaDaBrunilda; offset += 1) {
+    const dia = addDays(ancora, offset)
+    const horario = clinicFixture.horarios.find((item) => item.weekday === weekdayOf(dia))
+    const cabe = JANELAS_DA_BRUNILDA.some((janela) => janela.weekday === weekdayOf(dia))
+
+    if (!cabe || !horario || horario.fechado || feriados.some((item) => item.date === dia)) {
+      continue
+    }
+
+    for (let minuto = 15 * 60; minuto <= 17 * 60 + 30 && !vagaDaBrunilda; minuto += 15) {
+      for (const professional of professionalsFixture.filter((item) => item.ativo)) {
+        const vaga = {
+          professionalId: professional.id,
+          petId: PET_DA_FILA,
+          inicio: iso(dia, minuto),
+          fim: iso(dia, minuto + duracaoDaConsulta),
+        }
+
+        if (vagaLivre(agendaComPedidos, vaga)) {
+          vagaDaBrunilda = { inicio: vaga.inicio, professionalId: vaga.professionalId }
+          break
+        }
+      }
+    }
+  }
+
+  const agoraDaClinica = clock.now()
+  const fila = montarFila(ancora)
+
+  if (vagaDaBrunilda) {
+    fila.push(
+      filaDaBrunilda(
+        vagaDaBrunilda,
+        iso(addDays(hoje, -6), 10 * 60 + 12),
+        clock.toIso(agoraDaClinica.date, agoraDaClinica.minutes + 25),
+      ),
+    )
+  }
 
   return {
     semente,

@@ -16,6 +16,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { createClinicClock } from '../../domain/clinic-time'
 import { resumirEstoque } from '../../domain/estoque-vacinas'
+import { mesDe } from '../../domain/metas-de-estoque'
 import { reforcosDoPaciente } from '../../domain/vacinacao'
 import { CLINIC_UTC_OFFSET, vacinasFixture } from '../fixtures'
 import { getDataset, resetDataset } from '../store'
@@ -162,7 +163,18 @@ describe('o giro que o gráfico de consumo desenha', () => {
      * primeira versão do seed produziu, plantando o reforço do ano anterior numa janela de
      * vinte e quatro dias.
      */
+    const hoje = clock.today()
+
     for (const mes of resumo().consumo) {
+      /*
+       * No dia 1 o mês corrente ainda não teve tempo de girar (e pode ser domingo, com a clínica
+       * fechada): coluna vazia ali é verdade, não artefato. A semente põe dose no mês corrente a
+       * partir do dia 2 (`rotinaDeVacinacao`, "o mês corrente ganha o ritmo dos outros").
+       */
+      if (hoje.endsWith('-01') && mes.mes === mesDe(hoje)) {
+        continue
+      }
+
       expect(mes.total, mes.mes).toBeGreaterThan(0)
     }
   })

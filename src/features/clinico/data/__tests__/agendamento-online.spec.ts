@@ -42,10 +42,25 @@ beforeEach(() => {
   setClockSkew(0)
 
   const hoje = epochToWall(epochNow(), CLINIC_UTC_OFFSET).date
-  const diaUtil = isWeekend(hoje) ? nextBusinessDay(hoje) : hoje
+  let diaUtil = isWeekend(hoje) ? nextBusinessDay(hoje) : hoje
 
-  setClockSkew(wallToEpoch({ date: diaUtil, minutes: 10 * 60 }, CLINIC_UTC_OFFSET) - Date.now())
-  resetDataset()
+  /*
+   * Feriado também fecha a clínica (1º de janeiro, Natal): num deles a emergência dizia "fechada"
+   * e o teste de "aberta agora" quebrava no dia. O dia do teste é um em que ela abre.
+   */
+  for (let tentativa = 0; tentativa < 10; tentativa += 1) {
+    setClockSkew(wallToEpoch({ date: diaUtil, minutes: 10 * 60 }, CLINIC_UTC_OFFSET) - Date.now())
+    resetDataset()
+
+    const dia = diaUtil
+    if (!getDataset().clinic.feriados.some((feriado) => feriado.fechado && feriado.date === dia)) {
+      break
+    }
+
+    // `nextBusinessDay` devolve o próprio dia quando ele já é útil: o próximo começa amanhã.
+    diaUtil = nextBusinessDay(addDays(diaUtil, 1))
+  }
+
   setMockConfig({ latenciaMs: 0, jitterMs: 0 })
   disputarProximaReserva(false)
 })
