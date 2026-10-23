@@ -1,13 +1,5 @@
 <script setup lang="ts">
-/**
- * Entrar.
- *
- * Dois campos e um botão, com o "Esqueceu a senha?" ao lado do rótulo da senha — onde se olha
- * quando ela falha — e "Mostrar" dentro da caixa. Criar conta fica embaixo, separado por um fio:
- * é o caminho de quem chegou aqui por engano, não o de quem volta todo dia.
- *
- * Perfil inativo troca o formulário pelo pedido de reativação, na mesma folha.
- */
+import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
@@ -25,6 +17,7 @@ import {
 } from '@/service/user/inativacao-service'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const { t } = useI18n()
@@ -34,6 +27,8 @@ const password = ref('')
 const rememberAccess = ref(true)
 const loading = ref(false)
 const reactivating = ref(false)
+const showPassword = ref(false)
+const passwordInputType = computed(() => (showPassword.value ? 'text' : 'password'))
 
 /** Perfis inativos detectados no login — aguardam CTA de reativação. */
 const pendingReactivate = ref<ReactivateProfile[]>([])
@@ -44,6 +39,7 @@ const convitePendente = Boolean(lerTokenDoConvite())
 const router = useRouter()
 const toast = useToast()
 const usuarioPerfilStore = useUsuarioPerfilStore()
+const loginStyle = useAuthThemeVars()
 
 const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
 
@@ -204,11 +200,14 @@ function cancelReactivate() {
 </script>
 
 <template>
-  <AuthLayout :description="t('auth.login.descricao')" :title="t('auth.login.title')">
-    <div v-if="showReactivatePanel" class="login-reactivate" role="status">
-      <span class="login-reactivate__icon" aria-hidden="true">
+  <AuthLayout
+    :description="t('auth.login.description')"
+    :title="t('auth.login.title')"
+  >
+    <div v-if="showReactivatePanel" class="login-reactivate" :style="loginStyle" role="status">
+      <div class="login-reactivate__icon" aria-hidden="true">
         <i class="ph ph-user-minus" />
-      </span>
+      </div>
       <h2>{{ t('auth.login.reactivate.title') }}</h2>
       <p>{{ reactivateCopy }}</p>
 
@@ -241,19 +240,18 @@ function cancelReactivate() {
           }}
         </AuthButton>
 
-        <AuthButton
-          variant="secondary"
-          full-width
+        <Button
+          :label="t('auth.login.reactivate.otherAccount')"
+          severity="secondary"
+          outlined
           type="button"
           :disabled="reactivating"
           @click="cancelReactivate"
-        >
-          {{ t('auth.login.reactivate.otherAccount') }}
-        </AuthButton>
+        />
       </div>
     </div>
 
-    <form v-else class="login-form" @submit.prevent="handleLogin">
+    <form v-else class="login-form" :style="loginStyle" @submit.prevent="handleLogin">
       <p v-if="convitePendente" class="login-convite" role="status">
         <i class="ph ph-envelope-open" aria-hidden="true" />
         {{ t('parceiro.convite.link.semSessao') }}
@@ -263,7 +261,6 @@ function cancelReactivate() {
         id="email"
         v-model="email"
         autocomplete="email"
-        inputmode="email"
         :disabled="loading"
         :label="t('auth.login.email.label')"
         :placeholder="t('auth.login.email.placeholder')"
@@ -271,14 +268,14 @@ function cancelReactivate() {
         type="email"
       >
         <template #leading>
-          <i class="ph ph-envelope-simple" aria-hidden="true" />
+          <i class="ph ph-envelope-simple login-field-icon" aria-hidden="true" />
         </template>
       </AuthTextField>
 
-      <div class="login-senha">
-        <div class="login-senha__cabeca">
-          <label for="password">{{ t('auth.login.password.label') }}</label>
-          <RouterLink class="login-link" to="/auth/forgot-password">
+      <div class="login-password-group">
+        <div class="login-password-group__header">
+          <span>{{ t('auth.login.password.label') }}</span>
+          <RouterLink class="login-inline-link" to="/auth/forgot-password">
             {{ t('auth.login.password.forgot') }}
           </RouterLink>
         </div>
@@ -291,30 +288,61 @@ function cancelReactivate() {
           label=""
           :placeholder="t('auth.login.password.placeholder')"
           required
-          revelavel
-          type="password"
+          :type="passwordInputType"
         >
           <template #leading>
-            <i class="ph ph-lock-simple" aria-hidden="true" />
+            <i class="ph ph-lock login-field-icon" aria-hidden="true" />
+          </template>
+
+          <template #trailing>
+            <Button
+              :aria-label="
+                showPassword ? t('auth.login.password.hide') : t('auth.login.password.show')
+              "
+              class="login-password-toggle"
+              :disabled="loading"
+              :icon="showPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
+              rounded
+              severity="secondary"
+              text
+              type="button"
+              @click="showPassword = !showPassword"
+            />
           </template>
         </AuthTextField>
       </div>
 
-      <label class="login-lembrar" for="login-remember">
-        <Checkbox v-model="rememberAccess" binary :disabled="loading" input-id="login-remember" />
+      <label class="login-remember" for="login-remember">
+        <Checkbox
+          v-model="rememberAccess"
+          binary
+          :disabled="loading"
+          input-id="login-remember"
+          size="small"
+        />
         {{ t('auth.login.remember') }}
       </label>
 
       <AuthButton :loading="loading" full-width type="submit">
         {{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}
+        <i v-if="!loading" class="ph ph-arrow-right ms-2" aria-hidden="true" />
       </AuthButton>
+
+      <!-- Conta da clínica: ocultado por enquanto
+      <div class="login-divider">
+        <span>ou</span>
+      </div>
+
+      <AuthButton full-width variant="secondary">
+        <i class="ph ph-building me-2" aria-hidden="true" />
+        Acessar com conta da clínica
+      </AuthButton>
+      -->
     </form>
 
-    <p v-if="!showReactivatePanel" class="login-novo">
+    <p v-if="!showReactivatePanel" class="login-support">
       {{ t('auth.login.support.prompt') }}
-      <RouterLink class="login-link" to="/auth/register">
-        {{ t('auth.login.support.createAccount') }}
-      </RouterLink>
+      <RouterLink to="/auth/register">{{ t('auth.login.support.createAccount') }}</RouterLink>
     </p>
   </AuthLayout>
 </template>
@@ -322,7 +350,7 @@ function cancelReactivate() {
 <style scoped>
 .login-form {
   display: grid;
-  gap: 20px;
+  gap: 1.1rem;
 }
 
 .login-convite {
@@ -331,114 +359,129 @@ function cancelReactivate() {
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border: 1px solid var(--linha-suave);
-  border-radius: 12px;
-  color: var(--tinta);
+  border: 1px solid var(--auth-line);
+  border-radius: 0.875rem;
+  color: var(--auth-text);
   font-size: 14px;
   line-height: 1.5;
 }
 
 .login-convite i {
   margin-top: 2px;
-  color: var(--tinta-2);
+  color: var(--auth-muted);
   font-size: 18px;
 }
 
-.login-senha {
+.login-field-icon {
+  color: var(--auth-soft);
+  font-size: 1rem;
+}
+
+.login-password-group {
   display: grid;
-  gap: 7px;
+  gap: 0.45rem;
 }
 
-.login-senha__cabeca {
+.login-password-group__header {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 4px 12px;
+  color: var(--auth-text);
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
 
-.login-senha__cabeca label {
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 550;
+.login-inline-link,
+.login-support a {
+  color: var(--auth-link);
+  font-weight: 800;
+  text-decoration: none;
 }
 
-.login-link {
-  border-radius: 4px;
-  color: var(--musgo);
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in oklab, var(--musgo) 35%, transparent);
-  text-underline-offset: 3px;
+.login-password-toggle.p-button {
+  width: 2rem;
+  height: 2rem;
+  color: var(--auth-soft);
 }
 
-.login-link:hover {
-  text-decoration-color: currentColor;
+.login-password-toggle.p-button:not(:disabled):hover {
+  background: var(--auth-sage-tint);
+  color: var(--auth-soft);
 }
 
-.login-link:focus-visible {
-  outline: 2px solid var(--musgo);
-  outline-offset: 2px;
-}
-
-.login-lembrar {
+.login-remember {
   display: inline-flex;
   width: fit-content;
-  min-height: 36px;
   align-items: center;
-  gap: 10px;
-  color: var(--tinta-2);
+  gap: 0.65rem;
+  color: var(--auth-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 14.5px;
 }
 
-.login-novo {
-  margin: 0;
-  padding-top: 20px;
-  border-top: 1px solid var(--linha);
-  color: var(--tinta-2);
-  font-size: 14.5px;
+.login-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  color: var(--auth-divider);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.login-divider::before,
+.login-divider::after {
+  height: 1px;
+  background: var(--auth-line);
+  content: '';
+}
+
+.login-support {
+  margin: 2rem 0 0;
+  color: var(--auth-soft);
+  font-size: 0.875rem;
 }
 
 .login-reactivate {
   display: grid;
-  justify-items: start;
-  gap: 10px;
-  padding: 22px;
-  border: 1px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
+  gap: 0.75rem;
+  padding: 1.15rem 1.2rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--auth-sage) 28%, var(--auth-line));
+  border-radius: 1.1rem;
+  background: color-mix(in srgb, var(--auth-sage-tint) 72%, var(--auth-field-bg));
+  box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.06);
 }
 
 .login-reactivate__icon {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 2.6rem;
+  height: 2.6rem;
   place-items: center;
-  border-radius: 12px;
-  background: var(--atencao-fundo);
-  color: var(--atencao-tinta);
-  font-size: 21px;
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--auth-sage) 18%, var(--auth-field-bg));
+  color: var(--auth-sage-strong);
+  font-size: 1.15rem;
 }
 
 .login-reactivate h2 {
-  margin: 4px 0 0;
-  font-size: 18px;
-  font-weight: 600;
+  margin: 0;
+  color: var(--auth-text);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .login-reactivate p {
   margin: 0;
-  color: var(--tinta-2);
-  font-size: 14.5px;
+  color: var(--auth-muted);
+  font-size: 0.92rem;
   line-height: 1.5;
 }
 
 .login-reactivate__actions {
   display: grid;
-  width: 100%;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
 }
 </style>

@@ -1,20 +1,14 @@
 <script setup lang="ts">
-/**
- * A moldura da entrada — login, criar conta e redefinir senha. É a primeira coisa que alguém vê do
- * PetJourney, então diz quem somos antes de pedir qualquer coisa.
- *
- * Em tela larga, duas metades: a marca de um lado, no verde-floresta da barra do portal, com a
- * pata, uma frase do que o portal faz por quem trabalha com pets e os três ganhos; o formulário do
- * outro, sozinho no claro, com o título, uma frase e os campos. No celular, uma coluna: a marca
- * vira uma faixa curta no alto, e o formulário vem logo abaixo, sem rolar até ele.
- *
- * `eyebrow` continua aceito, mas não aparece: sobretítulo em caixa alta acima do título saiu do
- * sistema. Quem precisa dizer "passo 1 de 2" usa os passos (`RegisterStepIndicator`).
- */
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import logoNomeUrl from '@/assets/Logos/logo-for-dark-theme.png'
+import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
+import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
+import bgDarkUrl from '@/assets/login/login-dark-bg.jpg'
+import bgLightUrl from '@/assets/login/login-ligth-bg.jpg'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
+import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
+import { isDarkMode } from '@/theme/color-mode'
 
 defineProps<{
   eyebrow?: string
@@ -24,397 +18,317 @@ defineProps<{
 
 const { t } = useI18n()
 
-const ganhos = [
-  { id: 'programs', icone: 'ph ph-hand-heart' },
-  { id: 'indicacao', icone: 'ph ph-qr-code' },
-  { id: 'results', icone: 'ph ph-chart-line-up' },
-] as const
+const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
+const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
+const authLayoutStyle = useAuthThemeVars()
+
+/**
+ * A arte de fundo já traz a diagonal verde e a pata: a página inteira é a imagem,
+ * o formulário fica sobre a área lisa e o texto sobre o verde.
+ */
+const authArtStyle = computed(() => ({
+  '--auth-art': `url(${isDarkMode.value ? bgDarkUrl : bgLightUrl})`,
+}))
 </script>
 
 <template>
-  <main class="entrada">
-    <aside class="entrada__marca">
-      <!-- A trilha da marca, os nós ligados da pata, como no painel de abertura do portal. -->
-      <svg
-        class="marca__trilha"
-        viewBox="0 0 480 640"
-        preserveAspectRatio="xMidYMid slice"
-        aria-hidden="true"
-      >
-        <path
-          d="M 520 40 C 400 60 380 170 300 190 S 140 170 120 280 S 260 420 210 520 S 60 600 -40 660"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-dasharray="2 9"
-        />
-        <circle cx="300" cy="190" r="5" />
-        <circle cx="128" cy="300" r="3.5" />
-        <circle cx="212" cy="500" r="4.5" />
-      </svg>
-
-      <div class="marca__topo">
-        <span class="marca__pata" aria-hidden="true"><img src="/pata-escura.png" alt="" /></span>
-        <img class="marca__nome" :src="logoNomeUrl" alt="PetJourney" />
-        <LanguageSwitcher class="marca__idioma" variant="auth" tone="brand" />
-      </div>
-
-      <div class="marca__meio">
-        <p class="marca__frase">{{ t('auth.layout.frase') }}</p>
-        <p class="marca__apoio">{{ t('auth.layout.description') }}</p>
-
-        <slot name="aside">
-          <ul class="marca__ganhos">
-            <li v-for="ganho in ganhos" :key="ganho.id">
-              <span class="marca__disco" aria-hidden="true"><i :class="ganho.icone" /></span>
-              {{ t(`auth.layout.benefits.${ganho.id}`) }}
-            </li>
-          </ul>
-        </slot>
-      </div>
-    </aside>
-
-    <section class="entrada__lado">
-      <LanguageSwitcher class="entrada__idioma" variant="auth" tone="surface" />
-
-      <div class="entrada__caixa">
-        <div v-if="$slots.voltar" class="entrada__voltar">
-          <slot name="voltar" />
+  <main class="auth-page pj-entrada" :style="[authLayoutStyle, authArtStyle]">
+    <section class="auth-shell">
+      <div class="auth-form-panel">
+        <div class="auth-form-panel__locale auth-form-panel__locale--mobile">
+          <LanguageSwitcher variant="auth" tone="surface" />
         </div>
+        <div class="auth-form-panel__inner">
+          <div class="auth-brand-row">
+            <div class="flex gap-3 w-full">
+              <div class="bg-color-icon p-3 bg-red-500 w-[50px] h-auto rounded-2xl flex">
+                <img :src="logoUrl" alt="PetJourney" />
+              </div>
+              <div class="w-[150px] flex items-center">
+                <img :src="logoSemPata" alt="Logo PetJourney" />
+              </div>
+            </div>
+          </div>
 
-        <header class="entrada__cabeca">
-          <h1>{{ title }}</h1>
-          <p>{{ description }}</p>
-        </header>
+          <div class="auth-heading">
+            <p v-if="eyebrow" class="auth-eyebrow">{{ eyebrow }}</p>
+            <h1>{{ title }}</h1>
+            <p>{{ description }}</p>
+          </div>
 
-        <slot />
+          <slot />
+        </div>
       </div>
+
+      <aside class="auth-visual-panel">
+        <div class="auth-visual-panel__content">
+          <div class="auth-visual-panel__top">
+            <LanguageSwitcher variant="auth" tone="brand" />
+          </div>
+
+          <div class="auth-visual-panel__center">
+            <div>
+              <h2>{{ t('auth.layout.title') }}</h2>
+              <p>{{ t('auth.layout.description') }}</p>
+            </div>
+
+            <slot name="aside">
+              <ul class="auth-benefits">
+                <li>
+                  <i class="ph ph-check" aria-hidden="true" />
+                  {{ t('auth.layout.benefits.programs') }}
+                </li>
+                <li>
+                  <i class="ph ph-check" aria-hidden="true" />
+                  {{ t('auth.layout.benefits.indicacao') }}
+                </li>
+                <li>
+                  <i class="ph ph-check" aria-hidden="true" />
+                  {{ t('auth.layout.benefits.results') }}
+                </li>
+              </ul>
+            </slot>
+          </div>
+        </div>
+      </aside>
     </section>
   </main>
 </template>
 
 <style scoped>
-.entrada {
-  display: grid;
+.auth-page {
   min-height: 100vh;
-  min-height: 100dvh;
-  padding: 16px;
-  gap: 16px;
-  grid-template-columns: minmax(22rem, 0.92fr) minmax(0, 1.08fr);
-  background: var(--fundo);
-  color: var(--tinta);
-  font-family: var(--font-texto);
+  background-color: var(--auth-page-bg);
+  background-image: var(--auth-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  /* Preso à viewport: em página alta (cadastro) a arte não estica nem some ao rolar. */
+  background-attachment: fixed;
+  color: var(--auth-text);
+  font-family: 'DM Sans', 'PetJourney Arabic', Inter, system-ui, sans-serif;
 }
 
-/* ------------------------------------------------------------------ a marca */
-
-.entrada__marca {
-  --marca-fundo: var(--rail);
-
-  position: sticky;
-  top: 16px;
-  display: flex;
-  overflow: hidden;
-  height: calc(100dvh - 32px);
-  min-height: 34rem;
-  flex-direction: column;
-  padding: clamp(28px, 4vw, 48px);
-  border-radius: 24px;
+/*
+ * Árabe: as colunas trocam de lado, e a faixa verde da arte precisa ir junto, senão a copy
+ * branca da marca fica sobre o fundo claro. Imagem de fundo não espelha: a arte passa para um
+ * pseudo-elemento fixo, invertido na horizontal.
+ */
+[dir='rtl'] .auth-page {
   isolation: isolate;
-  background:
-    radial-gradient(
-      38rem 26rem at 100% 0%,
-      color-mix(in oklab, var(--salvia) 26%, transparent),
-      transparent 70%
-    ),
-    var(--marca-fundo);
-  color: var(--sobre-rail);
+  background-image: none;
 }
 
-/* No escuro o verde da barra é quase preto: a marca fica no musgo fundo, que ainda é floresta. */
-.app-dark .entrada__marca {
-  --marca-fundo: var(--musgo-fundo);
-}
-
-.marca__trilha {
-  position: absolute;
+[dir='rtl'] .auth-page::before {
+  content: '';
+  position: fixed;
   z-index: -1;
   inset: 0;
+  background-image: var(--auth-art);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  transform: scaleX(-1);
+}
+
+.bg-color-icon {
+  background: var(--auth-sage);
+}
+
+/* A coluna da direita fica dentro da faixa verde da arte em qualquer proporção de tela. */
+.auth-shell {
   width: 100%;
-  height: 100%;
-  color: rgb(255 255 255 / 22%);
-  fill: rgb(255 255 255 / 30%);
-  /* Só no canto de cima, à direita: atrás da frase e dos ganhos ela só atrapalharia a leitura. */
-  mask-image: linear-gradient(215deg, #000 0%, #000 12%, transparent 34%);
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(19rem, 0.62fr);
+  overflow: hidden;
 }
 
-/* A pata da marca, grande e quase sumida, saindo pelo canto de baixo. */
-.entrada__marca::after {
-  position: absolute;
-  z-index: -1;
-  bottom: -4rem;
-  width: 26rem;
-  aspect-ratio: 324 / 300;
-  inset-inline-end: -5rem;
-  background: url('/pata-clara.png') center / contain no-repeat;
-  content: '';
-  opacity: 0.07;
-  transform: rotate(-12deg);
-}
-
-.marca__topo {
+/* Centrado na vertical, encostado à esquerda: em tela larga o formulário não
+   caminha para a diagonal da arte. */
+.auth-form-panel {
+  position: relative;
+  width: 100%;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(2.5rem, 5vw, 4.5rem);
+  padding-inline-start: clamp(2.5rem, 11vw, 12rem);
 }
 
-.marca__pata {
-  display: grid;
-  width: 44px;
-  height: 44px;
-  flex: none;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--sobre-rail);
-}
-
-.marca__pata img {
-  width: 27px;
-  height: 27px;
-  object-fit: contain;
-}
-
-.marca__nome {
-  width: 132px;
-  height: auto;
-}
-
-.marca__idioma {
+.auth-form-panel__locale--mobile {
   display: none;
-  margin-inline-start: auto;
+  position: absolute;
+  top: 1.25rem;
+  inset-inline-end: 1.25rem;
+  z-index: 2;
 }
 
-.marca__meio {
-  display: grid;
+.auth-visual-panel__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.auth-form-panel__inner {
+  width: min(100%, 32rem);
+  justify-content: space-between;
+}
+
+.auth-brand-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.auth-heading {
+  margin-bottom: 2rem;
+}
+
+.auth-eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--auth-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.auth-heading h1 {
+  margin: 0;
+  color: var(--auth-text);
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  font-weight: 650;
+  letter-spacing: -0.045em;
+}
+
+.auth-heading p {
   max-width: 30rem;
-  gap: 18px;
-  margin-block: auto;
-  padding-block: 32px;
-}
-
-.marca__frase {
-  margin: 0;
-  font-size: clamp(30px, 3.1vw, 42px);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.12;
-  text-wrap: balance;
-}
-
-.marca__apoio {
-  margin: 0;
-  color: var(--sobre-rail-2);
-  font-size: 16px;
+  margin: 0.75rem 0 0;
+  color: var(--auth-muted);
+  font-size: 1rem;
   line-height: 1.6;
 }
 
-.marca__ganhos {
+.auth-visual-panel {
+  position: relative;
+  min-height: 100%;
+}
+
+.auth-visual-panel__content {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  padding-block: clamp(2rem, 4vw, 3.25rem);
+  padding-inline: 0 clamp(1.5rem, 3vw, 3rem);
+  color: var(--auth-on-brand);
+}
+
+/* No terço superior da arte: centrado no eixo, o texto desce até a pata.
+   Medida curta de propósito — linha longa em tela larga cansa e desalinha o bloco. */
+.auth-visual-panel__center {
+  position: relative;
+  /* Sem contexto próprio o véu de z-index negativo cairia atrás da arte da página. */
+  isolation: isolate;
   display: grid;
-  gap: 12px;
-  margin: 10px 0 0;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  max-width: 30rem;
+  margin-top: clamp(1rem, 8vh, 6rem);
+  margin-bottom: auto;
+}
+
+/* A pata da arte começa a ~62% da altura da imagem: em tela baixa (1600x900,
+   1366x768) ela sobe até os benefícios e o texto branco some sobre o branco dela.
+   O véu repõe o verde chapado da arte (#84C1B4, idêntico nos dois temas) atrás da
+   copy — invisível sobre a faixa verde, opaco sobre a pata. Borda difusa para não
+   marcar retângulo contra o JPEG. */
+.auth-visual-panel__center::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.75rem -2.25rem;
+  border-radius: 2.5rem;
+  background: var(--auth-sage);
+  filter: blur(1.25rem);
+}
+
+.auth-visual-panel h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 2.6vw, 2.75rem);
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+  /* Distribui as linhas do título em vez de deixar uma órfã curta no fim. */
+  text-wrap: balance;
+}
+
+/* Sobre o verde da arte o texto já é limítrofe: branco cheio, sem transparência. */
+.auth-visual-panel p {
+  margin: 1rem 0 0;
+  color: var(--auth-on-brand);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.auth-benefits {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* Os ganhos em vidro, como os números do painel de abertura. */
-.marca__ganhos li {
+.auth-benefits li {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  border: 1px solid rgb(255 255 255 / 11%);
-  border-radius: var(--raio-cartao-pequeno);
-  background: rgb(255 255 255 / 6%);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.4;
-  backdrop-filter: blur(6px);
-}
-
-.marca__disco {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 11px;
-  background: linear-gradient(145deg, color-mix(in oklab, var(--salvia) 70%, #fff), var(--salvia));
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
-  color: var(--rail);
-  font-size: 19px;
-}
-
-/* ------------------------------------------------------------------ o formulário */
-
-.entrada__lado {
-  position: relative;
-  display: grid;
-  min-width: 0;
-  align-items: center;
-  justify-items: center;
-  padding: 72px clamp(16px, 4vw, 48px) 48px;
-}
-
-.entrada__idioma {
-  position: absolute;
-  top: 12px;
-  inset-inline-end: 8px;
-}
-
-/* O formulário num cartão que flutua sobre o claro: o que se preenche junto vai junto. */
-.entrada__caixa {
-  display: grid;
-  width: min(100%, 31rem);
-  gap: 28px;
-  padding: 36px 38px 34px;
-  border: 1px solid var(--linha);
-  border-radius: var(--raio-painel);
-  background: var(--superficie);
-  box-shadow: var(--sombra-2);
-}
-
-.entrada__voltar :deep(a) {
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.entrada__voltar :deep(a:hover) {
-  color: var(--tinta);
-}
-
-.entrada__voltar :deep(a:focus-visible) {
-  border-radius: 6px;
-  outline: 2px solid var(--musgo);
-  outline-offset: 2px;
-}
-
-[dir='rtl'] .entrada__voltar :deep(.ph-arrow-left) {
-  transform: scaleX(-1);
-}
-
-.entrada__voltar {
-  margin-bottom: -16px;
-}
-
-.entrada__cabeca {
-  display: grid;
-  gap: 8px;
-}
-
-.entrada__cabeca h1 {
-  margin: 0;
-  font-size: 30px;
+  gap: 0.7rem;
+  color: var(--auth-on-brand);
+  font-size: 0.92rem;
   font-weight: 650;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
 }
 
-.entrada__cabeca p {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 15.5px;
-  line-height: 1.55;
+.auth-benefits .ph {
+  display: grid;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.45rem;
+  background: color-mix(in srgb, var(--auth-on-brand) 16%, transparent);
+  color: var(--auth-on-brand);
+  font-size: 0.7rem;
 }
 
-/* ------------------------------------------------------------------ celular */
-
-@media (max-width: 900px) {
-  .entrada {
-    display: block;
-    padding: 0;
+/* Sem a coluna verde, a arte cortaria a diagonal no meio do formulário: fica só o fundo liso. */
+@media (max-width: 980px) {
+  .auth-page {
+    background-image: none;
   }
 
-  .entrada__marca {
-    position: relative;
-    top: 0;
-    height: auto;
-    min-height: 0;
-    padding: 16px 16px 24px;
-    border-radius: 0 0 24px 24px;
-  }
-
-  .entrada__marca::after {
-    bottom: -7rem;
-    width: 15rem;
-    inset-inline-end: -3rem;
-  }
-
-  .marca__pata {
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-  }
-
-  .marca__pata img {
-    width: 23px;
-    height: 23px;
-  }
-
-  .marca__nome {
-    width: 112px;
-  }
-
-  .marca__idioma {
-    display: block;
-  }
-
-  .marca__meio {
-    margin: 0;
-    padding: 20px 0 0;
-  }
-
-  .marca__frase {
-    font-size: 23px;
-  }
-
-  .marca__apoio,
-  .marca__ganhos {
+  [dir='rtl'] .auth-page::before {
     display: none;
   }
 
-  .entrada__idioma {
-    display: none;
+  .auth-shell {
+    grid-template-columns: 1fr;
   }
 
-  .entrada__lado {
+  .auth-form-panel {
+    max-width: none;
+    align-items: center;
+    padding-inline-start: clamp(1.5rem, 5vw, 4.5rem);
+  }
+
+  .auth-form-panel__locale--mobile {
     display: block;
-    padding: 28px 16px 40px;
   }
 
-  .entrada__caixa {
-    width: min(100%, 27rem);
-    margin-inline: auto;
-    gap: 24px;
-    padding: 0;
-    border: 0;
-    background: none;
-    box-shadow: none;
-  }
-
-  .marca__trilha {
+  .auth-visual-panel {
     display: none;
-  }
-
-  .entrada__cabeca h1 {
-    font-size: 26px;
   }
 }
 </style>
