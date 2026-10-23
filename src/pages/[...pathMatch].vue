@@ -164,7 +164,7 @@ function goBack() {
   border-radius: var(--raio-painel);
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--musgo-fundo) 45%, var(--superficie)),
+    color-mix(in oklab, var(--musgo-fundo) 60%, var(--superficie)),
     var(--superficie) 44%
   );
   box-shadow: var(--sombra-2);

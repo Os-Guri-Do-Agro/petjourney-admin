@@ -658,11 +658,11 @@ function registrarAntes(administracaoId: string) {
 
 /* O atrasado ganha um véu de risco, além da marca e do selo: é o que não pode passar batido. */
 .item--atrasada {
-  background: color-mix(in oklab, var(--risco-fundo) 55%, transparent);
+  background: color-mix(in oklab, var(--risco-fundo) 60%, transparent);
 }
 
 .item--na-janela {
-  background: color-mix(in oklab, var(--atencao-fundo) 45%, transparent);
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, transparent);
 }
 
 .item__icone {

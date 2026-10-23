@@ -489,7 +489,7 @@ watch(showCustomReason, (allowed) => {
 
 /* A desativação: separada, com o vermelho só no ícone e no botão — o resto é texto para ler. */
 .risco {
-  background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
+  background: color-mix(in oklab, var(--risco-fundo) 60%, var(--superficie));
 }
 
 .risco__pontos {

@@ -2175,7 +2175,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   padding: 24px 24px 22px;
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--pj-lugar-fundo) 45%, var(--superficie)) 0%,
+    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)) 0%,
     var(--superficie) 100%
   );
 }
@@ -2317,7 +2317,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
 .capa__prazo--perto {
   border-color: color-mix(in oklab, var(--atencao) 35%, var(--linha));
-  background: color-mix(in oklab, var(--atencao-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, var(--superficie));
 }
 
 .capa__prazo--perto .capa__contagem {

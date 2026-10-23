@@ -246,7 +246,7 @@ function toggle(modo: ModoParticipacao) {
 
 .prog-card--on {
   border-color: var(--portal);
-  background: color-mix(in oklab, var(--portal-fundo) 45%, var(--superficie));
+  background: color-mix(in oklab, var(--portal-fundo) 60%, var(--superficie));
 }
 
 .prog-card--on:hover:not(.prog-card--locked) {

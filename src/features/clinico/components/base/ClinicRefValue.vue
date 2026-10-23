@@ -171,7 +171,7 @@ const titulo = computed(
 .ref--acima.ref--cartao,
 .ref--abaixo.ref--cartao {
   border-color: color-mix(in oklab, var(--risco) 45%, var(--linha));
-  background: color-mix(in oklab, var(--risco-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--risco-fundo) 60%, var(--superficie));
 }
 
 .ref--acima .ref__valor,

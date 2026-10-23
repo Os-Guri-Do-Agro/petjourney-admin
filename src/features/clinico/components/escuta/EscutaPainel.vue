@@ -875,7 +875,7 @@ const temAcoes = computed(
 /* Ouvindo, a faixa toma o tom do microfone aberto — sem virar alarme. */
 .escuta--gravando {
   border-color: color-mix(in oklab, var(--risco) 55%, var(--linha));
-  background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
+  background: color-mix(in oklab, var(--risco-fundo) 60%, var(--superficie));
 }
 
 /* Aplicada já é prontuário: a moldura da máquina sai e fica a linha comum de qualquer folha. */

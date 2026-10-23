@@ -413,7 +413,7 @@ function entregar() {
 }
 
 .lista--troca .linha:not(.linha--decidida) {
-  background: color-mix(in oklab, var(--atencao-fundo) 45%, transparent);
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, transparent);
 }
 
 .lista--troca .linha:first-child {

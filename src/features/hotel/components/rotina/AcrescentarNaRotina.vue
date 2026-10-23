@@ -699,7 +699,7 @@ function gravar() {
 /* A escolhida se distingue por contorno na cor do hotel e fundo leve, nunca por cor cheia. */
 .porta--ativa {
   border-color: var(--hotel);
-  background: color-mix(in oklab, var(--hotel-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--hotel-fundo) 60%, var(--superficie));
 }
 
 .porta:has(:focus-visible) {

@@ -767,7 +767,7 @@ const noApp = computed(() => {
 
 .app--liberado {
   border-color: color-mix(in oklab, var(--ok) 35%, var(--linha));
-  background: color-mix(in oklab, var(--ok-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie));
 }
 
 .app__icone {

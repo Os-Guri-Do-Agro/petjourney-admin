@@ -7,6 +7,10 @@
  *
  * Os valores são os do design system; mudou lá, muda aqui. Contraste conferido: texto 4,5:1 ou mais
  * em todas as superfícies, nos dois temas; bordas de controle e anel de foco, 3:1 ou mais.
+ *
+ * Os fundos de cor do claro (`--*-fundo`) são pastel desde 23/10/2026: o mesmo matiz de cada
+ * família, na luminosidade e na saturação da paleta da casa (#A8DADC, #BDB2FF, #FFB7A1), e não
+ * mais o quase branco do design system. A tinta de cada família continua com 4,5:1 ou mais em cima.
  */
 
 :root.trilha {
@@ -24,7 +28,7 @@
   --salvia: #84a59d;
   --sobre-salvia: #142721;
   --musgo: #2b5f51;
-  --musgo-fundo: #d8eee6;
+  --musgo-fundo: #b4e4d3;
   --sobre-musgo: #fbfbf8;
   --rail: #16312a;
   --rail-ativo: #25443b;
@@ -32,29 +36,29 @@
   --sobre-rail-2: #b0c3bc;
   --clinica: #1c7db0;
   --clinica-tinta: #005982;
-  --clinica-fundo: #dcf0fe;
+  --clinica-fundo: #b3defb;
   --clinica-claro: #7dc0ec;
   --hotel: #7766b4;
   --hotel-tinta: #554588;
-  --hotel-fundo: #edeaff;
+  --hotel-fundo: #d2c9ff;
   --hotel-claro: #b8acf0;
   --portal: #aa7d2d;
   --portal-tinta: #6e4b02;
-  --portal-fundo: #f7ebd9;
+  --portal-fundo: #f4dab2;
   --portal-claro: #d7b176;
   --pets: #458270;
   --pets-tinta: #285e4e;
-  --pets-fundo: #cdece1;
+  --pets-fundo: #aee3d1;
   --pets-claro: #93c4b3;
   --risco: #c54e45;
   --risco-tinta: #9d2e29;
-  --risco-fundo: #fee9e6;
+  --risco-fundo: #fdc9c2;
   --atencao: #d78a3f;
   --atencao-tinta: #905204;
-  --atencao-fundo: #fdebdc;
+  --atencao-fundo: #fdd8b7;
   --ok: #4a925c;
   --ok-tinta: #266b3a;
-  --ok-fundo: #d8f2dc;
+  --ok-fundo: #b9e7c1;
   --neutro-tinta: #4f5854;
   --neutro-fundo: #dde4e1;
   --sombra-xs: 0 1px 2px rgb(16 40 32 / 6%);

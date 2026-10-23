@@ -247,7 +247,7 @@ const podeAplicar = computed(() => !props.somenteLeitura && Object.keys(patch.va
   padding: 18px 24px;
   border: 1.5px dashed color-mix(in oklab, var(--pj-lugar) 55%, var(--linha));
   border-radius: var(--raio-cartao);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 40%, var(--superficie));
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
 }
 
 .pre__topo {

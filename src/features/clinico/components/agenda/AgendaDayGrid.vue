@@ -1042,7 +1042,7 @@ watch(() => agenda.data, medir)
 
 .grade__estado--confirmado {
   --estado: var(--clinica);
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
   --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
 }
 

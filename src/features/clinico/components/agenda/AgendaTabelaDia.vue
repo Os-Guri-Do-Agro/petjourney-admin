@@ -1247,7 +1247,7 @@ tbody > .tabela__linha:first-child > * {
 
 .estado--confirmado {
   --estado: var(--clinica);
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
   --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
 }
 
@@ -1477,12 +1477,13 @@ tbody > .tabela__linha:first-child > * {
   }
 }
 
+/* `--tinta-2`, e não a 3: a marcação fica no pastel do estado, e a tinta mais clara não lia nele. */
 .marcacao__feito {
-  color: var(--tinta-3);
+  color: var(--tinta-2);
 }
 
 .marcacao__origem {
-  color: var(--tinta-3);
+  color: var(--tinta-2);
 }
 
 .marcacao__risco {
@@ -1661,7 +1662,7 @@ tbody > .tabela__linha:first-child > * {
   padding: 2px 8px 2px 12px;
   border-radius: 6px;
   background: var(--estado-fundo);
-  color: var(--tinta-3);
+  color: var(--tinta-2);
   font-size: 12px;
   white-space: nowrap;
 }

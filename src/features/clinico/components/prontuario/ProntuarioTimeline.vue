@@ -295,7 +295,7 @@ const dataDaAnterior = computed(() =>
   overflow: hidden;
   padding: 14px 16px 16px 18px;
   border-color: color-mix(in oklab, var(--pj-lugar) 35%, var(--linha));
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 45%, var(--superficie));
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
 }
 
 /* O traço na cor do lugar: a mesma marca das linhas que pedem leitura primeiro. */
