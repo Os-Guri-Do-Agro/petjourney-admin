@@ -4,13 +4,30 @@
  * espaço que responde "como está o dia" antes de qualquer lista.
  *
  * À esquerda, a frase do momento e a ação principal; à direita, os poucos números que decidem o
- * que fazer primeiro, cada um levando à tela onde ele se resolve. Atrás, a trilha da marca — os
- * nós ligados da pata — atravessa o painel: é o mesmo desenho que liga os destinos na barra.
+ * que fazer primeiro, em 2 x 2, cada um levando à tela onde ele se resolve. Quando a frase não cabe
+ * ao lado, os números descem para baixo dela, do mesmo tamanho.
+ *
+ * O fundo é o do app: cor lisa do espaço com os desenhos de traço branco (bichos, ossinho, a pata
+ * da marca, corações e brilhos), muitos no pé e cada vez menos, menores e mais apagados conforme
+ * sobem. Fracos o bastante para não atrapalhar a leitura quando caem atrás do texto.
  *
  * Não é cabeçalho de toda tela: só das que abrem um espaço. As outras usam o título do `UiPagina`.
  */
+import {
+  PhBird,
+  PhBone,
+  PhCat,
+  PhDog,
+  PhFishSimple,
+  PhHeart,
+  PhRabbit,
+  PhSparkle,
+  PhStar,
+} from '@phosphor-icons/vue'
 import Skeleton from 'primevue/skeleton'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
+
+import pataDeTraco from '@/assets/Logos/pata-traco.png'
 
 export type IndicadorDaAbertura = {
   id: string
@@ -35,28 +52,136 @@ withDefaults(
   }>(),
   { resumo: '', sobre: '', indicadores: () => [], rotuloDosIndicadores: '' },
 )
+
+type Rabisco = {
+  tipo:
+    | 'pata'
+    | 'brilho'
+    | 'coracao'
+    | 'estrela'
+    | 'bolinha'
+    | 'cachorro'
+    | 'gato'
+    | 'passaro'
+    | 'peixe'
+    | 'coelho'
+    | 'osso'
+  tamanho: number
+  giro?: number
+  /** px a partir da borda de baixo (negativo sai por ela), ou % da altura do painel. */
+  baixo: number | `${number}%`
+  /** % da largura, a partir do começo da linha (troca de lado no árabe). */
+  inicio: number
+  /** Multiplica a opacidade dos desenhos: os de cima vão sumindo. Padrão: 1. */
+  alfa?: number
+}
+
+/** Bichos e afins em traço fino (Phosphor `light`). A pata é a imagem da marca, como no app. */
+const ICONE_DO_RABISCO = {
+  brilho: PhSparkle,
+  coracao: PhHeart,
+  estrela: PhStar,
+  cachorro: PhDog,
+  gato: PhCat,
+  passaro: PhBird,
+  peixe: PhFishSimple,
+  coelho: PhRabbit,
+  osso: PhBone,
+}
+
+/*
+ * A mesma subida dos cabeçalhos do app (`HeaderPattern`, em `components/ds/ScreenHeader.tsx`),
+ * com mais desenhos por faixa: o painel aqui é três a quatro vezes mais largo que um celular. As
+ * posições se desencontram de uma faixa para a outra, para não formar coluna nem fileira reta.
+ */
+const RABISCOS: Rabisco[] = [
+  // o pé: saem de baixo da borda, em alturas desencontradas
+  { tipo: 'cachorro', tamanho: 28, giro: -8, baixo: -7, inicio: 2 },
+  { tipo: 'pata', tamanho: 24, giro: 14, baixo: 4, inicio: 10 },
+  { tipo: 'gato', tamanho: 27, giro: 6, baixo: -6, inicio: 18.5 },
+  { tipo: 'osso', tamanho: 21, giro: -22, baixo: 6, inicio: 27 },
+  { tipo: 'coelho', tamanho: 27, giro: -6, baixo: -7, inicio: 35.5 },
+  { tipo: 'pata', tamanho: 28, giro: -12, baixo: 2, inicio: 44 },
+  { tipo: 'peixe', tamanho: 26, giro: 10, baixo: -5, inicio: 52.5 },
+  { tipo: 'passaro', tamanho: 25, giro: -8, baixo: 5, inicio: 61 },
+  { tipo: 'cachorro', tamanho: 27, giro: 8, baixo: -6, inicio: 69.5 },
+  { tipo: 'pata', tamanho: 24, giro: 18, baixo: 3, inicio: 78 },
+  { tipo: 'gato', tamanho: 26, giro: -6, baixo: -6, inicio: 86.5 },
+  { tipo: 'osso', tamanho: 20, giro: 20, baixo: 5, inicio: 95 },
+  // faixa 1
+  { tipo: 'pata', tamanho: 19, giro: 20, baixo: '14%', inicio: 6, alfa: 0.85 },
+  { tipo: 'coracao', tamanho: 17, giro: -12, baixo: '21%', inicio: 14.5, alfa: 0.85 },
+  { tipo: 'passaro', tamanho: 19, giro: -8, baixo: '12%', inicio: 23, alfa: 0.85 },
+  { tipo: 'gato', tamanho: 18, giro: 8, baixo: '19%', inicio: 31.5, alfa: 0.8 },
+  { tipo: 'brilho', tamanho: 16, baixo: '15%', inicio: 40, alfa: 0.8 },
+  { tipo: 'cachorro', tamanho: 19, giro: -6, baixo: '22%', inicio: 48.5, alfa: 0.8 },
+  { tipo: 'estrela', tamanho: 15, baixo: '13%', inicio: 57, alfa: 0.8 },
+  { tipo: 'pata', tamanho: 18, giro: -14, baixo: '20%', inicio: 65.5, alfa: 0.8 },
+  { tipo: 'coelho', tamanho: 18, giro: 6, baixo: '14%', inicio: 74, alfa: 0.8 },
+  { tipo: 'coracao', tamanho: 16, giro: 10, baixo: '21%', inicio: 82.5, alfa: 0.78 },
+  { tipo: 'brilho', tamanho: 15, baixo: '16%', inicio: 91, alfa: 0.78 },
+  // faixa 2
+  { tipo: 'brilho', tamanho: 14, baixo: '33%', inicio: 3, alfa: 0.65 },
+  { tipo: 'osso', tamanho: 15, giro: -20, baixo: '39%', inicio: 15, alfa: 0.62 },
+  { tipo: 'pata', tamanho: 15, giro: 16, baixo: '30%', inicio: 27, alfa: 0.62 },
+  { tipo: 'estrela', tamanho: 13, baixo: '37%', inicio: 39, alfa: 0.6 },
+  { tipo: 'coelho', tamanho: 15, giro: -6, baixo: '31%', inicio: 51, alfa: 0.6 },
+  { tipo: 'coracao', tamanho: 14, giro: 10, baixo: '38%', inicio: 63, alfa: 0.6 },
+  { tipo: 'passaro', tamanho: 15, giro: -8, baixo: '32%', inicio: 75, alfa: 0.58 },
+  { tipo: 'pata', tamanho: 14, giro: -10, baixo: '39%', inicio: 87, alfa: 0.58 },
+  // faixa 3
+  { tipo: 'estrela', tamanho: 11, baixo: '50%', inicio: 9, alfa: 0.45 },
+  { tipo: 'brilho', tamanho: 10, baixo: '56%', inicio: 25, alfa: 0.42 },
+  { tipo: 'pata', tamanho: 11, giro: -14, baixo: '47%', inicio: 41, alfa: 0.42 },
+  { tipo: 'bolinha', tamanho: 7, baixo: '54%', inicio: 57, alfa: 0.4 },
+  { tipo: 'coracao', tamanho: 10, giro: 8, baixo: '49%', inicio: 73, alfa: 0.4 },
+  { tipo: 'bolinha', tamanho: 7, baixo: '55%', inicio: 89, alfa: 0.4 },
+  // faixa 4: sumindo
+  { tipo: 'bolinha', tamanho: 6, baixo: '66%', inicio: 18, alfa: 0.3 },
+  { tipo: 'brilho', tamanho: 8, baixo: '71%', inicio: 42, alfa: 0.26 },
+  { tipo: 'bolinha', tamanho: 5, baixo: '68%', inicio: 66, alfa: 0.24 },
+  { tipo: 'estrela', tamanho: 7, baixo: '72%', inicio: 90, alfa: 0.24 },
+]
+
+function estiloDoRabisco(rabisco: Rabisco) {
+  return {
+    bottom: typeof rabisco.baixo === 'number' ? `${rabisco.baixo}px` : rabisco.baixo,
+    insetInlineStart: `${rabisco.inicio}%`,
+    '--rabisco-alfa': rabisco.alfa ?? 1,
+    transform: rabisco.giro ? `rotate(${rabisco.giro}deg)` : undefined,
+  }
+}
 </script>
 
 <template>
   <section class="abertura">
-    <svg
-      class="abertura__trilha"
-      viewBox="0 0 640 240"
-      preserveAspectRatio="xMaxYMid slice"
-      aria-hidden="true"
-    >
-      <path
-        d="M -20 220 C 120 210 170 120 280 128 S 430 210 520 120 S 600 20 680 30"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-dasharray="2 9"
-      />
-      <circle cx="280" cy="128" r="5" />
-      <circle cx="430" cy="178" r="3.5" />
-      <circle cx="610" cy="42" r="4.5" />
-    </svg>
+    <div class="abertura__rabiscos" aria-hidden="true">
+      <span
+        v-for="(rabisco, indice) in RABISCOS"
+        :key="indice"
+        class="abertura__rabisco"
+        :style="estiloDoRabisco(rabisco)"
+      >
+        <img
+          v-if="rabisco.tipo === 'pata'"
+          :src="pataDeTraco"
+          alt=""
+          :width="rabisco.tamanho"
+          :height="rabisco.tamanho"
+        />
+        <span
+          v-else-if="rabisco.tipo === 'bolinha'"
+          class="abertura__bolinha"
+          :style="{ width: `${rabisco.tamanho}px`, height: `${rabisco.tamanho}px` }"
+        />
+        <component
+          :is="ICONE_DO_RABISCO[rabisco.tipo]"
+          v-else
+          :size="rabisco.tamanho"
+          weight="light"
+        />
+      </span>
+    </div>
 
     <div class="abertura__texto">
       <p v-if="sobre" class="abertura__sobre">{{ sobre }}</p>
@@ -93,9 +218,9 @@ withDefaults(
           <Skeleton
             v-if="item.valor === null"
             class="abertura__esqueleto"
-            width="2.5rem"
-            height="2.1rem"
-            border-radius="8px"
+            width="2.2rem"
+            height="1.7rem"
+            border-radius="7px"
           />
           <strong v-else class="abertura__valor">{{ item.valor }}</strong>
           <span class="abertura__rotulo">{{ item.rotulo }}</span>
@@ -107,70 +232,63 @@ withDefaults(
 
 <style scoped>
 .abertura {
+  /* A cor lisa do espaço, como o fundo dos destaques do app: sem degradê nem brilho. */
   --abertura-fundo: color-mix(in oklab, var(--pj-lugar) 62%, var(--rail));
 
+  /* Branco fino a 20%, a mesma força dos desenhos do app. */
+  --abertura-rabisco: 0.2;
+
   position: relative;
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 28px 48px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  justify-content: space-between;
+  gap: 24px 32px;
   overflow: hidden;
-  padding: 34px 36px;
+  padding: 30px 34px;
   border-radius: var(--raio-painel);
-  background:
-    radial-gradient(
-      520px 260px at 100% 0%,
-      color-mix(in oklab, var(--pj-lugar-claro) 42%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      420px 240px at 0% 100%,
-      color-mix(in oklab, var(--pj-lugar) 55%, transparent),
-      transparent 70%
-    ),
-    linear-gradient(135deg, var(--abertura-fundo) 0%, color-mix(in oklab, var(--pj-lugar) 88%, var(--rail)) 100%);
-  box-shadow:
-    0 18px 40px -22px color-mix(in oklab, var(--pj-lugar) 75%, transparent),
-    inset 0 1px 0 rgb(255 255 255 / 14%);
+  background: var(--abertura-fundo);
+  box-shadow: 0 18px 40px -22px color-mix(in oklab, var(--pj-lugar) 75%, transparent);
   color: #fff;
   isolation: isolate;
 }
 
 .app-dark .abertura {
   --abertura-fundo: color-mix(in oklab, var(--pj-lugar) 26%, var(--rail));
+  --abertura-rabisco: 0.14;
 
-  background:
-    radial-gradient(
-      520px 260px at 100% 0%,
-      color-mix(in oklab, var(--pj-lugar) 30%, transparent),
-      transparent 72%
-    ),
-    linear-gradient(
-      135deg,
-      var(--abertura-fundo) 0%,
-      color-mix(in oklab, var(--pj-lugar) 42%, var(--rail)) 100%
-    );
-  box-shadow:
-    0 18px 40px -22px rgb(0 0 0 / 70%),
-    inset 0 1px 0 rgb(255 255 255 / 8%);
+  box-shadow: 0 18px 40px -22px rgb(0 0 0 / 70%);
 }
 
-.abertura__trilha {
+.abertura__rabiscos {
   position: absolute;
   z-index: -1;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  color: rgb(255 255 255 / 30%);
-  fill: rgb(255 255 255 / 36%);
+  color: #fff;
+  pointer-events: none;
+}
 
-  /* A trilha nasce depois do texto: atrás da frase ela só atrapalharia a leitura. */
-  mask-image: linear-gradient(90deg, transparent 0%, transparent 38%, #000 62%);
+.abertura__rabisco {
+  position: absolute;
+  display: block;
+  line-height: 0;
+  opacity: calc(var(--abertura-rabisco) * var(--rabisco-alfa));
+}
+
+.abertura__rabisco img {
+  display: block;
+}
+
+.abertura__bolinha {
+  display: block;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
 }
 
 .abertura__texto {
   display: grid;
   min-width: 0;
+  flex: 1 1 260px;
   justify-items: start;
   gap: 8px;
 }
@@ -238,11 +356,15 @@ withDefaults(
   box-shadow: 0 0 0 2px var(--abertura-fundo), 0 0 0 4px #fff;
 }
 
-/* Os números: vidro sobre a cor, dois por linha. Em fileira, quatro quadros espremiam a frase. */
+/*
+ * Os números: vidro sobre a cor, dois por linha. A grade tem a largura dos quadros e não estica:
+ * ao lado da frase ou embaixo dela, os quadros ficam do mesmo tamanho.
+ */
 .abertura__indicadores {
   display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(148px, 1fr));
+  flex: 0 0 auto;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(124px, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -251,12 +373,11 @@ withDefaults(
 .abertura__indicador {
   display: grid;
   height: 100%;
-  min-height: 138px;
   align-content: start;
-  gap: 4px;
-  padding: 16px 18px 18px;
+  gap: 2px;
+  padding: 12px 14px 13px;
   border: 1px solid rgb(255 255 255 / 16%);
-  border-radius: var(--raio-cartao);
+  border-radius: var(--raio-cartao-pequeno);
   background: rgb(255 255 255 / 10%);
   color: #fff;
   text-decoration: none;
@@ -280,25 +401,25 @@ withDefaults(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
 }
 
-/* O ícone num disco de vidro: dá ao número um ponto de partida e deixa a fileira menos rala. */
+/* O ícone num disco de vidro: dá ao número um ponto de partida. */
 .abertura__indicador-topo > i {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   place-items: center;
-  border-radius: 11px;
+  border-radius: 9px;
   background: rgb(255 255 255 / 14%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 12%);
 }
 
 .abertura__ponto {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   box-shadow: 0 0 0 3px rgb(255 255 255 / 18%);
 }
@@ -313,7 +434,7 @@ withDefaults(
 
 .abertura__valor {
   font-family: var(--font-dados);
-  font-size: 32px;
+  font-size: 26px;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
   letter-spacing: -0.03em;
@@ -327,20 +448,9 @@ withDefaults(
 
 .abertura__rotulo {
   color: rgb(255 255 255 / 86%);
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 500;
   line-height: 1.35;
-}
-
-@media (max-width: 1180px) {
-  .abertura {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Embaixo da frase, a grade 2 x 2 ocupa a largura toda. */
-  .abertura__indicadores {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 600px) {
@@ -348,30 +458,12 @@ withDefaults(
     padding: 22px 20px;
   }
 
-  /* Estreito, a trilha cruzaria o título: fica só no canto de cima. */
-  .abertura__trilha {
-    mask-image: linear-gradient(200deg, #000 0%, transparent 38%);
-  }
-
   .abertura__titulo {
     font-size: 24px;
   }
 
   .abertura__indicadores {
-    gap: 10px;
-  }
-
-  .abertura__indicador {
-    min-height: 0;
-    padding: 14px;
-  }
-
-  .abertura__indicador-topo {
-    margin-bottom: 8px;
-  }
-
-  .abertura__valor {
-    font-size: 26px;
+    gap: 8px;
   }
 }
 
