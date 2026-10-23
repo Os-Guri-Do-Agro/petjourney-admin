@@ -8,8 +8,9 @@
  *
  * E a ficha de emergência em dois degraus (visão de produto, item 14): o QR da coleira continua
  * abrindo a ficha pública de hoje — identificação, microchip e o alerta de alergia grave — e o
- * segundo degrau, com medicação, alergias, diagnósticos e o telefone de quem cuida, só abre para
- * profissional identificado pelo CRMV, fica registrado e o responsável é avisado na hora.
+ * segundo degrau, com medicação, alergias, diagnósticos e o último peso, só abre para
+ * profissional identificado pelo CRMV, com um motivo; fica registrado e o responsável é avisado
+ * na hora. É a spec L6 (ficha de emergência pelo QR), que a API implementou em 22/10.
  *
  * Nada aqui conhece a camada mocada: entra o que a API devolveria, sai o que a tela mostra.
  */
@@ -100,6 +101,13 @@ export type AberturaDoHistorico = {
   conselho: string
   parceiroNome: string
   categorias: CategoriaDoHistorico[]
+  /**
+   * Só na emergência: o motivo que o veterinário escreveu e o telefone da clínica **como
+   * estavam na abertura** (spec L6, D4): a clínica não consegue trocar depois o que o
+   * responsável lê. `null` na ficha aberta por acesso liberado.
+   */
+  motivo: string | null
+  parceiroTelefone: string | null
 }
 
 /**
@@ -303,13 +311,26 @@ export type FichaPublica = {
   alertasCriticos: string[]
 }
 
-/** O segundo degrau: o que o profissional precisa saber antes de medicar. */
-export type FichaDeEmergencia = FichaPublica & {
+/**
+ * O segundo degrau: o que o profissional precisa saber antes de medicar.
+ *
+ * Sem nada do responsável, nem nome nem telefone (spec L6, D3): o contato vai no sentido
+ * contrário. O responsável recebe o aviso e liga para a clínica.
+ */
+export type FichaDeEmergencia = Omit<FichaPublica, 'responsavelNome'> & {
   medicacaoContinua: ItemDoHistorico[]
   alergias: ItemDoHistorico[]
   diagnosticosAtivos: ItemDoHistorico[]
   ultimoPeso: ItemDoHistorico | null
-  responsavelTelefone: string
+}
+
+/** O motivo da abertura de emergência: obrigatório, de 10 a 300 caracteres (spec L6, D2). */
+export const MOTIVO_DA_EMERGENCIA = { min: 10, max: 300 } as const
+
+export function motivoDaEmergenciaValido(motivo: string): boolean {
+  const tamanho = motivo.trim().length
+
+  return tamanho >= MOTIVO_DA_EMERGENCIA.min && tamanho <= MOTIVO_DA_EMERGENCIA.max
 }
 
 type PetDaFicha = Pick<
@@ -333,14 +354,14 @@ export function montarFichaPublica(
 
 export function montarFichaDeEmergencia(
   pet: PetDaFicha,
-  responsavel: { nome: string; telefone: string },
   itens: ItemDoHistorico[],
 ): FichaDeEmergencia {
   const daCategoria = (categoria: CategoriaDoHistorico) =>
     ordenarItens(itens.filter((item) => item.categoria === categoria))
+  const { responsavelNome: _semResponsavel, ...publica } = montarFichaPublica(pet, '', itens)
 
   return {
-    ...montarFichaPublica(pet, responsavel.nome, itens),
+    ...publica,
     medicacaoContinua: daCategoria('MEDICAMENTOS').filter((item) => item.marcador === 'continuo'),
     // Grave primeiro: é a que não pode passar despercebida no meio da lista.
     alergias: [...daCategoria('ALERGIAS')].sort(
@@ -348,6 +369,5 @@ export function montarFichaDeEmergencia(
     ),
     diagnosticosAtivos: daCategoria('DIAGNOSTICOS').filter((item) => item.marcador === 'ativo'),
     ultimoPeso: daCategoria('PESO')[0] ?? null,
-    responsavelTelefone: responsavel.telefone,
   }
 }

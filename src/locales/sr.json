@@ -6602,7 +6602,7 @@
         "alergiaGrave": "Teška alergija: {lista}",
         "semAlerta": "Nije zabeležena nijedna teška alergija.",
         "segundo": "Hitni karton",
-        "segundoExplica": "Stalni lekovi, alergije, terapija koja je u toku i telefon osobe koja brine o ljubimcu. Samo za one sa CRMV brojem: beleži se ime, a vlasnik odmah dobija obaveštenje.",
+        "segundoExplica": "Stalni lekovi, alergije, terapija koja je u toku i poslednja težina. Samo za one sa CRMV brojem i uz razlog: beleži se ime, a vlasnik odmah dobija obaveštenje.",
         "quemAbre": "Ko otvara",
         "recepcao": "Recepcija (bez CRMV)",
         "semCrmv": "Samo osoba sa CRMV brojem može da otvori hitni karton.",
@@ -6611,14 +6611,17 @@
         "alergias": "Alergije",
         "diagnosticos": "Na terapiji",
         "peso": "Poslednja težina",
-        "telefone": "Telefon: {nome}",
         "nada": "Ništa nije zabeleženo",
-        "registro": "Otvorio/la {nome} ({conselho}) u {hora}. {responsavel} je dobio/la obaveštenje u aplikaciji.",
+        "registro": "Otvorio/la {nome} ({conselho}) u {hora}. Vlasnik je upravo obavešten.",
         "erros": {
           "COLEIRA_NAO_ENCONTRADA": "Ovaj QR kod nije sa PetJourney ogrlice.",
           "CRMV_OBRIGATORIO": "Samo osoba sa CRMV brojem može da otvori hitni karton.",
-          "generico": "Ogrlicu nije moguće očitati. Pokušajte ponovo."
-        }
+          "generico": "Ogrlicu nije moguće očitati. Pokušajte ponovo.",
+          "MOTIVO_INVALIDO": "Napišite razlog, od 10 do 300 karaktera."
+        },
+        "motivo": "Razlog",
+        "motivoExemplo": "Npr.: udaren automobilom, stigao bez svesti",
+        "motivoAjuda": "Vlasnik čita ovaj razlog u aplikaciji. Najmanje {min} karaktera."
       },
       "ensaio": {
         "quem": "Na telefonu",
@@ -6667,11 +6670,13 @@
           "titulo": "Ko je otvorio i kada",
           "ficha": "otvorio/la: {lista}",
           "emergencia": "otvorio/la hitni karton preko QR koda sa ogrlice",
-          "vazio": "Niko još nije otvorio."
+          "vazio": "Niko još nije otvorio.",
+          "motivo": "Razlog: {motivo}",
+          "telefone": "Telefon klinike: {telefone}"
         },
         "push": {
           "titulo": "Hitni karton je otvoren",
-          "corpo": "{nome} ({conselho}) je otvorio/la hitni karton ljubimca {pet} u {hora}, u: {clinica}.",
+          "corpo": "Jedna klinika je otvorila hitni karton ljubimca {pet} u {hora}. Pogledajte ko je to bio i zašto.",
           "fechar": "Zatvorite obaveštenje"
         },
         "voltar": "Nazad",

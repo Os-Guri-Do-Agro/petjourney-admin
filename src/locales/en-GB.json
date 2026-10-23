@@ -6602,7 +6602,7 @@
         "alergiaGrave": "Severe allergy: {lista}",
         "semAlerta": "No severe allergy recorded.",
         "segundo": "Emergency record",
-        "segundoExplica": "Ongoing medication, allergies, what is under treatment and the caregiver’s phone. Only for someone with a CRMV: it is recorded with the name, and the pet parent is notified right away.",
+        "segundoExplica": "Ongoing medication, allergies, what is under treatment and the latest weight. Only for someone with a CRMV and with a reason: it is recorded with the name, and the pet parent is notified right away.",
         "quemAbre": "Who opens it",
         "recepcao": "Front desk (no CRMV)",
         "semCrmv": "Only someone with a CRMV can open the emergency record.",
@@ -6611,14 +6611,17 @@
         "alergias": "Allergies",
         "diagnosticos": "Under treatment",
         "peso": "Latest weight",
-        "telefone": "{nome}’s phone",
         "nada": "Nothing recorded",
-        "registro": "Opened by {nome} ({conselho}) at {hora}. {responsavel} got the notice in the app.",
+        "registro": "Opened by {nome} ({conselho}) at {hora}. The pet parent has just been notified.",
         "erros": {
           "COLEIRA_NAO_ENCONTRADA": "This QR is not from a PetJourney collar.",
           "CRMV_OBRIGATORIO": "Only someone with a CRMV can open the emergency record.",
-          "generico": "Could not read the collar. Try again."
-        }
+          "generico": "Could not read the collar. Try again.",
+          "MOTIVO_INVALIDO": "Write the reason, from 10 to 300 characters."
+        },
+        "motivo": "Reason",
+        "motivoExemplo": "E.g. hit by a car, arrived unconscious",
+        "motivoAjuda": "The pet parent reads this reason in the app. At least {min} characters."
       },
       "ensaio": {
         "quem": "On the phone of",
@@ -6667,11 +6670,13 @@
           "titulo": "Who opened it and when",
           "ficha": "opened {lista}",
           "emergencia": "opened the emergency record from the collar QR",
-          "vazio": "No one has opened it yet."
+          "vazio": "No one has opened it yet.",
+          "motivo": "Reason: {motivo}",
+          "telefone": "Clinic phone: {telefone}"
         },
         "push": {
           "titulo": "Emergency record opened",
-          "corpo": "{nome} ({conselho}) opened {pet}’s emergency record at {hora}, at {clinica}.",
+          "corpo": "{pet}’s emergency record was opened by a clinic at {hora}. See who it was and why.",
           "fechar": "Close notice"
         },
         "voltar": "Back",

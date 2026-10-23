@@ -7,13 +7,17 @@
  * quem achou um cachorro na rua.
  *
  * O segundo degrau é o que o profissional precisa antes de medicar: o uso contínuo, as alergias,
- * o que está em tratamento, o último peso e o telefone de quem cuida. Só abre para quem tem CRMV,
- * fica registrado com nome e conselho, e o responsável recebe o aviso na hora — sem precisar estar
+ * o que está em tratamento e o último peso. Só abre para quem tem CRMV e com um motivo, fica
+ * registrado com nome e conselho, e o responsável recebe o aviso na hora — sem precisar estar
  * por perto para dizer sim. Nenhum dado de saúde fica numa URL aberta.
+ *
+ * Como a spec L6 decidiu (e a API fez em 22/10): a ficha não traz nada do responsável, nem nome
+ * nem telefone. O contato vai no sentido contrário: ele recebe o aviso e liga para a clínica.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
 import Select from 'primevue/select'
+import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -27,6 +31,8 @@ import { ErroDoHistorico, historicoLiberadoRepository } from '../../data/histori
 import type { PetSpecies } from '../../data/types'
 import {
   conselhoValidoParaEmergencia,
+  MOTIVO_DA_EMERGENCIA,
+  motivoDaEmergenciaValido,
   type AberturaDoHistorico,
   type FichaDeEmergencia,
   type FichaPublica,
@@ -98,6 +104,10 @@ const podeAbrir = computed(() => {
   return conselhoValidoParaEmergencia(profissional?.conselho)
 })
 
+/** O responsável lê este motivo no app: por isso é obrigatório, e escrito para ele entender. */
+const motivo = ref('')
+const motivoOk = computed(() => motivoDaEmergenciaValido(motivo.value))
+
 watch(
   () => props.aberta,
   (aberta) => {
@@ -107,6 +117,7 @@ watch(
       completa.value = null
       abertura.value = null
       erro.value = ''
+      motivo.value = ''
       quemAbre.value = clinico.profissionais.find((item) => item.ativo)?.id ?? RECEPCAO
     }
   },
@@ -150,6 +161,7 @@ async function abrirSegundoDegrau() {
     const resultado = await historicoLiberadoRepository.abrirEmergencia(
       coleira.value,
       quemAbre.value === RECEPCAO ? null : quemAbre.value,
+      motivo.value,
     )
 
     completa.value = resultado.ficha
@@ -260,11 +272,31 @@ const especie = computed(() => (publica.value?.especie ?? 'canina') as PetSpecie
           <i class="ph ph-lock-simple" aria-hidden="true" />
           {{ t('clinico.historicoLiberado.emergencia.semCrmv') }}
         </p>
+        <div v-else class="eg__quem">
+          <label for="eg-motivo">{{ t('clinico.historicoLiberado.emergencia.motivo') }}</label>
+          <Textarea
+            id="eg-motivo"
+            v-model="motivo"
+            rows="2"
+            auto-resize
+            :maxlength="MOTIVO_DA_EMERGENCIA.max"
+            :placeholder="t('clinico.historicoLiberado.emergencia.motivoExemplo')"
+            aria-describedby="eg-motivo-ajuda"
+            class="eg__select"
+          />
+          <small id="eg-motivo-ajuda" class="eg__ajuda-campo">
+            {{
+              t('clinico.historicoLiberado.emergencia.motivoAjuda', {
+                min: MOTIVO_DA_EMERGENCIA.min,
+              })
+            }}
+          </small>
+        </div>
         <Button
           type="button"
           icon="ph ph-first-aid-kit"
           :label="t('clinico.historicoLiberado.emergencia.abrir')"
-          :disabled="!podeAbrir"
+          :disabled="!podeAbrir || !motivoOk"
           :loading="trabalhando"
           @click="abrirSegundoDegrau"
         />
@@ -325,14 +357,8 @@ const especie = computed(() => (publica.value?.especie ?? 'canina') as PetSpecie
             </dd>
           </div>
           <div>
-            <dt>
-              {{
-                t('clinico.historicoLiberado.emergencia.telefone', {
-                  nome: completa.responsavelNome,
-                })
-              }}
-            </dt>
-            <dd>{{ completa.responsavelTelefone }}</dd>
+            <dt>{{ t('clinico.historicoLiberado.emergencia.motivo') }}</dt>
+            <dd>{{ abertura.motivo }}</dd>
           </div>
         </dl>
 
@@ -343,7 +369,6 @@ const especie = computed(() => (publica.value?.especie ?? 'canina') as PetSpecie
               nome: abertura.profissionalNome,
               conselho: abertura.conselho,
               hora: formato.hora(abertura.em),
-              responsavel: completa.responsavelNome,
             })
           }}
         </p>
@@ -480,6 +505,13 @@ const especie = computed(() => (publica.value?.especie ?? 'canina') as PetSpecie
 
 .eg__select {
   width: 100%;
+}
+
+.eg__ajuda-campo {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
 }
 
 .eg__bloco {

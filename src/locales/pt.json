@@ -6602,7 +6602,7 @@
         "alergiaGrave": "Alergia grave: {lista}",
         "semAlerta": "Nenhuma alergia grave registrada.",
         "segundo": "Ficha de emergência",
-        "segundoExplica": "Uso contínuo, alergias, o que está em tratamento e o telefone de quem cuida. Só para quem tem CRMV: fica registrado com o nome, e o responsável recebe o aviso na hora.",
+        "segundoExplica": "Uso contínuo, alergias, o que está em tratamento e o último peso. Só para quem tem CRMV e com um motivo: fica registrado com o nome, e o responsável recebe o aviso na hora.",
         "quemAbre": "Quem abre",
         "recepcao": "Recepção (sem CRMV)",
         "semCrmv": "Só quem tem CRMV abre a ficha de emergência.",
@@ -6611,14 +6611,17 @@
         "alergias": "Alergias",
         "diagnosticos": "Em tratamento",
         "peso": "Último peso",
-        "telefone": "Telefone de {nome}",
         "nada": "Nada registrado",
-        "registro": "Aberta por {nome} ({conselho}) às {hora}. {responsavel} recebeu o aviso no app.",
+        "registro": "Aberta por {nome} ({conselho}) às {hora}. O responsável foi avisado agora.",
         "erros": {
           "COLEIRA_NAO_ENCONTRADA": "Esse QR não é de uma coleira PetJourney.",
           "CRMV_OBRIGATORIO": "Só quem tem CRMV abre a ficha de emergência.",
-          "generico": "Não foi possível ler a coleira. Tente de novo."
-        }
+          "generico": "Não foi possível ler a coleira. Tente de novo.",
+          "MOTIVO_INVALIDO": "Escreva o motivo, de 10 a 300 caracteres."
+        },
+        "motivo": "Motivo",
+        "motivoExemplo": "Ex.: atropelamento, chegou inconsciente",
+        "motivoAjuda": "O responsável lê este motivo no app. Pelo menos {min} caracteres."
       },
       "ensaio": {
         "quem": "No celular de",
@@ -6667,11 +6670,13 @@
           "titulo": "Quem abriu e quando",
           "ficha": "abriu {lista}",
           "emergencia": "abriu a ficha de emergência pelo QR da coleira",
-          "vazio": "Ninguém abriu ainda."
+          "vazio": "Ninguém abriu ainda.",
+          "motivo": "Motivo: {motivo}",
+          "telefone": "Telefone da clínica: {telefone}"
         },
         "push": {
           "titulo": "Ficha de emergência aberta",
-          "corpo": "{nome} ({conselho}) abriu a ficha de emergência de {pet} às {hora}, em {clinica}.",
+          "corpo": "A ficha de emergência de {pet} foi aberta por uma clínica às {hora}. Veja quem foi e o motivo.",
           "fechar": "Fechar aviso"
         },
         "voltar": "Voltar",

@@ -219,14 +219,13 @@ async function verQuemAbriu() {
           <span class="push__texto">
             <small>PetJourney</small>
             <strong>{{ t('clinico.historicoLiberado.app.push.titulo') }}</strong>
+            <!-- Sem o nome da clínica (spec L6, D5): um nome trocado depois viraria golpe no
+                 push. Nome, telefone, CRMV e motivo ficam em "Quem abriu e quando". -->
             <span>
               {{
                 t('clinico.historicoLiberado.app.push.corpo', {
-                  nome: avisoRecente.abertura.profissionalNome,
-                  conselho: avisoRecente.abertura.conselho,
                   pet: avisoRecente.petNome,
                   hora: formato.hora(avisoRecente.em),
-                  clinica: avisoRecente.abertura.parceiroNome,
                 })
               }}
             </span>
@@ -482,6 +481,18 @@ async function verQuemAbriu() {
                 <strong>{{ abertura.profissionalNome }} · {{ abertura.conselho }}</strong>
                 <span>{{ abertura.parceiroNome }}</span>
                 <span>{{ rotulos.oQueAbriu(abertura) }} · {{ formato.relativo(abertura.em) }}</span>
+                <span v-if="abertura.motivo">
+                  {{
+                    t('clinico.historicoLiberado.app.quemAbriu.motivo', { motivo: abertura.motivo })
+                  }}
+                </span>
+                <span v-if="abertura.parceiroTelefone">
+                  {{
+                    t('clinico.historicoLiberado.app.quemAbriu.telefone', {
+                      telefone: abertura.parceiroTelefone,
+                    })
+                  }}
+                </span>
               </span>
             </li>
           </ul>

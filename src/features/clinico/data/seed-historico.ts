@@ -403,6 +403,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 41208',
       parceiroNome: clinic.nome,
       categorias: ['ALERGIAS', 'MEDICAMENTOS', 'DIAGNOSTICOS', 'VACINAS'],
+      motivo: null,
+      parceiroTelefone: null,
     },
     {
       id: 'abertura-thor-2',
@@ -414,6 +416,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 39877',
       parceiroNome: clinic.nome,
       categorias: ['DIAGNOSTICOS', 'DOCUMENTOS'],
+      motivo: null,
+      parceiroTelefone: null,
     },
     {
       id: 'abertura-thor-antes-1',
@@ -425,6 +429,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 28877',
       parceiroNome: CLINICA_DE_ANTES.nome,
       categorias: ['DIAGNOSTICOS'],
+      motivo: null,
+      parceiroTelefone: null,
     },
     {
       id: 'abertura-thor-antes-2',
@@ -436,6 +442,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 28877',
       parceiroNome: CLINICA_DE_ANTES.nome,
       categorias: ['VACINAS', 'PESO'],
+      motivo: null,
+      parceiroTelefone: null,
     },
     {
       id: 'abertura-nina-1',
@@ -447,6 +455,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 45610',
       parceiroNome: clinic.nome,
       categorias: ['ALERGIAS', 'MEDICAMENTOS'],
+      motivo: null,
+      parceiroTelefone: null,
     },
     {
       id: 'abertura-nina-onco-1',
@@ -458,6 +468,8 @@ export function semearHistoricoCompartilhado({ hoje, iso, clinic }: Entrada): Se
       conselho: 'CRMV-SP 31560',
       parceiroNome: CLINICA_DE_ONCOLOGIA.nome,
       categorias: ['MEDICAMENTOS', 'DIARIO'],
+      motivo: null,
+      parceiroTelefone: null,
     },
   ]
 

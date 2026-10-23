@@ -21,6 +21,7 @@ import {
   itensVisiveis,
   montarFichaDeEmergencia,
   montarFichaPublica,
+  motivoDaEmergenciaValido,
   motivoDoCodigoRecusado,
   normalizarCodigo,
   origensDoHistorico,
@@ -49,6 +50,8 @@ export type CodigoDeErroDoHistorico =
   | 'COLEIRA_NAO_ENCONTRADA'
   /** Quem tentou abrir a ficha de emergência não tem CRMV. */
   | 'CRMV_OBRIGATORIO'
+  /** O motivo da emergência é obrigatório, de 10 a 300 caracteres. */
+  | 'MOTIVO_INVALIDO'
 
 export class ErroDoHistorico extends Error {
   readonly codigo: CodigoDeErroDoHistorico
@@ -279,6 +282,8 @@ export const historicoLiberadoRepository = {
           conselho: profissional.conselho,
           parceiroNome: clinicaAtual().nome,
           categorias: [...new Set(itens.map((item) => item.categoria))],
+          motivo: null,
+          parceiroTelefone: null,
         }
         estado().aberturas.push(registrada)
       }
@@ -378,12 +383,14 @@ export const historicoLiberadoRepository = {
   },
 
   /**
-   * O segundo degrau. Só com CRMV; abrir fica registrado com nome e conselho e o responsável
-   * recebe o aviso na hora. Não depende de acesso liberado: é a emergência sem ele por perto.
+   * O segundo degrau. Só com CRMV e com um motivo; abrir fica registrado com nome, conselho,
+   * motivo e o telefone da clínica, e o responsável recebe o aviso na hora. Não depende de
+   * acesso liberado: é a emergência sem ele por perto.
    */
   abrirEmergencia(
     codigo: string,
     professionalId: string | null,
+    motivo: string,
   ): Promise<{ ficha: FichaDeEmergencia; abertura: AberturaDoHistorico }> {
     return simularChamada('historico.coleira', () => {
       const profissional = profissionalPorId(professionalId)
@@ -392,7 +399,11 @@ export const historicoLiberadoRepository = {
         throw new ErroDoHistorico('CRMV_OBRIGATORIO')
       }
 
-      const { pet, tutor } = petDaColeira(codigo)
+      if (!motivoDaEmergenciaValido(motivo)) {
+        throw new ErroDoHistorico('MOTIVO_INVALIDO')
+      }
+
+      const { pet } = petDaColeira(codigo)
       const agora = agoraIso()
       const itens = itensDoPet(pet.id)
       const abertura: AberturaDoHistorico = {
@@ -405,6 +416,8 @@ export const historicoLiberadoRepository = {
         conselho: profissional.conselho,
         parceiroNome: clinicaAtual().nome,
         categorias: ['ALERGIAS', 'MEDICAMENTOS', 'DIAGNOSTICOS', 'PESO'],
+        motivo: motivo.trim(),
+        parceiroTelefone: clinicaAtual().telefone,
       }
       const aviso: AvisoDoHistorico = {
         id: novoId('aviso-historico'),
@@ -417,14 +430,7 @@ export const historicoLiberadoRepository = {
       estado().aberturas.push(abertura)
       estado().avisos.push(aviso)
 
-      return {
-        ficha: montarFichaDeEmergencia(
-          paraFicha(pet),
-          { nome: tutor?.nome ?? '', telefone: tutor?.telefone ?? '' },
-          itens,
-        ),
-        abertura,
-      }
+      return { ficha: montarFichaDeEmergencia(paraFicha(pet), itens), abertura }
     })
   },
 }

@@ -15,6 +15,7 @@ import {
   gerarCodigo,
   itensVisiveis,
   montarFichaDeEmergencia,
+  motivoDaEmergenciaValido,
   montarFichaPublica,
   motivoDoCodigoRecusado,
   normalizarCodigo,
@@ -173,11 +174,7 @@ describe('ficha de emergência em dois degraus', () => {
   })
 
   it('o segundo traz o uso contínuo, as alergias com a grave em cima, o que está ativo e o último peso', () => {
-    const ficha = montarFichaDeEmergencia(
-      pet,
-      { nome: 'Renata Lima', telefone: '(11) 98120-4471' },
-      itens,
-    )
+    const ficha = montarFichaDeEmergencia(pet, itens)
 
     expect(ficha.medicacaoContinua.map((itemDaFicha) => itemDaFicha.titulo)).toEqual([
       'Fenobarbital',
@@ -188,7 +185,13 @@ describe('ficha de emergência em dois degraus', () => {
     ])
     expect(ficha.diagnosticosAtivos.map((itemDaFicha) => itemDaFicha.titulo)).toEqual(['Epilepsia'])
     expect(ficha.ultimoPeso?.titulo).toBe('12,6 kg')
-    expect(ficha.responsavelTelefone).toBe('(11) 98120-4471')
+  })
+
+  it('o segundo degrau não traz nada do responsável, nem nome nem telefone (spec L6, D3)', () => {
+    const ficha = montarFichaDeEmergencia(pet, itens)
+
+    expect(ficha).not.toHaveProperty('responsavelNome')
+    expect(ficha).not.toHaveProperty('responsavelTelefone')
   })
 
   it('só abre com CRMV', () => {
@@ -196,5 +199,13 @@ describe('ficha de emergência em dois degraus', () => {
     expect(conselhoValidoParaEmergencia('')).toBe(false)
     expect(conselhoValidoParaEmergencia(null)).toBe(false)
     expect(conselhoValidoParaEmergencia('Recepção')).toBe(false)
+  })
+
+  it('o motivo é obrigatório, de 10 a 300 caracteres, sem contar o espaço das pontas', () => {
+    expect(motivoDaEmergenciaValido('atropelamento, chegou inconsciente')).toBe(true)
+    expect(motivoDaEmergenciaValido('convulsão')).toBe(false)
+    expect(motivoDaEmergenciaValido('   convulsão   ')).toBe(false)
+    expect(motivoDaEmergenciaValido('x'.repeat(300))).toBe(true)
+    expect(motivoDaEmergenciaValido('x'.repeat(301))).toBe(false)
   })
 })

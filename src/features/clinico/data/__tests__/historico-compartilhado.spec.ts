@@ -200,26 +200,37 @@ describe('liberar para uma clínica nova', () => {
 })
 
 describe('emergência pelo QR da coleira', () => {
+  const MOTIVO = 'atropelamento, chegou inconsciente'
+
   it('a ficha pública só tem a alergia grave; a de emergência exige CRMV', async () => {
     const publica = await recepcao.lerColeira('fuba-3k9p')
 
     expect(publica.nome).toBe('Fubá')
     expect(publica.alertasCriticos).toEqual(['Amoxicilina com clavulanato'])
 
-    expect(await codigoDe(recepcao.abrirEmergencia('fuba-3k9p', null))).toBe('CRMV_OBRIGATORIO')
+    expect(await codigoDe(recepcao.abrirEmergencia('fuba-3k9p', null, MOTIVO))).toBe(
+      'CRMV_OBRIGATORIO',
+    )
+    expect(await codigoDe(recepcao.abrirEmergencia('fuba-3k9p', ANA, 'convulsão'))).toBe(
+      'MOTIVO_INVALIDO',
+    )
     expect(await codigoDe(recepcao.lerColeira('nao-existe'))).toBe('COLEIRA_NAO_ENCONTRADA')
   })
 
   it('aberta por quem tem CRMV, fica registrada e o responsável recebe o aviso, sem acesso liberado', async () => {
-    const { ficha, abertura } = await recepcao.abrirEmergencia('fuba-3k9p', ANA)
+    const { ficha, abertura } = await recepcao.abrirEmergencia('fuba-3k9p', ANA, MOTIVO)
 
     expect(ficha.medicacaoContinua.map((item) => item.titulo)).toEqual(['Fenobarbital 2,5 mg/kg'])
     expect(ficha.diagnosticosAtivos.map((item) => item.titulo)).toEqual(['Epilepsia idiopática'])
-    expect(ficha.responsavelTelefone).toBe('(11) 98120-4471')
+    // Nada do responsável na ficha: o contato vai no sentido contrário (spec L6, D3).
+    expect(ficha).not.toHaveProperty('responsavelTelefone')
     expect(abertura).toMatchObject({
       canal: 'EMERGENCIA',
       acessoId: null,
       conselho: 'CRMV-SP 41208',
+      motivo: MOTIVO,
+      // O telefone da clínica como estava na abertura (D4).
+      parceiroTelefone: '(11) 3555-0142',
     })
 
     const avisos = await app.avisos(RESPONSAVEL_SEM_VINCULO)

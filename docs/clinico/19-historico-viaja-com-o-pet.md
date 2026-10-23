@@ -34,7 +34,8 @@ mostrando o ganho: paciente novo chegando com alergias, uso contínuo e diagnós
       Veterinária Cuidar, a de antes, ainda vê o histórico e abriu há dois dias. No celular ele
       encerra em dois toques; a Cuidar só fica sabendo que o acesso terminou, sem nome e sem motivo.
 - [x] **Caso difícil: emergência sem o responsável por perto.** QR da coleira em dois degraus (veja
-      Decisões). O segundo degrau só abre com CRMV, fica registrado e a Renata recebe o aviso no app.
+      Decisões). O segundo degrau só abre com CRMV e com um motivo, fica registrado e a Renata
+      recebe o aviso no app.
 - [x] **Caso difícil: consentimento sem juridiquês.** Nenhum termo para aceitar. Uma frase antes de
       gerar o código ("A clínica vê só o que estiver marcado, até 21/11/2026. Cada vez que alguém de
       lá abrir, aparece aqui com o nome. Você encerra quando quiser, em dois toques.") e a lista de
@@ -52,9 +53,11 @@ mostrando o ganho: paciente novo chegando com alergias, uso contínuo e diagnós
 3. **Ver como o responsável vê** › Eduardo: a Clínica Veterinária Cuidar ainda vê o histórico do
    Thor e abriu há dois dias. Encerrar › Encerrar acesso.
 4. **Ler QR da coleira** › Fubá: a ficha pública. Em "Quem abre", a Recepção (sem CRMV) trava o
-   botão; com a Ana, a ficha de emergência abre com o registro no pé.
-5. No celular, troque para **Renata**: o aviso "Ficha de emergência aberta" chegou. Fechado o aviso,
-   "A ficha de emergência foi aberta 1 vez" leva a quem abriu.
+   botão; com a Ana, escreva o motivo ("atropelamento, chegou inconsciente") e a ficha de
+   emergência abre com o registro no pé.
+5. No celular, troque para **Renata**: o aviso "Ficha de emergência aberta" chegou, sem o nome da
+   clínica. Fechado o aviso, "A ficha de emergência foi aberta 1 vez" leva a quem abriu: a clínica,
+   o telefone dela, a Ana com o CRMV e o motivo.
 
 A Camila (Nina) mostra o acesso que venceu sozinho: na clínica, a linha desce para "Terminados" com
 a mesma frase de quem encerrou.
@@ -91,12 +94,17 @@ a mesma frase de quem encerrou.
 - **Prazos da API.** Os atalhos do app (24 h, 48 h, 72 h, 7 dias) e o teto de 30 dias
   (`DURACAO_MAX_HORAS`, decisão de produto). Não existe "para sempre": todo acesso termina sozinho.
   A semente respeita o teto, e um teste cobra.
-- **Emergência em dois degraus.** O QR da coleira continua abrindo a ficha pública de hoje
-  (identificação, microchip, quem cuida e o alerta de alergia grave), que serve a quem achou o pet na
-  rua. O segundo degrau (uso contínuo, alergias, o que está em tratamento, último peso e o telefone
-  de quem cuida) só abre para CRMV no formato `CRMV-UF número`, fica registrado e o responsável
-  recebe o aviso na hora. A Recepção aparece na lista de propósito: é ela que não pode. Nenhum dado
-  de saúde fica numa URL aberta.
+- **Emergência em dois degraus** (spec L6, que a API fez em 22/10). O QR da coleira continua
+  abrindo a ficha pública de hoje (identificação, microchip, quem cuida e o alerta de alergia
+  grave), que serve a quem achou o pet na rua. O segundo degrau (uso contínuo, alergias, o que está
+  em tratamento e o último peso) só abre para CRMV no formato `CRMV-UF número` e com um motivo de
+  10 a 300 caracteres, fica registrado e o responsável recebe o aviso na hora. A Recepção aparece
+  na lista de propósito: é ela que não pode. Nenhum dado de saúde fica numa URL aberta.
+- **A ficha de emergência não traz nada do responsável**, nem nome nem telefone: o contato vai no
+  sentido contrário. O registro guarda o motivo e o telefone da clínica **como estavam na
+  abertura**, e é isso que o responsável lê em "Quem abriu e quando", com o profissional e o CRMV.
+- **O aviso não diz o nome da clínica.** Um nome trocado depois da aprovação viraria golpe no push
+  ("PetJourney Suporte"); o nome aparece só na lista, com o resto.
 - **A emergência não depende de acesso liberado.** A Nina, com o acesso vencido, ainda abre pela
   coleira. Por isso o celular tem "A ficha de emergência foi aberta N vezes" fora dos acessos: sem
   ele, quem fechou o aviso não acharia mais quem abriu.
@@ -107,17 +115,19 @@ a mesma frase de quem encerrou.
 
 ## Para o `petjourney-app` e a API
 
-Conferido em `petjourney-api` `origin/develop` (`6dd3f7e`). Quase tudo já existe, em dois pedaços:
+Conferido em `petjourney-api` `origin/develop` (`6dd3f7e`, e `b8d5c2b` para as aberturas e a
+emergência, que entraram em 22/10 como resposta às lacunas L5 e L6). Quase tudo já existe, em dois
+pedaços:
 o **acesso temporário** (`compartilhamento-prestador`) e o **vínculo com a clínica** (E2-02, guia
 `docs/integracao-portal-parceiro/guias/portal-parceiro-e2.md`, seção 2, do quadro de novembro).
 
-| No protótipo        | Na API                                                                                                                                                                                                            |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Liberar com código  | `POST /tutor/compartilhamentos-prestador` com `tipoServico: CONSULTA`, `categorias` (`CategoriaInfoCompartilhada`, os mesmos nomes) e `duracaoHoras` = dias × 24, de 24 a 720                                     |
-| Receber pelo código | `POST /parceiro/portal/compartilhamentos/vincular` `{ codigo }`. No portal real já existe em Portal › Acessos (`VincularCodigoDialog.vue`)                                                                        |
-| Encerrar            | `DELETE /tutor/compartilhamentos-prestador/:id`. Também existem encurtar o prazo (`PATCH .../:id/validade`) e tirar uma categoria (`DELETE .../:id/categorias/:categoria`)                                        |
-| Quem abriu e quando | Do acesso temporário, só no admin (`GET /admin/compartilhamentos/:id/aberturas`, e prova pedido de arquivo, não leitura): lacuna L5. Da clínica vinculada, `GET /tutor/clinica/clinicas/:parceiroId/acessos` (E2) |
-| Ficha de emergência | Não existe. O QR público é o `/tutor/qr`, e a clínica que lê (`POST /parceiro/portal/vinculos/por-qr`) só propõe vínculo pela inbox: lacuna L6                                                                    |
+| No protótipo        | Na API                                                                                                                                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Liberar com código  | `POST /tutor/compartilhamentos-prestador` com `tipoServico: CONSULTA`, `categorias` (`CategoriaInfoCompartilhada`, os mesmos nomes) e `duracaoHoras` = dias × 24, de 24 a 720                                                                  |
+| Receber pelo código | `POST /parceiro/portal/compartilhamentos/vincular` `{ codigo }`. No portal real já existe em Portal › Acessos (`VincularCodigoDialog.vue`)                                                                                                     |
+| Encerrar            | `DELETE /tutor/compartilhamentos-prestador/:id`. Também existem encurtar o prazo (`PATCH .../:id/validade`) e tirar uma categoria (`DELETE .../:id/categorias/:categoria`)                                                                     |
+| Quem abriu e quando | Do acesso temporário, `GET /tutor/compartilhamentos-prestador/:id/aberturas` (visitas sem identificar quem, e os arquivos pedidos; o texto é "pediu", não "leu"). Da clínica vinculada, `GET /tutor/clinica/clinicas/:parceiroId/acessos` (E2) |
+| Ficha de emergência | `POST /parceiro/portal/emergencia/ficha` `{ publicSlug, motivo }` (CRMV conferido pelo admin); no app, o aviso `EMERGENCIA_FICHA_ABERTA`, `GET /tutor/emergencia/pets/:petId/acessos` e `PUT .../ficha` para desligar                          |
 
 Onde o modelo da API é diferente do protótipo:
 
@@ -134,9 +144,10 @@ Onde o modelo da API é diferente do protótipo:
 
 ## O que ainda não existe
 
-- Integração: o protótipo é mocado; as rotas do E2 são do quadro de novembro.
-- Bloquear a clínica, do E2.
-- Na API: as aberturas do acesso temporário para o responsável (L5) e a ficha de emergência (L6),
-  em [lacunas-da-api.md](../integracao-portal-parceiro/lacunas-da-api.md).
+- Integração: o protótipo é mocado. As telas reais são cards de novembro: E2 (vínculo), "App: quem
+  abriu o acesso temporário", "Portal: ficha de emergência pelo QR da coleira" e "App: ficha de
+  emergência do pet".
+- No celular da prévia: bloquear a clínica e desligar a ficha de emergência do pet, que a spec L6
+  também prevê.
 - A tela do app em si (o protótipo é a prévia do celular no portal) e a câmera lendo o QR (na
   demonstração, escolhe-se a coleira).
