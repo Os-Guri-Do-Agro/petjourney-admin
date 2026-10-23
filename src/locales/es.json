@@ -6515,6 +6515,172 @@
       "chamar": "Iniciar consulta",
       "recepcaoVazia": "Nadie esperando en recepción.",
       "salaVazia": "Ninguna consulta en curso."
+    },
+    "historicoLiberado": {
+      "titulo": "Historial compartido",
+      "resumo": {
+        "nenhum": "Ningún historial vigente ahora.",
+        "valendo": "1 paciente con el historial vigente | {n} pacientes con el historial vigente"
+      },
+      "acoes": {
+        "verComoVe": "Ver como lo ve el responsable",
+        "coleira": "Leer QR del collar",
+        "receber": "Recibir con un código"
+      },
+      "secoes": {
+        "valendo": "Vigentes",
+        "terminados": "Terminados"
+      },
+      "linha": {
+        "deQuem": "de {nome}",
+        "ve": "Ve {lista}",
+        "veioDe": "Vino de {lista}",
+        "valeAte": "Vale hasta el {data}",
+        "terminouEm": "El acceso terminó el {data}",
+        "ultimaAbertura": "Abierto por {nome}, {quando}",
+        "nuncaAberto": "Nadie de la clínica lo abrió todavía",
+        "abrir": "Abrir"
+      },
+      "vazio": {
+        "titulo": "Todavía no hay historial compartido",
+        "corpo": "Cuando el responsable comparte el historial de la mascota en la app, muestra un código en recepción. Solo escríbalo en Recibir con un código."
+      },
+      "categorias": {
+        "ALERGIAS": "Alergias",
+        "MEDICAMENTOS": "Medicamentos",
+        "DIAGNOSTICOS": "Diagnósticos",
+        "VACINAS": "Vacunas",
+        "PESO": "Peso",
+        "DOCUMENTOS": "Documentos",
+        "DIARIO": "Diario"
+      },
+      "marcador": {
+        "grave": "Grave",
+        "continuo": "Uso continuo",
+        "ativo": "En tratamiento"
+      },
+      "origem": {
+        "responsavel": "Anotado por el responsable en la app"
+      },
+      "semData": "Sin fecha",
+      "gaveta": {
+        "terminou": "El acceso terminó el {data}",
+        "terminouCorpo": "El historial anterior ya no aparece. Lo que la clínica registró en la ficha del paciente sigue aquí.",
+        "nadaRegistrado": "Nada registrado en las categorías compartidas.",
+        "quemAbriu": "Quién de la clínica lo abrió",
+        "registro": "Esta apertura quedó registrada como {nome}, y el responsable la ve en la app.",
+        "abrirFicha": "Abrir la ficha del paciente",
+        "erro": "No fue posible abrir el historial."
+      },
+      "receber": {
+        "ajuda": "El responsable genera el código en la app y lo muestra en recepción. El código vale una vez, para la primera clínica que lo reciba.",
+        "campo": "Código",
+        "conferir": "Verificar",
+        "incompleto": "El código tiene {n} dígitos.",
+        "demo": "En la demostración, los códigos en espera:",
+        "vem": "Qué llega",
+        "vale": "Vale hasta",
+        "novo": "La mascota todavía no es paciente: la ficha nace con este historial.",
+        "jaPaciente": "Ya es paciente: el historial entra en la ficha que ya existe.",
+        "receber": "Recibir historial",
+        "outro": "Otro código",
+        "erros": {
+          "CODIGO_NAO_ENCONTRADO": "Ese código no existe. Verifíquelo con el responsable.",
+          "CODIGO_EXPIRADO": "Ese código venció. Pida uno nuevo al responsable.",
+          "CODIGO_JA_USADO": "Ese código ya no vale. Pida uno nuevo al responsable.",
+          "generico": "No fue posible verificar el código. Intente de nuevo."
+        }
+      },
+      "emergencia": {
+        "ajuda": "Apunte la cámara al QR del collar. En la demostración, elija uno de los collares.",
+        "demo": "Collares de la demostración",
+        "publica": "Ficha pública",
+        "publicaExplica": "Lo que cualquier persona ve al leer el QR.",
+        "microchip": "Microchip {numero}",
+        "semMicrochip": "Sin microchip",
+        "responsavel": "Responsable: {nome}",
+        "alergiaGrave": "Alergia grave: {lista}",
+        "semAlerta": "Ninguna alergia grave registrada.",
+        "segundo": "Ficha de emergencia",
+        "segundoExplica": "Uso continuo, alergias, lo que está en tratamiento y el teléfono de quien cuida. Solo para quien tiene CRMV: queda registrado con el nombre, y el responsable recibe el aviso en el momento.",
+        "quemAbre": "Quién la abre",
+        "recepcao": "Recepción (sin CRMV)",
+        "semCrmv": "Solo quien tiene CRMV abre la ficha de emergencia.",
+        "abrir": "Abrir la ficha de emergencia",
+        "medicacao": "Uso continuo",
+        "alergias": "Alergias",
+        "diagnosticos": "En tratamiento",
+        "peso": "Último peso",
+        "telefone": "Teléfono de {nome}",
+        "nada": "Nada registrado",
+        "registro": "Abierta por {nome} ({conselho}) a las {hora}. {responsavel} recibió el aviso en la app.",
+        "erros": {
+          "COLEIRA_NAO_ENCONTRADA": "Ese QR no es de un collar PetJourney.",
+          "CRMV_OBRIGATORIO": "Solo quien tiene CRMV abre la ficha de emergencia.",
+          "generico": "No fue posible leer el collar. Intente de nuevo."
+        }
+      },
+      "ensaio": {
+        "quem": "En el celular de",
+        "eduardo": "Eduardo · cambió de clínica",
+        "renata": "Renata · primera vez",
+        "camila": "Camila · acceso vencido"
+      },
+      "app": {
+        "titulo": "Quién ve el historial",
+        "de": "Historial de {pet}",
+        "comAcesso": "Con acceso ahora",
+        "semAcesso": "Ya no lo ven",
+        "ninguem": "Ninguna clínica ve el historial ahora.",
+        "aguardando": "Código {codigo}",
+        "esperando": "Esperando a la clínica",
+        "ve": "Ve {lista}",
+        "periodo": "Desde el {desde} · hasta el {ate}",
+        "aberturas": "Lo abrió 1 vez | Lo abrió {n} veces",
+        "ninguemAbriu": "Nadie de la clínica lo abrió todavía",
+        "encerrar": "Terminar",
+        "confirmar": {
+          "corpo": "{clinica} deja de ver el historial de {pet} ahora. Lo que ya vio o anotó en su propia ficha queda allí, como en cualquier consulta. No recibe motivo: solo se entera de que el acceso terminó.",
+          "sim": "Terminar acceso",
+          "nao": "Volver"
+        },
+        "encerradoEm": "Terminado el {data}",
+        "venceuEm": "Venció el {data}",
+        "liberar": "Compartir con una clínica",
+        "liberarTitulo": "Compartir el historial",
+        "oQue": "Lo que la clínica va a ver",
+        "nenhumaCategoria": "Marca al menos un elemento.",
+        "prazo": "Por cuánto tiempo",
+        "prazos": {
+          "1": "24 h",
+          "2": "48 h",
+          "3": "72 h",
+          "7": "7 días",
+          "30": "30 días"
+        },
+        "comoFunciona": "La clínica ve solo lo que esté marcado, hasta el {data}. Cada vez que alguien de allí lo abra, aparece aquí con su nombre. Lo terminas cuando quieras, en dos toques.",
+        "gerar": "Generar código",
+        "codigo": "Muestra este código en recepción",
+        "codigoAjuda": "Vale una vez, hasta el {data}.",
+        "pronto": "Listo",
+        "quemAbriu": {
+          "titulo": "Quién lo abrió y cuándo",
+          "ficha": "abrió {lista}",
+          "emergencia": "abrió la ficha de emergencia con el QR del collar",
+          "vazio": "Nadie lo abrió todavía."
+        },
+        "push": {
+          "titulo": "Ficha de emergencia abierta",
+          "corpo": "{nome} ({conselho}) abrió la ficha de emergencia de {pet} a las {hora}, en {clinica}.",
+          "fechar": "Cerrar aviso"
+        },
+        "voltar": "Volver",
+        "erro": "No se pudo cargar. Intenta de nuevo.",
+        "emergencias": "La ficha de emergencia se abrió 1 vez | La ficha de emergencia se abrió {n} veces"
+      },
+      "erros": {
+        "carregar": "No fue posible cargar el historial compartido."
+      }
     }
   },
   "hotel": {
@@ -8473,7 +8639,8 @@
       "reservas": "Reservas",
       "pedidosDeReserva": "Solicitudes",
       "acomodacoes": "Alojamientos",
-      "rotinaPadrao": "Rutina estándar"
+      "rotinaPadrao": "Rutina estándar",
+      "historicoLiberado": "Historial compartido"
     },
     "abasAria": "Pantallas de {destino}"
   }

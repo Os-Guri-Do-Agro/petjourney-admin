@@ -264,6 +264,12 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
 
 const PATIENT_ROUTES = [
   { key: 'clinico.pacientes.titulo', to: '/veterinario/pacientes', icon: 'ph ph-users' },
+  /* O paciente que chegou com o histórico liberado pelo responsável (doc 19). */
+  {
+    key: 'clinico.historicoLiberado.titulo',
+    to: '/veterinario/historico-liberado',
+    icon: 'ph ph-share-network',
+  },
   { key: 'clinico.bulario.titulo', to: '/veterinario/bulario', icon: 'ph ph-book-open' },
 ] as const
 

@@ -62,6 +62,16 @@ export type MockOperation =
   | 'pedido.enviar'
   | 'pedido.listar'
   | 'pedido.responder'
+  /*
+   * O histórico que viaja com o pet. A clínica lista, recebe pelo código e abre; o celular do
+   * responsável libera e encerra; a coleira é lida por quem estiver com o pet.
+   */
+  | 'historico.listar'
+  | 'historico.receber'
+  | 'historico.abrir'
+  | 'historico.liberar'
+  | 'historico.encerrar'
+  | 'historico.coleira'
 
 export class MockError extends Error {
   /** `kind` traduzível, nunca texto pronto de servidor. */

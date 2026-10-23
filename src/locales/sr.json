@@ -6515,6 +6515,172 @@
       "chamar": "Započni pregled",
       "recepcaoVazia": "Niko ne čeka u čekaonici.",
       "salaVazia": "Nijedan pregled nije u toku."
+    },
+    "historicoLiberado": {
+      "titulo": "Podeljena istorija",
+      "resumo": {
+        "nenhum": "Trenutno nema važeće podeljene istorije.",
+        "valendo": "{n} pacijent sa važećom istorijom | {n} pacijenta sa važećom istorijom | {n} pacijenata sa važećom istorijom"
+      },
+      "acoes": {
+        "verComoVe": "Pogledajte kako vlasnik vidi",
+        "coleira": "Očitajte QR sa ogrlice",
+        "receber": "Primite preko koda"
+      },
+      "secoes": {
+        "valendo": "Važeće",
+        "terminados": "Završene"
+      },
+      "linha": {
+        "deQuem": "vlasnik: {nome}",
+        "ve": "Vidi: {lista}",
+        "veioDe": "Stiglo iz: {lista}",
+        "valeAte": "Važi do {data}",
+        "terminouEm": "Pristup je završen {data}",
+        "ultimaAbertura": "Otvorio/la {nome}, {quando}",
+        "nuncaAberto": "Niko iz klinike još nije otvorio",
+        "abrir": "Otvori"
+      },
+      "vazio": {
+        "titulo": "Još nema podeljene istorije",
+        "corpo": "Kada vlasnik podeli istoriju ljubimca u aplikaciji, pokazuje kod na pultu. Samo ga unesite u Primite preko koda."
+      },
+      "categorias": {
+        "ALERGIAS": "Alergije",
+        "MEDICAMENTOS": "Lekovi",
+        "DIAGNOSTICOS": "Dijagnoze",
+        "VACINAS": "Vakcine",
+        "PESO": "Težina",
+        "DOCUMENTOS": "Dokumenti",
+        "DIARIO": "Dnevnik"
+      },
+      "marcador": {
+        "grave": "Teška",
+        "continuo": "Stalna upotreba",
+        "ativo": "Na terapiji"
+      },
+      "origem": {
+        "responsavel": "Zabeležio vlasnik u aplikaciji"
+      },
+      "semData": "Bez datuma",
+      "gaveta": {
+        "terminou": "Pristup je završen {data}",
+        "terminouCorpo": "Ranija istorija se više ne prikazuje. Ono što je klinika upisala u karton pacijenta ostaje ovde.",
+        "nadaRegistrado": "Ništa nije zabeleženo u podeljenim kategorijama.",
+        "quemAbriu": "Ko je iz klinike otvorio",
+        "registro": "Ovo otvaranje je zabeleženo kao {nome}, i vlasnik ga vidi u aplikaciji.",
+        "abrirFicha": "Otvorite karton pacijenta",
+        "erro": "Istoriju nije moguće otvoriti."
+      },
+      "receber": {
+        "ajuda": "Vlasnik pravi kod u aplikaciji i pokazuje ga na pultu. Kod važi jednom, za prvu kliniku koja ga primi.",
+        "campo": "Kod",
+        "conferir": "Proverite",
+        "incompleto": "Kod ima {n} cifara.",
+        "demo": "U demonstraciji, kodovi koji čekaju:",
+        "vem": "Šta stiže",
+        "vale": "Važi do",
+        "novo": "Ljubimac još nije pacijent: karton nastaje sa ovom istorijom.",
+        "jaPaciente": "Već je pacijent: istorija ulazi u postojeći karton.",
+        "receber": "Primite istoriju",
+        "outro": "Drugi kod",
+        "erros": {
+          "CODIGO_NAO_ENCONTRADO": "Taj kod ne postoji. Proverite sa vlasnikom.",
+          "CODIGO_EXPIRADO": "Taj kod je istekao. Zatražite novi od vlasnika.",
+          "CODIGO_JA_USADO": "Taj kod više ne važi. Zatražite novi od vlasnika.",
+          "generico": "Kod nije moguće proveriti. Pokušajte ponovo."
+        }
+      },
+      "emergencia": {
+        "ajuda": "Usmerite kameru ka QR kodu na ogrlici. U demonstraciji, izaberite jednu od ogrlica.",
+        "demo": "Ogrlice za demonstraciju",
+        "publica": "Javna kartica",
+        "publicaExplica": "Ono što svako vidi kada očita QR kod.",
+        "microchip": "Mikročip {numero}",
+        "semMicrochip": "Bez mikročipa",
+        "responsavel": "Vlasnik: {nome}",
+        "alergiaGrave": "Teška alergija: {lista}",
+        "semAlerta": "Nije zabeležena nijedna teška alergija.",
+        "segundo": "Hitni karton",
+        "segundoExplica": "Stalni lekovi, alergije, terapija koja je u toku i telefon osobe koja brine o ljubimcu. Samo za one sa CRMV brojem: beleži se ime, a vlasnik odmah dobija obaveštenje.",
+        "quemAbre": "Ko otvara",
+        "recepcao": "Recepcija (bez CRMV)",
+        "semCrmv": "Samo osoba sa CRMV brojem može da otvori hitni karton.",
+        "abrir": "Otvorite hitni karton",
+        "medicacao": "Stalna upotreba",
+        "alergias": "Alergije",
+        "diagnosticos": "Na terapiji",
+        "peso": "Poslednja težina",
+        "telefone": "Telefon: {nome}",
+        "nada": "Ništa nije zabeleženo",
+        "registro": "Otvorio/la {nome} ({conselho}) u {hora}. {responsavel} je dobio/la obaveštenje u aplikaciji.",
+        "erros": {
+          "COLEIRA_NAO_ENCONTRADA": "Ovaj QR kod nije sa PetJourney ogrlice.",
+          "CRMV_OBRIGATORIO": "Samo osoba sa CRMV brojem može da otvori hitni karton.",
+          "generico": "Ogrlicu nije moguće očitati. Pokušajte ponovo."
+        }
+      },
+      "ensaio": {
+        "quem": "Na telefonu",
+        "eduardo": "Eduardo · promenio kliniku",
+        "renata": "Renata · prvi put",
+        "camila": "Camila · pristup istekao"
+      },
+      "app": {
+        "titulo": "Ko vidi istoriju",
+        "de": "Istorija: {pet}",
+        "comAcesso": "Imaju pristup sada",
+        "semAcesso": "Više ne vide",
+        "ninguem": "Nijedna klinika sada ne vidi istoriju.",
+        "aguardando": "Kod {codigo}",
+        "esperando": "Čeka kliniku",
+        "ve": "Vidi: {lista}",
+        "periodo": "Od {desde} · do {ate}",
+        "aberturas": "Otvoreno {n} put | Otvoreno {n} puta | Otvoreno {n} puta",
+        "ninguemAbriu": "Niko iz klinike još nije otvorio",
+        "encerrar": "Završite",
+        "confirmar": {
+          "corpo": "{clinica} od sada više ne vidi istoriju ljubimca {pet}. Ono što je već videla ili upisala u svoj karton ostaje kod nje, kao posle svakog pregleda. Ne dobija razlog: saznaje samo da je pristup završen.",
+          "sim": "Završite pristup",
+          "nao": "Nazad"
+        },
+        "encerradoEm": "Završeno {data}",
+        "venceuEm": "Isteklo {data}",
+        "liberar": "Podelite sa klinikom",
+        "liberarTitulo": "Podelite istoriju",
+        "oQue": "Šta će klinika videti",
+        "nenhumaCategoria": "Označite bar jednu stavku.",
+        "prazo": "Koliko dugo",
+        "prazos": {
+          "1": "24 h",
+          "2": "48 h",
+          "3": "72 h",
+          "7": "7 dana",
+          "30": "30 dana"
+        },
+        "comoFunciona": "Klinika vidi samo ono što je označeno, do {data}. Svaki put kada neko odande otvori, pojavi se ovde sa imenom. Završavate kad god želite, sa dva dodira.",
+        "gerar": "Napravite kod",
+        "codigo": "Pokažite ovaj kod na recepciji",
+        "codigoAjuda": "Važi jednom, do {data}.",
+        "pronto": "Gotovo",
+        "quemAbriu": {
+          "titulo": "Ko je otvorio i kada",
+          "ficha": "otvorio/la: {lista}",
+          "emergencia": "otvorio/la hitni karton preko QR koda sa ogrlice",
+          "vazio": "Niko još nije otvorio."
+        },
+        "push": {
+          "titulo": "Hitni karton je otvoren",
+          "corpo": "{nome} ({conselho}) je otvorio/la hitni karton ljubimca {pet} u {hora}, u: {clinica}.",
+          "fechar": "Zatvorite obaveštenje"
+        },
+        "voltar": "Nazad",
+        "erro": "Nije moguće učitati. Pokušajte ponovo.",
+        "emergencias": "Hitni karton otvoren {n} put | Hitni karton otvoren {n} puta | Hitni karton otvoren {n} puta"
+      },
+      "erros": {
+        "carregar": "Podeljenu istoriju nije moguće učitati."
+      }
     }
   },
   "hotel": {
@@ -8473,7 +8639,8 @@
       "reservas": "Rezervacije",
       "pedidosDeReserva": "Zahtevi",
       "acomodacoes": "Smeštaj",
-      "rotinaPadrao": "Standardna rutina"
+      "rotinaPadrao": "Standardna rutina",
+      "historicoLiberado": "Podeljena istorija"
     },
     "abasAria": "Ekrani: {destino}"
   }

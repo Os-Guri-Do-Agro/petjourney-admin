@@ -6515,6 +6515,172 @@
       "chamar": "Iniciar consulta",
       "recepcaoVazia": "Ninguém esperando na recepção.",
       "salaVazia": "Nenhuma consulta em andamento."
+    },
+    "historicoLiberado": {
+      "titulo": "Histórico liberado",
+      "resumo": {
+        "nenhum": "Nenhum histórico valendo agora.",
+        "valendo": "1 paciente com o histórico valendo | {n} pacientes com o histórico valendo"
+      },
+      "acoes": {
+        "verComoVe": "Ver como o responsável vê",
+        "coleira": "Ler QR da coleira",
+        "receber": "Receber pelo código"
+      },
+      "secoes": {
+        "valendo": "Valendo",
+        "terminados": "Terminados"
+      },
+      "linha": {
+        "deQuem": "de {nome}",
+        "ve": "Vê {lista}",
+        "veioDe": "Veio de {lista}",
+        "valeAte": "Vale até {data}",
+        "terminouEm": "O acesso terminou em {data}",
+        "ultimaAbertura": "Aberto por {nome}, {quando}",
+        "nuncaAberto": "Ninguém da clínica abriu ainda",
+        "abrir": "Abrir"
+      },
+      "vazio": {
+        "titulo": "Nenhum histórico liberado ainda",
+        "corpo": "Quando o responsável libera o histórico do pet pelo app, ele mostra um código no balcão. É só digitar em Receber pelo código."
+      },
+      "categorias": {
+        "ALERGIAS": "Alergias",
+        "MEDICAMENTOS": "Medicamentos",
+        "DIAGNOSTICOS": "Diagnósticos",
+        "VACINAS": "Vacinas",
+        "PESO": "Peso",
+        "DOCUMENTOS": "Documentos",
+        "DIARIO": "Diário"
+      },
+      "marcador": {
+        "grave": "Grave",
+        "continuo": "Uso contínuo",
+        "ativo": "Em tratamento"
+      },
+      "origem": {
+        "responsavel": "Anotado pelo responsável no app"
+      },
+      "semData": "Sem data",
+      "gaveta": {
+        "terminou": "O acesso terminou em {data}",
+        "terminouCorpo": "O histórico de antes não aparece mais. O que a clínica registrou na ficha do paciente continua aqui.",
+        "nadaRegistrado": "Nada registrado nas categorias liberadas.",
+        "quemAbriu": "Quem da clínica abriu",
+        "registro": "Esta abertura ficou registrada como {nome}, e o responsável vê no app.",
+        "abrirFicha": "Abrir a ficha do paciente",
+        "erro": "Não foi possível abrir o histórico."
+      },
+      "receber": {
+        "ajuda": "O responsável gera o código no app e mostra no balcão. O código vale uma vez, para a primeira clínica que receber.",
+        "campo": "Código",
+        "conferir": "Conferir",
+        "incompleto": "O código tem {n} dígitos.",
+        "demo": "Na demonstração, os códigos esperando:",
+        "vem": "O que vem",
+        "vale": "Vale até",
+        "novo": "O pet ainda não é paciente: a ficha nasce com este histórico.",
+        "jaPaciente": "Já é paciente: o histórico entra na ficha que já existe.",
+        "receber": "Receber histórico",
+        "outro": "Outro código",
+        "erros": {
+          "CODIGO_NAO_ENCONTRADO": "Esse código não existe. Confira com o responsável.",
+          "CODIGO_EXPIRADO": "Esse código venceu. Peça um novo ao responsável.",
+          "CODIGO_JA_USADO": "Esse código não vale mais. Peça um novo ao responsável.",
+          "generico": "Não foi possível conferir o código. Tente de novo."
+        }
+      },
+      "emergencia": {
+        "ajuda": "Aponte a câmera para o QR da coleira. Na demonstração, escolha uma das coleiras.",
+        "demo": "Coleiras da demonstração",
+        "publica": "Ficha pública",
+        "publicaExplica": "O que qualquer pessoa vê ao ler o QR.",
+        "microchip": "Microchip {numero}",
+        "semMicrochip": "Sem microchip",
+        "responsavel": "Responsável: {nome}",
+        "alergiaGrave": "Alergia grave: {lista}",
+        "semAlerta": "Nenhuma alergia grave registrada.",
+        "segundo": "Ficha de emergência",
+        "segundoExplica": "Uso contínuo, alergias, o que está em tratamento e o telefone de quem cuida. Só para quem tem CRMV: fica registrado com o nome, e o responsável recebe o aviso na hora.",
+        "quemAbre": "Quem abre",
+        "recepcao": "Recepção (sem CRMV)",
+        "semCrmv": "Só quem tem CRMV abre a ficha de emergência.",
+        "abrir": "Abrir a ficha de emergência",
+        "medicacao": "Uso contínuo",
+        "alergias": "Alergias",
+        "diagnosticos": "Em tratamento",
+        "peso": "Último peso",
+        "telefone": "Telefone de {nome}",
+        "nada": "Nada registrado",
+        "registro": "Aberta por {nome} ({conselho}) às {hora}. {responsavel} recebeu o aviso no app.",
+        "erros": {
+          "COLEIRA_NAO_ENCONTRADA": "Esse QR não é de uma coleira PetJourney.",
+          "CRMV_OBRIGATORIO": "Só quem tem CRMV abre a ficha de emergência.",
+          "generico": "Não foi possível ler a coleira. Tente de novo."
+        }
+      },
+      "ensaio": {
+        "quem": "No celular de",
+        "eduardo": "Eduardo · trocou de clínica",
+        "renata": "Renata · primeira vez",
+        "camila": "Camila · acesso vencido"
+      },
+      "app": {
+        "titulo": "Quem vê o histórico",
+        "de": "Histórico de {pet}",
+        "comAcesso": "Com acesso agora",
+        "semAcesso": "Não veem mais",
+        "ninguem": "Nenhuma clínica vê o histórico agora.",
+        "aguardando": "Código {codigo}",
+        "esperando": "Esperando a clínica",
+        "ve": "Vê {lista}",
+        "periodo": "Desde {desde} · até {ate}",
+        "aberturas": "Abriu 1 vez | Abriu {n} vezes",
+        "ninguemAbriu": "Ninguém da clínica abriu ainda",
+        "encerrar": "Encerrar",
+        "confirmar": {
+          "corpo": "{clinica} deixa de ver o histórico de {pet} agora. O que já viu ou anotou na ficha de lá continua lá, como em qualquer consulta. Não recebe motivo: só fica sabendo que o acesso terminou.",
+          "sim": "Encerrar acesso",
+          "nao": "Voltar"
+        },
+        "encerradoEm": "Encerrado em {data}",
+        "venceuEm": "Venceu em {data}",
+        "liberar": "Liberar para uma clínica",
+        "liberarTitulo": "Liberar o histórico",
+        "oQue": "O que a clínica vai ver",
+        "nenhumaCategoria": "Marque pelo menos um item.",
+        "prazo": "Por quanto tempo",
+        "prazos": {
+          "1": "24 h",
+          "2": "48 h",
+          "3": "72 h",
+          "7": "7 dias",
+          "30": "30 dias"
+        },
+        "comoFunciona": "A clínica vê só o que estiver marcado, até {data}. Cada vez que alguém de lá abrir, aparece aqui com o nome. Você encerra quando quiser, em dois toques.",
+        "gerar": "Gerar código",
+        "codigo": "Mostre este código na recepção",
+        "codigoAjuda": "Vale uma vez, até {data}.",
+        "pronto": "Pronto",
+        "quemAbriu": {
+          "titulo": "Quem abriu e quando",
+          "ficha": "abriu {lista}",
+          "emergencia": "abriu a ficha de emergência pelo QR da coleira",
+          "vazio": "Ninguém abriu ainda."
+        },
+        "push": {
+          "titulo": "Ficha de emergência aberta",
+          "corpo": "{nome} ({conselho}) abriu a ficha de emergência de {pet} às {hora}, em {clinica}.",
+          "fechar": "Fechar aviso"
+        },
+        "voltar": "Voltar",
+        "erro": "Não deu para carregar. Tente de novo.",
+        "emergencias": "A ficha de emergência foi aberta 1 vez | A ficha de emergência foi aberta {n} vezes"
+      },
+      "erros": {
+        "carregar": "Não foi possível carregar o histórico liberado."
+      }
     }
   },
   "hotel": {
@@ -8473,7 +8639,8 @@
       "reservas": "Reservas",
       "pedidosDeReserva": "Pedidos",
       "acomodacoes": "Acomodações",
-      "rotinaPadrao": "Rotina padrão"
+      "rotinaPadrao": "Rotina padrão",
+      "historicoLiberado": "Histórico liberado"
     },
     "abasAria": "Telas de {destino}"
   }

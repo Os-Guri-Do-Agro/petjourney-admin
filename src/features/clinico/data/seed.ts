@@ -70,6 +70,7 @@ import {
   petsDoResumo,
 } from './seed-resumo'
 import { planosDeEstoquePlantados } from './seed-estoque'
+import { semearHistoricoCompartilhado, type SementeDoHistorico } from './seed-historico'
 import { agendamentoOnlinePadrao, contasSoNoApp, semearPedidos } from './seed-pedidos'
 import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
 import type {
@@ -253,6 +254,8 @@ export type SeedResult = {
   /** Código de acompanhamento de cada pedido que veio pelo link, por id do pedido. */
   tokensDoLink: Record<string, string>
   avisosDoPedido: AvisoDoPedido[]
+  /** O histórico que o responsável libera para a clínica e as coleiras — ver `seed-historico.ts`. */
+  historicoCompartilhado: SementeDoHistorico
 }
 
 function iso(date: ISODate, minutes: number) {
@@ -3104,6 +3107,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     contasSoNoApp: contasSoNoApp(),
     tokensDoLink: dosPedidos.tokens,
     avisosDoPedido: [],
+    historicoCompartilhado: semearHistoricoCompartilhado({ hoje, iso, clinic }),
   }
 }
 

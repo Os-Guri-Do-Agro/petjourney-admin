@@ -97,6 +97,7 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     abas: [
       { rota: '/veterinario/pacientes', chave: 'espacos.abas.pacientes' },
       { rota: '/veterinario/atendimentos', chave: 'espacos.abas.atendimentos' },
+      { rota: '/veterinario/historico-liberado', chave: 'espacos.abas.historicoLiberado' },
       { rota: '/veterinario/bulario', chave: 'espacos.abas.bulario' },
     ],
     prefixos: ['/veterinario/paciente/', '/veterinario/atendimento/'],

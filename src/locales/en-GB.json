@@ -6515,6 +6515,172 @@
       "chamar": "Start consult",
       "recepcaoVazia": "No one waiting in reception.",
       "salaVazia": "No consult in progress."
+    },
+    "historicoLiberado": {
+      "titulo": "Shared history",
+      "resumo": {
+        "nenhum": "No shared history active right now.",
+        "valendo": "1 patient with active shared history | {n} patients with active shared history"
+      },
+      "acoes": {
+        "verComoVe": "See it as the pet parent does",
+        "coleira": "Scan collar QR",
+        "receber": "Receive with a code"
+      },
+      "secoes": {
+        "valendo": "Active",
+        "terminados": "Ended"
+      },
+      "linha": {
+        "deQuem": "from {nome}",
+        "ve": "Sees {lista}",
+        "veioDe": "Came from {lista}",
+        "valeAte": "Valid until {data}",
+        "terminouEm": "Access ended on {data}",
+        "ultimaAbertura": "Opened by {nome}, {quando}",
+        "nuncaAberto": "No one at the clinic has opened it yet",
+        "abrir": "Open"
+      },
+      "vazio": {
+        "titulo": "No shared history yet",
+        "corpo": "When the pet parent shares the pet’s history in the app, they show a code at the front desk. Just type it in Receive with a code."
+      },
+      "categorias": {
+        "ALERGIAS": "Allergies",
+        "MEDICAMENTOS": "Medications",
+        "DIAGNOSTICOS": "Diagnoses",
+        "VACINAS": "Vaccines",
+        "PESO": "Weight",
+        "DOCUMENTOS": "Documents",
+        "DIARIO": "Diary"
+      },
+      "marcador": {
+        "grave": "Severe",
+        "continuo": "Ongoing use",
+        "ativo": "Under treatment"
+      },
+      "origem": {
+        "responsavel": "Noted by the pet parent in the app"
+      },
+      "semData": "No date",
+      "gaveta": {
+        "terminou": "Access ended on {data}",
+        "terminouCorpo": "The earlier history no longer shows. What the clinic recorded in the patient file stays here.",
+        "nadaRegistrado": "Nothing recorded in the shared categories.",
+        "quemAbriu": "Who at the clinic opened it",
+        "registro": "This opening was recorded as {nome}, and the pet parent sees it in the app.",
+        "abrirFicha": "Open the patient file",
+        "erro": "Could not open the history."
+      },
+      "receber": {
+        "ajuda": "The pet parent creates the code in the app and shows it at the front desk. The code works once, for the first clinic that receives it.",
+        "campo": "Code",
+        "conferir": "Check",
+        "incompleto": "The code has {n} digits.",
+        "demo": "In the demo, the codes waiting:",
+        "vem": "What comes",
+        "vale": "Valid until",
+        "novo": "The pet is not a patient yet: the file starts with this history.",
+        "jaPaciente": "Already a patient: the history goes into the existing file.",
+        "receber": "Receive history",
+        "outro": "Another code",
+        "erros": {
+          "CODIGO_NAO_ENCONTRADO": "This code does not exist. Check it with the pet parent.",
+          "CODIGO_EXPIRADO": "This code has expired. Ask the pet parent for a new one.",
+          "CODIGO_JA_USADO": "This code is no longer valid. Ask the pet parent for a new one.",
+          "generico": "Could not check the code. Try again."
+        }
+      },
+      "emergencia": {
+        "ajuda": "Point the camera at the collar QR. In the demo, pick one of the collars.",
+        "demo": "Demo collars",
+        "publica": "Public card",
+        "publicaExplica": "What anyone sees when scanning the QR.",
+        "microchip": "Microchip {numero}",
+        "semMicrochip": "No microchip",
+        "responsavel": "Pet parent: {nome}",
+        "alergiaGrave": "Severe allergy: {lista}",
+        "semAlerta": "No severe allergy recorded.",
+        "segundo": "Emergency record",
+        "segundoExplica": "Ongoing medication, allergies, what is under treatment and the caregiver’s phone. Only for someone with a CRMV: it is recorded with the name, and the pet parent is notified right away.",
+        "quemAbre": "Who opens it",
+        "recepcao": "Front desk (no CRMV)",
+        "semCrmv": "Only someone with a CRMV can open the emergency record.",
+        "abrir": "Open the emergency record",
+        "medicacao": "Ongoing use",
+        "alergias": "Allergies",
+        "diagnosticos": "Under treatment",
+        "peso": "Latest weight",
+        "telefone": "{nome}’s phone",
+        "nada": "Nothing recorded",
+        "registro": "Opened by {nome} ({conselho}) at {hora}. {responsavel} got the notice in the app.",
+        "erros": {
+          "COLEIRA_NAO_ENCONTRADA": "This QR is not from a PetJourney collar.",
+          "CRMV_OBRIGATORIO": "Only someone with a CRMV can open the emergency record.",
+          "generico": "Could not read the collar. Try again."
+        }
+      },
+      "ensaio": {
+        "quem": "On the phone of",
+        "eduardo": "Eduardo · changed clinics",
+        "renata": "Renata · first visit",
+        "camila": "Camila · access expired"
+      },
+      "app": {
+        "titulo": "Who sees the history",
+        "de": "{pet}’s history",
+        "comAcesso": "Have access now",
+        "semAcesso": "No longer see it",
+        "ninguem": "No clinic sees the history right now.",
+        "aguardando": "Code {codigo}",
+        "esperando": "Waiting for the clinic",
+        "ve": "Sees {lista}",
+        "periodo": "From {desde} · until {ate}",
+        "aberturas": "Opened once | Opened {n} times",
+        "ninguemAbriu": "No one at the clinic has opened it yet",
+        "encerrar": "End",
+        "confirmar": {
+          "corpo": "{clinica} stops seeing {pet}’s history now. What they already saw or noted in their own file stays with them, as after any visit. They get no reason: they only learn that the access ended.",
+          "sim": "End access",
+          "nao": "Back"
+        },
+        "encerradoEm": "Ended on {data}",
+        "venceuEm": "Expired on {data}",
+        "liberar": "Share with a clinic",
+        "liberarTitulo": "Share the history",
+        "oQue": "What the clinic will see",
+        "nenhumaCategoria": "Select at least one item.",
+        "prazo": "For how long",
+        "prazos": {
+          "1": "24 h",
+          "2": "48 h",
+          "3": "72 h",
+          "7": "7 days",
+          "30": "30 days"
+        },
+        "comoFunciona": "The clinic only sees what is selected, until {data}. Every time someone there opens it, it shows up here with their name. You can end it whenever you want, in two taps.",
+        "gerar": "Create code",
+        "codigo": "Show this code at the front desk",
+        "codigoAjuda": "Works once, until {data}.",
+        "pronto": "Done",
+        "quemAbriu": {
+          "titulo": "Who opened it and when",
+          "ficha": "opened {lista}",
+          "emergencia": "opened the emergency record from the collar QR",
+          "vazio": "No one has opened it yet."
+        },
+        "push": {
+          "titulo": "Emergency record opened",
+          "corpo": "{nome} ({conselho}) opened {pet}’s emergency record at {hora}, at {clinica}.",
+          "fechar": "Close notice"
+        },
+        "voltar": "Back",
+        "erro": "Could not load. Try again.",
+        "emergencias": "Emergency record opened once | Emergency record opened {n} times"
+      },
+      "erros": {
+        "carregar": "Could not load the shared history."
+      }
     }
   },
   "hotel": {
@@ -8473,7 +8639,8 @@
       "reservas": "Bookings",
       "pedidosDeReserva": "Requests",
       "acomodacoes": "Rooms",
-      "rotinaPadrao": "Standard routine"
+      "rotinaPadrao": "Standard routine",
+      "historicoLiberado": "Shared history"
     },
     "abasAria": "{destino} screens"
   }
