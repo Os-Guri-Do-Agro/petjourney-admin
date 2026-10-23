@@ -6,11 +6,6 @@
  * esmaecida atrás. Vem depois de `trilha-tema.css` e `trilha-ui.css` e vale na raiz inteira, para
  * que o PrimeVue e as peças `ui-*` tenham a mesma cara em toda tela.
  *
- * Menos na entrada (login, cadastro, esqueci a senha, marcada com `.pj-entrada`): ela ficou com o
- * desenho de antes deste acabamento. Botão, campo, caixa flutuante e diálogo de dentro dela ficam
- * fora das regras daqui, e o `:where()` em volta da exceção não pesa na especificidade, para o
- * resto do sistema continuar exatamente igual. As cores dela estão no bloco "a entrada", abaixo.
- *
  * Três regras guiam o que está aqui:
  * - **Profundidade diz importância.** O que se lê junto flutua (cartão branco, sombra baixa); o que
  *   apoia fica rente (poço tingido, sem sombra). Nada flutua sem motivo.
@@ -68,24 +63,9 @@
   --hc-sombra: var(--sombra-cartao);
 }
 
-/* ---------------------------------------------------------------------------------- a entrada
- * O papel e o fio do kit de 18/10, que este acabamento clareou. A ponte `--auth-*` do
- * `trilha-tema.css` resolve no elemento da entrada, então lê estes valores daqui.
- */
-
-:root.trilha .pj-entrada {
-  --hc-cartao: #fbfbf8;
-  --hc-borda: #d5dfdb;
-}
-
-:root.trilha.app-dark .pj-entrada {
-  --hc-cartao: #161e1c;
-  --hc-borda: #2e3834;
-}
-
 /* ----------------------------------------------------------------------------------- botões */
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-button {
   min-height: var(--altura-controle);
   gap: 8px;
   padding-inline: 16px;
@@ -98,7 +78,7 @@ html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)) {
     transform var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-sm {
+html.trilha .p-button.p-button-sm {
   min-height: 34px;
   padding-inline: 12px;
   font-size: 13.5px;
@@ -108,27 +88,27 @@ html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-sm {
  * Só ícone: sem vão. O PrimeVue põe um filho vazio depois do ícone (o Badge/ripple), e com o vão
  * de 8px do botão o ícone ficava 4px à esquerda do centro — o "X" dos diálogos torto.
  */
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-icon-only {
+html.trilha .p-button.p-button-icon-only {
   width: var(--altura-controle);
   gap: 0;
   padding-inline: 0;
 }
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-icon-only.p-button-sm {
+html.trilha .p-button.p-button-icon-only.p-button-sm {
   width: 34px;
 }
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)):not(:disabled):active {
+html.trilha .p-button:not(:disabled):active {
   transform: translateY(1px);
 }
 
 /* A ação cheia: musgo com um brilho no alto, para ter volume e não parecer um retângulo pintado. */
 html.trilha
-  .p-button:where(:not(.pj-entrada, .pj-entrada *)):not(.p-button-secondary):not(
-    .p-button-outlined
-  ):not(.p-button-text):not(.p-button-link):not(.p-button-danger):not(.p-button-warn):not(
-    .p-button-contrast
-  ):not(.p-button-help):not(.p-button-info):not(.p-button-success) {
+  .p-button:not(.p-button-secondary):not(.p-button-outlined):not(.p-button-text):not(
+    .p-button-link
+  ):not(.p-button-danger):not(.p-button-warn):not(.p-button-contrast):not(.p-button-help):not(
+    .p-button-info
+  ):not(.p-button-success) {
   background-image: linear-gradient(180deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 0%));
   box-shadow:
     0 1px 2px rgb(16 40 32 / 18%),
@@ -137,11 +117,11 @@ html.trilha
 }
 
 html.trilha.app-dark
-  .p-button:where(:not(.pj-entrada, .pj-entrada *)):not(.p-button-secondary):not(
-    .p-button-outlined
-  ):not(.p-button-text):not(.p-button-link):not(.p-button-danger):not(.p-button-warn):not(
-    .p-button-contrast
-  ):not(.p-button-help):not(.p-button-info):not(.p-button-success) {
+  .p-button:not(.p-button-secondary):not(.p-button-outlined):not(.p-button-text):not(
+    .p-button-link
+  ):not(.p-button-danger):not(.p-button-warn):not(.p-button-contrast):not(.p-button-help):not(
+    .p-button-info
+  ):not(.p-button-success) {
   background-image: linear-gradient(180deg, rgb(255 255 255 / 18%), rgb(255 255 255 / 0%));
   box-shadow:
     0 1px 2px rgb(0 0 0 / 40%),
@@ -157,33 +137,26 @@ html:root.trilha {
   --p-button-outlined-primary-border-color: color-mix(in oklab, var(--musgo) 35%, var(--linha-media));
 }
 
-html.trilha
-  .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-secondary:not(.p-button-text):not(
-    .p-button-link
-  ),
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-outlined {
+html.trilha .p-button.p-button-secondary:not(.p-button-text):not(.p-button-link),
+html.trilha .p-button.p-button-outlined {
   box-shadow: var(--sombra-xs);
 }
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-outlined {
+html.trilha .p-button.p-button-outlined {
   background: var(--superficie);
 }
 
-html.trilha
-  .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-outlined:not(:disabled):hover {
+html.trilha .p-button.p-button-outlined:not(:disabled):hover {
   background: var(--superficie-2);
 }
 
-html.trilha
-  .p-button:where(:not(.pj-entrada, .pj-entrada *)).p-button-danger:not(.p-button-outlined):not(
-    .p-button-text
-  ) {
+html.trilha .p-button.p-button-danger:not(.p-button-outlined):not(.p-button-text) {
   box-shadow:
     0 1px 2px rgb(16 40 32 / 16%),
     0 6px 14px -8px color-mix(in oklab, var(--risco) 80%, transparent);
 }
 
-html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)):focus-visible {
+html.trilha .p-button:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px var(--superficie),
@@ -192,14 +165,14 @@ html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)):focus-visible {
 
 /* ----------------------------------------------------------------------------------- campos */
 
-html.trilha .p-inputtext:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-select:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-multiselect:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-autocomplete-input-multiple:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-inputnumber-input:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-textarea:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-password-input:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-datepicker-input:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-inputtext,
+html.trilha .p-select,
+html.trilha .p-multiselect,
+html.trilha .p-autocomplete-input-multiple,
+html.trilha .p-inputnumber-input,
+html.trilha .p-textarea,
+html.trilha .p-password-input,
+html.trilha .p-datepicker-input {
   border-radius: var(--raio-controle);
   box-shadow: var(--sombra-xs);
   transition:
@@ -207,18 +180,18 @@ html.trilha .p-datepicker-input:where(:not(.pj-entrada, .pj-entrada *)) {
     box-shadow var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-html.trilha .p-inputtext:where(:not(.pj-entrada, .pj-entrada *)):not(textarea),
-html.trilha .p-select:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-multiselect:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-inputtext:not(textarea),
+html.trilha .p-select,
+html.trilha .p-multiselect {
   min-height: var(--altura-controle);
 }
 
-html.trilha .p-inputtext:where(:not(.pj-entrada, .pj-entrada *)):enabled:focus,
-html.trilha .p-textarea:where(:not(.pj-entrada, .pj-entrada *)):enabled:focus,
-html.trilha .p-select:where(:not(.pj-entrada, .pj-entrada *)).p-focus,
-html.trilha .p-multiselect:where(:not(.pj-entrada, .pj-entrada *)).p-focus,
-html.trilha .p-inputnumber-input:where(:not(.pj-entrada, .pj-entrada *)):enabled:focus,
-html.trilha .p-datepicker-input:where(:not(.pj-entrada, .pj-entrada *)):enabled:focus {
+html.trilha .p-inputtext:enabled:focus,
+html.trilha .p-textarea:enabled:focus,
+html.trilha .p-select.p-focus,
+html.trilha .p-multiselect.p-focus,
+html.trilha .p-inputnumber-input:enabled:focus,
+html.trilha .p-datepicker-input:enabled:focus {
   border-color: var(--musgo);
   box-shadow:
     0 0 0 3px color-mix(in oklab, var(--musgo) 18%, transparent),
@@ -226,80 +199,80 @@ html.trilha .p-datepicker-input:where(:not(.pj-entrada, .pj-entrada *)):enabled:
   outline: none;
 }
 
-html.trilha .p-inputtext:where(:not(.pj-entrada, .pj-entrada *)):disabled,
-html.trilha .p-select:where(:not(.pj-entrada, .pj-entrada *)).p-disabled {
+html.trilha .p-inputtext:disabled,
+html.trilha .p-select.p-disabled {
   box-shadow: none;
 }
 
 /* Campo de busca com ícone dentro (IconField): o ícone na tinta de apoio. */
-html.trilha .p-iconfield:where(:not(.pj-entrada, .pj-entrada *)) .p-inputicon {
+html.trilha .p-iconfield .p-inputicon {
   color: var(--tinta-3);
 }
 
 /* ----------------------------------------------------------------------- caixas que flutuam */
 
-html.trilha .p-select-overlay:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-multiselect-overlay:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-autocomplete-overlay:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-datepicker-panel:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-popover:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-menu:where(:not(.pj-entrada, .pj-entrada *)).p-menu-overlay,
-html.trilha .p-tieredmenu-overlay:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-cascadeselect-overlay:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-select-overlay,
+html.trilha .p-multiselect-overlay,
+html.trilha .p-autocomplete-overlay,
+html.trilha .p-datepicker-panel,
+html.trilha .p-popover,
+html.trilha .p-menu.p-menu-overlay,
+html.trilha .p-tieredmenu-overlay,
+html.trilha .p-cascadeselect-overlay {
   overflow: hidden;
   border: 1px solid var(--linha);
   border-radius: var(--raio-cartao-pequeno);
   box-shadow: var(--sombra-2);
 }
 
-html.trilha .p-select-option:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-multiselect-option:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-menu-item-link:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-autocomplete-option:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-select-option,
+html.trilha .p-multiselect-option,
+html.trilha .p-menu-item-link,
+html.trilha .p-autocomplete-option {
   border-radius: 8px;
 }
 
-html.trilha .p-select-list:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-multiselect-list:where(:not(.pj-entrada, .pj-entrada *)),
-html.trilha .p-menu-list:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-select-list,
+html.trilha .p-multiselect-list,
+html.trilha .p-menu-list {
   padding: 6px;
 }
 
 /* -------------------------------------------------------------------------------- diálogos */
 
-html.trilha .p-dialog:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-dialog {
   overflow: hidden;
   border: 1px solid var(--linha);
   border-radius: var(--raio-painel);
   box-shadow: var(--sombra-3);
 }
 
-html.trilha .p-dialog-header:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-dialog-header {
   padding: 22px 24px 10px;
 }
 
-html.trilha .p-dialog-title:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-dialog-title {
   font-size: 19px;
   font-weight: 650;
   letter-spacing: -0.015em;
 }
 
-html.trilha .p-dialog-content:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-dialog-content {
   padding: 8px 24px 20px;
 }
 
-html.trilha .p-dialog-footer:where(:not(.pj-entrada, .pj-entrada *)) {
+html.trilha .p-dialog-footer {
   gap: 8px;
   padding: 14px 24px 20px;
 }
 
-html.trilha .p-dialog-mask:where(:not(.pj-entrada, .pj-entrada *)).p-overlay-mask,
+html.trilha .p-dialog-mask.p-overlay-mask,
 html.trilha .p-drawer-mask.p-overlay-mask {
   background: rgb(10 24 20 / 38%);
   backdrop-filter: blur(3px);
 }
 
-html.trilha.app-dark .p-dialog-mask:where(:not(.pj-entrada, .pj-entrada *)).p-overlay-mask,
+html.trilha.app-dark .p-dialog-mask.p-overlay-mask,
 html.trilha.app-dark .p-drawer-mask.p-overlay-mask {
   background: rgb(0 0 0 / 55%);
 }
@@ -376,13 +349,13 @@ html.trilha {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)),
-  html.trilha .p-inputtext:where(:not(.pj-entrada, .pj-entrada *)),
-  html.trilha .p-select:where(:not(.pj-entrada, .pj-entrada *)) {
+  html.trilha .p-button,
+  html.trilha .p-inputtext,
+  html.trilha .p-select {
     transition: none;
   }
 
-  html.trilha .p-button:where(:not(.pj-entrada, .pj-entrada *)):not(:disabled):active {
+  html.trilha .p-button:not(:disabled):active {
     transform: none;
   }
 }

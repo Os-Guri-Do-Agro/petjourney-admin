@@ -1,4 +1,12 @@
 <script setup lang="ts">
+/**
+ * A moldura da entrada (login, criar conta, redefinir senha), no layout de sempre: o formulário
+ * sobre a área lisa da arte, à esquerda, e a mensagem da marca sobre o verde, à direita.
+ *
+ * Os elementos são os do portal de hoje: campo, botão, checkbox e passos do kit, a fonte e os
+ * tokens do Trilha. As cores chegam às páginas pela família `--auth-*`, que o `trilha-tema.css`
+ * aponta para os tokens do kit.
+ */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -7,7 +15,6 @@ import logoDarkUrl from '@/assets/Logos/logo-for-dark-theme.png'
 import bgDarkUrl from '@/assets/login/login-dark-bg.jpg'
 import bgLightUrl from '@/assets/login/login-ligth-bg.jpg'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
-import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isDarkMode } from '@/theme/color-mode'
 
 defineProps<{
@@ -20,7 +27,6 @@ const { t } = useI18n()
 
 const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
-const authLayoutStyle = useAuthThemeVars()
 
 /**
  * A arte de fundo já traz a diagonal verde e a pata: a página inteira é a imagem,
@@ -32,7 +38,7 @@ const authArtStyle = computed(() => ({
 </script>
 
 <template>
-  <main class="auth-page pj-entrada" :style="[authLayoutStyle, authArtStyle]">
+  <main class="auth-page" :style="authArtStyle">
     <section class="auth-shell">
       <div class="auth-form-panel">
         <div class="auth-form-panel__locale auth-form-panel__locale--mobile">
@@ -106,7 +112,7 @@ const authArtStyle = computed(() => ({
   /* Preso à viewport: em página alta (cadastro) a arte não estica nem some ao rolar. */
   background-attachment: fixed;
   color: var(--auth-text);
-  font-family: 'DM Sans', 'PetJourney Arabic', Inter, system-ui, sans-serif;
+  font-family: var(--font-texto);
 }
 
 /*
@@ -201,7 +207,7 @@ const authArtStyle = computed(() => ({
   color: var(--auth-text);
   font-size: clamp(2rem, 3vw, 2.6rem);
   font-weight: 650;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.03em;
 }
 
 .auth-heading p {

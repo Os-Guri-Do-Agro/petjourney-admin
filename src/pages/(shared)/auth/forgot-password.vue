@@ -12,7 +12,6 @@ import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
-import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { ApiError } from '@/service/api'
 import {
   recoveryPassword,
@@ -24,7 +23,6 @@ import { isPasswordValid } from '@/utils/validation/password'
 const { t } = useI18n()
 const router = useRouter()
 const toast = useToast()
-const authStyle = useAuthThemeVars()
 
 const step = ref<1 | 2>(1)
 const email = ref('')
@@ -42,10 +40,6 @@ const resetToken = ref('')
 const pinOtpRef = ref<HTMLElement | null>(null)
 
 const pinFilled = computed(() => pin.value.replace(/\D/g, '').length === PIN_LENGTH)
-
-const dialogStyle = computed(() => ({
-  ...authStyle.value,
-}))
 
 watch(pinDialogVisible, async (open) => {
   if (!open) {
@@ -93,11 +87,6 @@ const confirmPassword = ref('')
 const newPasswordError = ref('')
 const confirmPasswordError = ref('')
 const resetting = ref(false)
-const showNewPassword = ref(false)
-const showConfirmPassword = ref(false)
-
-const newPasswordType = computed(() => (showNewPassword.value ? 'text' : 'password'))
-const confirmPasswordType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
 
 const stepMeta = computed(() => {
   if (step.value === 1) {
@@ -291,7 +280,7 @@ function closePinDialog() {
     :eyebrow="stepMeta.eyebrow"
     :title="stepMeta.title"
   >
-    <div class="forgot-stack" :style="authStyle">
+    <div class="forgot-stack">
       <form
         v-if="step === 1"
         class="forgot-stack__form"
@@ -329,26 +318,9 @@ function closePinDialog() {
           :label="t('auth.forgot.password.label')"
           :placeholder="t('auth.forgot.password.placeholder')"
           required
-          :type="newPasswordType"
-        >
-          <template #trailing>
-            <Button
-              :aria-label="
-                showNewPassword
-                  ? t('auth.forgot.password.hide')
-                  : t('auth.forgot.password.show')
-              "
-              class="forgot-password-toggle"
-              :disabled="resetting"
-              :icon="showNewPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-              rounded
-              severity="secondary"
-              text
-              type="button"
-              @click="showNewPassword = !showNewPassword"
-            />
-          </template>
-        </AuthTextField>
+          revelavel
+          type="password"
+        />
 
         <PasswordRequirements :password="newPassword" />
 
@@ -361,26 +333,9 @@ function closePinDialog() {
           :label="t('auth.forgot.confirm.label')"
           :placeholder="t('auth.forgot.confirm.placeholder')"
           required
-          :type="confirmPasswordType"
-        >
-          <template #trailing>
-            <Button
-              :aria-label="
-                showConfirmPassword
-                  ? t('auth.forgot.password.hide')
-                  : t('auth.forgot.password.show')
-              "
-              class="forgot-password-toggle"
-              :disabled="resetting"
-              :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-              rounded
-              severity="secondary"
-              text
-              type="button"
-              @click="showConfirmPassword = !showConfirmPassword"
-            />
-          </template>
-        </AuthTextField>
+          revelavel
+          type="password"
+        />
 
         <AuthButton :loading="resetting" full-width type="submit">
           {{ resetting ? t('auth.forgot.resetting') : t('auth.forgot.reset') }}
@@ -417,12 +372,12 @@ function closePinDialog() {
       class="forgot-pin-dialog"
       :pt="{
         root: { class: 'forgot-pin-dialog__root' },
-        mask: { class: 'forgot-pin-dialog__mask pj-entrada' },
+        mask: { class: 'forgot-pin-dialog__mask' },
         content: { class: 'forgot-pin-dialog__content' },
       }"
       @hide="closePinDialog"
     >
-      <div class="forgot-pin" :style="dialogStyle">
+      <div class="forgot-pin">
         <Button
           class="forgot-pin__close"
           type="button"
@@ -508,17 +463,6 @@ function closePinDialog() {
   gap: 1rem;
 }
 
-.forgot-password-toggle.p-button {
-  width: 2rem;
-  height: 2rem;
-  color: var(--auth-soft);
-}
-
-.forgot-password-toggle.p-button:not(:disabled):hover {
-  background: var(--auth-sage-tint);
-  color: var(--auth-soft);
-}
-
 .forgot-pin {
   position: relative;
   display: grid;
@@ -565,13 +509,12 @@ function closePinDialog() {
   box-shadow: 0 10px 24px rgb(var(--auth-shadow-rgb) / 0.08);
 }
 
+/* A linha pequena acima do título, em caixa normal, como no resto do portal. */
 .forgot-pin__eyebrow {
   margin: 0;
   color: var(--auth-soft);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
 .forgot-pin h2 {

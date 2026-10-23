@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
-import { currentColors } from '@/theme/color-mode'
-
+/**
+ * Os passos de um fluxo curto da entrada (criar conta, redefinir senha), deitados numa linha:
+ * o número e o nome de cada um, ligados por um traço que se enche quando o passo fica para trás.
+ * O passo feito troca o número pelo visto — o estado não depende só da cor.
+ */
 defineProps<{
   currentStep: number
   totalSteps: number
@@ -11,26 +12,10 @@ defineProps<{
    *  Não se chama `ariaLabel` de propósito: colidiria com o atributo nativo. */
   listLabel: string
 }>()
-
-const indicatorStyle = computed(() => {
-  const colors = currentColors.value
-
-  return {
-    '--step-active': colors.dashboard.primaryStrong,
-    '--step-done': colors.dashboard.successText,
-    '--step-pending': colors.auth.line,
-    '--step-pending-text': colors.auth.soft,
-    '--step-text': colors.auth.muted,
-    '--step-text-active': colors.auth.text,
-    /* Cor de contraste sobre marcador sólido: no claro é branco, no escuro é a
-       superfície escura. É o mesmo par que o resto do portal usa. */
-    '--step-on-solid': colors.auth.white,
-  }
-})
 </script>
 
 <template>
-  <ol class="register-steps" :style="indicatorStyle" :aria-label="listLabel">
+  <ol class="register-steps" :aria-label="listLabel" :data-total="totalSteps">
     <li
       v-for="(label, index) in labels"
       :key="index"
@@ -41,8 +26,8 @@ const indicatorStyle = computed(() => {
       }"
       :aria-current="currentStep === index + 1 ? 'step' : undefined"
     >
-      <span class="register-steps__marker">
-        <i v-if="currentStep > index + 1" class="ph ph-check" aria-hidden="true" />
+      <span class="register-steps__marker" aria-hidden="true">
+        <i v-if="currentStep > index + 1" class="ph ph-check" />
         <span v-else>{{ index + 1 }}</span>
       </span>
       <span class="register-steps__label">{{ label }}</span>
@@ -52,114 +37,106 @@ const indicatorStyle = computed(() => {
 
 <style scoped>
 .register-steps {
-  display: grid;
-  grid-template-columns: repeat(v-bind(totalSteps), minmax(0, 1fr));
-  gap: 0.5rem;
-  margin: 0 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .register-steps__item {
-  position: relative;
-  display: grid;
-  gap: 0.5rem;
-  justify-items: center;
+  display: flex;
   min-width: 0;
-  text-align: center;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Trilha ligando o marcador anterior a este: sem ela os passos leem como dois
-   badges soltos, não como um caminho. Recuada 1.4rem de cada centro, então nunca
-   passa por baixo dos círculos (raio 1rem). */
+/* O traço entre um passo e o seguinte: cresce para ocupar o espaço que sobra. */
 .register-steps__item + .register-steps__item::before {
-  content: '';
-  position: absolute;
-  top: 1rem;
-  inset-inline-end: 50%;
-  inset-inline-start: calc(-50% - 0.25rem);
+  width: clamp(16px, 6vw, 40px);
   height: 2px;
-  margin: 0 1.4rem;
-  border-radius: 999px;
-  background: var(--step-pending);
-  transition: background-color 180ms ease;
+  flex: none;
+  margin-inline-end: 2px;
+  border-radius: 2px;
+  background: var(--linha);
+  content: '';
+  transition: background-color var(--pj-tempo-medio) var(--pj-curva-chega);
 }
 
-/* A trilha é preenchida quando a etapa que ela alimenta já foi alcançada. */
-.register-steps__item--active::before,
-.register-steps__item--done::before {
-  background: var(--step-active);
+.register-steps__item + .register-steps__item--active::before,
+.register-steps__item + .register-steps__item--done::before {
+  background: var(--musgo);
 }
 
 .register-steps__marker {
-  position: relative;
-  z-index: 1;
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 28px;
+  height: 28px;
+  flex: none;
   place-items: center;
-  border: 2px solid var(--step-pending);
+  border: 1.5px solid var(--linha-forte);
   border-radius: 999px;
-  background: transparent;
-  color: var(--step-pending-text);
-  font-size: 0.8125rem;
-  font-weight: 800;
+  background: var(--superficie);
+  color: var(--tinta-2);
+  font-family: var(--font-dados);
+  font-size: 13px;
   font-variant-numeric: tabular-nums;
+  font-weight: 650;
   transition:
-    background-color 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
+    background-color var(--pj-tempo-medio) var(--pj-curva-chega),
+    border-color var(--pj-tempo-medio) var(--pj-curva-chega),
+    color var(--pj-tempo-medio) var(--pj-curva-chega);
 }
 
 .register-steps__label {
-  color: var(--step-text);
-  font-size: 0.7rem;
-  font-weight: 700;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-  transition: color 180ms ease;
+  overflow: hidden;
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Ativo: marcador sólido, com halo suave para puxar o olho sem glow decorativo. */
 .register-steps__item--active .register-steps__marker {
-  border-color: var(--step-active);
-  background: var(--step-active);
-  color: var(--step-on-solid);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--step-active) 16%, transparent);
+  border-color: var(--musgo);
+  background: var(--musgo);
+  box-shadow: 0 0 0 4px var(--musgo-fundo);
+  color: var(--sobre-musgo);
 }
 
 .register-steps__item--active .register-steps__label {
-  color: var(--step-text-active);
+  color: var(--tinta);
+  font-weight: 600;
 }
 
-/* Concluído: sólido também, mas em verde e com o check no lugar do número.
-   O ícone garante que o estado não dependa só da cor. */
 .register-steps__item--done .register-steps__marker {
-  border-color: var(--step-done);
-  background: var(--step-done);
-  color: var(--step-on-solid);
+  border-color: var(--musgo);
+  background: var(--musgo-fundo);
+  color: var(--musgo);
+  font-size: 14px;
 }
 
 .register-steps__item--done .register-steps__label {
-  color: var(--step-text-active);
+  color: var(--tinta);
+}
+
+/* Estreito: só o passo de agora leva o nome; os outros ficam no número. */
+@media (max-width: 420px) {
+  .register-steps__item:not(.register-steps__item--active) .register-steps__label {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .register-steps__item::before,
-  .register-steps__marker,
-  .register-steps__label {
+  .register-steps__marker {
     transition: none;
-  }
-}
-
-@media (max-width: 560px) {
-  .register-steps__label {
-    font-size: 0.64rem;
-  }
-
-  .register-steps__item + .register-steps__item::before {
-    margin: 0 1.2rem;
   }
 }
 </style>
