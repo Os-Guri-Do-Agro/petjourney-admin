@@ -339,7 +339,7 @@ function rotuloDoDia(dia: Dia) {
 /* Hoje: a coluna num fundo bem claro da Clínica, e o dia na tinta dela. */
 .semana__col--hoje,
 .semana__tabela thead th.semana__col--hoje {
-  background: color-mix(in oklab, var(--clinica-fundo) 45%, var(--superficie));
+  background: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
 }
 
 .semana__col--hoje .semana__dia-nome,
@@ -469,7 +469,7 @@ function rotuloDoDia(dia: Dia) {
 }
 
 .semana__celula:hover {
-  background: color-mix(in oklab, var(--clinica-fundo) 55%, transparent);
+  background: color-mix(in oklab, var(--clinica-fundo) 60%, transparent);
 }
 
 .semana__celula:focus-visible,

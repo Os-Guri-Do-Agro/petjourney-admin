@@ -463,7 +463,7 @@ const estilo = computed(() => {
 
 .card--confirmado {
   --estado: var(--clinica);
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 38%, var(--superficie));
+  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
   --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
   --estado-tinta: var(--clinica-tinta);
 }
@@ -656,9 +656,10 @@ const estilo = computed(() => {
   text-overflow: ellipsis;
 }
 
+/* `--tinta-2`, e não a 3: o fundo do cartão é o pastel do estado, e a tinta mais clara não lia nele. */
 .card__fim {
   flex: none;
-  color: var(--tinta-3);
+  color: var(--tinta-2);
 }
 
 .card--completa {

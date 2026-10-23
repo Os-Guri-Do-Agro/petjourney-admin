@@ -178,7 +178,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
   padding: 0;
   border: 1px solid color-mix(in oklab, var(--pj-lugar) 30%, var(--linha));
   border-radius: 12px;
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 35%, var(--superficie));
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
   list-style: none;
 }
 

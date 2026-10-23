@@ -617,7 +617,7 @@ function situacaoDe(vital: VitalKey) {
 
 /* Sistema alterado é onde a consulta tem conteúdo: ganha o fundo e a marca de atenção. */
 .sistema--alterado {
-  background: color-mix(in oklab, var(--atencao-fundo) 45%, var(--superficie));
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, var(--superficie));
 }
 
 .sistema:first-child {

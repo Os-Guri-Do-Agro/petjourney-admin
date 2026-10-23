@@ -750,7 +750,7 @@ async function celularMudou() {
   border-bottom: 1px solid var(--linha-suave);
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--clinica-fundo) 55%, var(--superficie)),
+    color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie)),
     var(--superficie)
   );
 }

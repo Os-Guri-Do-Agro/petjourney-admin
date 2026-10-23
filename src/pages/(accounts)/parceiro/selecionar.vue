@@ -238,7 +238,7 @@ onMounted(() => {
 }
 
 .empresa--ativa.ui-linha {
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
 }
 
 .empresa--ativa.ui-linha:hover {

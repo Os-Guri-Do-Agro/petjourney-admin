@@ -466,7 +466,7 @@ const motivoInativo = computed(() =>
   place-items: center;
   border: 1.5px dashed color-mix(in oklab, var(--ok) 60%, var(--linha));
   border-radius: 50%;
-  background: color-mix(in oklab, var(--ok-fundo) 55%, transparent);
+  background: color-mix(in oklab, var(--ok-fundo) 60%, transparent);
   color: var(--ok-tinta);
   font-size: 21px;
 }

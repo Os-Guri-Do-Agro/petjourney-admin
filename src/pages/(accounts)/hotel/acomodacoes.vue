@@ -1354,7 +1354,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .corredor-novo:hover {
   border-color: var(--pj-lugar);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 50%, transparent);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, transparent);
 }
 
 .corredor-novo:hover > i {
@@ -1767,7 +1767,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 .ladrilho--nova:hover {
   border-color: var(--pj-lugar);
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 50%, transparent);
+  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, transparent);
 }
 
 .ladrilho--nova:hover i {

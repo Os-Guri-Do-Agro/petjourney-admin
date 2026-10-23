@@ -678,7 +678,7 @@ const fraseDoQueFalta = computed(() => {
 }
 
 .pertences__item--ok {
-  background: color-mix(in oklab, var(--ok-fundo) 40%, transparent);
+  background: color-mix(in oklab, var(--ok-fundo) 60%, transparent);
 }
 
 .pertences__linha {

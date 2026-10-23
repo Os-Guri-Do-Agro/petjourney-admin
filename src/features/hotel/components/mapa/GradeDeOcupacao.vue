@@ -437,7 +437,7 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
   --grade-acom: 11.5rem;
   --grade-dia: 2.75rem;
   --grade-linha: 54px;
-  --grade-hoje: color-mix(in oklab, var(--hotel-fundo) 58%, transparent);
+  --grade-hoje: color-mix(in oklab, var(--hotel-fundo) 60%, transparent);
   --grade-fds: color-mix(in oklab, var(--superficie-2) 75%, transparent);
 
   display: grid;
@@ -722,7 +722,7 @@ thead th {
 
 /* A acomodação que serve para a busca: o nome no verde de "dá", com o visto ao lado. */
 .linha--serve .acom {
-  background: color-mix(in oklab, var(--ok-fundo) 55%, var(--superficie));
+  background: color-mix(in oklab, var(--ok-fundo) 60%, var(--superficie));
 }
 
 .linha:hover .acom {
