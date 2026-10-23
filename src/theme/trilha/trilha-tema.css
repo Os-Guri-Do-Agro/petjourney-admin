@@ -629,8 +629,31 @@ html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
 }
 
 /*
- * Entrada (login, cadastro, senha): a arte da marca continua; o texto do lado dela ganha um
- * cartão nítido em `rail`, no lugar do véu desfocado — legível sobre a sálvia e sobre a pata.
+ * Entrada (login, cadastro, senha): as páginas leem a família `--auth-*`, que antes vinha do
+ * `useAuthThemeVars` com as cores do tema antigo. Aqui ela aponta para os tokens do kit. O diálogo
+ * do código vai para o `body`, então entra pela máscara dele.
+ */
+:root.trilha .auth-page,
+:root.trilha .forgot-pin-dialog__mask {
+  --auth-text: var(--tinta);
+  --auth-muted: var(--tinta-2);
+  --auth-soft: var(--tinta-3);
+  --auth-divider: var(--tinta-3);
+  --auth-line: var(--linha);
+  --auth-field-bg: var(--superficie);
+  --auth-page-bg: var(--superficie);
+  --auth-link: var(--musgo);
+  --auth-danger: var(--risco-tinta);
+  --auth-sage: var(--musgo);
+  --auth-sage-strong: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
+  --auth-sage-tint: var(--musgo-fundo);
+  --auth-on-brand: var(--sobre-rail);
+  --auth-shadow-rgb: 16 40 32;
+}
+
+/*
+ * A arte da marca continua; o texto do lado dela ganha um cartão nítido em `rail`, no lugar do
+ * véu desfocado — legível sobre a sálvia e sobre a pata.
  */
 :root.trilha .auth-visual-panel__center::before {
   inset: -2rem -2.25rem;

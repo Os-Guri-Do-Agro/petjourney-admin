@@ -13,7 +13,7 @@ import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import SettingsCampo from '@/components/settings/SettingsCampo.vue'
+import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
 import { authSessionVersion, getAuthUser } from '@/service/auth/auth-session'
@@ -550,7 +550,7 @@ onMounted(() => {
         <p class="cfg-secao__descricao">{{ t('settings.perfil.secoes.identidade') }}</p>
       </header>
       <div class="cfg-secao__corpo">
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-nome"
           v-model="nome"
           autocomplete="name"
@@ -560,7 +560,7 @@ onMounted(() => {
           :disabled="savingProfile"
           :error="nomeError"
         />
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-email"
           :model-value="sessionUser.email"
           autocomplete="email"
@@ -571,7 +571,7 @@ onMounted(() => {
           <template #trailing>
             <i class="ph ph-lock-simple perfil__cadeado" aria-hidden="true" />
           </template>
-        </SettingsCampo>
+        </AuthTextField>
       </div>
     </section>
 
@@ -586,7 +586,7 @@ onMounted(() => {
         <p class="cfg-secao__descricao">{{ t('settings.perfil.secoes.contato') }}</p>
       </header>
       <div class="cfg-secao__corpo cfg-grade">
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-telefone"
           :model-value="telefone"
           autocomplete="tel"
@@ -597,7 +597,7 @@ onMounted(() => {
           :error="telefoneError"
           @update:model-value="onTelefoneInput"
         />
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-whatsapp"
           :model-value="telefoneWhatsApp"
           autocomplete="tel"
@@ -621,7 +621,7 @@ onMounted(() => {
         </h3>
       </header>
       <div class="cfg-secao__corpo cfg-grade">
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-cpf"
           :model-value="cpf"
           inputmode="numeric"
@@ -652,7 +652,7 @@ onMounted(() => {
         </p>
       </header>
       <div class="cfg-secao__corpo cfg-grade">
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-crmv"
           v-model="crmv"
           :label="t('settings.perfil.fields.crmv.label')"
@@ -661,7 +661,7 @@ onMounted(() => {
           :disabled="savingProfile"
           :error="crmvError"
         />
-        <SettingsCampo
+        <AuthTextField
           id="settings-perfil-especialidade"
           v-model="especialidade"
           :label="t('settings.perfil.fields.especialidade.label')"

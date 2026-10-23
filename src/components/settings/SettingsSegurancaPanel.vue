@@ -8,8 +8,8 @@ import { useToast } from 'primevue/usetoast'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import SettingsCampo from '@/components/settings/SettingsCampo.vue'
-import SettingsRequisitosDaSenha from '@/components/settings/SettingsRequisitosDaSenha.vue'
+import AuthTextField from '@/components/auth/AuthTextField.vue'
+import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import { changePasswordAuthenticated } from '@/service/auth/auth-service'
 import { isPasswordValid } from '@/utils/validation/password'
 
@@ -109,7 +109,7 @@ async function handleChangePassword() {
       </header>
 
       <div class="cfg-secao__corpo cfg-coluna">
-        <SettingsCampo
+        <AuthTextField
           id="settings-senha-atual"
           v-model="senhaAtual"
           autocomplete="current-password"
@@ -122,7 +122,7 @@ async function handleChangePassword() {
         />
 
         <div class="seguranca__nova">
-          <SettingsCampo
+          <AuthTextField
             id="settings-nova-senha"
             v-model="novaSenha"
             autocomplete="new-password"
@@ -133,10 +133,10 @@ async function handleChangePassword() {
             :disabled="savingPassword"
             :error="novaSenhaError"
           />
-          <SettingsRequisitosDaSenha :password="novaSenha" />
+          <PasswordRequirements :password="novaSenha" />
         </div>
 
-        <SettingsCampo
+        <AuthTextField
           id="settings-confirmar-senha"
           v-model="confirmarSenha"
           autocomplete="new-password"

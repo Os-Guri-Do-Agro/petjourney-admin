@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
@@ -12,7 +11,6 @@ import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
 import { checkEmailAvailability, registerUsuario } from '@/service/user/user-service'
-import { useAuthThemeVars } from '@/composables/useAuthThemeVars'
 import { isPasswordValid } from '@/utils/validation/password'
 
 /**
@@ -35,8 +33,6 @@ const toast = useToast()
 const currentStep = ref(1)
 const loading = ref(false)
 const submitting = ref(false)
-const showPassword = ref(false)
-const showConfirmPassword = ref(false)
 const acceptedTerms = ref(false)
 const rememberAccess = ref(true)
 
@@ -55,32 +51,20 @@ const globalError = ref('')
 const emailChecking = ref(false)
 const emailAvailable = ref<boolean | null>(null)
 
-const passwordInputType = computed(() => (showPassword.value ? 'text' : 'password'))
-const confirmPasswordInputType = computed(() => (showConfirmPassword.value ? 'text' : 'password'))
 const isBusy = computed(() => loading.value || submitting.value)
 
-const registerStyle = useAuthThemeVars()
-
-const stepMeta = computed(() => {
-  const eyebrow = t('auth.register.stepOf', {
-    current: currentStep.value,
-    total: TOTAL_STEPS,
-  })
-
-  if (currentStep.value === 1) {
-    return {
-      eyebrow,
-      title: t('auth.register.step1.title'),
-      description: t('auth.register.step1.description'),
-    }
-  }
-
-  return {
-    eyebrow,
-    title: t('auth.register.step3.title'),
-    description: t('auth.register.step3.description'),
-  }
-})
+/* Sem sobretítulo "Etapa 1 de 2": quem diz a etapa são os passos, logo abaixo do título. */
+const stepMeta = computed(() =>
+  currentStep.value === 1
+    ? {
+        title: t('auth.register.step1.title'),
+        description: t('auth.register.step1.description'),
+      }
+    : {
+        title: t('auth.register.step3.title'),
+        description: t('auth.register.step3.description'),
+      },
+)
 
 function resetFieldErrors() {
   nomeError.value = ''
@@ -257,12 +241,8 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthLayout
-    :description="stepMeta.description"
-    :eyebrow="stepMeta.eyebrow"
-    :title="stepMeta.title"
-  >
-    <div class="register-flow" :style="registerStyle">
+  <AuthLayout :description="stepMeta.description" :title="stepMeta.title">
+    <div class="register-flow">
       <RegisterStepIndicator
         :current-step="currentStep"
         :labels="STEP_LABELS"
@@ -318,26 +298,9 @@ async function handleSubmit() {
             :label="t('auth.register.password.label')"
             :placeholder="t('auth.register.password.placeholder')"
             required
-            :type="passwordInputType"
-          >
-            <template #trailing>
-              <Button
-                :aria-label="
-                  showPassword
-                    ? t('auth.register.password.hide')
-                    : t('auth.register.password.show')
-                "
-                class="register-password-toggle"
-                :disabled="isBusy"
-                :icon="showPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-                rounded
-                severity="secondary"
-                text
-                type="button"
-                @click="showPassword = !showPassword"
-              />
-            </template>
-          </AuthTextField>
+            revelavel
+            type="password"
+          />
 
           <PasswordRequirements :password="senha" />
 
@@ -350,26 +313,9 @@ async function handleSubmit() {
             :label="t('auth.register.confirmPassword.label')"
             :placeholder="t('auth.register.confirmPassword.placeholder')"
             required
-            :type="confirmPasswordInputType"
-          >
-            <template #trailing>
-              <Button
-                :aria-label="
-                  showConfirmPassword
-                    ? t('auth.register.password.hide')
-                    : t('auth.register.password.show')
-                "
-                class="register-password-toggle"
-                :disabled="isBusy"
-                :icon="showConfirmPassword ? 'ph ph-eye-slash' : 'ph ph-eye'"
-                rounded
-                severity="secondary"
-                text
-                type="button"
-                @click="showConfirmPassword = !showConfirmPassword"
-              />
-            </template>
-          </AuthTextField>
+            revelavel
+            type="password"
+          />
 
           <label class="register-terms" for="register-accept-terms">
             <Checkbox
@@ -379,7 +325,6 @@ async function handleSubmit() {
               :disabled="isBusy"
               input-id="register-accept-terms"
               :invalid="Boolean(termsError)"
-              size="small"
             />
             <span class="register-terms__copy">
               {{ t('auth.register.terms.copy') }}
@@ -403,7 +348,6 @@ async function handleSubmit() {
               class="register-terms__check"
               :disabled="isBusy"
               input-id="register-remember"
-              size="small"
             />
             <span class="register-terms__copy">
               {{ t('auth.register.remember') }}
@@ -452,7 +396,9 @@ async function handleSubmit() {
 
     <p class="register-support">
       {{ t('auth.register.support.prompt') }}
-      <RouterLink to="/auth/login">{{ t('auth.register.support.login') }}</RouterLink>
+      <RouterLink class="register-link" to="/auth/login">
+        {{ t('auth.register.support.login') }}
+      </RouterLink>
     </p>
   </AuthLayout>
 </template>
@@ -460,95 +406,87 @@ async function handleSubmit() {
 <style scoped>
 .register-flow {
   display: grid;
+  gap: 24px;
 }
 
 .register-form {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
 }
 
 .register-form__step {
   display: grid;
-  gap: 1rem;
+  gap: 20px;
 }
 
 .register-form__status {
-  margin: -0.35rem 0 0;
-  color: var(--auth-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  margin: -12px 0 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
 }
 
 .register-form__status--success {
-  color: var(--auth-link);
+  color: var(--ok-tinta);
 }
 
 .register-form__inline-error,
 .register-form__global-error {
   margin: 0;
-  color: var(--auth-danger);
-  font-size: 0.8125rem;
-  font-weight: 600;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 500;
 }
 
 .register-form__actions {
   display: grid;
-  gap: 0.75rem;
-}
-
-.register-password-toggle.p-button {
-  width: 2rem;
-  height: 2rem;
-  color: var(--auth-soft);
-}
-
-.register-password-toggle.p-button:not(:disabled):hover {
-  background: var(--auth-sage-tint);
-  color: var(--auth-soft);
+  gap: 10px;
 }
 
 .register-terms {
   display: inline-flex;
   align-items: flex-start;
-  gap: 0.65rem;
-  color: var(--auth-muted);
-  font-size: 0.875rem;
-  font-weight: 600;
-  line-height: 1.45;
+  gap: 10px;
+  color: var(--tinta-2);
   cursor: pointer;
+  font-size: 14.5px;
+  line-height: 1.45;
 }
 
 .register-terms__check {
   flex: 0 0 auto;
-  margin-top: 0.15rem;
+  margin-top: 1px;
 }
 
 .register-terms__copy {
   min-width: 0;
-  color: var(--auth-muted);
 }
 
-.register-terms__details {
-  color: var(--auth-link);
-  font-weight: 800;
+/* O link do kit: musgo sublinhado, o sublinhado acende no hover. */
+.register-terms__details,
+.register-link {
+  border-radius: 4px;
+  color: var(--musgo);
+  font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in oklab, var(--musgo) 35%, transparent);
+  text-underline-offset: 3px;
 }
 
-.register-terms__details:hover {
-  color: var(--auth-sage-strong);
+.register-terms__details:hover,
+.register-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.register-terms__details:focus-visible,
+.register-link:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
 }
 
 .register-support {
   margin: 2rem 0 0;
-  color: var(--auth-soft);
-  font-size: 0.875rem;
+  color: var(--tinta-2);
+  font-size: 14.5px;
   text-align: center;
-}
-
-.register-support a {
-  color: var(--auth-link);
-  font-weight: 800;
-  text-decoration: none;
 }
 </style>
