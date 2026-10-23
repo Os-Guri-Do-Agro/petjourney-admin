@@ -18,7 +18,13 @@
  */
 
 import { materializarBloqueios } from '../domain/conflicts'
-import { addDays, createClinicClock, type ClinicClock } from '../domain/clinic-time'
+import {
+  addDays,
+  createClinicClock,
+  isWeekend,
+  nextBusinessDay,
+  type ClinicClock,
+} from '../domain/clinic-time'
 import { CAPACIDADE_MINUTOS_POR_PROFISSIONAL } from '../domain/load'
 import {
   ocupacoesDosPedidos,
@@ -258,7 +264,13 @@ export type SementeDosPedidos = {
 
 export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
   const { hoje, agora } = entrada
-  const amanha = addDays(hoje, 1)
+  /*
+   * Os horários pedidos contam a partir do dia âncora, não de hoje. Num sábado o âncora é a
+   * segunda (`calcularAncora` em seed.ts), e "amanhã" caía nela: o Zeus e o telefonema da Luna
+   * entravam no dia que a semente promete com 40 atendimentos, e ele amanhecia com 42.
+   */
+  const ancora = isWeekend(hoje) ? nextBusinessDay(hoje) : hoje
+  const amanha = addDays(ancora, 1)
   const pedidos: PedidoDeHorario[] = []
   const atendimentos: Appointment[] = []
 
@@ -292,7 +304,7 @@ export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
 
   /* Nina e Oliver: a mesma casa, vacina seguida com a Helena. */
   const daCamila = primeiraOpcao(entrada, pedidos, {
-    aPartirDe: addDays(hoje, 2),
+    aPartirDe: addDays(ancora, 2),
     minuto: 14 * 60,
     typeId: 'tipo-vacina',
     petIds: ['pet-nina', 'pet-oliver'],
@@ -340,7 +352,12 @@ export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
         nascimento: nascimentoDoTobias,
         sexo: 'macho',
       },
-      preferencia: { de: amanha, ate: addDays(hoje, 4), periodos: ['manha'], professionalId: null },
+      preferencia: {
+        de: amanha,
+        ate: addDays(ancora, 4),
+        periodos: ['manha'],
+        professionalId: null,
+      },
       criadoEm: minutosAntes(agora, 125),
     }),
   )
@@ -390,7 +407,7 @@ export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
     { ...entrada, appointments: [...entrada.appointments, ...atendimentos] },
     pedidos,
     {
-      aPartirDe: addDays(hoje, 2),
+      aPartirDe: addDays(ancora, 2),
       minuto: 9 * 60,
       typeId: 'tipo-consulta',
       petIds: ['pet-zeus'],
@@ -443,7 +460,7 @@ export function semearPedidos(entrada: EntradaDaSemente): SementeDosPedidos {
       queixa: 'Banho e tosa higiênica, só no sábado.',
       preferencia: {
         de: amanha,
-        ate: addDays(hoje, 12),
+        ate: addDays(ancora, 12),
         periodos: ['manha'],
         professionalId: null,
       },
