@@ -2954,6 +2954,36 @@
       "abertura": {
         "internados": "Inpatient | Inpatients",
         "indicadores": "How the day is going"
+      },
+      "versoes": {
+        "rotulo": "Layout",
+        "aria": "Layout version",
+        "opcao": {
+          "foco": "Focus",
+          "linha": "Day timeline",
+          "mesa": "Desk",
+          "atual": "Current"
+        },
+        "estado": {
+          "sala": "In the room for {tempo}",
+          "espera": "Waiting for {tempo}",
+          "marcado": "Booked for {hora}"
+        },
+        "tambemNaSala": "Also in the room:",
+        "ninguemAgora": "No one in the room or at reception, and nothing else booked for today.",
+        "fila": "Up next",
+        "linha": {
+          "acao": "Action",
+          "encerrados": "{total} appointment closed | {total} appointments closed"
+        },
+        "mesa": {
+          "filas": "Today's queues",
+          "finalizados": "Finished",
+          "filaVazia": "No one in this queue right now.",
+          "escolha": "Pick someone from the list to see their details here.",
+          "resolverEm": "Resolve in {onde}",
+          "atalhos": "to switch patient"
+        }
       }
     },
     "resumo": {

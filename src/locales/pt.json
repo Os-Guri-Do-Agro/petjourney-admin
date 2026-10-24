@@ -2954,6 +2954,36 @@
       "abertura": {
         "internados": "Internado | Internados",
         "indicadores": "Como está o dia"
+      },
+      "versoes": {
+        "rotulo": "Layout",
+        "aria": "Versão do layout",
+        "opcao": {
+          "foco": "Foco",
+          "linha": "Linha do dia",
+          "mesa": "Mesa",
+          "atual": "Atual"
+        },
+        "estado": {
+          "sala": "Na sala há {tempo}",
+          "espera": "Esperando há {tempo}",
+          "marcado": "Marcado para {hora}"
+        },
+        "tambemNaSala": "Também na sala:",
+        "ninguemAgora": "Ninguém na sala nem na recepção, e nada mais marcado para hoje.",
+        "fila": "Quem vem depois",
+        "linha": {
+          "acao": "Ação",
+          "encerrados": "{total} atendimento encerrado | {total} atendimentos encerrados"
+        },
+        "mesa": {
+          "filas": "Filas do dia",
+          "finalizados": "Finalizados",
+          "filaVazia": "Ninguém nesta fila agora.",
+          "escolha": "Escolha alguém na lista para ver a ficha aqui.",
+          "resolverEm": "Resolver em {onde}",
+          "atalhos": "para trocar de paciente"
+        }
       }
     },
     "resumo": {

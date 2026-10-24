@@ -2954,6 +2954,36 @@
       "abertura": {
         "internados": "Hospitalizovan | Hospitalizovana | Hospitalizovanih",
         "indicadores": "Kako teče dan"
+      },
+      "versoes": {
+        "rotulo": "Raspored",
+        "aria": "Verzija rasporeda",
+        "opcao": {
+          "foco": "Fokus",
+          "linha": "Tok dana",
+          "mesa": "Sto",
+          "atual": "Trenutni"
+        },
+        "estado": {
+          "sala": "U sali već {tempo}",
+          "espera": "Čeka već {tempo}",
+          "marcado": "Zakazano za {hora}"
+        },
+        "tambemNaSala": "Takođe u sali:",
+        "ninguemAgora": "Nikoga u sali ni na recepciji, i ništa više nije zakazano za danas.",
+        "fila": "Ko dolazi sledeći",
+        "linha": {
+          "acao": "Radnja",
+          "encerrados": "{total} završen pregled | {total} završena pregleda | {total} završenih pregleda"
+        },
+        "mesa": {
+          "filas": "Redovi dana",
+          "finalizados": "Završeni",
+          "filaVazia": "Trenutno nikoga u ovom redu.",
+          "escolha": "Izaberite nekoga sa liste da biste ovde videli karton.",
+          "resolverEm": "Rešite u: {onde}",
+          "atalhos": "za promenu pacijenta"
+        }
       }
     },
     "resumo": {
