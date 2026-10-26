@@ -1040,10 +1040,11 @@ watch(() => agenda.data, medir)
   --estado-borda: var(--linha-media);
 }
 
+/* Confirmado na sálvia, como na tabela do dia: o azul é de quem está na sala. */
 .grade__estado--confirmado {
-  --estado: var(--clinica);
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
+  --estado: var(--pets);
+  --estado-fundo: color-mix(in oklab, var(--pets-fundo) 60%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--pets) 32%, var(--linha));
 }
 
 .grade__estado--aguardando {

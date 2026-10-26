@@ -28,6 +28,7 @@ import ClinicHeatmap from '@/features/clinico/components/resumo/ClinicHeatmap.vu
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { agendaRepository } from '@/features/clinico/data/repositories'
 import type { Appointment, Clinic, Encounter } from '@/features/clinico/data/types'
+import { aparenciaDoTipo } from '@/features/clinico/domain/appointment-kind'
 import { addDays } from '@/features/clinico/domain/clinic-time'
 import {
   FILTRO_RESUMO_PADRAO,
@@ -35,6 +36,7 @@ import {
   intervaloDoPeriodo,
   PERIODOS,
   resumirClinica,
+  type Fatia,
   type PeriodoId,
   type ResumoFiltro,
 } from '@/features/clinico/domain/resumo'
@@ -42,6 +44,13 @@ import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 
 const { t } = useI18n()
 const clinico = useClinicoStore()
+
+/** O ranking por tipo pinta cada barra com a cor do tipo, a mesma da agenda e da legenda. */
+function corDoTipo(fatia: Fatia) {
+  const tipo = clinico.tipo(fatia.id)
+
+  return tipo ? aparenciaDoTipo(tipo.kind).cor : undefined
+}
 const formato = useClinicFormat()
 
 const filtro = ref<ResumoFiltro>({ ...FILTRO_RESUMO_PADRAO })
@@ -359,9 +368,11 @@ function trocarPeriodo(periodo: PeriodoId) {
           Cada gráfico é um cartão com cabeçalho próprio — ladrilho, título e a pergunta que ele
           responde —, como os cartões do Início.
         -->
-        <section id="resumo-por-dia" class="painel ui-folha" aria-labelledby="resumo-por-dia-titulo">
+        <section id="resumo-por-dia" class="painel painel--salvia ui-folha" aria-labelledby="resumo-por-dia-titulo">
           <header class="painel__cabeca">
-            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-chart-bar" /></span>
+            <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
+              <i class="ph ph-chart-bar" />
+            </span>
             <span class="painel__titulos">
               <h2 id="resumo-por-dia-titulo">{{ t('clinico.resumo.grafico.porDia') }}</h2>
               <span class="painel__descricao">{{ t('clinico.resumo.grafico.porDiaAjuda') }}</span>
@@ -393,7 +404,7 @@ function trocarPeriodo(periodo: PeriodoId) {
         </section>
 
         <div class="relatorio__par">
-          <section id="resumo-por-tipo" class="painel ui-folha" aria-labelledby="resumo-por-tipo-titulo">
+          <section id="resumo-por-tipo" class="painel painel--tipo ui-folha" aria-labelledby="resumo-por-tipo-titulo">
             <header class="painel__cabeca">
               <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-stethoscope" /></span>
               <span class="painel__titulos">
@@ -401,17 +412,23 @@ function trocarPeriodo(periodo: PeriodoId) {
               </span>
             </header>
             <div class="relatorio__recheio">
-              <ClinicChartRanking :fatias="resumo.porTipo" :vazio="t('clinico.resumo.semDados')" />
+              <ClinicChartRanking
+                :fatias="resumo.porTipo"
+                :cor-da-fatia="corDoTipo"
+                :vazio="t('clinico.resumo.semDados')"
+              />
             </div>
           </section>
 
           <section
             id="resumo-por-profissional"
-            class="painel ui-folha"
+            class="painel painel--lavanda ui-folha"
             aria-labelledby="resumo-por-profissional-titulo"
           >
             <header class="painel__cabeca">
-              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-users" /></span>
+              <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
+                <i class="ph ph-users" />
+              </span>
               <span class="painel__titulos">
                 <h2 id="resumo-por-profissional-titulo">
                   {{ t('clinico.resumo.grafico.porProfissional') }}
@@ -428,9 +445,11 @@ function trocarPeriodo(periodo: PeriodoId) {
         </div>
 
         <div class="relatorio__par">
-          <section id="resumo-horarios" class="painel ui-folha" aria-labelledby="resumo-horarios-titulo">
+          <section id="resumo-horarios" class="painel painel--salvia ui-folha" aria-labelledby="resumo-horarios-titulo">
             <header class="painel__cabeca">
-              <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-clock" /></span>
+              <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
+                <i class="ph ph-clock" />
+              </span>
               <span class="painel__titulos">
                 <h2 id="resumo-horarios-titulo">{{ t('clinico.resumo.grafico.horarios') }}</h2>
                 <span class="painel__descricao">{{ t('clinico.resumo.grafico.horariosAjuda') }}</span>
@@ -447,9 +466,11 @@ function trocarPeriodo(periodo: PeriodoId) {
           </section>
 
           <div class="relatorio__coluna">
-            <section id="resumo-origem" class="painel ui-folha" aria-labelledby="resumo-origem-titulo">
+            <section id="resumo-origem" class="painel painel--rosa ui-folha" aria-labelledby="resumo-origem-titulo">
               <header class="painel__cabeca">
-                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-signpost" /></span>
+                <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
+                  <i class="ph ph-signpost" />
+                </span>
                 <span class="painel__titulos">
                   <h2 id="resumo-origem-titulo">{{ t('clinico.resumo.grafico.porOrigem') }}</h2>
                 </span>
@@ -461,11 +482,13 @@ function trocarPeriodo(periodo: PeriodoId) {
 
             <section
               id="resumo-diagnosticos"
-              class="painel ui-folha"
+              class="painel painel--barro ui-folha"
               aria-labelledby="resumo-diagnosticos-titulo"
             >
               <header class="painel__cabeca">
-                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-clipboard-text" /></span>
+                <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
+                  <i class="ph ph-clipboard-text" />
+                </span>
                 <span class="painel__titulos">
                   <h2 id="resumo-diagnosticos-titulo">
                     {{ t('clinico.resumo.grafico.diagnosticos') }}
@@ -516,7 +539,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 }
 
 .relatorio__intervalo i {
-  color: var(--clinica-tinta);
+  color: var(--app-salvia-texto, var(--musgo));
   font-size: 16px;
 }
 
@@ -563,11 +586,58 @@ function trocarPeriodo(periodo: PeriodoId) {
 
 /* ------------------------------------------------------------------ os cartões dos gráficos */
 
+/*
+ * Cada gráfico na cor do que mede, no ícone e nas marcas: o dia e os horários na sálvia, os
+ * profissionais em lavanda, a origem em rosa, os diagnósticos em barro; o tipo, na cor de cada
+ * tipo. Antes tudo saía no azul da Clínica, e os cinco gráficos liam como um só.
+ */
+/* Os tipos no claro são tons médios (feitos para traço e ícone): na barra, clareados a pastel. */
+.painel--tipo {
+  --ranking-pastel: 68%;
+}
+
+.app-dark .painel--tipo {
+  --ranking-pastel: 100%;
+}
+
+.painel--salvia {
+  --dado: var(--pets);
+  --dado-fundo-do-icone: var(--pets-fundo);
+  --dado-tinta-do-icone: var(--pets-tinta);
+}
+
+.painel--lavanda {
+  --dado: var(--hotel);
+  --dado-fundo-do-icone: var(--hotel-fundo);
+  --dado-tinta-do-icone: var(--hotel-tinta);
+}
+
+.painel--rosa {
+  --dado: var(--dado-rosa);
+  --dado-fundo-do-icone: var(--dado-rosa-fundo);
+  --dado-tinta-do-icone: var(--dado-rosa-tinta);
+}
+
+.painel--barro {
+  --dado: var(--dado-barro);
+  --dado-fundo-do-icone: var(--dado-barro-fundo);
+  --dado-tinta-do-icone: var(--dado-barro-tinta);
+}
+
 .painel {
+  --ranking-cor: var(--dado);
+  --mapa-cor: var(--dado);
+
   display: grid;
   min-width: 0;
   align-content: start;
   overflow: hidden;
+}
+
+/* O ícone da seção no fundo e na tinta da cor do gráfico. */
+.painel .ui-ladrilho--dado {
+  background: var(--dado-fundo-do-icone, var(--app-veu-forte));
+  color: var(--dado-tinta-do-icone, var(--app-salvia-texto));
 }
 
 .painel__cabeca {
@@ -617,7 +687,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 
 .relatorio__ocupacao i {
   flex: none;
-  color: var(--clinica-tinta);
+  color: var(--app-salvia-texto, var(--musgo));
   font-size: 18px;
 }
 

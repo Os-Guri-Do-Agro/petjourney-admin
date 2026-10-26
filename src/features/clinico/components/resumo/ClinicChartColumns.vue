@@ -68,7 +68,8 @@ function token(nome: string, reserva: string) {
 }
 
 /**
- * As cores do lugar (a Clínica) e do estado (falta), relidas a cada troca de tema: o tema do
+ * A cor das colunas (a sálvia de `--pets`, não mais o azul da Clínica, que já pintava a tela) e a
+ * do estado (falta), relidas a cada troca de tema: o tema do
  * gráfico já observa a raiz, e depender dele aqui é o que faz esta leitura acompanhar a troca.
  */
 const lugar = computed(() => {
@@ -76,12 +77,12 @@ const lugar = computed(() => {
   void tema.escuro.value
 
   const superficie = token('--superficie', '#ffffff')
-  const clinica = token('--clinica', '#1c7db0')
+  const acento = token('--pets', '#458270')
 
   return {
-    clinica,
-    tinta: token('--clinica-tinta', '#005982'),
-    previsto: misturar(clinica, superficie, 0.36),
+    acento,
+    tinta: token('--pets-tinta', '#285e4e'),
+    previsto: misturar(acento, superficie, 0.5),
     falta: token('--risco', '#c54e45'),
     fio: token('--linha-suave', '#e9efec'),
     poco: token('--superficie-2', '#f4f8f6'),
@@ -209,10 +210,10 @@ const opcoes = computed<ApexOptions>(() => {
   return {
     chart: { ...tema.grafico.value, type: tipo.value, height: ALTURA, stacked: true },
     /*
-     * As cores do lugar: concluído no azul cheio da Clínica, previsto no mesmo azul clareado (o que
-     * ainda vai acontecer lê mais leve), falta no vermelho do estado.
+     * Concluído na sálvia cheia, previsto na mesma sálvia clareada (o que ainda vai acontecer lê
+     * mais leve), falta no vermelho do estado.
      */
-    colors: [luz.clinica, luz.previsto, luz.falta, cor['attention-text']],
+    colors: [luz.acento, luz.previsto, luz.falta, cor['attention-text']],
     /* Grade leve: só os fios horizontais, contínuos e quase apagados. */
     grid: {
       ...tema.grade.value,
@@ -318,7 +319,7 @@ const opcoes = computed<ApexOptions>(() => {
               {
                 x: props.destaque,
                 strokeDashArray: 0,
-                borderColor: luz.clinica,
+                borderColor: luz.acento,
                 label: props.rotuloDestaque
                   ? {
                       text: props.rotuloDestaque,
@@ -326,7 +327,7 @@ const opcoes = computed<ApexOptions>(() => {
                       position: 'top',
                       offsetY: -6,
                       style: {
-                        background: token('--clinica-fundo', '#dcf0fe'),
+                        background: token('--pets-fundo', '#aee3d1'),
                         color: luz.tinta,
                         fontFamily: tema.fonte.value.familia,
                         fontSize: tema.fonte.value.rotulo,

@@ -955,11 +955,12 @@ function tomDaOcupacao(ocupacao: number) {
   background: var(--superficie-3);
 }
 
+/* A ocupação normal na sálvia; âmbar e vermelho só quando lota. O azul fica para quem está na sala. */
 .tabela__ocupacao-trilho > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--clinica);
+  background: var(--pets);
 }
 
 .tabela__ocupacao--atencao {
@@ -1235,9 +1236,10 @@ tbody > .tabela__linha:first-child > * {
  * borda (`--estado-borda`) e a sombra (`--estado-sombra`). O atendimento, a continuação e a
  * amostra do rodapé leem as mesmas quatro.
  *
- * A escada do dia: agendado em papel com traço cinza; confirmado com o traço da Clínica; na
- * recepção em âmbar; na sala no azul cheio, com brilho; feito apagado e rente; falta em vermelho;
- * cancelado só contorno, riscado.
+ * A escada do dia: agendado em papel com traço cinza; confirmado na sálvia; na
+ * recepção em âmbar; na sala no azul da Clínica, com brilho; feito apagado e rente; falta em
+ * vermelho; cancelado só contorno, riscado. Confirmado era um azul claro ao lado do azul da sala:
+ * os dois estados se confundiam e a grade inteira saía azul.
  */
 .estado--agendado {
   --estado: var(--linha-forte);
@@ -1246,9 +1248,9 @@ tbody > .tabela__linha:first-child > * {
 }
 
 .estado--confirmado {
-  --estado: var(--clinica);
-  --estado-fundo: color-mix(in oklab, var(--clinica-fundo) 60%, var(--superficie));
-  --estado-borda: color-mix(in oklab, var(--clinica) 22%, var(--linha));
+  --estado: var(--pets);
+  --estado-fundo: color-mix(in oklab, var(--pets-fundo) 60%, var(--superficie));
+  --estado-borda: color-mix(in oklab, var(--pets) 32%, var(--linha));
 }
 
 .estado--aguardando {

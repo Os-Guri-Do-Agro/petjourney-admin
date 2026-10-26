@@ -301,6 +301,12 @@ eles fossem para todas as telas, **com cor só em tom pastel**.
   blocos, número em 22 px, ícone de 32, passo de 42 de altura. A entrada (login, cadastro, senha)
   liga `html.moldura-app` e usa os mesmos tokens; o véu atrás da copy só entra quando a pata da
   arte encosta no texto (medido no `AuthLayout`).
+- **A cor do espaço só onde ela é identidade ou estado** (26/10/2026, "esse azul está sendo usado
+  demais"). Ícone de seção (`ui-ladrilho` sem modificador) e selo de contagem ficam no quadradinho
+  do app, sálvia sobre o véu (na faixa sálvia, vidro com ícone branco). O azul da Clínica fica na
+  barra, no bloco do Início e no "em atendimento"; "confirmado" na agenda é sálvia. Gráfico pinta
+  com a cor do que mede: tipo de atendimento na cor do tipo, profissional em lavanda, origem em rosa
+  (`--dado-rosa`), diagnóstico em barro (`--dado-barro`), dia e horário em sálvia (`--pets`).
 - **Ao mexer, o degradê de cabeçalho e de cartão sai** (caixa dos pedidos, blocos da fila e dos
   prontuários, fim do turno, leito crítico, avatar da conta): a cor que significa estado fica na
   borda, no ícone e no selo.

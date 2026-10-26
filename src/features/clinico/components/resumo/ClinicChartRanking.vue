@@ -14,6 +14,10 @@
  * Em HTML o nome quebra em duas linhas quando precisa, a ordem é a da lista (maior primeiro, como
  * as fatias já chegam do domínio) e o leitor de tela lê uma lista de verdade, sem tabela escondida.
  * A escala continua relativa ao primeiro colocado: comparar entre si é o ponto de um ranking.
+ *
+ * A cor da barra é a do gráfico, não a do espaço: quem usa define `--ranking-cor` (o ranking por
+ * profissional em lavanda, o de origem em rosa). Quando cada linha é uma entidade com cor própria
+ * em outras telas (o tipo de atendimento, na agenda), `corDaFatia` pinta a barra com a cor dela.
  */
 import { computed } from 'vue'
 
@@ -28,8 +32,10 @@ const props = withDefaults(
     /** `atencao` só onde a contagem é ruim por natureza (perdas de vacina); o resto é tinta da marca. */
     tom?: 'acento' | 'atencao'
     vazio?: string
+    /** A cor de cada linha, quando a entidade tem uma (o tipo de atendimento). */
+    corDaFatia?: (fatia: Fatia) => string | undefined
   }>(),
-  { unidade: '', tom: 'acento', vazio: '' },
+  { unidade: '', tom: 'acento', vazio: '', corDaFatia: undefined },
 )
 
 const formato = useClinicFormat()
@@ -48,7 +54,10 @@ function largura(fatia: Fatia) {
     <li v-for="fatia in fatias" :key="fatia.id" class="ranking__linha">
       <span class="ranking__nome">{{ fatia.rotulo }}</span>
       <span class="ranking__trilho" aria-hidden="true">
-        <span class="ranking__barra" :style="{ inlineSize: `${largura(fatia)}%` }" />
+        <span
+          class="ranking__barra"
+          :style="{ inlineSize: `${largura(fatia)}%`, '--ranking-cor': corDaFatia?.(fatia) }"
+        />
       </span>
       <span class="ranking__valor">
         <strong>{{ unidade ? `${fatia.valor} ${unidade}` : fatia.valor }}</strong>
@@ -102,7 +111,12 @@ function largura(fatia: Fatia) {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--pj-lugar, var(--clinica));
+  /* `--ranking-pastel` clareia a cor rumo à superfície (as cores dos tipos, no claro, são médias). */
+  background: color-mix(
+    in oklab,
+    var(--ranking-cor, var(--pj-lugar, var(--clinica))) var(--ranking-pastel, 100%),
+    var(--superficie)
+  );
   transition: inline-size 0.2s ease-out;
 }
 

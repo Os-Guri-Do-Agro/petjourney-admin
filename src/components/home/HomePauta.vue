@@ -299,12 +299,13 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
 }
 
 /*
- * Linha sem rosto (o assunto é de vários pacientes): o ícone dela ganha a cor do espaço, para o
- * espaço estar na linha também, e não só no título do grupo.
+ * Linha sem rosto (o assunto é de vários pacientes): o ícone no quadradinho do app, sálvia sobre o
+ * véu. O espaço já está no título do grupo; repetido em cada linha, o azul da Clínica tomava a
+ * lista inteira.
  */
 .grupo :deep(.pauta__sem-rosto) {
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
+  background: var(--app-veu-forte, var(--superficie-3));
+  color: var(--app-salvia-texto, var(--tinta-2));
 }
 
 .grupo__corpo {

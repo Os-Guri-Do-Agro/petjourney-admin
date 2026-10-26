@@ -850,3 +850,73 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   box-shadow: none;
   color: var(--pj-lugar-tinta) !important;
 }
+
+/* ======================================================================================
+ * A cor do espaço só onde ela é identidade (26/10/2026: "esse azul está sendo usado demais").
+ *
+ * O ícone de seção (`ui-ladrilho` sem estado) e o selo de contagem pintavam no tom do espaço, e
+ * uma tela da Clínica inteira saía azul, a do Hotel lilás. Agora eles ficam no quadradinho do
+ * app, sálvia sobre o véu, como na barra lateral. A cor do espaço fica na barra, no bloco do
+ * Início, no ladrilho `--lugar` e no que é estado.
+ * ==================================================================================== */
+/*
+ * `:where` deixa a regra com o peso da base do Trilha (`.trilha .ui-ladrilho`): ela troca o tom
+ * do espaço, mas o componente que pinta o próprio ladrilho com significado (o setor crítico, um
+ * estado) continua mandando.
+ */
+:where(:root.trilha.moldura-app)
+  .ui-ladrilho:not(
+    .ui-ladrilho--lugar,
+    .ui-ladrilho--risco,
+    .ui-ladrilho--atencao,
+    .ui-ladrilho--ok,
+    .ui-ladrilho--neutro,
+    .ui-ladrilho--dado
+  ) {
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+}
+
+/* Na faixa sálvia do alto (a capa da ficha, a do acesso), o véu sálvia sumia na sálvia: vidro e
+   ícone branco, como o resto da faixa. */
+:where(:root.trilha.moldura-app)
+  .faixa__cabeca
+  .ui-ladrilho:not(
+    .ui-ladrilho--lugar,
+    .ui-ladrilho--risco,
+    .ui-ladrilho--atencao,
+    .ui-ladrilho--ok,
+    .ui-ladrilho--neutro,
+    .ui-ladrilho--dado
+  ) {
+  background: var(--app-vidro);
+  color: #fff;
+}
+
+:root.moldura-app .ui-contagem {
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+}
+
+/*
+ * Cores de dado para gráfico, da paleta da casa, para cada gráfico ter a cor do que mede em vez de
+ * todos no azul da Clínica: rosa (#FAD2E1) e barro (#D5BDAF) em tom de barra, com o fundo e a
+ * tinta de cada uma. Sálvia, lavanda e o verde de "ok" já existem (`--pets`, `--hotel`, `--ok`).
+ */
+:root.trilha.moldura-app {
+  --dado-rosa: #eeb3c7;
+  --dado-rosa-fundo: #fbe2eb;
+  --dado-rosa-tinta: #8a3357;
+  --dado-barro: #d6b7a3;
+  --dado-barro-fundo: #f3e7df;
+  --dado-barro-tinta: #6e4a35;
+}
+
+:root.trilha.moldura-app.app-dark {
+  --dado-rosa: #d98fa9;
+  --dado-rosa-fundo: #3d2230;
+  --dado-rosa-tinta: #f2c2d3;
+  --dado-barro: #c09a83;
+  --dado-barro-fundo: #3a2c24;
+  --dado-barro-tinta: #e9cfbf;
+}

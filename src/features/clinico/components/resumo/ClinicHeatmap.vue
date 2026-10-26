@@ -190,28 +190,31 @@ const legenda = computed(() => {
   text-align: center;
 }
 
-/* A escada na cor do lugar (a Clínica): do poço vazio ao azul cheio do horário que lota. */
+/*
+ * A escada numa cor só, do poço vazio ao tom cheio do horário que lota (`--mapa-cor`, sálvia por
+ * padrão). Era o azul da Clínica, que já pintava o resto da tela.
+ */
 .mapa__celula--0 {
   background: var(--superficie-2);
 }
 
 .mapa__celula--1 {
-  background: color-mix(in oklab, var(--clinica) 14%, var(--superficie));
+  background: color-mix(in oklab, var(--mapa-cor, var(--pets)) 18%, var(--superficie));
   color: var(--tinta);
 }
 
 .mapa__celula--2 {
-  background: color-mix(in oklab, var(--clinica) 30%, var(--superficie));
+  background: color-mix(in oklab, var(--mapa-cor, var(--pets)) 36%, var(--superficie));
   color: var(--tinta);
 }
 
 .mapa__celula--3 {
-  background: color-mix(in oklab, var(--clinica) 56%, var(--superficie));
+  background: color-mix(in oklab, var(--mapa-cor, var(--pets)) 62%, var(--superficie));
   color: var(--tinta);
 }
 
 .mapa__celula--4 {
-  background: var(--clinica);
+  background: var(--mapa-cor, var(--pets));
   color: var(--superficie);
 }
 
