@@ -16,11 +16,15 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
+import { molduraPedida, pedidosDeBusca } from '@/components/layout/moldura'
 import ShellConta from '@/components/layout/ShellConta.vue'
 import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
+import ShellNavTopo from '@/components/layout/ShellNavTopo.vue'
+import ShellTrilho from '@/components/layout/ShellTrilho.vue'
 import FeedbackSaqueDialog from '@/components/parceiro/FeedbackSaqueDialog.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
+import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import { isCompactDensity, isListNavigator } from '@/composables/useLayoutPreferences'
@@ -56,6 +60,15 @@ function casaCompacto() {
 function lerRecolhida() {
   return typeof window !== 'undefined' && window.localStorage.getItem(CHAVE_RECOLHIDA) === 'true'
 }
+
+/** A moldura que a tela pediu (`usarMoldura`); em tela estreita, sempre a do portal. */
+const moldura = computed(() => (compacto.value ? 'portal' : molduraPedida.value))
+
+/** A moldura da lista troca a barra lateral pela navegação no topo, de ponta a ponta. */
+const navNoTopo = computed(() => moldura.value === 'lista')
+
+/** A dos cartões troca a barra larga por um trilho de ícones flutuante. */
+const trilhoFlutuante = computed(() => moldura.value === 'cartoes')
 
 /** Na gaveta a barra está sempre inteira: recolher é coisa de tela larga. */
 const barraRecolhida = computed(() => recolhida.value && !compacto.value)
@@ -196,6 +209,13 @@ watch(
   },
 )
 
+/* Um campo de busca da página (`pedirBusca`) abre a mesma busca do Ctrl K. */
+watch(pedidosDeBusca, () => {
+  if (hasClinicalProfile.value) {
+    buscaAberta.value = true
+  }
+})
+
 onMounted(() => {
   consulta = window.matchMedia(CONSULTA_COMPACTA)
   compacto.value = consulta.matches
@@ -219,9 +239,12 @@ onUnmounted(() => {
     class="shell"
     :class="[
       `pj-lugar--${lugar}`,
+      `shell--moldura-${moldura}`,
       {
         'shell--recolhida': barraRecolhida,
         'shell--compacto': compacto,
+        'shell--nav-no-topo': navNoTopo,
+        'shell--trilho': trilhoFlutuante,
         'shell--gaveta': compacto && gavetaAberta,
         'shell--densa': isCompactDensity,
       },
@@ -237,6 +260,8 @@ onUnmounted(() => {
         @click="fecharGaveta"
       />
     </Transition>
+
+    <ShellTrilho v-if="trilhoFlutuante" :espacos="espacos" :aqui="aqui" />
 
     <aside
       id="barra-do-portal"
@@ -258,6 +283,9 @@ onUnmounted(() => {
 
       <div class="barra__miolo">
         <div class="barra__topo">
+          <!-- O topo sálvia do layout App é um destaque: leva os desenhos de traço, como os da
+               página. Recolhida, a coluna é estreita demais para eles. -->
+          <UiRabiscos v-if="moldura === 'app' && !barraRecolhida" estreito />
           <RouterLink class="barra__marca" to="/inicio" :title="parceiroStore.parceiroNome">
             <span class="barra__pata" aria-hidden="true">
               <img src="/pata-escura.png" alt="" />
@@ -304,7 +332,7 @@ onUnmounted(() => {
           :espacos="espacos"
           :aqui="aqui"
           :recolhida="barraRecolhida"
-          :todos-abertos="isListNavigator"
+          :todos-abertos="isListNavigator || moldura === 'app'"
           @navegou="fecharGaveta"
         />
 
@@ -352,8 +380,19 @@ onUnmounted(() => {
         </button>
       </header>
 
-      <FitaDoDia v-if="mostrarFita" class="palco__fita" />
-      <FitaDaCasa v-else-if="mostrarFitaDaCasa" class="palco__fita" />
+      <ShellNavTopo
+        v-if="navNoTopo"
+        :espacos="espacos"
+        :aqui="aqui"
+        :busca="hasClinicalProfile"
+        :atalho="atalhoDaBusca"
+        @buscar="buscaAberta = true"
+      />
+
+      <template v-if="moldura === 'portal'">
+        <FitaDoDia v-if="mostrarFita" class="palco__fita" />
+        <FitaDaCasa v-else-if="mostrarFitaDaCasa" class="palco__fita" />
+      </template>
 
       <main id="conteudo" ref="conteudo" class="palco__conteudo" tabindex="-1">
         <slot />
@@ -913,6 +952,24 @@ onUnmounted(() => {
 
 .shell--compacto .barra__topo {
   padding-inline-end: 60px;
+}
+
+/* Navegação no topo: a barra lateral sai e a folha ocupa a largura inteira. */
+.shell--nav-no-topo {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.shell--nav-no-topo .barra {
+  display: none;
+}
+
+/* Trilho flutuante: a coluna estreita dos ícones no lugar da barra larga. */
+.shell--trilho {
+  grid-template-columns: 100px minmax(0, 1fr);
+}
+
+.shell--trilho .barra {
+  display: none;
 }
 
 .shell--gaveta .barra {

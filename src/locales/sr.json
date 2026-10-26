@@ -411,7 +411,9 @@
     "barra": {
       "pular": "Preskoči na sadržaj",
       "navegacao": "Glavna navigacija",
+      "outrosEspacos": "Ostali prostori",
       "inicio": "Početna",
+      "conta": "Nalog",
       "criarTitulo": "Napravi novo",
       "criarItens": {
         "agendamento": "Termin",
@@ -2959,9 +2961,9 @@
         "rotulo": "Raspored",
         "aria": "Verzija rasporeda",
         "opcao": {
-          "foco": "Fokus",
-          "linha": "Tok dana",
-          "mesa": "Sto",
+          "foco": "Aplikacija",
+          "cartoes": "Kartice i sale",
+          "lista": "Tri broja i lista",
           "atual": "Trenutni"
         },
         "estado": {
@@ -2972,17 +2974,141 @@
         "tambemNaSala": "Takođe u sali:",
         "ninguemAgora": "Nikoga u sali ni na recepciji, i ništa više nije zakazano za danas.",
         "fila": "Ko dolazi sledeći",
-        "linha": {
-          "acao": "Radnja",
-          "encerrados": "{total} završen pregled | {total} završena pregleda | {total} završenih pregleda"
+        "relogio": {
+          "rotulo": "Vreme",
+          "aria": "Vreme demonstracije",
+          "movimento": "Užurbano jutro",
+          "real": "Stvarno vreme"
         },
-        "mesa": {
-          "filas": "Redovi dana",
-          "finalizados": "Završeni",
-          "filaVazia": "Trenutno nikoga u ovom redu.",
-          "escolha": "Izaberite nekoga sa liste da biste ovde videli karton.",
-          "resolverEm": "Rešite u: {onde}",
-          "atalhos": "za promenu pacijenta"
+        "lista": {
+          "titulo": "Danas u klinici",
+          "voltar": "Nazad na početnu",
+          "novo": "Novi pregled",
+          "filtros": {
+            "botao": "Prikaži ili sakrij filtere",
+            "ativos": "Aktivni filteri",
+            "profissional": "Svi veterinari",
+            "servico": "Sve usluge",
+            "periodo": "Period",
+            "dia": "Ceo dan",
+            "manha": "Jutro",
+            "tarde": "Popodne",
+            "busca": "Pretraži ljubimca ili vlasnika"
+          },
+          "numeros": {
+            "recepcao": "Sada na recepciji",
+            "pets": "ljubimac | ljubimca | ljubimaca",
+            "espera": "Najduže čekanje",
+            "min": "min",
+            "fimDoDia": "Do kraja dana",
+            "atendimentos": "pregled | pregleda | pregleda"
+          },
+          "porHorario": "Pacijenti po satu",
+          "horaPassou": "deo sata koji je prošao",
+          "hora": "{h} h",
+          "sala": {
+            "agoraNo": "Sada: {sala}",
+            "nenhuma": "Trenutno nema pregleda",
+            "abrir": "Otvori pregled",
+            "emConsulta": "{pet} na pregledu",
+            "com": "sa {vet}",
+            "continuar": "Nastavi"
+          },
+          "abas": {
+            "aria": "Šta prikazati na listi",
+            "sala": "U sali",
+            "internacao": "Stacionar",
+            "fila": "Red za danas"
+          },
+          "estado": {
+            "esperando": "Čeka",
+            "chegou": "Stigao",
+            "emConsulta": "Na pregledu",
+            "naRecepcao": "Na recepciji"
+          },
+          "fila": {
+            "outros": "Vidi još {n} u redu | Vidi još {n} u redu | Vidi još {n} u redu",
+            "menos": "Vidi manje"
+          },
+          "detalhe": {
+            "paciente": "Pacijent",
+            "atendimento": "Pregled",
+            "responsavel": "Vlasnik",
+            "vacinas": "Vakcine",
+            "historico": "Istorija pregleda",
+            "agendar": "Zakaži za {pet}",
+            "espera": "Čekanje",
+            "horario": "Termin",
+            "posicao": "Mesto u redu",
+            "posicaoValor": "{n}.",
+            "depois": "Posle njega",
+            "ninguem": "Niko",
+            "naSala": "U sali već",
+            "sala": "Sala",
+            "profissional": "Veterinar"
+          },
+          "internacao": {
+            "abrir": "Otvori u stacionaru"
+          },
+          "vazio": {
+            "filtro": "Ništa sa ovim filterima.",
+            "sala": "Trenutno niko nije u sali.",
+            "internacao": "Ništa na čekanju u stacionaru."
+          }
+        },
+        "cartoes": {
+          "titulo": "Danas u klinici",
+          "busca": "Pretraži ljubimca ili vlasnika",
+          "novo": "Novi pregled",
+          "abas": "Ekrani klinike",
+          "frase": {
+            "sala": "{pet} je u prostoriji {sala}.",
+            "espera": "{pet} čeka već {tempo} na recepciji.",
+            "calma": "Trenutno nikoga nema u salama ni na recepciji."
+          },
+          "sala": {
+            "agoraNo": "Sada: {sala}",
+            "com": "{tipo} kod",
+            "responsavel": "Vlasnik",
+            "tambem": "Takođe u sali",
+            "tambemValor": "{pet}, {tempo}",
+            "volta": "Vraća se danas",
+            "voltaValor": "{hora}, {tipo}",
+            "continuar": "Nastavi pregled",
+            "ninguem": "Trenutno nema pregleda",
+            "proximo": "Sledeći: {pet} u {hora}"
+          },
+          "recepcao": {
+            "titulo": "Na recepciji",
+            "esperando": "čeka: {n}",
+            "vazio": "Niko ne čeka na recepciji.",
+            "todos": "Vidi sve u rasporedu"
+          },
+          "acao": {
+            "titulo": "Traži akciju",
+            "urgentes": "{n} hitno | {n} hitna | {n} hitnih",
+            "contato": "Zabeleži kontakt",
+            "dose": "Zabeleži dozu",
+            "resolver": "Reši",
+            "mais": "Još {n} obaveza bez hitnosti | Još {n} obaveze bez hitnosti | Još {n} obaveza bez hitnosti"
+          },
+          "dia": {
+            "titulo": "Sale tokom dana",
+            "porSala": "Po sali",
+            "porProfissional": "Po veterinaru",
+            "aria": "Grupiši liniju dana",
+            "agora": "Sada",
+            "hora": "{h} h",
+            "naSala": "U sali već {tempo}, kod {vet}",
+            "esperando": "čeka {tempo}",
+            "vazio": "Ništa zakazano u ovim satima.",
+            "legenda": {
+              "andamento": "U toku",
+              "espera": "Čeka",
+              "agendado": "Zakazano",
+              "confirmado": "Potvrđeno"
+            }
+          }
         }
       }
     },

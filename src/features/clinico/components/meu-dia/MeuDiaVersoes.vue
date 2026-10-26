@@ -2,98 +2,145 @@
 /**
  * O seletor das versões de layout do Hoje, para a equipe comparar na mesma tela.
  *
- * Fica preso no pé, no meio, fora do fluxo da página: nenhuma versão precisa abrir espaço para
- * ele, e trocar de versão não mexe na rolagem de quem está comparando. A escolha vai para a URL
- * (`?versao=`), então um link copiado abre a mesma versão para o colega.
+ * Um campo pequeno preso no canto de baixo, à direita, fora do fluxo da página: nenhuma versão
+ * abre espaço para ele. Ao lado, o horário da demonstração: a manhã de movimento (o padrão) ou a
+ * hora real. As escolhas vão para a URL (`?versao=`, `?relogio=real`), então um link copiado abre
+ * o mesmo para o colega.
  *
  * É andaime de avaliação: escolhida a versão, sai junto com as outras.
  */
-import SelectButton from 'primevue/selectbutton'
+import Select from 'primevue/select'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-export type VersaoDoMeuDia = 'foco' | 'linha' | 'mesa' | 'atual'
+import type { RelogioDaAvaliacao } from './relogio-da-avaliacao'
+
+export type VersaoDoMeuDia = 'foco' | 'cartoes' | 'lista' | 'atual'
 
 const versao = defineModel<VersaoDoMeuDia>({ required: true })
+const relogio = defineModel<RelogioDaAvaliacao>('relogio', { required: true })
 
 const { t } = useI18n()
 
 const opcoes = computed(() => [
-  { valor: 'foco', rotulo: t('clinico.meuDia.versoes.opcao.foco'), icone: 'ph ph-crosshair' },
-  { valor: 'linha', rotulo: t('clinico.meuDia.versoes.opcao.linha'), icone: 'ph ph-list-bullets' },
-  { valor: 'mesa', rotulo: t('clinico.meuDia.versoes.opcao.mesa'), icone: 'ph ph-columns' },
+  { valor: 'foco', rotulo: t('clinico.meuDia.versoes.opcao.foco'), icone: 'ph ph-device-mobile' },
+  { valor: 'cartoes', rotulo: t('clinico.meuDia.versoes.opcao.cartoes'), icone: 'ph ph-cards' },
+  { valor: 'lista', rotulo: t('clinico.meuDia.versoes.opcao.lista'), icone: 'ph ph-list-numbers' },
   {
     valor: 'atual',
     rotulo: t('clinico.meuDia.versoes.opcao.atual'),
     icone: 'ph ph-clock-counter-clockwise',
   },
 ])
+
+const escolhida = computed(() => opcoes.value.find((opcao) => opcao.valor === versao.value))
+
+const horarios = computed(() => [
+  { valor: 'movimento', rotulo: t('clinico.meuDia.versoes.relogio.movimento') },
+  { valor: 'real', rotulo: t('clinico.meuDia.versoes.relogio.real') },
+])
+
+const horarioEscolhido = computed(() =>
+  horarios.value.find((opcao) => opcao.valor === relogio.value),
+)
 </script>
 
 <template>
-  <div class="versoes" role="group" :aria-label="t('clinico.meuDia.versoes.aria')">
-    <span class="versoes__rotulo">
-      <i class="ph ph-layout" aria-hidden="true" />
-      {{ t('clinico.meuDia.versoes.rotulo') }}
-    </span>
-    <SelectButton
+  <div class="versoes">
+    <i class="ph ph-layout versoes__icone" aria-hidden="true" />
+    <Select
       v-model="versao"
       :options="opcoes"
       option-label="rotulo"
       option-value="valor"
-      :allow-empty="false"
+      :aria-label="t('clinico.meuDia.versoes.aria')"
+      class="versoes__campo"
+      append-to="body"
     >
-      <template #option="{ option }">
-        <i :class="option.icone" aria-hidden="true" />
-        <span>{{ option.rotulo }}</span>
+      <template #value>
+        <span class="versoes__valor">
+          {{ t('clinico.meuDia.versoes.rotulo') }}:
+          <strong>{{ escolhida?.rotulo }}</strong>
+        </span>
       </template>
-    </SelectButton>
+      <template #option="{ option }">
+        <span class="versoes__opcao">
+          <i :class="option.icone" aria-hidden="true" />
+          {{ option.rotulo }}
+        </span>
+      </template>
+    </Select>
+
+    <span class="versoes__divisa" aria-hidden="true" />
+    <i class="ph ph-clock versoes__icone" aria-hidden="true" />
+    <Select
+      v-model="relogio"
+      :options="horarios"
+      option-label="rotulo"
+      option-value="valor"
+      :aria-label="t('clinico.meuDia.versoes.relogio.aria')"
+      class="versoes__campo versoes__campo--horario"
+      append-to="body"
+    >
+      <template #value>
+        <span class="versoes__valor">
+          {{ t('clinico.meuDia.versoes.relogio.rotulo') }}:
+          <strong>{{ horarioEscolhido?.rotulo }}</strong>
+        </span>
+      </template>
+    </Select>
   </div>
 </template>
 
 <style scoped>
-/* No canto, ao lado do botão do painel de desenvolvimento: longe da barra lateral e do conteúdo. */
 .versoes {
   position: fixed;
-  z-index: 40;
+  z-index: 60;
+  right: 92px;
   bottom: 18px;
-  inset-inline-end: 92px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 6px 6px 6px 16px;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
   border: 1px solid var(--linha);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--superficie);
   box-shadow: var(--sombra-2);
 }
 
-.versoes__rotulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
+.versoes__divisa {
+  width: 1px;
+  height: 22px;
+  margin-inline: 4px;
+  background: var(--linha);
 }
 
-.versoes__rotulo i {
+.versoes__icone {
+  color: var(--tinta-2);
   font-size: 16px;
 }
 
-.versoes :deep(.p-togglebutton-content) {
+.versoes__campo {
+  min-width: 200px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.versoes__valor {
+  color: var(--tinta-2);
+  font-size: 13.5px;
   white-space: nowrap;
 }
 
-/* No tablet sobra pouco ao lado da barra lateral: some o rótulo, ficam os botões. */
-@media (max-width: 1180px) {
-  .versoes__rotulo {
-    display: none;
-  }
+.versoes__valor strong {
+  color: var(--tinta);
+  font-weight: 650;
+}
 
-  .versoes {
-    padding-left: 6px;
-  }
+.versoes__opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>

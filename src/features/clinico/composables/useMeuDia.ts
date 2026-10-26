@@ -311,9 +311,13 @@ export function useMeuDia() {
     return t('clinico.meuDia.resumo.emDia')
   })
 
+  /**
+   * O dia que a agenda carregou, e não o relógio lido uma vez: assim a data acompanha a virada da
+   * meia-noite e o relógio deslocado. Meio-dia, para o fuso do navegador não puxar para outro dia.
+   */
   const dataDeHoje = computed(() => {
     const intl = INTL_LOCALE[locale.value as Locale]
-    const rotulo = new Date(clinicClock.nowIso()).toLocaleDateString(intl, {
+    const rotulo = new Date(clinicClock.toIso(agenda.data, 12 * 60)).toLocaleDateString(intl, {
       weekday: 'long',
       day: 'numeric',
       month: 'long',

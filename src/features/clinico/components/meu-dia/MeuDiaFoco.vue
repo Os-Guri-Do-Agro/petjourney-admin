@@ -2,21 +2,16 @@
 /**
  * Hoje, versão **Foco**, no **design do app** (perfil de parceiro).
  *
- * O layout responde primeiro "quem eu atendo agora?" com um paciente só, grande, com o que se
- * precisa saber antes de abrir a porta. Embaixo, a fila numa lista só (recepção e depois os
- * horários) e, ao lado, o que pede ação.
+ * A tela é a home do parceiro no app, trazida para a tela grande: a barra lateral de sempre,
+ * vestida como o menu do app (o destaque sálvia em cima, os ícones em véu, o item aberto em
+ * pílula cheia), e na folha branca o destaque na mesma cor. Nele, a frase do dia, os números em
+ * vidro e o paciente da vez num cartão de papel branco, que salta da cor. Embaixo, a fila numa
+ * lista lisa e, ao lado, o que pede ação num painel em véu. Tudo na largura inteira da folha.
  *
- * O desenho é o do petjourney-app (`docs/design/padrao-tutor.md` de lá), na cor do parceiro:
- *
- * - **Liso.** Fundo branco, sem sombra, sem cartão flutuando, sem degradê. O que separa é espaço,
- *   título de seção e régua fina na cor do perfil.
- * - **Destaque na cor do perfil.** O topo é um bloco sálvia (`#84A59D` escurecido para `#7C9B94`,
- *   o mínimo para o branco ler como título) com os rabiscos de traço branco e cantos de 28. O
- *   paciente da vez é o cartão de dentro, um tom mais fundo do mesmo matiz, como o pet na home.
- * - **Listas de ponta a ponta**, sem caixa, com a régua começando no texto.
- * - **Cor em véu**: botão secundário, ícone de pendência e "o que pede ação" em véu translúcido.
- *   Atenção é marinho sobre superfície fria, nunca pêssego; urgência é o vermelho do app.
- * - Readex Pro em tudo, peso máximo 700, título 26, seção 17, linha 15,5.
+ * Regras do app (`docs/design/padrao-tutor.md`, no petjourney-app): tela branca e lisa, sem
+ * sombra nem degradê; destaque na cor do perfil com texto branco; marinho só como tinta; cor em
+ * véu; atenção é marinho sobre cinza frio, nunca pêssego; Readex, peso máximo 700, título 26,
+ * seção 17, linha 15,5. Os tokens moram em `components/layout/moldura-app.css`.
  */
 import { PhInfo, PhWarning, PhWarningOctagon } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
@@ -24,6 +19,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import '@/components/layout/moldura-app.css'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
@@ -46,14 +42,14 @@ const pendenciasAbertas = ref(false)
 const destaque = computed(() => props.dia.destaque)
 const petDoDestaque = computed(() => (destaque.value ? props.dia.pet(destaque.value.petId) : null))
 
-/** Os outros que estão em sala: cabem no pé do destaque, não disputam com ele. */
+/** Os outros que estão em sala: cabem no pé do cartão, não disputam com ele. */
 const tambemNaSala = computed(() =>
   props.dia.emConsulta.filter((item) => item.id !== destaque.value?.id),
 )
 
 type Entrada = { item: Appointment; estado: 'espera' | 'marcado' }
 
-/** A recepção e depois os horários, sem repetir quem já está no destaque. */
+/** A recepção e depois os horários, sem repetir quem já está no cartão. */
 const fila = computed<Entrada[]>(() => [
   ...props.dia.naRecepcao
     .filter((item) => item.id !== destaque.value?.id)
@@ -77,7 +73,12 @@ const pendenciasEscondidas = computed(() =>
   Math.max(0, props.dia.linhasDaPauta.length - LIMITE_DE_PENDENCIAS),
 )
 
-/** A linha pequena do cartão do destaque: em que pé ele está. */
+/** Os números do destaque, em vidro: os três que dizem como está a clínica agora. */
+const numeros = computed(() =>
+  props.dia.indicadores.filter((indicador) => indicador.id !== 'a-seguir'),
+)
+
+/** O estado do paciente da vez, na pílula em véu ao lado do nome. */
 const estadoDoDestaque = computed(() => {
   const item = destaque.value
 
@@ -125,239 +126,247 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
     bloquear-se-suspenso
     @tentar-de-novo="dia.carregar"
   >
-    <!-- O destaque: o dia numa frase e, dentro, o paciente da vez. -->
+    <!-- O destaque, colado no cabeçalho: a frase do dia, os números e o paciente da vez. -->
     <template #cabecalho>
       <section class="destaque">
         <UiRabiscos />
 
-        <div class="destaque__topo">
-          <div class="destaque__textos">
-            <p class="destaque__data">{{ dia.dataDeHoje }}</p>
-            <h1 class="destaque__titulo">{{ dia.fraseDoResumo }}</h1>
-            <p v-if="dia.andamentoDoDia" class="destaque__resumo">{{ dia.andamentoDoDia }}</p>
-          </div>
-          <RouterLink class="vidro" to="/veterinario/agenda">
-            <i class="ph ph-calendar-blank" aria-hidden="true" />
-            {{ t('clinico.meuDia.agendaCompleta') }}
-          </RouterLink>
-        </div>
-
-        <article v-if="destaque && petDoDestaque" class="cartao" aria-labelledby="foco-agora-nome">
-          <div class="cartao__quem">
-            <span class="cartao__rosto">
-              <PetAvatar
-                :nome="petDoDestaque.nome"
-                :iniciais="petDoDestaque.iniciais"
-                :especie="petDoDestaque.especie"
-                :foto-url="petDoDestaque.fotoUrl ?? ''"
-                tamanho="lg"
-              />
-            </span>
-            <div class="cartao__nome">
-              <p class="cartao__rotulo">{{ t('clinico.meuDia.agora') }} · {{ estadoDoDestaque }}</p>
-              <h2 id="foco-agora-nome">{{ petDoDestaque.nome }}</h2>
-              <p>{{ dia.linhaDoPaciente(petDoDestaque) }}</p>
+        <div class="destaque__miolo">
+          <div class="destaque__topo">
+            <div class="destaque__textos">
+              <h1>{{ dia.fraseDoResumo }}</h1>
+              <p>{{ [dia.dataDeHoje, dia.andamentoDoDia].filter(Boolean).join(' · ') }}</p>
             </div>
+
+            <ul class="numeros" :aria-label="t('clinico.meuDia.abertura.indicadores')">
+              <li v-for="numero in numeros" :key="numero.id">
+                <RouterLink class="numero" :to="numero.to ?? '/veterinario/agenda'">
+                  <i :class="numero.icone" aria-hidden="true" />
+                  <strong>{{ numero.valor }}</strong>
+                  <span>{{ numero.rotulo }}</span>
+                  <span v-if="numero.tom" class="numero__ponto" aria-hidden="true" />
+                </RouterLink>
+              </li>
+            </ul>
           </div>
 
-          <!-- Os fatos em vidro e, na mesma fileira, o alerta em papel branco: ele não pode sumir. -->
-          <div class="cartao__fichas">
-            <ul class="cartao__fatos">
+          <article
+            v-if="destaque && petDoDestaque"
+            class="cartao"
+            aria-labelledby="foco-agora-nome"
+          >
+            <div class="cartao__quem">
+              <span class="cartao__rosto">
+                <PetAvatar
+                  :nome="petDoDestaque.nome"
+                  :iniciais="petDoDestaque.iniciais"
+                  :especie="petDoDestaque.especie"
+                  :foto-url="petDoDestaque.fotoUrl ?? ''"
+                  tamanho="lg"
+                />
+              </span>
+              <div class="cartao__nome">
+                <h2 id="foco-agora-nome">{{ petDoDestaque.nome }}</h2>
+                <p>{{ dia.linhaDoPaciente(petDoDestaque) }}</p>
+              </div>
+              <span class="cartao__estado">
+                <i class="ph ph-clock" aria-hidden="true" />
+                {{ estadoDoDestaque }}
+              </span>
+            </div>
+
+            <!-- Os fatos em véu e, na mesma fileira, o alerta no véu vermelho: ele não pode sumir. -->
+            <ul class="cartao__fichas">
               <li v-for="fato in fatosDoDestaque" :key="fato.icone">
                 <i :class="fato.icone" aria-hidden="true" />
                 {{ fato.texto }}
               </li>
-            </ul>
-
-            <ul
-              v-if="dia.alertasRelevantes(petDoDestaque).length"
-              class="cartao__alertas"
-              :aria-label="t('clinico.hoje.alertas')"
-            >
               <li
                 v-for="alerta in dia.alertasRelevantes(petDoDestaque)"
                 :key="alerta.id"
+                class="cartao__alerta"
                 :class="`cartao__alerta--${alerta.severidade}`"
               >
                 <i class="ph ph-warning" aria-hidden="true" />
                 {{ dia.textoDoAlerta(alerta) }}
               </li>
             </ul>
-          </div>
 
-          <div class="cartao__acoes">
-            <Button
-              v-if="dia.acaoPrincipal"
-              type="button"
-              class="botao-branco"
-              icon="ph ph-stethoscope"
-              :label="dia.acaoPrincipal.rotulo"
-              @click="dia.abrirProntuario(dia.acaoPrincipal.item)"
-            />
-            <RouterLink class="vidro" :to="dia.rotaDoResumo(destaque)">
-              <i class="ph ph-notepad" aria-hidden="true" />
-              {{ t('clinico.resumoDoPaciente.verResumo') }}
-            </RouterLink>
-
-            <p v-if="tambemNaSala.length" class="cartao__tambem">
-              <span>{{ t('clinico.meuDia.versoes.tambemNaSala') }}</span>
-              <RouterLink
-                v-for="item in tambemNaSala"
-                :key="item.id"
-                class="cartao__outro"
-                :to="dia.rotaDoProntuario(item)"
-              >
-                {{ dia.pet(item.petId)?.nome }}
-                <span class="cartao__outro-tempo">
-                  {{ formato.duracao(dia.minutosDesde(item.iniciadoEm ?? item.inicio) ?? 0) }}
-                </span>
+            <div class="cartao__acoes">
+              <Button
+                v-if="dia.acaoPrincipal"
+                type="button"
+                class="cartao__principal"
+                icon="ph ph-stethoscope"
+                :label="dia.acaoPrincipal.rotulo"
+                @click="dia.abrirProntuario(dia.acaoPrincipal.item)"
+              />
+              <RouterLink class="cartao__secundario" :to="dia.rotaDoResumo(destaque)">
+                <i class="ph ph-notepad" aria-hidden="true" />
+                {{ t('clinico.resumoDoPaciente.verResumo') }}
               </RouterLink>
-            </p>
-          </div>
-        </article>
 
-        <p v-else class="destaque__vazio">{{ t('clinico.meuDia.versoes.ninguemAgora') }}</p>
+              <p v-if="tambemNaSala.length" class="cartao__tambem">
+                <span>{{ t('clinico.meuDia.versoes.tambemNaSala') }}</span>
+                <RouterLink
+                  v-for="item in tambemNaSala"
+                  :key="item.id"
+                  class="cartao__outro"
+                  :to="dia.rotaDoProntuario(item)"
+                >
+                  {{ dia.pet(item.petId)?.nome }}
+                  <span>
+                    {{ formato.duracao(dia.minutosDesde(item.iniciadoEm ?? item.inicio) ?? 0) }}
+                  </span>
+                </RouterLink>
+              </p>
+            </div>
+          </article>
+
+          <p v-else class="cartao cartao--vazio">{{ t('clinico.meuDia.versoes.ninguemAgora') }}</p>
+        </div>
       </section>
     </template>
 
-    <div class="corpo-caixa">
-      <div class="corpo">
-        <!-- A fila: recepção e depois horários, de ponta a ponta, sem caixa. -->
-        <section class="secao" aria-labelledby="foco-fila">
-          <header class="secao__cabeca">
-            <h2 id="foco-fila">{{ t('clinico.meuDia.versoes.fila') }}</h2>
-            <span v-if="fila.length" class="contagem">{{ fila.length }}</span>
-          </header>
+    <div class="corpo">
+      <!-- A fila: recepção e depois horários, de ponta a ponta, sem caixa. -->
+      <section class="secao" aria-labelledby="foco-fila">
+        <header class="secao__cabeca">
+          <h2 id="foco-fila">{{ t('clinico.meuDia.versoes.fila') }}</h2>
+          <span v-if="fila.length" class="contagem">{{ fila.length }}</span>
+          <RouterLink class="secao__acao" to="/veterinario/agenda">
+            {{ t('clinico.fila.aceite.verNaAgenda') }}
+            <i class="ph ph-caret-right" aria-hidden="true" />
+          </RouterLink>
+        </header>
 
-          <ul v-if="fila.length" class="lista">
-            <li
-              v-for="{ item, estado } in filaVisivel"
-              :key="item.id"
-              class="linha"
-              :class="`linha--${estado}`"
+        <ul v-if="fila.length" class="lista">
+          <li
+            v-for="{ item, estado } in filaVisivel"
+            :key="item.id"
+            class="linha"
+            :class="`linha--${estado}`"
+          >
+            <RouterLink
+              class="linha__toque"
+              :to="estado === 'espera' ? dia.rotaDoProntuario(item) : dia.focoNaAgenda(item.id)"
             >
-              <RouterLink
-                class="linha__toque"
-                :to="estado === 'espera' ? dia.rotaDoProntuario(item) : dia.focoNaAgenda(item.id)"
-              >
-                <PetAvatar
-                  :nome="dia.pet(item.petId)?.nome ?? ''"
-                  :iniciais="dia.pet(item.petId)?.iniciais ?? ''"
-                  :especie="dia.pet(item.petId)?.especie ?? null"
-                  :foto-url="dia.pet(item.petId)?.fotoUrl ?? ''"
-                  tamanho="md"
-                />
-                <span class="linha__texto">
-                  <strong>{{ dia.pet(item.petId)?.nome }}</strong>
-                  <span>{{ dia.linhaDoAtendimento(item) }}</span>
-                  <span
-                    v-if="dia.alertasRelevantes(dia.pet(item.petId)).length"
-                    class="linha__alerta"
-                  >
-                    <i class="ph ph-warning" aria-hidden="true" />
-                    {{
-                      dia.alertasRelevantes(dia.pet(item.petId)).map(dia.textoDoAlerta).join(' · ')
-                    }}
-                  </span>
-                </span>
-
-                <span v-if="estado === 'espera'" class="pilula-fria">
+              <PetAvatar
+                :nome="dia.pet(item.petId)?.nome ?? ''"
+                :iniciais="dia.pet(item.petId)?.iniciais ?? ''"
+                :especie="dia.pet(item.petId)?.especie ?? null"
+                :foto-url="dia.pet(item.petId)?.fotoUrl ?? ''"
+                tamanho="md"
+              />
+              <span class="linha__texto">
+                <strong>{{ dia.pet(item.petId)?.nome }}</strong>
+                <span>{{ dia.linhaDoAtendimento(item) }}</span>
+                <span
+                  v-if="dia.alertasRelevantes(dia.pet(item.petId)).length"
+                  class="linha__alerta"
+                >
+                  <i class="ph ph-warning" aria-hidden="true" />
                   {{
-                    t('clinico.meuDia.versoes.estado.espera', {
-                      tempo: formato.duracao(dia.minutosDesde(item.chegadaEm) ?? 0),
-                    })
+                    dia.alertasRelevantes(dia.pet(item.petId)).map(dia.textoDoAlerta).join(' · ')
                   }}
                 </span>
-                <span v-else class="linha__hora">
-                  <strong>{{ formato.hora(item.inicio) }}</strong>
-                  <small>{{ formato.status(item.status) }}</small>
-                </span>
+              </span>
 
+              <span v-if="estado === 'espera'" class="pilula-fria">
+                {{
+                  t('clinico.meuDia.versoes.estado.espera', {
+                    tempo: formato.duracao(dia.minutosDesde(item.chegadaEm) ?? 0),
+                  })
+                }}
+              </span>
+              <!-- A hora no quadradinho em véu, como a lista de consultas da home do app. -->
+              <span v-else class="linha__hora" :title="formato.status(item.status)">
+                {{ formato.hora(item.inicio) }}
                 <i
-                  v-if="estado !== 'espera'"
-                  class="ph ph-caret-right linha__seta"
-                  aria-hidden="true"
+                  v-if="item.status === 'confirmado'"
+                  class="ph ph-check"
+                  :aria-label="formato.status(item.status)"
                 />
-              </RouterLink>
+              </span>
+            </RouterLink>
 
-              <Button
-                v-if="estado === 'espera'"
-                type="button"
-                size="small"
-                severity="secondary"
-                class="linha__chamar"
-                icon="ph ph-door-open"
-                :label="t('clinico.hoje.chamar')"
-                @click="dia.abrirProntuario(item)"
-              />
+            <Button
+              v-if="estado === 'espera'"
+              type="button"
+              size="small"
+              severity="secondary"
+              class="linha__chamar"
+              icon="ph ph-door-open"
+              :label="t('clinico.hoje.chamar')"
+              @click="dia.abrirProntuario(item)"
+            />
+          </li>
+        </ul>
+        <p v-else class="vazio">{{ t('clinico.meuDia.semProximo') }}</p>
+
+        <Button
+          v-if="filaEscondida > 0"
+          type="button"
+          class="mais"
+          text
+          :icon="filaAberta ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+          :label="
+            filaAberta
+              ? t('clinico.meuDia.pauta.mostrarMenos')
+              : t('clinico.meuDia.pauta.mostrarMais', { total: filaEscondida })
+          "
+          :aria-expanded="filaAberta"
+          @click="filaAberta = !filaAberta"
+        />
+      </section>
+
+      <!-- O que pede ação: um painel em véu, o único bloco com fundo da tela. -->
+      <aside class="secao lado" aria-labelledby="foco-pendencias">
+        <header class="secao__cabeca">
+          <h2 id="foco-pendencias">{{ t('inicio.pauta.titulo') }}</h2>
+          <span v-if="dia.linhasDaPauta.length" class="contagem">
+            {{ dia.linhasDaPauta.length }}
+          </span>
+        </header>
+
+        <div class="painel">
+          <ul v-if="dia.linhasDaPauta.length" class="lista">
+            <li v-for="linha in pendenciasVisiveis" :key="linha.id" class="linha">
+              <RouterLink class="linha__toque" :to="linha.to">
+                <span class="icone-veu" :class="`icone-veu--${linha.tom}`" aria-hidden="true">
+                  <component :is="ICONE_DO_TOM[linha.tom]" :size="22" weight="duotone" />
+                </span>
+                <span class="linha__texto">
+                  <strong>
+                    <span class="so-leitor">{{ t(`inicio.pauta.gravidade.${linha.tom}`) }}:</span>
+                    {{ linha.frase }}
+                  </strong>
+                  <span class="linha__duas">
+                    {{ [linha.detalhe, linha.onde].filter(Boolean).join(' · ') }}
+                  </span>
+                </span>
+                <i class="ph ph-caret-right linha__seta" aria-hidden="true" />
+              </RouterLink>
             </li>
           </ul>
-          <p v-else class="vazio">{{ t('clinico.meuDia.semProximo') }}</p>
+          <p v-else class="vazio">{{ t('inicio.pauta.calma') }}</p>
 
           <Button
-            v-if="filaEscondida > 0"
+            v-if="pendenciasEscondidas > 0"
             type="button"
             class="mais"
             text
-            :icon="filaAberta ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+            :icon="pendenciasAbertas ? 'ph ph-caret-up' : 'ph ph-caret-down'"
             :label="
-              filaAberta
+              pendenciasAbertas
                 ? t('clinico.meuDia.pauta.mostrarMenos')
-                : t('clinico.meuDia.pauta.mostrarMais', { total: filaEscondida })
+                : t('clinico.meuDia.pauta.mostrarMais', { total: pendenciasEscondidas })
             "
-            :aria-expanded="filaAberta"
-            @click="filaAberta = !filaAberta"
+            :aria-expanded="pendenciasAbertas"
+            @click="pendenciasAbertas = !pendenciasAbertas"
           />
-        </section>
-
-        <!-- O que pede ação: um painel em véu, o único bloco com fundo da tela. -->
-        <aside class="secao lado" aria-labelledby="foco-pendencias">
-          <header class="secao__cabeca">
-            <h2 id="foco-pendencias">{{ t('inicio.pauta.titulo') }}</h2>
-            <span v-if="dia.linhasDaPauta.length" class="contagem">
-              {{ dia.linhasDaPauta.length }}
-            </span>
-          </header>
-
-          <div class="painel">
-            <ul v-if="dia.linhasDaPauta.length" class="lista">
-              <li v-for="linha in pendenciasVisiveis" :key="linha.id" class="linha">
-                <RouterLink class="linha__toque" :to="linha.to">
-                  <span class="icone-veu" :class="`icone-veu--${linha.tom}`" aria-hidden="true">
-                    <component :is="ICONE_DO_TOM[linha.tom]" :size="22" weight="duotone" />
-                  </span>
-                  <span class="linha__texto">
-                    <strong>
-                      <span class="so-leitor">{{ t(`inicio.pauta.gravidade.${linha.tom}`) }}:</span>
-                      {{ linha.frase }}
-                    </strong>
-                    <span class="linha__duas">
-                      {{ [linha.detalhe, linha.onde].filter(Boolean).join(' · ') }}
-                    </span>
-                  </span>
-                  <i class="ph ph-caret-right linha__seta" aria-hidden="true" />
-                </RouterLink>
-              </li>
-            </ul>
-            <p v-else class="vazio">{{ t('inicio.pauta.calma') }}</p>
-
-            <Button
-              v-if="pendenciasEscondidas > 0"
-              type="button"
-              class="mais"
-              text
-              :icon="pendenciasAbertas ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-              :label="
-                pendenciasAbertas
-                  ? t('clinico.meuDia.pauta.mostrarMenos')
-                  : t('clinico.meuDia.pauta.mostrarMais', { total: pendenciasEscondidas })
-              "
-              :aria-expanded="pendenciasAbertas"
-              @click="pendenciasAbertas = !pendenciasAbertas"
-            />
-          </div>
-        </aside>
-      </div>
+        </div>
+      </aside>
     </div>
 
     <template #sempre>
@@ -366,44 +375,22 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   </UiPagina>
 </template>
 
-<!-- O fundo da área de conteúdo é da página aberta: aqui, o branco liso do app. -->
+<!-- Em tela estreita a moldura é a do portal: o fundo da área de conteúdo vira o branco do app. -->
 <style>
 .palco__conteudo:has(.app-pj) {
-  background: #fff;
-}
-
-.app-dark .palco__conteudo:has(.app-pj) {
-  background: #121917;
+  background: var(--app-fundo, #fff);
 }
 </style>
 
 <style scoped>
-/* ---------------------------------------------------------------- tokens do app (parceiro) */
+/* A folha na largura inteira da tela: nada de coluna centralizada com as bordas vazias. */
+.app-pj.app-pj {
+  max-width: none;
+}
+
+/* -------------------------------------------------------- botões do app (raio 16, peso 700) */
 
 .app-pj {
-  --app-fundo: #fff;
-  --app-destaque: #7c9b94;
-  /* O cartão de dentro: marinho a 33% sobre o destaque (no app, 26%), para o texto pequeno passar. */
-  --app-destaque-cartao: #5c7980;
-  --app-vidro: rgb(0 0 0 / 13%);
-  --app-vidro-forte: rgb(0 0 0 / 20%);
-  --app-tinta: #1d3557;
-  --app-texto-2: #666;
-  --app-salvia: #84a59d;
-  --app-salvia-texto: #5c736e;
-  --app-botao: #627a74;
-  --app-botao-hover: #586e68;
-  --app-veu: rgb(132 165 157 / 9%);
-  --app-veu-forte: rgb(132 165 157 / 15%);
-  --app-regua: rgb(132 165 157 / 22%);
-  --app-fria: #f0f0f0;
-  --app-risco: #d32424;
-  --app-risco-veu: rgb(242 132 130 / 15%);
-
-  /* Readex nos números também, como no app. */
-  --font-dados: var(--font-texto);
-
-  /* Botões do app: cantos de 16, sem borda, sem sombra, peso 700. */
   --p-button-border-radius: 16px;
   --p-button-label-font-weight: 700;
   --p-button-primary-background: var(--app-botao);
@@ -429,26 +416,14 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   --p-button-text-primary-hover-background: var(--app-veu);
   --p-button-text-secondary-hover-background: var(--app-veu);
 
+  /* Readex nos números também, como no app. */
+  --font-dados: var(--font-texto);
+
   color: var(--app-tinta);
   font-family: var(--font-texto);
 }
 
-/* O app não tem modo escuro; aqui ele existe, então o mesmo desenho com a luz apagada. */
 .app-dark .app-pj {
-  --app-fundo: #121917;
-  --app-destaque: #56736c;
-  --app-destaque-cartao: #3f5852;
-  --app-tinta: #e6edeb;
-  --app-texto-2: #a9b6b2;
-  --app-salvia-texto: #a9c6be;
-  --app-botao: #9dbdb5;
-  --app-botao-hover: #b0cbc4;
-  --app-veu: rgb(132 165 157 / 12%);
-  --app-veu-forte: rgb(132 165 157 / 20%);
-  --app-regua: rgb(255 255 255 / 9%);
-  --app-fria: rgb(255 255 255 / 7%);
-  --app-risco: #f4908a;
-  --app-risco-veu: rgb(242 132 130 / 16%);
   --p-button-primary-color: #10302a;
   --p-button-primary-hover-color: #10302a;
   --p-button-primary-active-color: #10302a;
@@ -459,7 +434,6 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   border-width: 0;
   background-image: none !important;
   box-shadow: none !important;
-  font-weight: 700;
 }
 
 .app-pj .p-button.p-button-sm {
@@ -467,7 +441,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   border-radius: 12px;
 }
 
-/* ----------------------------------------------------------------------------- destaque */
+/* ------------------------------------------------------------------------------ destaque */
 
 .destaque {
   --rabiscos-forca: 0.2;
@@ -475,110 +449,144 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   position: relative;
   min-width: 0;
   flex: 1;
-  display: grid;
   overflow: hidden;
-  gap: 20px;
-  padding: 24px 28px 28px;
   border-radius: 28px;
   background: var(--app-destaque);
   color: #fff;
   isolation: isolate;
 }
 
+.destaque__miolo {
+  display: grid;
+  gap: 22px;
+  padding: 26px 30px 30px;
+}
+
+/*
+ * Na moldura do app o destaque vai de ponta a ponta da folha, colado no topo, só com os cantos de
+ * baixo arredondados, como o topo da home do app. O miolo alinha com a margem da página.
+ */
+.shell--moldura-app .app-pj.app-pj {
+  padding-top: 0;
+}
+
+.shell--moldura-app .destaque {
+  margin-inline: calc(var(--pagina-margem) * -1);
+  border-radius: 0 0 28px 28px;
+}
+
+.shell--moldura-app .destaque__miolo {
+  padding: 32px var(--pagina-margem) 34px;
+}
+
 .destaque__topo {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 16px 24px;
+  gap: 18px 32px;
 }
 
 .destaque__textos {
   display: grid;
   min-width: 0;
-  gap: 6px;
+  flex: 1 1 340px;
+  gap: 4px;
 }
 
-.destaque__data {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.destaque__titulo {
+.destaque__textos h1 {
   margin: 0;
   font-size: 26px;
   font-weight: 700;
   letter-spacing: -0.5px;
-  line-height: 1.2;
+  line-height: 1.25;
   text-wrap: balance;
 }
 
-.destaque__resumo {
+.destaque__textos p {
   margin: 0;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 14.5px;
+  line-height: 1.4;
 }
 
-.destaque__vazio {
+/* Os números do app: vidro sobre a cor, ícone, valor grande e rótulo curto. */
+.numeros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin: 0;
-  padding: 18px 20px;
-  border-radius: 22px;
-  background: var(--app-destaque-cartao);
-  font-size: 15px;
+  padding: 0;
+  list-style: none;
 }
 
-/* O vidro do app: botão e etiqueta sobre a cor, escuro translúcido, sem borda. */
-.vidro {
-  display: inline-flex;
-  min-height: 44px;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  border-radius: 16px;
+.numero {
+  position: relative;
+  display: grid;
+  min-width: 112px;
+  gap: 2px;
+  padding: 12px 16px 13px;
+  border-radius: 18px;
   background: var(--app-vidro);
   color: #fff;
-  font-size: 15px;
-  font-weight: 700;
   text-decoration: none;
   transition: background-color 150ms ease-out;
 }
 
-.vidro:hover {
+.numero:hover {
   background: var(--app-vidro-forte);
 }
 
-.vidro:focus-visible {
+.numero:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
 
-.vidro i {
+.numero i {
   font-size: 18px;
 }
 
-/* O paciente da vez: o cartão de dentro do destaque, como o pet na home do app. */
+.numero strong {
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.numero span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Número que é alerta: um ponto branco no canto, além da cor que não muda. */
+.numero .numero__ponto {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* O paciente da vez: papel branco dentro do destaque, com a tinta do app. */
 .cartao {
   display: grid;
   gap: 16px;
+  margin: 0;
   padding: 20px 22px 22px;
   border-radius: 22px;
-  background: var(--app-destaque-cartao);
+  background: var(--app-cartao);
+  color: var(--app-tinta);
 }
 
-.cartao__rotulo {
-  margin: 0;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
+.cartao--vazio {
+  font-size: 15px;
 }
 
 .cartao__quem {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
 .cartao__rosto {
@@ -586,18 +594,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   flex: none;
   padding: 3px;
   border-radius: 50%;
-  background: rgb(255 255 255 / 90%);
+  background: var(--app-veu-forte);
 }
 
 .cartao__nome {
   display: grid;
   min-width: 0;
+  flex: 1;
   gap: 2px;
 }
 
 .cartao__nome h2 {
   margin: 0;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
   line-height: 1.15;
@@ -605,60 +614,57 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 .cartao__nome p {
   margin: 0;
-  font-size: 15px;
+  color: var(--app-texto-2);
+  font-size: 14.5px;
+}
+
+.cartao__estado {
+  display: inline-flex;
+  min-height: 34px;
+  flex: none;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
 .cartao__fichas {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.cartao__fatos,
-.cartao__alertas {
-  display: contents;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.cartao__fatos li {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: var(--app-vidro);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-/* O alerta sobre a cor: pílula branca com o texto no vermelho do app, para não sumir no vidro. */
-.cartao__alertas li {
+.cartao__fichas li {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   min-height: 34px;
   padding: 4px 14px;
   border-radius: 999px;
-  background: #fff;
-  color: var(--app-tinta);
+  background: var(--app-veu);
+  color: var(--app-salvia-texto);
   font-size: 14px;
+  font-weight: 600;
+}
+
+/* O alerta: atenção é marinho sobre cinza frio; risco, o vermelho do app no véu dele. */
+.cartao__fichas .cartao__alerta {
+  background: var(--app-fria);
+  color: var(--app-tinta);
   font-weight: 700;
 }
 
-.cartao__alertas .cartao__alerta--risco {
-  color: #d32424;
-}
-
-.app-dark .cartao__alertas li {
-  background: #fff;
-  color: #1d3557;
-}
-
-.app-dark .cartao__alertas .cartao__alerta--risco {
-  color: #d32424;
+.cartao__fichas .cartao__alerta--risco {
+  background: var(--app-risco-veu);
+  color: var(--app-risco);
 }
 
 .cartao__acoes {
@@ -666,24 +672,42 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  padding-top: 4px;
 }
 
-/* A ação principal sobre a cor: papel branco com a tinta do destaque. */
-.app-pj .botao-branco {
-  --p-button-primary-background: #fff;
-  --p-button-primary-hover-background: #f1f5f4;
-  --p-button-primary-active-background: #e7eeec;
-  --p-button-primary-border-color: #fff;
-  --p-button-primary-hover-border-color: #f1f5f4;
-  --p-button-primary-active-border-color: #e7eeec;
-  --p-button-primary-color: #3f5852;
-  --p-button-primary-hover-color: #3f5852;
-  --p-button-primary-active-color: #3f5852;
-
+/* A ação principal é o botão cheio do app; a de apoio, o mesmo tamanho em véu. */
+.app-pj .cartao__principal {
   min-height: 48px;
   padding-inline: 20px;
   font-size: 15px;
+}
+
+.cartao__secundario {
+  display: inline-flex;
+  min-height: 48px;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 16px;
+  background: var(--app-veu);
+  color: var(--app-salvia-texto);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 150ms ease-out;
+}
+
+.cartao__secundario:hover {
+  background: var(--app-veu-forte);
+}
+
+.cartao__secundario:focus-visible {
+  outline: 2px solid var(--app-tinta);
+  outline-offset: 2px;
+}
+
+.cartao__secundario i {
+  font-size: 18px;
 }
 
 .cartao__tambem {
@@ -692,21 +716,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   align-items: center;
   gap: 6px 12px;
   margin: 0 0 0 auto;
+  color: var(--app-texto-2);
   font-size: 14px;
 }
 
 .cartao__outro {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #fff;
+  color: var(--app-tinta);
   font-weight: 700;
   text-decoration: underline;
-  text-decoration-color: rgb(255 255 255 / 50%);
+  text-decoration-color: var(--app-regua);
   text-underline-offset: 3px;
 }
 
-.cartao__outro-tempo {
+.cartao__outro span {
   font-weight: 500;
 }
 
@@ -716,25 +738,21 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   display: grid;
   align-items: start;
   gap: 36px 40px;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
-  padding: 8px 0 72px;
-}
-
-.corpo-caixa {
-  container: corpo-app / inline-size;
+  grid-template-columns: minmax(0, 1fr) clamp(320px, 32%, 560px);
+  padding: 12px 0 0;
 }
 
 .secao {
   display: grid;
   min-width: 0;
-  gap: 8px;
+  gap: 6px;
 }
 
 .secao__cabeca {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-height: 32px;
+  min-height: 34px;
 }
 
 .secao__cabeca h2 {
@@ -742,6 +760,28 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   color: var(--app-tinta);
   font-size: 17px;
   font-weight: 700;
+}
+
+.secao__acao {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+  border-radius: 8px;
+  color: var(--app-salvia-texto);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.secao__acao:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.secao__acao:focus-visible {
+  outline: 2px solid var(--app-salvia-texto);
+  outline-offset: 2px;
 }
 
 .contagem {
@@ -789,7 +829,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 }
 
 .painel .linha + .linha::before {
-  left: 70px;
+  left: 54px;
 }
 
 .linha__toque {
@@ -807,7 +847,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 }
 
 .linha__toque:hover {
-  background: rgb(132 165 157 / 6%);
+  background: var(--app-toque);
 }
 
 .linha__toque:focus-visible {
@@ -842,7 +882,6 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 /* Alerta na linha: marinho, a cor de "atenção" do app; nunca pêssego. */
 .linha .linha__alerta {
-  display: block;
   color: var(--app-tinta);
   font-weight: 600;
 }
@@ -859,23 +898,22 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   white-space: normal !important;
 }
 
+/* A hora no quadradinho em véu, como a lista de consultas da home do app. */
 .linha__hora {
-  display: grid;
+  display: inline-flex;
+  min-width: 64px;
+  height: 40px;
   flex: none;
-  justify-items: end;
-  line-height: 1.2;
-}
-
-.linha__hora strong {
-  color: var(--app-tinta);
-  font-size: 16px;
-  font-weight: 700;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 10px;
+  border-radius: 13px;
+  background: var(--app-veu);
+  color: var(--app-salvia-texto);
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
-}
-
-.linha__hora small {
-  color: var(--app-texto-2);
-  font-size: 12.5px;
+  font-weight: 700;
 }
 
 .linha__seta {
@@ -887,7 +925,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 /* Quem espera: a pílula fria do app (marinho sobre cinza frio) no lugar da hora. */
 .pilula-fria {
   display: inline-flex;
-  min-height: 28px;
+  min-height: 30px;
   flex: none;
   align-items: center;
   padding: 0 12px;
@@ -971,7 +1009,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 /* ---------------------------------------------------------------------------- estreito */
 
-@container corpo-app (max-width: 940px) {
+@media (max-width: 1180px) {
   .corpo {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -980,15 +1018,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
     position: static;
     order: -1;
   }
-}
 
-@media (max-width: 1100px) {
-  .destaque {
-    padding: 24px 22px 24px;
+  .destaque__miolo {
+    padding-inline: 22px;
   }
 
   .cartao__tambem {
     margin-left: 0;
+  }
+}
+
+@media (max-width: 760px) {
+  .cartao__quem {
+    flex-wrap: wrap;
   }
 }
 </style>

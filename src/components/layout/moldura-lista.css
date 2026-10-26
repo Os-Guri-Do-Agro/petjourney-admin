@@ -1,0 +1,170 @@
+/*
+ * A lista: o Hoje como a mesa da recepção, com a navegação no topo.
+ *
+ * Em cima, dois cartões (os números da recepção e a sala de agora); no meio, os filtros; embaixo, a
+ * folha com as abas (em sala, internação, fila do dia), a fila à esquerda e o paciente escolhido à
+ * direita, num cartão escuro.
+ *
+ * Os dois temas guardam o mesmo contraste: a folha de baixo é sempre clara, e a linha escolhida, as
+ * abas e o cartão do paciente são sempre a "noite" (a tinta da casa no claro, quase preto no escuro).
+ * A sálvia do parceiro (#84C1B4) marca o que está escolhido e a ação principal; âmbar é espera,
+ * coral é urgência.
+ *
+ * Os tokens valem na moldura (`.shell--moldura-lista`, que troca a barra lateral pela navegação no
+ * topo) e na página (`.ls`), que também aparece em tela estreita, onde a moldura volta a ser a do
+ * portal.
+ */
+
+.shell--moldura-lista,
+.ls,
+.ls-gaveta {
+  --ls-display: 'Instrument Sans Variable', 'Readex Pro Variable', system-ui, sans-serif;
+  --ls-texto: var(--font-texto, 'Readex Pro Variable', system-ui, sans-serif);
+  --ls-fundo: #edf1ef;
+  --ls-cartao: #fff;
+  --ls-cartao-2: #f1f5f3;
+  --ls-linha: #dfe6e3;
+  --ls-linha-forte: #c6d1cc;
+  --ls-tinta: #142721;
+  --ls-tinta-2: #4a5b55;
+  --ls-tinta-3: #62726c;
+  --ls-marca: #84c1b4;
+  --ls-marca-forte: #2b6b5d;
+  --ls-sobre-marca: #0f2a24;
+  --ls-ambar: #d98e2f;
+  --ls-ambar-texto: #8a5306;
+  --ls-coral: #d0573f;
+  --ls-coral-texto: #a83a28;
+
+  /* A noite: abas, linha escolhida e o cartão do paciente. */
+  --ls-noite: #16231f;
+  /* As abas da folha: a noite puxada para o cinza. */
+  --ls-abas: #2a3330;
+  --ls-noite-2: rgb(255 255 255 / 6%);
+  --ls-noite-linha: rgb(255 255 255 / 11%);
+  --ls-sobre-noite: #eef4f1;
+  --ls-sobre-noite-2: #a9bab4;
+
+  /* A folha de baixo: clara nos dois temas. */
+  --ls-folha: #fff;
+  --ls-folha-2: #f0f4f2;
+  --ls-folha-linha: #e2e8e5;
+  --ls-folha-tinta: #142721;
+  --ls-folha-tinta-2: #53635d;
+  --ls-folha-ambar: #8a5306;
+  --ls-folha-coral: #a83a28;
+  --ls-folha-marca: #2b6b5d;
+}
+
+.app-dark .shell--moldura-lista,
+.app-dark .ls,
+.app-dark .ls-gaveta {
+  --ls-fundo: #0e1311;
+  --ls-cartao: #172020;
+  --ls-cartao-2: #202a28;
+  --ls-linha: rgb(255 255 255 / 7%);
+  --ls-linha-forte: rgb(255 255 255 / 15%);
+  --ls-tinta: #eef3f1;
+  --ls-tinta-2: #a9b7b2;
+  --ls-tinta-3: #8b9a95;
+  --ls-marca-forte: #9fd4c7;
+  --ls-ambar: #e7a54b;
+  --ls-ambar-texto: #f2c072;
+  --ls-coral: #ef8a7a;
+  --ls-coral-texto: #f4a596;
+  --ls-noite: #101614;
+  --ls-abas: #262d2b;
+  --ls-folha: #e3e9e6;
+  --ls-folha-2: #d6dfdb;
+  --ls-folha-linha: #cfd8d4;
+}
+
+/* ------------------------------------------- a moldura: navegação no topo, folha inteira */
+
+html:has(.shell--moldura-lista) {
+  scrollbar-gutter: auto;
+}
+
+:root .shell.shell--moldura-lista {
+  background: var(--ls-fundo);
+}
+
+.shell.shell--moldura-lista .palco {
+  height: 100dvh;
+  margin: 0;
+  border-radius: 0;
+  background: var(--ls-fundo);
+  box-shadow: none;
+  outline: none;
+}
+
+.shell.shell--moldura-lista .palco__conteudo {
+  background: var(--ls-fundo);
+}
+
+/* ------------------------------------------------------------------ PrimeVue na página */
+
+.ls {
+  --p-button-border-radius: 999px;
+  --p-button-label-font-weight: 650;
+  --p-button-primary-background: var(--ls-marca);
+  --p-button-primary-hover-background: color-mix(in srgb, var(--ls-marca) 88%, #fff);
+  --p-button-primary-active-background: color-mix(in srgb, var(--ls-marca) 80%, #fff);
+  --p-button-primary-border-color: transparent;
+  --p-button-primary-hover-border-color: transparent;
+  --p-button-primary-active-border-color: transparent;
+  --p-button-primary-color: var(--ls-sobre-marca);
+  --p-button-primary-hover-color: var(--ls-sobre-marca);
+  --p-button-primary-active-color: var(--ls-sobre-marca);
+
+  color: var(--ls-tinta);
+  font-family: var(--ls-texto);
+}
+
+.ls .p-button {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.ls .p-button:not(:disabled):active {
+  transform: none;
+}
+
+/*
+ * Os filtros: campos em pílula, no tom dos cartões. O tema do portal pinta Select e InputText com
+ * regra pesada; a classe repetida pesa mais.
+ */
+.ls .ls-filtros.ls-filtros .p-select,
+.ls .ls-filtros.ls-filtros .p-inputtext {
+  min-height: 42px;
+  border: 1px solid var(--ls-linha);
+  border-radius: 999px;
+  background: var(--ls-cartao);
+  box-shadow: none;
+  color: var(--ls-tinta);
+  font-size: 14px;
+}
+
+.ls .ls-filtros.ls-filtros .p-select:hover,
+.ls .ls-filtros.ls-filtros .p-inputtext:hover {
+  border-color: var(--ls-linha-forte);
+}
+
+.ls .ls-filtros.ls-filtros .p-select-label {
+  padding-inline: 18px 8px;
+  color: var(--ls-tinta);
+  font-size: 14px;
+}
+
+.ls .ls-filtros.ls-filtros .p-select-dropdown {
+  color: var(--ls-tinta-2);
+}
+
+.ls .ls-filtros.ls-filtros .p-inputtext {
+  width: 100%;
+  padding-inline: 18px 44px;
+}
+
+.ls .ls-filtros.ls-filtros .p-inputtext::placeholder {
+  color: var(--ls-tinta-3);
+}

@@ -411,7 +411,9 @@
     "barra": {
       "pular": "Skip to content",
       "navegacao": "Main navigation",
+      "outrosEspacos": "Other spaces",
       "inicio": "Home",
+      "conta": "Account",
       "criarTitulo": "Create new",
       "criarItens": {
         "agendamento": "Appointment",
@@ -2959,9 +2961,9 @@
         "rotulo": "Layout",
         "aria": "Layout version",
         "opcao": {
-          "foco": "Focus",
-          "linha": "Day timeline",
-          "mesa": "Desk",
+          "foco": "App",
+          "cartoes": "Cards and rooms",
+          "lista": "Three numbers and a list",
           "atual": "Current"
         },
         "estado": {
@@ -2972,17 +2974,141 @@
         "tambemNaSala": "Also in the room:",
         "ninguemAgora": "No one in the room or at reception, and nothing else booked for today.",
         "fila": "Up next",
-        "linha": {
-          "acao": "Action",
-          "encerrados": "{total} appointment closed | {total} appointments closed"
+        "relogio": {
+          "rotulo": "Time",
+          "aria": "Demo time",
+          "movimento": "Busy morning",
+          "real": "Real time"
         },
-        "mesa": {
-          "filas": "Today's queues",
-          "finalizados": "Finished",
-          "filaVazia": "No one in this queue right now.",
-          "escolha": "Pick someone from the list to see their details here.",
-          "resolverEm": "Resolve in {onde}",
-          "atalhos": "to switch patient"
+        "lista": {
+          "titulo": "Today at the clinic",
+          "voltar": "Back to home",
+          "novo": "New appointment",
+          "filtros": {
+            "botao": "Show or hide filters",
+            "ativos": "Active filters",
+            "profissional": "All professionals",
+            "servico": "All services",
+            "periodo": "Period",
+            "dia": "All day",
+            "manha": "Morning",
+            "tarde": "Afternoon",
+            "busca": "Search pet or owner"
+          },
+          "numeros": {
+            "recepcao": "At reception now",
+            "pets": "pet | pets",
+            "espera": "Longest wait",
+            "min": "min",
+            "fimDoDia": "Until end of day",
+            "atendimentos": "appointment | appointments"
+          },
+          "porHorario": "Patients by hour",
+          "horaPassou": "part of the hour already gone",
+          "hora": "{h}:00",
+          "sala": {
+            "agoraNo": "Now in {sala}",
+            "nenhuma": "No consultation right now",
+            "abrir": "Open the visit",
+            "emConsulta": "{pet} in consultation",
+            "com": "with {vet}",
+            "continuar": "Continue"
+          },
+          "abas": {
+            "aria": "What to show in the list",
+            "sala": "In the room",
+            "internacao": "Inpatients",
+            "fila": "Today's queue"
+          },
+          "estado": {
+            "esperando": "Waiting",
+            "chegou": "Arrived",
+            "emConsulta": "In consultation",
+            "naRecepcao": "At reception"
+          },
+          "fila": {
+            "outros": "See the other one in the queue | See the other {n} in the queue",
+            "menos": "See less"
+          },
+          "detalhe": {
+            "paciente": "Patient",
+            "atendimento": "Visit",
+            "responsavel": "Owner",
+            "vacinas": "Vaccines",
+            "historico": "Visit history",
+            "agendar": "Book for {pet}",
+            "espera": "Wait",
+            "horario": "Time",
+            "posicao": "Queue position",
+            "posicaoValor": "#{n}",
+            "depois": "Next after",
+            "ninguem": "No one",
+            "naSala": "In the room for",
+            "sala": "Room",
+            "profissional": "Professional"
+          },
+          "internacao": {
+            "abrir": "Open in inpatients"
+          },
+          "vazio": {
+            "filtro": "Nothing matches these filters.",
+            "sala": "No one in the room right now.",
+            "internacao": "Nothing pending in inpatients."
+          }
+        },
+        "cartoes": {
+          "titulo": "Today at the clinic",
+          "busca": "Search pet or owner",
+          "novo": "New appointment",
+          "abas": "Clinic screens",
+          "frase": {
+            "sala": "{pet} is in {sala}.",
+            "espera": "{pet} has waited {tempo} at reception.",
+            "calma": "No one in the rooms or at reception right now."
+          },
+          "sala": {
+            "agoraNo": "Now in {sala}",
+            "com": "{tipo} with",
+            "responsavel": "Owner",
+            "tambem": "Also in a room",
+            "tambemValor": "{pet}, {tempo}",
+            "volta": "Back today",
+            "voltaValor": "{hora}, {tipo}",
+            "continuar": "Continue the visit",
+            "ninguem": "No one in consultation right now",
+            "proximo": "Next: {pet} at {hora}"
+          },
+          "recepcao": {
+            "titulo": "At reception",
+            "esperando": "{n} waiting",
+            "vazio": "No one waiting at reception.",
+            "todos": "See all in the schedule"
+          },
+          "acao": {
+            "titulo": "Needs action",
+            "urgentes": "{n} urgent | {n} urgent",
+            "contato": "Log contact",
+            "dose": "Log dose",
+            "resolver": "Resolve",
+            "mais": "{n} more non-urgent item | {n} more non-urgent items"
+          },
+          "dia": {
+            "titulo": "Rooms through the day",
+            "porSala": "By room",
+            "porProfissional": "By professional",
+            "aria": "Group the day line",
+            "agora": "Now",
+            "hora": "{h}:00",
+            "naSala": "In the room for {tempo}, with {vet}",
+            "esperando": "waiting {tempo}",
+            "vazio": "Nothing booked in these hours.",
+            "legenda": {
+              "andamento": "In progress",
+              "espera": "Waiting",
+              "agendado": "Booked",
+              "confirmado": "Confirmed"
+            }
+          }
         }
       }
     },

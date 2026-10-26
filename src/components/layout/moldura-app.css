@@ -1,0 +1,344 @@
+/*
+ * O mundo do app PetJourney (perfil de parceiro) na tela grande.
+ *
+ * Os tokens valem em dois lugares: na moldura do app (`.shell--moldura-app`: a barra lateral de
+ * sempre, vestida como o menu do app) e na página que usa o desenho do app (`.app-pj`), que também
+ * aparece em tela estreita, onde a moldura volta a ser a do portal.
+ *
+ * Regras do app (`docs/design/padrao-tutor.md`, no petjourney-app): tela branca e lisa, sem
+ * sombra nem degradê; destaque na cor do perfil com texto branco; marinho só como tinta; cor em
+ * véu translúcido; atenção é marinho sobre cinza frio, nunca pêssego.
+ */
+
+.shell--moldura-app,
+.app-pj {
+  --app-fundo: #fff;
+  /* A sálvia do parceiro (#84A59D) escurecida o mínimo para o branco ler em título, como no app. */
+  --app-destaque: #7c9b94;
+  /* O cartão de dentro do destaque: papel branco, o paciente salta da cor. */
+  --app-cartao: #fff;
+  --app-vidro: rgb(0 0 0 / 13%);
+  --app-vidro-forte: rgb(0 0 0 / 20%);
+  --app-tinta: #1d3557;
+  --app-texto-2: #5f6670;
+  --app-apagado: #6b7280;
+  --app-salvia: #84a59d;
+  --app-salvia-texto: #5c736e;
+  --app-botao: #627a74;
+  --app-botao-hover: #586e68;
+  --app-veu: rgb(132 165 157 / 9%);
+  --app-veu-forte: rgb(132 165 157 / 15%);
+  --app-toque: rgb(132 165 157 / 6%);
+  --app-regua: rgb(132 165 157 / 22%);
+  --app-fria: #f0f0f0;
+  --app-risco: #d32424;
+  --app-risco-veu: rgb(242 132 130 / 15%);
+}
+
+.app-dark .shell--moldura-app,
+.app-dark .app-pj {
+  --app-fundo: #121917;
+  --app-destaque: #56736c;
+  --app-cartao: #18211e;
+  --app-tinta: #e6edeb;
+  --app-texto-2: #a9b6b2;
+  --app-apagado: #94a19d;
+  --app-salvia-texto: #a9c6be;
+  --app-botao: #9dbdb5;
+  --app-botao-hover: #b0cbc4;
+  --app-veu: rgb(132 165 157 / 12%);
+  --app-veu-forte: rgb(132 165 157 / 20%);
+  --app-toque: rgb(132 165 157 / 8%);
+  --app-regua: rgb(255 255 255 / 9%);
+  --app-fria: rgb(255 255 255 / 7%);
+  --app-risco: #f4908a;
+  --app-risco-veu: rgb(242 132 130 / 16%);
+}
+
+/* ---------------------------------------------------------------- a moldura: tela lisa */
+
+/*
+ * Quem rola nesta moldura é a área de conteúdo, não a página: a calha que o `html` reserva para a
+ * barra de rolagem (main.css) só deixava uma faixa vazia de 10 px na borda direita.
+ */
+html:has(.shell--moldura-app) {
+  scrollbar-gutter: auto;
+}
+
+:root .shell.shell--moldura-app {
+  background: var(--app-fundo);
+}
+
+.shell.shell--moldura-app .palco {
+  height: 100dvh;
+  margin: 0;
+  border-radius: 0;
+  background: var(--app-fundo);
+  box-shadow: none;
+  outline: none;
+}
+
+/*
+ * Sem a barra de rolagem à vista (a rolagem continua), como o app: a calha dela deixava uma faixa
+ * branca ao lado do destaque, que vai até a borda da tela.
+ */
+.shell.shell--moldura-app .palco__conteudo {
+  background: var(--app-fundo);
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+}
+
+.shell.shell--moldura-app .palco__conteudo::-webkit-scrollbar {
+  display: none;
+}
+
+/* ----------------------------------------------- o menu: a barra lateral como o menu do app */
+
+/* Branca como a tela, separada dela só por uma régua de véu. */
+.shell.shell--moldura-app .barra {
+  border-inline-end: 1px solid var(--app-regua);
+  background: var(--app-fundo);
+  color: var(--app-tinta);
+}
+
+.shell.shell--moldura-app .barra__miolo::before {
+  display: none;
+}
+
+/*
+ * O topo do menu é o destaque do app: sálvia, texto branco, cantos de baixo arredondados e os
+ * desenhos de traço no fundo (`UiRabiscos estreito`), que pedem o recorte e a camada própria.
+ */
+.shell.shell--moldura-app .barra__topo {
+  position: relative;
+  padding: 22px 16px 24px;
+  border-radius: 0 0 28px 28px;
+  background: var(--app-destaque);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shell.shell--moldura-app .barra__marca,
+.shell.shell--moldura-app .barra__marca:hover {
+  background: transparent;
+  color: #fff;
+}
+
+.shell.shell--moldura-app .barra__empresa strong,
+.shell.shell--moldura-app .barra__empresa small {
+  color: #fff;
+}
+
+.shell.shell--moldura-app .barra__pata {
+  background: rgb(255 255 255 / 92%);
+}
+
+.shell.shell--moldura-app .barra__recolher {
+  border-color: transparent;
+  background: var(--app-vidro);
+  color: #fff;
+}
+
+.shell.shell--moldura-app .barra__recolher:hover {
+  border-color: transparent;
+  background: var(--app-vidro-forte);
+  color: #fff;
+}
+
+/*
+ * A busca e o criar, logo abaixo do destaque: a busca é o campo do app (véu sálvia, cantos de 16,
+ * o ícone na sálvia); o criar é o botão cheio do app.
+ */
+.shell.shell--moldura-app .barra__ferramentas {
+  padding: 16px 14px 0;
+}
+
+.shell.shell--moldura-app .barra__busca {
+  height: 44px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--app-veu);
+  color: var(--app-texto-2);
+  font-size: 15px;
+}
+
+.shell.shell--moldura-app .barra__busca:hover {
+  border: 0;
+  background: var(--app-veu-forte);
+  color: var(--app-tinta);
+}
+
+.shell.shell--moldura-app .barra__busca i {
+  color: var(--app-salvia-texto);
+}
+
+.shell.shell--moldura-app .barra__busca kbd {
+  background: var(--app-fundo);
+  color: var(--app-texto-2);
+}
+
+.shell.shell--moldura-app .barra__busca:focus-visible,
+.shell.shell--moldura-app .barra__cupom:focus-visible {
+  outline-color: var(--app-tinta);
+}
+
+.shell.shell--moldura-app .criar {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  background: var(--app-botao);
+  box-shadow: none;
+  color: #fff;
+  font-size: 20px;
+}
+
+.shell.shell--moldura-app .criar:hover {
+  background: var(--app-botao-hover);
+  filter: none;
+}
+
+.shell.shell--moldura-app .criar:focus-visible {
+  outline-color: var(--app-tinta);
+}
+
+.app-dark .shell.shell--moldura-app .criar {
+  color: #10302a;
+}
+
+.shell.shell--moldura-app .mapa {
+  gap: 2px;
+  padding: 16px 14px 18px;
+}
+
+.shell.shell--moldura-app .mapa__inicio,
+.shell.shell--moldura-app .destino {
+  min-height: 52px;
+  gap: 14px;
+  padding: 0 10px 0 6px;
+  border-radius: 16px;
+  color: var(--app-tinta);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.shell.shell--moldura-app .mapa__inicio {
+  margin-bottom: 6px;
+}
+
+.shell.shell--moldura-app .mapa__inicio:hover,
+.shell.shell--moldura-app .destino:hover,
+.shell.shell--moldura-app .espaco__cabeca:hover {
+  background: var(--app-toque);
+  color: var(--app-tinta);
+}
+
+/* O quadradinho de ícone do app: 40 px, cantos de 13, ícone na sálvia sobre o véu. */
+.shell.shell--moldura-app .mapa__ladrilho,
+.shell.shell--moldura-app .destino .destino__icone {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--app-veu);
+  box-shadow: none;
+  color: var(--app-salvia-texto);
+  font-size: 19px;
+  opacity: 1;
+}
+
+/* Cada espaço é um rótulo de grupo, como "CONTA" e "AJUDA" no menu do app. */
+.shell.shell--moldura-app .espaco {
+  margin-top: 10px;
+}
+
+.shell.shell--moldura-app .espaco__cabeca {
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: 10px;
+  color: var(--app-texto-2);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.shell.shell--moldura-app .espaco__cabeca .espaco__icone,
+.shell.shell--moldura-app .espaco__seta {
+  display: none;
+}
+
+.shell.shell--moldura-app .espaco__destinos {
+  gap: 2px;
+  margin: 2px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* O destino aberto: pílula cheia na cor do perfil, texto e ícone brancos, como a aba ativa. */
+.shell.shell--moldura-app .destino.destino--ativo,
+.shell.shell--moldura-app .destino.destino--ativo:hover,
+.shell.shell--moldura-app .mapa__inicio.mapa__inicio--ativo {
+  background: var(--app-destaque);
+  color: #fff;
+  font-weight: 700;
+}
+
+.shell.shell--moldura-app .destino.destino--ativo::before {
+  display: none;
+}
+
+.shell.shell--moldura-app .destino--ativo .destino__icone,
+.shell.shell--moldura-app .mapa__inicio--ativo .mapa__ladrilho {
+  background: var(--app-vidro);
+  color: #fff;
+}
+
+/* O selo de contagem do app: bolinha vermelha com o número branco. */
+.shell.shell--moldura-app .mapa__selo {
+  min-width: 22px;
+  height: 22px;
+  font-family: var(--font-texto);
+  font-weight: 700;
+}
+
+.shell.shell--moldura-app .mapa__selo--risco,
+.shell.shell--moldura-app .mapa__selo--atencao {
+  background: var(--app-risco);
+  color: #fff;
+}
+
+.app-dark .shell.shell--moldura-app .mapa__selo--risco,
+.app-dark .shell.shell--moldura-app .mapa__selo--atencao {
+  color: #3a0d09;
+}
+
+.shell.shell--moldura-app .mapa__selo--neutro {
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+}
+
+.shell.shell--moldura-app .destino--ativo .mapa__selo {
+  background: #fff;
+  color: var(--app-risco);
+}
+
+.shell.shell--moldura-app .barra__pe {
+  border-top: 1px solid var(--app-regua);
+}
+
+.shell.shell--moldura-app .barra__cupom {
+  background: transparent;
+  color: var(--app-tinta);
+}
+
+.shell.shell--moldura-app .barra__cupom-icone {
+  background: var(--app-veu);
+  color: var(--app-salvia-texto);
+}
+
+.shell.shell--moldura-app .barra .conta__botao {
+  background: var(--app-veu);
+  color: var(--app-tinta);
+}

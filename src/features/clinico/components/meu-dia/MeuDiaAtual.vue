@@ -26,6 +26,7 @@ const formato = useClinicFormat()
 
 <template>
   <UiPagina
+    class="atual"
     :carregando="dia.carregando"
     :erro="dia.erro"
     bloquear-se-suspenso
@@ -218,6 +219,11 @@ const formato = useClinicFormat()
 </template>
 
 <style scoped>
+/* A folha na largura inteira da tela: nada de coluna centralizada com as bordas vazias. */
+.atual.atual {
+  max-width: none;
+}
+
 .hoje {
   display: grid;
   gap: 40px;
