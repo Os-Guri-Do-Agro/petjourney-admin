@@ -10,13 +10,13 @@
  *
  * 1. **A saudação e uma frase de estado.** "Boa tarde, Carla" e, embaixo, a data e o que pede
  *    atenção em todos os espaços — "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1
- *    no Hotel." À direita, os números de cada espaço — o mesmo painel do Hoje da Clínica e do
- *    Hoje do Hotel (`useAberturaDoInicio`).
+ *    no Hotel." Embaixo dela, numa fileira, os números de cada espaço (`useAberturaDoInicio`); à
+ *    direita, o código de indicação com o QR, em destaque (`HomeIndique` na forma `destaque`).
  * 2. **Um bloco por espaço que a empresa tem**, na cor dele (Clínica maré, Hotel lavanda, Portal
  *    mel), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo. Quem
  *    não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
  * 3. **O que pede ação**, a lista do sistema (`UiPauta`), agrupada por espaço.
- * 4. **O resto, calmo, embaixo**: a agenda da semana, o código de indicação e a marca.
+ * 4. **O resto, calmo, embaixo**: a agenda da semana e a marca.
  *
  * A grade de módulos que existia saiu: a barra lateral já é o mapa. As ações rápidas do alto
  * ("Agenda de hoje", "Mapa de vagas", "Compartilhar código") foram para o título de cada bloco,
@@ -183,9 +183,6 @@ function compartilhar() {
   indique.value?.abrirQr()
 }
 
-/** O código aparece embaixo só para quem tem o programa ativo; sem ele, a marca fica sozinha. */
-const comIndicacao = computed(() => indique.value?.visivel ?? true)
-
 onMounted(() => {
   void ensureContext()
   clockId = setInterval(() => {
@@ -215,9 +212,13 @@ onUnmounted(() => {
         :titulo="saudacao"
         :indicadores="indicadores"
         :rotulo-dos-indicadores="t('clinico.meuDia.abertura.indicadores')"
+        em-linha
       >
         <template #resumo>
           <span aria-live="polite">{{ fraseDoResumo }}</span>
+        </template>
+        <template #lado>
+          <HomeIndique ref="indique" forma="destaque" />
         </template>
       </UiAbertura>
     </template>
@@ -242,24 +243,15 @@ onUnmounted(() => {
 
       <HomePauta v-if="temModulos" />
 
-      <div
-        class="calma"
-        :class="{
-          'calma--sem-agenda': !temModulos,
-          'calma--sem-indicacao': !comIndicacao,
-        }"
-      >
+      <div class="calma">
         <HomeAgenda
           v-if="temModulos"
           class="calma__agenda"
           :clinica="hasClinicalProfile"
           :hotel="hasHotelProfile"
         />
-        <div class="calma__lado">
-          <HomeIndique ref="indique" />
-          <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->
-          <HomeMarca class="calma__marca" />
-        </div>
+        <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->
+        <HomeMarca class="calma__marca" />
       </div>
     </div>
   </UiPagina>
@@ -314,55 +306,19 @@ onUnmounted(() => {
 /* ------------------------------------------------------------------ o resto, calmo */
 
 /*
- * A agenda à esquerda, larga; o código e a marca à direita. Sem clínica nem hotel não há agenda:
- * código e marca dividem a linha.
+ * A agenda na largura toda, como a pauta acima dela; a marca fecha a página numa faixa baixa. Com o
+ * código de indicação lá em cima, a marca sozinha numa coluna ao lado da agenda deixava um vão alto
+ * embaixo dela.
  */
 .calma {
   display: grid;
-  align-items: start;
-  gap: 28px 20px;
-  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
-}
-
-.calma__lado {
-  display: flex;
-  height: 100%;
-  flex-direction: column;
-  gap: 20px;
+  gap: 28px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .calma__marca {
-  flex: 1 0 auto;
-}
-
-.calma--sem-agenda {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.calma--sem-agenda .calma__lado {
-  display: grid;
-  align-items: end;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-}
-
-.calma--sem-agenda .calma__marca {
-  height: 100%;
-}
-
-.calma--sem-agenda.calma--sem-indicacao .calma__lado {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-@media (max-width: 1100px) {
-  .calma {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .calma__lado {
-    display: grid;
-    align-items: end;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-  }
+  min-height: 112px;
+  padding-block: 20px;
 }
 
 @media (max-width: 900px) {

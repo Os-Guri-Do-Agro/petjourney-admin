@@ -57,6 +57,6 @@ function gravar() {
 }
 
 .gatilho :deep(svg) {
-  color: var(--risco);
+  color: var(--risco-tinta);
 }
 </style>

@@ -16,6 +16,12 @@
  * mesma que acende o espaço na barra. A faixa do título, o ícone, a barra de andamento e o pé do
  * próximo passo leem dali.
  *
+ * ## A medida (26/10/2026)
+ *
+ * Um ritmo só: 18 px de folga nas bordas e 14 px entre cabeça, números, andamento e passo. O número
+ * em 22 px, o ícone em 32 e o passo com 42 de altura: com 30 px, 38 e 52 o bloco lia como um painel
+ * de números soltos, com vão entre as linhas.
+ *
  * ## Largo e estreito
  *
  * Estreito, os números se arrumam como couberem e o passo é o pé inteiro do bloco. Largo (a partir
@@ -166,9 +172,8 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 .espaco__cabeca {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 68px;
-  padding: 16px 16px 12px 18px;
+  gap: 10px;
+  padding: 16px 16px 0 18px;
   background: linear-gradient(
     180deg,
     color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie)) 0%,
@@ -178,17 +183,17 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .espaco__icone {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   flex: none;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--pj-lugar-degrade);
   box-shadow:
     var(--pj-lugar-sombra),
     inset 0 1px 0 rgb(255 255 255 / 22%);
   color: #fff;
-  font-size: 19px;
+  font-size: 17px;
 }
 
 .app-dark .espaco__icone {
@@ -199,8 +204,8 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 17px;
-  font-weight: 650;
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: -0.015em;
 }
 
@@ -233,11 +238,11 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .espaco__atalho {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 30px;
   flex: none;
   align-items: center;
   gap: 6px;
-  padding: 0 12px;
+  padding: 0 11px;
   border: 1px solid color-mix(in oklab, var(--pj-lugar) 22%, var(--linha));
   border-radius: 999px;
   background: var(--superficie);
@@ -245,14 +250,14 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   color: var(--pj-lugar-tinta);
   cursor: pointer;
   font: inherit;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .espaco__atalho i {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .espaco__atalho:hover {
@@ -273,26 +278,27 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   display: grid;
   align-content: start;
   gap: 14px;
-  padding: 6px 12px 16px;
+  padding: 14px 18px 14px;
 }
 
 .espaco__numeros {
   display: grid;
-  gap: 6px;
+  gap: 12px 14px;
   margin: 0;
   padding: 0;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr));
   list-style: none;
 }
 
+/* O número é o próprio link; o véu do hover sai um pouco para fora dele, sem mexer no alinhamento. */
 .numero {
   display: grid;
-  height: 100%;
   align-content: start;
-  gap: 3px;
-  padding: 12px 12px 13px;
+  gap: 2px;
+  margin: -5px -7px;
+  padding: 5px 7px;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 10px;
   color: var(--tinta);
   text-decoration: none;
   transition:
@@ -307,8 +313,8 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .numero__valor {
   color: var(--tinta);
-  font-size: 30px;
-  font-weight: 650;
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.05;
   white-space: nowrap;
@@ -320,7 +326,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .numero__rotulo {
   color: var(--tinta-2);
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.3;
 }
 
@@ -329,7 +335,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   display: -webkit-box;
   overflow: hidden;
   color: var(--tinta-3);
-  font-size: 12px;
+  font-size: 11.5px;
   line-height: 1.35;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -371,12 +377,11 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 .espaco__andamento {
   display: grid;
   gap: 6px;
-  padding: 0 10px;
 }
 
 .espaco__barra {
   display: block;
-  height: 6px;
+  height: 5px;
   overflow: hidden;
   border-radius: 999px;
   background: var(--superficie-3);
@@ -391,7 +396,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .espaco__andamento-texto {
   color: var(--tinta-2);
-  font-size: 12.5px;
+  font-size: 12px;
 }
 
 .espaco__aviso {
@@ -400,7 +405,6 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   align-items: center;
   gap: 4px 8px;
   margin: 0;
-  padding: 0 10px;
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.45;
@@ -414,24 +418,24 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 /* ------------------------------------------------------------------------------ próximo passo */
 
 .espaco__pe {
-  padding: 0 12px 12px;
+  padding: 0 18px 16px;
 }
 
 .passo {
   display: flex;
   width: 100%;
-  min-height: 52px;
+  min-height: 42px;
   align-items: center;
   gap: 10px;
   margin: 0;
-  padding: 10px 16px;
+  padding: 8px 14px;
   border: 1px solid color-mix(in oklab, var(--pj-lugar) 14%, transparent);
-  border-radius: 14px;
+  border-radius: 12px;
   background: color-mix(in oklab, var(--pj-lugar-fundo) 70%, var(--superficie));
   color: var(--pj-lugar-tinta);
   cursor: pointer;
   font: inherit;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
   line-height: 1.35;
   text-align: start;
@@ -449,7 +453,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .passo__icone {
   flex: none;
-  font-size: 19px;
+  font-size: 17px;
 }
 
 .passo__texto {
@@ -459,7 +463,7 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
 
 .passo__seta {
   flex: none;
-  font-size: 16px;
+  font-size: 15px;
   transition: translate var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 

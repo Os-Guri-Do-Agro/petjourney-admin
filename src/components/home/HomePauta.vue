@@ -278,8 +278,9 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
   height: 24px;
   place-items: center;
   border-radius: 7px;
-  background: var(--pj-lugar);
-  color: var(--superficie);
+  /* Pastel da área com a tinta dela: branco sobre a cor cheia não lia (e a cor cheia saiu). */
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
   font-size: 14px;
 }
 

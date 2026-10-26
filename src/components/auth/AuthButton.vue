@@ -2,8 +2,9 @@
 /**
  * O botão da entrada: grande, de toque fácil, e com a ação dita por extenso.
  *
- * `primary` é o próximo passo (musgo cheio), `secondary` o caminho ao lado (contorno) e `ghost`
- * o link com corpo de botão. Com `to`, vira um link de verdade (abre em outra guia, volta).
+ * `primary` é o próximo passo (a sálvia cheia da casa, com a tinta escura), `secondary` o caminho ao lado (contorno) e
+ * `ghost` o link com corpo de botão. Com `to`, vira um link de verdade (abre em outra guia, volta).
+ * O desenho é o do botão do app: liso, cantos de 16, rótulo em 700.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -56,10 +57,10 @@ const buttonClasses = computed(() => ['auth-button', `auth-button--${props.varia
   gap: 8px;
   padding: 0 22px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 16px;
   font-family: var(--font-texto);
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0;
   text-decoration: none;
   transition:
@@ -78,17 +79,18 @@ const buttonClasses = computed(() => ['auth-button', `auth-button--${props.varia
   opacity: 0.55;
 }
 
+/* A ação vem da moldura da entrada (`--auth-acao`, a sálvia da casa); fora dela, a do app. */
 .auth-button--primary.p-button,
 .auth-button--primary.p-button:not(:disabled):active {
-  border-color: var(--musgo);
-  background: var(--musgo);
-  color: var(--sobre-musgo);
+  border-color: var(--auth-acao, var(--app-botao, var(--musgo)));
+  background: var(--auth-acao, var(--app-botao, var(--musgo)));
+  color: var(--sobre-auth-acao, var(--sobre-musgo));
 }
 
 .auth-button--primary.p-button:not(:disabled):hover {
-  border-color: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
-  background: color-mix(in oklab, var(--musgo) 86%, var(--tinta));
-  color: var(--sobre-musgo);
+  border-color: var(--auth-acao-hover, var(--app-botao-hover, var(--musgo)));
+  background: var(--auth-acao-hover, var(--app-botao-hover, var(--musgo)));
+  color: var(--sobre-auth-acao, var(--sobre-musgo));
 }
 
 .auth-button--secondary.p-button {

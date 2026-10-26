@@ -1,20 +1,28 @@
 /*
- * O mundo do app PetJourney (perfil de parceiro) na tela grande.
+ * O mundo do app PetJourney (perfil de parceiro) na tela grande — o design do portal inteiro desde
+ * 26/10/2026.
  *
- * Os tokens valem em dois lugares: na moldura do app (`.shell--moldura-app`: a barra lateral de
- * sempre, vestida como o menu do app) e na página que usa o desenho do app (`.app-pj`), que também
- * aparece em tela estreita, onde a moldura volta a ser a do portal.
+ * Os tokens valem na raiz com a moldura do app (`:root.moldura-app`, posta pelo `AppShell`: diálogo
+ * e popover vão para o `body` e precisam deles), na moldura (`.shell--moldura-app`) e na página que
+ * usa o desenho do app (`.app-pj`).
  *
  * Regras do app (`docs/design/padrao-tutor.md`, no petjourney-app): tela branca e lisa, sem
  * sombra nem degradê; destaque na cor do perfil com texto branco; marinho só como tinta; cor em
- * véu translúcido; atenção é marinho sobre cinza frio, nunca pêssego.
+ * véu translúcido; atenção é marinho sobre cinza frio, nunca pêssego. E a regra da casa de
+ * 26/10/2026: **cor só em tom pastel**. Cor de família (clínica, hotel, risco…) entra pelo fundo
+ * pastel dela (`--*-fundo`) com a tinta dela por cima, nunca cheia nem em degradê.
  */
 
+:root.moldura-app,
 .shell--moldura-app,
 .app-pj {
   --app-fundo: #fff;
-  /* A sálvia do parceiro (#84A59D) escurecida o mínimo para o branco ler em título, como no app. */
-  --app-destaque: #7c9b94;
+  /*
+   * A sálvia do parceiro (#84A59D) escurecida para o branco ler em cima. O app usa #7C9B94, que dá
+   * 3,0:1 exatos: qualquer véu translúcido por cima (vidro, capa) derrubava para 2,95. Aqui #76938D,
+   * 3,3:1, com folga (auditoria de contraste de 26/10/2026).
+   */
+  --app-destaque: #76938d;
   /* O cartão de dentro do destaque: papel branco, o paciente salta da cor. */
   --app-cartao: #fff;
   --app-vidro: rgb(0 0 0 / 13%);
@@ -35,6 +43,7 @@
   --app-risco-veu: rgb(242 132 130 / 15%);
 }
 
+:root.moldura-app.app-dark,
 .app-dark .shell--moldura-app,
 .app-dark .app-pj {
   --app-fundo: #121917;
@@ -247,33 +256,61 @@ html:has(.shell--moldura-app) {
   opacity: 1;
 }
 
-/* Cada espaço é um rótulo de grupo, como "CONTA" e "AJUDA" no menu do app. */
+/*
+ * Cada espaço abre com o ícone dele no quadradinho cheio, na cor da área (a mesma dos cartões do
+ * Início: Clínica azul, Hotel lilás, Portal âmbar), e o nome em negrito. A cor aqui é categoria,
+ * não enfeite: diz de que área são os destinos de baixo. O título recolhe e abre a seção.
+ */
 .shell.shell--moldura-app .espaco {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .shell.shell--moldura-app .espaco__cabeca {
-  min-height: 30px;
-  padding: 0 8px;
-  border-radius: 10px;
-  color: var(--app-texto-2);
-  font-size: 11.5px;
+  min-height: 50px;
+  gap: 14px;
+  padding: 0 10px 0 6px;
+  border-radius: 16px;
+  color: var(--app-tinta);
+  font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
 }
 
-.shell.shell--moldura-app .espaco__cabeca .espaco__icone,
+.shell.shell--moldura-app .espaco__cabeca .espaco__icone {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  background: var(--pj-lugar-fundo);
+  box-shadow: none;
+  color: var(--pj-lugar-tinta);
+  font-size: 19px;
+}
+
 .shell.shell--moldura-app .espaco__seta {
-  display: none;
+  color: var(--app-texto-2);
+  font-size: 12px;
 }
 
+.shell.shell--moldura-app .espaco__cabeca--alterna:focus-visible {
+  outline: 2px solid var(--app-salvia-texto);
+  outline-offset: -2px;
+}
+
+/* Os destinos ficam um degrau para dentro, numa guia fina que nasce no ícone do espaço. */
 .shell.shell--moldura-app .espaco__destinos {
   gap: 2px;
-  margin: 2px 0 0;
-  padding: 0;
+  margin: 2px 0 6px 20px;
+  padding: 0 0 0 12px;
   border: 0;
+  border-inline-start: 2px solid var(--app-regua);
+  border-radius: 0;
   background: transparent;
+}
+
+/* Recolhida, a barra é só a coluna dos ícones: sem degrau nem guia. */
+.shell.shell--moldura-app .mapa--recolhida .espaco__destinos {
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  border-inline-start: 0;
 }
 
 /* O destino aberto: pílula cheia na cor do perfil, texto e ícone brancos, como a aba ativa. */
@@ -303,15 +340,15 @@ html:has(.shell--moldura-app) {
   font-weight: 700;
 }
 
-.shell.shell--moldura-app .mapa__selo--risco,
-.shell.shell--moldura-app .mapa__selo--atencao {
-  background: var(--app-risco);
-  color: #fff;
+/* O selo de contagem em pastel: o fundo da família com a tinta dela (o número é que avisa). */
+.shell.shell--moldura-app .mapa__selo--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
-.app-dark .shell.shell--moldura-app .mapa__selo--risco,
-.app-dark .shell.shell--moldura-app .mapa__selo--atencao {
-  color: #3a0d09;
+.shell.shell--moldura-app .mapa__selo--atencao {
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
 }
 
 .shell.shell--moldura-app .mapa__selo--neutro {
@@ -321,7 +358,7 @@ html:has(.shell--moldura-app) {
 
 .shell.shell--moldura-app .destino--ativo .mapa__selo {
   background: #fff;
-  color: var(--app-risco);
+  color: var(--risco-tinta);
 }
 
 .shell.shell--moldura-app .barra__pe {
@@ -341,4 +378,475 @@ html:has(.shell--moldura-app) {
 .shell.shell--moldura-app .barra .conta__botao {
   background: var(--app-veu);
   color: var(--app-tinta);
+}
+
+.app-dark .shell.shell--moldura-app .destino--ativo .mapa__selo {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+/*
+ * Densidade compacta (Configurações → Aparência). As medidas do app (linha de 52, quadradinho de
+ * 40) pesam mais que as da barra, então a versão baixa delas mora aqui: linha de 40, quadradinho
+ * de 30, mais destinos à vista sem rolar.
+ */
+.shell.shell--moldura-app.shell--densa .mapa__inicio,
+.shell.shell--moldura-app.shell--densa .destino,
+.shell.shell--moldura-app.shell--densa .espaco__cabeca {
+  min-height: 40px;
+  gap: 12px;
+  border-radius: 13px;
+  font-size: 14px;
+}
+
+.shell.shell--moldura-app.shell--densa .mapa__ladrilho,
+.shell.shell--moldura-app.shell--densa .destino .destino__icone,
+.shell.shell--moldura-app.shell--densa .espaco__cabeca .espaco__icone {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.shell.shell--moldura-app.shell--densa .espaco {
+  margin-top: 4px;
+}
+
+/*
+ * Avisos em ponto (Configurações → Aparência): o selo encolhe para um ponto na cor do estado. O
+ * número continua no texto, para o leitor de tela; só deixa de ser desenhado.
+ */
+.shell.shell--moldura-app.shell--selo-ponto .mapa__selo {
+  width: 9px;
+  min-width: 0;
+  height: 9px;
+  padding: 0;
+  overflow: hidden;
+  font-size: 0;
+}
+
+.shell.shell--moldura-app.shell--selo-ponto .mapa__selo--risco {
+  background: var(--risco);
+}
+
+.shell.shell--moldura-app.shell--selo-ponto .mapa__selo--atencao {
+  background: var(--atencao);
+}
+
+.shell.shell--moldura-app.shell--selo-ponto .mapa__selo--neutro {
+  background: var(--app-salvia);
+}
+
+.shell.shell--moldura-app.shell--selo-ponto .destino--ativo .mapa__selo {
+  background: #fff;
+}
+
+/* ======================================================================================
+ * O tema do app sobre o Trilha, no portal inteiro.
+ *
+ * As telas leem os tokens do Trilha (`--tinta`, `--superficie`, `--musgo`…); aqui eles passam a
+ * valer o que o app vale: página branca e lisa, tinta marinho, cartão sem sombra separado por uma
+ * régua de véu, ação na sálvia do app. Sombra só no que flutua (diálogo, popover, menu).
+ * ==================================================================================== */
+
+:root.trilha.moldura-app {
+  --fundo: #fff;
+  --superficie: #fff;
+  --superficie-2: #f5f8f7;
+  --superficie-3: #eaf0ee;
+  --linha: #e1e9e6;
+  --linha-suave: #edf2f0;
+  --linha-media: #d2ddd9;
+  --tinta: #1d3557;
+  --tinta-2: #5f6670;
+  --tinta-3: #6b7280;
+  --musgo: #5c736e;
+  --sobre-musgo: #fff;
+  --sombra-xs: none;
+  --sombra-1: none;
+  --sombra-cartao: none;
+  --brilho-topo: none;
+  --anel-foco: 0 0 0 2px #fff, 0 0 0 4px #5c736e;
+
+  /* Os botões do app: cantos de 16, rótulo em 700, a ação cheia na sálvia, a de apoio em véu. */
+  --p-button-border-radius: 16px;
+  --p-button-label-font-weight: 700;
+  --p-button-primary-background: var(--app-botao);
+  --p-button-primary-hover-background: var(--app-botao-hover);
+  --p-button-primary-active-background: var(--app-botao-hover);
+  --p-button-primary-border-color: var(--app-botao);
+  --p-button-primary-hover-border-color: var(--app-botao-hover);
+  --p-button-primary-active-border-color: var(--app-botao-hover);
+  --p-button-primary-color: #fff;
+  --p-button-primary-hover-color: #fff;
+  --p-button-primary-active-color: #fff;
+  --p-button-secondary-background: var(--app-veu);
+  --p-button-secondary-hover-background: var(--app-veu-forte);
+  --p-button-secondary-active-background: var(--app-veu-forte);
+  --p-button-secondary-border-color: transparent;
+  --p-button-secondary-hover-border-color: transparent;
+  --p-button-secondary-active-border-color: transparent;
+  --p-button-secondary-color: var(--app-salvia-texto);
+  --p-button-secondary-hover-color: var(--app-salvia-texto);
+  --p-button-secondary-active-color: var(--app-salvia-texto);
+  --p-button-text-secondary-color: var(--app-salvia-texto);
+  --p-button-text-primary-color: var(--app-salvia-texto);
+  --p-button-text-primary-hover-background: var(--app-veu);
+  --p-button-text-secondary-hover-background: var(--app-veu);
+  --p-button-outlined-secondary-border-color: var(--linha-media);
+  --p-button-outlined-primary-border-color: var(--linha-media);
+}
+
+:root.trilha.moldura-app.app-dark {
+  --fundo: #121917;
+  --superficie: #18211e;
+  --superficie-2: #1c2622;
+  --superficie-3: #24302b;
+  --linha: #26312d;
+  --linha-suave: #202a26;
+  --linha-media: #34413c;
+  --tinta: #e6edeb;
+  --tinta-2: #a9b6b2;
+  --tinta-3: #94a19d;
+  --musgo: #9dbdb5;
+  --sobre-musgo: #10302a;
+  --anel-foco: 0 0 0 2px #121917, 0 0 0 4px #9dbdb5;
+
+  --p-button-primary-color: #10302a;
+  --p-button-primary-hover-color: #10302a;
+  --p-button-primary-active-color: #10302a;
+}
+
+/* O degradê do lugar vira o fundo pastel da família: nada de cor cheia nem de brilho. */
+:root.trilha.moldura-app,
+:root.trilha.moldura-app [class*='pj-lugar--'] {
+  --pj-lugar-degrade: var(--pj-lugar-fundo);
+  --pj-lugar-sombra: none;
+}
+
+:root.trilha.moldura-app .ui-ladrilho--lugar,
+:root.trilha.moldura-app.app-dark .ui-ladrilho--lugar {
+  box-shadow: none;
+  color: var(--pj-lugar-tinta);
+}
+
+/* Botão do app: liso, sem o brilho de cima nem a sombra. O anel de foco continua. */
+html.trilha.moldura-app .p-button {
+  background-image: none !important;
+}
+
+html.trilha.moldura-app .p-button:not(:focus-visible) {
+  box-shadow: none !important;
+}
+
+html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not(.p-button-text) {
+  min-height: 44px;
+}
+
+/*
+ * Cor só em tom pastel (pedido de 26/10/2026). A cor "cheia" de cada família, que as telas usam em
+ * barra de progresso, faixa de status, ponto e pílula, passa ao mesmo matiz em pastel. O texto de
+ * cada família continua na tinta dela (`--*-tinta`), que é escura e lê em cima do pastel. No escuro
+ * as cores cheias já são claras e suaves: ficam como estão.
+ */
+:root.trilha.moldura-app:not(.app-dark) {
+  --clinica: #8cc4e6;
+  --hotel: #b2a7e3;
+  --portal: #e0bc7e;
+  --pets: #93c9b8;
+  --risco: #ee9f97;
+  --atencao: #f2bd88;
+  --ok: #98d0a5;
+}
+
+/* O que punha texto branco sobre a cor cheia passa à tinta da família, que lê sobre o pastel. */
+:root.trilha.moldura-app:not(.app-dark) .indique__ampliar,
+:root.trilha.moldura-app:not(.app-dark) .mapa__celula--4,
+:root.trilha.moldura-app:not(.app-dark) .grade .dia--hoje .dia__numero,
+:root.trilha.moldura-app:not(.app-dark) .agora__rotulo {
+  box-shadow: none;
+  color: var(--tinta);
+}
+
+:root.trilha.moldura-app:not(.app-dark) .plano__bloco--risco,
+:root.trilha.moldura-app:not(.app-dark) .exig__visto--risco,
+:root.trilha.moldura-app:not(.app-dark) .ronda--remedio .ronda__icone,
+:root.trilha.moldura-app:not(.app-dark) .tarefa--remedio-atrasado .tarefa__icone,
+:root.trilha.moldura-app:not(.app-dark) .agora__icone--risco {
+  color: var(--risco-tinta);
+}
+
+/* Os selos que enchiam com a tinta escura: fundo pastel e a tinta por cima. */
+:root.trilha.moldura-app .tabela__agora-rotulo {
+  background: var(--clinica-fundo);
+  color: var(--clinica-tinta);
+}
+
+/* O boletim retido continua o mais forte do leito, agora pela borda e pelo peso, não pela cor. */
+:root.trilha.moldura-app .leito__selo-forte.ui-selo {
+  background: var(--risco-fundo);
+  box-shadow: inset 0 0 0 1.5px var(--risco-tinta);
+  color: var(--risco-tinta);
+  font-weight: 700;
+}
+
+/* No tablet em pé a barra de cima é o topo do app: a sálvia do destaque, emendada na faixa. */
+.shell.shell--moldura-app .topo {
+  background: var(--app-destaque);
+  color: #fff;
+}
+
+.shell.shell--moldura-app .topo__menu:focus-visible {
+  outline-color: #fff;
+}
+
+.shell.shell--moldura-app .topo__lugar {
+  background: var(--pj-lugar-fundo);
+  color: var(--pj-lugar-tinta);
+}
+
+/* ======================================================================================
+ * O layout do app nas peças do Trilha.
+ *
+ * O padrão do app (`docs/design/padrao-tutor.md`, no petjourney-app): listas de ponta a ponta,
+ * agrupadas por título de seção e não por caixa; painel em véu, sem borda e sem sombra, só para
+ * resumo, aviso e formulário curto; métrica como número grande e rótulo curto num painel, não em
+ * cartões soltos que ficam com metade vazia.
+ * ==================================================================================== */
+
+/* O cartão com assunto vira seção: título 17/700 no branco, o conteúdo de ponta a ponta. */
+:root.trilha.moldura-app .ui-folha.ui-cartao {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+:root.trilha.moldura-app .ui-cartao__cabeca,
+:root.trilha.moldura-app .ui-cartao__cabeca--risco,
+:root.trilha.moldura-app .ui-cartao__cabeca--atencao,
+:root.trilha.moldura-app .ui-cartao__cabeca--ok,
+:root.trilha.moldura-app .ui-cartao__cabeca--lugar {
+  padding: 0 0 12px;
+  border-radius: 0;
+  background: none;
+}
+
+:root.trilha.moldura-app .ui-cartao__titulo {
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+:root.trilha.moldura-app .ui-cartao__cabeca + *,
+:root.trilha.moldura-app .ui-cartao__ferramentas + * {
+  border-top: 0;
+}
+
+:root.trilha.moldura-app .ui-cartao__ferramentas {
+  padding: 0 0 14px;
+  background: none;
+}
+
+:root.trilha.moldura-app .ui-folha.ui-cartao > .ui-cartao__corpo {
+  padding: 0;
+}
+
+:root.trilha.moldura-app .ui-cartao__pe {
+  padding: 14px 0 0;
+  border-top: 1px solid var(--linha-suave);
+  border-radius: 0;
+  background: none;
+}
+
+/* A linha de lista do app: sem caixa, régua de véu, o toque acende em véu com cantos macios. */
+:root.trilha.moldura-app .ui-folha.ui-cartao .ui-linha {
+  padding-inline: 10px;
+  border-radius: 14px;
+}
+
+:root.trilha.moldura-app .ui-lista > li + li {
+  border-top-color: var(--app-regua);
+}
+
+:root.trilha.moldura-app a.ui-linha:hover,
+:root.trilha.moldura-app button.ui-linha:hover,
+:root.trilha.moldura-app .ui-linha--clicavel:hover {
+  background: var(--app-toque);
+}
+
+/* A folha sem assunto (formulário, resumo, aviso) é o painel do app: véu, sem borda nem sombra. */
+:root.trilha.moldura-app .ui-folha:where(:not(.ui-cartao)) {
+  border: 0;
+  border-radius: 22px;
+  background: var(--app-veu);
+  box-shadow: none;
+}
+
+:root.trilha.moldura-app .ui-poco {
+  border: 0;
+  border-radius: 16px;
+  background: var(--app-veu);
+}
+
+/* Os números soltos viram a faixa de métricas do app: um painel em véu, sem cartão por número. */
+:root.trilha.moldura-app .ui-indicadores {
+  gap: 4px;
+  padding: 6px;
+  border-radius: 22px;
+  background: var(--app-veu);
+}
+
+:root.trilha.moldura-app .ui-indicador {
+  padding: 14px 16px 15px;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  box-shadow: none;
+}
+
+:root.trilha.moldura-app .ui-indicador .ui-ladrilho {
+  top: 14px;
+  inset-inline-end: 14px;
+}
+
+:root.trilha.moldura-app .ui-indicador__valor {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+:root.trilha.moldura-app button.ui-indicador:hover,
+:root.trilha.moldura-app a.ui-indicador:hover {
+  border-color: transparent;
+  background: var(--app-veu-forte);
+  box-shadow: none;
+  transform: none;
+}
+
+/* O número que filtra a lista: o escolhido é papel branco dentro do véu, como a pílula do app. */
+:root.trilha.moldura-app .ui-indicador--escolhido,
+:root.trilha.moldura-app .ui-indicador--escolhido:hover {
+  border-color: transparent;
+  background: var(--app-cartao);
+  box-shadow: none;
+}
+
+/*
+ * Folha com cabeçalho próprio (a ficha, os postos do Painel do hotel, os assuntos) é cartão com
+ * assunto, mesmo sem a classe `ui-cartao`: vira seção aberta. E lista ou tabela numa folha vai de
+ * ponta a ponta, sem a caixa em volta.
+ */
+:root.trilha.moldura-app .ui-folha:has(> header),
+:root.trilha.moldura-app .ui-lista.ui-folha,
+:root.trilha.moldura-app .ui-folha.tabela,
+:root.trilha.moldura-app .ui-folha:has(> .tabela),
+:root.trilha.moldura-app .ui-folha:has(> table) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Sem faixa colorida na borda (regra do app): o estado já está no selo e no ícone da linha. */
+:root.trilha.moldura-app .ui-marca::before {
+  display: none;
+}
+
+/*
+ * Cabeçalho tingido em degradê (o espaço no Início, o posto do Painel, o kit da Divulgação, o saldo,
+ * a capa do perfil, a capa do acesso, o topo do saque): no app o topo do bloco é liso. A cor fica
+ * no ícone em quadradinho pastel e no selo, não no fundo.
+ */
+:root.trilha.moldura-app .espaco__cabeca:not(.espaco__cabeca--alterna),
+:root.trilha.moldura-app .posto__cabeca,
+:root.trilha.moldura-app .kit__cabeca,
+:root.trilha.moldura-app .saldo__topo,
+:root.trilha.moldura-app .perfil__capa,
+:root.trilha.moldura-app .capa__corpo,
+:root.trilha.moldura-app .folha__cab,
+:root.trilha.moldura-app .sg__topo,
+:root.trilha.moldura-app .caixa__cabeca,
+:root.trilha.moldura-app .bloco__cabeca,
+:root.trilha.moldura-app .fim__cabeca {
+  background: none;
+}
+
+/* O leito crítico fica com a borda vermelha e o selo; o fundo tingido some, como nos cabeçalhos. */
+:root.trilha.moldura-app .leito--critico {
+  background-image: none;
+}
+
+/* O avatar da conta em cor lisa: degradê não entra no app. */
+.shell.shell--moldura-app .conta__avatar {
+  background: var(--pets-claro);
+}
+
+/* O saldo e o perfil são o assunto da tela: abertos, sem a caixa, como uma seção. */
+:root.trilha.moldura-app .saldo.ui-folha,
+:root.trilha.moldura-app .cfg-folha.perfil {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+:root.trilha.moldura-app .saldo__topo,
+:root.trilha.moldura-app .perfil__capa {
+  padding-inline: 0;
+}
+
+/* Na faixa de métricas o ícone vem ao lado do número, como no resumo do Hoje: sem vão no meio. */
+:root.trilha.moldura-app .ui-indicador {
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 2px;
+  align-items: center;
+}
+
+:root.trilha.moldura-app .ui-indicador > * {
+  grid-column: 2;
+}
+
+:root.trilha.moldura-app .ui-indicador > .ui-ladrilho,
+:root.trilha.moldura-app .ui-indicador--topo > .ui-ladrilho {
+  position: static;
+  grid-row: 1 / span 3;
+  grid-column: 1;
+  align-self: start;
+  margin: 2px 0 0;
+}
+
+:root.trilha.moldura-app
+  .ui-indicador:has(> .ui-ladrilho:not(.ui-ladrilho--estatico))
+  .ui-indicador__rotulo {
+  padding-inline-end: 0;
+}
+
+/*
+ * Textos da barra que eram claros para a barra escura antiga ("Em breve", o papel da conta e
+ * afins): na barra branca do app, a tinta de apoio. Texto claro sobre fundo claro, ou escuro
+ * sobre escuro, nunca.
+ */
+.shell.shell--moldura-app .barra__breve,
+.shell.shell--moldura-app .conta__quem small,
+.shell.shell--moldura-app .conta__mais {
+  color: var(--app-texto-2);
+}
+
+/*
+ * Tudo que pintava "degradê da área + texto branco" (o ícone do espaço no Início, o selo da
+ * carteira, o rosto da sessão e da empresa, a foto sem imagem do perfil, o selo do vínculo, o
+ * ladrilho do título): o degradê virou o pastel da área, e o branco em cima deixou de ler. A tinta
+ * da área por cima, nos dois temas (no escuro o pastel é escuro e a tinta é clara). Nunca texto
+ * claro sobre fundo claro, nem escuro sobre escuro.
+ */
+:root.trilha.moldura-app .espaco__icone,
+:root.trilha.moldura-app .cd__selo,
+:root.trilha.moldura-app .vincular-dialog__badge,
+:root.trilha.moldura-app .sessao__rosto,
+:root.trilha.moldura-app .perfil__foto,
+:root.trilha.moldura-app .empresa__rosto,
+:root.trilha.moldura-app .ui-ladrilho--lugar {
+  box-shadow: none;
+  color: var(--pj-lugar-tinta) !important;
 }

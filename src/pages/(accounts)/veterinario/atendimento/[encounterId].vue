@@ -64,6 +64,7 @@ import ProntuarioAnamnese from '@/features/clinico/components/prontuario/Prontua
 import ProntuarioConduta from '@/features/clinico/components/prontuario/ProntuarioConduta.vue'
 import ProntuarioDiagnostico from '@/features/clinico/components/prontuario/ProntuarioDiagnostico.vue'
 import ProntuarioDialogoTopo from '@/features/clinico/components/prontuario/ProntuarioDialogoTopo.vue'
+import ProntuarioFinalizarDialog from '@/features/clinico/components/prontuario/ProntuarioFinalizarDialog.vue'
 import ProntuarioExameFisico from '@/features/clinico/components/prontuario/ProntuarioExameFisico.vue'
 import ProntuarioImpressao from '@/features/clinico/components/prontuario/ProntuarioImpressao.vue'
 import ProntuarioPreConsulta from '@/features/clinico/components/prontuario/ProntuarioPreConsulta.vue'
@@ -110,7 +111,6 @@ const finalizarAberto = ref(false)
 const etapa = ref<EtapaId>('anamnese')
 const historicoAberto = ref(false)
 
-const idFinalizar = useId()
 const idAssumir = useId()
 
 // ------------------------------------------------------------------ modo teclado
@@ -296,6 +296,16 @@ const pendencias = computed(() => {
 
   if (alergiaNaoConfirmada(atual, prontuario.pet, (id) => clinico.medicamento(id))) {
     faltando.push({ texto: t('clinico.prontuario.nova.finalizar.alergia'), etapa: 'conduta' })
+  }
+
+  /* O retorno só se marca com o prontuário aberto: depois de finalizar, fica para a recepção. */
+  const { emDias, appointmentId } = atual.conduta.retorno
+
+  if (emDias && !appointmentId) {
+    faltando.push({
+      texto: t('clinico.prontuario.nova.finalizar.retorno', { dias: emDias }, emDias),
+      etapa: 'conduta',
+    })
   }
 
   return faltando
@@ -634,18 +644,6 @@ watch(
     }
   },
 )
-
-async function finalizar() {
-  await prontuario.finalizar()
-  finalizarAberto.value = false
-
-  /*
-   * Devolve à agenda. Antes a tela ficava onde estava, virava somente leitura e o passo
-   * seguinte do dia — o próximo paciente — exigia achar o menu. O atendimento acabou; o lugar
-   * de quem acabou de atender é a grade.
-   */
-  void router.push('/veterinario/agenda')
-}
 
 /** "Ir para o diagnóstico", de dentro do diálogo de finalizar: fecha e leva à etapa. */
 function resolverPendencia(id: EtapaId) {
@@ -1290,68 +1288,15 @@ onBeforeUnmount(() => {
         </template>
       </Dialog>
 
-      <!-- finalizar: nomeia o que falta, leva até lá, e ainda assim deixa finalizar -->
-      <Dialog
-        v-model:visible="finalizarAberto"
-        modal
-        class="clinic-dialog hc-tema"
-        :style="{ width: 'min(32rem, 94vw)' }"
-        :aria-labelledby="idFinalizar"
-        dismissable-mask
-      >
-        <template #header>
-          <ProntuarioDialogoTopo
-            :id="idFinalizar"
-            :titulo="t('clinico.prontuario.finalizarDialogo.titulo')"
-            :subtitulo="[prontuario.pet?.nome, profissional].filter(Boolean).join(' · ')"
-            :icone="pendencias.length > 0 ? 'ph ph-warning-circle' : 'ph ph-check-circle'"
-            :tom="pendencias.length > 0 ? 'atencao' : 'ok'"
-          />
-        </template>
-
-        <div class="dialogo">
-          <section v-if="pendencias.length > 0" class="dialogo__faltam">
-            <h3>{{ t('clinico.prontuario.nova.finalizar.faltam') }}</h3>
-            <ul>
-              <li v-for="item in pendencias" :key="item.etapa + item.texto">
-                <i class="ph ph-warning-circle" aria-hidden="true" />
-                <span>{{ item.texto }}</span>
-                <button type="button" class="ui-mais" @click="resolverPendencia(item.etapa)">
-                  {{ t('clinico.prontuario.nova.finalizar.ir', { etapa: rotuloDaEtapa(item.etapa) }) }}
-                </button>
-              </li>
-            </ul>
-          </section>
-
-          <p v-else class="dialogo__ok">
-            <i class="ph ph-check-circle" aria-hidden="true" />
-            {{ t('clinico.prontuario.nova.finalizar.tudoCerto') }}
-          </p>
-
-          <p class="dialogo__texto">{{ t('clinico.prontuario.nova.finalizar.depois') }}</p>
-        </div>
-
-        <template #footer>
-          <Button
-            type="button"
-            :label="t('clinico.prontuario.nova.finalizar.voltar')"
-            severity="secondary"
-            text
-            @click="finalizarAberto = false"
-          />
-          <Button
-            type="button"
-            :label="
-              pendencias.length > 0
-                ? t('clinico.prontuario.finalizarDialogo.confirmar')
-                : t('clinico.prontuario.finalizar')
-            "
-            icon="ph ph-check-circle"
-            :severity="pendencias.length > 0 ? 'warn' : undefined"
-            @click="finalizar"
-          />
-        </template>
-      </Dialog>
+      <!-- finalizar: nomeia o que falta e, depois de fechar, diz o que fazer em seguida -->
+      <ProntuarioFinalizarDialog
+        v-model:visivel="finalizarAberto"
+        :pendencias="pendencias"
+        :rotulo-da-etapa="rotuloDaEtapa"
+        :subtitulo="[prontuario.pet?.nome, profissional].filter(Boolean).join(' · ')"
+        @resolver="resolverPendencia"
+        @ver-resumo="irParaEtapa('resumo')"
+      />
 
       <ProntuarioTecladoDialog v-model:visible="mapaAberto" />
 
@@ -1981,83 +1926,11 @@ onBeforeUnmount(() => {
 
 /* ------------------------------------------------------------------ diálogos */
 
-.dialogo {
-  display: grid;
-  gap: 16px;
-}
-
 .dialogo__texto {
   margin: 0;
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.55;
-}
-
-.dialogo__faltam {
-  display: grid;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: var(--atencao-fundo);
-}
-
-.dialogo__faltam h3 {
-  margin: 0;
-  color: var(--atencao-tinta);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.dialogo__faltam ul {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.dialogo__faltam li {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 8px;
-  color: var(--tinta);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.dialogo__faltam li .ph {
-  align-self: center;
-  color: var(--atencao-tinta);
-  font-size: 16px;
-}
-
-.dialogo__faltam li span {
-  flex: 1 1 12rem;
-}
-
-.dialogo__faltam .ui-mais {
-  color: var(--clinica-tinta);
-  font-size: 13.5px;
-}
-
-.dialogo__ok {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: var(--ok-fundo);
-  color: var(--ok-tinta);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.dialogo__ok .ph {
-  margin-top: 2px;
-  font-size: 17px;
 }
 
 /* ------------------------------------------------------------------ larguras */

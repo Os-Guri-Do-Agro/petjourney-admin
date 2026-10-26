@@ -411,9 +411,7 @@
     "barra": {
       "pular": "Saltar al contenido",
       "navegacao": "Navegación principal",
-      "outrosEspacos": "Otros espacios",
       "inicio": "Inicio",
-      "conta": "Cuenta",
       "criarTitulo": "Crear nuevo",
       "criarItens": {
         "agendamento": "Cita",
@@ -705,7 +703,8 @@
       "linkCopiado": "Enlace copiado",
       "comoFunciona": "Cómo funciona",
       "seuCodigo": "Su código de indicación",
-      "maisDoCodigo": "Enlace, QR y lecturas"
+      "maisDoCodigo": "Enlace, QR y lecturas",
+      "leiturasSemana": "{total} lectura del QR en los últimos 7 días | {total} lecturas del QR en los últimos 7 días"
     },
     "dia": {
       "titulo": "Hoy",
@@ -2106,29 +2105,59 @@
           "label": "Compacta",
           "hint": "Más pantallas visibles sin desplazarse.",
           "hintBarra": "Líneas más bajas en la barra lateral, para ver más destinos sin desplazarse."
-        },
-        "descricaoBarra": "La altura de las líneas de la barra lateral."
+        }
       },
       "nota": "Las preferencias quedan en este navegador y valen en el próximo acceso.",
       "aplicada": "en uso",
-      "barra": {
-        "titulo": "Barra lateral",
-        "descricao": "Qué espacios quedan abiertos en la barra, con sus destinos a la vista.",
-        "secoes": {
-          "label": "Solo el espacio actual",
-          "hint": "La barra abre el espacio en el que está; los demás quedan en una línea, con el total de lo que pide acción."
-        },
-        "lista": {
-          "label": "Todos los espacios",
-          "hint": "Todos los espacios quedan abiertos a la vez, con sus destinos a la vista."
-        }
-      },
       "explicacoes": {
         "titulo": "Explicaciones",
         "descricao": "Un texto corto arriba de las pantallas del Portal, que dice para qué sirve cada una.",
         "ajuda": "Útil para quien está empezando. Cada pantalla también tiene el botón para mostrar u ocultar."
       },
-      "naHora": "Las elecciones se aplican al momento y quedan guardadas en este navegador."
+      "naHora": "Las elecciones se aplican al momento y quedan guardadas en este navegador.",
+      "navegacao": {
+        "titulo": "Navegación",
+        "descricao": "La barra lateral a su manera. La vista previa muestra el resultado al instante.",
+        "previa": "Vista previa con sus opciones.",
+        "previaAutoLarga": "Vista previa en esta pantalla: la barra queda ancha.",
+        "previaAutoIcones": "Vista previa en esta pantalla: la barra queda solo con íconos.",
+        "largura": {
+          "titulo": "Ancho de la barra",
+          "larga": {
+            "label": "Ancha",
+            "hint": "Ícono y nombre de cada pantalla."
+          },
+          "icones": {
+            "label": "Solo íconos",
+            "hint": "Más espacio para la pantalla. El nombre aparece al pasar el mouse."
+          },
+          "auto": {
+            "label": "Automática",
+            "hint": "Ancha en pantallas de {largura} px o más, solo íconos en las menores."
+          }
+        },
+        "espacos": {
+          "titulo": "Espacios en la barra",
+          "lista": {
+            "label": "Todos abiertos",
+            "hint": "Clínica, Hotel y Portal con sus pantallas a la vista. Contraiga un espacio por su nombre."
+          },
+          "secoes": {
+            "label": "Solo el actual",
+            "hint": "Abre el espacio en el que está; los demás quedan en una línea, con el total de pendientes."
+          }
+        },
+        "densidade": {
+          "titulo": "Altura de las filas"
+        },
+        "avisos": {
+          "titulo": "Avisos de pendientes",
+          "numero": "Número",
+          "ponto": "Solo un punto",
+          "numeroDica": "Cuántos pendientes hay en cada espacio y en cada pantalla.",
+          "pontoDica": "Barra más tranquila: el punto en el color del estado muestra dónde hay pendientes."
+        }
+      }
     },
     "perfil": {
       "fallbackName": "Usuario",
@@ -2925,18 +2954,12 @@
     },
     "meuDia": {
       "titulo": "Hoy en la clínica",
-      "agora": "Ahora",
-      "aSeguir": "A continuación",
       "semProximo": "Nada más agendado para hoy.",
       "esperando": "Ya llegaron",
       "esperaDe": "esperando {valor}",
       "marcarRetorno": "Agendar control",
-      "depois": "Después",
       "continuarCom": "Continuar con {pet}",
       "atenderCom": "Atender a {pet}",
-      "agendaCompleta": "Agenda completa",
-      "mapaDeLeitos": "Mapa de camas",
-      "acoesRotulo": "Acciones del día",
       "resumo": {
         "urgentes": "{total} asunto urgente requiere tu atención | {total} asuntos urgentes requieren tu atención",
         "pendentes": "{total} asunto te espera | {total} asuntos te esperan",
@@ -2957,160 +2980,21 @@
         "internados": "Internado | Internados",
         "indicadores": "Cómo va el día"
       },
-      "versoes": {
-        "rotulo": "Diseño",
-        "aria": "Versión del diseño",
-        "opcao": {
-          "foco": "App",
-          "cartoes": "Tarjetas y salas",
-          "lista": "Tres números y una lista",
-          "atual": "Actual"
-        },
-        "estado": {
-          "sala": "En la sala desde hace {tempo}",
-          "espera": "Esperando desde hace {tempo}",
-          "marcado": "Agendado para las {hora}"
-        },
-        "tambemNaSala": "También en la sala:",
-        "ninguemAgora": "Nadie en la sala ni en la recepción, y nada más agendado para hoy.",
-        "fila": "Quién viene después",
-        "relogio": {
-          "rotulo": "Horario",
-          "aria": "Horario de la demostración",
-          "movimento": "Mañana de movimiento",
-          "real": "Hora real"
-        },
-        "lista": {
-          "titulo": "Hoy en la clínica",
-          "voltar": "Volver al inicio",
-          "novo": "Nueva atención",
-          "filtros": {
-            "botao": "Mostrar u ocultar los filtros",
-            "ativos": "Filtros activos",
-            "profissional": "Todos los profesionales",
-            "servico": "Todos los servicios",
-            "periodo": "Período",
-            "dia": "Todo el día",
-            "manha": "Mañana",
-            "tarde": "Tarde",
-            "busca": "Buscar mascota o responsable"
-          },
-          "numeros": {
-            "recepcao": "En la recepción ahora",
-            "pets": "mascota | mascotas",
-            "espera": "Espera más larga",
-            "min": "min",
-            "fimDoDia": "Hasta el fin del día",
-            "atendimentos": "atención | atenciones"
-          },
-          "porHorario": "Pacientes por hora",
-          "horaPassou": "parte de la hora que ya pasó",
-          "hora": "{h} h",
-          "sala": {
-            "agoraNo": "Ahora en {sala}",
-            "nenhuma": "Ninguna consulta ahora",
-            "abrir": "Abrir la atención",
-            "emConsulta": "{pet} en consulta",
-            "com": "con {vet}",
-            "continuar": "Continuar"
-          },
-          "abas": {
-            "aria": "Qué mostrar en la lista",
-            "sala": "En sala",
-            "internacao": "Internación",
-            "fila": "Cola del día"
-          },
-          "estado": {
-            "esperando": "Esperando",
-            "chegou": "Llegó",
-            "emConsulta": "En consulta",
-            "naRecepcao": "En la recepción"
-          },
-          "fila": {
-            "outros": "Ver el otro de la cola | Ver los otros {n} de la cola",
-            "menos": "Ver menos"
-          },
-          "detalhe": {
-            "paciente": "Paciente",
-            "atendimento": "Atención",
-            "responsavel": "Responsable",
-            "vacinas": "Vacunas",
-            "historico": "Historial de consultas",
-            "agendar": "Agendar para {pet}",
-            "espera": "Espera",
-            "horario": "Horario",
-            "posicao": "Posición en la cola",
-            "posicaoValor": "{n}º",
-            "depois": "Después de él",
-            "ninguem": "Nadie",
-            "naSala": "En la sala hace",
-            "sala": "Sala",
-            "profissional": "Profesional"
-          },
-          "internacao": {
-            "abrir": "Abrir en internación"
-          },
-          "vazio": {
-            "filtro": "Nada con estos filtros.",
-            "sala": "Nadie en la sala ahora.",
-            "internacao": "Nada pendiente en internación."
-          }
-        },
-        "cartoes": {
-          "titulo": "Hoy en la clínica",
-          "busca": "Buscar mascota o responsable",
-          "novo": "Nueva atención",
-          "abas": "Pantallas de la Clínica",
-          "frase": {
-            "sala": "{pet} está en {sala}.",
-            "espera": "{pet} espera hace {tempo} en la recepción.",
-            "calma": "Nadie en las salas ni en la recepción ahora."
-          },
-          "sala": {
-            "agoraNo": "Ahora en {sala}",
-            "com": "{tipo} con",
-            "responsavel": "Responsable",
-            "tambem": "También en sala",
-            "tambemValor": "{pet}, {tempo}",
-            "volta": "Vuelve hoy",
-            "voltaValor": "{hora}, {tipo}",
-            "continuar": "Continuar la atención",
-            "ninguem": "Nadie en consulta ahora",
-            "proximo": "Próximo: {pet} a las {hora}"
-          },
-          "recepcao": {
-            "titulo": "En la recepción",
-            "esperando": "{n} esperando",
-            "vazio": "Nadie esperando en la recepción.",
-            "todos": "Ver todos en la agenda"
-          },
-          "acao": {
-            "titulo": "Pide acción",
-            "urgentes": "{n} urgente | {n} urgentes",
-            "contato": "Registrar contacto",
-            "dose": "Registrar dosis",
-            "resolver": "Resolver",
-            "mais": "{n} pendiente más sin urgencia | {n} pendientes más sin urgencia"
-          },
-          "dia": {
-            "titulo": "Salas a lo largo del día",
-            "porSala": "Por sala",
-            "porProfissional": "Por profesional",
-            "aria": "Agrupar la línea del día",
-            "agora": "Ahora",
-            "hora": "{h} h",
-            "naSala": "En la sala hace {tempo}, con {vet}",
-            "esperando": "esperando {tempo}",
-            "vazio": "Nada agendado en estas horas.",
-            "legenda": {
-              "andamento": "En curso",
-              "espera": "Esperando",
-              "agendado": "Agendado",
-              "confirmado": "Confirmado"
-            }
-          }
-        }
-      }
+      "estado": {
+        "sala": "En la sala desde hace {tempo}",
+        "espera": "Esperando desde hace {tempo}",
+        "marcado": "Agendado para las {hora}"
+      },
+      "carrossel": {
+        "grupo": "Pacientes en consulta ahora",
+        "anterior": "Paciente anterior",
+        "proximo": "Paciente siguiente",
+        "ver": "Ver a {pet}",
+        "posicao": "Paciente {atual} de {total}",
+        "continuar": "Continuar la consulta"
+      },
+      "ninguemAgora": "Nadie en la sala ni en la recepción, y nada más agendado para hoy.",
+      "fila": "Quién viene después"
     },
     "resumo": {
       "titulo": "Resumen de la clínica",
@@ -4009,8 +3893,29 @@
           "alergia": "Confirmar la receta pese a la alergia",
           "ir": "Ir al paso {etapa}",
           "tudoCerto": "Motivo, diagnóstico y conducta están registrados. Nada pendiente.",
-          "depois": "Al finalizar, la historia queda solo para lectura y usted vuelve a la agenda. Los documentos y el resumen de la app siguen disponibles.",
-          "voltar": "Seguir con la consulta"
+          "depois": "Al finalizar, la historia queda solo para lectura. Enseguida verá lo que todavía puede entregar y quién es el próximo paciente.",
+          "voltar": "Seguir con la consulta",
+          "retorno": "El horario del control indicado para dentro de {dias} día | El horario del control indicado para dentro de {dias} días",
+          "feito": {
+            "titulo": "Consulta finalizada",
+            "comEste": "Con esta consulta",
+            "fechado": "Historia cerrada a las {hora}. Ahora queda solo para lectura.",
+            "resumoPronto": "El resumen está listo para la app de {responsavel}.",
+            "resumoProntoSemNome": "El resumen está listo para la app del tutor.",
+            "entregar": "Enviar a la app",
+            "resumoEntregue": "Resumen enviado a la app a las {hora}.",
+            "documentos": "La receta, el certificado y los demás documentos están en el resumen.",
+            "verDocumentos": "Ver documentos",
+            "retornoMarcado": "Control agendado.",
+            "retornoSemHorario": "Control indicado para dentro de {dias} día, todavía sin horario. La recepción lo agenda. | Control indicado para dentro de {dias} días, todavía sin horario. La recepción lo agenda.",
+            "proximo": "Próximo paciente",
+            "esperaHa": "espera hace {minutos} min en la recepción",
+            "acabouDeChegar": "acaba de llegar a la recepción",
+            "horario": "turno de las {hora}",
+            "ninguem": "Nadie esperando y ningún otro turno hoy.",
+            "ficar": "Quedarse en la historia",
+            "agenda": "Volver a la agenda"
+          }
         },
         "passos": {
           "estado": {
@@ -6563,14 +6468,7 @@
       "internados": "{n} internado | {n} internados"
     },
     "hoje": {
-      "recepcao": "Recepción",
-      "emConsulta": "En consulta",
-      "minEsperando": "min esperando",
-      "minNaSala": "min en la sala",
-      "alertas": "Alertas",
-      "chamar": "Iniciar consulta",
-      "recepcaoVazia": "Nadie esperando en recepción.",
-      "salaVazia": "Ninguna consulta en curso."
+      "chamar": "Iniciar consulta"
     }
   },
   "hotel": {

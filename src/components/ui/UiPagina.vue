@@ -11,13 +11,19 @@
  *
  * O slot `sempre` é montado em qualquer estado. Diálogos moram nele: com a lista vazia, o botão
  * "Adicionar" ainda precisa abrir o formulário que vai deixar de deixá-la vazia.
+ *
+ * Na moldura do app (o portal inteiro desde 26/10/2026) o cabeçalho é o do Hoje da Clínica: a faixa
+ * sálvia de ponta a ponta, colada no topo, com os desenhos de traço, e o título num cartão branco
+ * por cima dela. Quem desenha a própria faixa (o Hoje, com dois cartões) usa o slot `destaque`.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { molduraPedida } from '@/components/layout/moldura'
 import UiAbas from '@/components/ui/UiAbas.vue'
+import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { useEspacos } from '@/navegacao/espacos'
@@ -141,11 +147,72 @@ const canais = [
 ] as const
 
 const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.value)
+
+/** O cabeçalho do app: a faixa sálvia com o cartão do título. Na moldura do portal, o de antes. */
+const comFaixa = computed(() => molduraPedida.value === 'app')
 </script>
 
 <template>
-  <div class="pagina" :class="[`pagina--${largura}`]">
-    <header class="pagina__cabeca">
+  <div class="pagina" :class="[`pagina--${largura}`, { 'pagina--faixa': comFaixa }]">
+    <section v-if="comFaixa" class="faixa">
+      <UiRabiscos />
+      <div class="faixa__miolo">
+        <slot name="destaque">
+          <!-- O cabeçalho do app: texto branco direto na cor, ações em vidro, abas em pílula. -->
+          <header class="faixa__cabeca">
+            <div v-if="$slots.voltar" class="pagina__voltar faixa__voltar">
+              <slot name="voltar" />
+            </div>
+
+            <div class="pagina__linha">
+              <slot name="cabecalho">
+                <div class="pagina__titulos">
+                  <h1 class="faixa__titulo">{{ tituloDaTela }}</h1>
+                  <p v-if="resumo || $slots.resumo" class="faixa__resumo">
+                    <slot name="resumo">{{ resumo }}</slot>
+                  </p>
+                </div>
+              </slot>
+
+              <div v-if="mostrarAcoes && ($slots.acoes || guia || tour)" class="pagina__acoes">
+                <Button
+                  v-if="tour"
+                  type="button"
+                  icon="ph ph-question"
+                  :label="t('shell.guidance.tour')"
+                  severity="secondary"
+                  text
+                  :title="t('shell.guidance.tourTitulo')"
+                  @click="emit('tour')"
+                />
+                <Button
+                  v-else-if="guia"
+                  type="button"
+                  :icon="isGuidanceVisible ? 'ph ph-eye-slash' : 'ph ph-info'"
+                  :label="isGuidanceVisible ? t('shell.guidance.hide') : t('shell.guidance.show')"
+                  severity="secondary"
+                  text
+                  :aria-pressed="isGuidanceVisible"
+                  @click="toggleGuidance"
+                />
+                <slot name="acoes" />
+              </div>
+            </div>
+
+            <UiAbas
+              v-if="abas.length"
+              vidro
+              class="faixa__abas"
+              :abas="abas"
+              :atual="aqui.aba?.to ?? null"
+              :rotulo="tituloDaTela"
+            />
+          </header>
+        </slot>
+      </div>
+    </section>
+
+    <header v-else class="pagina__cabeca">
       <div v-if="$slots.voltar" class="pagina__voltar">
         <slot name="voltar" />
       </div>
@@ -325,6 +392,171 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
 .pagina--leitura {
   max-width: 1120px;
+}
+
+/* ------------------------------------------------------------------- a faixa do app */
+
+/*
+ * Na moldura do app a folha vai de ponta a ponta (sem coluna centralizada) e a faixa cola no topo,
+ * só com os cantos de baixo arredondados, como o topo da home do app. Tela de leitura limita o
+ * conteúdo, não a faixa.
+ */
+.pagina.pagina--faixa {
+  max-width: none;
+  padding-top: 0;
+}
+
+.pagina--faixa.pagina--leitura .pagina__corpo {
+  max-width: 1120px;
+}
+
+.faixa {
+  --rabiscos-forca: 0.2;
+
+  position: relative;
+  margin: 0 calc(var(--pagina-margem) * -1) 28px;
+  overflow: hidden;
+  border-radius: 0 0 28px 28px;
+  background: var(--app-destaque);
+  color: #fff;
+  isolation: isolate;
+  container: faixa / inline-size;
+}
+
+.faixa__miolo {
+  position: relative;
+  padding: 28px var(--pagina-margem) 26px;
+}
+
+/*
+ * O cabeçalho do app (`ScreenHeader`): texto branco cheio direto na cor, nunca translúcido. O que a
+ * tela põe aqui (a capa da ficha, do leito, da estadia) lê os tokens do Trilha, então eles passam a
+ * valer o branco e o vidro dentro da faixa: tinta branca, régua e poço em vidro, botão principal em
+ * papel branco, o resto em vidro.
+ */
+.faixa__cabeca {
+  --tinta: #fff;
+  --tinta-2: #fff;
+  --tinta-3: #fff;
+  --linha: rgb(255 255 255 / 26%);
+  --linha-suave: rgb(255 255 255 / 18%);
+  --linha-media: rgb(255 255 255 / 40%);
+  --superficie: transparent;
+  --superficie-2: var(--app-vidro);
+  --superficie-3: var(--app-vidro-forte);
+  --musgo: #fff;
+  --pj-lugar: #fff;
+  --p-button-primary-background: #fff;
+  --p-button-primary-hover-background: rgb(255 255 255 / 88%);
+  --p-button-primary-active-background: rgb(255 255 255 / 80%);
+  --p-button-primary-border-color: #fff;
+  --p-button-primary-hover-border-color: #fff;
+  --p-button-primary-active-border-color: #fff;
+  --p-button-primary-color: #2c4741;
+  --p-button-primary-hover-color: #2c4741;
+  --p-button-primary-active-color: #2c4741;
+  --p-button-secondary-background: var(--app-vidro);
+  --p-button-secondary-hover-background: var(--app-vidro-forte);
+  --p-button-secondary-active-background: var(--app-vidro-forte);
+  --p-button-secondary-color: #fff;
+  --p-button-secondary-hover-color: #fff;
+  --p-button-secondary-active-color: #fff;
+  --p-button-text-secondary-color: #fff;
+  --p-button-text-primary-color: #fff;
+  --p-button-text-primary-hover-background: var(--app-vidro);
+  --p-button-text-secondary-hover-background: var(--app-vidro);
+  --p-button-outlined-secondary-border-color: rgb(255 255 255 / 45%);
+  --p-button-outlined-primary-border-color: rgb(255 255 255 / 45%);
+  --p-button-outlined-secondary-color: #fff;
+  --p-button-outlined-primary-color: #fff;
+
+  display: grid;
+  gap: 18px;
+  color: #fff;
+}
+
+/* No escuro a faixa é sálvia funda: o botão principal é o papel do cartão, não branco cheio. */
+.app-dark .faixa__cabeca {
+  --p-button-primary-background: var(--app-cartao);
+  --p-button-primary-hover-background: var(--app-fundo);
+  --p-button-primary-active-background: var(--app-fundo);
+  --p-button-primary-border-color: var(--app-cartao);
+  --p-button-primary-hover-border-color: var(--app-fundo);
+  --p-button-primary-active-border-color: var(--app-fundo);
+  --p-button-primary-color: var(--app-tinta);
+  --p-button-primary-hover-color: var(--app-tinta);
+  --p-button-primary-active-color: var(--app-tinta);
+}
+
+.faixa__voltar :deep(a),
+.faixa__voltar :deep(a:hover) {
+  color: #fff;
+  font-weight: 600;
+}
+
+.faixa__titulo {
+  margin: 0;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.faixa__resumo {
+  max-width: 80ch;
+  margin: 0;
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+/*
+ * O ícone da aba aberta da capa (ficha, leito) usa a tinta da área, escura: direto na sálvia ele
+ * some. Na faixa ele é branco como o rótulo. Os ícones em quadradinho pastel continuam na tinta.
+ */
+.faixa__cabeca :deep(.capa__aba--atual i) {
+  color: #fff;
+}
+
+/* Link na faixa (o telefone do responsável, "ver mais") é branco e sublinhado, nunca azul. */
+.faixa__cabeca :deep(a:not(.p-button)) {
+  color: #fff;
+  text-decoration-color: rgb(255 255 255 / 60%);
+}
+
+/*
+ * Segmentado na faixa (a adaptação na estadia): trilho em vidro, opções em branco, a marcada em
+ * papel com a tinta escura, como a aba aberta. A tinta da família (atenção, risco) que a tela põe
+ * no rótulo marcado continua lida, porque agora está sobre o papel.
+ */
+.faixa__cabeca :deep(.p-selectbutton) {
+  background: var(--app-vidro);
+}
+
+.faixa__cabeca :deep(.p-togglebutton) {
+  color: #fff;
+}
+
+/* `!important`: a regra do kit para segmentado (`html.trilha .p-selectbutton…`) pesa mais. */
+.faixa__cabeca :deep(.p-togglebutton.p-togglebutton-checked .p-togglebutton-content) {
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #2c4741;
+}
+
+.app-dark .faixa__cabeca :deep(.p-togglebutton.p-togglebutton-checked .p-togglebutton-content) {
+  background: var(--app-cartao) !important;
+  color: var(--app-tinta);
+}
+
+/* A capa que a tela traz numa folha se dissolve na faixa: a cor é o fundo dela. */
+.faixa__cabeca :deep(.ui-folha) {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .pagina__cabeca {
@@ -522,8 +754,13 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
     padding-top: 20px;
   }
 
-  .pagina__titulo {
+  .pagina__titulo,
+  .faixa__titulo {
     font-size: 24px;
+  }
+
+  .faixa__miolo {
+    padding-block: 20px 22px;
   }
 
   .pagina__ladrilho {

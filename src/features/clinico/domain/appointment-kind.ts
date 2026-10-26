@@ -20,6 +20,16 @@ export type AparenciaDoTipo = {
   icone: string
   /** Token CSS do acento — `var(...)` pronto para ir ao `style`. */
   cor: string
+  /**
+   * A cor do tipo para **ícone e texto**: o acento misturado à tinta do tema. O acento é pastel e,
+   * sozinho, não lê sobre fundo claro (2,2:1 no ícone de retorno); a mistura escurece no claro e
+   * clareia no escuro, porque `--tinta` troca com o tema. O acento puro fica para fundo e faixa.
+   */
+  tinta: string
+}
+
+function comTinta(cor: string): string {
+  return `color-mix(in oklab, ${cor} 50%, var(--tinta))`
 }
 
 /**
@@ -28,13 +38,41 @@ export type AparenciaDoTipo = {
  * duas salas. Tipo de atendimento não pode usar nenhum dos três.
  */
 const APARENCIA: Record<AppointmentTypeKind, AparenciaDoTipo> = {
-  consulta: { icone: 'ph ph-heart', cor: 'var(--clinic-tipo-consulta)' },
-  retorno: { icone: 'ph ph-arrow-counter-clockwise', cor: 'var(--clinic-tipo-retorno)' },
-  vacina: { icone: 'ph ph-shield', cor: 'var(--clinic-tipo-vacina)' },
-  exame: { icone: 'ph ph-magnifying-glass', cor: 'var(--clinic-tipo-exame)' },
-  cirurgia: { icone: 'ph ph-plus-circle', cor: 'var(--clinic-tipo-cirurgia)' },
-  banho: { icone: 'ph ph-sparkle', cor: 'var(--clinic-tipo-banho)' },
-  emergencia: { icone: 'ph ph-lightning', cor: 'var(--clinic-tipo-emergencia)' },
+  consulta: {
+    icone: 'ph ph-heart',
+    cor: 'var(--clinic-tipo-consulta)',
+    tinta: comTinta('var(--clinic-tipo-consulta)'),
+  },
+  retorno: {
+    icone: 'ph ph-arrow-counter-clockwise',
+    cor: 'var(--clinic-tipo-retorno)',
+    tinta: comTinta('var(--clinic-tipo-retorno)'),
+  },
+  vacina: {
+    icone: 'ph ph-shield',
+    cor: 'var(--clinic-tipo-vacina)',
+    tinta: comTinta('var(--clinic-tipo-vacina)'),
+  },
+  exame: {
+    icone: 'ph ph-magnifying-glass',
+    cor: 'var(--clinic-tipo-exame)',
+    tinta: comTinta('var(--clinic-tipo-exame)'),
+  },
+  cirurgia: {
+    icone: 'ph ph-plus-circle',
+    cor: 'var(--clinic-tipo-cirurgia)',
+    tinta: comTinta('var(--clinic-tipo-cirurgia)'),
+  },
+  banho: {
+    icone: 'ph ph-sparkle',
+    cor: 'var(--clinic-tipo-banho)',
+    tinta: comTinta('var(--clinic-tipo-banho)'),
+  },
+  emergencia: {
+    icone: 'ph ph-lightning',
+    cor: 'var(--clinic-tipo-emergencia)',
+    tinta: comTinta('var(--clinic-tipo-emergencia)'),
+  },
 }
 
 /** Ordem da legenda: rotina primeiro, procedimento depois, emergência por último. */
@@ -54,7 +92,7 @@ export const TIPOS_EM_ORDEM: AppointmentTypeKind[] = [
  */
 export function aparenciaDoTipo(kind: AppointmentTypeKind | null | undefined): AparenciaDoTipo {
   if (!kind || !(kind in APARENCIA)) {
-    return { icone: '', cor: 'var(--clinic-line-strong)' }
+    return { icone: '', cor: 'var(--clinic-line-strong)', tinta: 'var(--tinta-2)' }
   }
 
   return APARENCIA[kind]

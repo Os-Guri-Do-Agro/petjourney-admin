@@ -12,6 +12,10 @@
  * sobem. Fracos o bastante para não atrapalhar a leitura quando caem atrás do texto.
  *
  * Não é cabeçalho de toda tela: só das que abrem um espaço. As outras usam o título do `UiPagina`.
+ *
+ * **Em fileira** (`em-linha`, o Início): os números descem para uma fileira embaixo da frase, na
+ * largura dela, e o slot `lado` ganha a coluna da direita na altura toda. Os quatro quadros em 2 x 2
+ * na ponta, longe da frase, deixavam o meio da faixa vazio em tela larga.
  */
 import Skeleton from 'primevue/skeleton'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
@@ -38,13 +42,15 @@ withDefaults(
     indicadores?: IndicadorDaAbertura[]
     /** Rótulo da lista de números, para o leitor de tela. */
     rotuloDosIndicadores?: string
+    /** Números numa fileira embaixo da frase, e o slot `lado` à direita. */
+    emLinha?: boolean
   }>(),
-  { resumo: '', sobre: '', indicadores: () => [], rotuloDosIndicadores: '' },
+  { resumo: '', sobre: '', indicadores: () => [], rotuloDosIndicadores: '', emLinha: false },
 )
 </script>
 
 <template>
-  <section class="abertura">
+  <section class="abertura" :class="{ 'abertura--em-linha': emLinha }">
     <UiRabiscos />
 
     <div class="abertura__texto">
@@ -91,6 +97,10 @@ withDefaults(
         </component>
       </li>
     </ul>
+
+    <div v-if="emLinha && $slots.lado" class="abertura__lado">
+      <slot name="lado" />
+    </div>
   </section>
 </template>
 
@@ -290,6 +300,118 @@ withDefaults(
   font-size: 12.5px;
   font-weight: 500;
   line-height: 1.35;
+}
+
+/*
+ * Na moldura do app (o portal inteiro desde 26/10/2026) a abertura mora na faixa sálvia do
+ * `UiPagina`, que já traz a cor e os desenhos: ela perde o bloco próprio e fica só com o texto
+ * branco e os números em vidro, como o topo da home do app.
+ */
+.moldura-app .abertura {
+  overflow: visible;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.moldura-app .abertura > .rabiscos {
+  display: none;
+}
+
+.moldura-app .abertura__sobre,
+.moldura-app .abertura__resumo {
+  color: #fff;
+}
+
+.moldura-app .abertura__titulo {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+/* Botão de apoio na faixa: o vidro escuro do app. O vidro claro clareava a sálvia e o branco caía. */
+.moldura-app .abertura__acoes :deep(.p-button.p-button-secondary),
+.moldura-app .abertura__acoes :deep(.p-button.p-button-text) {
+  border-color: transparent;
+  background: var(--app-vidro);
+}
+
+.moldura-app .abertura__acoes :deep(.p-button.p-button-secondary:hover),
+.moldura-app .abertura__acoes :deep(.p-button.p-button-text:hover) {
+  background: var(--app-vidro-forte);
+}
+
+.moldura-app .abertura__indicador {
+  border: 0;
+  border-radius: 18px;
+  background: var(--app-vidro);
+  backdrop-filter: none;
+}
+
+.moldura-app .abertura__indicador--link:hover {
+  background: var(--app-vidro-forte);
+  transform: none;
+}
+
+.moldura-app .abertura__rotulo {
+  color: #fff;
+  font-weight: 600;
+}
+
+/*
+ * Em fileira: a frase e os números à esquerda, um embaixo do outro, os números dividindo a largura
+ * em partes iguais; o `lado` à direita, na altura toda.
+ */
+.abertura--em-linha {
+  display: grid;
+  align-items: stretch;
+  gap: 22px 28px;
+  grid-template-areas:
+    'texto lado'
+    'numeros lado';
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.abertura--em-linha .abertura__texto {
+  align-self: end;
+  grid-area: texto;
+}
+
+.abertura--em-linha .abertura__indicadores {
+  align-self: start;
+  grid-area: numeros;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+}
+
+.abertura__lado {
+  display: grid;
+  min-width: 0;
+  grid-area: lado;
+}
+
+/* O lado que não desenhou nada (sem código de indicação) não guarda coluna. */
+.abertura__lado:empty {
+  display: none;
+}
+
+.abertura--em-linha:has(.abertura__lado:empty),
+.abertura--em-linha:not(:has(.abertura__lado)) {
+  grid-template-areas:
+    'texto'
+    'numeros';
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Faixa estreita (tablet): o lado desce para baixo dos números. */
+@container faixa (max-width: 920px) {
+  .abertura--em-linha {
+    grid-template-areas:
+      'texto'
+      'numeros'
+      'lado';
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 600px) {

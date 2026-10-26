@@ -5,9 +5,11 @@
  *
  * Os elementos são os do portal de hoje: campo, botão, checkbox e passos do kit, a fonte e os
  * tokens do Trilha. As cores chegam às páginas pela família `--auth-*`, que o `trilha-tema.css`
- * aponta para os tokens do kit.
+ * aponta para os tokens do kit. Desde 26/10/2026 a entrada liga o tema do app na raiz
+ * (`html.moldura-app`, o mesmo que o `AppShell` liga no portal): tinta marinho, ação na sálvia do
+ * app, botão liso — o layout continua o mesmo.
  */
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import logoLightUrl from '@/assets/Logos/logo-clara-em-row.png'
@@ -35,6 +37,56 @@ const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUr
 const authArtStyle = computed(() => ({
   '--auth-art': `url(${isDarkMode.value ? bgDarkUrl : bgLightUrl})`,
 }))
+
+/*
+ * A arte cobre a janela (1920 x 1080, centrada) e o alto da pata fica a 678 px da borda de cima
+ * dela, medido no arquivo. Em tela baixa (1366 x 768, 1280 x 800) a pata sobe até os benefícios,
+ * e só aí o véu verde entra atrás da copy. Em tela grande ela fica abaixo do texto, e o véu
+ * pintava a cabeça da pata à toa.
+ */
+const ARTE = { largura: 1920, altura: 1080, topoDaPata: 678 }
+/** Só encostar de verdade liga o véu: com folga, a borda dele pintava a cabeça da pata. */
+const FOLGA_DA_PATA = 4
+
+const centro = ref<HTMLElement | null>(null)
+const textoSobreAPata = ref(false)
+
+function medirAPata() {
+  const alvo = centro.value
+
+  if (!alvo) {
+    return
+  }
+
+  const escala = Math.max(window.innerWidth / ARTE.largura, window.innerHeight / ARTE.altura)
+  const topoDaArte = (window.innerHeight - ARTE.altura * escala) / 2
+  const topoDaPata = topoDaArte + ARTE.topoDaPata * escala
+
+  textoSobreAPata.value = alvo.getBoundingClientRect().bottom + FOLGA_DA_PATA > topoDaPata
+}
+
+let observador: ResizeObserver | undefined
+
+onMounted(() => {
+  document.documentElement.classList.add('moldura-app')
+  medirAPata()
+  window.addEventListener('resize', medirAPata)
+  /* A arte é fixa na janela: rolar o cadastro (alto) leva o texto para longe da pata. */
+  window.addEventListener('scroll', medirAPata, { passive: true })
+  /* O texto muda de altura com o idioma e quando a fonte termina de carregar. */
+  observador = new ResizeObserver(medirAPata)
+
+  if (centro.value) {
+    observador.observe(centro.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove('moldura-app')
+  window.removeEventListener('resize', medirAPata)
+  window.removeEventListener('scroll', medirAPata)
+  observador?.disconnect()
+})
 </script>
 
 <template>
@@ -72,7 +124,11 @@ const authArtStyle = computed(() => ({
             <LanguageSwitcher variant="auth" tone="brand" />
           </div>
 
-          <div class="auth-visual-panel__center">
+          <div
+            ref="centro"
+            class="auth-visual-panel__center"
+            :class="{ 'auth-visual-panel__center--sobre-pata': textoSobreAPata }"
+          >
             <div>
               <h2>{{ t('auth.layout.title') }}</h2>
               <p>{{ t('auth.layout.description') }}</p>
@@ -102,7 +158,24 @@ const authArtStyle = computed(() => ({
 </template>
 
 <style scoped>
+/*
+ * A ação da entrada (o botão, o checkbox, o passo do cadastro) na matiz da sálvia da arte, com o
+ * rótulo branco (pedido de 26/10/2026). Branco sobre a sálvia da arte (#84C1B4) dá 2:1 e some; um
+ * tom mais fundo da mesma matiz (#4F9C8B) chega a 3,25:1 sem virar o cinza-esverdeado do botão do
+ * app (#627A74), que pesava sobre o creme. Os links continuam no `--musgo`: sálvia clara sobre o
+ * creme não lê.
+ */
 .auth-page {
+  --auth-acao: #4f9c8b;
+  --auth-acao-hover: #488e7f;
+  --sobre-auth-acao: #fff;
+  --p-checkbox-checked-background: var(--auth-acao);
+  --p-checkbox-checked-border-color: var(--auth-acao);
+  --p-checkbox-checked-hover-background: var(--auth-acao-hover);
+  --p-checkbox-checked-hover-border-color: var(--auth-acao-hover);
+  --p-checkbox-icon-checked-color: var(--sobre-auth-acao);
+  --p-checkbox-icon-checked-hover-color: var(--sobre-auth-acao);
+
   min-height: 100vh;
   background-color: var(--auth-page-bg);
   background-image: var(--auth-art);
@@ -137,8 +210,19 @@ const authArtStyle = computed(() => ({
   transform: scaleX(-1);
 }
 
+/* O ladrilho da pata na sálvia do destaque do app, a mesma do topo da barra. */
+/* `:deep`: o checkbox vem do formulário da página, pelo slot. */
+.auth-page :deep(.p-checkbox.p-checkbox-checked .p-checkbox-box) {
+  border-color: var(--auth-acao);
+  background: var(--auth-acao);
+}
+
+.auth-page :deep(.p-checkbox.p-checkbox-checked .p-checkbox-icon) {
+  color: var(--sobre-auth-acao);
+}
+
 .bg-color-icon {
-  background: var(--auth-sage);
+  background: var(--app-destaque, var(--auth-sage));
 }
 
 /* A coluna da direita fica dentro da faixa verde da arte em qualquer proporção de tela. */
@@ -247,20 +331,24 @@ const authArtStyle = computed(() => ({
   margin-bottom: auto;
 }
 
-/* A pata da arte começa a ~62% da altura da imagem: em tela baixa (1600x900,
-   1366x768) ela sobe até os benefícios. No claro ela é papel, e o texto escuro lê
-   nela; no escuro ela é quase preta, e o texto some. Só ali o véu repõe o verde
-   chapado da arte (#84c0b4, idêntico nos dois temas) atrás da copy — invisível sobre
-   a faixa verde, opaco sobre a pata. Borda difusa para não marcar retângulo contra o
-   JPEG. */
-.app-dark .auth-visual-panel__center::before {
+/* Só quando a pata chega ao texto (`textoSobreAPata`, medido no script): ela é papel no
+   claro e quase preta no escuro, e o texto branco some na primeira. O véu repõe o verde
+   chapado da arte (#84c0b4, idêntico nos dois temas) atrás da copy: invisível sobre a faixa
+   verde, opaco sobre a pata. É um degradê radial, não um bloco desfocado: chapado atrás do
+   texto, ele se apaga antes da borda e mais ainda no canto da diagonal, onde um
+   desfoque deixaria um halo verde sobre o creme (e claro sobre o escuro). */
+.auth-visual-panel__center--sobre-pata::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -1.75rem -2.25rem;
-  border-radius: 2.5rem;
-  background: #84c0b4;
-  filter: blur(1.25rem);
+  /* A última linha precisa ficar no chapado (o esmaecer são os 18% de fora da elipse), e o
+     véu não desce mais que isso: abaixo do texto ele só pintaria a pata. Nada do lado da
+     diagonal: ali o véu entortaria a borda da faixa verde no tablet. A elipse cabe na caixa
+     (`closest-side`) e chega a zero antes de qualquer borda; com inset lógico, o árabe
+     espelha sozinho. */
+  inset-block: -2.5rem;
+  inset-inline: 0 -3.5rem;
+  background: radial-gradient(closest-side, #84c0b4 82%, rgb(132 192 180 / 0%) 100%);
 }
 
 .auth-visual-panel h2 {
@@ -273,7 +361,15 @@ const authArtStyle = computed(() => ({
   text-wrap: balance;
 }
 
-/* Sobre o verde da arte o texto já é limítrofe: branco cheio, sem transparência. */
+/* Branco sobre a sálvia é limítrofe: branco cheio, sem transparência, e uma sombra curta na
+   tinta da casa que só dá contorno à letra. Sombra larga escurece em volta e desenha um
+   retângulo sobre a arte. */
+.auth-visual-panel h2,
+.auth-visual-panel p,
+.auth-benefits li {
+  text-shadow: 0 1px 2px rgb(16 48 42 / 30%);
+}
+
 .auth-visual-panel p {
   margin: 1rem 0 0;
   color: var(--auth-on-brand);

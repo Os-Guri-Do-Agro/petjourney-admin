@@ -1084,7 +1084,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .em-dia__bicho {
   width: 96px;
   height: 96px;
-  color: var(--hotel);
+  color: var(--hotel-tinta);
 }
 
 /* ----------------------------------------------------------------- o já resolvido */

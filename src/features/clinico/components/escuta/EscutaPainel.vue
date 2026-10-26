@@ -995,7 +995,7 @@ const temAcoes = computed(
 }
 
 .encerrar :deep(.p-button-icon) {
-  color: var(--risco);
+  color: var(--risco-tinta);
 }
 
 /* Entre o que muda a gravação e o que muda a vista, uma régua fina. */

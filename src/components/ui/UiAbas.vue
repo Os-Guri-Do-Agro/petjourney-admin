@@ -4,19 +4,31 @@
  *
  * Cada aba é um link de verdade (a URL da tela), então abrir em outra guia, voltar e favoritar
  * funcionam como em qualquer link.
+ *
+ * `vidro`: dentro do cabeçalho do app, as abas são pílulas de vidro com texto branco, e a aberta é
+ * papel branco com a tinta escura (o filtro do app: a escolhida cheia, as outras em véu, sem borda).
  */
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import type { Aba } from '@/navegacao/espacos'
 
-defineProps<{ abas: Aba[]; atual: string | null; rotulo: string }>()
+withDefaults(
+  defineProps<{ abas: Aba[]; atual: string | null; rotulo: string; vidro?: boolean }>(),
+  {
+    vidro: false,
+  },
+)
 
 const { t } = useI18n()
 </script>
 
 <template>
-  <nav class="abas" :aria-label="t('espacos.abasAria', { destino: rotulo })">
+  <nav
+    class="abas"
+    :class="{ 'abas--vidro': vidro }"
+    :aria-label="t('espacos.abasAria', { destino: rotulo })"
+  >
     <RouterLink
       v-for="aba in abas"
       :key="aba.to"
@@ -109,7 +121,7 @@ const { t } = useI18n()
 }
 
 .abas__aba--atual .abas__icone {
-  color: var(--pj-lugar, var(--musgo));
+  color: var(--pj-lugar-tinta, var(--musgo));
 }
 
 .abas__aba--atual::after,
@@ -154,5 +166,64 @@ const { t } = useI18n()
 .abas__selo--risco {
   background: var(--risco-fundo);
   color: var(--risco-tinta);
+}
+
+/* ----------------------------------------------------------- pílulas de vidro (cabeçalho) */
+
+.abas--vidro {
+  gap: 8px;
+  border-bottom: 0;
+}
+
+.abas--vidro .abas__aba,
+.abas--vidro .abas__aba:first-child {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--app-vidro);
+  color: #fff;
+  font-weight: 600;
+  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.abas--vidro .abas__icone {
+  color: #fff;
+}
+
+.abas--vidro .abas__aba:hover {
+  background: var(--app-vidro-forte);
+  color: #fff;
+}
+
+.abas--vidro .abas__aba::after,
+.abas--vidro .abas__aba:hover::after {
+  display: none;
+}
+
+.abas--vidro .abas__aba:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.abas--vidro .abas__aba.abas__aba--atual,
+.abas--vidro .abas__aba.abas__aba--atual:hover {
+  background: #fff;
+  color: #2c4741;
+  font-weight: 700;
+}
+
+.abas--vidro .abas__aba--atual .abas__icone {
+  color: #2c4741;
+}
+
+.app-dark .abas--vidro .abas__aba.abas__aba--atual,
+.app-dark .abas--vidro .abas__aba.abas__aba--atual:hover {
+  background: var(--app-cartao);
+  color: var(--app-tinta);
+}
+
+.app-dark .abas--vidro .abas__aba--atual .abas__icone {
+  color: var(--app-tinta);
 }
 </style>

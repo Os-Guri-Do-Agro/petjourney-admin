@@ -66,7 +66,7 @@ defineProps<{
 
 .register-steps__item + .register-steps__item--active::before,
 .register-steps__item + .register-steps__item--done::before {
-  background: var(--musgo);
+  background: var(--auth-acao, var(--musgo));
 }
 
 .register-steps__marker {
@@ -98,11 +98,12 @@ defineProps<{
   white-space: nowrap;
 }
 
+/* O passo ativo na sálvia da entrada, como o botão (`--auth-acao`, do `AuthLayout`). */
 .register-steps__item--active .register-steps__marker {
-  border-color: var(--musgo);
-  background: var(--musgo);
+  border-color: var(--auth-acao, var(--musgo));
+  background: var(--auth-acao, var(--musgo));
   box-shadow: 0 0 0 4px var(--musgo-fundo);
-  color: var(--sobre-musgo);
+  color: var(--sobre-auth-acao, var(--sobre-musgo));
 }
 
 .register-steps__item--active .register-steps__label {
@@ -111,7 +112,7 @@ defineProps<{
 }
 
 .register-steps__item--done .register-steps__marker {
-  border-color: var(--musgo);
+  border-color: var(--auth-acao, var(--musgo));
   background: var(--musgo-fundo);
   color: var(--musgo);
   font-size: 14px;

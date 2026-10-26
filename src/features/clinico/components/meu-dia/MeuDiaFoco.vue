@@ -1,12 +1,13 @@
 <script setup lang="ts">
 /**
- * Hoje, versão **Foco**, no **design do app** (perfil de parceiro).
+ * O Hoje da Clínica no **design do app** (perfil de parceiro), escolhido em 26/10/2026.
  *
  * A tela é a home do parceiro no app, trazida para a tela grande: a barra lateral de sempre,
  * vestida como o menu do app (o destaque sálvia em cima, os ícones em véu, o item aberto em
- * pílula cheia), e na folha branca o destaque na mesma cor. Nele, a frase do dia, os números em
- * vidro e o paciente da vez num cartão de papel branco, que salta da cor. Embaixo, a fila numa
- * lista lisa e, ao lado, o que pede ação num painel em véu. Tudo na largura inteira da folha.
+ * pílula cheia), e na folha branca o destaque na mesma cor. Nele, dois cartões de papel branco
+ * lado a lado: o paciente da vez e o resumo do dia (a frase, a data, o andamento e os três
+ * números). Embaixo, a fila numa lista lisa e, ao lado, o que pede ação num painel em véu. Tudo
+ * na largura inteira da folha.
  *
  * Regras do app (`docs/design/padrao-tutor.md`, no petjourney-app): tela branca e lisa, sem
  * sombra nem degradê; destaque na cor do perfil com texto branco; marinho só como tinta; cor em
@@ -15,13 +16,12 @@
  */
 import { PhInfo, PhWarning, PhWarningOctagon } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
-import { computed, ref } from 'vue'
+import Carousel from 'primevue/carousel'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-import '@/components/layout/moldura-app.css'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { MeuDia } from '@/features/clinico/composables/useMeuDia'
 import type { Appointment } from '@/features/clinico/data/types'
@@ -39,25 +39,64 @@ const LIMITE_DE_PENDENCIAS = 6
 const filaAberta = ref(false)
 const pendenciasAbertas = ref(false)
 
-const destaque = computed(() => props.dia.destaque)
-const petDoDestaque = computed(() => (destaque.value ? props.dia.pet(destaque.value.petId) : null))
+/**
+ * Os pacientes do cartão do destaque, um por vez num carrossel: todos os que estão em sala. Sem
+ * ninguém em sala, o da vez (o primeiro da recepção, ou o próximo horário), como antes.
+ */
+const noCartao = computed<Appointment[]>(() => {
+  if (props.dia.emConsulta.length) {
+    return props.dia.emConsulta
+  }
 
-/** Os outros que estão em sala: cabem no pé do cartão, não disputam com ele. */
-const tambemNaSala = computed(() =>
-  props.dia.emConsulta.filter((item) => item.id !== destaque.value?.id),
+  return props.dia.destaque ? [props.dia.destaque] : []
+})
+
+const pagina = ref(0)
+
+/* Alguém saiu da sala com o último cartão aberto: volta para um que ainda existe. */
+watch(
+  () => noCartao.value.length,
+  (total) => {
+    if (pagina.value >= total) {
+      pagina.value = Math.max(0, total - 1)
+    }
+  },
 )
+
+const carrossel = ref<HTMLElement | null>(null)
+
+/**
+ * Anda em roda: do último volta ao primeiro. Cada cartão tem a sua paginação, e o que sai fica
+ * inerte; então o foco passa para o mesmo controle no cartão que entrou, senão quem navega pelo
+ * teclado perde o lugar a cada troca.
+ */
+function irPara(indice: number, controle: string) {
+  const total = noCartao.value.length
+
+  pagina.value = total ? (indice + total) % total : 0
+
+  void nextTick(() => {
+    carrossel.value
+      ?.querySelector<HTMLElement>(`.cartao:not([inert]) [data-controle="${controle}"]`)
+      ?.focus()
+  })
+}
 
 type Entrada = { item: Appointment; estado: 'espera' | 'marcado' }
 
 /** A recepção e depois os horários, sem repetir quem já está no cartão. */
-const fila = computed<Entrada[]>(() => [
-  ...props.dia.naRecepcao
-    .filter((item) => item.id !== destaque.value?.id)
-    .map((item) => ({ item, estado: 'espera' as const })),
-  ...props.dia.aSeguir
-    .filter((item) => item.id !== destaque.value?.id)
-    .map((item) => ({ item, estado: 'marcado' as const })),
-])
+const fila = computed<Entrada[]>(() => {
+  const noDestaque = new Set(noCartao.value.map((item) => item.id))
+
+  return [
+    ...props.dia.naRecepcao
+      .filter((item) => !noDestaque.has(item.id))
+      .map((item) => ({ item, estado: 'espera' as const })),
+    ...props.dia.aSeguir
+      .filter((item) => !noDestaque.has(item.id))
+      .map((item) => ({ item, estado: 'marcado' as const })),
+  ]
+})
 
 const filaVisivel = computed(() =>
   filaAberta.value ? fila.value : fila.value.slice(0, LIMITE_DA_FILA),
@@ -73,47 +112,51 @@ const pendenciasEscondidas = computed(() =>
   Math.max(0, props.dia.linhasDaPauta.length - LIMITE_DE_PENDENCIAS),
 )
 
-/** Os números do destaque, em vidro: os três que dizem como está a clínica agora. */
+/** Os números do resumo: os três que dizem como está a clínica agora. */
 const numeros = computed(() =>
   props.dia.indicadores.filter((indicador) => indicador.id !== 'a-seguir'),
 )
 
-/** O estado do paciente da vez, na pílula em véu ao lado do nome. */
-const estadoDoDestaque = computed(() => {
-  const item = destaque.value
-
-  if (!item) {
-    return ''
-  }
-
+/** O estado do paciente do cartão, na pílula em véu ao lado do nome. */
+function estadoDe(item: Appointment) {
   if (item.status === 'em-atendimento') {
-    return t('clinico.meuDia.versoes.estado.sala', {
+    return t('clinico.meuDia.estado.sala', {
       tempo: formato.duracao(props.dia.minutosDesde(item.iniciadoEm ?? item.inicio) ?? 0),
     })
   }
 
   if (item.status === 'aguardando') {
-    return t('clinico.meuDia.versoes.estado.espera', {
+    return t('clinico.meuDia.estado.espera', {
       tempo: formato.duracao(props.dia.minutosDesde(item.chegadaEm) ?? 0),
     })
   }
 
-  return t('clinico.meuDia.versoes.estado.marcado', { hora: formato.hora(item.inicio) })
-})
+  return t('clinico.meuDia.estado.marcado', { hora: formato.hora(item.inicio) })
+}
 
-const fatosDoDestaque = computed(() => {
-  const item = destaque.value
-
-  if (!item) {
-    return []
-  }
-
+function fatosDe(item: Appointment) {
   return [
     { icone: 'ph ph-stethoscope', texto: props.dia.linhaDoAtendimento(item) },
     { icone: 'ph ph-door', texto: props.dia.salasDe(item) },
     { icone: 'ph ph-user', texto: props.dia.tutor(item.tutorId)?.nome ?? '' },
   ].filter((fato) => fato.texto)
-})
+}
+
+/** O rótulo do botão, sem o nome: o nome já é o título do cartão, e nome longo estourava o botão. */
+function acaoCurtaDe(item: Appointment) {
+  return item.status === 'em-atendimento'
+    ? t('clinico.meuDia.carrossel.continuar')
+    : t('clinico.hoje.chamar')
+}
+
+/** Quem está na sala se continua; quem espera ou vem, se atende. Para o leitor de tela, com o nome. */
+function acaoDe(item: Appointment) {
+  const pet = props.dia.pet(item.petId)?.nome ?? ''
+
+  return item.status === 'em-atendimento'
+    ? t('clinico.meuDia.continuarCom', { pet })
+    : t('clinico.meuDia.atenderCom', { pet })
+}
 
 const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhInfo }
 </script>
@@ -126,113 +169,207 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
     bloquear-se-suspenso
     @tentar-de-novo="dia.carregar"
   >
-    <!-- O destaque, colado no cabeçalho: a frase do dia, os números e o paciente da vez. -->
-    <template #cabecalho>
-      <section class="destaque">
-        <UiRabiscos />
-
+    <!--
+      Na faixa do app (a do `UiPagina`), dois cartões brancos em vez do cartão do título. O resumo
+      vem primeiro no documento (é o título da página), mas fica à direita na tela larga; o
+      paciente da vez, à esquerda, é onde a mão vai.
+    -->
+    <template #destaque>
+      <div class="destaque">
         <div class="destaque__miolo">
-          <div class="destaque__topo">
-            <div class="destaque__textos">
-              <h1>{{ dia.fraseDoResumo }}</h1>
-              <p>{{ [dia.dataDeHoje, dia.andamentoDoDia].filter(Boolean).join(' · ') }}</p>
+          <!--
+            O resumo do dia, de cima para baixo e sem vão: a frase, a data, o andamento numa barra e
+            os três números numa fileira. A altura sobra no meio, não num canto vazio.
+          -->
+          <section class="cartao resumo" aria-labelledby="foco-resumo">
+            <div class="resumo__textos">
+              <h1 id="foco-resumo">{{ dia.fraseDoResumo }}</h1>
+              <p>{{ dia.dataDeHoje }}</p>
+            </div>
+
+            <div v-if="dia.progressoDoDia.total" class="resumo__andamento">
+              <span class="resumo__barra" aria-hidden="true">
+                <span
+                  :style="{
+                    width: `${(dia.progressoDoDia.feitos / dia.progressoDoDia.total) * 100}%`,
+                  }"
+                />
+              </span>
+              <span>{{ dia.andamentoDoDia }}</span>
             </div>
 
             <ul class="numeros" :aria-label="t('clinico.meuDia.abertura.indicadores')">
               <li v-for="numero in numeros" :key="numero.id">
                 <RouterLink class="numero" :to="numero.to ?? '/veterinario/agenda'">
-                  <i :class="numero.icone" aria-hidden="true" />
-                  <strong>{{ numero.valor }}</strong>
-                  <span>{{ numero.rotulo }}</span>
-                  <span v-if="numero.tom" class="numero__ponto" aria-hidden="true" />
-                </RouterLink>
-              </li>
-            </ul>
-          </div>
-
-          <article
-            v-if="destaque && petDoDestaque"
-            class="cartao"
-            aria-labelledby="foco-agora-nome"
-          >
-            <div class="cartao__quem">
-              <span class="cartao__rosto">
-                <PetAvatar
-                  :nome="petDoDestaque.nome"
-                  :iniciais="petDoDestaque.iniciais"
-                  :especie="petDoDestaque.especie"
-                  :foto-url="petDoDestaque.fotoUrl ?? ''"
-                  tamanho="lg"
-                />
-              </span>
-              <div class="cartao__nome">
-                <h2 id="foco-agora-nome">{{ petDoDestaque.nome }}</h2>
-                <p>{{ dia.linhaDoPaciente(petDoDestaque) }}</p>
-              </div>
-              <span class="cartao__estado">
-                <i class="ph ph-clock" aria-hidden="true" />
-                {{ estadoDoDestaque }}
-              </span>
-            </div>
-
-            <!-- Os fatos em véu e, na mesma fileira, o alerta no véu vermelho: ele não pode sumir. -->
-            <ul class="cartao__fichas">
-              <li v-for="fato in fatosDoDestaque" :key="fato.icone">
-                <i :class="fato.icone" aria-hidden="true" />
-                {{ fato.texto }}
-              </li>
-              <li
-                v-for="alerta in dia.alertasRelevantes(petDoDestaque)"
-                :key="alerta.id"
-                class="cartao__alerta"
-                :class="`cartao__alerta--${alerta.severidade}`"
-              >
-                <i class="ph ph-warning" aria-hidden="true" />
-                {{ dia.textoDoAlerta(alerta) }}
-              </li>
-            </ul>
-
-            <div class="cartao__acoes">
-              <Button
-                v-if="dia.acaoPrincipal"
-                type="button"
-                class="cartao__principal"
-                icon="ph ph-stethoscope"
-                :label="dia.acaoPrincipal.rotulo"
-                @click="dia.abrirProntuario(dia.acaoPrincipal.item)"
-              />
-              <RouterLink class="cartao__secundario" :to="dia.rotaDoResumo(destaque)">
-                <i class="ph ph-notepad" aria-hidden="true" />
-                {{ t('clinico.resumoDoPaciente.verResumo') }}
-              </RouterLink>
-
-              <p v-if="tambemNaSala.length" class="cartao__tambem">
-                <span>{{ t('clinico.meuDia.versoes.tambemNaSala') }}</span>
-                <RouterLink
-                  v-for="item in tambemNaSala"
-                  :key="item.id"
-                  class="cartao__outro"
-                  :to="dia.rotaDoProntuario(item)"
-                >
-                  {{ dia.pet(item.petId)?.nome }}
-                  <span>
-                    {{ formato.duracao(dia.minutosDesde(item.iniciadoEm ?? item.inicio) ?? 0) }}
+                  <span class="numero__icone" aria-hidden="true"><i :class="numero.icone" /></span>
+                  <span class="numero__textos">
+                    <strong>{{ numero.valor }}</strong>
+                    <span class="numero__rotulo">{{ numero.rotulo }}</span>
                   </span>
+                  <span
+                    v-if="numero.tom"
+                    class="numero__ponto"
+                    :class="`numero__ponto--${numero.tom}`"
+                    aria-hidden="true"
+                  />
                 </RouterLink>
-              </p>
-            </div>
-          </article>
+              </li>
+            </ul>
+          </section>
 
-          <p v-else class="cartao cartao--vazio">{{ t('clinico.meuDia.versoes.ninguemAgora') }}</p>
+          <!--
+            Os pacientes em sala, um cartão por vez. Os rostos no pé do cartão são a paginação: dizem
+            quem mais está lá dentro e levam até ele; as setas andam em roda. Sem passar sozinho:
+            tela de trabalho não troca o que a pessoa está lendo. No tablet, arrastar também passa.
+          -->
+          <section
+            v-if="noCartao.length"
+            ref="carrossel"
+            class="paciente carrossel"
+            :aria-label="t('clinico.meuDia.carrossel.grupo')"
+          >
+            <Carousel
+              v-model:page="pagina"
+              :value="noCartao"
+              :num-visible="1"
+              :num-scroll="1"
+              :show-navigators="false"
+              :show-indicators="false"
+              class="carrossel__trilho"
+            >
+              <template #item="{ data: item, index }">
+                <article
+                  class="cartao"
+                  :aria-labelledby="`foco-agora-${item.id}`"
+                  :inert="index !== pagina || undefined"
+                >
+                  <div class="cartao__quem">
+                    <span class="cartao__rosto">
+                      <PetAvatar
+                        :nome="dia.pet(item.petId)?.nome ?? ''"
+                        :iniciais="dia.pet(item.petId)?.iniciais ?? ''"
+                        :especie="dia.pet(item.petId)?.especie ?? null"
+                        :foto-url="dia.pet(item.petId)?.fotoUrl ?? ''"
+                        tamanho="lg"
+                      />
+                    </span>
+                    <div class="cartao__nome">
+                      <h2 :id="`foco-agora-${item.id}`">{{ dia.pet(item.petId)?.nome }}</h2>
+                      <p v-if="dia.pet(item.petId)">
+                        {{ dia.linhaDoPaciente(dia.pet(item.petId)!) }}
+                      </p>
+                    </div>
+                    <span class="cartao__estado">
+                      <i class="ph ph-clock" aria-hidden="true" />
+                      {{ estadoDe(item) }}
+                    </span>
+                  </div>
+
+                  <!-- Os fatos numa linha de texto com ícone: pouco texto, sem uma pílula por fato. -->
+                  <ul class="cartao__fatos">
+                    <li v-for="fato in fatosDe(item)" :key="fato.icone" :title="fato.texto">
+                      <i :class="fato.icone" aria-hidden="true" />
+                      <span>{{ fato.texto }}</span>
+                    </li>
+                  </ul>
+
+                  <!-- O alerta em selo pastel: é a única coisa do cartão que não pode sumir. -->
+                  <ul
+                    v-if="dia.alertasRelevantes(dia.pet(item.petId)).length"
+                    class="cartao__alertas"
+                  >
+                    <li
+                      v-for="alerta in dia.alertasRelevantes(dia.pet(item.petId))"
+                      :key="alerta.id"
+                      class="cartao__alerta"
+                      :class="`cartao__alerta--${alerta.severidade}`"
+                    >
+                      <i class="ph ph-warning" aria-hidden="true" />
+                      {{ dia.textoDoAlerta(alerta) }}
+                    </li>
+                  </ul>
+
+                  <div class="cartao__acoes">
+                    <Button
+                      type="button"
+                      class="cartao__principal"
+                      icon="ph ph-stethoscope"
+                      :label="acaoCurtaDe(item)"
+                      :aria-label="acaoDe(item)"
+                      @click="dia.abrirProntuario(item)"
+                    />
+                    <RouterLink class="cartao__secundario" :to="dia.rotaDoResumo(item)">
+                      <i class="ph ph-notepad" aria-hidden="true" />
+                      {{ t('clinico.resumoDoPaciente.verResumo') }}
+                    </RouterLink>
+
+                    <div v-if="noCartao.length > 1" class="carrossel__paginas">
+                      <Button
+                        type="button"
+                        text
+                        rounded
+                        class="carrossel__seta"
+                        icon="ph ph-caret-left"
+                        data-controle="anterior"
+                        :aria-label="t('clinico.meuDia.carrossel.anterior')"
+                        @click="irPara(pagina - 1, 'anterior')"
+                      />
+                      <Button
+                        v-for="(outro, posicao) in noCartao"
+                        :key="outro.id"
+                        type="button"
+                        text
+                        rounded
+                        class="carrossel__rosto"
+                        :class="{ 'carrossel__rosto--atual': posicao === pagina }"
+                        :aria-label="
+                          t('clinico.meuDia.carrossel.ver', { pet: dia.pet(outro.petId)?.nome })
+                        "
+                        :aria-current="posicao === pagina || undefined"
+                        :data-controle="`rosto-${posicao}`"
+                        @click="irPara(posicao, `rosto-${posicao}`)"
+                      >
+                        <PetAvatar
+                          :nome="dia.pet(outro.petId)?.nome ?? ''"
+                          :iniciais="dia.pet(outro.petId)?.iniciais ?? ''"
+                          :especie="dia.pet(outro.petId)?.especie ?? null"
+                          :foto-url="dia.pet(outro.petId)?.fotoUrl ?? ''"
+                          tamanho="sm"
+                        />
+                      </Button>
+                      <Button
+                        type="button"
+                        text
+                        rounded
+                        class="carrossel__seta"
+                        icon="ph ph-caret-right"
+                        data-controle="proximo"
+                        :aria-label="t('clinico.meuDia.carrossel.proximo')"
+                        @click="irPara(pagina + 1, 'proximo')"
+                      />
+                    </div>
+                  </div>
+                </article>
+              </template>
+            </Carousel>
+
+            <p v-if="noCartao.length > 1" class="so-leitor" aria-live="polite">
+              {{
+                t('clinico.meuDia.carrossel.posicao', { atual: pagina + 1, total: noCartao.length })
+              }}
+            </p>
+          </section>
+
+          <p v-else class="cartao paciente cartao--vazio">{{ t('clinico.meuDia.ninguemAgora') }}</p>
         </div>
-      </section>
+      </div>
     </template>
 
     <div class="corpo">
       <!-- A fila: recepção e depois horários, de ponta a ponta, sem caixa. -->
       <section class="secao" aria-labelledby="foco-fila">
         <header class="secao__cabeca">
-          <h2 id="foco-fila">{{ t('clinico.meuDia.versoes.fila') }}</h2>
+          <h2 id="foco-fila">{{ t('clinico.meuDia.fila') }}</h2>
           <span v-if="fila.length" class="contagem">{{ fila.length }}</span>
           <RouterLink class="secao__acao" to="/veterinario/agenda">
             {{ t('clinico.fila.aceite.verNaAgenda') }}
@@ -274,7 +411,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
               <span v-if="estado === 'espera'" class="pilula-fria">
                 {{
-                  t('clinico.meuDia.versoes.estado.espera', {
+                  t('clinico.meuDia.estado.espera', {
                     tempo: formato.duracao(dia.minutosDesde(item.chegadaEm) ?? 0),
                   })
                 }}
@@ -375,47 +512,9 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   </UiPagina>
 </template>
 
-<!-- Em tela estreita a moldura é a do portal: o fundo da área de conteúdo vira o branco do app. -->
-<style>
-.palco__conteudo:has(.app-pj) {
-  background: var(--app-fundo, #fff);
-}
-</style>
-
 <style scoped>
-/* A folha na largura inteira da tela: nada de coluna centralizada com as bordas vazias. */
-.app-pj.app-pj {
-  max-width: none;
-}
-
-/* -------------------------------------------------------- botões do app (raio 16, peso 700) */
-
+/* Os botões do app moram no tema (`moldura-app.css`); aqui só o tamanho dos pequenos. */
 .app-pj {
-  --p-button-border-radius: 16px;
-  --p-button-label-font-weight: 700;
-  --p-button-primary-background: var(--app-botao);
-  --p-button-primary-hover-background: var(--app-botao-hover);
-  --p-button-primary-active-background: var(--app-botao-hover);
-  --p-button-primary-border-color: var(--app-botao);
-  --p-button-primary-hover-border-color: var(--app-botao-hover);
-  --p-button-primary-active-border-color: var(--app-botao-hover);
-  --p-button-primary-color: #fff;
-  --p-button-primary-hover-color: #fff;
-  --p-button-primary-active-color: #fff;
-  --p-button-secondary-background: var(--app-veu);
-  --p-button-secondary-hover-background: var(--app-veu-forte);
-  --p-button-secondary-active-background: var(--app-veu-forte);
-  --p-button-secondary-border-color: transparent;
-  --p-button-secondary-hover-border-color: transparent;
-  --p-button-secondary-active-border-color: transparent;
-  --p-button-secondary-color: var(--app-salvia-texto);
-  --p-button-secondary-hover-color: var(--app-salvia-texto);
-  --p-button-secondary-active-color: var(--app-salvia-texto);
-  --p-button-text-secondary-color: var(--app-salvia-texto);
-  --p-button-text-primary-color: var(--app-salvia-texto);
-  --p-button-text-primary-hover-background: var(--app-veu);
-  --p-button-text-secondary-hover-background: var(--app-veu);
-
   /* Readex nos números também, como no app. */
   --font-dados: var(--font-texto);
 
@@ -423,17 +522,9 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   font-family: var(--font-texto);
 }
 
-.app-dark .app-pj {
-  --p-button-primary-color: #10302a;
-  --p-button-primary-hover-color: #10302a;
-  --p-button-primary-active-color: #10302a;
-}
-
 .app-pj .p-button {
   min-height: 44px;
   border-width: 0;
-  background-image: none !important;
-  box-shadow: none !important;
 }
 
 .app-pj .p-button.p-button-sm {
@@ -443,137 +534,183 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 /* ------------------------------------------------------------------------------ destaque */
 
+/* A faixa (cor, desenhos, cantos) é a do `UiPagina`: aqui só o miolo dela. */
 .destaque {
-  --rabiscos-forca: 0.2;
-
-  position: relative;
   min-width: 0;
-  flex: 1;
-  overflow: hidden;
-  border-radius: 28px;
-  background: var(--app-destaque);
-  color: #fff;
-  isolation: isolate;
 }
 
+/* Os dois cartões lado a lado e da mesma altura: o paciente à esquerda, o resumo à direita. */
 .destaque__miolo {
   display: grid;
-  gap: 22px;
-  padding: 26px 30px 30px;
+  align-items: stretch;
+  gap: 18px;
+  grid-template-areas: 'paciente resumo';
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+
+.paciente {
+  grid-area: paciente;
+}
+
+.resumo {
+  grid-area: resumo;
 }
 
 /*
- * Na moldura do app o destaque vai de ponta a ponta da folha, colado no topo, só com os cantos de
- * baixo arredondados, como o topo da home do app. O miolo alinha com a margem da página.
+ * O resumo do dia, em coluna: a frase e a data, o andamento, os números. Juntos e no meio do
+ * cartão: quando o paciente ao lado é mais alto, a sobra vira margem igual em cima e embaixo, nunca
+ * um vão entre os blocos nem um canto vazio.
  */
-.shell--moldura-app .app-pj.app-pj {
-  padding-top: 0;
-}
-
-.shell--moldura-app .destaque {
-  margin-inline: calc(var(--pagina-margem) * -1);
-  border-radius: 0 0 28px 28px;
-}
-
-.shell--moldura-app .destaque__miolo {
-  padding: 32px var(--pagina-margem) 34px;
-}
-
-.destaque__topo {
+.resumo.resumo {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px 32px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
 }
 
-.destaque__textos {
+.resumo__textos {
   display: grid;
   min-width: 0;
-  flex: 1 1 340px;
   gap: 4px;
 }
 
-.destaque__textos h1 {
+.resumo__textos h1 {
   margin: 0;
-  font-size: 26px;
+  color: var(--app-tinta);
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
   line-height: 1.25;
   text-wrap: balance;
 }
 
-.destaque__textos p {
+.resumo__textos p {
   margin: 0;
+  color: var(--app-texto-2);
   font-size: 14.5px;
   line-height: 1.4;
 }
 
-/* Os números do app: vidro sobre a cor, ícone, valor grande e rótulo curto. */
-.numeros {
+/* O andamento do dia: a barra fina na sálvia e a frase ao lado, numa linha. */
+.resumo__andamento {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  color: var(--app-tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.resumo__barra {
+  display: block;
+  overflow: hidden;
+  width: 120px;
+  height: 8px;
+  flex: none;
+  border-radius: 999px;
+  background: var(--app-veu-forte);
+}
+
+.resumo__barra span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--app-salvia);
+}
+
+/* Os números numa fileira que ocupa a largura do cartão: ícone ao lado do valor, baixos. */
+.numeros {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.numeros li {
+  display: flex;
+  min-width: 0;
+}
+
 .numero {
   position: relative;
-  display: grid;
-  min-width: 112px;
-  gap: 2px;
-  padding: 12px 16px 13px;
-  border-radius: 18px;
-  background: var(--app-vidro);
-  color: #fff;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--app-veu);
+  color: var(--app-tinta);
   text-decoration: none;
   transition: background-color 150ms ease-out;
 }
 
 .numero:hover {
-  background: var(--app-vidro-forte);
+  background: var(--app-veu-forte);
 }
 
 .numero:focus-visible {
-  outline: 2px solid #fff;
+  outline: 2px solid var(--app-salvia-texto);
   outline-offset: 2px;
 }
 
-.numero i {
+.numero__icone {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--app-fundo);
+  color: var(--app-salvia-texto);
   font-size: 18px;
 }
 
+.numero__textos {
+  display: grid;
+  min-width: 0;
+}
+
 .numero strong {
-  font-size: 24px;
+  font-size: 22px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
-.numero span {
-  font-size: 13px;
+.numero .numero__rotulo {
+  overflow: hidden;
+  color: var(--app-texto-2);
+  font-size: 12.5px;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* Número que é alerta: um ponto branco no canto, além da cor que não muda. */
+/* Número que é alerta: um ponto no canto, na cor do estado (o rótulo diz o que é). */
 .numero .numero__ponto {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 8px;
-  height: 8px;
+  top: 9px;
+  right: 9px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--app-tinta);
+}
+
+.numero .numero__ponto--risco {
+  background: var(--risco-tinta);
 }
 
 /* O paciente da vez: papel branco dentro do destaque, com a tinta do app. */
 .cartao {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   margin: 0;
-  padding: 20px 22px 22px;
+  padding: 20px 22px;
   border-radius: 22px;
   background: var(--app-cartao);
   color: var(--app-tinta);
@@ -583,10 +720,11 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   font-size: 15px;
 }
 
+/* O nome numa linha só (nome longo corta), a idade embaixo e o tempo de sala à direita. */
 .cartao__quem {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .cartao__rosto {
@@ -604,67 +742,101 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   gap: 2px;
 }
 
-.cartao__nome h2 {
+.cartao__nome h2,
+.cartao__nome p {
+  overflow: hidden;
   margin: 0;
-  font-size: 24px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartao__nome h2 {
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: -0.5px;
-  line-height: 1.15;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
 }
 
 .cartao__nome p {
-  margin: 0;
   color: var(--app-texto-2);
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 .cartao__estado {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 32px;
   flex: none;
   align-items: center;
   gap: 7px;
-  padding: 0 14px;
+  padding: 0 13px;
   border-radius: 999px;
   background: var(--app-veu-forte);
   color: var(--app-salvia-texto);
-  font-size: 14px;
+  font-size: 13.5px;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-.cartao__fichas {
+/* Os fatos: uma linha de texto com ícone, sem pílula. Cada um corta antes de empurrar o outro. */
+.cartao__fatos {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 4px 18px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.cartao__fichas li {
+.cartao__fatos li {
   display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
   align-items: center;
   gap: 7px;
-  min-height: 34px;
-  padding: 4px 14px;
-  border-radius: 999px;
-  background: var(--app-veu);
-  color: var(--app-salvia-texto);
+  color: var(--app-texto-2);
   font-size: 14px;
-  font-weight: 600;
 }
 
-/* O alerta: atenção é marinho sobre cinza frio; risco, o vermelho do app no véu dele. */
-.cartao__fichas .cartao__alerta {
-  background: var(--app-fria);
-  color: var(--app-tinta);
+.cartao__fatos li i {
+  flex: none;
+  color: var(--app-salvia-texto);
+  font-size: 16px;
+}
+
+.cartao__fatos li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cartao__alertas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* O alerta em selo pastel: atenção em âmbar claro, risco em rosa claro, com a tinta da família. */
+.cartao__alerta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
   font-weight: 700;
 }
 
-.cartao__fichas .cartao__alerta--risco {
-  background: var(--app-risco-veu);
-  color: var(--app-risco);
+.cartao__alerta--risco {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
 }
 
 .cartao__acoes {
@@ -710,26 +882,111 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   font-size: 18px;
 }
 
-.cartao__tambem {
+/* -------------------------------------------------------------------------- carrossel */
+
+/*
+ * O carrossel ocupa a célula inteira, e cada cartão a altura do maior: trocar de paciente não faz
+ * o destaque pular. A viewport corta nos cantos do cartão.
+ */
+.carrossel {
   display: flex;
-  flex-wrap: wrap;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.carrossel__trilho,
+.carrossel :deep(.p-carousel-content-container),
+.carrossel :deep(.p-carousel-content),
+.carrossel :deep(.p-carousel-viewport) {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.carrossel :deep(.p-carousel-content-container) {
+  overflow: hidden;
+}
+
+.carrossel :deep(.p-carousel-viewport) {
+  border-radius: 22px;
+}
+
+.carrossel :deep(.p-carousel-item-list) {
+  flex: 1;
+  align-items: stretch;
+
+  /* O PrimeVue anda em 500 ms: aqui é a troca de um cartão, 200 ms bastam. */
+  transition-duration: 200ms !important;
+  transition-timing-function: ease-out !important;
+}
+
+.carrossel :deep(.p-carousel-item) {
+  display: flex;
+}
+
+/*
+ * A altura é a do paciente aberto, não a do mais alto do carrossel: o cartão fechado não ocupa
+ * altura (só a largura, para o deslize). Assim quem tem pouco a dizer não fica com um vão no meio.
+ * Ao lado do resumo o cartão estica até a altura da fileira; a pouca sobra fica antes das ações.
+ */
+.carrossel .cartao {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.carrossel .cartao[inert] {
+  max-height: 0;
+  padding-block: 0;
+  overflow: hidden;
+}
+
+.carrossel .cartao__acoes {
+  margin-top: auto;
+}
+
+/* Os rostos de quem está na sala, no canto do pé: a paginação diz quem mais está lá dentro. */
+.carrossel__paginas {
+  display: flex;
   align-items: center;
-  gap: 6px 12px;
-  margin: 0 0 0 auto;
-  color: var(--app-texto-2);
-  font-size: 14px;
+  gap: 2px;
+  margin-inline-start: auto;
 }
 
-.cartao__outro {
-  color: var(--app-tinta);
-  font-weight: 700;
-  text-decoration: underline;
-  text-decoration-color: var(--app-regua);
-  text-underline-offset: 3px;
+.app-pj .carrossel__seta {
+  width: 36px;
+  min-height: 36px;
+  height: 36px;
+  color: var(--app-salvia-texto);
 }
 
-.cartao__outro span {
-  font-weight: 500;
+.app-pj .carrossel__rosto {
+  width: 40px;
+  min-height: 40px;
+  height: 40px;
+  padding: 0;
+  opacity: 0.55;
+  transition: opacity 150ms ease-out;
+}
+
+.app-pj .carrossel__rosto:hover {
+  opacity: 0.85;
+}
+
+/* O rosto aberto: inteiro e com o anel na cor do perfil (a forma marca, não só a cor). */
+.app-pj .carrossel__rosto--atual,
+.app-pj .carrossel__rosto--atual:hover {
+  box-shadow:
+    0 0 0 2px var(--app-cartao),
+    0 0 0 4px var(--app-destaque) !important;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carrossel :deep(.p-carousel-item-list) {
+    transition: none !important;
+  }
 }
 
 /* -------------------------------------------------------------------------------- corpo */
@@ -1009,6 +1266,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 /* ---------------------------------------------------------------------------- estreito */
 
+/*
+ * Cada cartão precisa de uns 480 px: abaixo disso eles empilham, o resumo em cima. A conta é pela
+ * largura do destaque, não da janela: com a barra recolhida cabe lado a lado mais cedo.
+ */
+@container faixa (max-width: 1060px) {
+  .destaque__miolo {
+    grid-template-areas:
+      'resumo'
+      'paciente';
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 1180px) {
   .corpo {
     grid-template-columns: minmax(0, 1fr);
@@ -1017,20 +1287,6 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   .lado {
     position: static;
     order: -1;
-  }
-
-  .destaque__miolo {
-    padding-inline: 22px;
-  }
-
-  .cartao__tambem {
-    margin-left: 0;
-  }
-}
-
-@media (max-width: 760px) {
-  .cartao__quem {
-    flex-wrap: wrap;
   }
 }
 </style>

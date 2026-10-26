@@ -218,7 +218,7 @@ watch(
 }
 
 .conta-abas__aba--atual i {
-  color: var(--pj-lugar);
+  color: var(--pj-lugar-tinta);
 }
 
 .conta-abas__aba--atual::after {

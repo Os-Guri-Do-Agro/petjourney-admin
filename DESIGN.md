@@ -251,6 +251,60 @@ Conta/login.
 Nas seções abaixo, o que a Visão geral inaugurou fica sob o subtítulo **Variante da Visão geral** —
 é a origem do que hoje vale no portal.
 
+### Design do app (o portal inteiro, 26/10/2026)
+
+**Vale por cima de tudo o que vem depois neste documento.** Depois de comparar versões do Hoje da
+Clínica, o usuário escolheu o design e o layout do app PetJourney (perfil de parceiro) e pediu que
+eles fossem para todas as telas, **com cor só em tom pastel**.
+
+- **Moldura** (`components/layout/moldura.ts`, `AppShell.vue`): a do app é a padrão em todas as
+  telas, também no tablet em pé. A barra lateral é branca, com o topo em sálvia (`--app-destaque`,
+  #76938D, um tom abaixo do #7C9B94 do app para o branco por cima passar de 3:1) e os desenhos de
+  traço; cada espaço abre com o ícone dele num quadradinho pastel (o fundo
+  da família) e recolhe pelo título, lembrado no navegador. Sem a fita do dia. A raiz leva
+  `html.moldura-app`, para diálogo e popover herdarem o tema.
+- **Tema** (`components/layout/moldura-app.css`, importado em `main.ts` depois do Trilha): os
+  tokens do Trilha passam a valer os do app — página branca e lisa, tinta marinho (#1D3557), cartão
+  sem sombra separado por régua de véu, botão do app (cantos 16, rótulo 700, ação em #627A74, apoio
+  em véu). Sombra só no que flutua.
+- **Cabeçalho** (`components/ui/UiPagina.vue`) é o `ScreenHeader` do app: a faixa sálvia de ponta
+  a ponta, colada no topo, com os desenhos de traço; **título branco direto na cor** (sem cartão
+  branco), ações em vidro com a principal em papel branco, e **as abas em pílula de vidro dentro da
+  faixa** (a aberta em papel). A capa de tela de detalhe (ficha, leito, estadia, acesso) mora nela,
+  em branco. Quem desenha a própria faixa usa o slot `destaque` (o Hoje, com o carrossel do paciente
+  e o resumo do dia). A abertura (`UiAbertura`, Início e Painel do hotel) fica só com o texto
+  branco e os números em vidro.
+- **Corpo (o layout do app, 26/10/2026, segunda passada).** O usuário recusou a primeira passada
+  por ser "só o design, não o layout" e por cartões grandes com espaço vazio. Regras, todas em
+  `moldura-app.css`: **lista de ponta a ponta** (cartão com assunto, `ui-cartao` ou folha com
+  `header`, vira seção aberta: título 17/700 e conteúdo sem caixa); **painel em véu** só para
+  formulário, resumo e aviso; **métricas numa faixa em véu**, com o ícone ao lado do número, nunca
+  um cartão por número; sem faixa colorida na borda (`ui-marca`); sem cabeçalho tingido em degradê.
+  **Nada de cartão alto com vão**: o carrossel do Hoje mede só o paciente aberto e o resumo junta o
+  conteúdo no meio.
+- **Cor só em pastel.** Nada de cor cheia nem degradê de família como fundo: entra o `--*-fundo`
+  com a `--*-tinta` por cima. No claro, as cores cheias da família (`--clinica`, `--risco`…) viram o
+  mesmo matiz em pastel, para barra, faixa de status e ponto; texto de família usa sempre a tinta.
+  Selos de contagem também em pastel. O sálvia do destaque e o botão do app são a marca, não
+  "cor forte".
+- **Nunca escuro sobre escuro, nem claro sobre claro** (pedido do usuário, 26/10/2026, depois do
+  dia do mês em tinta escura sobre a pílula escura da agenda da semana). Texto e ícone ficam a
+  3:1 ou mais do fundo real, nos dois temas. Os dois jeitos de errar que já apareceram: uma regra
+  de cor global (`.dia--hoje .dia__numero`) que pegou um componente com fundo de outro tom — regra
+  de cor em `moldura-app.css` mira o componente (`.grade .dia--hoje`), nunca a classe solta — e
+  o acento pastel usado como cor de texto/ícone sobre branco — para isso existe a `tinta` do tipo
+  (`appointment-kind.ts`) e a `--pj-lugar-tinta`. Ao mexer em cor, medir todas as telas nos dois
+  temas, não só a que mudou. A única exceção é a copy branca da arte do login, pedida assim.
+- **Medida dos blocos (26/10/2026, terceira passada).** O hero do Início leva os números numa
+  fileira sob a saudação e o código de indicação com o QR num cartão de papel à direita
+  (`UiAbertura em-linha`, slot `lado`). Os cartões dos espaços: folga de 18 px nas bordas e 14 entre
+  blocos, número em 22 px, ícone de 32, passo de 42 de altura. A entrada (login, cadastro, senha)
+  liga `html.moldura-app` e usa os mesmos tokens; o véu atrás da copy só entra quando a pata da
+  arte encosta no texto (medido no `AuthLayout`).
+- **Ao mexer, o degradê de cabeçalho e de cartão sai** (caixa dos pedidos, blocos da fila e dos
+  prontuários, fim do turno, leito crítico, avatar da conta): a cor que significa estado fica na
+  borda, no ícone e no selo.
+
 ### Design do portal (migração)
 
 Como uma tela entra no design novo, e onde cada peça mora no código:

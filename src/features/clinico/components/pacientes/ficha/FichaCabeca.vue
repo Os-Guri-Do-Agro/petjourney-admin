@@ -668,7 +668,7 @@ function destino(vista: VistaDaFicha): string {
 }
 
 .capa__aba--atual i {
-  color: var(--pj-lugar, var(--musgo));
+  color: var(--pj-lugar-tinta, var(--musgo));
 }
 
 .capa__aba--atual::after,

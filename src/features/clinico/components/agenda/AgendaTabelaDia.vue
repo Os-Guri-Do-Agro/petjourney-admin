@@ -753,7 +753,7 @@ function tomDaOcupacao(ocupacao: number) {
                             <i
                               v-else-if="item.tipo === 'tipo'"
                               :class="['marcacao__tipo', aparenciaDoTipo(card.tipo?.kind).icone]"
-                              :style="{ color: aparenciaDoTipo(card.tipo?.kind).cor }"
+                              :style="{ color: aparenciaDoTipo(card.tipo?.kind).tinta }"
                               :title="item.rotulo"
                             />
                           </AgendaCartaoMarcas>

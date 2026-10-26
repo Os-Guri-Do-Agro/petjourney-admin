@@ -317,7 +317,6 @@ const atalho = computed<AtalhoDoEspaco | null>(() => {
 .portal__frase {
   max-width: 46ch;
   margin: 0;
-  padding: 0 10px;
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.5;
@@ -326,7 +325,7 @@ const atalho = computed<AtalhoDoEspaco | null>(() => {
 .programa {
   display: grid;
   gap: 6px;
-  padding: 8px 10px 0;
+  padding-top: 4px;
 }
 
 .programa__titulo {

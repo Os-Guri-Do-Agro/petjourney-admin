@@ -354,11 +354,11 @@ const dataLonga = computed(() =>
 }
 
 .fita__movimento--chega {
-  color: var(--ok);
+  color: var(--ok-tinta);
 }
 
 .fita__movimento--sai {
-  color: var(--hotel);
+  color: var(--hotel-tinta);
 }
 
 /* As tarefas: um traço curto por tarefa, empilhado pela densidade. */
@@ -453,12 +453,12 @@ const dataLonga = computed(() =>
 }
 
 .fita__conta i {
-  color: var(--ok);
+  color: var(--ok-tinta);
   font-size: 15px;
 }
 
 .fita__conta--sai i {
-  color: var(--hotel);
+  color: var(--hotel-tinta);
 }
 
 .fita__ponto {

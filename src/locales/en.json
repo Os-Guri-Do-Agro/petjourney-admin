@@ -411,9 +411,7 @@
     "barra": {
       "pular": "Skip to content",
       "navegacao": "Main navigation",
-      "outrosEspacos": "Other spaces",
       "inicio": "Home",
-      "conta": "Account",
       "criarTitulo": "Create new",
       "criarItens": {
         "agendamento": "Appointment",
@@ -705,7 +703,8 @@
       "linkCopiado": "Link copied",
       "comoFunciona": "How it works",
       "seuCodigo": "Your referral code",
-      "maisDoCodigo": "Link, QR and scans"
+      "maisDoCodigo": "Link, QR and scans",
+      "leiturasSemana": "{total} QR scan in the last 7 days | {total} QR scans in the last 7 days"
     },
     "dia": {
       "titulo": "Today",
@@ -2106,29 +2105,59 @@
           "label": "Compact",
           "hint": "More screens visible without scrolling.",
           "hintBarra": "Shorter rows in the sidebar, to see more pages without scrolling."
-        },
-        "descricaoBarra": "The height of the sidebar rows."
+        }
       },
       "nota": "Preferences stay in this browser and apply on your next visit.",
       "aplicada": "in use",
-      "barra": {
-        "titulo": "Sidebar",
-        "descricao": "Which spaces stay open in the sidebar, with their pages in view.",
-        "secoes": {
-          "label": "Only the current space",
-          "hint": "The sidebar opens the space you are in; the others stay on one line, with the count of what needs action."
-        },
-        "lista": {
-          "label": "All spaces",
-          "hint": "Every space stays open at once, with its pages in view."
-        }
-      },
       "explicacoes": {
         "titulo": "Explanations",
         "descricao": "A short text at the top of the Portal pages, saying what each one is for.",
         "ajuda": "Helpful when you are getting started. Each page also has a button to show or hide it."
       },
-      "naHora": "Your choices apply right away and are kept in this browser."
+      "naHora": "Your choices apply right away and are kept in this browser.",
+      "navegacao": {
+        "titulo": "Navigation",
+        "descricao": "The sidebar your way. The preview shows the result right away.",
+        "previa": "Preview with your choices.",
+        "previaAutoLarga": "Preview on this screen: the sidebar stays wide.",
+        "previaAutoIcones": "Preview on this screen: the sidebar shows icons only.",
+        "largura": {
+          "titulo": "Sidebar width",
+          "larga": {
+            "label": "Wide",
+            "hint": "Icon and name for every screen."
+          },
+          "icones": {
+            "label": "Icons only",
+            "hint": "More room for the screen. The name shows on hover."
+          },
+          "auto": {
+            "label": "Automatic",
+            "hint": "Wide on screens of {largura} px or more, icons only on smaller ones."
+          }
+        },
+        "espacos": {
+          "titulo": "Spaces in the sidebar",
+          "lista": {
+            "label": "All open",
+            "hint": "Clinic, Hotel and Portal with their screens in view. Collapse a space by its name."
+          },
+          "secoes": {
+            "label": "Current one only",
+            "hint": "Opens the space you're in; the others stay on one line, with their pending total."
+          }
+        },
+        "densidade": {
+          "titulo": "Row height"
+        },
+        "avisos": {
+          "titulo": "Pending markers",
+          "numero": "Number",
+          "ponto": "Just a dot",
+          "numeroDica": "How many pending items each space and screen has.",
+          "pontoDica": "A calmer sidebar: a dot in the status colour shows where something is pending."
+        }
+      }
     },
     "perfil": {
       "fallbackName": "User",
@@ -2925,18 +2954,12 @@
     },
     "meuDia": {
       "titulo": "Today at the clinic",
-      "agora": "Now",
-      "aSeguir": "Up next",
       "semProximo": "Nothing else booked for today.",
       "esperando": "Already here",
       "esperaDe": "waiting {valor}",
       "marcarRetorno": "Book follow-up",
-      "depois": "Later",
       "continuarCom": "Continue {pet}",
       "atenderCom": "See {pet}",
-      "agendaCompleta": "Full schedule",
-      "mapaDeLeitos": "Bed map",
-      "acoesRotulo": "Today's actions",
       "resumo": {
         "urgentes": "{total} urgent matter needs your attention | {total} urgent matters need your attention",
         "pendentes": "{total} matter waiting for you | {total} matters waiting for you",
@@ -2957,160 +2980,21 @@
         "internados": "Inpatient | Inpatients",
         "indicadores": "How the day is going"
       },
-      "versoes": {
-        "rotulo": "Layout",
-        "aria": "Layout version",
-        "opcao": {
-          "foco": "App",
-          "cartoes": "Cards and rooms",
-          "lista": "Three numbers and a list",
-          "atual": "Current"
-        },
-        "estado": {
-          "sala": "In the room for {tempo}",
-          "espera": "Waiting for {tempo}",
-          "marcado": "Booked for {hora}"
-        },
-        "tambemNaSala": "Also in the room:",
-        "ninguemAgora": "No one in the room or at reception, and nothing else booked for today.",
-        "fila": "Up next",
-        "relogio": {
-          "rotulo": "Time",
-          "aria": "Demo time",
-          "movimento": "Busy morning",
-          "real": "Real time"
-        },
-        "lista": {
-          "titulo": "Today at the clinic",
-          "voltar": "Back to home",
-          "novo": "New appointment",
-          "filtros": {
-            "botao": "Show or hide filters",
-            "ativos": "Active filters",
-            "profissional": "All professionals",
-            "servico": "All services",
-            "periodo": "Period",
-            "dia": "All day",
-            "manha": "Morning",
-            "tarde": "Afternoon",
-            "busca": "Search pet or owner"
-          },
-          "numeros": {
-            "recepcao": "At reception now",
-            "pets": "pet | pets",
-            "espera": "Longest wait",
-            "min": "min",
-            "fimDoDia": "Until end of day",
-            "atendimentos": "appointment | appointments"
-          },
-          "porHorario": "Patients by hour",
-          "horaPassou": "part of the hour already gone",
-          "hora": "{h}:00",
-          "sala": {
-            "agoraNo": "Now in {sala}",
-            "nenhuma": "No consultation right now",
-            "abrir": "Open the visit",
-            "emConsulta": "{pet} in consultation",
-            "com": "with {vet}",
-            "continuar": "Continue"
-          },
-          "abas": {
-            "aria": "What to show in the list",
-            "sala": "In the room",
-            "internacao": "Inpatients",
-            "fila": "Today's queue"
-          },
-          "estado": {
-            "esperando": "Waiting",
-            "chegou": "Arrived",
-            "emConsulta": "In consultation",
-            "naRecepcao": "At reception"
-          },
-          "fila": {
-            "outros": "See the other one in the queue | See the other {n} in the queue",
-            "menos": "See less"
-          },
-          "detalhe": {
-            "paciente": "Patient",
-            "atendimento": "Visit",
-            "responsavel": "Owner",
-            "vacinas": "Vaccines",
-            "historico": "Visit history",
-            "agendar": "Book for {pet}",
-            "espera": "Wait",
-            "horario": "Time",
-            "posicao": "Queue position",
-            "posicaoValor": "#{n}",
-            "depois": "Next after",
-            "ninguem": "No one",
-            "naSala": "In the room for",
-            "sala": "Room",
-            "profissional": "Professional"
-          },
-          "internacao": {
-            "abrir": "Open in inpatients"
-          },
-          "vazio": {
-            "filtro": "Nothing matches these filters.",
-            "sala": "No one in the room right now.",
-            "internacao": "Nothing pending in inpatients."
-          }
-        },
-        "cartoes": {
-          "titulo": "Today at the clinic",
-          "busca": "Search pet or owner",
-          "novo": "New appointment",
-          "abas": "Clinic screens",
-          "frase": {
-            "sala": "{pet} is in {sala}.",
-            "espera": "{pet} has waited {tempo} at reception.",
-            "calma": "No one in the rooms or at reception right now."
-          },
-          "sala": {
-            "agoraNo": "Now in {sala}",
-            "com": "{tipo} with",
-            "responsavel": "Owner",
-            "tambem": "Also in a room",
-            "tambemValor": "{pet}, {tempo}",
-            "volta": "Back today",
-            "voltaValor": "{hora}, {tipo}",
-            "continuar": "Continue the visit",
-            "ninguem": "No one in consultation right now",
-            "proximo": "Next: {pet} at {hora}"
-          },
-          "recepcao": {
-            "titulo": "At reception",
-            "esperando": "{n} waiting",
-            "vazio": "No one waiting at reception.",
-            "todos": "See all in the schedule"
-          },
-          "acao": {
-            "titulo": "Needs action",
-            "urgentes": "{n} urgent | {n} urgent",
-            "contato": "Log contact",
-            "dose": "Log dose",
-            "resolver": "Resolve",
-            "mais": "{n} more non-urgent item | {n} more non-urgent items"
-          },
-          "dia": {
-            "titulo": "Rooms through the day",
-            "porSala": "By room",
-            "porProfissional": "By professional",
-            "aria": "Group the day line",
-            "agora": "Now",
-            "hora": "{h}:00",
-            "naSala": "In the room for {tempo}, with {vet}",
-            "esperando": "waiting {tempo}",
-            "vazio": "Nothing booked in these hours.",
-            "legenda": {
-              "andamento": "In progress",
-              "espera": "Waiting",
-              "agendado": "Booked",
-              "confirmado": "Confirmed"
-            }
-          }
-        }
-      }
+      "estado": {
+        "sala": "In the room for {tempo}",
+        "espera": "Waiting for {tempo}",
+        "marcado": "Booked for {hora}"
+      },
+      "carrossel": {
+        "grupo": "Patients in the room now",
+        "anterior": "Previous patient",
+        "proximo": "Next patient",
+        "ver": "Show {pet}",
+        "posicao": "Patient {atual} of {total}",
+        "continuar": "Continue appointment"
+      },
+      "ninguemAgora": "No one in the room or at reception, and nothing else booked for today.",
+      "fila": "Up next"
     },
     "resumo": {
       "titulo": "Clinic summary",
@@ -4009,8 +3893,29 @@
           "alergia": "Confirm the prescription despite the allergy",
           "ir": "Go to {etapa}",
           "tudoCerto": "Complaint, diagnosis and plan are recorded. Nothing pending.",
-          "depois": "Once completed, the record becomes read only and you go back to the schedule. Documents and the app summary stay available.",
-          "voltar": "Keep working"
+          "depois": "Once completed, the record becomes read only. Next you'll see what's left to hand over and who the next patient is.",
+          "voltar": "Keep working",
+          "retorno": "A time for the follow-up due in {dias} day | A time for the follow-up due in {dias} days",
+          "feito": {
+            "titulo": "Visit completed",
+            "comEste": "For this visit",
+            "fechado": "Record closed at {hora}. It's read only now.",
+            "resumoPronto": "The summary is ready for {responsavel}'s app.",
+            "resumoProntoSemNome": "The summary is ready for the pet parent's app.",
+            "entregar": "Send to the app",
+            "resumoEntregue": "Summary sent to the app at {hora}.",
+            "documentos": "The prescription, certificate and other documents are in the summary.",
+            "verDocumentos": "View documents",
+            "retornoMarcado": "Follow-up booked in the schedule.",
+            "retornoSemHorario": "Follow-up due in {dias} day, no time booked yet. The front desk books it in the schedule. | Follow-up due in {dias} days, no time booked yet. The front desk books it in the schedule.",
+            "proximo": "Next patient",
+            "esperaHa": "waiting {minutos} min at the front desk",
+            "acabouDeChegar": "just arrived at the front desk",
+            "horario": "booked for {hora}",
+            "ninguem": "No one waiting and no other bookings today.",
+            "ficar": "Stay on the record",
+            "agenda": "Back to the schedule"
+          }
         },
         "passos": {
           "estado": {
@@ -6563,14 +6468,7 @@
       "internados": "{n} inpatient | {n} inpatients"
     },
     "hoje": {
-      "recepcao": "Reception",
-      "emConsulta": "In consult",
-      "minEsperando": "min waiting",
-      "minNaSala": "min in the room",
-      "alertas": "Alerts",
-      "chamar": "Start consult",
-      "recepcaoVazia": "No one waiting in reception.",
-      "salaVazia": "No consult in progress."
+      "chamar": "Start consult"
     }
   },
   "hotel": {

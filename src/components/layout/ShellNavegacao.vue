@@ -4,12 +4,15 @@
  *
  * O espaço aberto é o da tela atual; os outros ficam fechados numa linha só, com o total de
  * pendências deles — ninguém precisa abrir o Hotel para saber que lá há sete coisas paradas.
- * No modo "lista" (Configurações), todos ficam abertos.
+ * No modo "lista" (Configurações) e na moldura do app, todos nascem abertos, e o título de cada
+ * espaço vira um botão que o recolhe e o abre de novo; o que a pessoa recolheu fica lembrado no
+ * navegador. Recolhido, o espaço mostra o total de pendências, como no outro modo.
  *
  * Os destinos do espaço aberto ficam num painel de vidro, e o destino atual acende na cor do
  * espaço. Abrir e fechar um espaço desliza.
  */
-import { computed } from 'vue'
+import Button from 'primevue/button'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
@@ -29,8 +32,52 @@ const route = useRoute()
 
 const noInicio = computed(() => route.path === '/inicio')
 
+const CHAVE_RECOLHIDOS = 'petjourney-barra-espacos-recolhidos'
+
+/** Os espaços que a pessoa recolheu. Preferência deste navegador: sem ela, todos abertos. */
+function lerRecolhidos() {
+  try {
+    const salvo = JSON.parse(window.localStorage.getItem(CHAVE_RECOLHIDOS) ?? '[]')
+
+    return new Set<string>(Array.isArray(salvo) ? salvo : [])
+  } catch {
+    return new Set<string>()
+  }
+}
+
+const recolhidos = ref(lerRecolhidos())
+
+/** Com a barra só de ícones não há título para clicar: os espaços ficam como estavam, abertos. */
+const recolhivel = computed(() => props.todosAbertos && !props.recolhida)
+
+function alternar(espaco: Espaco) {
+  const proximos = new Set(recolhidos.value)
+
+  if (proximos.has(espaco.id)) {
+    proximos.delete(espaco.id)
+  } else {
+    proximos.add(espaco.id)
+  }
+
+  recolhidos.value = proximos
+
+  try {
+    window.localStorage.setItem(CHAVE_RECOLHIDOS, JSON.stringify([...proximos]))
+  } catch {
+    /* Sem armazenamento (janela anônima bloqueada): vale só nesta visita. */
+  }
+}
+
 function aberto(espaco: Espaco) {
-  return props.todosAbertos || props.aqui.espaco?.id === espaco.id
+  if (props.todosAbertos) {
+    return !recolhivel.value || !recolhidos.value.has(espaco.id)
+  }
+
+  return props.aqui.espaco?.id === espaco.id
+}
+
+function idDaGaveta(espaco: Espaco) {
+  return `gaveta-do-espaco-${espaco.id}`
 }
 
 function destinoAtivo(id: string, espaco: Espaco) {
@@ -39,7 +86,11 @@ function destinoAtivo(id: string, espaco: Espaco) {
 </script>
 
 <template>
-  <nav class="mapa" :class="{ 'mapa--recolhida': recolhida }" :aria-label="t('shell.barra.navegacao')">
+  <nav
+    class="mapa"
+    :class="{ 'mapa--recolhida': recolhida }"
+    :aria-label="t('shell.barra.navegacao')"
+  >
     <RouterLink
       class="mapa__inicio"
       :class="{ 'mapa__inicio--ativo': noInicio }"
@@ -58,7 +109,29 @@ function destinoAtivo(id: string, espaco: Espaco) {
       class="espaco"
       :class="[`pj-lugar--${espaco.lugar}`, { 'espaco--aberto': aberto(espaco) }]"
     >
+      <!-- Com todos abertos, o título recolhe e abre o espaço; no outro modo, leva até ele. -->
+      <Button
+        v-if="recolhivel"
+        unstyled
+        type="button"
+        class="espaco__cabeca espaco__cabeca--alterna"
+        :aria-expanded="aberto(espaco)"
+        :aria-controls="idDaGaveta(espaco)"
+        @click="alternar(espaco)"
+      >
+        <span class="mapa__ladrilho espaco__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
+        <span class="mapa__rotulo espaco__nome shell-rotulo">{{ espaco.rotulo }}</span>
+        <span
+          v-if="espaco.selo && !aberto(espaco)"
+          class="mapa__selo"
+          :class="`mapa__selo--${espaco.tom ?? 'neutro'}`"
+        >
+          {{ espaco.selo }}
+        </span>
+        <i class="ph ph-caret-right espaco__seta shell-rotulo" aria-hidden="true" />
+      </Button>
       <RouterLink
+        v-else
         class="espaco__cabeca"
         :to="espaco.to"
         :aria-expanded="aberto(espaco)"
@@ -86,6 +159,7 @@ function destinoAtivo(id: string, espaco: Espaco) {
         da grade vai de 0 a 1fr). Fechada, sai da ordem do Tab e do leitor de tela.
       -->
       <div
+        :id="idDaGaveta(espaco)"
         class="espaco__gaveta"
         :inert="!aberto(espaco) || undefined"
         :aria-hidden="!aberto(espaco) || undefined"
@@ -235,6 +309,17 @@ function destinoAtivo(id: string, espaco: Espaco) {
 
 .espaco__cabeca {
   color: var(--sobre-rail);
+}
+
+/* O título que recolhe é botão: herda a linha do link, sem o desenho de botão. */
+.espaco__cabeca--alterna {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
 .espaco__icone {

@@ -2651,7 +2651,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   place-items: center;
   border-radius: 11px;
   background: var(--risco-fundo);
-  color: var(--risco);
+  color: var(--risco-tinta);
   font-size: 18px;
 }
 

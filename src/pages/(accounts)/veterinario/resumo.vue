@@ -617,7 +617,7 @@ function trocarPeriodo(periodo: PeriodoId) {
 
 .relatorio__ocupacao i {
   flex: none;
-  color: var(--clinica);
+  color: var(--clinica-tinta);
   font-size: 18px;
 }
 

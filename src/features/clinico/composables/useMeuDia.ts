@@ -1,9 +1,8 @@
 /**
  * Os dados do Hoje da Clínica, separados do desenho.
  *
- * A tela tem mais de um layout em avaliação (ver `MeuDiaVersoes.vue`), e todos leem a mesma coisa:
- * quem está na sala, quem espera na recepção, quem vem depois e o que pede ação. A conta mora
- * aqui, uma vez só, para que trocar de layout nunca troque a resposta.
+ * Quem está na sala, quem espera na recepção, quem vem depois e o que pede ação. A conta mora
+ * aqui, e o desenho (`MeuDiaFoco`) só lê: mudar o layout nunca muda a resposta.
  *
  * Volta um `reactive`: o layout recebe o objeto inteiro como prop e lê `dia.naRecepcao` direto no
  * template, sem `.value`.
@@ -22,9 +21,6 @@ import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useInternacaoStore } from '@/features/clinico/stores/internacao'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-
-/** Quantos horários o "A seguir" mostra: o que cabe ao lado das outras duas colunas. */
-const LIMITE_A_SEGUIR = 5
 
 const ENCERRADOS: Appointment['status'][] = ['cancelado', 'falta', 'finalizado']
 
@@ -94,26 +90,6 @@ export function useMeuDia() {
         .sort((a, b) => a.inicio.localeCompare(b.inicio)),
     )
   })
-
-  const proximos = computed(() => aSeguir.value.slice(0, LIMITE_A_SEGUIR))
-
-  /** Os que já saíram da sala hoje, do mais recente para o mais antigo. */
-  const finalizados = computed(() =>
-    umPorGrupo(
-      agenda.atendimentos
-        .filter((item) => item.status === 'finalizado')
-        .sort((a, b) => (b.finalizadoEm ?? b.fim).localeCompare(a.finalizadoEm ?? a.fim)),
-    ),
-  )
-
-  /** O dia inteiro em ordem de horário, sem os cancelados: a matéria da linha do dia. */
-  const doDia = computed(() =>
-    umPorGrupo(
-      agenda.atendimentos
-        .filter((item) => item.status !== 'cancelado')
-        .sort((a, b) => a.inicio.localeCompare(b.inicio)),
-    ),
-  )
 
   /**
    * O paciente da ação principal: o primeiro que está na sala, ou o primeiro da recepção, ou o
@@ -384,20 +360,23 @@ export function useMeuDia() {
       .join(', ')
   }
 
-  /** "6 de 38 atendimentos feitos hoje": o ritmo do dia, embaixo da frase principal. */
-  const andamentoDoDia = computed(() => {
+  /** Quantos atendimentos do dia (sem os cancelados) já terminaram: a barra do resumo. */
+  const progressoDoDia = computed(() => {
     const doDiaSemCancelados = umPorGrupo(
       agenda.atendimentos.filter((item) => item.status !== 'cancelado'),
     )
-    const feitos = doDiaSemCancelados.filter((item) => item.status === 'finalizado').length
 
-    return doDiaSemCancelados.length
-      ? t(
-          'inicio.espacos.clinica.andamento',
-          { feitos, total: doDiaSemCancelados.length },
-          doDiaSemCancelados.length,
-        )
-      : ''
+    return {
+      feitos: doDiaSemCancelados.filter((item) => item.status === 'finalizado').length,
+      total: doDiaSemCancelados.length,
+    }
+  })
+
+  /** "6 de 38 atendimentos feitos hoje": o ritmo do dia, embaixo da frase principal. */
+  const andamentoDoDia = computed(() => {
+    const { feitos, total } = progressoDoDia.value
+
+    return total ? t('inicio.espacos.clinica.andamento', { feitos, total }, total) : ''
   })
 
   const internados = computed(
@@ -469,15 +448,12 @@ export function useMeuDia() {
     emConsulta,
     naRecepcao,
     aSeguir,
-    proximos,
-    finalizados,
-    doDia,
     destaque,
     linhasDaPauta,
-    urgentes,
     fraseDoResumo,
     dataDeHoje,
     andamentoDoDia,
+    progressoDoDia,
     acaoPrincipal,
     indicadores,
     pet: clinico.pet,
@@ -487,9 +463,7 @@ export function useMeuDia() {
     minutosDesde,
     linhaDoAtendimento,
     linhaDoPaciente,
-    profissionaisDe,
     salasDe,
-    tipoDe: (item: Appointment) => clinico.tipo(item.typeId)?.nome ?? '',
     focoNaAgenda,
     rotaDoProntuario,
     rotaDoResumo,

@@ -610,7 +610,7 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
               <i
                 v-if="aparencia.icone"
                 :class="aparencia.icone"
-                :style="{ color: aparencia.cor }"
+                :style="{ color: aparencia.tinta }"
                 aria-hidden="true"
               />
               <strong>{{ tipo?.nome }}</strong>

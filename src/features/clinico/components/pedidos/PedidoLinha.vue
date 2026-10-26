@@ -248,7 +248,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
         <i
           v-if="aparencia.icone"
           :class="['pedido__tipo', aparencia.icone]"
-          :style="{ color: aparencia.cor }"
+          :style="{ color: aparencia.tinta }"
           aria-hidden="true"
         />
         <strong>{{ tipo?.nome }}</strong>

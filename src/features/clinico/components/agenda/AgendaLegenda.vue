@@ -257,7 +257,8 @@ const itens = computed<ItemDaLegenda[]>(() =>
   place-items: center;
   border-radius: 50%;
   background: color-mix(in oklab, var(--chave-cor) 22%, var(--superficie));
-  color: var(--chave-cor);
+  /* O acento é pastel: no ícone, misturado à tinta para ler (a mesma conta de `tinta` do tipo). */
+  color: color-mix(in oklab, var(--chave-cor) 50%, var(--tinta));
   font-size: 13px;
 }
 

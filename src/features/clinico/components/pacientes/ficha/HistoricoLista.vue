@@ -491,7 +491,7 @@ function abrir(item: Item) {
 }
 
 :deep(.p-togglebutton-checked) .filtro__icone {
-  color: var(--pj-lugar, var(--clinica));
+  color: var(--pj-lugar-tinta, var(--clinica));
 }
 
 .filtro__total {
