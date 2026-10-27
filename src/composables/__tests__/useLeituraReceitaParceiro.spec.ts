@@ -140,6 +140,44 @@ describe('fluxo da leitura', () => {
     expect(aoLer).toHaveBeenCalledTimes(1)
   })
 
+  it('guarda os avisos da leitura com texto, na ordem da API, e solta ao limpar', async () => {
+    const { estado } = await carregar()
+    const modelo = {
+      codigo: 'DOCUMENTO_MODELO',
+      mensagem: 'Este documento parece ser um modelo ou exemplo, sem validade como receita.',
+    }
+    const outroPet = { codigo: 'PET_NOME_DIFERENTE', mensagem: 'A receita parece ser do Bob.' }
+    servico.getLeituraReceita.mockResolvedValue({
+      ...PRONTA,
+      avisos: [modelo, { codigo: 'LEGIBILIDADE_RUIM', mensagem: '  ' }, outroPet],
+    })
+
+    await estado.adicionarArquivos([foto()])
+    await estado.enviar()
+    await vi.advanceTimersByTimeAsync(2000)
+
+    expect(estado.etapa).toBe('pronta')
+    expect(estado.resultado?.avisos).toEqual([modelo, outroPet])
+
+    estado.limpar()
+    expect(estado.resultado).toBeNull()
+  })
+
+  it('leitura pronta sem a lista de avisos não quebra: nenhum aviso', async () => {
+    const { estado } = await carregar()
+    servico.getLeituraReceita.mockResolvedValue({
+      ...PRONTA,
+      avisos: undefined as unknown as LeituraReceitaParceiro['avisos'],
+    })
+
+    await estado.adicionarArquivos([foto()])
+    await estado.enviar()
+    await vi.advanceTimersByTimeAsync(2000)
+
+    expect(estado.etapa).toBe('pronta')
+    expect(estado.resultado?.avisos).toEqual([])
+  })
+
   it('para de perguntar por volta de 60 s (na consulta que passa do prazo) e "Ver de novo" volta a consultar', async () => {
     const { estado } = await carregar()
     servico.getLeituraReceita.mockResolvedValue(leitura())

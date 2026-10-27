@@ -615,6 +615,17 @@ const regra = computed(() => {
             }}
           </span>
         </div>
+        <!-- O que a API viu na receita (modelo sem validade, outro pet, letra difícil): logo abaixo
+             do título, porque muda o quanto confiar nos remédios que entraram na lista. -->
+        <ul v-if="leitura.resultado.avisos.length" class="lrc__avisos">
+          <li
+            v-for="(avisoDaLeitura, indice) in leitura.resultado.avisos"
+            :key="`${avisoDaLeitura.codigo}-${indice}`"
+          >
+            <i class="ph ph-warning" aria-hidden="true" />
+            <span>{{ avisoDaLeitura.mensagem }}</span>
+          </li>
+        </ul>
         <p v-if="leitura.resultado.cortados > 0" class="lrc__texto">
           {{
             t(
@@ -857,6 +868,31 @@ const regra = computed(() => {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
+}
+
+/* Avisos da leitura: a urgência fica no ícone, na cor de atenção; o texto segue na tinta. */
+.lrc__avisos {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lrc__avisos li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--tinta);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.lrc__avisos i {
+  flex: 0 0 auto;
+  color: var(--atencao-tinta);
+  font-size: 15px;
+  transform: translateY(2px);
 }
 
 .lrc__acoes {
@@ -1235,6 +1271,21 @@ const regra = computed(() => {
 @media (max-width: 640px) {
   .lrc__leitura {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Estreito: a ação desce para baixo do texto, como nas outras caixas. Ao lado, ela ficava com
+     metade da largura e os avisos quebravam a cada duas palavras. */
+  .lrc__caixa--pronta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lrc__caixa--pronta > .lrc__acoes {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .lrc__caixa--pronta .lrc__espaco {
+    display: block;
   }
 }
 </style>

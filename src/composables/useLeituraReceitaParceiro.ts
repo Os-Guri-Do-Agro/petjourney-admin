@@ -61,6 +61,9 @@ export type AvisoLeituraReceita =
   /** Mensagem da API (já no idioma do pedido) ou de rede. */
   | { tipo: 'mensagem'; texto: string }
 
+/** Aviso da leitura pronta (receita de exemplo, outro pet, letra difícil), com o texto da API. */
+export type AvisoDaLeitura = LeituraReceitaParceiro['avisos'][number]
+
 export type ResultadoLeituraReceita = {
   /** Remédios lidos (antes do teto da lista). */
   lidos: number
@@ -68,6 +71,8 @@ export type ResultadoLeituraReceita = {
   cortados: number
   /** Algum campo aplicado ficou com "Confira". */
   temConferir: boolean
+  /** Na ordem da API, que põe o de documento modelo primeiro. */
+  avisos: AvisoDaLeitura[]
 }
 
 export type VinculoLeituraReceita = {
@@ -84,7 +89,7 @@ type Opcoes = {
   /** Anexos já escolhidos no formulário da anotação. */
   anexosDoFormulario: MaybeRefOrGetter<number>
   /** Põe os remédios lidos no formulário. Chamado uma vez por leitura. */
-  aoLer: (leitura: LeituraReceitaParceiro) => Omit<ResultadoLeituraReceita, 'lidos'>
+  aoLer: (leitura: LeituraReceitaParceiro) => Omit<ResultadoLeituraReceita, 'lidos' | 'avisos'>
   /** 409: o acesso encerrou com a tela aberta. */
   aoEncerrarAcesso: () => void
   /** 503 (ou acesso que não é de consulta): o botão some; a tela avisa com a mensagem da API. */
@@ -95,6 +100,17 @@ type Opcoes = {
 
 function mensagemDoErro(erro: unknown): string {
   return erro instanceof Error ? erro.message : ''
+}
+
+/** Só os avisos com texto: a API já manda a mensagem no idioma do pedido, e o portal não traduz código. */
+function avisosComTexto(leitura: LeituraReceitaParceiro): AvisoDaLeitura[] {
+  if (!Array.isArray(leitura.avisos)) {
+    return []
+  }
+
+  return leitura.avisos.filter(
+    (aviso) => typeof aviso?.mensagem === 'string' && aviso.mensagem.trim() !== '',
+  )
 }
 
 export function useLeituraReceitaParceiro(opcoes: Opcoes) {
@@ -191,6 +207,7 @@ export function useLeituraReceitaParceiro(opcoes: Opcoes) {
       resultado.value = {
         lidos: Array.isArray(leitura.itensFormulario) ? leitura.itensFormulario.length : 0,
         ...aplicado,
+        avisos: avisosComTexto(leitura),
       }
       vinculo.value = {
         id,
