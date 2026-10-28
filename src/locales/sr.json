@@ -298,7 +298,7 @@
       "programas": "Programi",
       "divulgacao": "Promocija",
       "acessos": "Pristupi",
-      "financeiro": "Zarada od preporuka",
+      "financeiro": "Novčanik",
       "settings": "Podešavanja"
     }
   },
@@ -1298,6 +1298,16 @@
       "baixar": "Preuzmite",
       "arquivoN": "Fajl {n}",
       "emissao": "Izdato: {data}",
+      "tipos": {
+        "CARTEIRA_VACINACAO": "Knjižica vakcinacije",
+        "EXAME_SANGUE": "Analiza krvi",
+        "RAIO_X": "Rendgen",
+        "ULTRASSOM": "Ultrazvuk",
+        "RECEITA_MEDICA": "Recept",
+        "REGISTRO_NASCIMENTO": "Izvod o rođenju",
+        "CERTIFICADO_PEDIGREE": "Rodovnik",
+        "OUTRO": "Drugo"
+      },
       "expiracao": "Važi do {data}",
       "semArquivo": "Nema dostupnog fajla"
     },
@@ -1333,7 +1343,14 @@
       "title": "Nova beleška",
       "lede": "Zabeležite uslugu i ono što staratelj treba da zna. Prilozi ostaju povezani sa ovom posetom.",
       "servico": "Obavljena usluga",
-      "servicoPlaceholder": "Kupanje i šišanje",
+      "servicoExemplo": {
+        "BANHO": "Kupanje sa negom",
+        "TOSA": "Higijensko šišanje",
+        "CONSULTA": "Kontrolni pregled",
+        "EXAME": "Kompletna krvna slika",
+        "HOTEL": "Boravak od 3 noći",
+        "OUTRO": "Trening"
+      },
       "texto": "Beleška",
       "textoPlaceholder": "Kako je prošla poseta, napomene za staratelja...",
       "profissional": "Stručno lice (opciono)",
@@ -1771,7 +1788,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Zarada od preporuka",
+    "title": "Novčanik",
     "tabs": {
       "ariaLabel": "Kartice: {labels}",
       "visao": {
@@ -1905,7 +1922,7 @@
       }
     },
     "detail": {
-      "subtitle": "Zarada od preporuka",
+      "subtitle": "Novčanik",
       "title": "Detalji isplate",
       "back": "Nazad",
       "loadingAria": "Učitavanje detalja isplate",
@@ -5456,6 +5473,13 @@
         "pausar": "Pauzirajte",
         "continuar": "Nastavite",
         "tentarDeNovo": "Pokušajte ponovo"
+      },
+      "conclusao": {
+        "titulo": "Uvoz je završen",
+        "frase": "U bazu klinike je uneto {entraram} od {total} redova.",
+        "completar": "{n} zapis ima nešto da se dopuni. | {n} zapisa imaju nešto da se dopuni. | {n} zapisa ima nešto da se dopuni.",
+        "fora": "{n} red nije unet: spisak za ispravku je u izveštaju. | {n} reda nisu uneta: spisak za ispravku je u izveštaju. | {n} redova nije uneto: spisak za ispravku je u izveštaju.",
+        "verRelatorio": "Pogledajte izveštaj"
       },
       "relatorio": {
         "chip": "Uvoz je završen",

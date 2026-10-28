@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import type { ItemSnapshot, SnapshotPetCompartilhado } from '@/service/parceiro/types'
 import {
   carimboDoResumo,
+  chaveDoTipoDeDocumento,
   estadoDoBloco,
   estadoTratamentosContinuos,
   montarBlocosLista,
@@ -300,5 +301,19 @@ describe('estadoTratamentosContinuos', () => {
     const encerrado = fonte({ status: 'REVOGADO', snapshot: null, categorias: undefined })
 
     expect(estadoTratamentosContinuos(encerrado)).toBe('OCULTO')
+  })
+})
+
+describe('chaveDoTipoDeDocumento', () => {
+  it('traduz os tipos que o app grava pelo rótulo em português', () => {
+    expect(chaveDoTipoDeDocumento('Exame de Sangue')).toBe('EXAME_SANGUE')
+    expect(chaveDoTipoDeDocumento('Carteira de Vacinação')).toBe('CARTEIRA_VACINACAO')
+    expect(chaveDoTipoDeDocumento(' Raio-X ')).toBe('RAIO_X')
+  })
+
+  it('devolve null para texto livre e vazio, que a tela mostra como veio', () => {
+    expect(chaveDoTipoDeDocumento('Laudo do cardiologista')).toBeNull()
+    expect(chaveDoTipoDeDocumento(null)).toBeNull()
+    expect(chaveDoTipoDeDocumento('')).toBeNull()
   })
 })

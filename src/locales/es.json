@@ -298,7 +298,7 @@
       "programas": "Programas",
       "divulgacao": "Divulgación",
       "acessos": "Accesos",
-      "financeiro": "Ganancias por referidos",
+      "financeiro": "Cartera",
       "settings": "Configuración"
     }
   },
@@ -1298,6 +1298,16 @@
       "baixar": "Descargar",
       "arquivoN": "Archivo {n}",
       "emissao": "Emitido el {data}",
+      "tipos": {
+        "CARTEIRA_VACINACAO": "Cartilla de vacunación",
+        "EXAME_SANGUE": "Análisis de sangre",
+        "RAIO_X": "Radiografía",
+        "ULTRASSOM": "Ecografía",
+        "RECEITA_MEDICA": "Receta médica",
+        "REGISTRO_NASCIMENTO": "Registro de nacimiento",
+        "CERTIFICADO_PEDIGREE": "Certificado de pedigrí",
+        "OUTRO": "Otro"
+      },
       "expiracao": "Válido hasta {data}",
       "semArquivo": "Sin archivo disponible"
     },
@@ -1333,7 +1343,14 @@
       "title": "Nueva nota",
       "lede": "Registre el servicio y lo que el tutor necesita saber. Los adjuntos quedan vinculados a esta atención.",
       "servico": "Servicio realizado",
-      "servicoPlaceholder": "Baño y peluquería",
+      "servicoExemplo": {
+        "BANHO": "Baño con hidratación",
+        "TOSA": "Corte higiénico",
+        "CONSULTA": "Consulta de control",
+        "EXAME": "Hemograma completo",
+        "HOTEL": "Estancia de 3 noches",
+        "OUTRO": "Sesión de adiestramiento"
+      },
       "texto": "Nota",
       "textoPlaceholder": "Cómo fue la atención, observaciones para el tutor...",
       "profissional": "Profesional (opcional)",
@@ -1771,7 +1788,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Ganancias por referidos",
+    "title": "Cartera",
     "tabs": {
       "ariaLabel": "Pestañas: {labels}",
       "visao": {
@@ -1905,7 +1922,7 @@
       }
     },
     "detail": {
-      "subtitle": "Ganancias por referidos",
+      "subtitle": "Cartera",
       "title": "Detalle del retiro",
       "back": "Volver",
       "loadingAria": "Cargando detalle del retiro",
@@ -5456,6 +5473,13 @@
         "pausar": "Pausar",
         "continuar": "Continuar",
         "tentarDeNovo": "Intentar de nuevo"
+      },
+      "conclusao": {
+        "titulo": "Importación completada",
+        "frase": "{entraram} de {total} filas entraron en la base de la clínica.",
+        "completar": "{n} registro tiene algo por completar. | {n} registros tienen algo por completar.",
+        "fora": "{n} fila no entró: la lista para corregir está en el informe. | {n} filas no entraron: la lista para corregir está en el informe.",
+        "verRelatorio": "Ver el informe"
       },
       "relatorio": {
         "chip": "Importación completada",

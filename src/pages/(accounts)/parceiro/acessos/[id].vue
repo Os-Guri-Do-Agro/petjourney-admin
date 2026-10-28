@@ -85,6 +85,7 @@ import type {
 } from '@/utils/parceiro/snapshot-compartilhado'
 import {
   carimboDoResumo,
+  chaveDoTipoDeDocumento,
   estadoDoBloco,
   estadoTratamentosContinuos,
   montarBlocosLista,
@@ -293,6 +294,11 @@ const servicoLabel = computed(() => {
   return t(`acessos.servico.${detalhe.value.tipoServico}`)
 })
 
+/** O exemplo do "Serviço realizado" segue o tipo do acesso: "Banho e tosa" numa consulta confundia. */
+const exemploDeServico = computed(() =>
+  t(`acessos.anotacao.servicoExemplo.${detalhe.value?.tipoServico ?? 'OUTRO'}`),
+)
+
 function normalizeTutorText(value: string | null | undefined) {
   return value?.replace(/\s+/g, ' ').trim() ?? ''
 }
@@ -352,6 +358,21 @@ function textoMotivo(bloco: BlocoSnapshot, motivo: MotivoVazioRender) {
   return t('acessos.snapshot.vazio.generico')
 }
 
+/**
+ * Linha recolhida: os primeiros nomes, para dar para ler sem abrir.
+ *
+ * No diagnóstico o título é só a categoria ("Dermatológica, Dermatológica, Ortopédica") e o que a
+ * veterinária precisa ler é o detalhe ("Canine atopic dermatitis"): ele vem primeiro quando
+ * existe. E o mesmo nome não se repete (a antirrábica de cada ano dizia "Rabies, ..., Rabies").
+ */
+function resumoDoBloco(id: BlocoLista, items: { titulo: string; detalhe?: string }[]) {
+  const nomes = items.map((item) =>
+    id === 'diagnosticos' && item.detalhe ? item.detalhe : item.titulo,
+  )
+
+  return [...new Set(nomes)].join(', ')
+}
+
 /** Categoria compartilhada com bloco vazio continua rendendo seção — com o motivo. */
 const snapshotListSections = computed(() =>
   montarBlocosLista(fonteSnapshot.value).map((bloco) => {
@@ -367,8 +388,7 @@ const snapshotListSections = computed(() =>
       // Alergia sem nenhuma registrada não é alerta: o tom quente só com item na lista.
       tone: items.length ? APARENCIA_BLOCO[bloco.id].tone : 'default',
       items,
-      /** Linha recolhida mostra os primeiros nomes: dá para ler sem abrir. */
-      resumo: items.map((item) => item.titulo).join(', '),
+      resumo: resumoDoBloco(bloco.id, items),
       vazioTexto: bloco.motivo ? textoMotivo(bloco.id, bloco.motivo) : '',
     }
   }),
@@ -427,14 +447,18 @@ const tratamentosVazioTexto = computed(() =>
 const documentos = computed(() => {
   const lista = detalhe.value?.snapshot?.documentos ?? []
 
-  return lista.map((doc, index) => ({
-    key: doc.origemId || `${doc.nome}-${index}`,
-    nome: doc.nome,
-    tipo: doc.tipo,
-    emissao: doc.dataEmissao ? formatDate(doc.dataEmissao) : null,
-    expiracao: doc.dataExpiracao ? formatDate(doc.dataExpiracao) : null,
-    arquivos: doc.arquivoIds.map((id) => ({ id, nome: doc.nome })),
-  }))
+  return lista.map((doc, index) => {
+    const chaveDoTipo = chaveDoTipoDeDocumento(doc.tipo)
+
+    return {
+      key: doc.origemId || `${doc.nome}-${index}`,
+      nome: doc.nome,
+      tipo: chaveDoTipo ? t(`acessos.documentos.tipos.${chaveDoTipo}`) : doc.tipo,
+      emissao: doc.dataEmissao ? formatDate(doc.dataEmissao) : null,
+      expiracao: doc.dataExpiracao ? formatDate(doc.dataExpiracao) : null,
+      arquivos: doc.arquivoIds.map((id) => ({ id, nome: doc.nome })),
+    }
+  })
 })
 
 const documentosEstado = computed(() =>
@@ -1755,7 +1779,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     id="anot-servico"
                     v-model="anotacaoForm.servicoRealizado"
                     :maxlength="LIMITES_CAMPOS_LIVRES.servicoRealizado"
-                    :placeholder="t('acessos.anotacao.servicoPlaceholder')"
+                    :placeholder="exemploDeServico"
                     :invalid="faltaObrigatorio && !anotacaoForm.servicoRealizado.trim()"
                     aria-required="true"
                   />

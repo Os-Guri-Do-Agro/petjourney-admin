@@ -298,7 +298,7 @@
       "programas": "Programas",
       "divulgacao": "Divulgação",
       "acessos": "Acessos",
-      "financeiro": "Ganhos de indicação",
+      "financeiro": "Carteira",
       "settings": "Configurações"
     }
   },
@@ -1298,6 +1298,16 @@
       "baixar": "Baixar",
       "arquivoN": "Arquivo {n}",
       "emissao": "Emitido em {data}",
+      "tipos": {
+        "CARTEIRA_VACINACAO": "Carteira de vacinação",
+        "EXAME_SANGUE": "Exame de sangue",
+        "RAIO_X": "Raio-X",
+        "ULTRASSOM": "Ultrassom",
+        "RECEITA_MEDICA": "Receita médica",
+        "REGISTRO_NASCIMENTO": "Registro de nascimento",
+        "CERTIFICADO_PEDIGREE": "Certificado de pedigree",
+        "OUTRO": "Outro"
+      },
       "expiracao": "Válido até {data}",
       "semArquivo": "Sem arquivo disponível"
     },
@@ -1333,7 +1343,14 @@
       "title": "Nova anotação",
       "lede": "Registre o serviço e o que o responsável precisa saber. Anexos ficam vinculados a este atendimento.",
       "servico": "Serviço realizado",
-      "servicoPlaceholder": "Banho e tosa",
+      "servicoExemplo": {
+        "BANHO": "Banho com hidratação",
+        "TOSA": "Tosa higiênica",
+        "CONSULTA": "Consulta de retorno",
+        "EXAME": "Hemograma completo",
+        "HOTEL": "Hospedagem de 3 diárias",
+        "OUTRO": "Sessão de adestramento"
+      },
       "texto": "Anotação",
       "textoPlaceholder": "Como foi o atendimento, observações para o responsável...",
       "profissional": "Profissional (opcional)",
@@ -1771,7 +1788,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Ganhos de indicação",
+    "title": "Carteira",
     "tabs": {
       "ariaLabel": "Abas: {labels}",
       "visao": {
@@ -1905,7 +1922,7 @@
       }
     },
     "detail": {
-      "subtitle": "Ganhos de indicação",
+      "subtitle": "Carteira",
       "title": "Detalhe do saque",
       "back": "Voltar",
       "loadingAria": "Carregando detalhe do saque",
@@ -5456,6 +5473,13 @@
         "pausar": "Pausar",
         "continuar": "Continuar",
         "tentarDeNovo": "Tentar de novo"
+      },
+      "conclusao": {
+        "titulo": "Importação concluída",
+        "frase": "{entraram} de {total} linhas entraram na base da clínica.",
+        "completar": "{n} cadastro tem algo a completar. | {n} cadastros têm algo a completar.",
+        "fora": "{n} linha não entrou: a lista para corrigir está no relatório. | {n} linhas não entraram: a lista para corrigir está no relatório.",
+        "verRelatorio": "Ver o relatório"
       },
       "relatorio": {
         "chip": "Importação concluída",

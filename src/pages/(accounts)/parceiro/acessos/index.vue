@@ -275,6 +275,14 @@ const avisoDoCadastro = computed(() => {
 const podeAbrirVinculo = computed(() => modoDoVinculo(store.status) !== null)
 
 /**
+ * A dica de bloqueio só com o status em mãos: enquanto ele carrega o botão fica parado, mas dizer
+ * "Disponível após a aprovação" a uma empresa já aprovada assusta quem acabou de entrar.
+ */
+const dicaDoVinculo = computed(() =>
+  store.status && !podeAbrirVinculo.value ? t('acessos.vincular.bloqueado') : undefined,
+)
+
+/**
  * Digitar rápido dispara várias buscas; a resposta lenta de uma tecla antiga pode
  * chegar depois da nova e sobrescrever a lista. Só a requisição mais recente
  * escreve no estado.
@@ -955,7 +963,7 @@ useRevalidarAoVoltar(() => {
         icon="ph ph-link"
         :label="t('acessos.vincular.cta')"
         :disabled="!podeAbrirVinculo"
-        :title="!podeAbrirVinculo ? t('acessos.vincular.bloqueado') : undefined"
+        :title="dicaDoVinculo"
         @click="vincularVisible = true"
       />
     </template>
@@ -1229,7 +1237,7 @@ useRevalidarAoVoltar(() => {
             icon="ph ph-link"
             :label="t('acessos.vincular.cta')"
             :disabled="!podeAbrirVinculo"
-            :title="!podeAbrirVinculo ? t('acessos.vincular.bloqueado') : undefined"
+            :title="dicaDoVinculo"
             @click="vincularVisible = true"
           />
         </div>

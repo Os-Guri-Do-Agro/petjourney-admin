@@ -19,10 +19,12 @@
  * garante que nada saiu da planilha calado. Quem quiser conferir abre o painel.
  */
 import Button from 'primevue/button'
-import { computed, ref } from 'vue'
+import Dialog from 'primevue/dialog'
+import { computed, onBeforeUnmount, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
+import AgendaDialogoTopo from '../agenda/AgendaDialogoTopo.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import { useColunasDaPlanilha } from '../../composables/useColunasDaPlanilha'
 import { useRotulosDaMigracao } from '../../composables/useRotulosDaMigracao'
@@ -158,9 +160,107 @@ const oQueEntra = computed(() => {
 
 // ------------------------------------------------------------------ progresso
 
-const percentual = computed(() =>
-  migracao.total === 0 ? 100 : Math.round((migracao.cursor / migracao.total) * 100),
+/*
+ * O número real só muda quando um lote volta: com 115 linhas a barra ia de 0% a 70% e acabava.
+ * Dentro do lote ela anda pela estimativa (o tempo por linha do lote anterior, ou um palpite no
+ * primeiro) e para em 90% dele, sem contar o que não voltou. Quando o lote volta, encaixa no real;
+ * se ele falha, volta ao que foi gravado. Com movimento reduzido, só o número real.
+ */
+const MS_POR_LINHA_PALPITE = 36
+const TETO_DENTRO_DO_LOTE = 0.9
+const reduzMovimento =
+  typeof window !== 'undefined' &&
+  window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+
+const linhasNaBarra = ref(migracao.cursor)
+let msPorLinha = MS_POR_LINHA_PALPITE
+let inicioDoLote = 0
+let linhasDoLote = 0
+let quadro = 0
+
+function andarDentroDoLote() {
+  const estimadas = Math.min(
+    linhasDoLote * TETO_DENTRO_DO_LOTE,
+    (performance.now() - inicioDoLote) / msPorLinha,
+  )
+
+  linhasNaBarra.value = migracao.cursor + estimadas
+  quadro = requestAnimationFrame(andarDentroDoLote)
+}
+
+watch(
+  () => migracao.loteEmVoo,
+  (emVoo) => {
+    cancelAnimationFrame(quadro)
+
+    if (emVoo) {
+      inicioDoLote = performance.now()
+      linhasDoLote = Math.min(TAMANHO_DO_LOTE, migracao.total - migracao.cursor)
+
+      if (!reduzMovimento) {
+        quadro = requestAnimationFrame(andarDentroDoLote)
+      }
+
+      return
+    }
+
+    /* O lote voltou (o cursor já andou): o tempo dele afina a estimativa do próximo. */
+    if (linhasDoLote > 0 && migracao.estado !== 'falhou') {
+      msPorLinha = (performance.now() - inicioDoLote) / linhasDoLote
+    }
+
+    linhasNaBarra.value = migracao.cursor
+  },
+  /*
+   * Na hora, e não antes do próximo desenho: a loja fecha um lote e abre o seguinte no mesmo
+   * instante, e o observador de sempre via "em voo" antes e depois, sem a passagem. A conta do
+   * primeiro lote seguia somando por cima do número gravado ("152 de 115").
+   */
+  { flush: 'sync' },
 )
+
+watch(
+  () => migracao.cursor,
+  (cursor) => {
+    if (!migracao.loteEmVoo) {
+      linhasNaBarra.value = cursor
+    }
+  },
+  { flush: 'sync' },
+)
+
+onBeforeUnmount(() => cancelAnimationFrame(quadro))
+
+const linhasVisiveis = computed(() =>
+  Math.min(migracao.total, Math.floor(Math.max(linhasNaBarra.value, migracao.cursor))),
+)
+
+const percentual = computed(() =>
+  migracao.total === 0 ? 100 : Math.round((linhasVisiveis.value / migracao.total) * 100),
+)
+
+// ------------------------------------------------------------------ conclusão
+
+/*
+ * Ao terminar, uma janela diz que acabou e o que fazer agora. Só na passagem de "importando" para
+ * "concluída": voltar à página com a importação já feita mostra o relatório, sem repetir o aviso.
+ */
+const conclusaoAberta = ref(false)
+const idDaConclusao = useId()
+
+watch(
+  () => migracao.estado,
+  (agora, antes) => {
+    if (agora === 'concluida' && antes !== undefined && antes !== 'concluida') {
+      conclusaoAberta.value = true
+    }
+  },
+)
+
+function verPacientes() {
+  conclusaoAberta.value = false
+  void router.push('/veterinario/pacientes')
+}
 
 const lote = computed(() => ({
   atual: Math.min(
@@ -266,16 +366,28 @@ function abrirPaciente(petId: string) {
 
     <!-- -------------------------------------------------------------- progresso -->
     <div v-if="migracao.estado !== 'parada' && migracao.estado !== 'concluida'" class="progresso">
-      <p class="progresso__numero">
+      <!--
+        A tela mostra a estimativa, que anda a cada quadro; o leitor de tela ouve só o número real,
+        que muda por lote. Com o anúncio a cada quadro, a região viva falaria sem parar.
+      -->
+      <p class="progresso__numero" aria-hidden="true">
         <strong class="ui-num">
           {{
             t('clinico.migracao.importacao.feitas', {
-              feitas: formato.numero(migracao.cursor, 0),
+              feitas: formato.numero(linhasVisiveis, 0),
               total: formato.numero(migracao.total, 0),
             })
           }}
         </strong>
         <span class="ui-num">{{ formato.percentual(percentual / 100) }}</span>
+      </p>
+      <p class="sr-only">
+        {{
+          t('clinico.migracao.importacao.feitas', {
+            feitas: formato.numero(migracao.cursor, 0),
+            total: formato.numero(migracao.total, 0),
+          })
+        }}
       </p>
       <div
         class="progresso__barra"
@@ -572,6 +684,77 @@ function abrirPaciente(petId: string) {
     v-model:filtro="filtroDoPainel"
     @abrir="abrirPaciente"
   />
+
+  <Dialog
+    v-model:visible="conclusaoAberta"
+    modal
+    :draggable="false"
+    :aria-labelledby="idDaConclusao"
+    class="clinic-dialog clinic-scope agenda-dialogo conclusao"
+    :style="{ width: 'min(32rem, calc(100vw - 2rem))' }"
+  >
+    <template #header>
+      <!-- O arquivo vai pelo slot: o `subtitulo` põe maiúscula na primeira letra, feito para datas. -->
+      <AgendaDialogoTopo
+        :id="idDaConclusao"
+        :titulo="t('clinico.migracao.conclusao.titulo')"
+        icone="ph ph-check-circle"
+        tom="ok"
+      >
+        {{ migracao.planilha?.arquivo }}
+      </AgendaDialogoTopo>
+    </template>
+
+    <p class="conclusao__frase">
+      {{
+        t('clinico.migracao.conclusao.frase', {
+          entraram: formato.numero(entram, 0),
+          total: formato.numero(itens.length, 0),
+        })
+      }}
+    </p>
+
+    <ul class="conclusao__lista">
+      <li v-for="linha in oQueEntra" :key="linha">
+        <i class="ph ph-check" aria-hidden="true" />
+        <span>{{ linha }}</span>
+      </li>
+      <li v-if="paraCompletar.length" class="conclusao__item--atencao">
+        <i class="ph ph-pencil-simple" aria-hidden="true" />
+        <span>{{
+          t(
+            'clinico.migracao.conclusao.completar',
+            { n: formato.numero(paraCompletar.length, 0) },
+            paraCompletar.length,
+          )
+        }}</span>
+      </li>
+      <li v-if="fora.length" class="conclusao__item--risco">
+        <i class="ph ph-x-circle" aria-hidden="true" />
+        <span>{{
+          t('clinico.migracao.conclusao.fora', { n: formato.numero(fora.length, 0) }, fora.length)
+        }}</span>
+      </li>
+    </ul>
+
+    <template #footer>
+      <Button
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-list-checks"
+        :label="t('clinico.migracao.conclusao.verRelatorio')"
+        @click="conclusaoAberta = false"
+      />
+      <Button
+        type="button"
+        icon="ph ph-users"
+        :label="t('clinico.migracao.relatorio.verPacientes')"
+        autofocus
+        @click="verPacientes"
+      />
+    </template>
+  </Dialog>
 </template>
 
 <style scoped>
@@ -817,5 +1000,46 @@ function abrirPaciente(petId: string) {
   .progresso__cheia {
     transition: none;
   }
+}
+
+/* ------------------------------------------------------------------------------ conclusão */
+
+.conclusao__frase {
+  margin: 0 0 14px;
+  color: var(--tinta);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.conclusao__lista {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.conclusao__lista li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.conclusao__lista .ph {
+  flex: none;
+  margin-top: 2px;
+  color: var(--ok-tinta);
+  font-size: 16px;
+}
+
+.conclusao__item--atencao .ph {
+  color: var(--atencao-tinta);
+}
+
+.conclusao__item--risco .ph {
+  color: var(--risco-tinta);
 }
 </style>

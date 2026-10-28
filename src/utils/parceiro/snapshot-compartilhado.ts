@@ -227,3 +227,24 @@ export function carimboDoResumo(fonte: {
     atualizado,
   }
 }
+
+/**
+ * Tipo de documento do cofre do responsável. A API guarda o rótulo em português que o app usa como
+ * chave estável ("Carteira de Vacinação", "Exame de Sangue"...), e o app traduz pela mesma tabela
+ * (`DOCUMENTO_TIPO_KEY` no petjourney-app). Sem isto o portal em inglês mostrava "Exame de Sangue".
+ * Tipo fora da tabela (texto livre do "Outro") volta `null` e a tela mostra como veio.
+ */
+const CHAVE_DO_TIPO_DE_DOCUMENTO: Record<string, string> = {
+  'Carteira de Vacinação': 'CARTEIRA_VACINACAO',
+  'Exame de Sangue': 'EXAME_SANGUE',
+  'Raio-X': 'RAIO_X',
+  Ultrassom: 'ULTRASSOM',
+  'Receita Médica': 'RECEITA_MEDICA',
+  'Registro de Nascimento': 'REGISTRO_NASCIMENTO',
+  'Certificado de Pedigree': 'CERTIFICADO_PEDIGREE',
+  Outro: 'OUTRO',
+}
+
+export function chaveDoTipoDeDocumento(tipo: string | null | undefined): string | null {
+  return tipo ? (CHAVE_DO_TIPO_DE_DOCUMENTO[tipo.trim()] ?? null) : null
+}

@@ -15,7 +15,7 @@ const props = withDefaults(
     titulo: string
     subtitulo?: string
     icone: string
-    tom?: 'clinica' | 'atencao' | 'risco'
+    tom?: 'clinica' | 'atencao' | 'risco' | 'ok'
   }>(),
   { subtitulo: '', tom: 'clinica' },
 )
@@ -69,6 +69,11 @@ const subtituloComInicial = computed(() =>
 .topo__icone--risco {
   background: var(--risco-fundo);
   color: var(--risco-tinta);
+}
+
+.topo__icone--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
 }
 
 .topo__texto {

@@ -133,71 +133,75 @@ export const migracaoRepository = {
     itens: ItemDoPlano[],
     vinculosAnteriores: VinculosDaImportacao,
   ): Promise<{ resultados: ResultadoDaLinha[]; vinculos: VinculosDaImportacao }> {
-    return simularChamada('migracao.importar', () => {
-      const dataset = getDataset()
-      const vinculos: VinculosDaImportacao = {
-        tutores: { ...vinculosAnteriores.tutores },
-        animais: { ...vinculosAnteriores.animais },
-      }
-
-      const resultados = itens.map((item): ResultadoDaLinha => {
-        if (item.situacao === 'fora' || item.situacao === 'pendente') {
-          return { linha: item.linha, situacao: item.situacao, tutorId: null, petId: null }
+    return simularChamada(
+      'migracao.importar',
+      () => {
+        const dataset = getDataset()
+        const vinculos: VinculosDaImportacao = {
+          tutores: { ...vinculosAnteriores.tutores },
+          animais: { ...vinculosAnteriores.animais },
         }
 
-        const tutorId = garantirResponsavel(item, vinculos)
+        const resultados = itens.map((item): ResultadoDaLinha => {
+          if (item.situacao === 'fora' || item.situacao === 'pendente') {
+            return { linha: item.linha, situacao: item.situacao, tutorId: null, petId: null }
+          }
 
-        if (item.situacao === 'contato' || !item.animal || !tutorId) {
-          return { linha: item.linha, situacao: 'contato', tutorId, petId: null }
-        }
+          const tutorId = garantirResponsavel(item, vinculos)
 
-        if (item.juntaComLinha !== null) {
-          return {
-            linha: item.linha,
-            situacao: 'junta',
+          if (item.situacao === 'contato' || !item.animal || !tutorId) {
+            return { linha: item.linha, situacao: 'contato', tutorId, petId: null }
+          }
+
+          if (item.juntaComLinha !== null) {
+            return {
+              linha: item.linha,
+              situacao: 'junta',
+              tutorId,
+              petId: vinculos.animais[item.juntaComLinha] ?? null,
+            }
+          }
+
+          if (item.petExistente) {
+            const pet = dataset.pets.find((candidato) => candidato.id === item.petExistente!.id)
+
+            if (pet) {
+              preencherPaciente(pet, item)
+            }
+
+            vinculos.animais[item.linha] = item.petExistente.id
+
+            return { linha: item.linha, situacao: 'junta', tutorId, petId: item.petExistente.id }
+          }
+
+          const animal = item.animal
+          const pet: Pet = {
+            id: novoId('pet'),
+            nome: animal.nome,
+            especie: animal.especie!,
+            raca: animal.raca,
+            sexo: animal.sexo,
+            nascimento: animal.nascimento,
+            castrado: animal.castrado,
+            porte: null,
+            pesoKg: animal.pesoKg,
+            microchip: animal.microchip,
+            pelagem: animal.pelagem,
             tutorId,
-            petId: vinculos.animais[item.juntaComLinha] ?? null,
-          }
-        }
-
-        if (item.petExistente) {
-          const pet = dataset.pets.find((candidato) => candidato.id === item.petExistente!.id)
-
-          if (pet) {
-            preencherPaciente(pet, item)
+            alertas: animal.alergia ? [alergiaComoAlerta(animal.alergia)] : [],
+            iniciais: iniciaisDe(animal.nome),
+            fotoUrl: '',
           }
 
-          vinculos.animais[item.linha] = item.petExistente.id
+          dataset.pets.push(pet)
+          vinculos.animais[item.linha] = pet.id
 
-          return { linha: item.linha, situacao: 'junta', tutorId, petId: item.petExistente.id }
-        }
+          return { linha: item.linha, situacao: 'entra', tutorId, petId: pet.id }
+        })
 
-        const animal = item.animal
-        const pet: Pet = {
-          id: novoId('pet'),
-          nome: animal.nome,
-          especie: animal.especie!,
-          raca: animal.raca,
-          sexo: animal.sexo,
-          nascimento: animal.nascimento,
-          castrado: animal.castrado,
-          porte: null,
-          pesoKg: animal.pesoKg,
-          microchip: animal.microchip,
-          pelagem: animal.pelagem,
-          tutorId,
-          alertas: animal.alergia ? [alergiaComoAlerta(animal.alergia)] : [],
-          iniciais: iniciaisDe(animal.nome),
-          fotoUrl: '',
-        }
-
-        dataset.pets.push(pet)
-        vinculos.animais[item.linha] = pet.id
-
-        return { linha: item.linha, situacao: 'entra', tutorId, petId: pet.id }
-      })
-
-      return { resultados, vinculos }
-    })
+        return { resultados, vinculos }
+      },
+      itens.length,
+    )
   },
 }

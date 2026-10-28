@@ -169,15 +169,27 @@ function sleep(ms: number) {
 }
 
 /**
+ * Operação em lote custa pelo tamanho do lote: gravar 80 tutores e pets não leva o mesmo que ler
+ * uma ficha. O valor é uma fração da latência base por item, para seguir o painel de
+ * desenvolvimento e zerar junto nos testes. Com os 220 ms de base, 115 linhas levam uns 4 s: o
+ * tempo de ver a barra andar, que antes passava em 0,7 s.
+ */
+const LATENCIA_POR_ITEM: Partial<Record<MockOperation, number>> = {
+  'migracao.importar': 0.14,
+}
+
+/**
  * Envelope de toda chamada da camada mocada: paga a latência configurada e sorteia falha
  * conforme a operação. O `produce` roda depois da espera, para que o dado devolvido reflita
- * o estado no momento da "resposta".
+ * o estado no momento da "resposta". `itens` é o tamanho do lote, nas operações que têm um.
  */
 export async function simularChamada<T>(
   operation: MockOperation,
   produce: () => T,
+  itens = 0,
 ): Promise<T> {
-  const espera = config.latenciaMs + Math.random() * config.jitterMs
+  const porItem = config.latenciaMs * (LATENCIA_POR_ITEM[operation] ?? 0)
+  const espera = config.latenciaMs + Math.random() * config.jitterMs + itens * porItem
 
   await sleep(espera)
 

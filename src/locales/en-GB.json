@@ -298,7 +298,7 @@
       "programas": "Programmes",
       "divulgacao": "Promotion",
       "acessos": "Access",
-      "financeiro": "Referral earnings",
+      "financeiro": "Wallet",
       "settings": "Settings"
     }
   },
@@ -1298,6 +1298,16 @@
       "baixar": "Download",
       "arquivoN": "File {n}",
       "emissao": "Issued on {data}",
+      "tipos": {
+        "CARTEIRA_VACINACAO": "Vaccination card",
+        "EXAME_SANGUE": "Blood test",
+        "RAIO_X": "X-ray",
+        "ULTRASSOM": "Ultrasound",
+        "RECEITA_MEDICA": "Prescription",
+        "REGISTRO_NASCIMENTO": "Birth record",
+        "CERTIFICADO_PEDIGREE": "Pedigree certificate",
+        "OUTRO": "Other"
+      },
       "expiracao": "Valid until {data}",
       "semArquivo": "No file available"
     },
@@ -1333,7 +1343,14 @@
       "title": "New note",
       "lede": "Record the service and what the pet parent needs to know. Attachments stay linked to this appointment.",
       "servico": "Service performed",
-      "servicoPlaceholder": "Bath and grooming",
+      "servicoExemplo": {
+        "BANHO": "Bath with conditioning",
+        "TOSA": "Hygienic trim",
+        "CONSULTA": "Follow-up consultation",
+        "EXAME": "Complete blood count",
+        "HOTEL": "3-night stay",
+        "OUTRO": "Training session"
+      },
       "texto": "Note",
       "textoPlaceholder": "How the visit went, remarks for the pet parent...",
       "profissional": "Professional (optional)",
@@ -1771,7 +1788,7 @@
   },
   "carteira": {
     "subtitle": "Portal",
-    "title": "Referral earnings",
+    "title": "Wallet",
     "tabs": {
       "ariaLabel": "Tabs: {labels}",
       "visao": {
@@ -1905,7 +1922,7 @@
       }
     },
     "detail": {
-      "subtitle": "Referral earnings",
+      "subtitle": "Wallet",
       "title": "Payout detail",
       "back": "Back",
       "loadingAria": "Loading payout detail",
@@ -5456,6 +5473,13 @@
         "pausar": "Pause",
         "continuar": "Resume",
         "tentarDeNovo": "Try again"
+      },
+      "conclusao": {
+        "titulo": "Import complete",
+        "frase": "{entraram} of {total} rows are now in the clinic's records.",
+        "completar": "{n} record has something to complete. | {n} records have something to complete.",
+        "fora": "{n} row did not come in: the list to fix is in the report. | {n} rows did not come in: the list to fix is in the report.",
+        "verRelatorio": "See the report"
       },
       "relatorio": {
         "chip": "Import complete",
