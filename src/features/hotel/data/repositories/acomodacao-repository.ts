@@ -32,6 +32,8 @@ export type ImpedimentoDeCadastro =
   | 'nome-repetido'
   | 'ocupada'
   | 'tem-reserva'
+  /** Tirar de operação com reserva marcada: a reserva precisa mudar de acomodação antes. */
+  | 'tem-reserva-inativar'
   | 'tem-historico'
   | 'nao-encontrada'
   /**
@@ -199,6 +201,15 @@ export const acomodacaoRepository = {
 
       if (ocupada) {
         throw new CadastroRecusadoError('ocupada')
+      }
+
+      /*
+       * Reserva marcada também trava. Sem isto, tirar a Baia A5 para manutenção deixava a estadia
+       * do Bidu, confirmada para daqui a três dias, presa numa baia fora de operação, e ninguém
+       * ficava sabendo até o dia da chegada.
+       */
+      if (reservasVivas(acomodacao.id).length > 0) {
+        throw new CadastroRecusadoError('tem-reserva-inativar')
       }
 
       acomodacao.ativa = false

@@ -17,6 +17,7 @@
 import { PhInfo, PhWarning, PhWarningOctagon } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Carousel from 'primevue/carousel'
+import Skeleton from 'primevue/skeleton'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -176,7 +177,25 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
     -->
     <template #destaque>
       <div class="destaque">
-        <div class="destaque__miolo">
+        <!--
+          A faixa aparece antes dos dados (é do `UiPagina`, que só troca o corpo pelo "Carregando").
+          Sem isto ela dizia "Nada parado" e três zeros até o dia chegar: os dois cartões ficam
+          em esqueleto, na mesma forma, e a troca não pula.
+        -->
+        <div v-if="dia.carregando" class="destaque__miolo" aria-hidden="true">
+          <div class="cartao resumo cartao--esqueleto">
+            <Skeleton width="70%" height="1.4rem" border-radius="8px" />
+            <Skeleton width="40%" height="0.9rem" border-radius="6px" />
+            <Skeleton height="3.6rem" border-radius="16px" />
+          </div>
+          <div class="cartao paciente cartao--esqueleto">
+            <Skeleton shape="circle" size="3.5rem" />
+            <Skeleton width="60%" height="0.9rem" border-radius="6px" />
+            <Skeleton width="12rem" height="3rem" border-radius="16px" />
+          </div>
+        </div>
+
+        <div v-else class="destaque__miolo">
           <!--
             O resumo do dia, de cima para baixo e sem vão: a frase, a data, o andamento numa barra e
             os três números numa fileira. A altura sobra no meio, não num canto vazio.
@@ -639,8 +658,8 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   min-width: 0;
   flex: 1;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 10px;
   border-radius: 16px;
   background: var(--app-veu);
   color: var(--app-tinta);
@@ -681,13 +700,16 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   line-height: 1.1;
 }
 
+/*
+ * O rótulo quebra em vez de cortar: com três números lado a lado no cartão do resumo, "Na
+ * recepção" e "Em consulta" viravam "Na recepç…" e "Em consu…" já em 1440.
+ */
 .numero .numero__rotulo {
-  overflow: hidden;
   color: var(--app-texto-2);
   font-size: 12.5px;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  overflow-wrap: break-word;
 }
 
 /* Número que é alerta: um ponto no canto, na cor do estado (o rótulo diz o que é). */
@@ -718,6 +740,11 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
 
 .cartao--vazio {
   font-size: 15px;
+}
+
+.cartao--esqueleto {
+  min-height: 210px;
+  align-content: center;
 }
 
 /* O nome numa linha só (nome longo corta), a idade embaixo e o tempo de sala à direita. */

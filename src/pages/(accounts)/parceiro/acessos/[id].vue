@@ -1313,9 +1313,14 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
             </template>
           </span>
         </span>
-        <RouterLink class="faixa__link ui-mais" to="/settings?aba=empresa">
-          {{ t(`frame.operability.${avisoDoCadastro}.link`) }}
-        </RouterLink>
+        <Button
+          :as="RouterLink"
+          to="/settings?aba=empresa"
+          class="faixa__link"
+          severity="secondary"
+          size="small"
+          :label="t(`frame.operability.${avisoDoCadastro}.link`)"
+        />
       </section>
 
       <!-- Encerrado: sem formulário e sem resumo. O que aconteceu e o que sobrou. -->
@@ -2422,8 +2427,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-size: 13.5px;
 }
 
-.faixa__link.ui-mais {
-  color: var(--faixa-tinta);
+.faixa__link {
+  flex: none;
+  text-decoration: none;
 }
 
 .faixa--atencao,

@@ -29,7 +29,7 @@ export const HOTEL_UTC_OFFSET = CLINIC_UTC_OFFSET
 export const hotelFixture: Hotel = {
   id: 'hotel-petjourney',
   nome: 'PetJourney Hotel',
-  endereco: 'Estrada do Campo Limpo, 2.140 — São Paulo/SP · CEP 05777-001',
+  endereco: 'Estrada do Campo Limpo, 2.140 · São Paulo/SP · CEP 05777-001',
   telefone: '(11) 3555-0188',
   utcOffset: HOTEL_UTC_OFFSET,
   politica: {
@@ -333,9 +333,13 @@ export const acomodacoesFixture: Acomodacao[] = [
 
 export const cuidadoresFixture: Cuidador[] = [
   {
+    /*
+     * A gerente é a dona da conta de demonstração (Helena Prado, no rodapé do menu). Com outro
+     * sobrenome, o check-in feito por ela aparecia "recebido por Helena Barros".
+     */
     id: 'eq-helena',
-    nome: 'Helena Barros',
-    iniciais: 'HB',
+    nome: 'Helena Prado',
+    iniciais: 'HP',
     funcao: 'gerente',
     corIndice: 0,
     ativo: true,

@@ -143,11 +143,18 @@ const andamento = computed(() => {
     return null
   }
 
-  const feitos = contarPorEstado(contas).feito
+  /* Falta não vira "feito" nunca: contada no total, a barra não chegava a 100% no fim do dia. */
+  const contagem = contarPorEstado(contas)
+  const feitos = contagem.feito
+  const total = contas.length - contagem.falta
+
+  if (total === 0) {
+    return null
+  }
 
   return {
-    texto: t('inicio.espacos.clinica.andamento', { feitos, total: contas.length }, contas.length),
-    percentual: Math.round((feitos / contas.length) * 100),
+    texto: t('inicio.espacos.clinica.andamento', { feitos, total }, total),
+    percentual: Math.round((feitos / total) * 100),
   }
 })
 

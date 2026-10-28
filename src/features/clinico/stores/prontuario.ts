@@ -37,6 +37,8 @@ const PREFIXO_RASCUNHO = 'clinic.draft.'
 const CHAVE_DISPOSITIVO = 'clinic.deviceId'
 /** Tempo de pausa na digitação que dispara a gravação. */
 const ATRASO_AUTOSAVE_MS = 800
+/** Depois de uma gravação que falhou (rede ruim), quanto esperar para tentar de novo sozinho. */
+const ATRASO_NOVA_TENTATIVA_MS = 5000
 
 function identificarDispositivo(): EncounterLock {
   let id = ''
@@ -82,6 +84,11 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
   const salvando = ref(false)
   const salvoEm = ref<string | null>(null)
   const erro = ref('')
+  /**
+   * A última gravação automática falhou (rede). Não é erro de tela: o texto continua no campo e
+   * no rascunho local, e a gravação tenta de novo sozinha. A página só avisa na linha de estado.
+   */
+  const falhaAoGravar = ref(false)
   const rascunhoPendente = ref<EncounterDraft | null>(null)
   const simulandoSegundoDispositivo = ref(false)
 
@@ -89,6 +96,8 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
 
   let temporizador: ReturnType<typeof setTimeout> | null = null
   let patchAcumulado: EncounterPatch = {}
+  /** Conta as gravações enviadas: só a resposta da mais recente volta para a tela. */
+  let ultimaGravacao = 0
 
   /**
    * O quarto estado, que é do prontuário e não da página: leitura. Acontece quando outro
@@ -281,7 +290,12 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
       clearTimeout(temporizador)
     }
 
-    temporizador = setTimeout(() => void gravar(), ATRASO_AUTOSAVE_MS)
+    temporizador = setTimeout(dispararGravacao, ATRASO_AUTOSAVE_MS)
+  }
+
+  function dispararGravacao() {
+    temporizador = null
+    void gravar()
   }
 
   /**
@@ -306,6 +320,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     }
 
     const patch = patchAcumulado
+    const numero = ++ultimaGravacao
 
     patchAcumulado = {}
     salvando.value = true
@@ -313,9 +328,22 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     try {
       const salvo = await encounterRepository.salvar(atual.id, patch, dispositivo.deviceId)
 
-      encounter.value = { ...salvo }
+      falhaAoGravar.value = false
       salvoEm.value = clinicClock.nowIso()
-      descartarRascunho()
+
+      /*
+       * O que se digitou enquanto a gravação viajava continua na tela: a cópia do servidor só
+       * entra nos campos que não mudaram desde o envio. Antes, ela voltava inteira, o campo
+       * recuava para o texto enviado e o que se digitasse em seguida apagava o resto de vez.
+       * Resposta de uma gravação mais antiga (duas no ar) não volta o texto para trás.
+       */
+      if (numero === ultimaGravacao && encounter.value?.id === salvo.id) {
+        encounter.value = { ...salvo, ...patchAcumulado }
+
+        if (Object.keys(patchAcumulado).length === 0) {
+          descartarRascunho()
+        }
+      }
     } catch (falha) {
       if (falha instanceof EncounterLockedError) {
         /** Perdeu a edição no meio do caminho: mantém o texto na tela e passa para leitura. */
@@ -323,7 +351,16 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
         gravarRascunho(atual)
         erro.value = ''
       } else {
-        erro.value = 'clinico.erros.mutacao'
+        /*
+         * Rede ruim não tira a folha da tela: o que não foi volta para a fila (o que se digitou
+         * depois vale mais), o rascunho local já guarda tudo, e a gravação tenta de novo sozinha.
+         */
+        patchAcumulado = { ...patch, ...patchAcumulado }
+        falhaAoGravar.value = true
+
+        if (!temporizador && encounter.value?.id === atual.id) {
+          temporizador = setTimeout(dispararGravacao, ATRASO_NOVA_TENTATIVA_MS)
+        }
       }
     } finally {
       salvando.value = false
@@ -339,8 +376,17 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
 
     await gravar()
 
+    /* Saindo sem rede: o que não foi fica no rascunho local, oferecido na próxima abertura. */
+    if (temporizador) {
+      clearTimeout(temporizador)
+      temporizador = null
+    }
+
     if (encounter.value && !somenteLeitura.value) {
-      await encounterRepository.liberarEdicao(encounter.value.id, dispositivo.deviceId)
+      /* Sem rede, soltar a edição falha; sair da tela não pode depender disso. */
+      await encounterRepository
+        .liberarEdicao(encounter.value.id, dispositivo.deviceId)
+        .catch(() => undefined)
     }
   }
 
@@ -469,11 +515,35 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
       return
     }
 
+    if (temporizador) {
+      clearTimeout(temporizador)
+      temporizador = null
+    }
+
     await gravar()
 
-    const finalizado = await encounterRepository.finalizar(encounter.value.id)
+    /*
+     * Finalizar com texto ainda não gravado fecharia o prontuário sem ele. Sem rede, a folha fica
+     * aberta, o aviso aparece e o diálogo continua na pergunta para tentar de novo.
+     */
+    if (Object.keys(patchAcumulado).length > 0) {
+      erro.value = 'clinico.erros.mutacao'
+
+      throw new Error('prontuario: alterações ainda não gravadas')
+    }
+
+    let finalizado: Encounter
+
+    try {
+      finalizado = await encounterRepository.finalizar(encounter.value.id)
+    } catch (falha) {
+      erro.value = 'clinico.erros.mutacao'
+
+      throw falha
+    }
 
     encounter.value = finalizado
+    falhaAoGravar.value = false
     descartarRascunho()
 
     /** Finalizar muda a grade do dia, a carga da semana e o painel de atividades. */
@@ -524,7 +594,13 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     sugestoesDeRetorno.value = []
     salvoEm.value = null
     erro.value = ''
+    falhaAoGravar.value = false
     patchAcumulado = {}
+
+    if (temporizador) {
+      clearTimeout(temporizador)
+      temporizador = null
+    }
   }
 
   return {
@@ -535,6 +611,7 @@ export const useProntuarioStore = defineStore('clinico-prontuario', () => {
     salvando,
     salvoEm,
     erro,
+    falhaAoGravar,
     rascunhoPendente,
     sugestoesDeRetorno,
     buscandoRetorno,

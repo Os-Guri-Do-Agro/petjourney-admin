@@ -21,6 +21,9 @@ import { sincronizarPrimeVue } from './i18n/primevue'
 import router from './router'
 import './theme/color-mode'
 import { PetJourneyPreset } from './theme/primevue'
+import { deixarEscPassarPeloSelectFechado } from './theme/primevue-esc-do-select'
+
+deixarEscPassarPeloSelectFechado()
 
 const app = createApp(App)
 

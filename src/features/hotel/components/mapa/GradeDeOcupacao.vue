@@ -205,7 +205,7 @@ function descricaoDaBarra(faixa: FaixaNaGrade): string {
   const partes = [base, formato.statusDaReserva(faixa.status)]
 
   if (temAviso(faixa)) {
-    partes.push(formato.situacaoDaExigencia(faixa.admissao))
+    partes.push(formato.resumoDaAdmissao(faixa.admissao))
   }
 
   return partes.join(' · ')

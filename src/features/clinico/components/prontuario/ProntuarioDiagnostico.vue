@@ -18,7 +18,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicForm from '../base/ClinicForm.vue'
@@ -60,6 +60,8 @@ const sugestoes = computed(() => {
     .slice(0, 6)
 })
 
+const campoDeBusca = ref<{ $el: HTMLElement } | null>(null)
+
 function adicionar(codigo: string, descricao: string) {
   emit('atualizar', {
     diagnosticos: [
@@ -68,6 +70,12 @@ function adicionar(codigo: string, descricao: string) {
     ],
   })
   termo.value = ''
+
+  /*
+   * A sugestão clicada sai da lista e levava o foco junto (ia para o início da página): quem
+   * adiciona pelo teclado volta para a busca, pronto para o próximo diagnóstico.
+   */
+  void nextTick(() => campoDeBusca.value?.$el.focus())
 }
 
 function remover(id: string) {
@@ -133,6 +141,7 @@ function alterarTipo(id: string, kind: DiagnosisKind) {
       <IconField>
         <InputIcon class="ph ph-magnifying-glass" />
         <InputText
+          ref="campoDeBusca"
           v-model="termo"
           :placeholder="t('clinico.prontuario.diagnostico.buscar')"
           :aria-label="t('clinico.prontuario.diagnostico.buscar')"

@@ -62,7 +62,7 @@ import {
   tarefasPorDia,
   type PrevisaoDaPublicacao,
 } from '@/features/hotel/domain/rotina-padrao'
-import { useHotelStore } from '@/features/hotel/stores/hotel'
+import { hotelClock, useHotelStore } from '@/features/hotel/stores/hotel'
 
 const { t } = useI18n()
 const formato = useHotelFormat()
@@ -209,6 +209,17 @@ function descartarRascunho() {
   if (publicada.value) itens.value = copiar(publicada.value.itens)
 }
 
+/**
+ * O instante em que o plano novo começa a valer, no relógio da casa.
+ *
+ * "Agora" era `new Date().toISOString()`, em UTC: depois das 20h (fuso -04:00) a data já é a de
+ * amanhã, e "Agora" virava "Amanhã" sem aviso. A previsão dava o mesmo número nas duas opções e a
+ * mudança não chegava ao turno da noite.
+ */
+function vigenteDesde() {
+  return vigencia.value === 'agora' ? hotelClock.nowIso() : amanhaNaCasa()
+}
+
 async function calcularPrevisao() {
   if (!publicada.value) return
 
@@ -217,7 +228,7 @@ async function calcularPrevisao() {
   try {
     previsao.value = await rotinaPadraoRepository.previsao({
       itens: itens.value,
-      vigenteDesde: vigencia.value === 'agora' ? new Date().toISOString() : amanhaNaCasa(),
+      vigenteDesde: vigenteDesde(),
     })
   } catch {
     previsao.value = null
@@ -243,7 +254,7 @@ async function publicar() {
   try {
     const atual = await rotinaPadraoRepository.publicar({
       itens: itens.value,
-      vigenteDesde: vigencia.value === 'agora' ? new Date().toISOString() : amanhaNaCasa(),
+      vigenteDesde: vigenteDesde(),
       por: hotelStore.operadorAtual(),
     })
 
@@ -322,7 +333,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     @tentar-de-novo="carregar()"
   >
     <template #resumo>
-      <span class="plano-estado">
+      <!-- Sem o plano publicado não há conta: "0 tarefas por hóspede" em cima do erro mentia. -->
+      <span v-if="publicada" class="plano-estado">
         <!-- O número mora dentro da frase: separado, ele se repetia ("8 8 tarefas"). -->
         {{ t('hotel.rotinaPadrao.porDia', { total: porDia }, porDia) }}{{ '. ' }}
         <template v-if="fraseDaVersao">{{ fraseDaVersao }}{{ ' ' }}</template>

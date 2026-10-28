@@ -18,6 +18,7 @@ import {
 import {
   avaliarVaga,
   mapaDoPeriodo,
+  reservaDoAnimalNoPeriodo,
   reservaSegura,
   taxaDeOcupacao,
   type VagaNoPeriodo,
@@ -323,6 +324,7 @@ export const reservaRepository = {
         : null
 
       return {
+        /* Sai como cópia pelo `simularChamada` (ver `comoResposta` no mock-runtime). */
         reserva,
         admissao,
         comprovantes: dataset.comprovantes.filter((item) => item.petId === reserva.petId),
@@ -458,6 +460,68 @@ export const reservaRepository = {
   },
 
   /**
+   * Para onde a reserva pode ir, num período novo: o mapa visto **sem ela**.
+   *
+   * Síncrona como a `vaga`: a lista de acomodações se refaz enquanto a recepção mexe nas datas. A
+   * própria reserva não conflita consigo mesma, e o animal não pode estar em outra reserva viva
+   * no período novo (devolvido em `animal`).
+   */
+  vagasParaMover(entrada: { reservaId: string; inicio: ISODateTime; fim: ISODateTime }): {
+    vagas: VagaNoPeriodo[]
+    animal: Reserva | null
+  } {
+    const dataset = base()
+    const reserva = dataset.reservas.find((item) => item.id === entrada.reservaId)
+
+    if (!reserva) {
+      return { vagas: [], animal: null }
+    }
+
+    const pet = dataset.pets.find((item) => item.id === reserva.petId)
+
+    return {
+      vagas: mapaDoPeriodo({
+        acomodacoes: dataset.acomodacoes,
+        reservas: dataset.reservas,
+        inicio: entrada.inicio,
+        fim: entrada.fim,
+        porte: pet?.porte ?? null,
+        especie: pet?.especie ?? null,
+        ocupantes: reserva.acompanhantePetId ? 2 : 1,
+        ignorarReservaId: reserva.id,
+      }),
+      animal: reservaDoAnimalNoPeriodo(
+        dataset.reservas,
+        [reserva.petId, reserva.acompanhantePetId ?? ''],
+        entrada.inicio,
+        entrada.fim,
+        reserva.id,
+      ),
+    }
+  },
+
+  /**
+   * A reserva viva que já segura este animal (ou o acompanhante) no período, se houver.
+   *
+   * Síncrona como a `vaga`, e pela mesma razão: o aviso aparece quando o hóspede é escolhido, e não
+   * na recusa do clique de confirmar.
+   */
+  reservaDoAnimal(entrada: {
+    petIds: string[]
+    inicio: ISODateTime
+    fim: ISODateTime
+    ignorarReservaId?: string
+  }): Reserva | null {
+    return reservaDoAnimalNoPeriodo(
+      base().reservas,
+      entrada.petIds,
+      entrada.inicio,
+      entrada.fim,
+      entrada.ignorarReservaId,
+    )
+  },
+
+  /**
    * Quem a família já cadastrou para buscar.
    *
    * Síncrona como a `vaga`, e pela mesma razão: a lista aparece no instante em que o hóspede é
@@ -525,6 +589,18 @@ export const reservaRepository = {
 
       if (vaga.impedimentos.length > 0) {
         throw new VagaIndisponivelError(vaga.impedimentos[0]!)
+      }
+
+      /* O mesmo animal não dorme em duas baias: a segunda venda prenderia uma vaga vazia. */
+      if (
+        reservaDoAnimalNoPeriodo(
+          dataset.reservas,
+          [pet.id, entrada.acompanhantePetId ?? ''],
+          entrada.inicio,
+          entrada.fim,
+        )
+      ) {
+        throw new VagaIndisponivelError('animal-ja-reservado')
       }
 
       const tarifa = dataset.tarifas.find((item) => item.id === acomodacao.tarifaId)!
@@ -635,6 +711,18 @@ export const reservaRepository = {
 
       if (vaga.impedimentos.length > 0) {
         throw new VagaIndisponivelError(vaga.impedimentos[0]!)
+      }
+
+      if (
+        reservaDoAnimalNoPeriodo(
+          dataset.reservas,
+          [reserva.petId, reserva.acompanhantePetId ?? ''],
+          inicio,
+          fim,
+          reserva.id,
+        )
+      ) {
+        throw new VagaIndisponivelError('animal-ja-reservado')
       }
 
       const tarifa = dataset.tarifas.find((item) => item.id === acomodacao.tarifaId)!

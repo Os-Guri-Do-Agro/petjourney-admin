@@ -87,7 +87,7 @@ const meta = computed(() => {
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     formato.idade(pet.nascimento),
     formato.sexo(pet.sexo),
-    pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
+    t(`clinico.paciente.${pet.castrado ? 'castrad' : 'inteir'}${pet.sexo === 'femea' ? 'a' : 'o'}`),
     /*
      * No compacto (gaveta da agenda, diálogo) não há trilho para o número grande: o peso entra
      * na linha de identificação, como mais um dado. Sem ele, quem abre a gaveta para encaixar

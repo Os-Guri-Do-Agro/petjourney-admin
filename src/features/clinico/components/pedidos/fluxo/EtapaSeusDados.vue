@@ -20,10 +20,11 @@ import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import InputText from 'primevue/inputtext'
 import SelectButton from 'primevue/selectbutton'
-import { computed, type Component } from 'vue'
+import { computed, ref, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { ESPECIES_NA_CLINICA, type EspecieNaClinica } from '../../../contrato/responsavel'
+import { formatarTelefone, somenteDigitos, telefoneValido } from '../../../domain/cadastro'
 
 import { useFluxo } from './fluxo-do-pedido'
 
@@ -52,6 +53,24 @@ const especies = computed(() =>
   })),
 )
 
+/*
+ * O celular se formata enquanto se digita — "(11) 98765-4321", o mesmo desenho do cadastro da
+ * clínica — e diz o que falta depois de sair do campo. Antes ficava "11987650042" cru, inclusive
+ * na confirmação, e com o DDD faltando o "Continuar" só ficava apagado, sem dizer por quê.
+ */
+const telefoneTocado = ref(false)
+
+const telefoneComErro = computed(
+  () =>
+    telefoneTocado.value &&
+    somenteDigitos(fluxo.pedido.visitante.telefone).length > 0 &&
+    !telefoneValido(fluxo.pedido.visitante.telefone),
+)
+
+function aoDigitarTelefone(valor: string | undefined) {
+  fluxo.pedido.visitante.telefone = formatarTelefone(valor ?? '')
+}
+
 const sexos = computed(() => [
   { valor: 'MACHO', rotulo: t('clinico.pedidos.app.sexo.macho'), icone: PhGenderMale },
   { valor: 'FEMEA', rotulo: t('clinico.pedidos.app.sexo.femea'), icone: PhGenderFemale },
@@ -71,12 +90,19 @@ const sexos = computed(() => [
       <label class="fx-campo">
         <span>{{ t('clinico.pedidos.link.telefone') }}</span>
         <InputText
-          v-model="fluxo.pedido.visitante.telefone"
+          :model-value="fluxo.pedido.visitante.telefone"
           inputmode="tel"
           autocomplete="tel"
           :placeholder="t('clinico.pedidos.link.telefoneExemplo')"
+          :invalid="telefoneComErro"
+          :aria-describedby="telefoneComErro ? 'link-telefone-erro' : undefined"
           fluid
+          @update:model-value="aoDigitarTelefone"
+          @blur="telefoneTocado = true"
         />
+        <small v-if="telefoneComErro" id="link-telefone-erro" class="fx-erro">
+          {{ t('clinico.paciente.novo.erros.telefone') }}
+        </small>
       </label>
 
       <label class="fx-campo">

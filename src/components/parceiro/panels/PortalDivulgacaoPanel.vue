@@ -70,6 +70,16 @@ const TERM_ICONS: Record<(typeof TERM_IDS)[number], string> = {
 
 const termsOpen = ref(false)
 
+/**
+ * O título da espera. Com o pedido já feito (ou o cadastro em análise), "Programa afiliado
+ * necessário" mandava pedir de novo o que estava em análise.
+ */
+const tituloDaEspera = computed(() =>
+  store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO'
+    ? t('carteira.gate.emAnaliseTitle')
+    : t('carteira.gate.title'),
+)
+
 const indicacaoTerms = computed(() =>
   TERM_IDS.map((id) => ({
     id,
@@ -301,7 +311,13 @@ function formatResgateDate(value: string) {
  */
 const emit = defineEmits<{
   estado: [
-    estado: { codigo: string; link: string; leituras: number | null; podeIndicar: boolean },
+    estado: {
+      codigo: string
+      link: string
+      leituras: number | null
+      podeIndicar: boolean
+      carregando: boolean
+    },
   ]
 }>()
 
@@ -311,6 +327,7 @@ watch(
     link: linkIndicacao.value,
     leituras: metricas.value?.scanCount ?? null,
     podeIndicar: Boolean(indicacao.value?.podeIndicar),
+    carregando: loading.value,
   }),
   (estado) => emit('estado', estado),
   { immediate: true },
@@ -409,8 +426,11 @@ watch(lastSuccessAt, (at) => {
           <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
             <i class="ph ph-hourglass" />
           </span>
-          <h2>{{ t('carteira.gate.title') }}</h2>
-          <p v-if="indicacao.aviso">{{ indicacao.aviso }}</p>
+          <h2>{{ tituloDaEspera }}</h2>
+          <!--
+            O `aviso` da API não entra: vem só em português e sem acento ("esta em analise"), e
+            diz o mesmo que a frase abaixo, que é traduzida.
+          -->
           <p>{{ t('divulgacao.shareKit.esperaHint') }}</p>
           <RouterLink class="p-button p-component estado__acao" :to="PROGRAMAS_ROUTE">
             <i class="ph ph-squares-four" aria-hidden="true" />

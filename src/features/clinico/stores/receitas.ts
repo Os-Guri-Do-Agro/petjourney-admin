@@ -18,6 +18,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 import type { Encounter, Prescription, Receita } from '../data/types'
+import { alergiaAoPrincipio } from '../domain/bulario'
 import { addDays } from '../domain/clinic-time'
 import { gerarCodigoVerificador, VALIDADE_EM_DIAS } from '../domain/receita'
 
@@ -85,10 +86,33 @@ export const useReceitasStore = defineStore('clinico-receitas', () => {
    * mão do responsável — e receita sem assinatura não vale nada na farmácia, então o estado
    * intermediário só produziria confusão.
    */
+  /**
+   * Algum item conflita com alergia registrada do paciente e a consulta ainda não aceitou o
+   * risco. Papel assinado não sai assim: a confirmação existe na prescrição, e assinar não pode
+   * passar por cima dela (passava: a Dipirona da Nina saía assinada com a caixa desmarcada).
+   */
+  function alergiaSemAceite(encounter: Encounter, prescricoes: Prescription[]): boolean {
+    const pet = clinico.pet(encounter.petId)
+
+    if (!pet) {
+      return false
+    }
+
+    return prescricoes.some((prescricao) => {
+      const medicamento = clinico.medicamento(prescricao.medicamentoId)
+
+      return (
+        !prescricao.alergiaConfirmada &&
+        medicamento !== null &&
+        alergiaAoPrincipio(pet, medicamento) !== null
+      )
+    })
+  }
+
   function emitir(encounter: Encounter, prescricoes: Prescription[]): Receita | null {
     const profissional = clinico.profissional(encounter.professionalId)
 
-    if (!profissional || prescricoes.length === 0) {
+    if (!profissional || prescricoes.length === 0 || alergiaSemAceite(encounter, prescricoes)) {
       return null
     }
 
@@ -166,6 +190,7 @@ export const useReceitasStore = defineStore('clinico-receitas', () => {
     doPaciente,
     doAtendimento,
     ultimaAssinada,
+    alergiaSemAceite,
     emitir,
     enviar,
   }

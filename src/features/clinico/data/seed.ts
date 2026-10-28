@@ -1560,7 +1560,11 @@ function montarFila(ancora: ISODate): WaitlistEntry[] {
       criadoEm: iso(addDays(ancora, -2), clockToMinutes('10:00')),
       /** Oferta perto de expirar: é o caso que testa o relógio da fila. */
       ofertaExpiraEm: iso(clock.dateOf(agora), clock.minutesOf(agora) + 4),
-      ofertaSlotInicio: iso(ancora, clockToMinutes('17:00')),
+      /*
+       * A próxima quarta às 17h, dentro da janela dele. "Hoje às 17h" ficava no passado quando a
+       * demonstração abria à noite: a fila oferecia uma vaga que já tinha passado.
+       */
+      ofertaSlotInicio: iso(proximoDiaDaSemana(addDays(ancora, 1), 3), clockToMinutes('17:00')),
       observacao: 'Aceita qualquer profissional em caso de urgência.',
     },
     {
@@ -2949,9 +2953,16 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     const dia = clock.dateOf(appointment.inicio)
 
     if (appointment.status === 'confirmado' && (dia === ancora || dia === amanha)) {
+      const sorteio = hashSeed(`confirma|${appointment.id}`) % 150
+
       appointment.confirmacao = {
         por: appointment.origem === 'app' ? 'app' : 'recepcao',
-        em: iso(addDays(dia, -1), 19 * 60 + (hashSeed(`confirma|${appointment.id}`) % 150)),
+        /*
+         * O de amanhã foi confirmado hoje de manhã: "a noite anterior" dele ainda não chegou, e a
+         * demonstração aberta à noite mostrava "Confirmada pela recepção em 23 min".
+         */
+        em:
+          dia === ancora ? iso(addDays(dia, -1), 19 * 60 + sorteio) : iso(ancora, 9 * 60 + sorteio),
       }
     }
   }

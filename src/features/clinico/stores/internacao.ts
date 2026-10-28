@@ -414,6 +414,8 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
     try {
       await internacaoRepository.registrarLigacao({ boletimId, professionalId })
       await carregarPaciente(internacaoId)
+      /* O boletim retido conta no menu, no mapa e no Hoje: a ligação muda os três. */
+      clinico.invalidarTudo()
     } catch {
       erroDeAcao.value = 'clinico.erros.internacaoAcao'
     } finally {
@@ -441,6 +443,7 @@ export const useInternacaoStore = defineStore('clinico-internacao', () => {
     try {
       await internacaoRepository.enviarBoletim(boletimId)
       await carregarPaciente(internacaoId)
+      clinico.invalidarTudo()
     } catch (falha) {
       erroDeAcao.value =
         falha instanceof BoletimBloqueadoError

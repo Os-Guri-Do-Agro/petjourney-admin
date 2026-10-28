@@ -10,13 +10,12 @@
  * ## A forma (redesenho de 19/10/2026)
  *
  * Uma lista **por paciente**, não por remédio: a ligação é para uma casa, e a casa responde por
- * todos os remédios do bicho. Cada paciente abre com o rosto, quem cuida e o telefone, e as duas
- * ações — ligar e abrir a ficha. Embaixo, um remédio por linha, com a faixa dos últimos 14 dias
+ * todos os remédios do bicho. Cada paciente abre com o rosto, quem cuida e o telefone, e a ação de
+ * abrir a ficha (onde o contato se registra). Embaixo, um remédio por linha, com a faixa dos últimos 14 dias
  * em tamanho de leitura (horários à esquerda, datas embaixo), a conta da mesma janela e, quando a
  * adesão caiu, o selo e a frase do alerta: o que aconteceu, o motivo que a casa deu, e como era
  * antes. É o que a clínica precisa saber antes de discar.
  */
-import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -170,9 +169,6 @@ function rotaDaFicha(petId: string) {
   return `/veterinario/paciente/${petId}/tratamento`
 }
 
-function hrefDoTelefone(telefone: string) {
-  return `tel:${telefone.replace(/[^\d+]/g, '')}`
-}
 </script>
 
 <template>
@@ -239,23 +235,11 @@ function hrefDoTelefone(telefone: string) {
                 </p>
               </div>
 
+              <!--
+                Sem botão "Ligar": a clínica liga pelo telefone do cadastro (ele está na linha
+                acima) e a tela registra o contato, na ficha. Combinado com o dono do produto.
+              -->
               <div class="paciente__acoes">
-                <Button
-                  v-if="paciente.primeira.tutorTelefone"
-                  as="a"
-                  :href="hrefDoTelefone(paciente.primeira.tutorTelefone)"
-                  icon="ph ph-phone"
-                  :label="t('clinico.vacinas.ligar')"
-                  :aria-label="
-                    t('clinico.adesao.lista.ligarPara', {
-                      nome: paciente.primeira.tutorNome,
-                      telefone: paciente.primeira.tutorTelefone,
-                    })
-                  "
-                  severity="secondary"
-                  outlined
-                  size="small"
-                />
                 <RouterLink class="ui-mais paciente__ficha" :to="rotaDaFicha(paciente.petId)">
                   <i class="ph ph-clipboard-text" aria-hidden="true" />
                   {{ t('clinico.adesao.lista.abrirFicha') }}

@@ -203,6 +203,8 @@ async function registrar() {
       observacao: observacao.value,
     })
 
+    /* Como na aplicação daqui: a capa e o menu contam de novo (ver `AplicarVacinaDialog`). */
+    clinico.invalidarTudo()
     emit('registrada', aplicacao)
     emit('update:visivel', false)
   } catch (falha) {

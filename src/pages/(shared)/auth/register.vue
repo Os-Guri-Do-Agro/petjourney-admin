@@ -2,7 +2,7 @@
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
 import { computed, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { I18nT, useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import AuthButton from '@/components/auth/AuthButton.vue'
@@ -22,9 +22,11 @@ const TOTAL_STEPS = 2
 
 const { t } = useI18n()
 
+/* O passo e o título dizem a mesma coisa: "Senha" no passo, "Escolha uma senha" no título. Antes
+   o passo era "Conta" e o título "Segurança da conta". */
 const STEP_LABELS = computed(() => [
   t('auth.register.stepLabels.identity'),
-  t('auth.register.stepLabels.account'),
+  t('auth.register.passos.senha'),
 ])
 
 const router = useRouter()
@@ -61,7 +63,7 @@ const stepMeta = computed(() =>
         description: t('auth.register.step1.description'),
       }
     : {
-        title: t('auth.register.step3.title'),
+        title: t('auth.register.passo2.titulo'),
         description: t('auth.register.step3.description'),
       },
 )
@@ -250,8 +252,11 @@ async function handleSubmit() {
         :list-label="t('auth.register.stepsAria')"
       />
 
+      <!-- `novalidate`: a conferência é a da tela, embaixo de cada campo e no idioma do portal. O
+           balão do navegador ("Preencha este campo.") tapava a lista de requisitos da senha. -->
       <form
         class="register-form"
+        novalidate
         @submit.prevent="currentStep === 2 ? handleSubmit() : goToNextStep()"
       >
         <section v-if="currentStep === 1" class="register-form__step">
@@ -326,18 +331,25 @@ async function handleSubmit() {
               input-id="register-accept-terms"
               :invalid="Boolean(termsError)"
             />
-            <span class="register-terms__copy">
-              {{ t('auth.register.terms.copy') }}
-              <a
-                class="register-terms__details"
-                href="https://www.petjourney.health/termos"
-                target="_blank"
-                rel="noopener noreferrer"
-                @click.stop
-              >
-                {{ t('auth.register.terms.details') }}
-              </a>
-            </span>
+            <!-- O link é o próprio nome dos termos, dentro da frase, e não um "detalhes" solto. -->
+            <I18nT
+              keypath="auth.register.terms.copy"
+              tag="span"
+              class="register-terms__copy"
+              scope="global"
+            >
+              <template #termos>
+                <a
+                  class="register-terms__details"
+                  href="https://www.petjourney.health/termos"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  @click.stop
+                >
+                  {{ t('auth.register.terms.details') }}
+                </a>
+              </template>
+            </I18nT>
           </label>
           <p v-if="termsError" class="register-form__inline-error">{{ termsError }}</p>
 

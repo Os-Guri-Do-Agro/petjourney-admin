@@ -104,6 +104,23 @@ const erro = ref('')
 
 const hoje = computed(() => clinicClock.today())
 
+/**
+ * Paciente imunossuprimido (quimioterapia, corticoide em dose alta): vacina de agente vivo costuma
+ * ser contraindicada e a resposta às outras é incerta. O diálogo não sabe qual vacina é viva, então
+ * não trava; mas não pode deixar aplicar sem dizer isso, como a prescrição faz com a alergia.
+ */
+const imunossupressao = computed(() => {
+  const alerta = props.pet.alertas.find((item) => item.kind === 'imunossuprimido')
+
+  if (!alerta) {
+    return ''
+  }
+
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
+})
+
 const catalogo = computed(() => vacinasDaEspecie(vacinaRepository.catalogo(), props.pet.especie))
 const vacina = computed(() => catalogo.value.find((item) => item.id === vacinaId.value) ?? null)
 
@@ -402,6 +419,11 @@ async function aplicar() {
       proximaNaAgenda: agendar,
     })
 
+    /*
+     * Toda mutação do módulo passa pela invalidação: sem ela a aba "Vacinas" da capa seguia
+     * dizendo 3 atrasadas com a frase logo abaixo já dizendo 2, e o contador do menu idem.
+     */
+    clinico.invalidarTudo()
     emit('aplicada', aplicacao)
     emit('update:visivel', false)
   } catch (falha) {
@@ -460,6 +482,11 @@ const textoDaSugestao = computed(() => {
     </template>
 
     <form class="aplicar clinic-scope" @submit.prevent="aplicar">
+      <p v-if="imunossupressao" class="aviso aviso--risco aviso--paciente" role="alert">
+        <i class="ph ph-warning" aria-hidden="true" />
+        <span>{{ t('clinico.vacinas.aplicar.imunossuprimido', { alerta: imunossupressao }) }}</span>
+      </p>
+
       <div class="aplicar__linha aplicar__linha--vacina">
         <ClinicField :rotulo="t('clinico.vacinas.colunaVacina')" obrigatorio>
           <template #default="{ id }">
@@ -859,6 +886,11 @@ const textoDaSugestao = computed(() => {
 
 .aviso--risco {
   color: var(--risco-tinta);
+}
+
+/* O aviso do paciente abre o formulário: não está preso a um campo, então sem a margem negativa. */
+.aviso--paciente {
+  margin: 0;
 }
 
 .aviso--atencao {

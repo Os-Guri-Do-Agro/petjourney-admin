@@ -305,6 +305,13 @@ describe('a estadia, de ponta a ponta', () => {
     /* Uma ligação, e os três destravam. Exigir três cliques deixaria o responsável sem notícia. */
     await hospedagemRepository.registrarContato(ocorrencia.id, 'eq-helena')
 
+    /* A tela lê o status: depois da ligação o boletim não pode seguir "retido". */
+    const depoisDaLigacao = await hospedagemRepository.abrir(hospedagem.id)
+
+    expect(depoisDaLigacao?.boletins.find((item) => item.id === boletim.id)?.status).toBe(
+      'rascunho',
+    )
+
     const enviado = await hospedagemRepository.enviarBoletim(boletim.id)
 
     expect(enviado.status).toBe('enviado')
@@ -341,6 +348,10 @@ describe('a estadia, de ponta a ponta', () => {
 
     await hospedagemRepository.pesarNaSaida(hospedagem.id, 19.2)
 
+    /* O saldo que o diálogo mostra é o da saída agora, o mesmo que o check-out vai gravar. */
+    const antes = (await hospedagemRepository.abrir(hospedagem.id))!
+    const pagoAntes = getDataset().reservas.find((item) => item.id === 'res-zeus')!.pagoCentavos
+
     const encerrada = await hospedagemRepository.checkOut({
       hospedagemId: hospedagem.id,
       entreguePor: 'eq-bruna',
@@ -354,6 +365,17 @@ describe('a estadia, de ponta a ponta', () => {
     const reserva = (await reservaRepository.abrir('res-zeus'))!
 
     expect(reserva.reserva.status).toBe('encerrada')
+
+    /*
+     * Cobrado no balcão, na entrega: a estadia fecha sem nada a receber, pelo valor que o diálogo
+     * mostrou. Saída antecipada pode deixar crédito (sinal maior que a estadia real): o saldo fica
+     * negativo, nunca positivo.
+     */
+    expect(reserva.reserva.orcamento.saldoCentavos).toBeLessThanOrEqual(0)
+    expect(reserva.reserva.pagoCentavos).toBe(
+      Math.max(pagoAntes, reserva.reserva.orcamento.totalCentavos),
+    )
+    expect(antes.saldoNaSaidaCentavos).toBe(reserva.reserva.orcamento.totalCentavos - pagoAntes)
 
     /* E a estadia encerrada some da prancheta: refeição pendente de quem foi embora é ruído. */
     const prancheta = await hospedagemRepository.rotina(getDataset().ancora)
@@ -457,6 +479,27 @@ describe('cadastro da casa', () => {
         detalhe: '',
       }),
     ).rejects.toThrow(CadastroRecusadoError)
+  })
+
+  it('recusa desativar acomodação com reserva marcada, e diz por quê', async () => {
+    /* A reserva confirmada para depois de amanhã ficaria presa numa baia fora de operação. */
+    const dataset = getDataset()
+    const ocupadas = new Set(
+      dataset.hospedagens
+        .filter((item) => item.status === 'hospedado')
+        .map((item) => item.acomodacaoId),
+    )
+    const marcada = dataset.reservas.find(
+      (item) => item.status === 'confirmada' && !ocupadas.has(item.acomodacaoId),
+    )!
+
+    await expect(
+      acomodacaoRepository.desativar({
+        acomodacaoId: marcada.acomodacaoId,
+        motivo: 'manutencao',
+        detalhe: '',
+      }),
+    ).rejects.toMatchObject({ kind: 'tem-reserva-inativar' })
   })
 })
 

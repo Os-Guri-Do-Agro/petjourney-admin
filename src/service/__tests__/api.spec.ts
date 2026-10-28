@@ -91,3 +91,63 @@ describe('apiFetch', () => {
     expect((error as Error).message).toContain('502')
   })
 })
+
+describe('apiFetch — 401 com sessão aberta', () => {
+  /** Token que só expira em 2100: o 401 é da API, não do relógio. */
+  const TOKEN = `x.${btoa(JSON.stringify({ userId: 'u-1', exp: 4102444800 }))}.y`
+
+  function resposta401() {
+    return new Response(JSON.stringify({ message: 'A senha antiga está incorreta' }), {
+      status: 401,
+      headers: JSON_HEADERS,
+    })
+  }
+
+  it('sessão que caiu: limpa o token e avisa a raiz', async () => {
+    const { apiFetch, EVENTO_SESSAO_EXPIRADA } = await loadApi('https://api.exemplo.test')
+    localStorage.setItem('access_token', TOKEN)
+    mockFetch(resposta401())
+    const ouvinte = vi.fn<() => void>()
+    window.addEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+
+    await expect(apiFetch('/parceiro/portal/status')).rejects.toMatchObject({ statusCode: 401 })
+
+    expect(localStorage.getItem('access_token')).toBeNull()
+    expect(ouvinte).toHaveBeenCalledTimes(1)
+    window.removeEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+  })
+
+  it('senha atual errada na troca de senha: o 401 é do campo e a sessão fica', async () => {
+    const { apiFetch, EVENTO_SESSAO_EXPIRADA } = await loadApi('https://api.exemplo.test')
+    localStorage.setItem('access_token', TOKEN)
+    mockFetch(resposta401())
+    const ouvinte = vi.fn<() => void>()
+    window.addEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+
+    await expect(
+      apiFetch(
+        '/auth/reset-password-authenticated',
+        { method: 'POST', body: '{}' },
+        { manterSessaoEm401: true },
+      ),
+    ).rejects.toMatchObject({ statusCode: 401, message: 'A senha antiga está incorreta' })
+
+    expect(localStorage.getItem('access_token')).toBe(TOKEN)
+    expect(ouvinte).not.toHaveBeenCalled()
+    window.removeEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+  })
+
+  it('401 do login, sem sessão, não dispara o aviso de sessão expirada', async () => {
+    const { apiFetch, EVENTO_SESSAO_EXPIRADA } = await loadApi('https://api.exemplo.test')
+    mockFetch(resposta401())
+    const ouvinte = vi.fn<() => void>()
+    window.addEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+
+    await expect(apiFetch('/auth/login', { method: 'POST', body: '{}' })).rejects.toMatchObject({
+      statusCode: 401,
+    })
+
+    expect(ouvinte).not.toHaveBeenCalled()
+    window.removeEventListener(EVENTO_SESSAO_EXPIRADA, ouvinte)
+  })
+})

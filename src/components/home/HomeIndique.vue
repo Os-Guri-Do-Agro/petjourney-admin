@@ -60,7 +60,7 @@ withDefaults(
 
 const { t } = useI18n()
 const toast = useToast()
-const { ensureContext, parceiroQuery } = useParceiroPortal()
+const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 
 const indicacao = ref<PortalIndicacao | null>(null)
 const carregando = ref(true)
@@ -81,7 +81,12 @@ const podeIndicar = computed(() => Boolean(indicacao.value?.podeIndicar))
 const temQr = computed(() => podeIndicar.value && Boolean(qrUrl.value) && !qrFalhou.value)
 
 /** A seção aparece carregando, com falha, ou com código; sem programa ativo, não. */
-const visivel = computed(() => carregando.value || falhou.value || podeIndicar.value)
+const visivel = computed(
+  () =>
+    /* Conta sem empresa (403 no contexto): não há código a esperar; o cartão ficava parado no
+       esqueleto em cima da faixa. */
+    !store.semAcessoParceiro && (carregando.value || falhou.value || podeIndicar.value),
+)
 
 watch(qrUrl, () => {
   qrFalhou.value = false
@@ -213,6 +218,17 @@ const resumo = computed(() => {
 onMounted(() => {
   void carregar()
 })
+
+/* Afiliação aprovada com o Início aberto (a moldura relê o status ao voltar para a aba): o código
+   aparece sem recarregar. */
+watch(
+  () => store.statusAfiliadoAtivo,
+  (ativo, antes) => {
+    if (ativo && !antes) {
+      void carregar()
+    }
+  },
+)
 
 defineExpose({ abrirQr, temQr, podeIndicar, visivel, resumo, carregando })
 </script>

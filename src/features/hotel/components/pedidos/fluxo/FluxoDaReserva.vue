@@ -22,6 +22,7 @@ import ConfeteDePatas from '@/features/clinico/components/pedidos/ConfeteDePatas
 import FolhaDoDia from '@/features/clinico/components/pedidos/FolhaDoDia.vue'
 import '@/features/clinico/components/pedidos/fluxo/fluxo.css'
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
+import { formatPhone } from '@/utils/format/phone'
 
 import PetAvatar from '../../base/PetAvatar.vue'
 import { useHotelFormat } from '../../../composables/useHotelFormat'
@@ -787,12 +788,20 @@ function trocarParaHotelEscolhe() {
           </label>
           <label class="fx-campo">
             <span>{{ t('hotel.pedidos.link.telefone') }}</span>
+            <!--
+              Com máscara: sem ela o celular ia cru ("11987214455") para a revisão, para a linha do
+              pedido no balcão e para o cadastro novo. A validação conta dígitos, então não muda.
+            -->
             <InputText
-              v-model="fluxo.pedido.visitante.telefone"
+              :model-value="fluxo.pedido.visitante.telefone"
               inputmode="tel"
               autocomplete="tel"
               placeholder="(11) 98765-4321"
+              maxlength="15"
               fluid
+              @update:model-value="
+                (valor) => (fluxo.pedido.visitante.telefone = formatPhone(valor ?? ''))
+              "
             />
           </label>
           <label class="fx-campo">

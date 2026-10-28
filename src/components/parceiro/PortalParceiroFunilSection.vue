@@ -91,8 +91,17 @@ function programasToastDetail(programas: ModoParticipacao[] | undefined) {
     return t('parceiroCadastro.toast.enviadoDetail')
   }
 
+  /* "Cadastro da empresa, Programa de Afiliados e Programa Participativo foram para análise":
+     a lista na regra do idioma, e não "Cadastro e A, B". */
+  const itens = [
+    t('parceiroCadastro.resumo.cadastro'),
+    ...programas.map((modo) => t(`parceiroCadastro.programas.${modo}.name`)),
+  ]
+
   return t('parceiroCadastro.toast.enviadoComProgramas', {
-    programas: programas.map((modo) => t(`parceiroCadastro.programas.${modo}.name`)).join(', '),
+    itens: new Intl.ListFormat(INTL_LOCALE[locale.value as Locale], {
+      type: 'conjunction',
+    }).format(itens),
   })
 }
 

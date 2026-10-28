@@ -16,6 +16,7 @@ import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import { useToast } from 'primevue/usetoast'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -25,6 +26,7 @@ import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { BlockReason, ISODate, WeekdayIndex } from '../../data/types'
 import { clockToMinutes } from '../../domain/clinic-time'
+import { ocupaHorario } from '../../domain/conflicts'
 import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
@@ -41,6 +43,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const toast = useToast()
 const agenda = useAgendaStore()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
@@ -111,6 +114,37 @@ const podeSalvar = computed(
   () => janelaValida.value && (!repete.value || diasEscolhidos.value.length > 0),
 )
 
+/**
+ * Quem já está marcado debaixo do bloqueio, neste dia. O bloqueio continua possível (a folga é
+ * da pessoa), mas a recepção precisa saber antes que vai ter de remarcar alguém: sem isto, o
+ * bloqueio das 15h às 16h do Tiago caía em cima do banho da Sushi sem uma palavra.
+ */
+const afetados = computed(() => {
+  if (!janelaValida.value || agenda.data !== props.data) {
+    return []
+  }
+
+  const de = clinicClock.toIso(props.data, clockToMinutes(inicio.value))
+  const ate = clinicClock.toIso(props.data, clockToMinutes(fim.value))
+
+  return agenda.atendimentos
+    .filter(
+      (item) =>
+        ocupaHorario(item) &&
+        item.inicio < ate &&
+        item.fim > de &&
+        (professionalId.value === null || item.professionalId === professionalId.value) &&
+        (roomId.value === null || item.roomIds.includes(roomId.value)),
+    )
+    .sort((um, outro) => um.inicio.localeCompare(outro.inicio))
+})
+
+const frase = computed(() =>
+  afetados.value
+    .map((item) => `${clinico.pet(item.petId)?.nome ?? ''} ${formato.hora(item.inicio)}`)
+    .join(', '),
+)
+
 watch(
   () => props.visivel,
   (aberto) => {
@@ -148,6 +182,12 @@ async function confirmar() {
     })
 
     if (bloqueio) {
+      /* Sem isto o diálogo só sumia: a recepção não sabia se o bloqueio tinha entrado (C-09). */
+      toast.add({
+        severity: 'success',
+        summary: t('clinico.agenda.bloqueio.criado', { inicio: inicio.value, fim: fim.value }),
+        life: 4000,
+      })
       emit('criado')
       emit('update:visivel', false)
     }
@@ -284,6 +324,19 @@ async function confirmar() {
           </button>
         </div>
       </fieldset>
+
+      <p v-if="afetados.length > 0" class="afetados formulario__largo" role="status">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>
+          {{
+            t(
+              'clinico.agenda.bloqueio.afetados',
+              { nomes: frase, count: afetados.length },
+              afetados.length,
+            )
+          }}
+        </span>
+      </p>
     </form>
 
     <template #footer>
@@ -313,6 +366,24 @@ async function confirmar() {
 
 .formulario__largo {
   grid-column: 1 / -1;
+}
+
+.afetados {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.afetados i {
+  margin-top: 2px;
+  font-size: 16px;
 }
 
 .opcao {

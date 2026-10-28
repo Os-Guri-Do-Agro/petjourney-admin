@@ -10,7 +10,7 @@
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
@@ -166,10 +166,12 @@ function clearProfileErrors() {
 
 function onTelefoneInput(value: string) {
   telefone.value = formatPhone(value)
+  telefoneError.value = ''
 }
 
 function onWhatsAppInput(value: string) {
   telefoneWhatsApp.value = formatPhone(value)
+  telefoneWhatsAppError.value = ''
 }
 
 function onCpfInput(value: string) {
@@ -178,7 +180,22 @@ function onCpfInput(value: string) {
   }
 
   cpf.value = formatCpf(value)
+  cpfError.value = ''
 }
+
+/* O erro sai quando a pessoa mexe no campo: ficar vermelho depois de corrigido parece que não
+   aceitou a correção. A conferência de novo é no salvar. */
+watch(nome, () => {
+  nomeError.value = ''
+})
+
+watch(crmv, () => {
+  crmvError.value = ''
+})
+
+watch(especialidade, () => {
+  especialidadeError.value = ''
+})
 
 function validateProfileForm() {
   clearProfileErrors()

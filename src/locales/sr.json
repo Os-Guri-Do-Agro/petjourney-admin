@@ -15,7 +15,7 @@
       "title": "Kuponi stižu uskoro",
       "lede": "Uskoro ćete na pultu potvrđivati iskorišćene kupone, pratiti kampanje i gledati kako stiže svaka konverzija, sve na jednom mestu.",
       "body": "Doterujemo poslednje detalje pred pokretanje. Pratite nas: kada se otvori, Vaša promocija dobija potpuno novi ritam.",
-      "cta": "Jedva čekam! Nazad na kontrolnu tablu",
+      "cta": "Razumem, nazad na kontrolnu tablu",
       "sectionCta": "Saznajte više",
       "closeAria": "Zatvorite obaveštenje"
     }
@@ -33,6 +33,9 @@
     },
     "login": {
       "title": "Dobro došli nazad",
+      "erroCredenciais": "Imejl ili lozinka nisu tačni. Proverite i pokušajte ponovo.",
+      "sessaoExpirada": "Vaša sesija je istekla",
+      "sessaoExpiradaDetalhe": "Prijavite se ponovo da nastavite gde ste stali.",
       "description": "Prijavite se na portal i podstaknite partnerstvo preporukama i rezultatima.",
       "email": {
         "label": "Imejl",
@@ -119,8 +122,8 @@
         "placeholder": "Ponovite lozinku"
       },
       "terms": {
-        "copy": "Pročitao/la sam i prihvatam uslove korišćenja i politiku privatnosti portala PetJourney.",
-        "details": "detalji"
+        "copy": "Pročitao/la sam i prihvatam {termos} portala PetJourney.",
+        "details": "uslove korišćenja i politiku privatnosti"
       },
       "remember": "Ostanite prijavljeni na ovom računaru posle registracije",
       "continue": "Nastavite",
@@ -410,6 +413,9 @@
     },
     "barra": {
       "pular": "Preskoči na sadržaj",
+      "empresaProvisoria": "Vaša firma",
+      "aprovacaoTitulo": "Registracija je odobrena",
+      "aprovacaoDetalhe": "Vaša firma je akreditovana. Odobreni programi su već dostupni na portalu.",
       "navegacao": "Glavna navigacija",
       "inicio": "Početna",
       "criarTitulo": "Napravi novo",
@@ -427,7 +433,7 @@
     "loading": "Učitavanje...",
     "emptyDefault": "Ovde još nema ničega",
     "error": {
-      "title": "Učitavanje nije uspelo",
+      "title": "Nešto nije u redu",
       "retry": "Pokušajte ponovo"
     },
     "tabs": {
@@ -452,7 +458,7 @@
     "operability": {
       "pending": {
         "title": "Registracija je na proveri",
-        "body": "Radnje na portalu ostaju blokirane dok akreditacija ne bude odobrena.",
+        "body": "Do odobrenja, kod za preporuku, novčanik i novi pristupi su na čekanju.",
         "link": "Pratite akreditaciju"
       },
       "rejected": {
@@ -593,7 +599,7 @@
       "barraAria": "Oslobođeno {liberado} od {total}"
     },
     "programa": {
-      "titulo": "Partnerski program",
+      "titulo": "Afilijejt program",
       "selo": {
         "NAO_SOLICITADO": "Nije aktivno",
         "SOLICITADO": "Na proveri",
@@ -609,6 +615,7 @@
         "ATIVO": "Program je aktivan."
       },
       "motivo": "Navedeni razlog: {motivo}",
+      "textoAmbosEmAnalise": "Oba zahteva su na proveri. Rezultat se pojavljuje ovde čim bude odlučeno.",
       "cta": "Pogledaj programe"
     },
     "pauta": {
@@ -668,6 +675,8 @@
     },
     "resumo": {
       "portal": "Pratite zaradu i podelite svoj kod.",
+      "portalEmAnalise": "Vaša registracija je na proveri. Rezultat stiže imejlom.",
+      "portalSemPrograma": "Vaš kod i zarada pojavljuju se kada Afilijejt program bude aktivan.",
       "conferindo": "Proveravamo šta traži vašu pažnju…",
       "urgentes": "{total} hitan predmet traži vašu pažnju danas | {total} hitna predmeta traže vašu pažnju danas | {total} hitnih predmeta traži vašu pažnju danas",
       "esperando": "{total} predmet vas čeka danas | {total} predmeta vas čekaju danas | {total} predmeta vas čeka danas",
@@ -999,7 +1008,7 @@
       "step2Title": "Na proveri",
       "step2Desc": "Tim PetJourney proverava registraciju.",
       "step3Title": "Odobreno",
-      "step3Desc": "Dopunite podatke i zatražite programe.",
+      "step3Desc": "Odobreni programi se pojavljuju na portalu.",
       "submit": "Pošaljite registraciju"
     },
     "pendente": {
@@ -1029,7 +1038,7 @@
     },
     "editar": {
       "title": "Izmenite registraciju",
-      "lede": "Ažurirajte podatke o firmi. Izmene se čuvaju odmah.",
+      "lede": "Ažurirajte podatke o firmi i sačuvajte izmene.",
       "submit": "Sačuvajte izmene"
     },
     "toast": {
@@ -1037,7 +1046,7 @@
       "enviadoDetail": "Sada je na redu tim PetJourney. Rezultat ćete dobiti imejlom.",
       "salvo": "Registracija je ažurirana",
       "salvoDetail": "Izmene podataka o firmi su sačuvane.",
-      "enviadoComProgramas": "Poslato na proveru: registracija i {programas}. Rezultat stiže imejlom."
+      "enviadoComProgramas": "Poslato na proveru: {itens}. Rezultat stiže imejlom."
     },
     "errors": {
       "generic": "Slanje registracije nije uspelo.",
@@ -1781,7 +1790,9 @@
     "gate": {
       "title": "Potreban je afilijejt program",
       "body": "Novčanik, izvod i isplate dostupni su samo uz aktivan afilijejt program. Zatražite ga na ekranu „Programi“.",
-      "cta": "Zatražite afilijejt program"
+      "cta": "Zatražite afilijejt program",
+      "emAnaliseTitle": "Afilijejt program je na proveri",
+      "emAnaliseBody": "Novčanik, izvod i isplate otvaraju se čim tim PetJourney odobri program. Rezultat stiže imejlom."
     },
     "visao": {
       "loadingAria": "Učitavanje novčanika",
@@ -1798,6 +1809,7 @@
         "title": "PIX ključ",
         "label": "PIX ključ",
         "hint": "Neophodan za zahteve za isplatu.",
+        "invalida": "Ovo ne liči na PIX ključ. Koristite CPF, CNPJ, imejl, broj mobilnog sa pozivnim brojem ili nasumični ključ banke.",
         "placeholder": "ime{'@'}firma.com ili CNPJ",
         "save": "Sačuvajte ključ"
       },
@@ -2005,6 +2017,7 @@
       "subtitle": "Više firmi",
       "title": "Izaberite partnera",
       "body": "Vaš nalog pripada većem broju partnerskih firmi. Izaberite kojom sada želite da upravljate.",
+      "bodyUma": "Ovo je firma kojom vaš nalog upravlja. Ako se pridružite timu druge firme, ona se pojavljuje ovde za izbor.",
       "roleDono": "Vaša firma",
       "roleOperador": "Tim",
       "current": "U upotrebi",
@@ -2024,10 +2037,10 @@
     "convite": {
       "subtitle": "Tim",
       "title": "Prihvatite poziv",
-      "body": "Pozvani ste u tim partnerske firme portala PetJourney. Unesite identifikator iz imejla ili otvorite kompletan link poziva.",
-      "idLabel": "ID partnera",
-      "idHint": "Obavezno. Nalazi se u linku kao ?parceiroId=...",
-      "idPlaceholder": "cuid-firme",
+      "body": "Stigao vam je poziv da se pridružite timu partnerske firme portala PetJourney. Otvorite link poziva iz imejla da biste ga prihvatili.",
+      "idLabel": "Kod firme",
+      "idHint": "Link poziva iz imejla već popunjava ovo polje.",
+      "idPlaceholder": "Kod iz linka poziva",
       "accept": "Prihvatite poziv",
       "footnote": "Nakon prihvatanja radite na portalu sa ulogom koju je odredio vlasnik firme.",
       "toast": {
@@ -2540,6 +2553,8 @@
       "responsavel": "Staratelj",
       "castrado": "Sterilisan",
       "inteiro": "Nesterilisan",
+      "castrada": "Sterilisana",
+      "inteira": "Nesterilisana",
       "semPeso": "Težina nije uneta",
       "verHistorico": "Pogledajte istoriju",
       "abrirProntuario": "Otvorite karton",
@@ -2821,7 +2836,7 @@
       "cancelarDialogo": {
         "titulo": "Otkažite termin",
         "motivo": "Razlog",
-        "descricao": "Vreme se oslobađa, ali kartica ostaje vidljiva za taj dan.",
+        "descricao": "Vreme se oslobađa. Da biste videli otkazane termine u rasporedu, isključite „Sakrijte otkazane“ u Prikazu.",
         "confirmar": "Otkažite termin",
         "aviso": "Termin za ljubimca {paciente} je otkazan ({motivo}). Javite nam se da zakažemo novi termin."
       },
@@ -2879,6 +2894,8 @@
         "motivo": "Razlog",
         "ate": "Kraj",
         "janelaInvalida": "Kraj mora biti posle početka.",
+        "afetados": "U ovom terminu već postoji pregled: {nomes}. Blokada nikoga ne otkazuje; zakažite ponovo i obavestite vlasnika. | U ovom terminu već postoje {count} pregleda: {nomes}. Blokada nikoga ne otkazuje; zakažite ponovo i obavestite vlasnike. | U ovom terminu već postoji {count} pregleda: {nomes}. Blokada nikoga ne otkazuje; zakažite ponovo i obavestite vlasnike.",
+        "criado": "Termin je blokiran: od {inicio} do {fim}.",
         "clinicaInteira": "Cela klinika",
         "semSala": "Bez određene prostorije",
         "detalhe": "Detalji",
@@ -2906,6 +2923,8 @@
         "encerrado": "Rok je istekao: samo telefonom"
       },
       "acoesRotulo": "Akcije rasporeda",
+      "comoChegou": "Kako je zakazan",
+      "tipoCurto": "Vrsta",
       "frase": {
         "atendimentos": "{total} termin | {total} termina | {total} termina",
         "naRecepcao": "na recepciji: {total}",
@@ -2926,7 +2945,8 @@
         "encaixe": "Vanredni",
         "marcarAs": "Zakaži u {hora} kod: {nome}",
         "agora": "Sada",
-        "dica": "Prevucite pregled na drugo vreme ili kod drugog stručnjaka da biste ga pomerili. Kliknite slobodan termin da zakažete."
+        "dica": "Prevucite pregled na drugo vreme ili kod drugog stručnjaka da biste ga pomerili. Kliknite slobodan termin da zakažete.",
+        "dicaToque": "Dodirnite slobodan termin da zakažete. Da biste pomerili pregled, otvorite ga i dodirnite olovku."
       },
       "formato": {
         "titulo": "Format",
@@ -3202,7 +3222,7 @@
         },
         "comprovante-vacinacao": {
           "titulo": "Potvrda o vakcinaciji",
-          "descricao": "Serija i proizvođač se još ne beleže."
+          "descricao": "Primenjene vakcine, sa serijom, proizvođačem i datumom revakcinacije."
         },
         "termo-consentimento": {
           "titulo": "Obrazac informisanog pristanka",
@@ -3248,6 +3268,7 @@
           "titulo": "Potvrda o zdravstvenom stanju",
           "corpoComDiagnostico": "Potvrđujem da je dana {data} izvršen pregled životinje {paciente}, gore identifikovane, i da je utvrđeno sledeće: {diagnostico}.",
           "corpoSemAchado": "Potvrđujem da je dana {data} izvršen pregled životinje {paciente}, gore identifikovane, i da tokom obavljenog pregleda nisu utvrđena klinička odstupanja.",
+          "corpoComAchado": "Potvrđujem da je dana {data} izvršen pregled životinje {paciente}, gore identifikovane, i da je pregledom zabeleženo: {achados}.",
           "recomendacoes": "Preporuke:"
         },
         "comparecimento": {
@@ -3598,7 +3619,7 @@
         "queixaPrincipal": "Glavna tegoba",
         "historia": "Istorija bolesti",
         "duracaoSintomas": "Koliko dugo",
-        "duracaoExemplo": "3 dana",
+        "duracaoExemplo": "Npr.: 3 dana",
         "apetite": "Apetit",
         "hidratacao": "Hidratacija",
         "evacuacao": "Defekacija",
@@ -3759,7 +3780,7 @@
         "usoContinuo": "Dugotrajna terapija",
         "conta": {
           "peso-por-dose": "1. {peso} kg × {mgPorKg} mg/kg = {mg} mg po dozi",
-          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg = {quantidade} po dozi",
+          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg/{porUnidade} = {quantidade} {unidade} po dozi",
           "total": "3. {porDia}× dnevno × {dias} d = {total} (ukupan broj doza)"
         },
         "fracao": {
@@ -3870,6 +3891,7 @@
           "etapas": "Završeno koraka: {feitas} od {total}"
         },
         "salvoAs": "Sačuvano u {hora}",
+        "semConexao": "Nema veze. Sačuvano na ovom računaru dok se mreža ne vrati.",
         "autosave": "Čuva se samo dok kucate",
         "imprimir": "Odštampajte ili sačuvajte PDF",
         "fixoRotulo": "Pacijent na pregledu",
@@ -3909,7 +3931,7 @@
             "retornoMarcado": "Kontrola je zakazana u rasporedu.",
             "retornoSemHorario": "Kontrola predviđena za {dias} dan, još bez termina. Recepcija je zakazuje u rasporedu. | Kontrola predviđena za {dias} dana, još bez termina. Recepcija je zakazuje u rasporedu. | Kontrola predviđena za {dias} dana, još bez termina. Recepcija je zakazuje u rasporedu.",
             "proximo": "Sledeći pacijent",
-            "esperaHa": "čeka {minutos} min na recepciji",
+            "esperaHa": "čeka {tempo} na recepciji",
             "acabouDeChegar": "upravo je stigao na recepciju",
             "horario": "termin u {hora}",
             "ninguem": "Niko ne čeka i danas nema drugih termina.",
@@ -4276,6 +4298,7 @@
       "validaAte": "Važi do {data}",
       "controlada": "Kontrolisana supstanca · Pravilnik 344/98",
       "semPrescricao": "Nema terapije za izdavanje.",
+      "confirmeAlergia": "Potvrdite alergiju u terapiji da biste potpisali.",
       "vistaDoResponsavel": "Prikaz za vlasnika",
       "lembrete": "Postaje podsetnik u aplikaciji: {quantidade}, {frequencia}",
       "lembreteContinuo": "Trajni podsetnik, bez datuma završetka",
@@ -4415,6 +4438,7 @@
         "abrir": "Daj vakcinu",
         "atalho": "Daj",
         "titulo": "Daj vakcinu · {pet}",
+        "imunossuprimido": "{alerta}. Živa vakcina je obično kontraindikovana: proverite pre davanja.",
         "confirmar": "Daj i zabeleži",
         "opcionalNaoIniciada": "Neobavezna, još nije započeta",
         "serieDoPaciente": "{serie}: {total} doze za ovu vakcinu.",
@@ -4652,9 +4676,9 @@
         "historicoTitulo": "Tok lečenja po smenama",
         "semEvolucao": "Još nema beleški o toku lečenja.",
         "avisoPiora": "Beleženje pogoršanja stvara izveštaj koji se šalje tek kada neko pozove vlasnika.",
-        "observadoExemplo": "Pojeo je ceo obrok i dvaput mokrio.",
-        "avaliacaoExemplo": "Bol pod kontrolom. Nema novih znakova.",
-        "planoExemplo": "Nastaviti analgeziju i ponovo proceniti u 22 h."
+        "observadoExemplo": "Npr.: pojeo je ceo obrok i dvaput mokrio.",
+        "avaliacaoExemplo": "Npr.: bol pod kontrolom, nema novih znakova.",
+        "planoExemplo": "Npr.: nastaviti analgeziju i ponovo proceniti u 22 h."
       },
       "boletim": {
         "retidoTitulo": "Zadržan izveštaj",
@@ -4763,9 +4787,9 @@
           "obito": "Ostaje u evidenciji hospitalizacije. Ništa od ovoga se ne šalje kao poruka."
         },
         "orientacaoExemplo": {
-          "alta": "Mirovanje 3 dana, vlažna hrana, kontrola za 7 dana.",
-          "transferido": "Upućen u Veterinarsku bolnicu X na hemodijalizu, uz kopiju medicinskog kartona.",
-          "obito": "Vlasnik je obavešten telefonom u 14:20; objašnjene su mogućnosti kremacije."
+          "alta": "Npr.: mirovanje 3 dana, vlažna hrana, kontrola za 7 dana.",
+          "transferido": "Npr.: upućen u Veterinarsku bolnicu X na hemodijalizu, uz kopiju medicinskog kartona.",
+          "obito": "Npr.: vlasnik je obavešten telefonom u 14:20; objašnjene su mogućnosti kremacije."
         },
         "canal": {
           "alta": "Vlasnik dobija poruku u aplikaciji da je ljubimac otišao kući.",
@@ -5956,6 +5980,7 @@
         },
         "de": "od {alvo}",
         "ritmo": "po današnjem ritmu, završava na: {n}",
+        "limite": "· ograničenje {alvo}",
         "planejar": "Planiraj {mes}",
         "doMes": "Ciljevi za {mes}",
         "emCurso": "U toku · poslednji dan | U toku · ostao je {n} dan | U toku · ostala su {n} dana | U toku · ostalo je {n} dana",
@@ -6633,6 +6658,7 @@
       "pertences": "Stvari",
       "peso": "Težina na vagi",
       "pesoCadastro": "U kartonu: {valor}",
+      "faltaPeso": "Nedostaje težina sa vage.",
       "petiscos": "Poslastice",
       "porcao": "Obrok",
       "racaoPropria": "Hrana doneta od kuće",
@@ -6739,6 +6765,7 @@
         "ocupada": "U ovom smeštaju je gost upravo sada.",
         "tem-historico": "Ovaj smeštaj je već primao goste: izbacite ga iz upotrebe umesto da ga uklonite.",
         "tem-reserva": "Postoji buduća rezervacija za ovaj smeštaj.",
+        "tem-reserva-inativar": "Ovaj smeštaj ima rezervaciju. U rezervaciji upotrebite \"Promeni datume\" da je premestite u drugi smeštaj pre nego što ga isključite iz rada.",
         "ultimo": "Mora da ostane bar jedan."
       },
       "catalogos": "Podaci hotela nisu mogli biti učitani.",
@@ -6761,6 +6788,7 @@
         "higienizacao": "Smeštaj se u to vreme još čisti.",
         "inativa": "Ovaj smeštaj je van upotrebe.",
         "ocupada": "Već postoji rezervacija za ovaj smeštaj u tom periodu.",
+        "animal-ja-reservado": "Ova životinja već ima drugu rezervaciju u tom periodu.",
         "periodo-invalido": "Odlazak mora biti posle dolaska.",
         "porte": "Životinja je prevelika za ovaj smeštaj."
       }
@@ -6794,6 +6822,7 @@
       "pertences": "Stvari",
       "precisaLigar": "Pozovite vlasnika {nome} pre kraja smene",
       "racaoDaCasa": "Hrana kuće",
+      "racaoTrazida": "Hrana doneta od kuće",
       "registrar": "Upiši",
       "registrarLigacao": "Upiši poziv",
       "registrarOcorrencia": "Upiši",
@@ -6925,7 +6954,9 @@
       "vermifugo": "Tretman protiv parazita"
     },
     "exigencias": {
-      "apresentacao": "Datum predaje",
+      "apresentacao": "Datum primene ili izdavanja",
+      "apresentacaoDica": "Onaj iz knjižice ili dokumenta, ne današnji. Rok važenja se računa od njega.",
+      "escolhaAData": "Izaberite datum iz knjižice da vidite rok važenja.",
       "apresentadoEm": "Predato {data}",
       "autorizadaPor": "Odobrio",
       "bloqueado": "{total} dokument blokira prijavu. | {total} dokumenta blokiraju prijavu. | {total} dokumenata blokira prijavu.",
@@ -6954,6 +6985,7 @@
       "dias": "{valor} dan | {valor} dana | {valor} dana",
       "emTempo": "za {valor}",
       "haTempo": "pre {valor}",
+      "hoje": "od danas",
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
@@ -7319,7 +7351,21 @@
       "confirmarSinal": "Upiši kaparu i potvrdi",
       "criar": "Napravi rezervaciju",
       "diarias": "{total} noćenje | {total} noćenja | {total} noćenja",
+      "alterar": {
+        "abrir": "Promeni datume",
+        "agora": "Trenutna rezervacija: {acomodacao}, {periodo}.",
+        "conta": "Novi iznos: {novo} (pre {antes}).",
+        "datas": "Dolazak i odlazak",
+        "escolha": "Izaberite smeštaj",
+        "novaSaida": "Novi datum odlaska",
+        "prorrogar": "Produži boravak",
+        "salvar": "Sačuvaj izmenu",
+        "semVaga": "Nema slobodnog smeštaja za te datume.",
+        "titulo": "Izmena rezervacije"
+      },
+      "animalJaReservado": "{pet} već ima rezervaciju u tom periodu ({acomodacao}, {periodo}). Izmenite ili otkažite tu pre nego što napravite novu.",
       "escolhaHospede": "Izaberite životinju",
+      "hospedeNaoEncontrado": "Nema životinje sa tim imenom u evidenciji hotela.",
       "exigencias": "Dokumentacija za prijem",
       "fazerCheckIn": "Prijavi gosta",
       "hospede": "Gost",
@@ -7348,6 +7394,9 @@
         "naoEncontradaTitulo": "Rezervacija nije pronađena",
         "naoEncontradaDescricao": "Adresa je možda nepotpuna ili rezervacija više ne postoji. Vratite se na listu rezervacija.",
         "registrarComprovante": "Upiši potvrdu",
+        "sinalConfirmar": "Upiši i potvrdi",
+        "sinalSugerido": "Predložen avans: {valor}",
+        "sinalValor": "Koliko je vlasnik platio avansa",
         "cancelar": "Otkaži rezervaciju",
         "cancelarTitulo": "Otkazivanje rezervacije za {pet}",
         "cancelarMotivo": "Zašto",
@@ -7486,6 +7535,7 @@
       "desfazer": "Poništi",
       "feita": "Urađeno",
       "filtroTipo": "Filtriraj po vrsti",
+      "naoMarcou": "Označavanje nije uspelo: veza je pukla. Zadatak je i dalje na čekanju; dodirnite ponovo.",
       "jaPassou": "Već rešeno ({total} termin) | Već rešeno ({total} termina) | Već rešeno ({total} termina)",
       "jaResolvidas": "{total} već rešen | {total} već rešena | {total} već rešenih",
       "maisTarde": "Kasnije danas",
@@ -7551,6 +7601,7 @@
       "editar": "Izmeni",
       "editarTitulo": "Termini: {servico}",
       "exigeAutorizacao": "samo za goste čiji je vlasnik dao saglasnost",
+      "ignorados": "Nije jasno: {itens}. Upišite vreme kao 09:00, između 00:00 i 23:59.",
       "horarios": "{total} termin | {total} termina | {total} termina",
       "naoMexe": "Obroci i lekovi se ne podešavaju ovde: njihovi termini dolaze iz kartona svakog gosta, a hotel ne propisuje terapiju.",
       "noTurno": "{total} pada u tekuću smenu | {total} padaju u tekuću smenu | {total} pada u tekuću smenu",
@@ -7574,6 +7625,7 @@
       "vigenciaAgora": "Odmah",
       "vigenciaAmanha": "Sutra",
       "vigenciaDica": "Ako počne sutra, tekuća smena ostaje netaknuta.",
+      "vigenciaDicaAgora": "Važi već za ostatak dana: termini koji još nisu prošli ulaze u rutinu ove smene.",
       "nova": {
         "versao": "Verzija {versao}, objavio: {pessoa}.",
         "versaoSemPessoa": "Verzija {versao}.",
@@ -7604,6 +7656,13 @@
       "recreacao-individual": "Individualna igra",
       "tosa": "Šišanje",
       "transporte": "Prevoz"
+    },
+    "resumoAdmissao": {
+      "ausente": "Nedostaje dokument",
+      "dispensado": "Dokument oslobođen",
+      "ok": "Dokumenti važe",
+      "vence-durante": "Dokument ističe tokom boravka",
+      "vencido": "Dokument istekao"
     },
     "situacaoExigencia": {
       "ausente": "Nije predato",

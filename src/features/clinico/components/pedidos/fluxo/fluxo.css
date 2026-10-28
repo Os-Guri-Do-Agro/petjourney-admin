@@ -265,6 +265,12 @@ label.fx-opcao:hover {
   font-weight: 550;
 }
 
+.fx-erro {
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
 /* ------------------------------------------------------------------ escolhas em cartão */
 
 /*

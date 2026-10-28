@@ -104,7 +104,7 @@ html:has(.shell--moldura-app) {
 /* ----------------------------------------------- o menu: a barra lateral como o menu do app */
 
 /* Branca como a tela, separada dela só por uma régua de véu. */
-.shell.shell--moldura-app .barra {
+.shell.shell--moldura-app > .barra {
   border-inline-end: 1px solid var(--app-regua);
   background: var(--app-fundo);
   color: var(--app-tinta);
@@ -557,6 +557,18 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   --risco: #ee9f97;
   --atencao: #f2bd88;
   --ok: #98d0a5;
+}
+
+/*
+ * O botão de perigo cheio ficou pastel: texto branco por cima dava 2:1 ("Cancelar atendimento").
+ * Passa à tinta, como o de atenção já fazia: cerca de 6:1 no repouso e 5:1 no hover. Vale também
+ * dentro do `.hc-tema` (os diálogos da clínica), que redefine os botões para o branco.
+ */
+:root.trilha.moldura-app:not(.app-dark),
+:root.trilha.moldura-app:not(.app-dark) .hc-tema {
+  --p-button-danger-color: var(--tinta);
+  --p-button-danger-hover-color: var(--tinta);
+  --p-button-danger-active-color: var(--tinta);
 }
 
 /* O que punha texto branco sobre a cor cheia passa à tinta da família, que lê sobre o pastel. */

@@ -165,11 +165,14 @@ function confirmar() {
           }}
         </span>
 
-        <!-- O telefone fica clicável: a ligação acontece agora, não depois. -->
-        <a v-if="tutor" class="reagendar__telefone" :href="`tel:${tutor.telefone}`">
+        <!--
+          O telefone à vista, para quem liga do aparelho da clínica. Não é botão de ligar: a tela
+          registra o contato, não disca (mesma regra do diálogo de falta).
+        -->
+        <span v-if="tutor" class="reagendar__telefone">
           <i class="ph ph-phone" aria-hidden="true" />
           <bdi dir="ltr" class="ui-num">{{ tutor.telefone }}</bdi>
-        </a>
+        </span>
       </div>
 
       <p v-if="buscando" class="reagendar__estado" role="status">
@@ -261,33 +264,20 @@ function confirmar() {
   gap: 10px 14px;
 }
 
+/* Texto, não botão: sem borda nem hover, para não prometer um clique que não existe. */
 .reagendar__telefone {
   display: inline-flex;
-  min-height: 36px;
   align-items: center;
   gap: 8px;
-  padding: 0 14px;
-  border: 1px solid var(--linha-forte);
-  border-radius: 10px;
   color: var(--tinta);
   font-size: 14px;
   font-weight: 550;
-  text-decoration: none;
   white-space: nowrap;
 }
 
 .reagendar__telefone i {
   color: var(--clinica-tinta);
   font-size: 16px;
-}
-
-.reagendar__telefone:hover {
-  background: var(--superficie-2);
-}
-
-.reagendar__telefone:focus-visible {
-  outline: 2px solid var(--clinica);
-  outline-offset: 2px;
 }
 
 .reagendar__estado {

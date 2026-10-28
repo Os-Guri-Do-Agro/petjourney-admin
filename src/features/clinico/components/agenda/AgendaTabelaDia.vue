@@ -75,7 +75,12 @@ const linhas = computed<Linha[]>(() => {
   const lista: Linha[] = []
 
   for (let minuto = inicio; minuto < fim; minuto += LINHA_EM_MINUTOS) {
-    const bloqueio = bloqueioDaClinica(minuto)
+    /*
+     * Atendimento que começa dentro do bloqueio (a consulta das 17:30 durante a reunião) não pode
+     * sumir debaixo da faixa: a meia hora dele volta a ser linha comum, hachurada nas outras colunas.
+     */
+    const algumComeca = colunas.value.some((coluna) => queComecam(coluna, minuto).length > 0)
+    const bloqueio = algumComeca ? null : bloqueioDaClinica(minuto)
     const anterior = lista.at(-1)
 
     /* Almoço das 12h às 13h é uma linha, não duas com "Almoço" repetido. */
@@ -127,14 +132,19 @@ function bloqueioDaClinica(minuto: number) {
   )
 }
 
+/**
+ * O bloqueio que toca esta meia hora nesta coluna. O da clínica inteira também conta: quando a
+ * linha não vira faixa (ele cobre só parte dela, ou há atendimento começando ali), a célula fica
+ * hachurada e deixa de oferecer "Marcar".
+ */
 function bloqueioDaColuna(coluna: ColunaAgenda, minuto: number) {
-  return (
-    coluna.faixas.find((faixa) => {
-      const { inicio, fim } = minutosDaFaixa(faixa)
+  const tocaALinha = (faixa: FaixaBloqueio) => {
+    const { inicio, fim } = minutosDaFaixa(faixa)
 
-      return inicio < minuto + LINHA_EM_MINUTOS && fim > minuto
-    }) ?? null
-  )
+    return inicio < minuto + LINHA_EM_MINUTOS && fim > minuto
+  }
+
+  return coluna.faixas.find(tocaALinha) ?? faixasDaClinica.value.find(tocaALinha) ?? null
 }
 
 /**
@@ -146,6 +156,21 @@ function bloqueioComecaAqui(faixa: FaixaBloqueio, minuto: number) {
   const { inicio } = minutosDaFaixa(faixa)
 
   return inicio >= minuto || minuto === linhas.value[0]?.minuto
+}
+
+/**
+ * Onde o motivo aparece dentro da célula. O bloqueio da clínica inteira que não virou faixa (porque
+ * há atendimento começando ali) diz o motivo uma vez só, na primeira coluna: nas outras, o
+ * hachurado já basta, e cinco "Almoço até 13:00" lado a lado viravam parede de texto.
+ */
+function mostraRotuloDoBloqueio(coluna: ColunaAgenda, minuto: number) {
+  const faixa = bloqueioDaColuna(coluna, minuto)
+
+  if (!faixa || !bloqueioComecaAqui(faixa, minuto)) {
+    return false
+  }
+
+  return coluna.faixas.includes(faixa) || coluna.id === colunas.value[0]?.id
 }
 
 function tituloDoBloqueio(faixa: FaixaBloqueio) {
@@ -612,10 +637,7 @@ function tomDaOcupacao(ocupacao: number) {
 
                 <ul class="tabela__lista">
                   <li
-                    v-if="
-                      bloqueioDaColuna(coluna, linha.minuto) &&
-                      bloqueioComecaAqui(bloqueioDaColuna(coluna, linha.minuto)!, linha.minuto)
-                    "
+                    v-if="mostraRotuloDoBloqueio(coluna, linha.minuto)"
                     class="tabela__bloqueio"
                   >
                     <span
@@ -797,9 +819,17 @@ function tomDaOcupacao(ocupacao: number) {
     </div>
 
     <footer class="tabela__pe">
-      <p class="tabela__dica">
+      <!--
+        No tablet não há arrastar (o arraste é do mouse): a dica do toque manda remarcar pelo
+        "Editar" do atendimento, em vez de prometer um gesto que não acontece.
+      -->
+      <p class="tabela__dica tabela__dica--mouse">
         <i class="ph ph-hand-grabbing" aria-hidden="true" />
         {{ t('clinico.agenda.tabela.dica') }}
+      </p>
+      <p class="tabela__dica tabela__dica--toque">
+        <i class="ph ph-hand-tap" aria-hidden="true" />
+        {{ t('clinico.agenda.tabela.dicaToque') }}
       </p>
 
       <!-- A chave das cores do estado: a mesma palavra que o painel do atendimento usa. -->
@@ -1097,9 +1127,13 @@ tbody > .tabela__linha:first-child > * {
   font-size: 14px;
 }
 
+/* Na coluna estreita quem cede é o motivo, com reticências: o "até 17:00" é o que se procura. */
 .tabela__etiqueta strong {
+  min-width: 0;
+  overflow: hidden;
   color: var(--tinta);
   font-weight: 600;
+  text-overflow: ellipsis;
 }
 
 .tabela__etiqueta-detalhe {
@@ -1108,6 +1142,7 @@ tbody > .tabela__linha:first-child > * {
 }
 
 .tabela__etiqueta-ate {
+  flex: none;
   color: var(--tinta-3);
 }
 
@@ -1702,6 +1737,20 @@ tbody > .tabela__linha:first-child > * {
 .tabela__dica i {
   flex: none;
   font-size: 16px;
+}
+
+.tabela__dica--toque {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .tabela__dica--mouse {
+    display: none;
+  }
+
+  .tabela__dica--toque {
+    display: flex;
+  }
 }
 
 /* A chave do estado: uma amostra do próprio cartão, com a palavra ao lado. */

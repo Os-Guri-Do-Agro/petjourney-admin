@@ -392,7 +392,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         <ClinicField :rotulo="t('clinico.internacao.prescricao.tipo')">
           <template #default="{ id }">
             <Select
-              :id="id"
+              :input-id="id"
               v-model="nova.kind"
               :options="opcoesDeKind"
               option-label="rotulo"
@@ -409,7 +409,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         >
           <template #default="{ id }">
             <Select
-              :id="id"
+              :input-id="id"
               :model-value="nova.medicamentoId"
               :options="opcoesDeMedicamento"
               option-label="rotulo"
@@ -455,7 +455,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         >
           <template #default="{ id }">
             <Select
-              :id="id"
+              :input-id="id"
               v-model="nova.via"
               :options="opcoesDeVia"
               option-label="rotulo"
@@ -469,7 +469,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
         <ClinicField :rotulo="t('clinico.internacao.prescricao.frequencia')">
           <template #default="{ id }">
             <Select
-              :id="id"
+              :input-id="id"
               v-model="nova.frequenciaHoras"
               :options="opcoesDeFrequencia"
               option-label="rotulo"
@@ -485,7 +485,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
           :dica="t('clinico.internacao.prescricao.primeiraDica')"
         >
           <template #default="{ id }">
-            <InputNumber :id="id" v-model="nova.emQuantasHoras" :min="0" :max="12" fluid />
+            <InputNumber :input-id="id" v-model="nova.emQuantasHoras" :min="0" :max="12" fluid />
           </template>
         </ClinicField>
       </div>

@@ -21,7 +21,7 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Popover from 'primevue/popover'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { GrupoDeFiltro } from './filter-types'
@@ -74,10 +74,19 @@ function alternar(grupoId: string, valor: string) {
 function limpar() {
   emit('update:selecionados', {})
 }
+
+const raiz = ref<HTMLElement | null>(null)
+
+/** Limpa e devolve o foco ao campo: o botão some com a busca vazia e o foco caía no corpo. */
+async function limparBusca() {
+  emit('update:busca', '')
+  await nextTick()
+  raiz.value?.querySelector<HTMLInputElement>('input[type="search"]')?.focus()
+}
 </script>
 
 <template>
-  <div class="filtro">
+  <div ref="raiz" class="filtro">
     <div class="filtro__linha">
       <IconField class="filtro__busca">
         <InputIcon class="ph ph-magnifying-glass" />
@@ -88,6 +97,20 @@ function limpar() {
           :placeholder="placeholderBusca"
           :aria-label="placeholderBusca"
           @update:model-value="emit('update:busca', $event ?? '')"
+        />
+        <!-- O "x" do navegador saía azul, fora da paleta: o limpar é um botão da casa. -->
+        <Button
+          v-if="busca"
+          type="button"
+          class="filtro__limpar"
+          icon="ph ph-x"
+          severity="secondary"
+          text
+          rounded
+          size="small"
+          :aria-label="t('primevue.clear')"
+          :title="t('primevue.clear')"
+          @click="limparBusca"
         />
       </IconField>
 
@@ -211,6 +234,29 @@ function limpar() {
   inset-inline-start: 13px;
   color: var(--tinta-3);
   font-size: 16px;
+}
+
+.filtro__busca {
+  position: relative;
+}
+
+.filtro__busca :deep(.p-inputtext) {
+  padding-inline-end: 40px;
+}
+
+.filtro__busca :deep(.p-inputtext::-webkit-search-cancel-button) {
+  appearance: none;
+}
+
+.filtro__limpar.p-button {
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 6px;
+  width: 30px;
+  height: 30px;
+  min-height: 0;
+  color: var(--tinta-2);
+  transform: translateY(-50%);
 }
 
 /* -------------------------------------------------------------------------- filtros */

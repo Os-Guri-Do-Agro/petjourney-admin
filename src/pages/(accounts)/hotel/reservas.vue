@@ -241,7 +241,8 @@ function semana(data: ISODate) {
 const ativas: ReservaStatus[] = ['pendente', 'confirmada']
 
 const fraseDoResumo = computed(() => {
-  if (reservas.carregando && reservas.lista.length === 0) {
+  /* Com a leitura falhando, "0 reservas: ninguém chega nos próximos 7 dias" seria uma mentira. */
+  if ((reservas.carregando && reservas.lista.length === 0) || reservas.erro) {
     return ''
   }
 
@@ -465,14 +466,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     tour
     @tour="tourAberto = true"
     @tentar-de-novo="carregar"
-    @acao-do-vazio="router.push('/hotel/mapa')"
+    @acao-do-vazio="router.push('/hotel/mapa?nova=1')"
   >
     <template #acoes>
+      <!-- A reserva nasce no mapa; `?nova=1` já abre lá o "onde cabe", sem um segundo clique. -->
       <Button
         type="button"
         icon="ph ph-calendar-plus"
         :label="t('hotel.reservas.novaNoMapa')"
-        @click="router.push('/hotel/mapa')"
+        @click="router.push('/hotel/mapa?nova=1')"
       />
     </template>
 
@@ -544,7 +546,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <span class="ui-linha__fim">
                 <span class="ui-selo ui-selo--risco">
                   <i class="ph" :class="SELO_DA_ADMISSAO[linha.admissao].icone" aria-hidden="true" />
-                  {{ formato.situacaoDaExigencia(linha.admissao) }}
+                  {{ formato.resumoDaAdmissao(linha.admissao) }}
                 </span>
                 <span class="vespera__resolver">{{ t('hotel.reservas.tela.resolver') }}</span>
                 <i class="ph ph-caret-right ui-linha__seta" aria-hidden="true" />

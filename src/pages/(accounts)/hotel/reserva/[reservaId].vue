@@ -22,7 +22,9 @@
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
+import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
+import Popover from 'primevue/popover'
 import SelectButton from 'primevue/selectbutton'
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -35,6 +37,7 @@ import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import type { PassoDoTour } from '@/features/hotel/components/base/tour-types'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import CheckInDialog from '@/features/hotel/components/estadia/CheckInDialog.vue'
+import AlterarReservaGaveta from '@/features/hotel/components/reserva/AlterarReservaGaveta.vue'
 import ExigenciaDialog from '@/features/hotel/components/reserva/ExigenciaDialog.vue'
 import ExigenciasLista from '@/features/hotel/components/reserva/ExigenciasLista.vue'
 import OrcamentoTabela from '@/features/hotel/components/reserva/OrcamentoTabela.vue'
@@ -42,6 +45,7 @@ import { useHotelFormat } from '@/features/hotel/composables/useHotelFormat'
 import type {
   ExigenciaKind,
   ISODate,
+  ISODateTime,
   MedicacaoDaEstadia,
   MotivoDeCancelamento,
   ReservaStatus,
@@ -372,6 +376,71 @@ const fraseDoCancelamento = computed(() => {
     : t('hotel.reserva.tela.canceladaEm', { quando, motivo })
 })
 
+// ------------------------------------------------------------------ alterar datas
+
+/** Mudar datas ou acomodação; para quem já está na casa, prorrogar a saída. */
+const alterarAberto = ref(false)
+
+const podeAlterar = computed(() => ativa.value || reserva.value?.status === 'hospedado')
+
+function abrirAlteracao() {
+  alterarAberto.value = true
+}
+
+async function salvarAlteracao(payload: {
+  inicio: ISODateTime
+  fim: ISODateTime
+  acomodacaoId: string
+}) {
+  if (!reserva.value) {
+    return
+  }
+
+  const feita = await reservas.editar({ reservaId: reserva.value.id, ...payload })
+
+  if (feita) {
+    alterarAberto.value = false
+  }
+}
+
+// ------------------------------------------------------------------ o sinal
+
+/**
+ * Quanto entrou de sinal, perguntado antes de gravar.
+ *
+ * O botão gravava o sinal **sugerido** num clique só: o responsável que pagou R$ 100 de um sinal de
+ * R$ 98,10, ou metade dele, ficava com um valor que ninguém recebeu, e a conta da saída saía
+ * errada. O valor nasce no sugerido, que é o caso comum, e muda com o teclado.
+ */
+const popoverDoSinal = ref<InstanceType<typeof Popover> | null>(null)
+const valorDoSinal = ref<number | null>(null)
+
+function abrirSinal(evento?: Event) {
+  const atual = reserva.value
+
+  if (!atual || !evento) {
+    return
+  }
+
+  valorDoSinal.value = atual.orcamento.sinalCentavos / 100
+  popoverDoSinal.value?.show(evento)
+}
+
+async function confirmarSinal() {
+  const atual = reserva.value
+  const centavos = Math.round((valorDoSinal.value ?? 0) * 100)
+
+  if (!atual || centavos <= 0) {
+    return
+  }
+
+  const feito = await reservas.confirmar(atual.id, centavos)
+
+  if (feito) {
+    popoverDoSinal.value?.hide()
+  }
+}
+
 // ------------------------------------------------------------------ o próximo passo
 
 /**
@@ -401,7 +470,7 @@ const acaoPrincipal = computed(() => {
       rotulo: t('hotel.reserva.confirmarSinal'),
       icone: 'ph ph-check',
       desabilitada: false,
-      executar: () => reservas.confirmar(atual.id, atual.orcamento.sinalCentavos),
+      executar: (evento?: Event) => abrirSinal(evento),
     }
   }
 
@@ -543,6 +612,19 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         @click="abrirCancelamento"
       />
       <Button
+        v-if="podeAlterar"
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-calendar-dots"
+        :label="
+          reserva.status === 'hospedado'
+            ? t('hotel.reserva.alterar.prorrogar')
+            : t('hotel.reserva.alterar.abrir')
+        "
+        @click="abrirAlteracao"
+      />
+      <Button
         v-if="primeiraPendente && !detalhe.hospedagemId && ativa"
         type="button"
         severity="secondary"
@@ -568,8 +650,52 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :label="acaoPrincipal.rotulo"
         :disabled="acaoPrincipal.desabilitada"
         :loading="acaoPrincipal.id === 'sinal' && reservas.salvando"
-        @click="acaoPrincipal.executar()"
+        :aria-haspopup="acaoPrincipal.id === 'sinal' ? 'dialog' : undefined"
+        @click="acaoPrincipal.executar($event)"
       />
+
+      <Popover ref="popoverDoSinal" class="clinic-overlay">
+        <form class="sinal" @submit.prevent="confirmarSinal">
+          <label :for="`${idCampo}-sinal`" class="sinal__rotulo">
+            {{ t('hotel.reserva.tela.sinalValor') }}
+          </label>
+          <InputNumber
+            v-model="valorDoSinal"
+            :input-id="`${idCampo}-sinal`"
+            mode="currency"
+            currency="BRL"
+            :locale="tag"
+            :min="0"
+            :max="(reserva?.orcamento.totalCentavos ?? 0) / 100"
+            :max-fraction-digits="2"
+            autofocus
+            fluid
+          />
+          <small class="sinal__dica">
+            {{
+              t('hotel.reserva.tela.sinalSugerido', {
+                valor: formato.moeda(reserva?.orcamento.sinalCentavos ?? 0),
+              })
+            }}
+          </small>
+          <div class="sinal__acoes">
+            <Button
+              type="button"
+              severity="secondary"
+              text
+              :label="t('hotel.comum.cancelar')"
+              @click="popoverDoSinal?.hide()"
+            />
+            <Button
+              type="submit"
+              icon="ph ph-check"
+              :label="t('hotel.reserva.tela.sinalConfirmar')"
+              :loading="reservas.salvando"
+              :disabled="!valorDoSinal"
+            />
+          </div>
+        </form>
+      </Popover>
     </template>
 
     <div v-if="reserva && detalhe && daRota" class="reserva">
@@ -776,6 +902,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         "
       />
 
+      <AlterarReservaGaveta
+        :aberta="alterarAberto"
+        :reserva="reserva"
+        :salvando="reservas.salvando"
+        :erro="alterarAberto ? reservas.erroDeAcao : ''"
+        @fechar="alterarAberto = false"
+        @salvar="salvarAlteracao"
+      />
+
       <CheckInDialog
         :aberto="checkInAberto"
         :pet-nome="pet?.nome ?? ''"
@@ -870,6 +1005,35 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 .reserva {
   display: grid;
   gap: 24px;
+}
+
+/* O valor do sinal, perguntado ao lado do botão que o grava. */
+.sinal {
+  display: grid;
+  gap: 8px;
+  width: min(24rem, 80vw);
+}
+
+.sinal__acoes :deep(.p-button) {
+  white-space: nowrap;
+}
+
+.sinal__rotulo {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sinal__dica {
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.sinal__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 /* ------------------------------------------------------------------ topo */

@@ -1782,9 +1782,20 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <div class="ficha__item">
               <dt><i class="ph ph-bowl-food" aria-hidden="true" />{{ t('hotel.estadia.alimentacao') }}</dt>
               <dd>
+                <!--
+                  Sem marca, a origem da ração decide o texto: "Ração da casa" para quem trouxe a
+                  própria contradizia o check-in. E porção zero é porção não informada, não "0 g".
+                -->
                 <span class="ficha__linha">
-                  {{ registro.planoAlimentar.marca || t('hotel.estadia.racaoDaCasa') }}
-                  · <span class="ui-num">{{ registro.planoAlimentar.porcaoGramas }} g</span>
+                  {{
+                    registro.planoAlimentar.marca ||
+                    (registro.planoAlimentar.racaoPropria
+                      ? t('hotel.estadia.racaoTrazida')
+                      : t('hotel.estadia.racaoDaCasa'))
+                  }}
+                  <template v-if="registro.planoAlimentar.porcaoGramas > 0">
+                    · <span class="ui-num">{{ registro.planoAlimentar.porcaoGramas }} g</span>
+                  </template>
                 </span>
                 <span class="ficha__linha ui-num">{{ registro.planoAlimentar.horarios.join(', ') }}</span>
                 <span v-if="registro.planoAlimentar.restricoes" class="ficha__linha ficha__linha--alerta">
@@ -1903,8 +1914,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         :aberto="checkOutAberto"
         :hospedagem="registro"
         :pet-nome="pet?.nome ?? ''"
-        :saldo-centavos="estadia?.saldoCentavos ?? 0"
-        :acrescimo-de-saida="estadia?.acrescimoDeSaida ?? 0"
+        :saldo-centavos="estadia?.saldoNaSaidaCentavos ?? estadia?.saldoCentavos ?? 0"
+        :acrescimo-de-saida="estadia?.acrescimoNaSaida ?? estadia?.acrescimoDeSaida ?? 0"
         :ocorrencias-travadas="hospedagem.ocorrenciasTravadasDaEstadia"
         :responsavel-nome="tutor?.nome ?? ''"
         :responsavel-telefone="tutor?.telefone ?? ''"
@@ -2074,6 +2085,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
 /* O degrau escolhido leva a cor do estado: âmbar em adaptação, vermelho estressado. */
 /* Na palavra (`label`), e não na caixa: a caixa escolhida tem a cor dela no kit. */
+/*
+ * "Tranquilo" é o tom neutro e não tinha regra: herdava o branco da capa sobre a caixa branca do
+ * escolhido, e a palavra sumia. Dentro da capa `--tinta` é branco; a tinta certa é a dos botões
+ * claros da capa (`--app-tinta`), que acompanha o tema. Âmbar e vermelho a sobrescrevem.
+ */
+.capa__escada :deep(.p-togglebutton-checked .p-togglebutton-label) {
+  color: var(--app-tinta);
+}
+
 .capa__escada--atencao :deep(.p-togglebutton-checked .p-togglebutton-label) {
   color: var(--atencao-tinta);
 }

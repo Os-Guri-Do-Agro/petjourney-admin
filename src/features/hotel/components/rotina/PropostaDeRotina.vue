@@ -174,8 +174,11 @@ const total = computed(() => mudancas.value.filter((item) => marcadas.value[item
  * "received as estressado".
  */
 function porqueEmTexto(porque: { fonte: FonteDaSugestao; valor: string }): string {
+  /* No meio da frase, minúscula: "recebido como em adaptação", e não "como Em adaptação". */
   const valor =
-    porque.fonte === 'adaptacao' ? formato.adaptacao(porque.valor as Adaptacao) : porque.valor
+    porque.fonte === 'adaptacao'
+      ? formato.adaptacao(porque.valor as Adaptacao).toLocaleLowerCase()
+      : porque.valor
 
   return t(CHAVE_DO_PORQUE[porque.fonte], { valor })
 }

@@ -65,7 +65,10 @@ const meta = computed(() => {
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     valor.nascimento ? formato.idade(valor.nascimento) : '',
     formato.sexo(valor.sexo),
-    valor.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
+    /* Concorda com o sexo, como no cabeçalho do paciente: "Fêmea · Castrada", não "Castrado". */
+    t(
+      `clinico.paciente.${valor.castrado ? 'castrad' : 'inteir'}${valor.sexo === 'femea' ? 'a' : 'o'}`,
+    ),
   ].filter(Boolean)
 })
 

@@ -363,6 +363,27 @@ html:has(> body.p-overflow-hidden) {
   border-color: color-mix(in srgb, var(--pj-toast-error) 42%, var(--pj-toast-line)) !important;
 }
 
+/*
+ * Erro e aviso voltam a ter ícone: sem ele, "A alteração não foi salva" saía igual a um sucesso.
+ * A urgência mora no ícone, não na superfície; sucesso e informação seguem só no texto.
+ */
+.p-toast .p-toast-message-error .p-toast-message-icon,
+.p-toast .p-toast-message-warn .p-toast-message-icon {
+  display: inline-flex !important;
+  flex: 0 0 auto;
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  margin: 0.05rem 0 0 !important;
+}
+
+.p-toast .p-toast-message-error .p-toast-message-icon {
+  color: var(--pj-toast-error) !important;
+}
+
+.p-toast .p-toast-message-warn .p-toast-message-icon {
+  color: var(--pj-toast-warn) !important;
+}
+
 .app-dark .p-toast .p-toast-message {
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.45) !important;
 }

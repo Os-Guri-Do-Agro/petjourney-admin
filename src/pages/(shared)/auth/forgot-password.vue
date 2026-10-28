@@ -284,6 +284,7 @@ function closePinDialog() {
       <form
         v-if="step === 1"
         class="forgot-stack__form"
+        novalidate
         @submit.prevent="handleSendCode"
       >
         <AuthTextField
@@ -307,6 +308,7 @@ function closePinDialog() {
       <form
         v-else
         class="forgot-stack__form"
+        novalidate
         @submit.prevent="handleResetPassword"
       >
         <AuthTextField

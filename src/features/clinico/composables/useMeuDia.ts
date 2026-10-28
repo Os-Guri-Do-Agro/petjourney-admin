@@ -418,7 +418,13 @@ export function useMeuDia() {
   ])
 
   const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
-  const carregando = computed(() => agenda.carregando && !agenda.dia)
+  /*
+   * Carregando até o dia de hoje chegar. Antes, enquanto o catálogo carregava (a agenda ainda nem
+   * tinha começado), a tela já desenhava "Nada parado", "Ninguém na sala" e três zeros: mentira
+   * que piscava na abertura e ficava parada enquanto a rede demorava. Vale também para o dia de
+   * outra data, pedido antes na agenda, até o de hoje chegar.
+   */
+  const carregando = computed(() => !agenda.erro && agenda.dia?.data !== agenda.data)
 
   async function carregar() {
     await clinico.carregar()

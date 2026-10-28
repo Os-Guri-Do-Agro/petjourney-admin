@@ -66,7 +66,23 @@ function hasNoBody(response: Response) {
   )
 }
 
-export async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+export interface ApiFetchOpcoes {
+  /**
+   * 401 que quer dizer "a senha digitada não confere", e não "a sessão caiu". A troca de senha
+   * responde 401 para a senha atual errada: limpar a sessão ali derrubava a pessoa no meio da tela,
+   * sem o menu e sem aviso.
+   */
+  manterSessaoEm401?: boolean
+}
+
+/** Avisa a raiz (App.vue) que a sessão caiu no meio do uso, para levar de volta à entrada. */
+export const EVENTO_SESSAO_EXPIRADA = 'petjourney:sessao-expirada'
+
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: RequestInit,
+  opcoes?: ApiFetchOpcoes,
+): Promise<T> {
   const token = getAccessToken()
   const headers = new Headers(options?.headers)
   const hasBody = options?.body != null && options.body !== ''
@@ -93,8 +109,13 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   if (!response.ok) {
     const errorBody = isJsonResponse(response) ? await response.json().catch(() => null) : null
 
-    if (response.status === 401) {
+    if (response.status === 401 && !opcoes?.manterSessaoEm401) {
       clearAuthSession()
+
+      /* Só quem tinha sessão perde a sessão: o 401 do login (senha errada) não é queda. */
+      if (token && typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent(EVENTO_SESSAO_EXPIRADA))
+      }
     }
 
     throw new ApiError(

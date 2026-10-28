@@ -90,11 +90,13 @@ const entram = computed(
     itens.value.filter((item) => item.situacao !== 'fora' && item.situacao !== 'pendente').length,
 )
 const fora = computed(() => itens.value.filter((item) => item.situacao === 'fora'))
+/*
+ * A mesma régua da aba "Corrigidas" do painel que o "Ver quais" abre: toda linha mexida, inclusive
+ * a que teve valor errado deixado em branco. Contando só as reformatadas, a caixa dizia "1 linha"
+ * logo acima de "3 valores errados ficam em branco", e o painel abria com 3.
+ */
 const corrigidas = computed(
-  () =>
-    itens.value.filter(
-      (item) => item.situacao !== 'fora' && item.ajustes.some((ajuste) => !ehDescarte(ajuste.tipo)),
-    ).length,
+  () => itens.value.filter((item) => item.situacao !== 'fora' && item.ajustes.length > 0).length,
 )
 const paraCompletar = computed(() =>
   itens.value.filter(

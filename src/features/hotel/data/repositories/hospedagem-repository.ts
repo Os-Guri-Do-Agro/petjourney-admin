@@ -257,6 +257,10 @@ export type EstadiaDetalhada = {
   saldoCentavos: number
   /** Percentual de diária que a saída prevista acrescenta. 0 quando sai no horário. */
   acrescimoDeSaida: number
+  /** O saldo se a entrega for agora: é o que o check-out grava e o que o balcão cobra. */
+  saldoNaSaidaCentavos: number
+  /** O acréscimo pela hora real da entrega (agora), não pela prevista. */
+  acrescimoNaSaida: number
   /**
    * Quem, além do responsável, pode retirar o animal.
    *
@@ -303,6 +307,55 @@ export type PassagemDeTurno = {
 // ---------------------------------------------------------------------------
 // Leitura
 // ---------------------------------------------------------------------------
+
+/**
+ * A conta se a saída for **agora**: é a que o check-out grava.
+ *
+ * O diálogo de saída mostrava o saldo calculado para a saída **prevista** (R$ 437,85 do Bento,
+ * previsto às 16:30) e o check-out gravava o da saída real (R$ 507,35 às 21:26). A recepção
+ * cobrava um valor e o sistema registrava outro. As duas leituras saem daqui.
+ */
+function orcamentoNaSaida(hospedagem: Hospedagem, agora: ISODateTime) {
+  const dataset = base()
+  const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
+
+  if (!reserva) {
+    return null
+  }
+
+  const acomodacao = dataset.acomodacoes.find((item) => item.id === reserva.acomodacaoId)
+  const tarifa = dataset.tarifas.find((item) => item.id === acomodacao?.tarifaId)
+
+  if (!tarifa) {
+    return null
+  }
+
+  const pet = dataset.pets.find((item) => item.id === reserva.petId)
+  const acompanhante = reserva.acompanhantePetId
+    ? dataset.pets.find((item) => item.id === reserva.acompanhantePetId)
+    : null
+
+  return montarOrcamento({
+    entrada: hospedagem.entradaEm,
+    saida: agora,
+    tarifa,
+    porte: pet?.porte ?? null,
+    porteAcompanhante: acompanhante?.porte ?? null,
+    temporadas: dataset.temporadas,
+    servicos: reserva.servicos,
+    catalogoDeServicos: dataset.servicos,
+    politica: dataset.hotel.politica,
+    pagoCentavos: reserva.pagoCentavos,
+  })
+}
+
+/** Ainda na casa depois da hora prevista de saída. */
+function atrasouASaida(hospedagem: Hospedagem) {
+  return (
+    hospedagem.status === 'hospedado' &&
+    Date.parse(agoraIso()) > Date.parse(hospedagem.saidaPrevistaEm)
+  )
+}
 
 function tarefasDe(hospedagemId: string) {
   return base().tarefas.filter((tarefa) => tarefa.hospedagemId === hospedagemId)
@@ -400,7 +453,14 @@ export const hospedagemRepository = {
             const acomodacao = dataset.acomodacoes.find(
               (item) => item.id === hospedagem.acomodacaoId,
             )
-            const tarefas = tarefasDe(hospedagem.id)
+            /*
+             * De hoje em diante, como a prancheta. Com as de ontem, a água das 18h de ontem
+             * aparecia "atrasou 27 h" na grade de hóspedes e somava 13 atrasadas, enquanto o
+             * painel e a rotina, no mesmo instante, diziam 5.
+             */
+            const tarefas = tarefasDe(hospedagem.id).filter(
+              (tarefa) => dataDe(tarefa.previstaPara) >= hoje,
+            )
 
             return {
               hospedagem,
@@ -454,6 +514,7 @@ export const hospedagemRepository = {
       const ocorrencias = ocorrenciasDe(hospedagemId)
 
       return {
+        /* Sai como cópia pelo `simularChamada` (ver `comoResposta` no mock-runtime). */
         hospedagem,
         tarefas: tarefasDe(hospedagemId).sort((um, outro) =>
           um.previstaPara.localeCompare(outro.previstaPara),
@@ -473,8 +534,30 @@ export const hospedagemRepository = {
           ocorrencias,
           pesoSaidaKg: hospedagem.pesoSaidaKg,
         }),
-        saldoCentavos: reserva?.orcamento.saldoCentavos ?? 0,
-        acrescimoDeSaida: cobrancaDaSaida(hospedagem.saidaPrevistaEm, dataset.hotel.politica),
+        /*
+         * Passada a hora prevista, o saldo da tela é o da entrega agora: o atraso já mudou a
+         * conta, e a ficha não pode dizer um valor enquanto o check-out cobra outro.
+         */
+        saldoCentavos: atrasouASaida(hospedagem)
+          ? (orcamentoNaSaida(hospedagem, agoraIso())?.saldoCentavos ??
+            reserva?.orcamento.saldoCentavos ??
+            0)
+          : (reserva?.orcamento.saldoCentavos ?? 0),
+        acrescimoDeSaida: cobrancaDaSaida(
+          atrasouASaida(hospedagem) ? agoraIso() : hospedagem.saidaPrevistaEm,
+          dataset.hotel.politica,
+        ),
+        /* O que o balcão cobra se entregar agora, e o acréscimo da hora real. */
+        saldoNaSaidaCentavos:
+          hospedagem.status === 'hospedado'
+            ? (orcamentoNaSaida(hospedagem, agoraIso())?.saldoCentavos ??
+              reserva?.orcamento.saldoCentavos ??
+              0)
+            : (reserva?.orcamento.saldoCentavos ?? 0),
+        acrescimoNaSaida:
+          hospedagem.status === 'hospedado'
+            ? cobrancaDaSaida(agoraIso(), dataset.hotel.politica)
+            : cobrancaDaSaida(hospedagem.saidaPrevistaEm, dataset.hotel.politica),
         autorizadosARetirar: reserva?.autorizadosARetirar ?? [],
       }
     })
@@ -992,6 +1075,13 @@ export const hospedagemRepository = {
       for (const boletim of dataset.boletins) {
         if (boletim.hospedagemId === ocorrencia.hospedagemId && boletim.status === 'retido') {
           boletim.contatoEm = ocorrencia.contatoEm
+          /*
+           * E deixa de ser "retido". Só gravar o contato liberava o envio aqui, mas a tela lê o
+           * status: seguia "Retido: falta a ligação", com o Enviar desabilitado, depois da ligação.
+           */
+          if (boletimPodeSair(boletim)) {
+            boletim.status = 'rascunho'
+          }
         }
       }
 
@@ -1228,26 +1318,19 @@ export const hospedagemRepository = {
       const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
 
       if (reserva) {
-        const acomodacao = dataset.acomodacoes.find((item) => item.id === reserva.acomodacaoId)
-        const tarifa = dataset.tarifas.find((item) => item.id === acomodacao?.tarifaId)
-        const pet = dataset.pets.find((item) => item.id === reserva.petId)
-        const acompanhante = reserva.acompanhantePetId
-          ? dataset.pets.find((item) => item.id === reserva.acompanhantePetId)
-          : null
+        const conta = orcamentoNaSaida(hospedagem, agora)
 
-        if (tarifa) {
-          reserva.orcamento = montarOrcamento({
-            entrada: hospedagem.entradaEm,
-            saida: agora,
-            tarifa,
-            porte: pet?.porte ?? null,
-            porteAcompanhante: acompanhante?.porte ?? null,
-            temporadas: dataset.temporadas,
-            servicos: reserva.servicos,
-            catalogoDeServicos: dataset.servicos,
-            politica: dataset.hotel.politica,
-            pagoCentavos: reserva.pagoCentavos,
-          })
+        if (conta) {
+          /*
+           * "Cobrado no balcão, na hora da entrega": fechar a estadia é receber o saldo. Sem
+           * isto, a estadia encerrada mostrava "Saldo R$ 507,35 · Nada a receber" e a lista de
+           * reservas, "R$ 507,35 a receber", do mesmo hóspede que já tinha ido embora.
+           */
+          reserva.pagoCentavos = Math.max(reserva.pagoCentavos, conta.totalCentavos)
+          reserva.orcamento = {
+            ...conta,
+            saldoCentavos: conta.totalCentavos - reserva.pagoCentavos,
+          }
           reserva.diarias = contarDiarias(hospedagem.entradaEm, agora)
         }
 

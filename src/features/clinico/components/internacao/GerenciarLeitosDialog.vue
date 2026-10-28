@@ -370,7 +370,7 @@ defineExpose({ voltarParaLista })
           <ClinicField :rotulo="t('clinico.internacao.leitos.tipo')">
             <template #default="{ id }">
               <Select
-                :id="id"
+                :input-id="id"
                 v-model="kind"
                 :options="opcoesDeKind"
                 option-label="rotulo"
@@ -384,7 +384,7 @@ defineExpose({ voltarParaLista })
           <ClinicField :rotulo="t('clinico.internacao.leitos.sala')">
             <template #default="{ id }">
               <Select
-                :id="id"
+                :input-id="id"
                 v-model="roomId"
                 :options="salasDeInternacao"
                 option-label="rotulo"
@@ -462,7 +462,7 @@ defineExpose({ voltarParaLista })
               <ClinicField :rotulo="t('clinico.internacao.leitos.tipo')">
                 <template #default="{ id }">
                   <Select
-                    :id="id"
+                    :input-id="id"
                     v-model="kind"
                     :options="opcoesDeKind"
                     option-label="rotulo"
@@ -502,7 +502,7 @@ defineExpose({ voltarParaLista })
               <ClinicField :rotulo="t('clinico.internacao.leitos.motivoRotulo')">
                 <template #default="{ id }">
                   <Select
-                    :id="id"
+                    :input-id="id"
                     v-model="motivo"
                     :options="opcoesDeMotivo"
                     option-label="rotulo"

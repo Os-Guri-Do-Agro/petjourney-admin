@@ -118,7 +118,15 @@ onMounted(() => {
       <div class="centro-cabeca">
         <span class="ui-ladrilho ui-ladrilho--lugar centro-cabeca__selo" aria-hidden="true"><i class="ph ph-buildings" /></span>
         <h1 class="centro-cabeca__titulo">{{ t('parceiro.selecionar.title') }}</h1>
-        <p class="centro-cabeca__texto">{{ t('parceiro.selecionar.body') }}</p>
+        <!-- Com uma empresa só, "participa de mais de uma" não era verdade: o menu da conta leva
+             aqui sempre, pelo "Trocar de empresa". -->
+        <p class="centro-cabeca__texto">
+          {{
+            !loading && opcoes.length === 1
+              ? t('parceiro.selecionar.bodyUma')
+              : t('parceiro.selecionar.body')
+          }}
+        </p>
       </div>
     </template>
 
@@ -276,7 +284,8 @@ onMounted(() => {
 
 .empresa__nome {
   font-size: 15.5px;
-  white-space: nowrap;
+  /* O nome inteiro, em duas linhas se preciso: cortado em "Hotel Veter…" não se reconhece. */
+  white-space: normal;
 }
 
 .empresa__papel {

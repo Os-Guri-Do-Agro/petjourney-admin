@@ -81,7 +81,8 @@ const proximoStatus = computed<AppointmentStatus | null>(() => {
   switch (props.appointment?.status) {
     case 'agendado':
     case 'confirmado':
-      return 'aguardando'
+      /* Chegada só no dia: "Registrar chegada" na consulta de amanhã punha na recepção quem nem saiu de casa. */
+      return clinicClock.dateOf(props.appointment.inicio) === clinicClock.today() ? 'aguardando' : null
     case 'aguardando':
       return 'em-atendimento'
     case 'em-atendimento':
@@ -251,8 +252,13 @@ const prazoDoApp = computed(() => {
           <dt><i class="ph ph-door" aria-hidden="true" />{{ t('clinico.agenda.bloqueioDialogo.sala') }}</dt>
           <dd>{{ salas.join(', ') || t('clinico.agenda.semSala') }}</dd>
         </div>
+        <!-- Rótulo em cima, valor embaixo, como os vizinhos: antes o tipo virava rótulo da origem. -->
         <div>
-          <dt><i class="ph ph-stethoscope" aria-hidden="true" />{{ tipo?.nome }}</dt>
+          <dt><i class="ph ph-stethoscope" aria-hidden="true" />{{ t('clinico.agenda.tipoCurto') }}</dt>
+          <dd>{{ tipo?.nome }}</dd>
+        </div>
+        <div>
+          <dt><i class="ph ph-signpost" aria-hidden="true" />{{ t('clinico.agenda.comoChegou') }}</dt>
           <dd>{{ t(`clinico.origem.${appointment.origem}`) }}</dd>
         </div>
         <div v-if="appointment.chegadaEm">

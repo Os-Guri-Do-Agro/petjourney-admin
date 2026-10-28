@@ -123,6 +123,25 @@ const dataDeHoje = computed(() => {
 })
 
 /**
+ * Só com o Portal: "acompanhe seus ganhos e compartilhe seu código" prometia o que a empresa em
+ * análise ainda não tem. A frase diz em que pé está até o programa de Afiliados ficar ativo.
+ */
+const fraseDoPortal = computed(() => {
+  /* Sem frase até saber o estado: a provisória trocava diante de quem olhava. */
+  if (store.loadState === 'idle' || store.loadState === 'loading' || store.semAcessoParceiro) {
+    return ''
+  }
+
+  if (store.loadState !== 'ready' || store.statusAfiliadoAtivo) {
+    return t('inicio.resumo.portal')
+  }
+
+  return store.statusAuditoria === 'PENDENTE'
+    ? t('inicio.resumo.portalEmAnalise')
+    : t('inicio.resumo.portalSemPrograma')
+})
+
+/**
  * A frase de estado: o que a pauta diz, em uma frase, e — com Clínica e Hotel ligados — em qual
  * espaço está. "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1 no Hotel."
  */
@@ -131,7 +150,7 @@ const fraseDoResumo = computed(() => {
 
   switch (atual.estado) {
     case 'semModulos':
-      return t('inicio.resumo.portal')
+      return fraseDoPortal.value
     case 'conferindo':
       return t('inicio.resumo.conferindo')
     case 'falhou':

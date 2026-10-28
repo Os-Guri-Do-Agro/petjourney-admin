@@ -139,7 +139,7 @@ function seloDaDocumentacao(linha: ReservaNaLista): Selo {
     id: 'doc',
     tom: travada(linha) ? 'risco' : linha.admissao === 'vence-durante' ? 'atencao' : 'neutro',
     icone: travada(linha) ? 'ph ph-file-x' : 'ph ph-file-text',
-    texto: formato.situacaoDaExigencia(linha.admissao),
+    texto: formato.resumoDaAdmissao(linha.admissao),
   }
 }
 
@@ -536,9 +536,19 @@ const andamentoDaRotina = computed(() => {
   return total ? t('inicio.espacos.hotel.andamento', { feitas, total }, total) : ''
 })
 
+/**
+ * Quantos animais estão na casa, com o acompanhante contado.
+ *
+ * A lista tem uma linha por estadia ("Mel · com Amora"), mas o número é de animais, como no
+ * Início. Antes o painel dizia "5 Na casa" e o Início, no mesmo instante, "6 Na casa".
+ */
+const animaisNaCasa = computed(() =>
+  hospedagem.hospedes.reduce((soma, hospede) => soma + (hospede.acompanhante ? 2 : 1), 0),
+)
+
 /** Os quatro números da casa, os mesmos da fita e do Início, cada um levando aonde se resolve. */
 const indicadores = computed<IndicadorDaAbertura[]>(() => {
-  const naCasaTotal = hospedagem.hospedes.length
+  const naCasaTotal = animaisNaCasa.value
   const chegam = chegamHoje.value.length
   const saem = saemHoje.value.length
   const atrasadas = hospedagem.atrasadasNaPrancheta
@@ -577,6 +587,9 @@ const indicadores = computed<IndicadorDaAbertura[]>(() => {
     },
   ]
 })
+
+/** A leitura do dia falhou: a abertura fica sem números, e o corpo mostra o erro. */
+const falhouALeitura = computed(() => Boolean(hospedagem.erro))
 
 const vazio = computed(
   () =>
@@ -660,12 +673,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       frase do momento, o ritmo da rotina e os quatro números da fita.
     -->
     <template #cabecalho>
+      <!--
+        Sem dados não há frase nem número: com a leitura falhando, a abertura dizia "0 Na casa ·
+        0 Chegam hoje" em cima do "Não foi possível carregar", e o zero lia como casa vazia.
+      -->
       <UiAbertura
         class="hoje__abertura"
         :sobre="sobreAAbertura"
-        :titulo="fraseDoResumo"
-        :resumo="andamentoDaRotina"
-        :indicadores="indicadores"
+        :titulo="falhouALeitura ? t('hotel.painel.titulo') : fraseDoResumo"
+        :resumo="falhouALeitura ? '' : andamentoDaRotina"
+        :indicadores="falhouALeitura ? [] : indicadores"
         :rotulo-dos-indicadores="t('clinico.meuDia.abertura.indicadores')"
       >
         <template #acoes>
@@ -778,7 +795,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               <i class="ph ph-house-line" />
             </span>
             <h2 id="posto-casa">{{ t('hotel.hoje.painel.naCasa') }}</h2>
-            <span class="posto__total ui-num">{{ hospedagem.hospedes.length }}</span>
+            <span class="posto__total ui-num">{{ animaisNaCasa }}</span>
           </header>
 
           <ul v-if="naCasaVisiveis.length" class="ui-lista">
@@ -831,13 +848,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
           <footer v-if="hospedagem.hospedes.length" class="posto__pe">
             <RouterLink class="ui-mais" to="/hotel/hospedes">
-              {{
-                t(
-                  'hotel.hoje.painel.todosOsHospedes',
-                  { total: hospedagem.hospedes.length },
-                  hospedagem.hospedes.length,
-                )
-              }}
+              {{ t('hotel.hoje.painel.todosOsHospedes', { total: animaisNaCasa }, animaisNaCasa) }}
               <i class="ph ph-arrow-right" aria-hidden="true" />
             </RouterLink>
           </footer>

@@ -132,10 +132,15 @@ export async function login(data: LoginCredentials, options?: LoginOptions): Pro
 }
 
 export async function changePasswordAuthenticated(payload: ChangePasswordAuthenticatedPayload) {
-  return apiFetch<ApiEnvelope<unknown>>('/auth/reset-password-authenticated', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  })
+  /* A API responde 401 para a senha atual errada: é erro do campo, a sessão continua valendo. */
+  return apiFetch<ApiEnvelope<unknown>>(
+    '/auth/reset-password-authenticated',
+    {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    },
+    { manterSessaoEm401: true },
+  )
 }
 
 /** Público — anti-enumeração: API responde 200 mesmo se o e-mail não existir. */

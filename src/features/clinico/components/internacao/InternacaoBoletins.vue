@@ -382,7 +382,7 @@ function compor() {
             <ClinicField :rotulo="t('clinico.internacao.boletim.frequencia')">
               <template #default="{ id }">
                 <Select
-                  :id="id"
+                  :input-id="id"
                   :model-value="preferencia.frequenciaHoras"
                   :options="opcoesDeFrequencia"
                   option-label="rotulo"

@@ -37,6 +37,7 @@ import {
   maskBrlCurrencyInput,
   parseBrlToCentavos,
 } from '@/utils/format/money'
+import { isValidChavePix } from '@/utils/validation/pix'
 
 export type EstadoDaCarteira = {
   carregando: boolean
@@ -75,6 +76,12 @@ const error = ref('')
 const chavePix = ref('')
 const valorSaque = ref('')
 const savingPix = ref(false)
+/** A chave que não é CPF, CNPJ, e-mail, telefone nem aleatória: recusada antes de ir à API. */
+const erroDaChave = ref('')
+
+watch(chavePix, () => {
+  erroDaChave.value = ''
+})
 const requestingSaque = ref(false)
 const saqueAberto = ref(false)
 const pixAberto = ref(false)
@@ -217,6 +224,11 @@ defineExpose({ abrirSaque, abrirPix })
 
 async function savePix() {
   if (!chavePix.value.trim()) {
+    return
+  }
+
+  if (!isValidChavePix(chavePix.value)) {
+    erroDaChave.value = t('carteira.visao.pix.invalida')
     return
   }
 
@@ -475,14 +487,16 @@ onBeforeUnmount(() => {
             </span>
             <span class="ui-indicador__rotulo saldo__rotulo-chave">
               {{ t('carteira.visao.pix.label') }}
-              <button
+              <!-- Botão visível: sem saldo, é o único caminho para cadastrar a chave. -->
+              <Button
                 v-if="mostraBotaoDaChave"
                 type="button"
-                class="ui-mais fato__trocar"
+                class="fato__trocar"
+                severity="secondary"
+                size="small"
+                :label="carteira.chavePix ? t('carteira.tela.trocarPix') : t('carteira.tela.cadastrarPix')"
                 @click="abrirPix"
-              >
-                {{ carteira.chavePix ? t('carteira.tela.trocarPix') : t('carteira.tela.cadastrarPix') }}
-              </button>
+              />
             </span>
             <span class="ui-indicador__nota">
               {{ t('carteira.resumo.minimo') }}
@@ -631,9 +645,17 @@ onBeforeUnmount(() => {
                 spellcheck="false"
                 :placeholder="t('carteira.visao.pix.placeholder')"
                 aria-describedby="chave-pix-dica"
+                :invalid="Boolean(erroDaChave)"
+                :aria-invalid="erroDaChave ? 'true' : undefined"
                 @keydown.enter.prevent="savePix"
               />
-              <small id="chave-pix-dica" class="cd__dica">{{ t('carteira.visao.pix.hint') }}</small>
+              <small v-if="erroDaChave" id="chave-pix-dica" class="cd__erro" role="alert">
+                <i class="ph ph-warning-circle" aria-hidden="true" />
+                {{ erroDaChave }}
+              </small>
+              <small v-else id="chave-pix-dica" class="cd__dica">
+                {{ t('carteira.visao.pix.hint') }}
+              </small>
             </div>
           </div>
 
@@ -850,8 +872,9 @@ onBeforeUnmount(() => {
   gap: 4px 10px;
 }
 
-.fato__trocar.ui-mais {
-  font-family: var(--font-texto);
+.fato__trocar.p-button {
+  margin-inline-start: 8px;
+  padding-block: 2px;
   font-size: 13px;
 }
 
@@ -1071,6 +1094,21 @@ onBeforeUnmount(() => {
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.cd__erro {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--risco-tinta);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.cd__erro .ph {
+  margin-top: 2px;
+  font-size: 15px;
 }
 
 .cd__dicas {

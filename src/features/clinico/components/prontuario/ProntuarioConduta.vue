@@ -311,8 +311,35 @@ function contaDaPrescricao(prescricao: Prescription) {
   return medicamento ? passosDaConta(prescricao.calculo, medicamento) : []
 }
 
+/**
+ * O número da conta no formato de quem lê ("6,4 kg", "0,26 mL"), com as casas que ele tem, até
+ * duas. Antes ia cru para a frase e saía "6.4 kg" e "0.26" ao lado de "0,26 mL" no resultado:
+ * justamente o erro de vírgula que a conta existe para pegar.
+ */
+function numeroDaConta(valor: string | number) {
+  if (typeof valor !== 'number') {
+    return valor
+  }
+
+  const casas = Math.min(2, (String(valor).split('.')[1] ?? '').length)
+
+  return formato.numero(valor, casas)
+}
+
 function textoDoPasso(passo: PassoDaConta) {
-  return t(`clinico.prontuario.conduta.conta.${passo.kind}`, passo.params)
+  const params: Record<string, string | number> = Object.fromEntries(
+    Object.entries(passo.params).map(([chave, valor]) => [chave, numeroDaConta(valor)]),
+  )
+
+  /* A unidade da apresentação: "500 mg/mL = 0,26 mL", "500 mg/comprimido = 0,26 comprimido". */
+  if (passo.kind === 'dose-por-concentracao') {
+    const chave = `clinico.prontuario.conduta.unidade.${String(passo.params.unidade)}`
+
+    params.porUnidade = t(chave, 1)
+    params.unidade = t(chave, Number(passo.params.quantidade))
+  }
+
+  return t(`clinico.prontuario.conduta.conta.${passo.kind}`, params)
 }
 
 /**

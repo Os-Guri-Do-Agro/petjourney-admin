@@ -12,6 +12,7 @@ import {
   avaliarVaga,
   mapaDoPeriodo,
   porteCabe,
+  reservaDoAnimalNoPeriodo,
   reservaSegura,
   taxaDeOcupacao,
 } from '../disponibilidade'
@@ -228,5 +229,55 @@ describe('o mapa e a ocupação', () => {
     })
 
     expect(taxaDeOcupacao(vagas)).toBeCloseTo(1 / 3)
+  })
+})
+
+describe('o mesmo animal em duas reservas', () => {
+  const existente = reserva({ id: 'res-bidu', petId: 'pet-bidu', acomodacaoId: 'acom-a5' })
+
+  it('acha a reserva viva do animal que cruza o período, mesmo em outra baia', () => {
+    const achada = reservaDoAnimalNoPeriodo(
+      [existente],
+      ['pet-bidu'],
+      iso('2026-06-12', '08:00'),
+      iso('2026-06-15', '12:00'),
+    )
+
+    expect(achada?.id).toBe('res-bidu')
+  })
+
+  it('vale para o animal que vai como acompanhante', () => {
+    const comAcompanhante = reserva({ petId: 'pet-mel', acompanhantePetId: 'pet-amora' })
+
+    expect(
+      reservaDoAnimalNoPeriodo(
+        [comAcompanhante],
+        ['pet-amora'],
+        iso('2026-06-11', '08:00'),
+        iso('2026-06-12', '12:00'),
+      ),
+    ).not.toBeNull()
+  })
+
+  it('não conta cancelada, a própria reserva, nem estadia que já terminou', () => {
+    const cancelada = reserva({ id: 'res-c', petId: 'pet-bidu', status: 'cancelada' })
+
+    expect(
+      reservaDoAnimalNoPeriodo(
+        [cancelada, existente],
+        ['pet-bidu'],
+        iso('2026-06-14', '10:00'),
+        iso('2026-06-16', '12:00'),
+      ),
+    ).toBeNull()
+    expect(
+      reservaDoAnimalNoPeriodo(
+        [existente],
+        ['pet-bidu'],
+        iso('2026-06-11', '08:00'),
+        iso('2026-06-13', '12:00'),
+        'res-bidu',
+      ),
+    ).toBeNull()
   })
 })

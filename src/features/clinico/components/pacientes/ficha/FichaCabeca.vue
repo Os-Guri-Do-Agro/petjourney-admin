@@ -83,7 +83,8 @@ const meta = computed(() => {
     porte ? t(`clinico.paciente.porte.${porte}`) : '',
     formato.idade(pet.nascimento),
     formato.sexo(pet.sexo),
-    pet.castrado ? t('clinico.paciente.castrado') : t('clinico.paciente.inteiro'),
+    /* Concorda com o sexo: "Fêmea · Castrada", nunca "Fêmea · Castrado". */
+    t(`clinico.paciente.${pet.castrado ? 'castrad' : 'inteir'}${pet.sexo === 'femea' ? 'a' : 'o'}`),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -310,7 +311,7 @@ function destino(vista: VistaDaFicha): string {
               {{ t('clinico.paciente.responsavel') }}
             </dt>
             <dd class="capa__tutor">
-              <strong>{{ tutor.nome }}</strong>
+              <strong :title="tutor.nome">{{ tutor.nome }}</strong>
               <a
                 v-if="telefoneDiscavel"
                 class="capa__telefone ui-num"
@@ -432,7 +433,9 @@ function destino(vista: VistaDaFicha): string {
   font-weight: 650;
   letter-spacing: -0.025em;
   line-height: 1.15;
-  overflow-wrap: anywhere;
+
+  /* Quebra entre palavras; só parte a palavra que sozinha não cabe na linha. */
+  overflow-wrap: break-word;
 }
 
 .capa__meta {
@@ -479,7 +482,10 @@ function destino(vista: VistaDaFicha): string {
   min-height: 74px;
   align-content: center;
   gap: 3px;
-  padding: 12px 24px 12px 62px;
+
+  /* Lógico, como o ícone (`inset-inline-start`): no árabe o ícone vai à direita e cobria o texto. */
+  padding-block: 12px;
+  padding-inline: 62px 24px;
 }
 
 .capa__dado--tutor {
@@ -739,6 +745,14 @@ function destino(vista: VistaDaFicha): string {
     flex-wrap: nowrap;
     justify-content: flex-end;
   }
+
+  /*
+   * Responsável de nome comprido corta (o nome inteiro fica na dica): sem teto, a coluna dos
+   * dados crescia até espremer o nome do paciente numa palavra por linha.
+   */
+  .capa__dado--tutor {
+    max-width: 360px;
+  }
 }
 
 /* Sem espaço, descem para baixo do nome, alinhados com o texto. */
@@ -826,7 +840,8 @@ function destino(vista: VistaDaFicha): string {
 
   .capa__dado {
     min-height: 64px;
-    padding: 10px 14px 10px 54px;
+    padding-block: 10px;
+    padding-inline: 54px 14px;
   }
 
   .capa__dado-icone {

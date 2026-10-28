@@ -95,6 +95,8 @@
 /* Campos lado a lado quando cabem; um embaixo do outro no estreito. */
 .cfg-grade {
   display: grid;
+  /* Cada campo do tamanho dele: o erro embaixo de um não empurra a caixa do vizinho para baixo. */
+  align-items: start;
   gap: 18px 16px;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
 }

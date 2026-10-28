@@ -197,7 +197,7 @@ const proximo = computed(() => {
   const quando = esperando
     ? minutos < 1
       ? t('clinico.prontuario.nova.finalizar.feito.acabouDeChegar')
-      : t('clinico.prontuario.nova.finalizar.feito.esperaHa', { minutos })
+      : t('clinico.prontuario.nova.finalizar.feito.esperaHa', { tempo: formato.duracao(minutos) })
     : t('clinico.prontuario.nova.finalizar.feito.horario', { hora: formato.hora(item.inicio) })
 
   const colega = meu(item) ? '' : (clinico.profissional(item.professionalId)?.nome ?? '')
@@ -411,12 +411,18 @@ const topo = computed(() =>
             <strong class="proximo__nome">{{ proximo.nome }}</strong>
             <span class="proximo__linha">{{ proximo.linha }}</span>
           </span>
+          <!--
+            O rótulo sem o nome (o nome já está ao lado, em destaque): com "Maximiliano Bartholomeu
+            von Schnauzerhausen III" o botão passava da borda do diálogo e levava a lista junto.
+            O leitor de tela continua ouvindo o nome.
+          -->
           <Button
             v-if="proximo.esperando"
             type="button"
             icon="ph ph-arrow-right"
             icon-pos="right"
-            :label="t('clinico.meuDia.atenderCom', { pet: proximo.nome })"
+            :label="t('clinico.hoje.chamar')"
+            :aria-label="t('clinico.meuDia.atenderCom', { pet: proximo.nome })"
             @click="atenderProximo"
           />
         </div>

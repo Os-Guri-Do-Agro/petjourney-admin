@@ -35,6 +35,7 @@
 import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import ToggleSwitch from 'primevue/toggleswitch'
+import { useToast } from 'primevue/usetoast'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { onBeforeRouteLeave, RouterLink, useRoute, useRouter } from 'vue-router'
@@ -91,15 +92,18 @@ import {
   alergiaNaoConfirmada,
   progressoDoAtendimento,
 } from '@/features/clinico/domain/encounter-progress'
+import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useEscutaStore } from '@/features/clinico/stores/escuta'
 import { useProntuarioStore } from '@/features/clinico/stores/prontuario'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 const { t } = useI18n()
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
+const agenda = useAgendaStore()
 const prontuario = useProntuarioStore()
 const escuta = useEscutaStore()
 const formato = useClinicFormat()
@@ -315,16 +319,42 @@ function rotuloDaEtapa(id: EtapaId) {
   return passos.value.find((passo) => passo.id === id)?.rotulo ?? ''
 }
 
-const erroTraduzido = computed(() => (prontuario.erro ? t(prontuario.erro) : ''))
+/*
+ * O erro toma a tela só quando não há prontuário para mostrar (a carga falhou). Com a folha
+ * aberta, o que falha é uma ação (retorno, finalizar, entregar o resumo): vira aviso, e a folha
+ * com o que já foi escrito continua na tela.
+ */
+const erroTraduzido = computed(() =>
+  prontuario.erro && !encounter.value ? t(prontuario.erro) : '',
+)
 
+watch(
+  () => prontuario.erro,
+  (chave) => {
+    if (!chave || !encounter.value) {
+      return
+    }
+
+    toast.add({ severity: 'error', summary: t(chave), life: 6000 })
+    prontuario.erro = ''
+  },
+)
+
+/**
+ * Retorno de verdade: o horário marcado é do tipo retorno e há consulta anterior para ler. Antes
+ * bastava ter consulta anterior, que quase todo paciente tem; no tablet o histórico abria em cima
+ * da anamnese em toda consulta, e a queixa principal ficava a duas telas de rolagem.
+ */
 const ehRetorno = computed(() => {
   const appointmentId = encounter.value?.appointmentId
 
-  if (!appointmentId) {
+  if (!appointmentId || prontuario.consultaAnterior === null) {
     return false
   }
 
-  return prontuario.consultaAnterior !== null
+  const marcado = agenda.atendimentos.find((item) => item.id === appointmentId)
+
+  return marcado ? clinico.tipo(marcado.typeId)?.kind === 'retorno' : false
 })
 
 const podeFinalizar = computed(
@@ -412,12 +442,17 @@ const fraseDoResumo = computed(() => {
 
 /** Gravando agora, salvo às tantas, ou a promessa de que salva sozinho. */
 const estadoDaGravacao = computed(() => {
-  if (!encounter.value || finalizado.value) {
+  /* Em leitura (outro dispositivo edita) não há o que salvar: "Salva sozinho…" seria promessa falsa. */
+  if (!encounter.value || finalizado.value || prontuario.somenteLeitura) {
     return ''
   }
 
   if (prontuario.salvando) {
     return t('clinico.prontuario.salvandoAgora')
+  }
+
+  if (prontuario.falhaAoGravar) {
+    return t('clinico.prontuario.nova.semConexao')
   }
 
   return prontuario.salvoEm
@@ -952,9 +987,20 @@ onBeforeUnmount(() => {
 
         <!-- As ferramentas da etapa: o microfone fora da anamnese, o teclado, o contexto. -->
         <div class="ferramentas">
-          <span v-if="estadoDaGravacao" class="gravacao" aria-live="polite">
+          <span
+            v-if="estadoDaGravacao"
+            class="gravacao"
+            :class="{ 'gravacao--falha': prontuario.falhaAoGravar && !prontuario.salvando }"
+            aria-live="polite"
+          >
             <i
-              :class="prontuario.salvando ? 'ph ph-circle-notch ph-spin' : 'ph ph-cloud-check'"
+              :class="
+                prontuario.salvando
+                  ? 'ph ph-circle-notch ph-spin'
+                  : prontuario.falhaAoGravar
+                    ? 'ph ph-cloud-slash'
+                    : 'ph ph-cloud-check'
+              "
               aria-hidden="true"
             />
             {{ estadoDaGravacao }}
@@ -1473,6 +1519,13 @@ onBeforeUnmount(() => {
 
 .gravacao .ph {
   font-size: 16px;
+}
+
+/* Sem rede: o aviso na tinta de atenção, sem tirar a folha da tela. */
+.gravacao--falha {
+  color: var(--atencao-tinta);
+  font-weight: 600;
+  white-space: normal;
 }
 
 .corpo {

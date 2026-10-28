@@ -103,12 +103,12 @@ function detalhe(item: ExigenciaAvaliada): string {
 
     return t(
       'hotel.exigencias.venceDurante',
-      { data: formato.data(item.comprovante.validoAte), dias },
+      { data: formato.validade(item.comprovante.validoAte), dias },
       dias,
     )
   }
 
-  return t('hotel.exigencias.valeAte', { data: formato.data(item.comprovante.validoAte) })
+  return t('hotel.exigencias.valeAte', { data: formato.validade(item.comprovante.validoAte) })
 }
 </script>
 

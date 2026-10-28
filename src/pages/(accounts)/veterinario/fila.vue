@@ -23,6 +23,7 @@
  * sai da URL, como o `?novo=1` da agenda.
  */
 import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -39,6 +40,7 @@ import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
 const { t } = useI18n()
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const clinico = useClinicoStore()
@@ -118,7 +120,11 @@ function registrarResposta(entrada: WaitlistEntry, aceitou: boolean) {
   void fila.responder(entrada.id, aceitou)
 }
 
+/** A entrada cuja remoção está sendo confirmada na própria linha. */
+const aRemover = ref<string | null>(null)
+
 function remover(entrada: WaitlistEntry) {
+  aRemover.value = null
   void fila.remover(entrada.id)
 }
 
@@ -216,7 +222,29 @@ async function confirmarOferta({ mensagem }: { mensagem: string }) {
   paraOfertar.value = null
 }
 
-const erroTraduzido = computed(() => (fila.erro ? t(fila.erro) : ''))
+/*
+ * Como na Agenda: erro de carga toma a tela; erro de salvar (adicionar, responder, remover) vira
+ * aviso e a lista fica. Antes, um "Registrar aceite" que falhava apagava a fila inteira.
+ */
+const ERRO_DE_SALVAR = 'clinico.erros.mutacao'
+
+const erroTraduzido = computed(() =>
+  fila.erro && fila.erro !== ERRO_DE_SALVAR ? t(fila.erro) : '',
+)
+
+/*
+ * `sync`: o "Registrar aceite" que falha marca o erro e, no `finally`, recarrega a lista, que zera
+ * o erro no mesmo instante. Um watch comum só via o valor final ('') e a falha passava calada.
+ */
+watch(
+  () => fila.erro,
+  (erro) => {
+    if (erro === ERRO_DE_SALVAR) {
+      toast.add({ severity: 'error', summary: t(ERRO_DE_SALVAR), life: 6000 })
+    }
+  },
+  { flush: 'sync' },
+)
 
 /** Quantos esperam vaga e quantas ofertas esperam resposta. */
 const fraseDoResumo = computed(() => {
@@ -577,7 +605,31 @@ onMounted(carregar)
               <small>{{ t('clinico.fila.tela.naFila') }}</small>
             </span>
 
-            <span class="acoes">
+            <!--
+              Remover some com a entrada sem deixar rastro: o primeiro clique só pergunta, ali
+              mesmo, e o segundo remove. Um clique errado na lista apagava o pedido do tutor.
+            -->
+            <span v-if="aRemover === entrada.id" class="acoes">
+              <Button
+                type="button"
+                size="small"
+                severity="secondary"
+                text
+                :label="t('clinico.comum.cancelar')"
+                @click="aRemover = null"
+              />
+              <Button
+                type="button"
+                size="small"
+                icon="ph ph-trash"
+                severity="danger"
+                outlined
+                :label="t('clinico.fila.remover')"
+                :disabled="fila.salvando"
+                @click="remover(entrada)"
+              />
+            </span>
+            <span v-else class="acoes">
               <Button
                 type="button"
                 size="small"
@@ -587,7 +639,7 @@ onMounted(carregar)
                 :label="t('clinico.comum.remover')"
                 :title="t('clinico.fila.remover')"
                 :disabled="fila.salvando"
-                @click="remover(entrada)"
+                @click="aRemover = entrada.id"
               />
             </span>
 

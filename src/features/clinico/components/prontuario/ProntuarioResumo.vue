@@ -239,7 +239,8 @@ const catalogo = computed(() => [
   {
     id: 'declaracao-obito' as DocumentoId,
     icone: 'ph ph-heart',
-    grupo: 'termos' as const,
+    /* Quem assina é o veterinário: é declaração, não termo do responsável. */
+    grupo: 'declaracoes' as const,
     disponivel: true,
     /* Nunca sugerido. Oferecer isto numa consulta de rotina é indelicado e assustador. */
     sugerido: false,

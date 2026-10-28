@@ -74,8 +74,14 @@ const ICONE: Record<SituacaoDaMeta, string> = {
       <span class="meta__numeros">
         <span>
           <strong class="ui-num">{{ rotulos.valor(item.meta.tipo, item.realizado) }}</strong>
+          <!-- Teto não é alvo a alcançar: "5 doses · limite 0 doses", não "5 doses de 0 doses". -->
           {{
-            t('clinico.estoque.metas.de', { alvo: rotulos.valor(item.meta.tipo, item.meta.alvo) })
+            t(
+              item.sentido === 'teto' ? 'clinico.estoque.metas.limite' : 'clinico.estoque.metas.de',
+              {
+                alvo: rotulos.valor(item.meta.tipo, item.meta.alvo),
+              },
+            )
           }}
         </span>
         <span

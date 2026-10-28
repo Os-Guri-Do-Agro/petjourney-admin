@@ -33,7 +33,6 @@ import {
   LIMITE_DE_DOSES,
 } from '../../data/repositories'
 import type { LoteDeVacina, Vacina } from '../../data/types'
-import { addDays } from '../../domain/clinic-time'
 import { JANELA_DE_VALIDADE_EM_DIAS, type LoteNoEstoque } from '../../domain/estoque-vacinas'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
@@ -78,7 +77,6 @@ const salvando = ref(false)
 const erro = ref('')
 
 const hoje = computed(() => clinicClock.today())
-const amanha = computed(() => addDays(hoje.value, 1))
 
 const opcoesVacina = computed(() =>
   props.vacinas.map((vacina) => ({ valor: vacina.id, rotulo: vacina.nome })),
@@ -168,15 +166,12 @@ const erroCodigo = computed(() =>
 )
 
 const erroValidade = computed(() => {
-  if (!tentouSalvar.value) {
-    return ''
+  /* Validade vencida é fato, não campo esquecido: diz na hora, sem esperar o "Dar entrada". */
+  if (validade.value && validade.value <= hoje.value) {
+    return t('clinico.estoque.recusa.validade-passada')
   }
 
-  if (!validade.value) {
-    return t('clinico.estoque.receber.erros.validade')
-  }
-
-  return validade.value <= hoje.value ? t('clinico.estoque.recusa.validade-passada') : ''
+  return tentouSalvar.value && !validade.value ? t('clinico.estoque.receber.erros.validade') : ''
 })
 
 const erroQuantidade = computed(() =>
@@ -285,10 +280,14 @@ async function receber() {
       <div class="receber__linha">
         <ClinicField :rotulo="t('clinico.vacinas.validadeLote')" obrigatorio :erro="erroValidade">
           <template #default="{ id, descrito }">
+            <!--
+              Sem data mínima de propósito: com ela, a validade vencida digitada sumia do campo e a
+              tela só dizia "Informe a validade". Assim a data fica e o erro diz o porquê
+              ("frasco vencido volta ao fornecedor").
+            -->
             <ClinicDateField
               v-model="validade"
               :input-id="id"
-              :min="amanha"
               :aria-describedby="descrito"
               :invalido="Boolean(erroValidade)"
             />

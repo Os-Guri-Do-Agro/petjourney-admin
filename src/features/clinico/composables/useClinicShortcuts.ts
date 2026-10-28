@@ -65,6 +65,25 @@ function ehCampoDeTexto(alvo: EventTarget | null): boolean {
   return ['INPUT', 'TEXTAREA', 'SELECT'].includes(alvo.tagName)
 }
 
+/**
+ * Tecla que nasce num diálogo, gaveta ou lista aberta pertence a ela, não à agenda por trás.
+ *
+ * Sem isto, quem abria "Novo atendimento", clicava em Paciente e digitava "Rita" trocava a agenda
+ * para "por sala" no "R" (o foco ainda estava no combobox, que não é campo de texto) e a busca
+ * ficava com "ita". O mesmo valia para "d", "s", "t" e as setas com um modal aberto.
+ */
+const CAMADAS =
+  '[role="dialog"], [role="alertdialog"], [role="combobox"], [role="listbox"], [role="menu"], .p-overlay, .p-popover, .p-select-overlay, .p-datepicker-panel'
+
+function ehDeOutraCamada(alvo: EventTarget | null): boolean {
+  if (alvo instanceof Element && alvo.closest(CAMADAS)) {
+    return true
+  }
+
+  /* Modal aberto e foco perdido no corpo da página: a tecla também não é da agenda. */
+  return Boolean(document.querySelector('.p-dialog-mask'))
+}
+
 export function useClinicShortcuts(mapa: MapaDeAtalhos) {
   function aoTeclar(evento: KeyboardEvent) {
     if (evento.altKey || evento.ctrlKey || evento.metaKey) {
@@ -80,7 +99,7 @@ export function useClinicShortcuts(mapa: MapaDeAtalhos) {
       return
     }
 
-    if (noCampo) {
+    if (noCampo || ehDeOutraCamada(evento.target)) {
       return
     }
 

@@ -18,8 +18,30 @@ import type {
 import { decidirAcessoPortal } from '@/utils/parceiro/acesso-portal'
 
 const PARCEIRO_ID_STORAGE_KEY = 'petjourney-parceiro-id'
+/**
+ * O nome da empresa da última sessão: o topo da barra mostra a empresa já no primeiro quadro, em
+ * vez de um "Parceiro" provisório que trocava diante de quem olhava enquanto o dashboard chegava.
+ */
+const PARCEIRO_NOME_STORAGE_KEY = 'petjourney-parceiro-nome'
+/**
+ * O último estado do credenciamento que esta sessão viu. A aprovação acontece no CMS, sem aviso no
+ * portal: comparando com o que se viu antes, a moldura anuncia a aprovação uma vez só.
+ */
+const PARCEIRO_AUDITORIA_STORAGE_KEY = 'petjourney-parceiro-auditoria'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error'
+
+function lerDoArmazenamento(chave: string) {
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    return window.localStorage.getItem(chave)
+  } catch {
+    return null
+  }
+}
 
 export const useParceiroStore = defineStore('parceiro', () => {
   const parceiroId = ref<string | null>(readStoredParceiroId())
@@ -40,7 +62,15 @@ export const useParceiroStore = defineStore('parceiro', () => {
   /** Cadastro suspenso pelo admin: portal parceiro fica totalmente inacessível. */
   const cadastroSuspenso = computed(() => statusAuditoria.value === 'SUSPENSO')
   const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
-  const parceiroNome = computed(() => dashboard.value?.parceiro.nome ?? 'Parceiro')
+  const nomeGuardado = ref<string | null>(lerDoArmazenamento(PARCEIRO_NOME_STORAGE_KEY))
+  /** Virou APROVADO desde a última vez que esta sessão olhou: a moldura avisa e zera. */
+  const aprovacaoRecente = ref(false)
+  const parceiroNome = computed(
+    () =>
+      dashboard.value?.parceiro.nome ??
+      nomeGuardado.value ??
+      String(i18n.global.t('shell.barra.empresaProvisoria')),
+  )
 
   function modoBloco(modo: ModoParticipacao): ModoStatusBloco {
     const bloco = modo === 'afiliado' ? status.value?.afiliado : status.value?.participativo
@@ -51,11 +81,51 @@ export const useParceiroStore = defineStore('parceiro', () => {
   }
 
   function readStoredParceiroId() {
-    if (typeof window === 'undefined') {
-      return null
+    return lerDoArmazenamento(PARCEIRO_ID_STORAGE_KEY)
+  }
+
+  /** Compara o credenciamento de agora com o último visto e guarda o de agora. */
+  function anotarAuditoria(id: string, atual: PortalStatus['statusAuditoria'] | null) {
+    /* Por empresa, e fica depois do logout: quem sai à noite e é aprovada de madrugada vê o
+       aviso ao entrar de novo. */
+    const chave = `${PARCEIRO_AUDITORIA_STORAGE_KEY}:${id}`
+    const anterior = lerDoArmazenamento(chave)
+
+    if (anterior === 'PENDENTE' && atual === 'APROVADO') {
+      aprovacaoRecente.value = true
     }
 
-    return window.localStorage.getItem(PARCEIRO_ID_STORAGE_KEY)
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      if (atual) {
+        window.localStorage.setItem(chave, atual)
+      } else {
+        window.localStorage.removeItem(chave)
+      }
+    } catch {
+      /* Sem armazenamento, só não há o aviso da aprovação. */
+    }
+  }
+
+  function aprovacaoAvisada() {
+    aprovacaoRecente.value = false
+  }
+
+  function guardarNome(nome: string | null) {
+    nomeGuardado.value = nome
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    if (nome) {
+      window.localStorage.setItem(PARCEIRO_NOME_STORAGE_KEY, nome)
+    } else {
+      window.localStorage.removeItem(PARCEIRO_NOME_STORAGE_KEY)
+    }
   }
 
   function setParceiroId(id: string | null) {
@@ -72,9 +142,20 @@ export const useParceiroStore = defineStore('parceiro', () => {
     }
   }
 
+  /**
+   * A carga em andamento. A moldura, o Início e os blocos dele pedem o contexto juntos ao abrir a
+   * tela: sem isto, cada um disparava o próprio dashboard + status (quatro pares na mesma carga,
+   * contra um limite de 60 pedidos por minuto da API).
+   */
+  let cargaEmAndamento: Promise<void> | null = null
+
   async function bootstrap(force = false) {
     if (!force && loadState.value === 'ready' && dashboard.value) {
       return
+    }
+
+    if (!force && cargaEmAndamento) {
+      return cargaEmAndamento
     }
 
     loadState.value = 'loading'
@@ -83,7 +164,15 @@ export const useParceiroStore = defineStore('parceiro', () => {
     semAcessoParceiro.value = false
     acessoEncerrado.value = false
 
-    await carregarContexto(parceiroId.value, false)
+    const carga = carregarContexto(parceiroId.value, false).finally(() => {
+      if (cargaEmAndamento === carga) {
+        cargaEmAndamento = null
+      }
+    })
+
+    cargaEmAndamento = carga
+
+    return carga
   }
 
   async function carregarContexto(idAlvo: string | null, jaRetentou: boolean): Promise<void> {
@@ -99,6 +188,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
       dashboard.value = dashboardData
       status.value = statusData
       setParceiroId(dashboardData.parceiro.id)
+      guardarNome(dashboardData.parceiro.nome)
+      anotarAuditoria(dashboardData.parceiro.id, statusData.statusAuditoria)
       loadState.value = 'ready'
     } catch (error) {
       const decisao = decidirAcessoPortal(error, {
@@ -122,6 +213,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
         dashboard.value = null
         status.value = null
         setParceiroId(null)
+        guardarNome(null)
         errorMessage.value = String(
           i18n.global.t(
             acessoEncerrado.value
@@ -165,6 +257,10 @@ export const useParceiroStore = defineStore('parceiro', () => {
     )
 
     status.value = statusData
+
+    if (dashboard.value) {
+      anotarAuditoria(dashboard.value.parceiro.id, statusData.statusAuditoria)
+    }
   }
 
   function patchModoStatus(modo: ModoParticipacao, modoStatus: StatusModoParceiro) {
@@ -209,6 +305,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     semAcessoParceiro.value = false
     acessoEncerrado.value = false
     setParceiroId(null)
+    guardarNome(null)
   }
 
   return {
@@ -234,5 +331,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     refreshStatus,
     patchModoStatus,
     reset,
+    aprovacaoRecente,
+    aprovacaoAvisada,
   }
 })

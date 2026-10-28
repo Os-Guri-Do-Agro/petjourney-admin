@@ -435,3 +435,19 @@ onBeforeUnmount(() => {
   }
 }
 </style>
+
+<style>
+/*
+ * A entrada rola a página inteira (o cadastro passa da altura da tela). A barra do sistema, cinza
+ * e com setas, aparecia colada na arte; como no portal, ela some e a rolagem continua (roda,
+ * toque, teclado). Sem a calha reservada do `html`, a arte vai até a borda.
+ */
+html:has(.auth-page) {
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+}
+
+html:has(.auth-page)::-webkit-scrollbar {
+  display: none;
+}
+</style>

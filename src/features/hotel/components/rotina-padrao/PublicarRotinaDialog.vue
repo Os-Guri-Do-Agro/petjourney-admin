@@ -70,7 +70,14 @@ const nadaMuda = computed(
           :allow-empty="false"
           @update:model-value="(valor: 'amanha' | 'agora') => emit('atualizar:vigencia', valor)"
         />
-        <p class="campo__dica">{{ t('hotel.rotinaPadrao.vigenciaDica') }}</p>
+        <!-- A dica acompanha a escolha: "Amanhã não mexe no turno" ao lado de "Agora" marcado confundia. -->
+        <p class="campo__dica">
+          {{
+            vigencia === 'agora'
+              ? t('hotel.rotinaPadrao.vigenciaDicaAgora')
+              : t('hotel.rotinaPadrao.vigenciaDica')
+          }}
+        </p>
       </div>
 
       <section class="previsao">

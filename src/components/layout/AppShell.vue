@@ -11,6 +11,7 @@
  *
  * Até 900 px a barra vira gaveta, e um topo fino com o menu e o nome da tela toma o lugar dela.
  */
+import { useToast } from 'primevue/usetoast'
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
@@ -33,6 +34,7 @@ import {
   navigatorWidth,
   setNavigatorWidth,
 } from '@/composables/useLayoutPreferences'
+import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import { CUPOM_FEATURE_ENABLED } from '@/features/cupom-feature'
 import { oferecerEspacos } from '@/navegacao/espacos'
@@ -177,6 +179,47 @@ const tituloNoTopo = computed(() => {
   return aqui.value.espaco?.rotulo ?? t('shell.barra.inicio')
 })
 
+/*
+ * A aprovação do cadastro acontece no CMS e não avisa o portal. Com o cadastro ou um programa em
+ * análise, voltar para a aba relê o status (no máximo a cada 30 s): o menu, o Início e a faixa
+ * mudam sem recarregar. Quando o credenciamento vira aprovado, um aviso só, uma vez.
+ */
+const toast = useToast()
+
+function temAlgoEmAnalise() {
+  const status = parceiroStore.status
+
+  return (
+    status?.statusAuditoria === 'PENDENTE' ||
+    status?.afiliado.status === 'SOLICITADO' ||
+    status?.participativo.status === 'SOLICITADO'
+  )
+}
+
+useRevalidarAoVoltar(() => {
+  if (parceiroStore.loadState === 'ready' && temAlgoEmAnalise()) {
+    void parceiroStore.refreshStatus().catch(() => undefined)
+  }
+})
+
+watch(
+  () => parceiroStore.aprovacaoRecente,
+  (aprovada) => {
+    if (!aprovada) {
+      return
+    }
+
+    toast.add({
+      severity: 'success',
+      summary: t('shell.barra.aprovacaoTitulo'),
+      detail: t('shell.barra.aprovacaoDetalhe'),
+      life: 8000,
+    })
+    parceiroStore.aprovacaoAvisada()
+  },
+  { immediate: true },
+)
+
 function clicarCupom() {
   if (!cupomLigado) {
     abrirCupomEmBreve()
@@ -304,7 +347,9 @@ onUnmounted(() => {
               <img src="/pata-escura.png" alt="" />
             </span>
             <span class="barra__empresa shell-rotulo">
-              <strong>{{ parceiroStore.parceiroNome }}</strong>
+              <!-- `dir="auto"`: no árabe, o nome em letras latinas era cortado pelo começo
+                   ("…otel Veterinário"); com a direção do próprio texto, o corte fica no fim. -->
+              <strong dir="auto">{{ parceiroStore.parceiroNome }}</strong>
               <small>PetJourney</small>
             </span>
           </RouterLink>
@@ -922,9 +967,12 @@ onUnmounted(() => {
   left: 0;
   width: min(304px, 86vw);
   border-radius: 0 var(--raio-painel) var(--raio-painel) 0;
-  box-shadow: var(--sombra-3);
+  /* Sombra só aberta: fechada, a gaveta fica 12 px fora da tela e a sombra larga vazava uma
+     faixa cinza na borda esquerda do tablet em pé. */
+  box-shadow: none;
   transform: translateX(-104%);
-  transition: transform 320ms var(--pj-curva-chega);
+  /* 200 ms: abrir a gaveta é mudança de estado, não espetáculo (Regra 4). */
+  transition: transform 200ms var(--pj-curva-chega);
 }
 
 .shell--compacto .barra__miolo {
@@ -959,6 +1007,7 @@ onUnmounted(() => {
 }
 
 .shell--gaveta .barra {
+  box-shadow: var(--sombra-3);
   transform: none;
 }
 

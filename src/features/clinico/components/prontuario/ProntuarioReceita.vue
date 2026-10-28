@@ -64,7 +64,14 @@ const podeRepetir = computed(
   () => !props.somenteLeitura && anterior.value !== null && anterior.value.prescricoes.length > 0,
 )
 
-const podeEmitir = computed(() => !props.somenteLeitura && prescricoes.value.length > 0)
+/** Item em conflito com alergia registrada, sem o "Confirmo" da prescrição: não se assina. */
+const faltaConfirmarAlergia = computed(() =>
+  receitas.alergiaSemAceite(props.encounter, prescricoes.value),
+)
+
+const podeEmitir = computed(
+  () => !props.somenteLeitura && prescricoes.value.length > 0 && !faltaConfirmarAlergia.value,
+)
 
 /**
  * Como cada item chega ao responsável.
@@ -184,10 +191,17 @@ function repetir() {
           outlined
           :disabled="!podeEmitir"
           :loading="receitas.salvando"
+          :aria-describedby="faltaConfirmarAlergia ? `${idBase}-alergia` : undefined"
           @click="emitir"
         />
       </div>
     </header>
+
+    <!-- Por que não dá para assinar: dito ao lado do botão apagado, nunca só a cor dele. -->
+    <p v-if="faltaConfirmarAlergia" :id="`${idBase}-alergia`" class="receita__trava">
+      <i class="ph ph-warning" aria-hidden="true" />
+      {{ t('clinico.receita.confirmeAlergia') }}
+    </p>
 
     <!--
       O que o responsável recebe, ao lado do que o vet prescreveu. É assim que "sem redigitação"
@@ -351,6 +365,22 @@ function repetir() {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+}
+
+/* A trava da assinatura: texto na tinta de risco, sem caixa (o alerta cheio mora na prescrição). */
+.receita__trava {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.receita__trava .ph {
+  flex: none;
+  font-size: 16px;
 }
 
 /* --------------------------------------------------------- visão do responsável */

@@ -221,14 +221,19 @@ const dataDaAnterior = computed(() =>
 
       <p v-else class="ui-folha ui-vazio">{{ t('clinico.prontuario.timeline.vazio') }}</p>
 
+      <!--
+        Sem número: a linha do tempo daqui conta só os eventos ("Ver todos (16)"), e a vista
+        Histórico conta também faltas e consultas sem diagnóstico (a aba da capa diz 30). O link
+        prometia 16 e abria 30.
+      -->
       <RouterLink v-if="restantes > 0 && rotaCompleta" class="ui-mais" :to="rotaCompleta">
-        {{ t('clinico.comum.verTodos', { contagem: eventos.length }) }}
+        {{ t('clinico.paciente.verHistorico') }}
         <i class="ph ph-arrow-right" aria-hidden="true" />
       </RouterLink>
     </section>
 
     <RouterLink v-else-if="rotaCompleta && eventos.length > 0" class="ui-mais" :to="rotaCompleta">
-      {{ t('clinico.comum.verTodos', { contagem: eventos.length }) }}
+      {{ t('clinico.paciente.verHistorico') }}
       <i class="ph ph-arrow-right" aria-hidden="true" />
     </RouterLink>
   </aside>

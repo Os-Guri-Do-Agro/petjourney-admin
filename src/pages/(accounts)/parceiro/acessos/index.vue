@@ -976,9 +976,14 @@ useRevalidarAoVoltar(() => {
             </template>
           </span>
         </span>
-        <RouterLink class="faixa__link ui-mais" to="/settings?aba=empresa">
-          {{ t(`frame.operability.${avisoDoCadastro}.link`) }}
-        </RouterLink>
+        <Button
+          :as="RouterLink"
+          to="/settings?aba=empresa"
+          class="faixa__link"
+          severity="secondary"
+          size="small"
+          :label="t(`frame.operability.${avisoDoCadastro}.link`)"
+        />
       </section>
 
       <!-- Os códigos guardados com o cadastro em análise: o que espera a aprovação e o que não
@@ -1692,8 +1697,9 @@ useRevalidarAoVoltar(() => {
   font-size: 13.5px;
 }
 
-.faixa__link.ui-mais {
-  color: var(--atencao-tinta);
+.faixa__link {
+  flex: none;
+  text-decoration: none;
 }
 
 /* ------------------------------------------------------------------ explicações */

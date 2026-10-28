@@ -18,13 +18,25 @@ const ABA_TO_HASH: Record<string, string> = {
 const { t } = useI18n()
 
 /** O que o painel carregou e a frase do topo precisa: código, link e leituras do QR. */
-const estado = ref({ codigo: '', link: '', leituras: null as number | null, podeIndicar: false })
+const estado = ref({
+  codigo: '',
+  link: '',
+  leituras: null as number | null,
+  podeIndicar: false,
+  carregando: true,
+})
 
 /**
  * A frase do topo: quantas leituras o QR já teve. O código está grande logo abaixo, então a frase
  * não o repete. Sem programa de afiliados ativo não existe código, e a frase diz o que falta.
  */
 const fraseDoResumo = computed(() => {
+  /* Sem frase enquanto carrega: "O código aparece quando o programa estiver ativo" aparecia por um
+     instante para quem já tem o programa ativo. */
+  if (estado.value.carregando) {
+    return ''
+  }
+
   if (!estado.value.podeIndicar || !estado.value.codigo) {
     return t('divulgacao.saudacao.semCodigo')
   }

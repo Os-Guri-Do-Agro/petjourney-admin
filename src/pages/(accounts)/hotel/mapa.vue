@@ -21,7 +21,7 @@ import DatePicker from 'primevue/datepicker'
 import InputNumber from 'primevue/inputnumber'
 import Popover from 'primevue/popover'
 import Select from 'primevue/select'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
@@ -89,12 +89,24 @@ function paraIso(data: Date): ISODate {
   ).padStart(2, '0')}`
 }
 
+/**
+ * A grade que não carregou é erro, não casa vazia.
+ *
+ * Sem o `catch`, a falha virava promessa rejeitada sem dono e a grade ficava `null`: a tela dizia
+ * "Nenhuma acomodação cadastrada. Cadastre as acomodações da casa..." para quem só estava sem rede,
+ * e não oferecia "Tentar de novo".
+ */
+const erroDaGrade = ref('')
+
 async function carregarGrade() {
   carregandoGrade.value = true
+  erroDaGrade.value = ''
 
   try {
     await hotelStore.carregar()
     grade.value = await reservaRepository.grade(inicioDaGrade.value, fimDaGrade.value)
+  } catch {
+    erroDaGrade.value = 'hotel.erros.mapa'
   } finally {
     carregandoGrade.value = false
   }
@@ -105,7 +117,34 @@ async function carregar() {
   await reservas.carregarMapa()
 }
 
-onMounted(carregar)
+/* Só o elemento interessa (é a âncora do popover); o tipo da instância do Button não expõe `$el`. */
+const botaoNovaReserva = ref<{ $el: HTMLElement } | null>(null)
+
+/**
+ * "Nova reserva" na lista chega aqui com `?nova=1` e já abre o "onde cabe".
+ *
+ * Antes a lista só trocava de tela, e a pessoa precisava achar e clicar de novo no mesmo botão,
+ * agora no mapa. A query sai da barra para a recarga não reabrir a lista sozinha.
+ */
+async function abrirNovaSePedida() {
+  if (router.currentRoute.value.query.nova === undefined) {
+    return
+  }
+
+  await router.replace({ query: {} })
+  await nextTick()
+
+  const alvo = botaoNovaReserva.value?.$el ?? null
+
+  if (alvo) {
+    popoverDeOnde.value?.show({ currentTarget: alvo } as unknown as Event, alvo)
+  }
+}
+
+onMounted(async () => {
+  await carregar()
+  await abrirNovaSePedida()
+})
 
 watch(intervalo, (valor) => {
   const [inicio, fim] = valor ?? []
@@ -196,7 +235,13 @@ async function criar(payload: Parameters<typeof reservas.criar>[0]) {
   }
 }
 
-const vazio = computed(() => !carregandoGrade.value && (grade.value?.linhas.length ?? 0) === 0)
+const vazio = computed(
+  () =>
+    !carregandoGrade.value &&
+    !erroDaGrade.value &&
+    grade.value !== null &&
+    grade.value.linhas.length === 0,
+)
 
 // ------------------------------------------------------------------ a frase de cima
 
@@ -241,8 +286,11 @@ const fraseDoResumo = computed(() => {
   const indiceDeHoje = atual.dias.indexOf(hoje)
   const deHoje = indiceDeHoje >= 0 ? atual.porDia[indiceDeHoje] : null
 
-  /* Daqui para a frente, sem hoje: o hoje já está dito na primeira metade da frase. */
-  const futuras = atual.porDia.filter((dia) => dia.data > hoje && dia.operando > 0)
+  /*
+   * De hoje em diante, **com** hoje. Sem ele, a frase dizia "a noite mais cheia das três semanas
+   * é qua. 28/10, com 14 vagas" numa noite de hoje com 13: a mais cheia era hoje e a frase negava.
+   */
+  const futuras = atual.porDia.filter((dia) => dia.data >= hoje && dia.operando > 0)
   const candidatas = futuras.length > 0 ? futuras : atual.porDia.filter((dia) => dia.operando > 0)
   const pico = candidatas.reduce<(typeof candidatas)[number] | null>(
     (maior, dia) => (!maior || dia.ocupadas > maior.ocupadas ? dia : maior),
@@ -336,7 +384,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     class="tela-mapa"
     :resumo="fraseDoResumo"
     :carregando="carregandoGrade && !grade"
-    :erro="reservas.erro ? t(reservas.erro) : ''"
+    :erro="erroDaGrade ? t(erroDaGrade) : reservas.erro ? t(reservas.erro) : ''"
     :vazio="vazio"
     :vazio-titulo="t('hotel.mapa.vazioTitulo')"
     :vazio-descricao="t('hotel.mapa.vazioDescricao')"
@@ -347,6 +395,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   >
     <template #acoes>
       <Button
+        ref="botaoNovaReserva"
         type="button"
         icon="ph ph-calendar-plus"
         :label="t('hotel.reservas.novaNoMapa')"
@@ -355,7 +404,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       />
     </template>
 
-    <div class="mapa">
+    <div class="tela-mapa__corpo">
       <!--
         A procura é uma frase, não um formulário: "tenho um cão de porte grande, de tal dia a tal
         dia". Os campos estão na ordem em que a pessoa do outro lado da linha os diz, e a resposta
@@ -570,8 +619,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 </template>
 
 <style scoped>
-.mapa {
+/*
+ * Não se chama `.mapa`: a casca já usa essa classe no menu lateral, e a regra global da moldura
+ * (`.shell--moldura-app .mapa`) vazava padding e gap para cá. A trilha `minmax(0, 1fr)` deixa a
+ * grade rolar por dentro em vez de empurrar a procura para fora da tela.
+ */
+.tela-mapa__corpo {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 }
 

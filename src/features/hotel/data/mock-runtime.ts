@@ -126,5 +126,29 @@ export async function simularChamada<T>(operation: HotelOperation, produce: () =
     throw new HotelMockError('falha-servidor', operation)
   }
 
-  return produce()
+  return comoResposta(produce())
+}
+
+/**
+ * A resposta sai como cópia, como sairia de uma API de verdade.
+ *
+ * Devolver o objeto do conjunto em memória fazia a tela guardar a mesma referência que a próxima
+ * escrita muda no lugar. O Vue não via a mudança: a tarefa marcada seguia com "Feita" no botão, o
+ * pertence conferido seguia "3 de 4", o selo do sinal seguia "Sem sinal". Com cópia, cada resposta
+ * é um objeto novo e a tela redesenha.
+ *
+ * `structuredClone` não atravessa proxy reativo (um array que veio de um `ref` e foi gravado no
+ * conjunto); nesse caso a cópia passa por JSON, que lê através do proxy. O módulo só guarda texto,
+ * número, booleano e listas, então nada se perde.
+ */
+function comoResposta<T>(valor: T): T {
+  if (valor === null || typeof valor !== 'object') {
+    return valor
+  }
+
+  try {
+    return structuredClone(valor)
+  } catch {
+    return JSON.parse(JSON.stringify(valor)) as T
+  }
 }

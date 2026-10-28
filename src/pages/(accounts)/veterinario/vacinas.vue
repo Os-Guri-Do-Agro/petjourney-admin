@@ -491,8 +491,15 @@ function prazo(dias: number): string {
  * telefone do cadastro, que está escrito na linha. A tela não disca — leva à agenda, onde a
  * recepção escolhe o horário olhando a grade.
  */
-function agendar() {
-  void router.push({ path: '/veterinario/agenda' })
+function agendar(petId: string) {
+  /*
+   * O formulário da agenda abre já com o pet e o tipo "vacina", como o "Marcar retorno" de
+   * Atividades: antes caía na agenda vazia e a recepção procurava o paciente de novo.
+   */
+  void router.push({
+    path: '/veterinario/agenda',
+    query: { novo: '1', paciente: petId, tipo: 'vacina' },
+  })
 }
 
 /*
@@ -537,8 +544,12 @@ const vazio = computed(
     !carregando.value && !erro.value && linhas.value.length === 0 && aplicacoes.value.length === 0,
 )
 
-/** Minutos de agenda que a chamada pode recuperar, a 20 min por aplicação. */
-const potencial = computed(() => linhas.value.length * 20)
+/**
+ * Minutos de agenda que a chamada pode recuperar, a 20 min por aplicação — das que estão na lista
+ * à vista. Contando a lista inteira, "Quem chamar" com 4 pets e 6 vacinas vencidas prometia
+ * "4 h 20 min" (as 13 de todos os recortes).
+ */
+const potencial = computed(() => visiveis.value.length * 20)
 
 /**
  * A frase de estado: quantas vencidas há para chamar hoje e quantas vencem no mês. É o número
@@ -649,7 +660,7 @@ watch([busca, filtros], () => {
               <h2 id="vacinas-chamada-titulo" class="ui-cartao__titulo">
                 {{ t('clinico.vacinas.chamada.titulo') }}
               </h2>
-              <p v-if="linhas.length > 0" class="ui-cartao__descricao">
+              <p v-if="visiveis.length > 0" class="ui-cartao__descricao">
                 {{ t('clinico.vacinas.potencialFrase', { duracao: formato.duracao(potencial) }) }}
               </p>
             </span>
@@ -730,7 +741,7 @@ watch([busca, filtros], () => {
                 outlined
                 size="small"
                 :aria-label="`${t('clinico.vacinas.agendar')}: ${linha.petNome}`"
-                @click="agendar"
+                @click="agendar(linha.petId)"
               />
             </li>
           </ul>

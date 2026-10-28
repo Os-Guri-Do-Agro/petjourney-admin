@@ -19,7 +19,8 @@ import { useI18n } from 'vue-i18n'
 
 import DocumentoFolha from './DocumentoFolha.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { Encounter, Pet, Tutor } from '../../data/types'
+import type { Encounter, Pet, Tutor, VitalKey } from '../../data/types'
+import { medicaoPreenchida, statusDaMedicao } from '../../domain/ranges'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
@@ -58,6 +59,53 @@ const diagnosticos = computed(() =>
     .filter(Boolean),
 )
 
+const VITAIS: VitalKey[] = [
+  'peso',
+  'temperatura',
+  'frequenciaCardiaca',
+  'frequenciaRespiratoria',
+  'tempoPreenchimentoCapilar',
+  'escoreCorporal',
+  'pressaoSistolica',
+]
+
+/**
+ * O que o exame registrou fora do normal: sinal vital fora da faixa da espécie e sistema marcado
+ * como alterado, com a nota de quem examinou. Sem diagnóstico, é isto que o atestado declara;
+ * antes ele dizia "não tendo constatado alterações clínicas" com a dor no quadril anotada no
+ * exame da mesma consulta.
+ */
+const achados = computed(() => {
+  const especie = props.pet?.especie ?? 'canina'
+  const exame = props.encounter.exameFisico
+
+  const vitais = VITAIS.flatMap((vital) => {
+    const medicao = exame.vitais[vital]
+    const faixa = clinico.faixaDe(vital, especie)
+
+    return medicaoPreenchida(medicao) &&
+      ['abaixo', 'acima'].includes(statusDaMedicao(medicao, faixa))
+      ? [
+          `${t(`clinico.prontuario.exameFisico.${vital}`)} ${formato.medicao(
+            medicao,
+            faixa,
+            vital === 'peso' ? 'kg' : '',
+          )}`,
+        ]
+      : []
+  })
+
+  const sistemas = Object.entries(exame.sistemas)
+    .filter(([, sistema]) => sistema.status === 'alterado')
+    .map(([chave, sistema]) => {
+      const rotulo = t(`clinico.prontuario.exameFisico.sistema.${chave}`)
+
+      return sistema.nota ? `${rotulo}: ${sistema.nota.replace(/\.$/, '')}` : rotulo
+    })
+
+  return [...vitais, ...sistemas]
+})
+
 /**
  * A frase muda conforme o que o prontuário sabe — nunca conforme o que seria conveniente.
  */
@@ -85,6 +133,14 @@ const declaracao = computed(() => {
       paciente: props.pet?.nome ?? '',
       data: formato.dataPorExtenso(dataDoDocumento.value),
       diagnostico: diagnosticos.value.join('; '),
+    })
+  }
+
+  if (achados.value.length > 0) {
+    return t('clinico.documentos.atestado.saude.corpoComAchado', {
+      paciente: props.pet?.nome ?? '',
+      data: formato.dataPorExtenso(dataDoDocumento.value),
+      achados: achados.value.join('; '),
     })
   }
 

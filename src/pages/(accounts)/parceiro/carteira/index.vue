@@ -62,6 +62,15 @@ const showAfiliadoGate = computed(
   () => store.loadState === 'ready' && !store.statusAfiliadoAtivo,
 )
 
+/**
+ * Pedido já feito (ou cadastro em análise): a folha diz que está em análise e leva aos programas
+ * para acompanhar. "Solicitar programa afiliado" mandava pedir de novo o que já estava pedido.
+ */
+const gateEmAnalise = computed(
+  () =>
+    store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO',
+)
+
 const estado = ref<EstadoDaCarteira | null>(null)
 
 function formatBrl(centavos: number) {
@@ -104,8 +113,13 @@ onMounted(() => {
 </script>
 
 <template>
+  <!--
+    O título vem do menu, e a Carteira só entra no menu com o programa ativo: sem ele a faixa
+    ficava sem nome. O nome é o mesmo do item do menu.
+  -->
   <UiPagina
     class="tela-carteira"
+    :titulo="t('nav.items.financeiro')"
     :erro="loadError"
     :sem-acesso-de-parceiro="store.semAcessoParceiro"
     bloquear-se-suspenso
@@ -120,12 +134,12 @@ onMounted(() => {
       <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
         <i class="ph ph-wallet" />
       </span>
-      <h2>{{ t('carteira.gate.title') }}</h2>
-      <p>{{ t('carteira.gate.body') }}</p>
+      <h2>{{ gateEmAnalise ? t('carteira.gate.emAnaliseTitle') : t('carteira.gate.title') }}</h2>
+      <p>{{ gateEmAnalise ? t('carteira.gate.emAnaliseBody') : t('carteira.gate.body') }}</p>
       <Button
         type="button"
         icon="ph ph-squares-four"
-        :label="t('carteira.gate.cta')"
+        :label="gateEmAnalise ? t('divulgacao.shareKit.esperaCta') : t('carteira.gate.cta')"
         @click="goToProgramas"
       />
     </div>
@@ -216,6 +230,8 @@ onMounted(() => {
   margin: 0 0 12px;
   color: var(--tinta-2);
   line-height: 1.5;
+  /* Sem "e-" sozinho no fim da linha e "mail." na outra. */
+  text-wrap: pretty;
 }
 
 @media (max-width: 640px) {

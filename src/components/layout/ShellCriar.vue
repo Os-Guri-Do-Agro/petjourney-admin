@@ -9,12 +9,23 @@
 import Popover from 'primevue/popover'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter, type RouteLocationRaw } from 'vue-router'
+import { useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 
 const props = defineProps<{ recolhida: boolean; clinica: boolean }>()
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
+
+/*
+ * Na ficha de um paciente, "Agendamento" já vem com ele escolhido: a recepção estava olhando o
+ * Tofu e caía em "Escolha o paciente". A Agenda atende `?novo=1&paciente=<id>`.
+ */
+const pacienteAberto = computed(() => {
+  const petId = (route.params as Record<string, unknown>).petId
+
+  return route.path.startsWith('/veterinario/paciente/') && typeof petId === 'string' ? petId : null
+})
 
 const menu = ref<InstanceType<typeof Popover> | null>(null)
 const aberto = ref(false)
@@ -29,7 +40,12 @@ const opcoes = computed<Opcao[]>(() =>
           icone: 'ph ph-calendar-plus',
           rotulo: t('shell.barra.criarItens.agendamento'),
           dica: t('shell.barra.criarItens.agendamentoDica'),
-          destino: { path: '/veterinario/agenda', query: { novo: '1' } },
+          destino: {
+            path: '/veterinario/agenda',
+            query: pacienteAberto.value
+              ? { novo: '1', paciente: pacienteAberto.value }
+              : { novo: '1' },
+          },
         },
         {
           id: 'paciente',

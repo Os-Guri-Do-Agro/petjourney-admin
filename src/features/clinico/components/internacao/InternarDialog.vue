@@ -80,7 +80,7 @@ const opcoesDePaciente = computed(() =>
     .filter((pet) => !props.jaInternados.includes(pet.id))
     .map((pet) => ({
       valor: pet.id,
-      rotulo: `${pet.nome} — ${clinico.tutor(pet.tutorId)?.nome ?? ''}`,
+      rotulo: [pet.nome, clinico.tutor(pet.tutorId)?.nome].filter(Boolean).join(' · '),
     })),
 )
 
@@ -194,9 +194,14 @@ function confirmar() {
         obrigatorio
       >
         <template #default="{ id }">
+          <!--
+            `input-id`, não `id`: é o que liga o rótulo ao controle (o `id` caía no invólucro e o
+            leitor de tela anunciava "Escolha o paciente" em vez de "Paciente"). A lista não passa
+            da largura do diálogo: o nome longo quebra em vez de empurrar a caixa para fora.
+          -->
           <Select
-            :id="id"
             v-model="petId"
+            :input-id="id"
             :options="opcoesDePaciente"
             option-label="rotulo"
             option-value="valor"
@@ -204,7 +209,10 @@ function confirmar() {
             :filter-placeholder="t('clinico.internacao.internar.buscarPaciente')"
             filter
             fluid
-            :pt="{ overlay: { class: 'clinic-overlay' } }"
+            :pt="{
+              overlay: { class: 'clinic-overlay', style: 'max-width: min(37rem, 92vw)' },
+              option: { style: 'white-space: normal' },
+            }"
           />
         </template>
       </ClinicField>
@@ -212,8 +220,8 @@ function confirmar() {
       <ClinicField :rotulo="t('clinico.internacao.internar.responsavelClinico')" obrigatorio>
         <template #default="{ id }">
           <Select
-            :id="id"
             v-model="responsavelId"
+            :input-id="id"
             :options="opcoesDeProfissional"
             option-label="rotulo"
             option-value="valor"
@@ -252,8 +260,8 @@ function confirmar() {
       >
         <template #default="{ id }">
           <InputNumber
-            :id="id"
             v-model="pesoKg"
+            :input-id="id"
             :min-fraction-digits="1"
             :max-fraction-digits="2"
             suffix=" kg"

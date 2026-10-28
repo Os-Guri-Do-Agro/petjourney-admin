@@ -299,7 +299,14 @@ export function resumirEstoque(entrada: EntradaDoEstoque): ResumoDoEstoque {
 
   const saldos: SaldoDaVacina[] = vacinas.map((vacina) => {
     const daVacina = noEstoque.filter((lote) => lote.vacinaId === vacina.id)
-    const saldo = daVacina.reduce((total, lote) => total + lote.saldo, 0)
+    /*
+     * O saldo que aplica é o que não venceu. Lote vencido ainda está na geladeira (e no valor
+     * parado, até o descarte), mas não vacina ninguém: contado aqui, a V10 com 2 doses vencidas
+     * aparecia "em nível" com 11 de mínimo 10, quando só 9 serviam.
+     */
+    const saldo = daVacina
+      .filter((lote) => lote.situacao !== 'vencido')
+      .reduce((total, lote) => total + lote.saldo, 0)
     const consumoMensal = (consumoNaJanela.get(vacina.id) ?? 0) / meses
 
     return {

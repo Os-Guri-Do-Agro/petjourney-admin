@@ -13,7 +13,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
+import { DEFAULT_LOCALE, INTL_LOCALE, isLocale, isRTLLocale } from '@/i18n/locales'
 
 import { HOTEL_UTC_OFFSET } from '../data/fixtures'
 import type {
@@ -94,6 +94,24 @@ export function useHotelFormat() {
   }
 
   /**
+   * Data de validade: com o ano quando ele não é o de hoje.
+   *
+   * "Vale até 27/10" sobre uma vacina que vence em outubro do ano que vem lia como "vence hoje" —
+   * o dia e o mês coincidiam com a data da conferência. Validade é a única data do hotel que
+   * costuma cair em outro ano, e é justamente nela que o ano decide.
+   */
+  function validade(iso: ISODate): string {
+    const outroAno = iso.slice(0, 4) !== clock.today().slice(0, 4)
+
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      day: '2-digit',
+      month: '2-digit',
+      ...(outroAno ? { year: 'numeric' as const } : {}),
+      timeZone: 'UTC',
+    }).format(new Date(`${iso}T12:00:00Z`))
+  }
+
+  /**
    * Um `MM-DD` sem ano, na ordem do idioma: `20/12` em pt, `12/20` em en.
    *
    * Temporada é recorrente — "todo ano, de 20 de dezembro a 5 de janeiro" —, e carimbar um ano
@@ -135,7 +153,10 @@ export function useHotelFormat() {
    * devolve ao cliente a pergunta que ele acabou de fazer.
    */
   function periodo(inicio: ISODateTime, fim: ISODateTime): string {
-    return `${quando(inicio)} → ${quando(fim)}`
+    /* A seta aponta para onde a leitura segue: no árabe, da direita para a esquerda. */
+    const seta = isLocale(locale.value) && isRTLLocale(locale.value) ? '←' : '→'
+
+    return `${quando(inicio)} ${seta} ${quando(fim)}`
   }
 
   function duracao(minutos: number): string {
@@ -176,6 +197,11 @@ export function useHotelFormat() {
 
   /** "há 21 dias", para o que envelhece calado — a acomodação parada, a espera na fila. */
   function haDias(dias: number): string {
+    /* "há 0 dias" na acomodação que acabou de sair de operação: o certo é "hoje". */
+    if (dias <= 0) {
+      return t('hotel.formato.hoje')
+    }
+
     return t('hotel.formato.haTempo', { valor: t('hotel.formato.dias', { valor: dias }, dias) })
   }
 
@@ -245,6 +271,7 @@ export function useHotelFormat() {
   return {
     hora,
     data,
+    validade,
     mesDia,
     dataLonga,
     dataPorExtenso,
@@ -268,6 +295,11 @@ export function useHotelFormat() {
     motivoCancelamento: porKind<MotivoDeCancelamento>('motivoCancelamento'),
     exigencia: porKind<ExigenciaKind>('exigencia'),
     situacaoDaExigencia: porKind<SituacaoDaExigencia>('situacaoExigencia'),
+    /*
+     * A mesma situação, como resumo da reserva inteira. "Não apresentado" serve ao lado do nome
+     * da vacina; sozinho, ao lado de "Atrasou 5 h", lia como "o animal não apareceu".
+     */
+    resumoDaAdmissao: porKind<SituacaoDaExigencia>('resumoAdmissao'),
     servico: porKind<ServicoKind>('servico'),
     tarefaKind: porKind<TarefaKind>('tarefaKind'),
     situacaoDaTarefa: porKind<SituacaoDaTarefa>('situacaoTarefa'),

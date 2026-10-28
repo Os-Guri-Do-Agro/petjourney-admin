@@ -203,13 +203,14 @@ async function carregar() {
     await clinico.carregar()
 
     /*
-     * A janela buscada é sempre a do período escolhido — menos os "novos pacientes", que
-     * precisam da base inteira para saber se o primeiro atendimento do bicho foi mesmo aqui.
-     * Trinta dias para trás e a semana inteira para frente cobrem os dois casos sem trazer o
-     * histórico completo para dentro da tela.
+     * Os gráficos usam só o período escolhido (`resumirClinica` recorta), mas os "novos
+     * pacientes" precisam do que veio antes para saber se o primeiro atendimento do bicho foi
+     * mesmo neste período. Buscando só a semana, todo paciente que veio na semana "estreava"
+     * nela: a tela dizia 24 pacientes novos numa clínica de 29. Um ano para trás cobre quem
+     * volta uma vez por ano (a vacina anual) sem trazer o histórico inteiro.
      */
     const janela = intervaloDoPeriodo(filtro.value.periodo, hoje.value)
-    const dados = await agendaRepository.obterIntervalo(janela.inicio, janela.fim)
+    const dados = await agendaRepository.obterIntervalo(addDays(janela.inicio, -365), janela.fim)
 
     atendimentos.value = dados.atendimentos
     prontuarios.value = dados.prontuarios

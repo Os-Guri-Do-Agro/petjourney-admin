@@ -326,8 +326,9 @@ async function salvar() {
     </div>
 
     <template #footer>
+      <!-- Formulário novo não tem "como está" a manter: a saída é cancelar. -->
       <Button
-        :label="t('clinico.agenda.mover.cancelar')"
+        :label="t('clinico.comum.cancelar')"
         severity="secondary"
         text
         @click="aberto = false"

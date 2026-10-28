@@ -313,6 +313,34 @@ const vaga = computed(() => {
 
 const semVaga = computed(() => (vaga.value?.impedimentos.length ?? 0) > 0)
 
+/**
+ * A reserva que já segura este animal no período, se houver.
+ *
+ * A vaga olha a baia; esta olha o hóspede. Sem ela, o mesmo cão saía com duas reservas no mesmo
+ * feriado e a segunda prendia uma vaga que ninguém ia ocupar.
+ */
+const reservaJaExistente = computed(() => {
+  if (!petId.value) {
+    return null
+  }
+
+  const existente = reservaRepository.reservaDoAnimal({
+    petIds: [petId.value, acompanhanteId.value ?? ''],
+    inicio: inicioEscolhido.value,
+    fim: fimEscolhido.value,
+  })
+
+  if (!existente) {
+    return null
+  }
+
+  return {
+    pet: hotelStore.pet(existente.petId)?.nome ?? '',
+    periodo: formato.periodo(existente.entradaPrevista, existente.saidaPrevista),
+    acomodacao: hotelStore.acomodacao(existente.acomodacaoId)?.nome ?? '',
+  }
+})
+
 watch(
   () => props.acomodacao?.id,
   (novo) => {
@@ -333,7 +361,13 @@ watch(petId, () => {
 })
 
 function confirmar() {
-  if (!props.acomodacao || !petId.value || semVaga.value || cadastroPendente.value) {
+  if (
+    !props.acomodacao ||
+    !petId.value ||
+    semVaga.value ||
+    reservaJaExistente.value ||
+    cadastroPendente.value
+  ) {
     return
   }
 
@@ -449,10 +483,17 @@ function confirmar() {
             option-label="rotulo"
             option-value="valor"
             filter
+            reset-filter-on-hide
             :placeholder="t('hotel.reserva.escolhaHospede')"
+            :empty-filter-message="t('hotel.reserva.hospedeNaoEncontrado')"
             fluid
           />
         </div>
+
+        <!-- Logo abaixo do hóspede, que é o que a pessoa acabou de escolher e o que precisa mudar. -->
+        <Message v-if="reservaJaExistente" severity="error" :closable="false" class="campo--largo">
+          {{ t('hotel.reserva.animalJaReservado', reservaJaExistente) }}
+        </Message>
 
         <div v-if="acompanhantes.length > 0" class="campo">
           <label :for="`${idCampo}-acomp`">{{ t('hotel.reserva.acompanhante') }}</label>
@@ -573,7 +614,7 @@ function confirmar() {
         :label="t('hotel.reserva.criar')"
         icon="ph ph-check"
         :loading="salvando"
-        :disabled="!petId || cadastroPendente"
+        :disabled="!petId || cadastroPendente || !!reservaJaExistente"
         @click="confirmar"
       />
     </template>

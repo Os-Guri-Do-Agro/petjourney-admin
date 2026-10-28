@@ -325,12 +325,14 @@ function handleSubmit() {
           {{ item }}
         </li>
       </ul>
+      <!-- Ação de verdade (abre a escolha dos programas): botão visível, não texto solto. -->
       <Button
         v-if="activeTab === 'dados'"
         class="cad-resumo__link"
         type="button"
-        link
+        severity="secondary"
         size="small"
+        icon="ph ph-squares-four"
         :label="t('parceiroCadastro.resumo.edit')"
         @click="activeTab = 'programas'"
       />
@@ -515,13 +517,6 @@ function handleSubmit() {
 
 .cad-resumo__link.p-button {
   margin-inline-start: auto;
-  padding: 0;
-  color: var(--musgo);
-  font-size: 13.5px;
-}
-
-.cad-resumo__link.p-button :deep(.p-button-label) {
-  font-weight: 600;
 }
 
 .cad-form__actions {

@@ -719,6 +719,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   background: var(--pj-lugar);
 }
 
+/*
+ * No escuro, 45% de lavanda sobre a superfície dava uma barra cinza-azulada a 2,5:1 do fundo:
+ * escuro sobre escuro, justo nos dias de semana, que são a maioria. Com 70% a barra passa de 3:1 e
+ * continua mais apagada que a do fim de semana.
+ */
+.app-dark .grafico__barra:not(.grafico__barra--fim),
+.app-dark .legenda__cor:not(.legenda__cor--fim) {
+  background: color-mix(in oklab, var(--pj-lugar) 70%, var(--superficie));
+}
+
 .grafico__coluna:hover .grafico__barra {
   background: var(--pj-lugar-tinta);
 }

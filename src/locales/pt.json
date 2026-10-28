@@ -15,7 +15,7 @@
       "title": "Cupons chegando com tudo",
       "lede": "Em breve você valida resgates no balcão, acompanha campanhas e vê cada conversão acontecer, tudo no mesmo painel.",
       "body": "Estamos polindo os últimos detalhes para o lançamento. Fica de olho: quando abrir, sua operação de divulgação ganha outro ritmo.",
-      "cta": "Animado! Voltar ao painel",
+      "cta": "Entendi, voltar ao painel",
       "sectionCta": "Quero saber mais",
       "closeAria": "Fechar aviso"
     }
@@ -32,7 +32,10 @@
       "frase": "Mais responsáveis por pets chegando até você."
     },
     "login": {
-      "title": "Bem-vindo de volta",
+      "title": "Olá de novo",
+      "erroCredenciais": "E-mail ou senha não conferem. Confira e tente de novo.",
+      "sessaoExpirada": "Sua sessão terminou",
+      "sessaoExpiradaDetalhe": "Entre de novo para continuar de onde parou.",
       "description": "Acesse o portal e impulsione sua parceria com indicação e resultados.",
       "email": {
         "label": "E-mail",
@@ -49,7 +52,7 @@
       "submit": "Entrar no painel",
       "submitting": "Entrando...",
       "support": {
-        "prompt": "Novo por aqui?",
+        "prompt": "Ainda não tem conta?",
         "createAccount": "Criar conta"
       },
       "reactivate": {
@@ -73,7 +76,7 @@
         },
         "reactivated": {
           "summary": "Perfil reativado",
-          "detail": "Bem-vindo de volta ao painel."
+          "detail": "Tudo certo: o painel está liberado de novo."
         },
         "reactivateError": {
           "summary": "Não foi possível reativar",
@@ -119,8 +122,8 @@
         "placeholder": "Repita a senha"
       },
       "terms": {
-        "copy": "Li e aceito os termos de uso e a política de privacidade da PetJourney.",
-        "details": "detalhes"
+        "copy": "Li e aceito os {termos} da PetJourney.",
+        "details": "termos de uso e a política de privacidade"
       },
       "remember": "Manter conectado neste computador após o cadastro",
       "continue": "Continuar",
@@ -148,7 +151,7 @@
       "toast": {
         "success": {
           "summary": "Conta criada",
-          "detail": "Bem-vindo! Agora cadastre sua empresa para começar."
+          "detail": "Agora cadastre sua empresa para começar."
         },
         "error": {
           "summary": "Erro no cadastro"
@@ -181,7 +184,7 @@
       "email": {
         "label": "E-mail",
         "placeholder": "seuemail{'@'}clinica.com",
-        "hint": "Por segurança, a resposta é a mesma mesmo se o e-mail não existir."
+        "hint": "Por segurança, a resposta é igual mesmo que o e-mail não exista."
       },
       "submit": "Enviar código",
       "sending": "Enviando…",
@@ -309,8 +312,8 @@
       "badge": "Painel parceiro"
     },
     "drawer": {
-      "close": "Fechar navegador",
-      "open": "Abrir navegador",
+      "close": "Fechar menu",
+      "open": "Abrir menu",
       "collapse": "Recolher menu",
       "expand": "Expandir menu"
     },
@@ -334,11 +337,11 @@
       "perfil": "Perfil",
       "settings": "Configurações",
       "trocarEmpresa": "Trocar de empresa",
-      "logout": "Logout"
+      "logout": "Sair da conta"
     },
     "logoutConfirm": {
       "title": "Sair da conta?",
-      "message": "Você será desconectado deste painel. Para acessar novamente, será necessário fazer login.",
+      "message": "Este computador sai da sua conta. Para voltar, é só entrar de novo com e-mail e senha.",
       "cancel": "Continuar no painel"
     },
     "cupom": {
@@ -410,6 +413,9 @@
     },
     "barra": {
       "pular": "Pular para o conteúdo",
+      "empresaProvisoria": "Sua empresa",
+      "aprovacaoTitulo": "Cadastro aprovado",
+      "aprovacaoDetalhe": "Sua empresa foi credenciada. Os programas aprovados já estão liberados no portal.",
       "navegacao": "Navegação principal",
       "inicio": "Início",
       "criarTitulo": "Criar novo",
@@ -427,7 +433,7 @@
     "loading": "Carregando...",
     "emptyDefault": "Nada por aqui ainda",
     "error": {
-      "title": "Não foi possível carregar",
+      "title": "Algo deu errado",
       "retry": "Tentar novamente"
     },
     "tabs": {
@@ -452,7 +458,7 @@
     "operability": {
       "pending": {
         "title": "Cadastro em análise",
-        "body": "Ações do portal ficam bloqueadas até o credenciamento ser aprovado.",
+        "body": "Até a aprovação, o código de indicação, a carteira e os novos acessos ficam em espera.",
         "link": "Acompanhar credenciamento"
       },
       "rejected": {
@@ -609,6 +615,7 @@
         "ATIVO": "O programa está ativo."
       },
       "motivo": "Motivo informado: {motivo}",
+      "textoAmbosEmAnalise": "Os dois pedidos estão em análise. O resultado aparece aqui assim que for decidido.",
       "cta": "Ver programas"
     },
     "pauta": {
@@ -668,6 +675,8 @@
     },
     "resumo": {
       "portal": "Acompanhe seus ganhos e compartilhe seu código.",
+      "portalEmAnalise": "Seu cadastro está em análise. O resultado chega por e-mail.",
+      "portalSemPrograma": "Seu código e seus ganhos aparecem quando o Programa de Afiliados estiver ativo.",
       "conferindo": "Conferindo o que pede sua atenção…",
       "urgentes": "{total} assunto urgente pede sua atenção hoje | {total} assuntos urgentes pedem sua atenção hoje",
       "esperando": "{total} assunto espera por você hoje | {total} assuntos esperam por você hoje",
@@ -999,14 +1008,14 @@
       "step2Title": "Em análise",
       "step2Desc": "A equipe PetJourney revisa o cadastro.",
       "step3Title": "Aprovado",
-      "step3Desc": "Complete os dados e solicite os programas.",
+      "step3Desc": "Os programas aprovados aparecem no portal.",
       "submit": "Enviar cadastro"
     },
     "pendente": {
       "title": "Cadastro em análise",
       "body": "Você recebe um e-mail com o resultado. Enquanto isso, pode revisar os dados enviados.",
       "analiseLabel": "Em análise agora",
-      "itemCadastro": "Cadastro do negócio",
+      "itemCadastro": "Cadastro da empresa",
       "analiseHint": "Tudo é decidido na mesma revisão. Você não precisa pedir nada de novo."
     },
     "rejeitado": {
@@ -1029,7 +1038,7 @@
     },
     "editar": {
       "title": "Editar cadastro",
-      "lede": "Ajuste os dados da empresa. As alterações são salvas imediatamente.",
+      "lede": "Ajuste os dados da empresa e salve as alterações.",
       "submit": "Salvar alterações"
     },
     "toast": {
@@ -1037,7 +1046,7 @@
       "enviadoDetail": "Agora é com a equipe PetJourney. Você recebe o resultado por e-mail.",
       "salvo": "Cadastro atualizado",
       "salvoDetail": "As alterações da empresa foram registradas.",
-      "enviadoComProgramas": "Cadastro e {programas} foram para análise. O resultado chega por e-mail."
+      "enviadoComProgramas": "{itens} foram para análise. O resultado chega por e-mail."
     },
     "errors": {
       "generic": "Não foi possível enviar o cadastro.",
@@ -1076,7 +1085,7 @@
         "step3Desc": "Aprovou, os recursos do programa aparecem no portal."
       },
       "afiliado": {
-        "name": "Programa Afiliado",
+        "name": "Programa de Afiliados",
         "tagline": "Participação por indicação",
         "description": "Cada responsável que assina pela sua indicação gera participação para você. O acompanhamento é seu, dentro do portal.",
         "feature1": "Participação por indicação que vira assinatura",
@@ -1781,7 +1790,9 @@
     "gate": {
       "title": "Programa afiliado necessário",
       "body": "A carteira, extrato e saques só ficam disponíveis com o programa afiliado ativo. Solicite a participação na tela de programas.",
-      "cta": "Solicitar programa afiliado"
+      "cta": "Solicitar programa afiliado",
+      "emAnaliseTitle": "Programa de Afiliados em análise",
+      "emAnaliseBody": "A carteira, o extrato e os saques abrem assim que a equipe PetJourney aprovar o programa. O resultado chega por e-mail."
     },
     "visao": {
       "loadingAria": "Carregando carteira",
@@ -1798,6 +1809,7 @@
         "title": "Chave PIX",
         "label": "Chave PIX",
         "hint": "Necessária para solicitar saques.",
+        "invalida": "Esta não parece uma chave PIX. Use CPF, CNPJ, e-mail, celular com DDD ou a chave aleatória do banco.",
         "placeholder": "email{'@'}empresa.com ou CNPJ",
         "save": "Salvar chave"
       },
@@ -2005,6 +2017,7 @@
       "subtitle": "Multi-empresa",
       "title": "Selecionar parceiro",
       "body": "Sua conta participa de mais de uma empresa parceira. Escolha qual você quer operar agora.",
+      "bodyUma": "Esta é a empresa que a sua conta opera. Se você entrar na equipe de outra, ela aparece aqui para escolher.",
       "roleDono": "Seu negócio",
       "roleOperador": "Equipe",
       "current": "Em uso",
@@ -2024,10 +2037,10 @@
     "convite": {
       "subtitle": "Equipe",
       "title": "Aceitar convite",
-      "body": "Você foi convidado para integrar a equipe de uma empresa parceira PetJourney. Informe o identificador recebido no e-mail ou abra o link completo do convite.",
-      "idLabel": "ID do parceiro",
-      "idHint": "Obrigatório. Vem no link como ?parceiroId=...",
-      "idPlaceholder": "cuid-da-empresa",
+      "body": "Você recebeu um convite para entrar na equipe de uma empresa parceira PetJourney. Abra o link do convite que chegou por e-mail para aceitar.",
+      "idLabel": "Código da empresa",
+      "idHint": "O link do convite que chegou por e-mail já preenche este campo.",
+      "idPlaceholder": "Código que vem no link do convite",
       "accept": "Aceitar convite",
       "footnote": "Após aceitar, você passa a operar no portal com o papel definido pelo dono da empresa.",
       "toast": {
@@ -2169,8 +2182,8 @@
       },
       "roles": {
         "veterinario": "Veterinário",
-        "donoParceiro": "Dono do parceiro",
-        "operadorParceiro": "Operador parceiro",
+        "donoParceiro": "Titular da empresa",
+        "operadorParceiro": "Equipe da empresa",
         "admin": "Admin"
       },
       "partnerContext": {
@@ -2526,10 +2539,10 @@
       "risco": "Risco"
     },
     "conflitos": {
-      "professional-overlap": "Sobrepõe {paciente}, das {hora} — {minutos} min em comum.",
+      "professional-overlap": "Sobrepõe {paciente}, das {hora}: {minutos} min em comum.",
       "room-overlap": "A sala {sala} já está ocupada por {paciente} neste horário.",
       "pet-double-book": "{paciente} já tem atendimento marcado às {hora}.",
-      "block-invasion": "Invade um bloqueio de {motivo} por {minutos} min.",
+      "block-invasion": "Entra {minutos} min no horário bloqueado ({motivo}).",
       "outside-hours": "Fora do expediente, que vai das {abre} às {fecha}.",
       "lunch-overlap": "Atravessa o intervalo de almoço por {minutos} min.",
       "holiday-closed": "A clínica está fechada: {feriado}.",
@@ -2540,6 +2553,8 @@
       "responsavel": "Responsável",
       "castrado": "Castrado",
       "inteiro": "Inteiro",
+      "castrada": "Castrada",
+      "inteira": "Inteira",
       "semPeso": "Peso não registrado",
       "verHistorico": "Ver histórico",
       "abrirProntuario": "Abrir prontuário",
@@ -2561,7 +2576,7 @@
         "email": "E-mail (opcional)",
         "salvar": "Cadastrar e usar",
         "erro": "Não foi possível cadastrar o paciente.",
-        "ajudaCompleta": "A ficha inteira. Só nome e responsável são obrigatórios — o resto entra quando existe.",
+        "ajudaCompleta": "A ficha inteira. Só nome e responsável são obrigatórios; o resto entra quando existe.",
         "pesoDica": "O da balança. A dose do bulário sai daqui.",
         "identificacao": "Identificação",
         "microchip": "Microchip",
@@ -2591,7 +2606,7 @@
           "nome": "mesmo nome"
         },
         "telefoneSecundario": "Telefone secundário (opcional)",
-        "telefoneSecundarioDica": "Para quando o primeiro não atende — a internação depende disso.",
+        "telefoneSecundarioDica": "Para quando o primeiro não atende. A internação depende disso.",
         "canalPreferido": "Falar por",
         "canalDica": "Por onde a clínica avisa e manda boletim.",
         "canal": {
@@ -2703,7 +2718,7 @@
           "dose": "Dose",
           "doseDica": "Como foi administrada.",
           "quando": "Quando aconteceu",
-          "quandoDica": "Não é a hora do lançamento — é a hora do ato.",
+          "quandoDica": "Não é a hora do lançamento. É a hora do ato.",
           "quem": "Quem executou",
           "quemDica": "Em branco: a clínica não presenciou, e o registro dirá isso.",
           "quemNinguem": "Ninguém da clínica",
@@ -2821,9 +2836,9 @@
       "cancelarDialogo": {
         "titulo": "Cancelar atendimento",
         "motivo": "Motivo",
-        "descricao": "O horário volta a ficar livre, mas o card continua visível no dia.",
+        "descricao": "O horário volta a ficar livre. Para ver os cancelados na agenda, desligue \"Ocultar cancelados\" em Exibição.",
         "confirmar": "Cancelar atendimento",
-        "aviso": "O atendimento do {paciente} foi cancelado ({motivo}). Entre em contato para remarcar."
+        "aviso": "O atendimento de {paciente} foi cancelado ({motivo}). Entre em contato para remarcar."
       },
       "bloqueioDialogo": {
         "titulo": "Bloquear horário",
@@ -2879,6 +2894,8 @@
         "motivo": "Motivo",
         "ate": "Fim",
         "janelaInvalida": "O fim precisa ser depois do início.",
+        "afetados": "Já tem atendimento neste horário: {nomes}. Bloquear não desmarca ninguém; remarque e avise o responsável. | Já tem {count} atendimentos neste horário: {nomes}. Bloquear não desmarca ninguém; remarque e avise os responsáveis.",
+        "criado": "Horário bloqueado: {inicio} às {fim}.",
         "clinicaInteira": "Clínica inteira",
         "semSala": "Nenhuma sala específica",
         "detalhe": "Detalhe",
@@ -2906,6 +2923,8 @@
         "encerrado": "Prazo encerrado: só por telefone"
       },
       "acoesRotulo": "Ações da agenda",
+      "comoChegou": "Como chegou",
+      "tipoCurto": "Tipo",
       "frase": {
         "atendimentos": "{total} atendimento | {total} atendimentos",
         "naRecepcao": "{total} na recepção",
@@ -2926,7 +2945,8 @@
         "encaixe": "Encaixe",
         "marcarAs": "Marcar às {hora} com {nome}",
         "agora": "Agora",
-        "dica": "Arraste um atendimento para outro horário ou profissional para remarcar. Clique num horário livre para marcar."
+        "dica": "Arraste um atendimento para outro horário ou profissional para remarcar. Clique num horário livre para marcar.",
+        "dicaToque": "Toque num horário livre para marcar. Para remarcar, abra o atendimento e toque no lápis."
       },
       "formato": {
         "titulo": "Formato",
@@ -3119,10 +3139,10 @@
         "alergia": "Alergia registrada: {detalhe}"
       },
       "cuidado": {
-        "gestante": "Paciente gestante — este princípio ativo pede cautela.",
-        "lactante": "Paciente lactante — este princípio ativo pede cautela.",
-        "filhote": "Paciente filhote — este princípio ativo pede cautela.",
-        "idoso": "Paciente idoso — este princípio ativo pede cautela.",
+        "gestante": "Paciente gestante: este princípio ativo pede cautela.",
+        "lactante": "Paciente lactante: este princípio ativo pede cautela.",
+        "filhote": "Paciente filhote: este princípio ativo pede cautela.",
+        "idoso": "Paciente idoso: este princípio ativo pede cautela.",
         "renal": "Condição renal registrada: {detalhe}",
         "hepatico": "Condição hepática registrada: {detalhe}",
         "cardiaco": "Condição cardíaca registrada: {detalhe}",
@@ -3202,7 +3222,7 @@
         },
         "comprovante-vacinacao": {
           "titulo": "Comprovante de vacinação",
-          "descricao": "Lote e fabricante ainda não são registrados."
+          "descricao": "Vacinas aplicadas, com lote, fabricante e data do reforço."
         },
         "termo-consentimento": {
           "titulo": "Termo de consentimento livre e esclarecido",
@@ -3228,8 +3248,8 @@
         "usoRotulo": "Uso:",
         "quantidadeTotal": "Quantidade a dispensar: {valor} {unidade}",
         "via": {
-          "primeira": "1ª via — retenção da farmácia",
-          "segunda": "2ª via — orientação ao responsável"
+          "primeira": "1ª via: retenção da farmácia",
+          "segunda": "2ª via: orientação ao responsável"
         },
         "avisoControle": "Receituário de controle especial em duas vias, conforme Portaria SVS/MS 344/98.",
         "comprador": "Identificação do comprador",
@@ -3248,6 +3268,7 @@
           "titulo": "Atestado de saúde",
           "corpoComDiagnostico": "Atesto, para os devidos fins, que examinei em {data} o animal {paciente}, acima identificado, tendo constatado: {diagnostico}.",
           "corpoSemAchado": "Atesto, para os devidos fins, que examinei em {data} o animal {paciente}, acima identificado, não tendo constatado alterações clínicas no exame realizado.",
+          "corpoComAchado": "Atesto, para os devidos fins, que examinei em {data} o animal {paciente}, acima identificado, tendo registrado no exame: {achados}.",
           "recomendacoes": "Recomendações:"
         },
         "comparecimento": {
@@ -3257,8 +3278,8 @@
         "viagem": {
           "titulo": "Atestado de saúde para viagem",
           "corpo": "Atesto que o animal {paciente}, da espécie {especie}, foi examinado nesta data ({data}) e não apresentou sinais clínicos de doença infectocontagiosa, encontrando-se apto ao transporte.",
-          "antirrabica": "Vacina antirrábica — data e lote",
-          "vermifugacao": "Vermifugação — data e produto",
+          "antirrabica": "Vacina antirrábica: data e lote",
+          "vermifugacao": "Vermifugação: data e produto",
           "validade": "Validade exigida pelo destino"
         }
       },
@@ -3314,7 +3335,7 @@
         },
         "eutanasia": {
           "titulo": "Termo de autorização para eutanásia",
-          "carimbo": "Documento de autorização — exige assinatura do responsável",
+          "carimbo": "Documento de autorização: exige assinatura do responsável",
           "declaracao": "Eu, {responsavel}, responsável pelo animal {paciente}, declaro que fui esclarecido(a) sobre o quadro clínico de {objeto}, sobre o prognóstico apresentado e sobre as alternativas de tratamento e de cuidados paliativos, e autorizo a realização da eutanásia.",
           "itensTitulo": "Declaro estar ciente de que",
           "itens": "A eutanásia é ato irreversível.|Fui informado(a) das alternativas existentes, incluindo cuidados paliativos.|A decisão foi tomada por mim, sem coação, após esclarecimento.|Sou o(a) responsável legal pelo animal identificado neste documento.",
@@ -3351,7 +3372,7 @@
       },
       "orcamento": {
         "titulo": "Orçamento",
-        "carimbo": "Orçamento — não é autorização de procedimento",
+        "carimbo": "Orçamento: não é autorização de procedimento",
         "consulta": "Consulta",
         "item": "Item",
         "grupoColuna": "Tipo",
@@ -3421,7 +3442,7 @@
       "posicaoNaFila": "{posicao}º na fila",
       "oferta": {
         "prazo": "A oferta expira em {minutos} minutos. Passado o prazo, a vaga volta para a clínica.",
-        "mensagemPadrao": "Olá! Abriu um horário para o {paciente} em {data} às {hora}. Confirma? Guardamos por {minutos} minutos."
+        "mensagemPadrao": "Olá! Abriu um horário para {paciente} em {data} às {hora}. Confirma? Guardamos por {minutos} minutos."
       },
       "aceite": {
         "marcado": "Horário de {paciente} marcado para {data} às {hora}, com {profissional}.",
@@ -3477,7 +3498,7 @@
         "titulo": "Reagendar",
         "confirmar": "Reagendar e avisar",
         "faltouEm": "Faltou em {data} às {hora}",
-        "mensagemPadrao": "Olá! Sentimos falta de {paciente} hoje. Conseguimos um novo horário em {data} às {hora} — podemos confirmar?"
+        "mensagemPadrao": "Olá! Sentimos falta de {paciente} hoje. Conseguimos um novo horário em {data} às {hora}. Podemos confirmar?"
       },
       "historico": {
         "titulo": "Faltas de {nome}",
@@ -3598,7 +3619,7 @@
         "queixaPrincipal": "Queixa principal",
         "historia": "História clínica",
         "duracaoSintomas": "Há quanto tempo",
-        "duracaoExemplo": "3 dias",
+        "duracaoExemplo": "Ex.: 3 dias",
         "apetite": "Apetite",
         "hidratacao": "Hidratação",
         "evacuacao": "Evacuação",
@@ -3722,7 +3743,7 @@
         "frequencia": "Frequência (h)",
         "duracao": "Duração (dias)",
         "observacao": "Observação",
-        "resumoDose": "{quantidade} {unidade} ({mg} mg) a cada {frequencia} h por {duracao} dias — {total} administrações.",
+        "resumoDose": "{quantidade} {unidade} ({mg} mg) a cada {frequencia} h por {duracao} dias, {total} administrações.",
         "semPeso": "Sem o peso do paciente a dose não é calculada.",
         "avisoDose": {
           "abaixo-da-usual": "Abaixo da dose usual ({min}–{max} mg/kg).",
@@ -3759,7 +3780,7 @@
         "usoContinuo": "Uso contínuo",
         "conta": {
           "peso-por-dose": "1. {peso} kg × {mgPorKg} mg/kg = {mg} mg por administração",
-          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg = {quantidade} por administração",
+          "dose-por-concentracao": "2. {mg} mg ÷ {concentracao} mg/{porUnidade} = {quantidade} {unidade} por administração",
           "total": "3. {porDia}× ao dia × {dias} dias = {total} administrações"
         },
         "fracao": {
@@ -3817,7 +3838,7 @@
       "imprimir": "Salvar em PDF",
       "impressao": {
         "titulo": "Prontuário clínico",
-        "dica": "Abre a impressão do navegador — escolha \"Salvar como PDF\" no destino.",
+        "dica": "Abre a impressão do navegador. Escolha \"Salvar como PDF\" no destino.",
         "paciente": "Paciente",
         "documento": "Documento",
         "valor": "Valor",
@@ -3844,7 +3865,7 @@
         "titulo": "Respondido no app",
         "origem": "Pelo responsável, {quando}",
         "aplicar": "Usar respostas",
-        "pesoInformado": "Peso informado em casa: {valor} — confirme na balança"
+        "pesoInformado": "Peso informado em casa: {valor}. Confirme na balança"
       },
       "teclado": {
         "titulo": "Teclas do prontuário",
@@ -3870,6 +3891,7 @@
           "etapas": "{feitas} de {total} etapas completas"
         },
         "salvoAs": "Salvo às {hora}",
+        "semConexao": "Sem conexão. Guardado neste computador até a rede voltar.",
         "autosave": "Salva sozinho enquanto você escreve",
         "imprimir": "Imprimir ou salvar PDF",
         "fixoRotulo": "Paciente em atendimento",
@@ -3909,7 +3931,7 @@
             "retornoMarcado": "Retorno marcado na agenda.",
             "retornoSemHorario": "Retorno indicado para daqui a {dias} dia, ainda sem horário. A recepção marca pela agenda. | Retorno indicado para daqui a {dias} dias, ainda sem horário. A recepção marca pela agenda.",
             "proximo": "Próximo paciente",
-            "esperaHa": "espera há {minutos} min na recepção",
+            "esperaHa": "espera há {tempo} na recepção",
             "acabouDeChegar": "acabou de chegar à recepção",
             "horario": "horário das {hora}",
             "ninguem": "Ninguém esperando e nenhum outro horário hoje.",
@@ -4276,6 +4298,7 @@
       "validaAte": "Válida até {data}",
       "controlada": "Controle especial · Portaria 344/98",
       "semPrescricao": "Nenhuma prescrição para emitir.",
+      "confirmeAlergia": "Confirme a alergia na prescrição para assinar.",
       "vistaDoResponsavel": "Como o responsável vê",
       "lembrete": "Vira lembrete no app: {quantidade}, {frequencia}",
       "lembreteContinuo": "Lembrete contínuo, sem data de fim",
@@ -4415,6 +4438,7 @@
         "abrir": "Aplicar vacina",
         "atalho": "Aplicar",
         "titulo": "Aplicar vacina · {pet}",
+        "imunossuprimido": "{alerta}. Vacina de agente vivo costuma ser contraindicada: confirme antes de aplicar.",
         "confirmar": "Aplicar e registrar",
         "opcionalNaoIniciada": "Opcional, ainda não iniciada",
         "serieDoPaciente": "{serie}: {total} doses nesta vacina.",
@@ -4630,7 +4654,7 @@
         "por": "por {nome} às {hora}",
         "atrasoMinutos": "{minutos} min de atraso",
         "conferencia": "conferência da bomba",
-        "naTroca": "Cai na troca de plantão — combine quem dá antes de passar o turno.",
+        "naTroca": "Cai na troca de plantão: combine quem dá antes de passar o turno.",
         "checar": "Checar",
         "antesDaHora": "Prevista para {hora}. Registrar agora mesmo assim?",
         "registrarAgora": "Registrar agora",
@@ -4643,7 +4667,7 @@
         "jaRegistrada": "Já registrada neste turno",
         "turnoAnterior": "Turno anterior",
         "observado": "O que foi observado",
-        "observadoDica": "Comeu, urinou, dormiu — é isto que o responsável quer ouvir.",
+        "observadoDica": "Comeu, urinou, dormiu: é isto que o responsável quer ouvir.",
         "avaliacao": "Avaliação clínica",
         "plano": "Plano",
         "planoDica": "O que o próximo plantão precisa fazer.",
@@ -4652,14 +4676,14 @@
         "historicoTitulo": "Evoluções por plantão",
         "semEvolucao": "Nenhuma evolução registrada ainda.",
         "avisoPiora": "Registrar piora gera um boletim que só sai depois de alguém ligar para o responsável.",
-        "observadoExemplo": "Comeu toda a ração e urinou duas vezes.",
-        "avaliacaoExemplo": "Dor controlada. Sem sinais novos.",
-        "planoExemplo": "Manter analgesia e reavaliar às 22h."
+        "observadoExemplo": "Ex.: comeu toda a ração e urinou duas vezes.",
+        "avaliacaoExemplo": "Ex.: dor controlada, sem sinais novos.",
+        "planoExemplo": "Ex.: manter analgesia e reavaliar às 22h."
       },
       "boletim": {
         "retidoTitulo": "Boletim retido",
         "retidoRegra": "O quadro piorou. Este boletim só é enviado depois que alguém da clínica falar com o responsável por telefone.",
-        "ligacaoPendente": "Ligar para {nome} — {telefone}",
+        "ligacaoPendente": "Ligar para {nome}, {telefone}",
         "ligacaoFeita": "Ligação feita por {nome} às {hora}",
         "registrarLigacao": "Registrar ligação",
         "enviar": "Enviar ao responsável",
@@ -4701,7 +4725,7 @@
       "passagem": {
         "titulo": "Passagem de plantão",
         "emCimaDaTroca": "Em cima da troca",
-        "emCimaDaTrocaAjuda": "Estas doses caem no minuto da passagem. Marque cada uma depois de combinar quem dá — quem sai ou quem entra.",
+        "emCimaDaTrocaAjuda": "Estas doses caem no minuto da passagem. Marque cada uma depois de combinar quem dá: quem sai ou quem entra.",
         "atrasadas": "Não fechadas neste turno",
         "semEvolucao": "Sem evolução registrada",
         "abrir": "Abrir",
@@ -4763,9 +4787,9 @@
           "obito": "Fica no registro da internação. Nada disto sai por mensagem."
         },
         "orientacaoExemplo": {
-          "alta": "Repouso por 3 dias, ração úmida, retorno em 7 dias para reavaliação.",
-          "transferido": "Encaminhado ao Hospital Veterinário X para hemodiálise, com cópia do prontuário.",
-          "obito": "Comunicado à responsável por telefone às 14h20; orientada quanto à cremação."
+          "alta": "Ex.: repouso por 3 dias, ração úmida, retorno em 7 dias para reavaliação.",
+          "transferido": "Ex.: encaminhado ao Hospital Veterinário X para hemodiálise, com cópia do prontuário.",
+          "obito": "Ex.: comunicado à responsável por telefone às 14h20; orientada quanto à cremação."
         },
         "canal": {
           "alta": "O responsável recebe no aplicativo a mensagem de que o pet foi para casa.",
@@ -4801,7 +4825,7 @@
         "via": "Via",
         "frequencia": "Frequência",
         "aCada": "A cada {horas} h",
-        "continuo": "Contínuo — conferir a cada {horas} h",
+        "continuo": "Contínuo, conferir a cada {horas} h",
         "primeira": "Primeira administração em",
         "primeiraDica": "Em quantas horas, a partir de agora.",
         "criar": "Prescrever",
@@ -4814,9 +4838,9 @@
         "confirmarSuspensao": "Suspender",
         "cancelar": "Cancelar",
         "suspensasTitulo": "Suspensas",
-        "suspensaEm": "Suspensa às {hora} — {motivo}",
+        "suspensaEm": "Suspensa às {hora}: {motivo}",
         "descricaoExemplo": "Aferir temperatura, FC e FR",
-        "doseExemplo": "25 mg/kg — 1,6 mL",
+        "doseExemplo": "25 mg/kg (1,6 mL)",
         "motivoExemplo": "Troca para via intravenosa.",
         "escolhaMedicamento": "Escolha no bulário",
         "buscarMedicamento": "Buscar por nome"
@@ -4872,7 +4896,7 @@
         },
         "recusa": {
           "ocupado": "Há um paciente neste leito. Transfira ou dê alta antes de tirá-lo de operação.",
-          "tem-historico": "Este leito já recebeu pacientes e não pode ser apagado — tire de operação.",
+          "tem-historico": "Este leito já recebeu pacientes e não pode ser apagado. Tire de operação.",
           "nome-repetido": "Já existe um leito com esse nome.",
           "sem-nome": "Dê um nome ao leito."
         },
@@ -5956,6 +5980,7 @@
         },
         "de": "de {alvo}",
         "ritmo": "no ritmo de hoje, fecha em {n}",
+        "limite": "· limite {alvo}",
         "planejar": "Planejar {mes}",
         "doMes": "Metas de {mes}",
         "emCurso": "Em curso · último dia | Em curso · falta {n} dia | Em curso · faltam {n} dias",
@@ -5981,7 +6006,7 @@
         "vazio": "Nada a comprar para {mes}: a geladeira cobre as metas e o mínimo.",
         "total": "{doses} · {valor} estimados",
         "semFornecedor": "Sem fornecedor",
-        "cabecalhoTexto": "Pedido de vacinas — {mes}",
+        "cabecalhoTexto": "Pedido de vacinas: {mes}",
         "linhaTexto": "• {vacina}: {doses}",
         "totalTexto": "Total estimado: {valor}"
       },
@@ -6112,7 +6137,7 @@
       "respondido": {
         "aceito": "Marcado: {quando} com {profissional}",
         "automatico": "Aceito sozinho: {quando} com {profissional}",
-        "recusado": "Recusado — {motivo}",
+        "recusado": "Recusado: {motivo}",
         "desistiu": "O responsável desistiu",
         "expirado": "Perdeu o prazo sem resposta",
         "pendente": "Esperando resposta"
@@ -6139,7 +6164,7 @@
           "outro": "Outro"
         },
         "mensagem": {
-          "sem-horario": "Oi, {nome}! Não temos horário nesse período para {pets}. Se puder outro dia, peça de novo — ou ligue {telefone} que a gente encaixa.",
+          "sem-horario": "Oi, {nome}! Não temos horário nesse período para {pets}. Se puder outro dia, peça de novo ou ligue {telefone} que a gente encaixa.",
           "precisa-avaliar": "Oi, {nome}! Para {pets}, precisamos conversar antes de marcar. Pode ligar {telefone}? É rapidinho.",
           "servico-indisponivel": "Oi, {nome}! Esse serviço está indisponível no momento. Ligue {telefone} que indicamos o melhor caminho para {pets}.",
           "emergencia": "Oi, {nome}! Pelo que você contou, {pets} precisa ser visto agora. Venha direto ou ligue {telefone} no caminho.",
@@ -6352,7 +6377,7 @@
         "seguidosPara": "horários seguidos para {nomes}",
         "dias": "Dias",
         "procurando": "Procurando horários…",
-        "horarioSumiu": "Alguém pediu o horário das {hora} antes de você. Ele saiu da lista — escolha outro.",
+        "horarioSumiu": "Alguém pediu o horário das {hora} antes de você. Ele saiu da lista: escolha outro.",
         "reservaVenceu": "Seguramos o horário por 5 minutos e o tempo acabou. Escolha de novo.",
         "fechadaFeriado": "A clínica não abre neste dia ({feriado}).",
         "fechadaNoDia": "A clínica não abre neste dia.",
@@ -6590,11 +6615,11 @@
       "viaAjuste": "Ajustar horários da casa",
       "viaAjusteDica": "mudar ou suspender só para este hóspede",
       "viaCuidado": "Cuidado do hóspede",
-      "viaCuidadoDica": "curativo, compressa, casaco — sem dose",
+      "viaCuidadoDica": "curativo, compressa, casaco: sem dose",
       "viaMedicacao": "Medicação",
       "viaMedicacaoDica": "remédio com dose e receita",
       "viaServico": "Serviço extra",
-      "viaServicoDica": "banho, tosa, passeio — entra na conta"
+      "viaServicoDica": "banho, tosa, passeio: entra na conta"
     },
     "adaptacao": {
       "em-adaptacao": "Em adaptação",
@@ -6633,6 +6658,7 @@
       "pertences": "Pertences",
       "peso": "Peso na balança",
       "pesoCadastro": "No cadastro: {valor}",
+      "faltaPeso": "Falta o peso na balança.",
       "petiscos": "Petiscos",
       "porcao": "Porção",
       "racaoPropria": "Ração trazida de casa",
@@ -6645,7 +6671,7 @@
       "removerRemedio": "Remover remédio",
       "restricoes": "Restrições",
       "titulo": "Check-in de {pet}",
-      "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar — e a conta continua cobrando.",
+      "vendaSemAutorizacao": "A reserva vendeu serviço que depende de: {itens}. Sem a autorização, a casa não pode executar, e a conta continua cobrando.",
       "veterinario": "Veterinário do pet",
       "via": "Via",
       "quemBusca": "Quem pode buscar {pet}",
@@ -6739,6 +6765,7 @@
         "ocupada": "Há hóspede nesta acomodação agora.",
         "tem-historico": "Esta acomodação já hospedou: tire de operação em vez de remover.",
         "tem-reserva": "Há reserva futura nesta acomodação.",
+        "tem-reserva-inativar": "Há reserva marcada nesta acomodação. Na reserva, use \"Alterar datas\" para mudá-la de acomodação antes de tirar esta de operação.",
         "ultimo": "Precisa sobrar ao menos um."
       },
       "catalogos": "Não foi possível carregar os dados do hotel.",
@@ -6761,6 +6788,7 @@
         "higienizacao": "A acomodação ainda está em higienização nesse horário.",
         "inativa": "Esta acomodação está fora de operação.",
         "ocupada": "Já há reserva nesta acomodação no período escolhido.",
+        "animal-ja-reservado": "Este animal já tem outra reserva nesse período.",
         "periodo-invalido": "A saída precisa ser depois da entrada.",
         "porte": "O porte do animal não cabe nesta acomodação."
       }
@@ -6794,6 +6822,7 @@
       "pertences": "Pertences",
       "precisaLigar": "Ligue para {nome} antes do fim do turno",
       "racaoDaCasa": "Ração da casa",
+      "racaoTrazida": "Ração trazida de casa",
       "registrar": "Registrar",
       "registrarLigacao": "Registrar ligação",
       "registrarOcorrencia": "Registrar",
@@ -6925,7 +6954,9 @@
       "vermifugo": "Vermífugo"
     },
     "exigencias": {
-      "apresentacao": "Data da apresentação",
+      "apresentacao": "Data da aplicação ou emissão",
+      "apresentacaoDica": "A que está na carteira ou no documento, não a de hoje. A validade conta a partir dela.",
+      "escolhaAData": "Escolha a data da carteira para ver a validade.",
       "apresentadoEm": "Apresentado em {data}",
       "autorizadaPor": "Autorizada por",
       "bloqueado": "{total} documento impede o check-in. | {total} documentos impedem o check-in.",
@@ -6954,6 +6985,7 @@
       "dias": "{valor} dia | {valor} dias",
       "emTempo": "em {valor}",
       "haTempo": "há {valor}",
+      "hoje": "desde hoje",
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
@@ -7282,13 +7314,13 @@
       "naoProponho": "O que não proponho",
       "porqueAdaptacao": "o hóspede foi recebido como {valor}",
       "porqueCasa": "da rotina padrão da casa",
-      "porqueEstadiaLonga": "estadia de {valor} noites: o peso de saída sem um meio do caminho não diz quando o animal emagreceu",
+      "porqueEstadiaLonga": "estadia de {valor} noites: sem uma pesagem no meio, o peso da saída não mostra quando o animal emagreceu",
       "porqueInspecao": "inspeção de entrada: \"{valor}\"",
       "porqueMedicacao": "da receita registrada: {valor}",
       "porquePlano": "dos horários de refeição da ficha",
       "proponhoMudar": "Proponho mudar",
-      "recusaMedicacao": "Medicação — não proponho remédio nem dose. O hotel não prescreve.",
-      "recusaRefeicao": "Refeição — mudar horário de refeição se combina com o responsável.",
+      "recusaMedicacao": "Medicação: não proponho remédio nem dose. O hotel não prescreve.",
+      "recusaRefeicao": "Refeição: mudar horário de refeição se combina com o responsável.",
       "semMudancas": "Nada a propor para este hóspede: a rotina da casa já dá conta.",
       "titulo": "Proposta de rotina",
       "transcrita": "transcrita"
@@ -7319,8 +7351,22 @@
       "confirmarSinal": "Registrar sinal e confirmar",
       "criar": "Criar reserva",
       "diarias": "{total} diária | {total} diárias",
+      "alterar": {
+        "abrir": "Alterar datas",
+        "agora": "Reserva atual: {acomodacao}, {periodo}.",
+        "conta": "Nova conta: {novo} (antes {antes}).",
+        "datas": "Entrada e saída",
+        "escolha": "Escolha a acomodação",
+        "novaSaida": "Nova data de saída",
+        "prorrogar": "Prorrogar estadia",
+        "salvar": "Salvar alteração",
+        "semVaga": "Nenhuma acomodação livre nessas datas.",
+        "titulo": "Alterar reserva"
+      },
+      "animalJaReservado": "{pet} já tem reserva nesse período ({acomodacao}, {periodo}). Ajuste ou cancele aquela antes de criar outra.",
       "escolhaHospede": "Escolha o animal",
       "exigencias": "Documentação de admissão",
+      "hospedeNaoEncontrado": "Nenhum animal com esse nome no cadastro do hotel.",
       "fazerCheckIn": "Fazer check-in",
       "hospede": "Hóspede",
       "irParaEstadia": "Abrir estadia",
@@ -7348,6 +7394,9 @@
         "naoEncontradaTitulo": "Reserva não encontrada",
         "naoEncontradaDescricao": "O endereço pode estar incompleto, ou a reserva não existe mais. Volte para a lista de reservas.",
         "registrarComprovante": "Registrar comprovante",
+        "sinalConfirmar": "Registrar e confirmar",
+        "sinalSugerido": "Sinal sugerido: {valor}",
+        "sinalValor": "Quanto o responsável pagou de sinal",
         "cancelar": "Cancelar reserva",
         "cancelarTitulo": "Cancelar a reserva de {pet}",
         "cancelarMotivo": "Por quê",
@@ -7486,6 +7535,7 @@
       "desfazer": "Desfazer",
       "feita": "Feita",
       "filtroTipo": "Filtrar por tipo",
+      "naoMarcou": "Não deu para marcar: a conexão falhou. A tarefa continua pendente; toque de novo.",
       "jaPassou": "Já resolvido ({total} horário) | Já resolvido ({total} horários)",
       "jaResolvidas": "{total} já resolvida | {total} já resolvidas",
       "maisTarde": "Mais tarde hoje",
@@ -7551,6 +7601,7 @@
       "editar": "Editar",
       "editarTitulo": "Horários de {servico}",
       "exigeAutorizacao": "só para quem tem autorização do responsável",
+      "ignorados": "Não deu para ler: {itens}. Escreva a hora como 09:00, entre 00:00 e 23:59.",
       "horarios": "{total} horário | {total} horários",
       "naoMexe": "Refeição e medicação não entram aqui: os horários vêm da ficha de cada hóspede, e o hotel não prescreve.",
       "noTurno": "{total} cai no turno de agora | {total} caem no turno de agora",
@@ -7574,6 +7625,7 @@
       "vigenciaAgora": "Agora",
       "vigenciaAmanha": "Amanhã",
       "vigenciaDica": "Começar amanhã não mexe no turno de quem está trabalhando agora.",
+      "vigenciaDicaAgora": "Vale já para o resto de hoje: os horários que ainda não passaram entram na rotina deste turno.",
       "nova": {
         "versao": "Versão {versao}, publicada por {pessoa}.",
         "versaoSemPessoa": "Versão {versao}.",
@@ -7604,6 +7656,13 @@
       "recreacao-individual": "Recreação individual",
       "tosa": "Tosa",
       "transporte": "Transporte"
+    },
+    "resumoAdmissao": {
+      "ausente": "Falta documento",
+      "dispensado": "Documento dispensado",
+      "ok": "Documentação em dia",
+      "vence-durante": "Documento vence na estadia",
+      "vencido": "Documento vencido"
     },
     "situacaoExigencia": {
       "ausente": "Não apresentado",
@@ -7663,7 +7722,7 @@
           "titulo": "A ficha da estadia"
         },
         "ocorrencias": {
-          "texto": "Notícia ruim não vai por aplicativo. Uma ocorrência grave segura o boletim do responsável até alguém da casa ligar — e o botão de registrar a ligação está ali do lado.",
+          "texto": "Notícia ruim não vai por aplicativo. Uma ocorrência grave segura o boletim do responsável até alguém da casa ligar, e o botão de registrar a ligação está ali do lado.",
           "titulo": "Ocorrências e o boletim"
         },
         "pergunta": {
@@ -7753,13 +7812,13 @@
           "titulo": "A pergunta desta tela"
         },
         "periodo": {
-          "texto": "Entrada, saída, quantas diárias e em qual acomodação. Se a saída prevista passar do horário da casa, a meia diária já aparece no orçamento — não vira surpresa no balcão.",
+          "texto": "Entrada, saída, quantas diárias e em qual acomodação. Se a saída prevista passar do horário da casa, a meia diária já aparece no orçamento: não vira surpresa no balcão.",
           "titulo": "O período e a conta"
         }
       },
       "reservas": {
         "espera": {
-          "texto": "A lista de espera fica no rodapé porque só é consultada quando uma reserva cai — e nesse momento você já está nesta tela.",
+          "texto": "A lista de espera fica no rodapé porque só é consultada quando uma reserva cai, e nesse momento você já está nesta tela.",
           "titulo": "Quem ficou sem vaga"
         },
         "horizonte": {
@@ -7781,7 +7840,7 @@
       },
       "resumo": {
         "cartoes": {
-          "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso — deu para revender; não comparecer é vaga queimada.",
+          "texto": "Receita por origem da reserva e por serviço, as ocorrências do período, e as perdas. Cancelamento é aviso: deu para revender; não comparecer é vaga queimada.",
           "titulo": "De onde vem, e o que se perde"
         },
         "grafico": {
@@ -7789,7 +7848,7 @@
           "titulo": "Ocupação dia a dia"
         },
         "numeros": {
-          "texto": "Ocupação média, receita, diária média e retorno. O retorno conta responsáveis que já tinham vindo antes — é fidelidade, não volume.",
+          "texto": "Ocupação média, receita, diária média e retorno. O retorno conta responsáveis que já tinham vindo antes: é fidelidade, não volume.",
           "titulo": "Os quatro números"
         },
         "pergunta": {
@@ -7811,7 +7870,7 @@
           "titulo": "Marcar custa um toque"
         },
         "passagem": {
-          "texto": "No pé da prancheta: quantas tarefas ficam para quem assume e o que impede a entrega. Aparece desde o começo do turno, e não só na hora de passar — ocorrência sem contato às 22h já não dá para resolver.",
+          "texto": "No pé da prancheta: quantas tarefas ficam para quem assume e o que impede a entrega. Aparece desde o começo do turno, e não só na hora de passar: ocorrência sem contato às 22h já não dá para resolver.",
           "titulo": "O turno acaba aqui"
         },
         "pergunta": {
@@ -7823,11 +7882,11 @@
           "titulo": "Quanto já foi feito"
         },
         "ronda": {
-          "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda — \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um.",
+          "texto": "As tarefas do mesmo serviço no mesmo horário viram uma ronda: \"Refeição, 20 animais\". Ronda curta já vem aberta; ronda longa abre num toque. Dá para marcar a ronda inteira de uma vez, menos a de medicação: remédio se marca um a um.",
           "titulo": "Uma ronda, não vinte linhas"
         },
         "tempo": {
-          "texto": "As tarefas se agrupam em rondas, e cada ronda traz a hora na frente. O que está atrasado sobe para \"Para agora\", com a hora em vermelho — não some no meio da lista.",
+          "texto": "As tarefas se agrupam em rondas, e cada ronda traz a hora na frente. O que está atrasado sobe para \"Para agora\", com a hora em vermelho: não some no meio da lista.",
           "titulo": "Agora, mais tarde, e o que passou"
         }
       },
@@ -7866,7 +7925,7 @@
         },
         "celular": {
           "titulo": "O outro lado",
-          "texto": "Abra o celular para pedir como o responsável pede — e veja a linha chegar aqui, ou o aviso chegar lá."
+          "texto": "Abra o celular para pedir como o responsável pede, e veja a linha chegar aqui, ou o aviso chegar lá."
         }
       }
     },
@@ -7954,7 +8013,7 @@
       "escolheuTipo": "Escolheu: {tipo}",
       "hotelEscolhe": "Pediu que o hotel escolha a acomodação",
       "aceitaMudar": "aceita mudar um dia",
-      "mesmaAcomodacao": "Na mesma acomodação — são da mesma casa",
+      "mesmaAcomodacao": "Na mesma acomodação: são da mesma casa",
       "semVagaNoTipo": "Sem {tipo} livre para quem pediu antes",
       "semSugestao": "Nenhuma acomodação livre que sirva",
       "prazo": {
@@ -7974,7 +8033,7 @@
       },
       "respondido": {
         "aceito": "Reservado: {acomodacao} · {valor}",
-        "recusado": "Recusado — {motivo}",
+        "recusado": "Recusado: {motivo}",
         "desistiu": "O responsável desistiu",
         "expirado": "Perdeu o prazo sem resposta",
         "pendente": "Esperando resposta"
@@ -7998,7 +8057,7 @@
           "outro": "Outro"
         },
         "mensagem": {
-          "sem-vaga": "Oi, {nome}! Estamos lotados nessas datas para {nomes}. Se puder mudar a data, peça de novo — ou ligue {telefone} que colocamos na lista de espera.",
+          "sem-vaga": "Oi, {nome}! Estamos lotados nessas datas para {nomes}. Se puder mudar a data, peça de novo, ou ligue {telefone} que colocamos na lista de espera.",
           "exigencias": "Oi, {nome}! Para receber {nomes}, a carteira de vacinação precisa estar em dia na entrada. Com a dose em dia, é só pedir de novo. Dúvidas: {telefone}.",
           "perfil": "Oi, {nome}! Pelo que você contou, a nossa casa não é a melhor para {nomes}. Ligue {telefone} que indicamos um caminho.",
           "outro": "Oi, {nome}! Não conseguimos reservar para {nomes}."
@@ -8042,7 +8101,7 @@
         "outroPedido": "Fazer outro pedido",
         "situacao": {
           "AGUARDANDO_HOTEL": "Esperando o hotel responder",
-          "ACEITO": "Reservado — falta o sinal",
+          "ACEITO": "Reservado: falta o sinal",
           "RECUSADO": "O hotel não conseguiu reservar",
           "CANCELADO_PELO_RESPONSAVEL": "Você desistiu deste pedido",
           "EXPIRADO": "O pedido perdeu o prazo"
@@ -8110,7 +8169,7 @@
         "pedirDeNovo": "Pedir outra data",
         "pedirHospedagem": "Pedir hospedagem",
         "paraHoje": "É para hoje ou amanhã?",
-        "petsAjuda": "Escolha um, ou dois da mesma casa — eles ficam juntos na mesma acomodação.",
+        "petsAjuda": "Escolha um, ou dois da mesma casa: eles ficam juntos na mesma acomodação.",
         "faltaPorte": "Falta o porte",
         "hospedadoAgora": "Hospedado agora",
         "primeiraEstadia": "Primeira estadia aqui",

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import Checkbox from 'primevue/checkbox'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import AuthButton from '@/components/auth/AuthButton.vue'
 import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
+import { ApiError } from '@/service/api'
 import { login, refreshAuthSession } from '@/service/auth/auth-service'
 import { clearAuthSession, getAuthUser, getVeterinarioId } from '@/service/auth/auth-session'
 import {
@@ -24,6 +25,27 @@ const password = ref('')
 const rememberAccess = ref(true)
 const loading = ref(false)
 const reactivating = ref(false)
+
+/**
+ * E-mail ou senha que não conferem: o erro mora embaixo da senha, onde a pessoa está olhando, e o
+ * foco volta para ela. No toast do canto ele chegava longe do formulário, em linguagem de sistema
+ * ("Credenciais inválidas"), e o foco ia parar no X do aviso.
+ */
+const erroDeCredencial = ref('')
+
+watch([email, password], () => {
+  erroDeCredencial.value = ''
+})
+
+async function focarSenha() {
+  await nextTick()
+  const campo = document.getElementById('password')
+
+  if (campo instanceof HTMLInputElement) {
+    campo.focus()
+    campo.select()
+  }
+}
 
 /** Perfis inativos detectados no login — aguardam CTA de reativação. */
 const pendingReactivate = ref<ReactivateProfile[]>([])
@@ -117,6 +139,13 @@ async function handleLogin() {
 
     await enterPanelAfterAuth()
   } catch (error) {
+    if (error instanceof ApiError && error.statusCode === 401) {
+      erroDeCredencial.value = t('auth.login.erroCredenciais')
+      loading.value = false
+      void focarSenha()
+      return
+    }
+
     toast.add({
       severity: 'error',
       summary: t('auth.login.toast.loginError.summary'),
@@ -278,6 +307,7 @@ function cancelReactivate() {
           required
           revelavel
           type="password"
+          :error="erroDeCredencial"
         >
           <template #leading>
             <i class="ph ph-lock-simple" aria-hidden="true" />

@@ -241,11 +241,20 @@ const livresAgora = computed(
  */
 const fraseDaCasa = computed(() => {
   const total = hotelStore.acomodacoes.length
+  /*
+   * "Ocupadas agora" e "livres" vêm de quem está na casa. Se essa leitura falhou, a frase dizia "0
+   * ocupadas agora, 19 livres" com cinco hóspedes dentro: sem ela, fica só o tamanho da casa.
+   */
+  const semOcupacao = Boolean(hospedagem.erro)
   const partes = [
     t('hotel.acomodacoes.resumo', { total }, total),
     t('hotel.acomodacoes.lugares', { total: lugares.value }, lugares.value),
-    t('hotel.casa.resumo.ocupadas', { total: ocupadasAgora.value }, ocupadasAgora.value),
-    t('hotel.casa.resumo.livres', { total: livresAgora.value }, livresAgora.value),
+    ...(semOcupacao
+      ? []
+      : [
+          t('hotel.casa.resumo.ocupadas', { total: ocupadasAgora.value }, ocupadasAgora.value),
+          t('hotel.casa.resumo.livres', { total: livresAgora.value }, livresAgora.value),
+        ]),
   ]
 
   if (paradas.value > 0) {

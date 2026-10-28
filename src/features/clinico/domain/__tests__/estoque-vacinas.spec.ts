@@ -213,6 +213,16 @@ describe('saldo por vacina', () => {
     expect(saldoDe(resumo, 'vac-v10').saldo).toBe(25)
   })
 
+  it('lote vencido fica fora do saldo que aplica, mas segue no valor parado', () => {
+    /* Na geladeira até o descarte, mas não vacina ninguém: não pode segurar a vacina "em nível". */
+    const resumo = resumir({
+      lotes: [lote(), lote({ id: 'l-vencido', codigo: 'V10-V', validade: addDays(HOJE, -3) })],
+    })
+
+    expect(saldoDe(resumo, 'vac-v10').saldo).toBe(20)
+    expect(saldoDe(resumo, 'vac-v10').valorParado).toBe(40 * 3000)
+  })
+
   it('vacina sem lote nenhum aparece zerada, e não some', () => {
     /* É a pior notícia do estoque: uma vacina do catálogo que a clínica deixou acabar. */
     const resumo = resumir()

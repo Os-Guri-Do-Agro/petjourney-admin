@@ -189,10 +189,9 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
 const statusDoPrograma = computed<StatusModoParceiro>(
   () => store.status?.afiliado.status ?? 'NAO_SOLICITADO',
 )
-const motivoDoPrograma = computed(() => store.status?.afiliado.motivo?.trim() ?? '')
 
-const tomDoPrograma = computed(() => {
-  switch (statusDoPrograma.value) {
+function tomDoStatus(status: StatusModoParceiro) {
+  switch (status) {
     case 'REJEITADO':
     case 'SUSPENSO':
       return 'risco'
@@ -201,7 +200,42 @@ const tomDoPrograma = computed(() => {
     default:
       return 'neutro'
   }
+}
+
+/**
+ * Os programas pedidos, cada um com o seu selo. O de Afiliados sempre (é ele que abre a carteira e
+ * o código); o Participativo só quando foi pedido. Antes só o de Afiliados aparecia, e quem pediu
+ * os dois no cadastro achava que o outro tinha se perdido.
+ */
+const programas = computed(() => {
+  const lista = [
+    {
+      id: 'afiliado',
+      titulo: t('inicio.programa.titulo'),
+      status: statusDoPrograma.value,
+      motivo: store.status?.afiliado.motivo?.trim() ?? '',
+    },
+  ]
+  const participativo = store.status?.participativo
+
+  if (participativo && participativo.status !== 'NAO_SOLICITADO') {
+    lista.push({
+      id: 'participativo',
+      titulo: t('programas.card.participativo.title'),
+      status: participativo.status,
+      motivo: participativo.motivo?.trim() ?? '',
+    })
+  }
+
+  return lista.map((programa) => ({ ...programa, tom: tomDoStatus(programa.status) }))
 })
+
+/** A frase do bloco: a do programa de Afiliados, ou uma só para os dois em análise juntos. */
+const textoDoPrograma = computed(() =>
+  programas.value.length > 1 && programas.value.every((p) => p.status === 'SOLICITADO')
+    ? t('inicio.programa.textoAmbosEmAnalise')
+    : t(`inicio.programa.texto.${statusDoPrograma.value}`),
+)
 
 /** A frase longa do saldo, quando a curta não cabe embaixo do número. */
 const fraseLonga = computed(() => {
@@ -299,16 +333,20 @@ const atalho = computed<AtalhoDoEspaco | null>(() => {
     <p v-if="fraseLonga" class="portal__frase">{{ fraseLonga }}</p>
 
     <div v-if="pronto && !afiliadoAtivo" class="programa">
-      <span class="programa__titulo">
-        {{ t('inicio.programa.titulo') }}
-        <span class="ui-selo" :class="`ui-selo--${tomDoPrograma}`">
-          {{ t(`inicio.programa.selo.${statusDoPrograma}`) }}
-        </span>
-      </span>
-      <p class="programa__texto">{{ t(`inicio.programa.texto.${statusDoPrograma}`) }}</p>
-      <p v-if="motivoDoPrograma" class="programa__motivo">
-        {{ t('inicio.programa.motivo', { motivo: motivoDoPrograma }) }}
-      </p>
+      <ul class="programa__lista">
+        <li v-for="programa in programas" :key="programa.id" class="programa__item">
+          <span class="programa__titulo">
+            {{ programa.titulo }}
+            <span class="ui-selo" :class="`ui-selo--${programa.tom}`">
+              {{ t(`inicio.programa.selo.${programa.status}`) }}
+            </span>
+          </span>
+          <p v-if="programa.motivo" class="programa__motivo">
+            {{ t('inicio.programa.motivo', { motivo: programa.motivo }) }}
+          </p>
+        </li>
+      </ul>
+      <p class="programa__texto">{{ textoDoPrograma }}</p>
     </div>
   </HomeEspaco>
 </template>
@@ -326,6 +364,19 @@ const atalho = computed<AtalhoDoEspaco | null>(() => {
   display: grid;
   gap: 6px;
   padding-top: 4px;
+}
+
+.programa__lista {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.programa__item {
+  display: grid;
+  gap: 2px;
 }
 
 .programa__titulo {

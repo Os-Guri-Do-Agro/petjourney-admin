@@ -36,6 +36,7 @@ import {
   type PetDaConta,
 } from '../../../data/agendamento-online'
 import type { AvisoDoPedido, PetSex } from '../../../data/types'
+import { telefoneValido } from '../../../domain/cadastro'
 import { addDays, weekdayOf } from '../../../domain/clinic-time'
 import { clinicClock } from '../../../stores/clinico'
 
@@ -587,7 +588,8 @@ export function criarFluxoDoPedido(opcoes: {
   const visitanteValido = computed(
     () =>
       pedido.visitante.nome.trim().length > 1 &&
-      pedido.visitante.telefone.replace(/\D/g, '').length >= 10 &&
+      /* A mesma régua do cadastro: celular sem o nono dígito não passa por fixo. */
+      telefoneValido(pedido.visitante.telefone) &&
       pedido.visitante.petNome.trim().length > 0,
   )
 

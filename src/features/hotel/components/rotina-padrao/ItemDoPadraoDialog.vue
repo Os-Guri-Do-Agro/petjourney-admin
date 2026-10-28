@@ -54,6 +54,19 @@ watch(
 
 const horarios = computed(() => lerHorarios(texto.value))
 
+/**
+ * O que foi digitado e não virou horário ("9h", "25:00").
+ *
+ * A leitura descartava em silêncio: "9h, 25:00, 16:00" virava só "16:00", com o Aplicar aceso, e a
+ * higiene das nove sumia da casa sem ninguém notar. Agora a tela diz o que ficou de fora.
+ */
+const ignorados = computed(() =>
+  texto.value
+    .split(/[,;]/)
+    .map((item) => item.trim())
+    .filter((item) => item !== '' && lerHorarios(item).length === 0),
+)
+
 const problemas = computed(() =>
   props.item
     ? problemasDoItem({ ...props.item, horarios: horarios.value, ativo: ativo.value })
@@ -108,6 +121,10 @@ function aplicar() {
         <li v-for="hora in horarios" :key="hora" class="chip ui-hora">{{ hora }}</li>
       </ul>
 
+      <Message v-if="ignorados.length > 0" severity="error" :closable="false">
+        {{ t('hotel.rotinaPadrao.ignorados', { itens: ignorados.join(', ') }) }}
+      </Message>
+
       <Message v-if="problemas.includes('sem-horario')" severity="warn" :closable="false">
         {{ t('hotel.rotinaPadrao.semHorario') }}
       </Message>
@@ -129,6 +146,7 @@ function aplicar() {
         type="button"
         :label="t('hotel.rotinaPadrao.aplicar')"
         icon="ph ph-check"
+        :disabled="ignorados.length > 0"
         @click="aplicar"
       />
     </template>

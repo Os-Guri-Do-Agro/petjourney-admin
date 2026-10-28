@@ -46,7 +46,13 @@ const { t } = useI18n()
 const formato = useHotelFormat()
 const idCampo = useId()
 
-const apresentadoEm = ref<Date>(new Date())
+/*
+ * Começa vazia: vir com hoje contradizia a dica ("não a de hoje") e quem tinha pressa registrava a
+ * vacina de março com a data do balcão.
+ */
+const apresentadoEm = ref<Date | null>(null)
+/** Aplicação no futuro não existe: o calendário para em hoje. */
+const hojeLocal = new Date()
 const documento = ref('')
 const motivo = ref('')
 const autorizadaPor = ref('')
@@ -57,8 +63,12 @@ const exigencia = computed(
   () => props.exigencias.find((item) => item.kind === props.alvo?.kind) ?? null,
 )
 
-const dataIso = computed<ISODate>(() => {
+const dataIso = computed<ISODate | null>(() => {
   const data = apresentadoEm.value
+
+  if (!data) {
+    return null
+  }
 
   return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(
     data.getDate(),
@@ -66,12 +76,14 @@ const dataIso = computed<ISODate>(() => {
 })
 
 /** O resultado da conta, antes de salvar: é o que evita a carteira registrada com validade errada. */
-const validade = computed(() => validadeDe(dataIso.value, exigencia.value?.validadeMeses ?? null))
+const validade = computed(() =>
+  dataIso.value ? validadeDe(dataIso.value, exigencia.value?.validadeMeses ?? null) : null,
+)
 
 const podeSalvar = computed(() =>
   props.alvo?.modo === 'dispensar'
     ? motivo.value.trim().length >= 10 && autorizadaPor.value !== ''
-    : documento.value.trim() !== '',
+    : dataIso.value !== null && documento.value.trim() !== '',
 )
 
 watch(
@@ -81,7 +93,7 @@ watch(
       return
     }
 
-    apresentadoEm.value = new Date()
+    apresentadoEm.value = null
     documento.value = ''
     motivo.value = ''
     autorizadaPor.value = props.cuidadores[0]?.id ?? ''
@@ -90,6 +102,8 @@ watch(
 
 function confirmar() {
   const alvo = props.alvo
+
+  const data = dataIso.value
 
   if (!alvo || !podeSalvar.value) {
     return
@@ -105,9 +119,13 @@ function confirmar() {
     return
   }
 
+  if (!data) {
+    return
+  }
+
   emit('registrar', {
     kind: alvo.kind,
-    apresentadoEm: dataIso.value,
+    apresentadoEm: data,
     documento: documento.value,
   })
 }
@@ -131,14 +149,24 @@ function confirmar() {
     <div v-if="alvo" class="exig">
       <template v-if="alvo.modo === 'registrar'">
         <div class="campo">
+          <!--
+            A data que conta a validade é a da aplicação (ou da emissão), a que está na carteira.
+            Com o rótulo "data da apresentação", a recepção punha o dia de hoje e a vacina de
+            março ganhava sete meses a mais de validade.
+          -->
           <label :for="`${idCampo}-data`">{{ t('hotel.exigencias.apresentacao') }}</label>
           <DatePicker
             :input-id="`${idCampo}-data`"
             v-model="apresentadoEm"
             date-format="dd/mm/yy"
+            :max-date="hojeLocal"
             show-icon
             fluid
+            :aria-describedby="`${idCampo}-data-dica`"
           />
+          <small :id="`${idCampo}-data-dica`" class="exig__dica">
+            {{ t('hotel.exigencias.apresentacaoDica') }}
+          </small>
         </div>
 
         <div class="campo">
@@ -155,11 +183,16 @@ function confirmar() {
           A validade calculada, à vista, antes de salvar. Quem digita a data da aplicação não
           deveria precisar fazer a conta — e quando precisa, erra.
         -->
-        <p class="exig__validade" aria-live="polite">
+        <p
+          class="exig__validade"
+          :class="{ 'exig__validade--pendente': !dataIso }"
+          aria-live="polite"
+        >
           <i class="ph ph-calendar-check" aria-hidden="true" />
           <template v-if="validade">
-            {{ t('hotel.exigencias.validadeCalculada', { data: formato.data(validade) }) }}
+            {{ t('hotel.exigencias.validadeCalculada', { data: formato.validade(validade) }) }}
           </template>
+          <template v-else-if="!dataIso">{{ t('hotel.exigencias.escolhaAData') }}</template>
           <template v-else>{{ t('hotel.exigencias.semValidade') }}</template>
         </p>
       </template>
@@ -255,5 +288,16 @@ function confirmar() {
 
 .exig__validade i {
   font-size: 18px;
+}
+
+/* Sem data ainda não há validade a festejar: o verde fica para quando a conta existe. */
+.exig__validade--pendente {
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+}
+
+.exig__dica {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 </style>

@@ -111,6 +111,35 @@ export function reservasQueCruzam(
 }
 
 /**
+ * A reserva viva que já segura **este animal** num período que cruza o pedido.
+ *
+ * A checagem de vaga olha a acomodação e deixava passar o mesmo cão em duas baias no mesmo fim de
+ * semana — a segunda venda prendia uma vaga que ninguém ia ocupar, justamente no feriado em que ela
+ * faltava. Vale para o animal como hóspede principal e como acompanhante. Sem higienização: ela é
+ * da baia, não do animal.
+ */
+export function reservaDoAnimalNoPeriodo(
+  reservas: Reserva[],
+  petIds: string[],
+  inicio: ISODateTime,
+  fim: ISODateTime,
+  ignorarReservaId?: string,
+): Reserva | null {
+  const ids = petIds.filter(Boolean)
+
+  return (
+    reservas.find(
+      (reserva) =>
+        reservaSegura(reserva) &&
+        reserva.id !== ignorarReservaId &&
+        (ids.includes(reserva.petId) ||
+          (reserva.acompanhantePetId !== null && ids.includes(reserva.acompanhantePetId))) &&
+        cruzam(inicio, fim, reserva.entradaPrevista, reserva.saidaPrevista),
+    ) ?? null
+  )
+}
+
+/**
  * A acomodação serve para este hóspede, neste período?
  *
  * Devolve **todos** os impedimentos e não só o primeiro. Uma tela que diz "não aceita gatos" e,

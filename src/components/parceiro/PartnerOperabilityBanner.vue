@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -65,9 +66,17 @@ const copyKey = computed(() => {
         </template>
       </span>
     </span>
-    <RouterLink class="ui-mais operability-banner__link" to="/settings?aba=empresa">
-      {{ t(`frame.operability.${copyKey}.link`) }}
-    </RouterLink>
+    <!-- O caminho para resolver num botão de verdade, e não em texto solto sobre a faixa. -->
+    <!-- O componente, e não as classes num link: sem um Button montado na tela o PrimeVue não
+         carrega o estilo, e o "botão" virava texto solto (no escuro, sumia na faixa). -->
+    <Button
+      :as="RouterLink"
+      to="/settings?aba=empresa"
+      class="operability-banner__link"
+      severity="secondary"
+      size="small"
+      :label="t(`frame.operability.${copyKey}.link`)"
+    />
   </aside>
 </template>
 
@@ -125,7 +134,8 @@ const copyKey = computed(() => {
   font-size: 13.5px;
 }
 
-.operability-banner__link.ui-mais {
-  color: var(--faixa-tinta);
+.operability-banner__link {
+  flex: none;
+  text-decoration: none;
 }
 </style>

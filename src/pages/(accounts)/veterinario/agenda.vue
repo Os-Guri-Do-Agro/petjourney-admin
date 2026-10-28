@@ -10,6 +10,7 @@
  * mesma visão, e o link que a recepção manda para o veterinário abre onde deveria.
  */
 import Button from 'primevue/button'
+import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -46,6 +47,7 @@ import type {
   MotivoDeFalta,
   SlotSugestao,
 } from '@/features/clinico/data/types'
+import { ocupaHorario } from '@/features/clinico/domain/conflicts'
 import { motivoEncerraOCaso } from '@/features/clinico/domain/faltas'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
@@ -56,6 +58,7 @@ const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const agenda = useAgendaStore()
+const toast = useToast()
 const clinico = useClinicoStore()
 const fila = useFilaStore()
 const avisos = useAvisosStore()
@@ -93,14 +96,38 @@ const paraEditar = computed(
 
 const feriado = computed(() => agenda.dia?.feriado ?? null)
 
-const erroTraduzido = computed(() => (agenda.erro ? t(agenda.erro) : ''))
+/*
+ * Erro de **carga** toma o lugar da grade; erro de **salvar** não. Antes os dois iam para o mesmo
+ * estado da página: um "Agendar" que falhava trocava a agenda inteira por "Não foi possível
+ * carregar", por trás do diálogo, e o diálogo continuava aberto sem dizer nada. O de salvar vira
+ * aviso por cima de tudo (o toast fica acima da máscara do diálogo), e a grade continua lá.
+ */
+const ERRO_DE_SALVAR = 'clinico.erros.mutacao'
+
+const erroTraduzido = computed(() =>
+  agenda.erro && agenda.erro !== ERRO_DE_SALVAR ? t(agenda.erro) : '',
+)
+
+watch(
+  () => agenda.erro,
+  (erro) => {
+    if (erro === ERRO_DE_SALVAR) {
+      toast.add({ severity: 'error', summary: t(ERRO_DE_SALVAR), life: 6000 })
+    }
+  },
+  { flush: 'sync' },
+)
 
 /**
  * A frase da saudação (redesenho de 30/09/2026): quantos atendimentos o dia aberto tem, e quantos
  * já esperam na recepção — a única conta que pede alguém levantar agora.
  */
 const fraseDoDia = computed(() => {
-  const ativos = agenda.atendimentos.filter((item) => item.status !== 'cancelado')
+  /*
+   * A mesma conta da fita da semana logo abaixo (`ocupaHorario`: sem cancelado nem falta). Com
+   * contas diferentes, a saudação dizia 38 e o dia escolhido na fita dizia 32.
+   */
+  const ativos = agenda.atendimentos.filter(ocupaHorario)
 
   if (ativos.length === 0) {
     return t('clinico.agenda.frase.vazio')

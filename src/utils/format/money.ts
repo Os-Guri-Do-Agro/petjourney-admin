@@ -22,7 +22,14 @@ const brlAmountFormatter = new Intl.NumberFormat('pt-BR', {
 })
 
 export function formatCentavosToBrl(centavos: number, intlLocale = 'pt-BR') {
-  return brlFormatter(intlLocale).format(centavos / 100)
+  const texto = brlFormatter(intlLocale).format(centavos / 100)
+
+  /*
+   * No árabe a linha corre da direita para a esquerda, e "R$" (o R é letra latina, o $ não tem
+   * direção) se partia: a carteira mostrava "$R 0.00". Isolado da linha (LRI … PDI), o valor sai
+   * inteiro, "0.00 R$", como o idioma escreve.
+   */
+  return intlLocale.startsWith('ar') ? `⁦${texto}⁩` : texto
 }
 
 /** Máscara de digitação BRL (centavos → `1.234,56`). */

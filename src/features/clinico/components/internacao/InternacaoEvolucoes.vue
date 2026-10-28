@@ -206,7 +206,7 @@ function registrar() {
             <ClinicField :rotulo="t(`clinico.prontuario.exameFisico.${vital}`)">
               <template #default="{ id }">
                 <InputNumber
-                  :id="id"
+                  :input-id="id"
                   :model-value="rascunho.vitais[vital].valor"
                   :placeholder="faixaDoVital(vital)"
                   :min-fraction-digits="0"

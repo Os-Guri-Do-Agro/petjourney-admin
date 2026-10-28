@@ -137,3 +137,80 @@ describe('store parceiro: exclusão lógica do parceiro', () => {
     expect(store.acessoEncerrado).toBe(true)
   })
 })
+
+describe('store parceiro: a carga que a tela inteira pede junto', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    window.localStorage.clear()
+    getPortalDashboard.mockReset()
+    getPortalStatus.mockReset()
+  })
+
+  it('moldura, Início e blocos pedindo ao mesmo tempo viram um só par de pedidos', async () => {
+    const store = useParceiroStore()
+    respondeOk()
+
+    await Promise.all([store.bootstrap(), store.bootstrap(), store.bootstrap(), store.bootstrap()])
+
+    expect(getPortalDashboard).toHaveBeenCalledTimes(1)
+    expect(getPortalStatus).toHaveBeenCalledTimes(1)
+    expect(store.loadState).toBe('ready')
+  })
+
+  it('o forçado ainda pede de novo, mesmo com uma carga em andamento', async () => {
+    const store = useParceiroStore()
+    respondeOk()
+
+    await Promise.all([store.bootstrap(), store.bootstrap(true)])
+
+    expect(getPortalDashboard).toHaveBeenCalledTimes(2)
+  })
+
+  it('guarda o nome da empresa para o topo da barra da próxima sessão, e esquece ao sair', async () => {
+    const store = useParceiroStore()
+    respondeOk()
+
+    await store.bootstrap()
+    expect(window.localStorage.getItem('petjourney-parceiro-nome')).toBe('Clínica Teste')
+
+    setActivePinia(createPinia())
+    expect(useParceiroStore().parceiroNome).toBe('Clínica Teste')
+
+    useParceiroStore().reset()
+    expect(window.localStorage.getItem('petjourney-parceiro-nome')).toBeNull()
+  })
+})
+
+describe('store parceiro: aprovação vista pela primeira vez', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    window.localStorage.clear()
+    getPortalDashboard.mockReset()
+    getPortalStatus.mockReset()
+  })
+
+  it('PENDENTE numa sessão e APROVADO na seguinte: avisa uma vez', async () => {
+    getPortalDashboard.mockResolvedValue(dashboardDe('p-1'))
+    getPortalStatus.mockResolvedValueOnce({
+      ...STATUS_OK,
+      statusAuditoria: 'PENDENTE',
+    } as PortalStatus)
+
+    await useParceiroStore().bootstrap()
+    expect(useParceiroStore().aprovacaoRecente).toBe(false)
+
+    setActivePinia(createPinia())
+    getPortalStatus.mockResolvedValueOnce(STATUS_OK)
+    const depois = useParceiroStore()
+    await depois.bootstrap()
+
+    expect(depois.aprovacaoRecente).toBe(true)
+    depois.aprovacaoAvisada()
+
+    setActivePinia(createPinia())
+    getPortalStatus.mockResolvedValueOnce(STATUS_OK)
+    const outraVez = useParceiroStore()
+    await outraVez.bootstrap()
+    expect(outraVez.aprovacaoRecente).toBe(false)
+  })
+})

@@ -25,6 +25,7 @@
  */
 import { PhCat } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
+import Message from 'primevue/message'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -563,7 +564,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         <time :datetime="hospedagem.dia">{{ dataDeHoje }}</time
         >{{ '. ' }}
         <template v-if="fraseDoTurno">{{ fraseDoTurno }}{{ ' ' }}</template>
-        <span v-if="hospedagem.prancheta.length > 0" aria-live="polite">
+        <!-- Com a leitura falhando, a contagem seria a da prancheta antiga: some junto. -->
+        <span v-if="hospedagem.prancheta.length > 0 && !hospedagem.erro" aria-live="polite">
           {{ fraseDoProgresso }}
         </span>
       </span>
@@ -583,6 +585,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     <div class="rotina">
       <div class="rotina__grade">
         <div class="prancheta">
+          <!--
+            Marcar que falhou (rede ruim no fundo do canil) precisa dizer que falhou, aqui em cima
+            da prancheta. O erro só aparecia dentro da proposta, na lateral, e o "Feita" tocado
+            simplesmente não acontecia: a pessoa seguia achando que tinha marcado.
+          -->
+          <Message
+            v-if="
+              hospedagem.erroDeAcao && !passagemAberta && !medicacaoAberta && !hospedagem.proposta
+            "
+            severity="error"
+            class="prancheta__erro"
+            role="alert"
+            closable
+            @close="hospedagem.erroDeAcao = ''"
+          >
+            {{ t('hotel.rotina.naoMarcou') }}
+          </Message>
+
           <!-- O filtro por tipo: só os tipos que existem hoje, com quantos são. -->
           <div class="filtros" role="group" :aria-label="t('hotel.rotina.filtroTipo')">
             <button

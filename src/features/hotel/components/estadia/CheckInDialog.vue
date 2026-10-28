@@ -422,13 +422,21 @@ function confirmar() {
 
         <div class="grade">
           <div class="campo">
-            <label :for="`${idCampo}-peso`">{{ t('hotel.checkin.peso') }}</label>
+            <!--
+              O peso é o único campo que trava o "Confirmar check-in". Sem a marca, o botão ficava
+              cinza no pé de um formulário longo e ninguém sabia o que faltava.
+            -->
+            <label :for="`${idCampo}-peso`">
+              {{ t('hotel.checkin.peso') }}
+              <span class="campo__obrigatorio" aria-hidden="true">*</span>
+            </label>
             <InputNumber
               :input-id="`${idCampo}-peso`"
               v-model="peso"
               :min="0"
               :max-fraction-digits="1"
               suffix=" kg"
+              :aria-required="true"
               fluid
             />
             <small v-if="pesoCadastroKg !== null" class="campo__dica">
@@ -762,6 +770,9 @@ function confirmar() {
     </div>
 
     <template #footer>
+      <small v-if="!bloqueado && !(peso && peso > 0)" class="rodape__falta" aria-live="polite">
+        {{ t('hotel.checkin.faltaPeso') }}
+      </small>
       <Button
         :label="t('hotel.comum.cancelar')"
         severity="secondary"
@@ -877,6 +888,18 @@ function confirmar() {
   color: var(--tinta-2);
   font-size: 12.5px;
   line-height: 1.4;
+}
+
+.campo__obrigatorio {
+  color: var(--clinic-risk-text);
+}
+
+/* O motivo do botão desabilitado, ao lado dele. */
+.rodape__falta {
+  align-self: center;
+  margin-inline-end: auto;
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .campo__erro {

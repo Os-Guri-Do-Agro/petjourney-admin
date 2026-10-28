@@ -385,10 +385,6 @@ const chaveSelecionada = computed(() => {
   return linha ? `${linha.tutorId}-${linha.petId}` : null
 })
 
-function hrefDoTelefone(telefone: string) {
-  return `tel:${telefone.replace(/[^\d+]/g, '')}`
-}
-
 const reincidentes = computed(() => linhas.value.filter((linha) => linha.reincidente))
 
 /**
@@ -733,17 +729,11 @@ onMounted(carregar)
                   <h2 :id="idDetalhe" class="ui-cartao__titulo detalhe__titulo">
                     {{ t('clinico.faltas.historico.titulo', { nome: nomeDoResponsavelAberto }) }}
                   </h2>
-                  <a
-                    v-if="doResponsavelAberto.telefone"
-                    class="ui-mais detalhe__telefone"
-                    :href="hrefDoTelefone(doResponsavelAberto.telefone)"
-                    :title="
-                      t('clinico.faltas.detalhe.ligar', { telefone: doResponsavelAberto.telefone })
-                    "
-                  >
+                  <!-- O telefone à vista, sem discar: a tela registra o contato (regra da casa). -->
+                  <span v-if="doResponsavelAberto.telefone" class="detalhe__telefone">
                     <i class="ph ph-phone" aria-hidden="true" />
                     <bdi dir="ltr" class="ui-num">{{ doResponsavelAberto.telefone }}</bdi>
-                  </a>
+                  </span>
                 </div>
                 <Button
                   type="button"
@@ -1076,7 +1066,11 @@ onMounted(carregar)
 }
 
 .detalhe__telefone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   justify-self: start;
+  color: var(--tinta-2);
   font-size: 14px;
 }
 

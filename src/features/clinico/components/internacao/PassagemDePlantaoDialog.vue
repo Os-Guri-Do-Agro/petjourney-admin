@@ -269,7 +269,7 @@ function entregar() {
       <ClinicField :rotulo="t('clinico.internacao.passagem.recebidoPor')">
         <template #default="{ id }">
           <Select
-            :id="id"
+            :input-id="id"
             v-model="recebidoPor"
             :options="opcoesDeProfissional"
             option-label="rotulo"

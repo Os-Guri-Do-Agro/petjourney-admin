@@ -34,7 +34,11 @@ function prescricao(patch: Partial<Prescription> = {}): Prescription {
       totalAdministracoes: 14,
     },
     observacao: '',
-    alergiaConfirmada: false,
+    /*
+     * A Luna (dona do primeiro atendimento do dataset) tem alergia registrada a amoxicilina: os
+     * itens destes testes já vêm com o aceite da consulta, senão a receita nem sairia.
+     */
+    alergiaConfirmada: true,
     ...patch,
   }
 }
@@ -79,6 +83,27 @@ describe('emitir', () => {
 
   it('não emite receita sem prescrição', () => {
     expect(useReceitasStore().emitir(encounter(), [])).toBeNull()
+  })
+
+  /*
+   * A Nina tem alergia registrada a dipirona. A prescrição pede o "Confirmo" explícito; assinar
+   * não pode passar por cima dele (passava, e a receita saía assinada com a caixa desmarcada).
+   */
+  it('não assina item em conflito com alergia sem o aceite da consulta', () => {
+    const store = useReceitasStore()
+    const daNina = useClinicoStore().pet('pet-nina')
+    const atual = { ...encounter(), petId: 'pet-nina' }
+
+    expect(daNina?.alertas.some((alerta) => alerta.kind === 'alergia')).toBe(true)
+    expect(
+      store.emitir(atual, [
+        prescricao({ medicamentoId: 'med-dipirona', alergiaConfirmada: false }),
+      ]),
+    ).toBeNull()
+    expect(
+      store.emitir(atual, [prescricao({ medicamentoId: 'med-dipirona', alergiaConfirmada: true })])
+        ?.status,
+    ).toBe('assinada')
   })
 
   it('marca como controlada quando algum item é de controle especial', () => {

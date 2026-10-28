@@ -210,6 +210,11 @@ const corredores = computed<Corredor[]>(() => {
  * não quer que o estado da casa vire "1 de 1".
  */
 const fraseDaCasa = computed(() => {
+  /* Sem leitura não há frase: "A casa está em dia" em cima de "Não foi possível carregar" mentia. */
+  if (hospedagem.erro) {
+    return ''
+  }
+
   const total = hospedagem.hospedes.length
   const precisam = hospedagem.hospedes.filter(precisaDeAlguem).length
 
