@@ -6,11 +6,17 @@ na parede.
 
 | Arquivo | Para quê |
 |---|---|
-| `Roteiro-de-Apresentacao.pdf` | O roteiro: 39 páginas, um tronco comum de 10 min e um percurso por tipo de empresa |
+| `Roteiro-de-Apresentacao.pdf` | O roteiro: 40 páginas, um tronco comum de 10 min e um percurso por tipo de empresa |
 | `Roteiro-de-Apresentacao.html` | **A fonte.** O PDF é gerado dela, nunca editado |
 | `telas/*.png` | Capturas do sistema rodando, não maquetes |
 | `sessao-de-captura.js` | O que roda antes do app para as capturas saírem cheias e iguais |
-| `fontes/`, `logo-clara-em-row.png` | Readex Pro e Instrument Sans (as do portal) e a marca, para o PDF não depender da máquina |
+| `faixa-capa.png`, `faixa-secao.png` | A faixa sálvia com os desenhos de traço, tirada do próprio portal (capa e divisórias) |
+| `fontes/`, `logo-branca.png` | Readex Pro e Instrument Sans (as do portal) e a marca em branco, para o PDF não depender da máquina |
+
+O documento veste o design do portal (o do app, 26/10/2026): a faixa sálvia de ponta a ponta no
+alto, título branco direto na cor, painéis em véu sálvia, a cor de cada módulo só em pastel com a
+tinta dele por cima, e nenhuma tarja colorida na borda. Refeito em 27/10/2026, com todas as
+capturas no design novo.
 
 ## O que tem no roteiro
 
@@ -64,7 +70,9 @@ ar. Antes de cada navegação roda o `sessao-de-captura.js` (como `initScript`, 
   deslogaria.
 
 Antes de capturar, espere a tela sossegar (sem `.p-skeleton`, sem animação, ~800 ms sem
-mutação) e esconda o botão do painel de demonstração (`.dev__gatilho`).
+mutação) e esconda o botão do painel de demonstração (`.dev__gatilho`). O prontuário leva uns
+segundos a mais para montar: espere o `h1` com o nome do pet, não só o silêncio do DOM. Ele rola
+dentro de `main.palco__conteudo`, não na janela.
 
 | Captura | Tela | Estado |
 |---|---|---|
@@ -72,15 +80,22 @@ mutação) e esconda o botão do painel de demonstração (`.dev__gatilho`).
 | `02-inicio`, `03-inicio-escuro` | `/inicio` | `?tema=dark` na segunda |
 | `10`–`12` | `/veterinario/meu-dia`, `/agenda`, `/pedidos` | — |
 | `13-agendar-publico` | `/agendar/petjourney-vila-madalena?clinico=on&sair=1` | Vacina → Escolher dia e horário → Qualquer profissional |
-| `14`–`16` | `/veterinario/atendimento/enc-apt-alergia?etapa=conduta` | topo; a prescrição; o bloco Receita |
+| `14`–`16` | `/veterinario/atendimento/enc-apt-alergia?etapa=conduta` | topo; a prescrição (`scrollTop` 855); o bloco Receita |
+| `23-clinica-finalizado` | a mesma | Finalizar atendimento → Finalizar mesmo assim; só o diálogo, sem foco no X |
 | `17`–`20` | `/veterinario/internacao`, `/vacinas`, `/resumo`, `/paciente/importar` | no importador, "Usar este" na planilha da clínica |
-| `21`, `22` | `/veterinario/paciente/pet-perola/resumo` e `/vacinas` | "Carteirinha no app" aberta |
+| `21`, `22` | `/veterinario/paciente/pet-perola/resumo` e `/vacinas` | "Carteirinha no app" aberta (gaveta à direita) |
 | `30`, `31`, `33` | `/hotel/painel`, `/rotina`, `/hospedagem/hosp-tofu` | — |
 | `32-hotel-proposta` | `/hotel/rotina` | Tofu em "Gerenciar rotina"; só o painel, em janela de 1500 de altura |
 | `34-hotel-mapa` | `/hotel/mapa` | janela de 1120 de altura |
 | `35`, `37`, `39` | `/hotel/pedidos`, `/reserva/res-zeus`, `/resumo` | — |
 | `36-reservar-publico` | `/reservar/petjourney-hotel?hotel=on&sair=1` | Cão médio → datas → Escolher a acomodação |
 | `40`–`44` | `/parceiro/divulgacao`, `/programas`, `/acessos`, `/acessos/c1`, `/carteira` | no `c1`, serviço e anotação preenchidos |
+
+As faixas (`faixa-capa.png`, `faixa-secao.png`) saem de qualquer tela com `UiPagina`, em
+`deviceScaleFactor` 2: esconda o `.faixa__miolo` (`visibility: hidden`) e ponha a
+`section.faixa` em `position: fixed; inset: 0; width: 100vw; height: 100vh; border-radius: 0`,
+numa janela de 1050 × 750 (capa) ou 1200 × 340 (divisória). Os desenhos são os do
+`UiRabiscos`, os mesmos do app; nada é desenhado à mão.
 
 ## Ao mudar uma tela
 

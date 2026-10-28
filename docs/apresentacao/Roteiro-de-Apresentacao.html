@@ -11,6 +11,10 @@
        * computador. Cada ato é uma tela, na ordem em que ela aparece, com o que fazer, o que
        * dizer e o que não prometer.
        *
+       * Veste o design do portal (o do app, 26/10/2026): a faixa sálvia com os desenhos de traço
+       * (faixa-*.png, tiradas do próprio portal), tinta marinho, véu sálvia nos painéis, cor de
+       * módulo só em pastel com a tinta dele por cima, sem tarja colorida na borda.
+       *
        * As imagens são capturas do sistema rodando (ver README.md). O PDF é gerado daqui, nunca
        * editado à mão.
        */
@@ -45,14 +49,14 @@
           content: 'PetJourney · Roteiro de apresentação do portal';
           font-family: 'Readex Pro', sans-serif;
           font-size: 7.5pt;
-          color: #6b7a76;
+          color: #6b7280;
         }
 
         @bottom-right {
           content: counter(page) ' / ' counter(pages);
           font-family: 'Instrument Sans', sans-serif;
           font-size: 8pt;
-          color: #6b7a76;
+          color: #6b7280;
         }
       }
 
@@ -69,38 +73,35 @@
       }
 
       :root {
-        --tinta: #10302a;
-        --texto: #1e2b28;
-        --suave: #46554f;
-        --fraco: #6b7a76;
-        --linha: #d3ddd9;
-        --linha-forte: #b9c8c2;
+        /* Os tokens do app (moldura-app.css), em cor sólida para o papel. */
+        --tinta: #1d3557;
+        --texto: #2a3446;
+        --suave: #5f6670;
+        --fraco: #6b7280;
         --papel: #ffffff;
-        --pagina: #dee5e1;
-        --salvia: #84c1b4;
-        --salvia-clara: #e3f0ec;
-        --marca: #2f8c7c;
+        --destaque: #76938d;
+        --salvia-texto: #5c736e;
+        --botao: #627a74;
+        --veu: #f3f7f6;
+        --veu-forte: #ecf2f0;
+        --regua: #dfe8e5;
 
-        --atencao-fundo: #ffedd8;
-        --atencao-borda: #e7a35f;
-        --atencao-tinta: #7a3e12;
+        /* Família: o pastel de fundo e a tinta que lê por cima (trilha-tokens.css). */
+        --tronco-fundo: #aee3d1;
+        --tronco-tinta: #285e4e;
+        --clinica-fundo: #b3defb;
+        --clinica-tinta: #005982;
+        --hotel-fundo: #d2c9ff;
+        --hotel-tinta: #554588;
+        --portal-fundo: #f4dab2;
+        --portal-tinta: #6e4b02;
 
-        --ia-fundo: #eeebff;
-        --ia-borda: #bdb2ff;
-        --ia-tinta: #3f3591;
-
-        --risco-fundo: #fde4e2;
-        --risco-tinta: #9e3426;
-
-        /* Cor de módulo: categoria, a mesma do portal. */
-        --tronco: #2f6f62;
-        --tronco-claro: #e1efea;
-        --clinica: #2a6f9e;
-        --clinica-claro: #ddebf5;
-        --hotel: #5e50a8;
-        --hotel-claro: #e8e4fa;
-        --portal: #8c5b14;
-        --portal-claro: #f6e7cc;
+        /* Painéis de aviso: o pastel da família a 60% sobre o papel, o piso da casa. */
+        --atencao-veu: #fee8d4;
+        --atencao-tinta: #905204;
+        --ia-veu: #e4dfff;
+        --ia-tinta: #554588;
+        --risco-tinta: #9d2e29;
       }
 
       * {
@@ -150,7 +151,7 @@
 
       h4 {
         margin: 10pt 0 4pt;
-        color: var(--suave);
+        color: var(--salvia-texto);
         font-size: 7.6pt;
         font-weight: 600;
         letter-spacing: 0.12em;
@@ -204,64 +205,73 @@
         height: 297mm;
         margin-left: -15mm;
         overflow: hidden;
-        background: var(--pagina);
+        background: var(--papel);
       }
 
-      .capa__arte {
+      /* A faixa do app, de ponta a ponta e colada no topo, com os cantos de baixo arredondados. */
+      .capa__faixa {
         position: absolute;
-        top: -70mm;
-        right: -96mm;
-        width: 170mm;
-        height: 250mm;
-        border-radius: 60mm;
-        background: var(--salvia);
-        transform: rotate(-24deg);
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 160mm;
+        border-radius: 0 0 12mm 12mm;
+        background: var(--destaque) url('faixa-capa.png') center bottom / cover no-repeat;
       }
 
       .capa__conteudo {
         position: absolute;
-        top: 26mm;
+        top: 24mm;
         left: 22mm;
-        width: 118mm;
+        width: 124mm;
+        color: #fff;
       }
 
       .capa__logo {
-        width: 52mm;
-        margin-bottom: 40mm;
+        display: block;
+        width: 44mm;
+        margin-bottom: 22mm;
       }
 
       .capa__etiqueta {
+        display: inline-block;
         margin-bottom: 6mm;
-        color: var(--tronco);
-        font-size: 8.5pt;
+        padding: 1.6mm 3.6mm;
+        border-radius: 99px;
+        background: rgb(0 0 0 / 13%);
+        color: #fff;
+        font-size: 8pt;
         font-weight: 600;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
       }
 
       .capa h1 {
-        margin: 0 0 7mm;
-        font-size: 33pt;
+        margin: 0 0 6mm;
+        color: #fff;
+        font-size: 32pt;
         line-height: 1.06;
         letter-spacing: -0.025em;
       }
 
       .capa__sub {
         margin: 0;
-        color: var(--suave);
-        font-size: 12.5pt;
+        color: #fff;
+        font-size: 12pt;
+        font-weight: 400;
         line-height: 1.45;
       }
 
+      /* A captura flutua sobre o fim da faixa: é o único lugar do documento com sombra. */
       .capa__tela {
         position: absolute;
+        top: 134mm;
         right: -1px;
-        bottom: 34mm;
-        width: 150mm;
-        border: 1px solid #c4d2cc;
+        width: 158mm;
+        border: 1px solid var(--regua);
         border-right: 0;
-        border-radius: 3mm 0 0 3mm;
-        box-shadow: 0 4mm 12mm rgba(16, 48, 42, 0.16);
+        border-radius: 4mm 0 0 4mm;
+        box-shadow: 0 4mm 12mm rgb(29 53 87 / 16%);
         overflow: hidden;
       }
 
@@ -272,22 +282,23 @@
 
       .capa__rodape {
         position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
+        right: 22mm;
+        bottom: 16mm;
+        left: 22mm;
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 6mm;
-        padding: 8mm 22mm 10mm;
-        background: var(--tinta);
-        color: #e6efec;
+        padding: 6mm 7mm;
+        border-radius: 5mm;
+        background: var(--veu-forte);
+        color: var(--tinta);
         font-size: 8.5pt;
       }
 
       .capa__rodape b {
         display: block;
         margin-bottom: 1mm;
-        color: var(--salvia);
+        color: var(--salvia-texto);
         font-size: 7pt;
         font-weight: 600;
         letter-spacing: 0.14em;
@@ -296,10 +307,11 @@
 
       /* --------------------------------------------------------- blocos de texto */
 
+      /* Painel em véu, como no app: sem tarja na borda, a etiqueta diz o que ele é. */
       .caixa {
         margin: 10pt 0;
         padding: 10pt 12pt;
-        border-radius: 5pt;
+        border-radius: 8pt;
         break-inside: avoid;
       }
 
@@ -308,21 +320,19 @@
       }
 
       .caixa--neutra {
-        border: 1px solid var(--linha);
-        background: #f6f9f8;
+        background: var(--veu);
       }
 
       .caixa--chave {
-        border-left: 3pt solid var(--tinta);
-        background: var(--salvia-clara);
+        background: var(--veu-forte);
+        color: var(--tinta);
       }
 
       .fala {
         margin: 7pt 0;
-        padding: 6pt 12pt 7pt 14pt;
-        border-left: 3pt solid var(--salvia);
-        border-radius: 0 5pt 5pt 0;
-        background: var(--salvia-clara);
+        padding: 7pt 12pt 8pt;
+        border-radius: 8pt;
+        background: var(--veu-forte);
         color: var(--tinta);
         font-size: 9.5pt;
         font-style: italic;
@@ -332,7 +342,7 @@
       .fala::before {
         display: block;
         margin-bottom: 2pt;
-        color: var(--tronco);
+        color: var(--salvia-texto);
         content: 'Fale';
         font-size: 7pt;
         font-style: normal;
@@ -343,22 +353,21 @@
 
       .vende {
         margin: 6pt 0;
-        padding-left: 14pt;
+        padding-left: 12pt;
         color: var(--suave);
         font-size: 9pt;
       }
 
       .vende b {
-        color: var(--tronco);
+        color: var(--salvia-texto);
       }
 
       .atencao {
         margin: 7pt 0 0;
-        padding: 6pt 12pt;
-        border-left: 3pt solid var(--atencao-borda);
-        border-radius: 0 5pt 5pt 0;
-        background: var(--atencao-fundo);
-        color: #3d2410;
+        padding: 7pt 12pt;
+        border-radius: 8pt;
+        background: var(--atencao-veu);
+        color: var(--tinta);
         font-size: 8.8pt;
         break-inside: avoid;
       }
@@ -377,11 +386,10 @@
 
       .maquina {
         margin: 7pt 0 0;
-        padding: 6pt 12pt;
-        border-left: 3pt solid var(--ia-borda);
-        border-radius: 0 5pt 5pt 0;
-        background: var(--ia-fundo);
-        color: #262063;
+        padding: 7pt 12pt;
+        border-radius: 8pt;
+        background: var(--ia-veu);
+        color: var(--tinta);
         font-size: 8.8pt;
         break-inside: avoid;
       }
@@ -401,7 +409,7 @@
 
       .legenda > div {
         padding: 7pt 10pt;
-        border-radius: 4pt;
+        border-radius: 8pt;
         font-size: 8.8pt;
       }
 
@@ -413,25 +421,24 @@
       }
 
       .legenda .l-passos {
-        border: 1px solid var(--linha);
+        border: 1px solid var(--regua);
       }
 
       .legenda .l-fala {
-        border-left: 3pt solid var(--salvia);
-        background: var(--salvia-clara);
+        background: var(--veu-forte);
+      }
+
+      .legenda .l-fala b,
+      .legenda .l-vende b {
+        color: var(--salvia-texto);
       }
 
       .legenda .l-vende {
-        border: 1px dashed var(--linha-forte);
-      }
-
-      .legenda .l-vende b {
-        color: var(--tronco);
+        border: 1px dashed var(--regua);
       }
 
       .legenda .l-atencao {
-        border-left: 3pt solid var(--atencao-borda);
-        background: var(--atencao-fundo);
+        background: var(--atencao-veu);
       }
 
       .legenda .l-atencao b {
@@ -470,7 +477,7 @@
 
       td {
         padding: 4pt 6pt;
-        border-bottom: 1px solid var(--linha);
+        border-bottom: 1px solid var(--regua);
         vertical-align: top;
       }
 
@@ -545,84 +552,88 @@
 
       /* ------------------------------------------------------------ divisórias */
 
+      /* A faixa do app: sálvia com os desenhos de traço, título branco direto na cor. */
       .divisoria {
         break-before: page;
         margin: 0 0 12pt;
-        padding: 12pt 16pt 10pt;
-        border-radius: 7pt;
-        background: var(--tronco-claro);
+        padding: 13pt 16pt 12pt;
+        border-radius: 12pt;
+        background: var(--destaque) url('faixa-secao.png') center bottom / cover no-repeat;
+        color: #fff;
       }
 
       .divisoria__etiqueta {
-        margin-bottom: 4pt;
-        color: var(--tronco);
-        font-size: 7.6pt;
+        display: inline-block;
+        margin-bottom: 6pt;
+        padding: 2pt 8pt;
+        border-radius: 99px;
+        background: var(--tronco-fundo);
+        color: var(--tronco-tinta);
+        font-size: 7.4pt;
         font-weight: 600;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.12em;
         text-transform: uppercase;
       }
 
       .divisoria h2 {
         margin-bottom: 4pt;
-        font-size: 20pt;
+        color: #fff;
+        font-size: 21pt;
       }
 
       .divisoria p {
         max-width: 155mm;
         margin-bottom: 4pt;
-        color: var(--suave);
-        font-size: 9.4pt;
+        color: #fff;
+        font-size: 9.6pt;
+        font-weight: 400;
+      }
+
+      .divisoria b {
+        font-weight: 600;
       }
 
       .divisoria ol {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
         gap: 0 12pt;
-        margin: 6pt 0 0;
+        margin: 8pt 0 0;
         padding: 0;
         list-style: none;
-        font-size: 8.4pt;
+        font-size: 8.6pt;
+        font-weight: 400;
       }
 
       .divisoria li {
         display: flex;
         justify-content: space-between;
         margin: 0;
-        padding: 2pt 0;
-        border-bottom: 1px solid rgba(16, 48, 42, 0.12);
+        padding: 2.5pt 0;
+        border-bottom: 1px solid rgb(255 255 255 / 28%);
       }
 
       .divisoria li span:last-child {
-        color: var(--suave);
         font-family: 'Instrument Sans', sans-serif;
       }
 
-      .divisoria--clinica {
-        background: var(--clinica-claro);
-      }
-
       .divisoria--clinica .divisoria__etiqueta {
-        color: var(--clinica);
-      }
-
-      .divisoria--hotel {
-        background: var(--hotel-claro);
+        background: var(--clinica-fundo);
+        color: var(--clinica-tinta);
       }
 
       .divisoria--hotel .divisoria__etiqueta {
-        color: var(--hotel);
-      }
-
-      .divisoria--portal {
-        background: var(--portal-claro);
+        background: var(--hotel-fundo);
+        color: var(--hotel-tinta);
       }
 
       .divisoria--portal .divisoria__etiqueta {
-        color: var(--portal);
+        background: var(--portal-fundo);
+        color: var(--portal-tinta);
       }
 
-      .divisoria--apoio {
-        background: #eef1f0;
+      .divisoria--apoio .divisoria__etiqueta {
+        background: #fff;
+        color: var(--salvia-texto);
       }
 
       /* ------------------------------------------------------------------ atos */
@@ -634,7 +645,7 @@
 
       .ato + .ato {
         padding-top: 14pt;
-        border-top: 1px solid var(--linha);
+        border-top: 1px solid var(--regua);
       }
 
       .ato--nova-pagina {
@@ -651,31 +662,35 @@
         break-after: avoid;
       }
 
+      /* O quadradinho do app: o pastel da família com a tinta dela. */
       .ato__num {
         flex: 0 0 auto;
-        min-width: 26pt;
-        height: 26pt;
+        min-width: 28pt;
+        height: 28pt;
         padding: 0 5pt;
-        border-radius: 6pt;
-        background: var(--tronco);
-        color: #fff;
+        border-radius: 8pt;
+        background: var(--tronco-fundo);
+        color: var(--tronco-tinta);
         font-family: 'Instrument Sans', sans-serif;
         font-size: 11pt;
         font-weight: 700;
-        line-height: 26pt;
+        line-height: 28pt;
         text-align: center;
       }
 
       .ato--clinica .ato__num {
-        background: var(--clinica);
+        background: var(--clinica-fundo);
+        color: var(--clinica-tinta);
       }
 
       .ato--hotel .ato__num {
-        background: var(--hotel);
+        background: var(--hotel-fundo);
+        color: var(--hotel-tinta);
       }
 
       .ato--portal .ato__num {
-        background: var(--portal);
+        background: var(--portal-fundo);
+        color: var(--portal-tinta);
       }
 
       .ato__meta {
@@ -709,8 +724,13 @@
         max-width: 100%;
         max-height: 98mm;
         margin: 0 auto;
-        border: 1px solid var(--linha-forte);
-        border-radius: 4pt;
+        border: 1px solid var(--regua);
+        border-radius: 6pt;
+      }
+
+      /* Ato que divide a página com a divisória do percurso: a captura cede a altura. */
+      figure.baixa img {
+        max-height: 80mm;
       }
 
       figure figcaption {
@@ -749,6 +769,10 @@
         align-items: start;
       }
 
+      .lado--largo {
+        grid-template-columns: 1fr 80mm;
+      }
+
       .lado figure {
         margin-top: 0;
       }
@@ -774,7 +798,7 @@
         width: 13pt;
         height: 13pt;
         border-radius: 50%;
-        background: var(--tinta);
+        background: var(--botao);
         color: #fff;
         content: counter(passo);
         font-family: 'Instrument Sans', sans-serif;
@@ -786,8 +810,8 @@
 
       .rotulo {
         padding: 0 3pt;
-        border-radius: 2pt;
-        background: #eef3f1;
+        border-radius: 3pt;
+        background: var(--veu-forte);
         color: var(--tinta);
         font-weight: 500;
         white-space: nowrap;
@@ -804,14 +828,18 @@
 
       .tres > div {
         padding: 8pt 10pt;
-        border-radius: 5pt;
+        border-radius: 8pt;
+        background: var(--veu);
         font-size: 8.4pt;
         line-height: 1.45;
         break-inside: avoid;
       }
 
       .tres h4 {
+        display: inline-block;
         margin-top: 0;
+        padding: 1.5pt 7pt;
+        border-radius: 99px;
       }
 
       .tres ul {
@@ -823,16 +851,19 @@
         margin-bottom: 2pt;
       }
 
-      .tres .t-portal {
-        background: var(--portal-claro);
+      .tres .t-portal h4 {
+        background: var(--portal-fundo);
+        color: var(--portal-tinta);
       }
 
-      .tres .t-clinica {
-        background: var(--clinica-claro);
+      .tres .t-clinica h4 {
+        background: var(--clinica-fundo);
+        color: var(--clinica-tinta);
       }
 
-      .tres .t-hotel {
-        background: var(--hotel-claro);
+      .tres .t-hotel h4 {
+        background: var(--hotel-fundo);
+        color: var(--hotel-tinta);
       }
 
       .nao-prometa li {
@@ -878,9 +909,9 @@
   <body>
     <!-- ================================================================== CAPA -->
     <section class="capa">
-      <div class="capa__arte"></div>
+      <div class="capa__faixa"></div>
       <div class="capa__conteudo">
-        <img class="capa__logo" src="logo-clara-em-row.png" alt="PetJourney" />
+        <img class="capa__logo" src="logo-branca.png" alt="PetJourney" />
         <div class="capa__etiqueta">Roteiro de apresentação</div>
         <h1>O portal do parceiro, do primeiro clique ao fechamento</h1>
         <p class="capa__sub">
@@ -892,7 +923,7 @@
       <div class="capa__rodape">
         <div><b>Para quem</b>Quem apresenta o portal a uma empresa</div>
         <div><b>Duração</b>15 a 30 minutos, conforme o percurso</div>
-        <div><b>Conferido</b>No sistema em 26 de outubro de 2026</div>
+        <div><b>Conferido</b>No sistema em 27 de outubro de 2026, com o design novo</div>
       </div>
     </section>
 
@@ -950,8 +981,10 @@
       </div>
 
       <p class="vende">
-        As capturas deste roteiro saíram do sistema rodando em 26/10/2026. As do Portal usam uma
-        empresa de exemplo, a <b>Vila Madalena Pet</b>: na sua conta, os números serão outros.
+        As capturas deste roteiro saíram do sistema rodando em 27/10/2026, já com o design novo,
+        o mesmo do app: a faixa sálvia no alto de cada tela, com o título e as abas dentro dela. As
+        do Portal usam uma empresa de exemplo, a <b>Vila Madalena Pet</b>: na sua conta, os números
+        serão outros.
       </p>
     </section>
 
@@ -982,25 +1015,25 @@
           </tr>
         </thead>
         <tbody>
-          <tr class="grupo"><td colspan="7" style="color: var(--tronco)">Tronco comum</td></tr>
+          <tr class="grupo"><td colspan="7" style="color: var(--tronco-tinta)">Tronco comum</td></tr>
           <tr><td>0</td><td>A promessa, sem tela</td><td class="t">30 s</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
           <tr><td>1</td><td>A entrada</td><td class="t">1 min</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
           <tr><td>2</td><td>O Início</td><td class="t">2 min</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
           <tr><td>3</td><td>Acessos: o histórico que viaja com o pet</td><td class="t">3 min</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
           <tr><td>4</td><td>Divulgação e ganhos</td><td class="t">3 min</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
 
-          <tr class="grupo"><td colspan="7" style="color: var(--clinica)">Percurso Clínica</td></tr>
+          <tr class="grupo"><td colspan="7" style="color: var(--clinica-tinta)">Percurso Clínica</td></tr>
           <tr><td>C1</td><td>Hoje na clínica</td><td class="t">1 min</td><td class="sim">●</td><td></td><td></td><td class="sim">●</td></tr>
           <tr><td>C2</td><td>A agenda</td><td class="t">2 min 30 s</td><td class="sim">●</td><td></td><td></td><td class="curto">○</td></tr>
           <tr><td>C3</td><td>Agendamento online</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
           <tr><td>C4</td><td>O atendimento</td><td class="t">5 min</td><td class="sim">●</td><td></td><td></td><td class="curto">○</td></tr>
-          <tr><td>C5</td><td>A receita e os documentos</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
+          <tr><td>C5</td><td>A receita, os documentos e o fim da consulta</td><td class="t">2 min 30 s</td><td class="sim">●</td><td></td><td></td><td></td></tr>
           <tr><td>C6</td><td>O pet em 30 segundos e a carteirinha</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
           <tr><td>C7</td><td>Internação</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
           <tr><td>C8</td><td>Pendências que viram faturamento</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
           <tr><td>C9</td><td>Relatórios e a base que vem junto</td><td class="t">2 min</td><td class="sim">●</td><td></td><td></td><td></td></tr>
 
-          <tr class="grupo"><td colspan="7" style="color: var(--hotel)">Percurso Hotel e creche</td></tr>
+          <tr class="grupo"><td colspan="7" style="color: var(--hotel-tinta)">Percurso Hotel e creche</td></tr>
           <tr><td>H1</td><td>Painel do dia</td><td class="t">1 min 30 s</td><td></td><td class="sim">●</td><td></td><td class="sim">●</td></tr>
           <tr><td>H2</td><td>A rotina do turno</td><td class="t">2 min</td><td></td><td class="sim">●</td><td></td><td></td></tr>
           <tr><td>H3</td><td>A proposta de rotina</td><td class="t">2 min</td><td></td><td class="sim">●</td><td></td><td class="curto">○</td></tr>
@@ -1009,12 +1042,12 @@
           <tr><td>H6</td><td>Reserva online</td><td class="t">2 min</td><td></td><td class="sim">●</td><td></td><td></td></tr>
           <tr><td>H7</td><td>Relatórios</td><td class="t">1 min</td><td></td><td class="sim">●</td><td></td><td></td></tr>
 
-          <tr class="grupo"><td colspan="7" style="color: var(--portal)">Percurso Rede</td></tr>
+          <tr class="grupo"><td colspan="7" style="color: var(--portal-tinta)">Percurso Rede</td></tr>
           <tr><td>R1</td><td>Programas</td><td class="t">1 min 30 s</td><td></td><td></td><td class="sim">●</td><td></td></tr>
           <tr><td>R2</td><td>A anotação de banho e tosa</td><td class="t">2 min</td><td></td><td></td><td class="sim">●</td><td></td></tr>
           <tr><td>R3</td><td>O que vem: cupom</td><td class="t">30 s</td><td></td><td></td><td class="sim">●</td><td></td></tr>
 
-          <tr class="grupo"><td colspan="7">Para todos</td></tr>
+          <tr class="grupo"><td colspan="7" style="color: var(--salvia-texto)">Para todos</td></tr>
           <tr><td>F</td><td>O fecho</td><td class="t">1 min</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td><td class="sim">●</td></tr>
 
           <tr class="total"><td></td><td>Total aproximado</td><td></td><td class="t">30 min</td><td class="t">25 min</td><td class="t">15 min</td><td class="t">20 min</td></tr>
@@ -1034,7 +1067,7 @@
       <p>
         Entre com a <b>conta de demonstração</b> da empresa, com o cadastro aprovado e o
         <b>Programa de Afiliados ativo</b>. Uma conta nova abre Divulgação e Ganhos em "Programa
-        afiliado necessário", e o Início sem números no bloco do Portal.
+        afiliado necessário", e o Início sem o código de indicação nem números no bloco do Portal.
       </p>
 
       <h4>2 · Um pet compartilhado</h4>
@@ -1048,8 +1081,8 @@
       <h4>3 · Os módulos Clínica e Hotel</h4>
       <p>
         Eles nascem escondidos. Acrescente <span class="rota">?clinico=on&amp;hotel=on</span> ao
-        endereço de qualquer tela e confira que <b>Clínica</b> e <b>Hotel</b> apareceram no
-        menu. (Digitar <i>clinico</i> ou <i>hotel</i> fora de um campo de texto também liga, e
+        endereço de qualquer tela e confira que <b>Clínica</b> e <b>Hotel</b> apareceram na barra
+        lateral. (Digitar <i>clinico</i> ou <i>hotel</i> fora de um campo de texto também liga, e
         desliga se já estiver ligado. Nunca faça isso na Agenda: lá a letra <i>n</i> abre um
         atendimento novo.)
       </p>
@@ -1083,8 +1116,8 @@
         </li>
         <li>
           Carregue a página <b>pouco antes</b> de começar e <b>não recarregue</b> durante:
-          os dados de demonstração nascem a cada carga, e o que você fez some. Navegue pelo menu,
-          não pela barra de endereço. Trabalhe <b>numa aba só</b>.
+          os dados de demonstração nascem a cada carga, e o que você fez some. Navegue pela barra
+          lateral, não pela barra de endereço. Trabalhe <b>numa aba só</b>.
         </li>
         <li>
           Abra uma vez o <span class="rotulo">Gravar consulta</span> de um prontuário e escolha
@@ -1096,8 +1129,9 @@
       <h4>6 · A tela</h4>
       <p>
         1280 px de largura ou mais, zoom em 100%, <b>tema claro</b> (projetor lava o escuro).
-        Feche notificações e o WhatsApp Web: <span class="rotulo">Enviar no WhatsApp</span> abre o
-        WhatsApp de verdade.
+        Se a tela for estreita, em <b>Configurações → Aparência</b> escolha
+        <span class="rotulo">Só ícones</span> na largura da barra. Feche notificações e o WhatsApp
+        Web: <span class="rotulo">Enviar no WhatsApp</span> abre o WhatsApp de verdade.
       </p>
 
       <h4>Checklist</h4>
@@ -1105,7 +1139,7 @@
         <tbody>
           <tr><td>Conta de demonstração, cadastro aprovado e afiliado ativo</td><td class="check"><span class="caixinha"></span></td></tr>
           <tr><td>Um pet compartilhado com a empresa, vencendo daqui a dias</td><td class="check"><span class="caixinha"></span></td></tr>
-          <tr><td>Clínica e Hotel aparecendo no menu</td><td class="check"><span class="caixinha"></span></td></tr>
+          <tr><td>Clínica e Hotel aparecendo na barra lateral</td><td class="check"><span class="caixinha"></span></td></tr>
           <tr><td>Dia útil, entre 9h e 15h30 do relógio da demonstração</td><td class="check"><span class="caixinha"></span></td></tr>
           <tr><td>Janela anônima nova, página carregada há poucos minutos</td><td class="check"><span class="caixinha"></span></td></tr>
           <tr><td>"Consulta de demonstração" escolhida no Gravar consulta</td><td class="check"><span class="caixinha"></span></td></tr>
@@ -1170,11 +1204,11 @@
       <div class="par">
         <figure>
           <img src="telas/01-entrada.png" alt="Tela de entrada do portal em português" />
-          <figcaption>A entrada, com a promessa da marca à direita.</figcaption>
+          <figcaption>A entrada, com a promessa da marca sobre a arte da pata, à direita.</figcaption>
         </figure>
         <figure>
           <img src="telas/01-entrada-arabe.png" alt="A mesma tela em árabe, espelhada" />
-          <figcaption>A mesma tela em árabe: a página inteira espelha.</figcaption>
+          <figcaption>A mesma tela em árabe: a página inteira espelha, a arte também.</figcaption>
         </figure>
       </div>
       <ol class="passos">
@@ -1183,10 +1217,10 @@
           <i>Mais clientes. Mais alcance. Mais retorno para a sua marca.</i>
         </li>
         <li>
-          Abra o seletor de idioma no canto e escolha <b>AR</b>. A tela espelha. Volte para
-          <b>PT</b>.
+          Abra o seletor de idioma no canto (a bandeira com <b>PT</b>) e escolha <b>AR</b>. A tela
+          espelha. Volte para <b>PT</b>.
         </li>
-        <li>Entre com a conta de demonstração.</li>
+        <li>Entre com a conta de demonstração: <span class="rotulo">Entrar no painel</span>.</li>
       </ol>
       <blockquote class="fala">
         O portal fala seis línguas: português, inglês, inglês britânico, espanhol, sérvio e árabe,
@@ -1211,33 +1245,38 @@
         </div>
       </div>
       <figure>
-        <img src="telas/02-inicio.png" alt="O Início com os blocos de Clínica, Hotel e Portal" />
+        <img src="telas/02-inicio.png" alt="O Início com a saudação, o código de indicação e os blocos de Clínica, Hotel e Portal" />
         <figcaption>
-          A saudação com a frase de estado, os números do momento e um bloco por área, cada um com
-          o próximo passo no rodapé.
+          Na faixa, a saudação, a frase de estado e os números do momento; à direita, o código de
+          indicação com o QR. Abaixo, um bloco por área, cada um com o próximo passo no rodapé.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          Leia a saudação e a frase de estado: <i>2 assuntos urgentes pedem sua atenção hoje</i>.
+          Leia a saudação e a frase de estado: <i>2 assuntos urgentes pedem sua atenção hoje: 2 na
+          Clínica</i>. Logo abaixo, quatro números: na recepção, em consulta, na casa, chegam hoje.
+        </li>
+        <li>
+          Aponte o cartão à direita: o código <b>VILA24</b>, o QR e as leituras da semana. O
+          convite para o app está sempre à mão: <span class="rotulo">Copiar código</span>.
         </li>
         <li>
           Aponte os três blocos, <b>Clínica</b>, <b>Hotel</b> e <b>Portal</b>, cada um com os
           números do momento e o próximo passo no rodapé (<i>Atender Chico, que espera na
-          recepção</i>; <i>Pedir saque</i>).
+          recepção</i>; <i>Resolver a documentação de Zeus</i>; <i>Pedir saque</i>).
         </li>
         <li>
-          Desça até <b>O que pede ação</b>: a lista única do que está atrasado em todas as áreas.
-          Cada linha leva à tela onde se resolve.
+          Desça até <b>O que pede ação</b>: o que está atrasado, agrupado por área. Cada linha leva
+          à tela onde se resolve. Mais abaixo, a agenda da semana.
         </li>
         <li>
-          Opcional: menu da conta (canto inferior esquerdo) → <span class="rotulo">Tema escuro</span>.
+          Opcional: menu da conta (pé da barra lateral) → <span class="rotulo">Tema escuro</span>.
           Mostre e volte ao claro.
         </li>
       </ol>
       <blockquote class="fala">
         Esta é a primeira tela de quem chega. Ela não mostra tudo: mostra o que pede ação agora e
-        por onde começar. Se a empresa só usa a indicação, aparece só o bloco do Portal. O menu
+        por onde começar. Se a empresa só usa a indicação, aparece só o bloco do Portal. A barra
         mostra só o que o perfil usa.
       </blockquote>
       <p class="vende">
@@ -1246,7 +1285,7 @@
       </p>
       <div class="atencao">
         <b>Os números da Clínica e do Hotel são de demonstração</b> e mudam com a hora. Não leia
-        como resultado. Os do Portal vêm da sua conta.
+        como resultado. Os do Portal, e o código, vêm da sua conta.
       </div>
     </section>
 
@@ -1267,7 +1306,7 @@
         <img src="telas/42-acessos.png" alt="Lista de acessos ativos, um pet por linha" />
         <figcaption>
           Um pet por linha: o serviço, o que o dono compartilhou e quanto tempo falta. A barra de
-          "Expira em" esvazia; abaixo de um dia, fica âmbar.
+          "Expira em" esvazia; abaixo de um dia, ganha o relógio e fica âmbar.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -1278,8 +1317,8 @@
         </li>
         <li>
           Se tiver o app no celular, gere um código ali e clique em
-          <span class="rotulo">Vincular código</span>: o acesso aparece na hora. É o momento mais
-          forte do tronco.
+          <span class="rotulo">Vincular código</span>, no alto da tela: o acesso aparece na hora.
+          É o momento mais forte do tronco.
         </li>
         <li>Abra um pet (na próxima página, a Mel).</li>
       </ol>
@@ -1289,19 +1328,18 @@
       <figure>
         <img src="telas/43-acesso-detalhe.png" alt="Detalhe de um acesso: o resumo do pet e a nova anotação" />
         <figcaption>
-          À esquerda, o que o dono trouxe: a mensagem dele, o tratamento contínuo com a posologia,
-          alergias, vacinas, documentos e diário. À direita, a anotação que volta para o app.
+          Na faixa, o pet, o peso e quanto falta para o acesso expirar. À esquerda, o que o dono
+          trouxe: a mensagem dele e o tratamento contínuo. À direita, a anotação que volta para o app.
         </figcaption>
       </figure>
       <ol class="passos" style="counter-reset: passo 3">
         <li>
           À esquerda, leia a <b>mensagem do responsável</b> e o <b>tratamento contínuo</b>. Desça:
-          alergias, vacinas, documentos (<span class="rotulo">Abrir</span>,
-          <span class="rotulo">Baixar</span>) e o diário.
+          alergias, vacinas, documentos (<span class="rotulo">Abrir</span>) e o diário.
         </li>
         <li>
           À direita, em <b>Nova anotação</b>, mostre que os campos mudam com o serviço. Consulta:
-          motivo, diagnóstico, peso, prescrição, exames. Banho e tosa: produtos, pele e pelo,
+          motivo, peso, diagnóstico, prescrição, exames. Banho e tosa: produtos, pele e pelo,
           comportamento. Hotel: entrada, saída, alimentação, intercorrências.
         </li>
         <li>
@@ -1309,8 +1347,10 @@
           responsável.</i>
         </li>
         <li>
-          Em consulta, mostre <span class="rotulo">Ler receita com IA</span>: a foto da receita
-          vira a lista de remédios para conferir, com <i>Confira</i> onde a leitura teve dúvida.
+          Em <b>Detalhes da consulta</b>, mostre <span class="rotulo">Ler receita com IA</span>: a
+          foto da receita vira a lista de remédios para conferir, com <i>Confira</i> onde a leitura
+          teve dúvida. Se a foto parecer receita de exemplo ou de outro pet, o aviso aparece logo
+          abaixo do título.
         </li>
       </ol>
       <blockquote class="fala">
@@ -1360,7 +1400,10 @@
           Desça até <b>Leituras do seu QR</b>: quantas pessoas escanearam, dia a dia, e de que
           aparelho. Sem endereço de IP, por respeito à LGPD.
         </li>
-        <li>Abra <b>Como indicar rende</b>: 5% de cada assinatura indicada, todo mês, por 18 meses.</li>
+        <li>
+          No pé da tela, <b>Como a indicação rende</b>: 5% de cada assinatura indicada, todo mês,
+          por 18 meses.
+        </li>
       </ol>
     </section>
 
@@ -1368,8 +1411,8 @@
       <figure>
         <img src="telas/44-ganhos.png" alt="Ganhos de indicação: saldo disponível, liberando e movimentações" />
         <figcaption>
-          O saldo disponível para saque, o que ainda está liberando (14 dias por crédito) e cada
-          participação creditada, com a data em que libera.
+          O saldo disponível para saque, o que ainda está liberando (14 dias por crédito), o que já
+          foi sacado e a chave PIX. Abaixo, cada participação creditada, com a data em que libera.
         </figcaption>
       </figure>
       <ol class="passos" style="counter-reset: passo 3">
@@ -1416,11 +1459,11 @@
         <li><span>C2 · A agenda</span><span>2 min 30 s</span></li>
         <li><span>C3 · Agendamento online</span><span>2 min</span></li>
         <li><span>C4 · O atendimento</span><span>5 min</span></li>
-        <li><span>C5 · A receita e os documentos</span><span>2 min</span></li>
+        <li><span>C5 · Receita e fim da consulta</span><span>2 min 30 s</span></li>
         <li><span>C6 · O pet em 30 segundos</span><span>2 min</span></li>
         <li><span>C7 · Internação</span><span>2 min</span></li>
-        <li><span>C8 · Pendências que viram faturamento</span><span>2 min</span></li>
-        <li><span>C9 · Relatórios e a base que vem junto</span><span>2 min</span></li>
+        <li><span>C8 · Pendências</span><span>2 min</span></li>
+        <li><span>C9 · Relatórios e a base</span><span>2 min</span></li>
       </ol>
     </section>
 
@@ -1432,35 +1475,37 @@
           <div class="ato__meta"><span class="rota">/veterinario/meu-dia</span><span class="tempo">1 min</span></div>
         </div>
       </div>
-      <figure>
-        <img src="telas/10-clinica-hoje.png" alt="Hoje na clínica: recepção, em consulta e a seguir" />
+      <figure class="baixa">
+        <img src="telas/10-clinica-hoje.png" alt="Hoje na clínica: o paciente em sala, o resumo do dia, quem vem depois e o que pede ação" />
         <figcaption>
-          A fita do dia no alto, a frase do momento e três colunas: quem espera, quem está em
-          consulta e quem vem a seguir.
+          Na faixa, quem está em sala, um paciente por vez, e o resumo do dia ao lado. Abaixo, quem
+          vem depois e o que pede ação.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          <b>Clínica → Hoje.</b> Leia a frase: <i>2 assuntos urgentes pedem sua atenção</i> e
-          <i>8 de 37 atendimentos feitos hoje</i>.
+          <b>Clínica → Hoje.</b> No cartão da direita, a frase do dia: <i>2 assuntos urgentes
+          pedem sua atenção</i>, <i>10 de 37 atendimentos feitos hoje</i> e três números: na
+          recepção, em consulta, internados.
         </li>
         <li>
-          Aponte as três colunas: <b>Recepção</b> (quem espera, há quantos minutos, com a condição
-          crônica em destaque), <b>Em consulta</b> e <b>A seguir</b>.
+          À esquerda, quem está em sala agora: o Bento, em cirurgia, com o profissional, a sala e o
+          responsável. Passe para o Oliver pelos rostos ou pelas setas.
         </li>
         <li>
-          Aponte a fita do dia, no alto: o dia inteiro numa faixa, com a marca de agora e os
-          contadores de recepção, consulta e internados.
+          <b>Quem vem depois</b>: a recepção primeiro, com o tempo de espera e a condição crônica
+          em destaque, e <span class="rotulo">Iniciar consulta</span>; depois os horários. Ao lado,
+          <b>O que pede ação</b>: internação, recepção e quem chega com alerta.
         </li>
       </ol>
       <blockquote class="fala">
-        Antes de abrir qualquer ficha, a clínica sabe onde está: quem chegou, quem está lá dentro e
+        Antes de abrir qualquer ficha, a clínica sabe onde está: quem está lá dentro, quem chegou e
         quem vem depois. É a tela que a recepção deixa aberta o dia todo.
       </blockquote>
       <div class="atencao">
-        <b>Não clique em "Continuar {pet}" esperando uma consulta pronta.</b> Ele abre o
-        prontuário em branco, e o status do paciente não muda nesta tela. A consulta preparada para
-        a demonstração é a da Nina, no ato C4.
+        <b>Não clique em "Continuar atendimento" esperando uma consulta pronta.</b> Ele abre o
+        prontuário do paciente em sala sem nada preenchido. A consulta preparada para a
+        demonstração é a da Nina, no ato C4.
       </div>
     </section>
 
@@ -1477,11 +1522,14 @@
         <img src="telas/11-clinica-agenda.png" alt="Agenda do dia por profissional" />
         <figcaption>
           Uma coluna por profissional, com a ocupação de cada um, a linha do agora, o almoço e os
-          ícones de estado em cada atendimento.
+          ícones de estado em cada atendimento. Na faixa, as abas Agenda, Pedidos e Fila de espera.
         </figcaption>
       </figure>
       <ol class="passos">
-        <li>Mostre o dia por profissional, a linha do agora e a <b>Legenda</b>: cada estado tem cor e nome.</li>
+        <li>
+          Mostre o dia por profissional, a linha do agora e a legenda do pé da grade: cada estado
+          tem cor e nome.
+        </li>
         <li>
           <b>Arraste um atendimento</b> para outro horário. Abre <i>Confirmar remarcação</i>: de →
           para, os avisos e a mensagem que sai para o responsável, editável. Remarque e aponte o
@@ -1512,7 +1560,7 @@
           <li>A mensagem ao responsável fica como comprovante em <i>Avisos enviados</i>; nada sai por SMS ou app.</li>
           <li>Atendimentos cancelados nascem ocultos; o interruptor está em Exibição.</li>
           <li>
-            Na segunda-feira, para a falta oferecer a vaga a alguém da fila, antes vá a
+            Na segunda-feira, para a falta oferecer a vaga a alguém da fila, antes vá à aba
             <b>Fila de espera</b> e registre a recusa da Brunilda.
           </li>
           <li>Em tablet, o arraste por toque pode falhar: remarque pelo painel lateral.</li>
@@ -1533,19 +1581,21 @@
       <figure>
         <img src="telas/12-clinica-pedidos.png" alt="Caixa de pedidos de horário" />
         <figcaption>
-          Os pedidos do app e do link, ordenados pelo prazo de resposta. Na Luna, o horário pedido
-          foi ocupado, e o botão já sugere outro.
+          Os pedidos do app e do link, o que vence primeiro em cima. Na Luna, o horário pedido foi
+          ocupado, e o botão já sugere outro.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          <b>Agenda → Pedidos.</b> Os pedidos chegam pelo app e pelo link da clínica, em ordem de
-          prazo. Aponte a Luna: <i>Horário pedido foi ocupado</i>, e o botão já oferece outro.
+          Na Agenda, aba <b>Pedidos</b>. Os pedidos chegam pelo app e pelo link da clínica, em
+          ordem de prazo. Aponte a Luna: <i>Horário pedido foi ocupado</i>, e o botão já oferece
+          <span class="rotulo">Marcar 13:45</span>.
         </li>
         <li><span class="rotulo">Aceitar</span> no Thor: o atendimento nasce na agenda com o ícone de celular.</li>
         <li>
-          <span class="rotulo">Link da clínica</span> → <span class="rotulo">Abrir a página</span>,
-          na mesma aba. É a página pública, sem login e sem app (próxima página).
+          Na faixa, <span class="rotulo">Link da clínica</span> →
+          <span class="rotulo">Abrir a página</span>, na mesma aba. É a página pública, sem login
+          e sem app (próxima página).
         </li>
       </ol>
     </section>
@@ -1554,8 +1604,8 @@
       <figure>
         <img src="telas/13-agendar-publico.png" alt="Página pública de agendamento da clínica" />
         <figcaption>
-          A página pública: o dono escolhe o motivo, como marcar e o horário, que fica segurado por
-          5 minutos enquanto ele preenche os dados.
+          A página pública: o dono escolhe o motivo, como marcar, com quem e o horário, que fica
+          segurado por 5 minutos enquanto ele preenche os dados.
         </figcaption>
       </figure>
       <ol class="passos" style="counter-reset: passo 3">
@@ -1565,8 +1615,8 @@
           <i>Primeira vez</i>.
         </li>
         <li>
-          Opcional: <span class="rotulo">Ver como o responsável pede</span> abre um celular
-          simulado, com o lado do app.
+          Opcional: <span class="rotulo">Ver como o responsável pede</span>, na faixa dos Pedidos,
+          abre um celular simulado, com o lado do app.
         </li>
       </ol>
       <blockquote class="fala">
@@ -1596,20 +1646,21 @@
       </div>
       <p>
         O trecho mais longo, e o que justifica o produto. Use a <b>Nina</b>, que já está no meio da
-        consulta. Para abrir: <b>Pacientes → Atendimentos → Continuar rascunho de Nina</b>, ou a
-        linha <i>Nina às 16:00</i> em O que pede ação, no Hoje.
+        consulta. Para abrir: no Hoje, <b>O que pede ação → Mostrar mais → Nina às 16:00</b>; ou
+        <b>Pacientes → Atendimentos</b>, a linha da Nina em <i>Para assinar</i>.
       </p>
       <figure>
-        <img src="telas/14-clinica-atendimento.png" alt="Prontuário da Nina com alergia e imunossupressão no cabeçalho" />
+        <img src="telas/14-clinica-atendimento.png" alt="Prontuário da Nina com alergia e imunossupressão na faixa" />
         <figcaption>
-          Imunossupressão e alergia à dipirona no cabeçalho, sem clicar. As cinco etapas dizem onde
-          a consulta está, e onde há alerta.
+          Imunossupressão e alergia à dipirona na faixa, sem clicar, com o peso e o responsável ao
+          lado. As cinco etapas dizem onde a consulta está, e onde há alerta.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          <b>Cabeçalho</b>: <i>Imunossuprimido: Quimioterapia em curso</i> e <i>Alergia:
-          Dipirona</i> aparecem sem clicar. As cinco etapas mostram onde a consulta está.
+          <b>Na faixa</b>: <i>Imunossuprimido: Quimioterapia em curso</i> e <i>Alergia:
+          Dipirona</i> aparecem sem clicar. As cinco etapas mostram onde a consulta está; ao
+          rolar, elas grudam no alto, com o <span class="rotulo">Finalizar atendimento</span>.
         </li>
         <li>
           <b>Anamnese</b>: <span class="rotulo">Gravar consulta</span> → <i>Consulta de
@@ -1629,7 +1680,7 @@
         <img src="telas/15-clinica-dose.png" alt="A conta da dose aberta e o alerta de alergia" />
         <figcaption>
           A conta da dose aberta, passo a passo, e o alerta de alergia logo abaixo, pedindo
-          confirmação explícita.
+          confirmação explícita. Ao lado, o histórico do paciente.
         </figcaption>
       </figure>
       <ol class="passos" style="counter-reset: passo 3">
@@ -1661,10 +1712,10 @@
         desenho do fluxo: ouvir, sugerir, citar a fonte, o profissional aprovar.
       </div>
       <div class="atencao">
-        <b>Não recarregue o prontuário.</b> Depois de uma recarga, o endereço dele dá "Não foi
-        possível carregar": volte pela lista de Atendimentos. Se perguntarem do app, abra a
-        <b>Amora</b> (pré-consulta das 15:30): o bloco <i>Respondido no app</i> traz
-        <span class="rotulo">Usar respostas</span>, que só preenche o que está vazio.
+        <b>Não recarregue o prontuário.</b> Os dados de demonstração nascem de novo e o que você
+        preencheu some. Se perguntarem do app, abra a <b>Amora</b> (pré-consulta das 15:30): o
+        bloco <i>Respondido no app</i> traz <span class="rotulo">Usar respostas</span>, que só
+        preenche o que está vazio.
       </div>
     </section>
 
@@ -1672,15 +1723,15 @@
       <div class="ato__cab">
         <div class="ato__num">C5</div>
         <div>
-          <h3>A receita e os documentos</h3>
-          <div class="ato__meta"><span class="rota">mesma tela, fim da Conduta e etapa Resumo</span><span class="tempo">2 min</span></div>
+          <h3>A receita, os documentos e o fim da consulta</h3>
+          <div class="ato__meta"><span class="rota">mesma tela: fim da Conduta, etapa Resumo e Finalizar</span><span class="tempo">2 min 30 s</span></div>
         </div>
       </div>
       <figure>
         <img src="telas/16-clinica-receita.png" alt="Receita com o bloco Como o responsável vê" />
         <figcaption>
           A mesma prescrição em linguagem de casa e o lembrete que nasce dela no app. Acima, a
-          vacinação atrasada, com a carteirinha do app a um clique.
+          vacinação atrasada, com a carteira do app a um clique, e o retorno já marcado na agenda.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -1696,11 +1747,6 @@
           <span class="rotulo">Assinar e emitir</span>: sai o código de verificação, o CRMV e a
           validade de 30 dias. Depois, <span class="rotulo">Enviar ao responsável</span>.
         </li>
-        <li>
-          Etapa <b>Resumo</b>: os documentos sugeridos para este atendimento e
-          <i>Outros documentos</i>, 15 modelos em A4 (atestado, termos, encaminhamento, orçamento).
-          <span class="rotulo">Finalizar atendimento</span> volta à agenda.
-        </li>
       </ol>
       <blockquote class="fala">
         É aqui que o elo aparece: a mesma receita vai para o aplicativo de quem trouxe o animal,
@@ -1710,13 +1756,53 @@
         <b>Por que isso vende.</b> É o diferencial que os sistemas de clínica não têm. Guarde-o
         para depois que a plateia entendeu a consulta.
       </p>
-      <div class="atencao">
-        <b>O que ainda é forma.</b>
-        <ul>
-          <li><i>Enviar ao responsável</i> registra a data; a entrega pelo app ainda não está ligada.</li>
-          <li>O código de verificação é provisório; virará assinatura digital. O receituário impresso ainda não traz código nem assinatura.</li>
-          <li>Confirme a alergia antes de assinar: o sistema deixa assinar sem a confirmação, e não é o exemplo que você quer dar.</li>
-        </ul>
+    </section>
+
+    <section class="ato ato--clinica ato--nova-pagina">
+      <div class="lado lado--largo">
+        <div>
+          <ol class="passos" style="counter-reset: passo 3">
+            <li>
+              Etapa <b>Resumo</b>: os documentos sugeridos para este atendimento e
+              <i>Outros documentos</i>, 15 modelos em A4 (atestado, termos, encaminhamento,
+              orçamento).
+            </li>
+            <li>
+              <span class="rotulo">Finalizar atendimento</span>. Se faltar algo, a tela diz o quê,
+              com o atalho para a etapa (<i>Pelo menos um diagnóstico</i>; <i>Confirmar a
+              prescrição apesar da alergia</i>). Dá para voltar ou finalizar mesmo assim.
+            </li>
+            <li>
+              Depois de finalizar, <b>Atendimento finalizado</b>: o prontuário fecha para leitura,
+              o resumo fica pronto para o app da Camila, os documentos ficam no resumo e o retorno,
+              na agenda.
+            </li>
+            <li>
+              Em <b>Próximo paciente</b>, quem espera na recepção, do mesmo profissional primeiro:
+              <span class="rotulo">Atender Chico</span>.
+            </li>
+          </ol>
+          <blockquote class="fala">
+            Terminou a consulta, o sistema diz o que foi feito e quem é o próximo. Ninguém volta
+            para a agenda procurando onde estava.
+          </blockquote>
+          <div class="atencao">
+            <b>O que ainda é forma.</b>
+            <ul>
+              <li><i>Enviar ao responsável</i> e <i>Entregar no app</i> registram a data; a entrega pelo app ainda não está ligada.</li>
+              <li>O código de verificação é provisório; virará assinatura digital. O receituário impresso ainda não traz código nem assinatura.</li>
+              <li>Confirme a alergia antes de assinar: o sistema deixa assinar sem a confirmação, e não é o exemplo que você quer dar.</li>
+              <li>Finalizar a Nina fecha o prontuário dela até a próxima carga: faça por último.</li>
+            </ul>
+          </div>
+        </div>
+        <figure>
+          <img src="telas/23-clinica-finalizado.png" alt="Atendimento finalizado: o que foi feito e o próximo paciente" />
+          <figcaption>
+            Depois de finalizar: o que ficou feito com este atendimento e o próximo paciente, a um
+            clique.
+          </figcaption>
+        </figure>
       </div>
     </section>
 
@@ -1744,23 +1830,24 @@
           preenche no app.
         </li>
         <li>
-          <span class="rotulo">Abrir atendimento</span>: o prontuário abre com a anamnese já
-          preenchida pelo diário.
+          <span class="rotulo">Abrir atendimento</span>, na faixa: o prontuário abre com a anamnese
+          já preenchida pelo diário.
         </li>
         <li>
           Aba <b>Vacinas</b>: antirrábica atrasada há 16 dias. <span class="rotulo">Carteirinha no
-          app</span> mostra o que o celular da Fátima vê. <span class="rotulo">Aplicar agora</span>
-          → <span class="rotulo">Aplicar e registrar</span>: a pendência some dos dois lados.
+          app</span> abre, numa gaveta ao lado, o que o celular da Fátima vê.
+          <span class="rotulo">Aplicar agora</span> → <span class="rotulo">Aplicar e registrar</span>:
+          a pendência some dos dois lados.
         </li>
       </ol>
     </section>
 
     <section class="ato ato--clinica ato--nova-pagina">
       <figure>
-        <img src="telas/22-clinica-carteirinha.png" alt="Ficha de vacinas com a carteirinha do app ao lado" />
+        <img src="telas/22-clinica-carteirinha.png" alt="Ficha de vacinas com a carteirinha do app na gaveta" />
         <figcaption>
-          À direita, a prévia do app da responsável: o mesmo atraso, o mesmo protocolo. Quando a
-          clínica aplica, a carteirinha muda na hora.
+          Na gaveta, a carteira de vacinação do app da responsável: o mesmo atraso, o mesmo
+          protocolo. Quando a clínica aplica, a carteirinha muda na hora.
         </figcaption>
       </figure>
       <blockquote class="fala">
@@ -1772,9 +1859,9 @@
         nenhum concorrente tem o dono do animal do outro lado.
       </p>
       <div class="atencao">
-        <b>Prévia, não entrega.</b> O celular desta tela é uma simulação do app: o que a clínica
-        faz aqui ainda não chega ao app real. Aplicar a vacina só funciona uma vez por carga, e os
-        sinais da Pérola somem depois que a consulta de hoje é finalizada.
+        <b>Prévia, não entrega.</b> A carteirinha desta tela é uma simulação do app: o que a
+        clínica faz aqui ainda não chega ao app real. Aplicar a vacina só funciona uma vez por
+        carga, e os sinais da Pérola somem depois que a consulta de hoje é finalizada.
       </div>
     </section>
 
@@ -1795,8 +1882,8 @@
       </figure>
       <ol class="passos">
         <li>
-          Leia a frase do plantão e <b>O que pede ação no plantão</b>: o boletim do Tofu aguardando
-          ligação e a Cacau com uma administração atrasada.
+          Leia a frase do plantão, na faixa, e <b>O que pede ação no plantão</b>: o boletim do Tofu
+          aguardando contato e a Cacau com uma administração atrasada.
         </li>
         <li>
           Abra o <b>Tofu</b> (UTI): <span class="rotulo">Resolver boletim retido</span> →
@@ -1838,8 +1925,8 @@
       <figure>
         <img src="telas/18-clinica-vacinas.png" alt="Lista de chamada de vacinas vencidas" />
         <figcaption>
-          Vencidas, a vencer em 30 dias e séries abertas. Em "Quem chamar", o responsável, o
-          telefone e há quantos dias está atrasada.
+          Vencidas, a vencer em 30 dias e séries abertas numa faixa. Em "Quem chamar", o
+          responsável, o telefone e há quantos dias está atrasada.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -1852,9 +1939,9 @@
           telefone e <span class="rotulo">Agendar</span>.
         </li>
         <li>
-          Passe pelas outras abas: <b>Atividades</b> (o que ficou começado), <b>Faltas</b>
-          (reincidentes), <b>Tratamentos em casa</b> (a Duna parou o remédio: acabou) e
-          <b>Estoque de vacinas</b> (lote vencido, metas do mês, pedido de compra).
+          Passe pelas outras abas da faixa: <b>Atividades</b> (o que ficou começado),
+          <b>Faltas</b> (reincidentes), <b>Tratamentos em casa</b> (a Duna parou o remédio: a
+          adesão caiu) e <b>Estoque de vacinas</b> (lote vencendo, metas do mês, o que comprar).
         </li>
       </ol>
       <blockquote class="fala">
@@ -1885,7 +1972,7 @@
       <div class="par">
         <figure>
           <img src="telas/19-clinica-relatorios.png" alt="Relatórios da clínica" />
-          <figcaption>Comparecimento, tempo de atendimento, ocupação e movimento por dia.</figcaption>
+          <figcaption>Comparecimento, tempo de atendimento e ocupação numa faixa; abaixo, o movimento por dia.</figcaption>
         </figure>
         <figure>
           <img src="telas/20-clinica-importar.png" alt="Importador de pacientes de outro sistema" />
@@ -1899,7 +1986,7 @@
           escolha <b>Semana passada</b>.
         </li>
         <li>
-          <b>Pacientes → Trazer pacientes de outro sistema</b> → em <i>Não tem um arquivo agora?</i>,
+          <b>Pacientes → Importar planilha</b> → em <i>Não tem um arquivo agora?</i>,
           <span class="rotulo">Usar este</span> na <i>Planilha feita na clínica</i>. As colunas se
           ligam sozinhas; ele só pergunta o que não dá para deduzir (<i>Qual é a espécie de Lua?</i>).
         </li>
@@ -1951,21 +2038,25 @@
       <figure>
         <img src="telas/30-hotel-painel.png" alt="Painel do dia do hotel" />
         <figcaption>
-          O turno e quem está nele, as tarefas feitas e três colunas: chegam, estão na casa e saem
-          hoje, cada um com o que falta.
+          Na faixa, o turno, a frase do dia e quatro números. Abaixo, três colunas: chegam, estão
+          na casa e saem hoje, cada um com o que falta.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          <b>Hotel → Hoje.</b> A frase diz o turno e quem está nele (<i>Manhã, 06:00–14:00, com
-          Rafael Lima</i>) e quantas tarefas da rotina foram feitas.
+          <b>Hotel → Hoje.</b> A faixa diz o turno e quem está nele (<i>Manhã, 06:00–14:00, com
+          Rafael Lima</i>), o que pede atenção e quantas tarefas da rotina foram feitas. Ao lado:
+          na casa, chegam hoje, sai hoje, tarefas atrasadas.
         </li>
         <li>
           <b>Chegam hoje</b>: Sushi <i>Pode entrar</i>, com <span class="rotulo">Fazer check-in</span>;
           Zeus <i>Não apresentado</i>, falta documento. <b>Na casa</b>: o Tofu com ocorrência sem
-          contato. <b>Saem hoje</b>: o Bento, que falta pesar e conferir pertences.
+          contato e boletim retido. <b>Saem hoje</b>: o Bento, que falta pesar e conferir pertences.
         </li>
-        <li>No alto, a fita da casa: o dia inteiro, com chegadas, saídas e a marca de agora.</li>
+        <li>
+          As abas <b>Painel do dia</b>, <b>Rotina</b> e <b>Hóspedes</b> ficam na faixa, junto com
+          <span class="rotulo">Abrir rotina</span> e <span class="rotulo">Passar turno</span>.
+        </li>
       </ol>
       <blockquote class="fala">
         Quem chega, quem está e quem sai, e o que não pode esperar. Cada selo leva aonde se resolve.
@@ -1983,8 +2074,8 @@
       <figure>
         <img src="telas/31-hotel-rotina.png" alt="Rotina do turno com o que é para agora" />
         <figcaption>
-          O atrasado em cima, a marca de agora, o que vem mais tarde. À direita, o fim do turno e o
-          que trava a entrega.
+          O atrasado em cima, a marca de agora, o que vem mais tarde. À direita, o fim do turno, o
+          que trava a entrega e os horários da casa.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -2006,8 +2097,9 @@
         não passa com pendência grave escondida.
       </blockquote>
       <div class="atencao">
-        <b>Os horários da casa</b> se mudam em <b>A casa → Rotina padrão</b>, com a prévia de
-        quantas tarefas nascem e saem antes de publicar. Vale mostrar se perguntarem.
+        <b>Os horários da casa</b> ficam ao lado, em <b>Rotina padrão da casa</b>.
+        <span class="rotulo">Mudar os horários da casa</span> leva à tela com a prévia de quantas
+        tarefas nascem e saem antes de publicar. Vale mostrar se perguntarem.
       </div>
     </section>
 
@@ -2016,15 +2108,16 @@
         <div class="ato__num">H3</div>
         <div>
           <h3>A proposta de rotina</h3>
-          <div class="ato__meta"><span class="rota">/hotel/rotina, coluna "Gerenciar rotina"</span><span class="tempo">2 min</span></div>
+          <div class="ato__meta"><span class="rota">/hotel/rotina, painel "Gerenciar rotina"</span><span class="tempo">2 min</span></div>
         </div>
       </div>
       <div class="lado">
         <div>
           <ol class="passos">
             <li>
-              Em <b>Gerenciar rotina</b>, escolha o <b>Tofu</b>. A proposta aparece em três
-              partes: <i>A casa já faz</i>, <i>Da ficha</i>, <i>Proponho mudar</i>.
+              Em <b>Gerenciar rotina</b>, à direita, abaixo da rotina padrão, escolha o
+              <b>Tofu</b>. A proposta aparece em três partes: <i>A casa já faz</i>, <i>Da ficha</i>,
+              <i>Proponho mudar</i>.
             </li>
             <li>
               Leia os porquês: água extra às 15:00 porque ele chegou estressado; uma pesagem no meio
@@ -2072,8 +2165,8 @@
       <figure>
         <img src="telas/33-hotel-estadia.png" alt="Estadia do Tofu com o que pede atenção" />
         <figcaption>
-          O rosto, o responsável, como ele está se adaptando, os números da estadia e o que pede
-          atenção agora: ligar antes de mandar boletim.
+          Na faixa, o rosto, o responsável e como ele está se adaptando. Abaixo, os números da
+          estadia e o que pede atenção agora: ligar antes de mandar boletim.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -2124,11 +2217,12 @@
       <ol class="passos">
         <li>
           <b>Reservas → Mapa.</b> A procura em frase: <i>Tenho um [cão] [médio] de [datas]</i>
-          responde <i>12 acomodações servem</i>.
+          responde quantas acomodações servem (<i>12 acomodações servem</i>, sem escolher espécie
+          nem porte).
         </li>
         <li>
-          Clique numa célula livre ou em <span class="rotulo">Nova reserva</span>: noites,
-          horários, hóspede, serviços e o orçamento ao vivo (meia diária, temporada).
+          Clique numa célula livre ou em <span class="rotulo">Nova reserva</span>, na faixa:
+          noites, horários, hóspede, serviços e o orçamento ao vivo (meia diária, temporada).
           <span class="rotulo">Criar reserva</span>: nasce pendente.
         </li>
       </ol>
@@ -2175,14 +2269,14 @@
       <figure>
         <img src="telas/35-hotel-pedidos.png" alt="Pedidos de reserva esperando resposta" />
         <figcaption>
-          Quem quer se hospedar, pelo prazo de resposta. Cada linha já sugere onde cabe:
+          Quem quer se hospedar, o que vence primeiro em cima. Cada linha já sugere onde cabe:
           <i>Reservar Suíte S1</i>.
         </figcaption>
       </figure>
       <ol class="passos">
         <li>
-          <b>Reservas → Pedidos</b>: em ordem de prazo (<i>20 min para responder</i>). O Bolota
-          veio pelo link, <i>Primeira vez</i>.
+          Em Reservas, aba <b>Pedidos</b>: em ordem de prazo (<i>20 min para responder</i>). O
+          Bolota veio pelo link, <i>Primeira vez</i>.
         </li>
         <li>
           Na linha, <span class="rotulo">Reservar Suíte S1</span> grava a reserva.
@@ -2190,9 +2284,9 @@
           a mensagem pronta.
         </li>
         <li>
-          <span class="rotulo">Link do hotel</span> → <span class="rotulo">Abrir a página</span>
-          (na mesma aba): porte, datas, acomodação com <i>N livres</i> e preço aproximado, extras,
-          dados.
+          Na faixa, <span class="rotulo">Link do hotel</span> →
+          <span class="rotulo">Abrir a página</span> (na mesma aba): porte, datas, acomodação com
+          <i>N livres</i> e preço aproximado, extras, dados.
         </li>
         <li>
           <span class="rotulo">Ver como o responsável pede</span>: o celular simulado mostra o
@@ -2230,8 +2324,8 @@
       <figure>
         <img src="telas/39-hotel-resumo.png" alt="Relatórios do hotel" />
         <figcaption>
-          Os últimos 30 dias: ocupação, receita, diária média e retorno, e a ocupação de cada
-          noite, com o fim de semana destacado.
+          Os últimos 30 dias: ocupação, receita, diária média e retorno numa faixa, e a ocupação de
+          cada noite, com o fim de semana destacado.
         </figcaption>
       </figure>
       <ol class="passos">
@@ -2291,7 +2385,7 @@
         </li>
         <li>
           <b>Como um programa é ativado</b>: Solicitar → Em análise → Ativo.
-          <span class="rotulo">Credenciamento</span> leva ao cadastro da empresa.
+          <span class="rotulo">Credenciamento</span>, na faixa, leva ao cadastro da empresa.
         </li>
       </ol>
       <blockquote class="fala">
@@ -2434,9 +2528,10 @@
           <tr>
             <td>"Tem inteligência artificial?"</td>
             <td>
-              A leitura de receita por foto, nos Acessos, funciona ligada ao servidor. A escuta da
-              consulta e a proposta de rotina do hotel são protótipos que mostram o fluxo: a máquina
-              sugere, cita a fonte, o profissional aprova.
+              A leitura de receita por foto, nos Acessos, funciona ligada ao servidor, e avisa
+              quando a foto parece receita de exemplo ou de outro pet. A escuta da consulta e a
+              proposta de rotina do hotel são protótipos que mostram o fluxo: a máquina sugere,
+              cita a fonte, o profissional aprova.
             </td>
           </tr>
           <tr>
@@ -2450,7 +2545,7 @@
             <td>"Funciona no celular?"</td>
             <td>
               O portal é feito para computador e tablet: recepção, consultório, canil, internação. O
-              celular é o lado do dono do animal, no app.
+              celular é o lado do dono do animal, no app, que tem o mesmo desenho que vocês viram aqui.
             </td>
           </tr>
           <tr>
@@ -2496,9 +2591,9 @@
             <li>Programas e a solicitação</li>
             <li>Código, link, QR e leituras</li>
             <li>Acessos: vincular, ler, anotar</li>
-            <li>Ler receita com IA</li>
+            <li>Ler receita com IA, com os avisos da leitura</li>
             <li>Ganhos, extrato, PIX e saque</li>
-            <li>Seis idiomas, tema claro e escuro</li>
+            <li>Seis idiomas, tema claro e escuro, a barra lateral do seu jeito</li>
             <li>Troca de empresa</li>
           </ul>
         </div>
@@ -2509,6 +2604,7 @@
             <li>Pedidos online, página pública, fila de espera</li>
             <li>Prontuário com salvamento automático</li>
             <li>Faixas de referência, conta da dose, alergia por princípio ativo</li>
+            <li>Finalizar com o que falta e o próximo paciente</li>
             <li>15 documentos em A4</li>
             <li>Vacinas com lote e validade; lista de chamada; estoque e metas</li>
             <li>Internação, checklist, passagem de plantão</li>
@@ -2538,7 +2634,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>"Enviar ao responsável", "Liberar", boletins enviados</td><td>Registram a data e o status. A entrega pelo app ainda não está ligada.</td></tr>
+          <tr><td>"Enviar ao responsável", "Entregar no app", "Liberar", boletins enviados</td><td>Registram a data e o status. A entrega pelo app ainda não está ligada.</td></tr>
           <tr><td>Avisos de remarcação e oferta de vaga</td><td>O texto fica como comprovante. Nenhuma mensagem sai.</td></tr>
           <tr><td>Celular simulado, carteirinha e adesão "no app"</td><td>É uma prévia na tela. O que a clínica faz não chega ao app real.</td></tr>
           <tr><td>Assinatura e código de verificação da receita</td><td>Código provisório. Virará assinatura digital.</td></tr>
@@ -2571,7 +2667,7 @@
         </thead>
         <tbody>
           <tr>
-            <td>O menu não tem Clínica nem Hotel</td>
+            <td>A barra lateral não tem Clínica nem Hotel</td>
             <td>Os módulos estão desligados. Acrescente <span class="rota">?clinico=on&amp;hotel=on</span> ao endereço.</td>
           </tr>
           <tr>
@@ -2584,7 +2680,7 @@
           </tr>
           <tr>
             <td>O prontuário diz "Não foi possível carregar"</td>
-            <td>A página foi recarregada. Abra de novo pela lista: Pacientes → Atendimentos.</td>
+            <td>Abra de novo pela lista: Pacientes → Atendimentos.</td>
           </tr>
           <tr>
             <td>Início ou Portal em "Não foi possível carregar"</td>
@@ -2624,7 +2720,10 @@
           </tr>
           <tr>
             <td>A tela aperta no projetor</td>
-            <td>Recolha a barra lateral (botão ao lado do nome da empresa) ou baixe o zoom para 90%.</td>
+            <td>
+              Recolha a barra lateral (o botão ao lado do nome da empresa), ou em Configurações →
+              Aparência escolha <span class="rotulo">Só ícones</span>. Em último caso, zoom em 90%.
+            </td>
           </tr>
         </tbody>
       </table>
@@ -2644,7 +2743,7 @@
             <dt>Divulgação</dt><dd class="rota">/parceiro/divulgacao</dd>
             <dt>Ganhos de indicação</dt><dd class="rota">/parceiro/carteira</dd>
             <dt>Programas</dt><dd class="rota">/parceiro/programas</dd>
-            <dt>Configurações (idioma, tema)</dt><dd class="rota">/settings</dd>
+            <dt>Aparência (tema, barra lateral, idioma)</dt><dd class="rota">/settings?aba=aparencia</dd>
           </dl>
         </div>
         <div>
@@ -2652,6 +2751,7 @@
           <dl>
             <dt>Hoje</dt><dd class="rota">/veterinario/meu-dia</dd>
             <dt>Agenda · Pedidos · Fila</dt><dd class="rota">/veterinario/agenda · /pedidos · /fila</dd>
+            <dt>Atendimentos (prontuários)</dt><dd class="rota">/veterinario/atendimentos</dd>
             <dt>Atendimento da Nina</dt><dd class="rota">/veterinario/atendimento/enc-apt-alergia</dd>
             <dt>Pérola: resumo e vacinas</dt><dd class="rota">/veterinario/paciente/pet-perola/resumo</dd>
             <dt>Internação · Tofu</dt><dd class="rota">/veterinario/internacao · /internacao/int-tofu</dd>
@@ -2681,11 +2781,13 @@
             (cardiologia), Márcia Do Espírito Santo Albuquerque (anestesia).
           </p>
           <dl>
-            <dt>Nina · Camila Ferraz</dt><dd>Alergia a dipirona, quimioterapia; a consulta das 16:00 (C4).</dd>
+            <dt>Nina · Camila Ferraz</dt><dd>Alergia a dipirona, quimioterapia; a consulta das 16:00 (C4, C5).</dd>
             <dt>Pérola · Fátima Gonçalves</dt><dd>Perda de peso no diário, antirrábica atrasada (C6).</dd>
+            <dt>Bento e Oliver</dt><dd>Em sala no Hoje: Bento em cirurgia, Oliver em consulta (C1).</dd>
+            <dt>Chico</dt><dd>Espera na recepção; o próximo paciente depois da Nina (C1, C5).</dd>
             <dt>Tofu · Rita Nakamura</dt><dd>UTI, boletim retido até a ligação (C7).</dd>
             <dt>Cacau · Ana Lu</dt><dd>Internada, dose atrasada (C7).</dd>
-            <dt>Duna · Eduardo Bittencourt</dt><dd>Parou o remédio em casa (C8).</dd>
+            <dt>Duna · Eduardo Bittencourt</dt><dd>A adesão ao remédio em casa caiu (C8).</dd>
             <dt>Amora</dt><dd>Pré-consulta respondida no app (C4).</dd>
             <dt>Thor</dt><dd>Encaixe das 16:20 por cima do bloqueio (C2).</dd>
           </dl>
