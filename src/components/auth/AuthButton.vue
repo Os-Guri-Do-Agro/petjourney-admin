@@ -79,7 +79,7 @@ const buttonClasses = computed(() => ['auth-button', `auth-button--${props.varia
   opacity: 0.55;
 }
 
-/* A ação vem da moldura da entrada (`--auth-acao`, a sálvia da casa); fora dela, a do app. */
+/* A ação vem da moldura da entrada (`--auth-acao`, que é o botão do app); fora dela, a do app. */
 .auth-button--primary.p-button,
 .auth-button--primary.p-button:not(:disabled):active {
   border-color: var(--auth-acao, var(--app-botao, var(--musgo)));

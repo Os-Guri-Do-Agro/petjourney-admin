@@ -98,7 +98,7 @@ defineProps<{
   white-space: nowrap;
 }
 
-/* O passo ativo na sálvia da entrada, como o botão (`--auth-acao`, do `AuthLayout`). */
+/* O passo ativo na cor da ação da entrada, como o botão (`--auth-acao`, do `AuthLayout`). */
 .register-steps__item--active .register-steps__marker {
   border-color: var(--auth-acao, var(--musgo));
   background: var(--auth-acao, var(--musgo));

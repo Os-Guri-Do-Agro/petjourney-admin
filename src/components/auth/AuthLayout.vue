@@ -159,16 +159,16 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /*
- * A ação da entrada (o botão, o checkbox, o passo do cadastro) na matiz da sálvia da arte, com o
- * rótulo branco (pedido de 26/10/2026). Branco sobre a sálvia da arte (#84C1B4) dá 2:1 e some; um
- * tom mais fundo da mesma matiz (#4F9C8B) chega a 3,25:1 sem virar o cinza-esverdeado do botão do
- * app (#627A74), que pesava sobre o creme. Os links continuam no `--musgo`: sálvia clara sobre o
- * creme não lê.
+ * A entrada usa o verde de dentro do portal (pedido de 28/10/2026): a faixa da arte é o
+ * `--app-destaque` (a arte foi recolorida para ele, nos dois temas) e a ação (o botão, o checkbox,
+ * o passo do cadastro) é o `--app-botao`, com a tinta que o app põe por cima. Antes era um
+ * sálvia mais vivo (#84C1B4) com o botão em #4F9C8B, e quem entrava via dois verdes. De quebra o
+ * rótulo do botão sobe de 3,25:1 para cerca de 4,6:1. Os links continuam no `--musgo`.
  */
 .auth-page {
-  --auth-acao: #4f9c8b;
-  --auth-acao-hover: #488e7f;
-  --sobre-auth-acao: #fff;
+  --auth-acao: var(--app-botao);
+  --auth-acao-hover: var(--app-botao-hover);
+  --sobre-auth-acao: var(--sobre-musgo);
   --p-checkbox-checked-background: var(--auth-acao);
   --p-checkbox-checked-border-color: var(--auth-acao);
   --p-checkbox-checked-hover-background: var(--auth-acao-hover);
@@ -333,7 +333,7 @@ onBeforeUnmount(() => {
 
 /* Só quando a pata chega ao texto (`textoSobreAPata`, medido no script): ela é papel no
    claro e quase preta no escuro, e o texto branco some na primeira. O véu repõe o verde
-   chapado da arte (#84c0b4, idêntico nos dois temas) atrás da copy: invisível sobre a faixa
+   chapado da arte (o `--app-destaque` do tema, o mesmo verde da faixa) atrás da copy: invisível sobre a faixa
    verde, opaco sobre a pata. É um degradê radial, não um bloco desfocado: chapado atrás do
    texto, ele se apaga antes da borda e mais ainda no canto da diagonal, onde um
    desfoque deixaria um halo verde sobre o creme (e claro sobre o escuro). */
@@ -348,7 +348,11 @@ onBeforeUnmount(() => {
      espelha sozinho. */
   inset-block: -2.5rem;
   inset-inline: 0 -3.5rem;
-  background: radial-gradient(closest-side, #84c0b4 82%, rgb(132 192 180 / 0%) 100%);
+  background: radial-gradient(
+    closest-side,
+    var(--app-destaque) 82%,
+    color-mix(in srgb, var(--app-destaque) 0%, transparent) 100%
+  );
 }
 
 .auth-visual-panel h2 {
