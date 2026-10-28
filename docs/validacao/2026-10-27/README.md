@@ -22,6 +22,18 @@ reservado para teste e nenhum e-mail chega a um desconhecido (por isso "esqueci 
 | Rafael Moura (veterinário) | `rafael@clinica-aurora.example.com` | Conta criada; convite da Aurora pendente (ver P-26) |
 | Camila Rocha (tutora) | `camila.tutora@clinica-aurora.example.com` | Cachorra Paçoca, compartilhada com a Aurora (código 760039) |
 
+**Paçoca, para a apresentação (28/10), tudo em inglês.** Foto (o recorte do Wikimedia Commons já
+usado no módulo clínico, CC BY-SA 3.0, crédito em `public/demo/pacientes/CREDITOS.md`), nascimento
+14/03/2021, microchip, 3 alergias, 3 diagnósticos, 3 tratamentos contínuos, 5 vacinas, 4 doses de
+remédio, 4 pesagens, 4 consultas, 4 registros de diário (um com foto), 4 documentos com arquivo
+(carteira de vacinação, hemograma, laudo do raio-X de quadril, receita; clínica e laboratório
+fictícios) e a ficha de emergência do QR liberada. Acesso completo para a Aurora, **código 233252**,
+as 10 categorias, válido até **27/11/2026** (30 dias é o teto do produto: depois disso a Camila cria
+outro). No portal, duas anotações em inglês: retorno da dermatologia (Dr. Helena Prado) e
+reavaliação do quadril com o medo de barulho (Dr. Rafael Moura). Uma terceira, a primeira versão
+incompleta da dermatologia (13:01), foi enviada por engano pela automação e não tem como ser apagada.
+O acesso antigo, de 7 dias (código 760039), vence em 03/11.
+
 Clínica e Hotel são módulos de demonstração neste branch (ligar com `?clinico=on&hotel=on`): os
 dados vêm da semente e o que se grava some ao recarregar a página. Os relatórios de cada frente
 listam o que foi criado, para refazer numa apresentação.
