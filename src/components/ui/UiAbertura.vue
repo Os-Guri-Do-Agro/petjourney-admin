@@ -403,8 +403,13 @@ withDefaults(
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* Faixa estreita (tablet): o lado desce para baixo dos números. */
-@container faixa (max-width: 920px) {
+/*
+ * O lado desce para baixo dos números de 1440 px de tela para baixo (com o menu aberto, a faixa tem
+ * 1168 px aí). Lado a lado, os quatro números cabiam por 6 px: uma barra de rolagem já jogava o
+ * último para outra linha e o lado esticava na altura, com vão em cima e embaixo. Pela largura da
+ * faixa, e não da tela: com o menu recolhido sobra lugar e a fileira continua.
+ */
+@container faixa (max-width: 1180px) {
   .abertura--em-linha {
     grid-template-areas:
       'texto'

@@ -787,6 +787,44 @@ defineExpose({ abrirQr, temQr, podeIndicar, visivel, resumo, carregando })
   white-space: nowrap;
 }
 
+/*
+ * Com a faixa empilhada (a mesma régua do `UiAbertura`: 1180 px de faixa, 1440 de tela), o cartaz
+ * deita na largura toda: o código fica à esquerda e as ações vão para a ponta, sem deixar a metade
+ * direita do cartão vazia. A régua é a da faixa porque o cartaz, lado a lado, mede pelo conteúdo e
+ * não pode ser contêiner dele mesmo.
+ */
+@container faixa (min-width: 640px) and (max-width: 1180px) {
+  .cartaz__texto {
+    flex: 1;
+    align-items: center;
+    column-gap: 24px;
+    grid-template-areas:
+      'rotulo acoes'
+      'codigo acoes'
+      'leituras acoes';
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .cartaz__rotulo {
+    grid-area: rotulo;
+  }
+
+  .cartaz__codigo {
+    grid-area: codigo;
+  }
+
+  .cartaz__leituras {
+    grid-area: leituras;
+  }
+
+  .cartaz__acoes {
+    align-self: center;
+    justify-self: end;
+    margin-top: 0;
+    grid-area: acoes;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cartaz__qr {
     transition: none;
