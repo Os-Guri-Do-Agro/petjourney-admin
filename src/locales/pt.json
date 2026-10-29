@@ -297,6 +297,7 @@
       "overview": "Visão geral",
       "programas": "Programas",
       "divulgacao": "Divulgação",
+      "indicados": "Indicados",
       "acessos": "Acessos",
       "financeiro": "Carteira",
       "settings": "Configurações"
@@ -2171,6 +2172,66 @@
         "enviar": "Enviar convite",
         "cancelar": "Cancelar",
         "reenviarPendente": "Reenviar o convite pendente"
+      }
+    },
+    "indicados": {
+      "titulo": "Indicados",
+      "resumo": "Quem entrou na PetJourney pelo seu código ou pelo seu QR, se já assinou e quanto rendeu de participação.",
+      "filtroRotulo": "Filtrar a lista",
+      "filtros": {
+        "TODOS": "Todos",
+        "COM_ASSINATURA": "Já assinaram",
+        "SEM_ASSINATURA": "Não assinaram",
+        "CANCELADO": "Cancelaram"
+      },
+      "contador": "{count} pessoa | {count} pessoas",
+      "status": {
+        "COM_ASSINATURA": "Assinou",
+        "SEM_ASSINATURA": "Não assinou",
+        "CANCELADO": "Cancelou"
+      },
+      "planos": {
+        "MENSAL": "Plano mensal",
+        "ANUAL": "Plano anual"
+      },
+      "assinouEm": "Assinou em {data}",
+      "entrouEm": "Entrou em {data}",
+      "semNome": "Sem nome no cadastro",
+      "participacao": "de participação",
+      "carregarMais": "Carregar mais",
+      "maisErro": "Não deu para carregar o resto da lista.",
+      "erroCarregar": "Não deu para carregar a lista de indicados.",
+      "rodape": "Quem apaga a conta sai da lista.",
+      "vazio": {
+        "titulo": "Ninguém entrou pelo seu código ainda",
+        "corpo": "Quando alguém se cadastrar na PetJourney com seu código ou seu QR, o nome aparece aqui.",
+        "acao": "Ver meu código e QR"
+      },
+      "vazioFiltro": {
+        "COM_ASSINATURA": {
+          "titulo": "Ninguém assinou ainda",
+          "corpo": "Quem entrou pelo seu código ainda não assinou um plano."
+        },
+        "SEM_ASSINATURA": {
+          "titulo": "Todo mundo já assinou",
+          "corpo": "Quem entrou pelo seu código já assinou um plano."
+        },
+        "CANCELADO": {
+          "titulo": "Ninguém cancelou",
+          "corpo": "Quem assinou pelo seu código continua assinando."
+        }
+      },
+      "apenasDono": {
+        "titulo": "Só quem é dono da conta vê esta lista",
+        "corpo": "A lista mostra o nome de clientes, por isso só quem é dono da conta do parceiro pode ver."
+      },
+      "naoOperacional": {
+        "titulo": "Lista indisponível no momento",
+        "corpo": "Seu cadastro de parceiro não está ativo agora. Assim que ele voltar a ficar ativo, a lista aparece aqui."
+      },
+      "indisponivel": {
+        "titulo": "Lista ainda não disponível",
+        "corpo": "Essa lista está chegando. Tente de novo em alguns dias."
       }
     }
   },

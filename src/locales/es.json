@@ -297,6 +297,7 @@
       "overview": "Vista general",
       "programas": "Programas",
       "divulgacao": "Divulgación",
+      "indicados": "Referidos",
       "acessos": "Accesos",
       "financeiro": "Cartera",
       "settings": "Configuración"
@@ -2171,6 +2172,66 @@
         "enviar": "Enviar invitación",
         "cancelar": "Cancelar",
         "reenviarPendente": "Reenviar la invitación pendiente"
+      }
+    },
+    "indicados": {
+      "titulo": "Referidos",
+      "resumo": "Quién entró en PetJourney con su código o su QR, si ya se suscribió y cuánta participación generó.",
+      "filtroRotulo": "Filtrar la lista",
+      "filtros": {
+        "TODOS": "Todos",
+        "COM_ASSINATURA": "Ya se suscribieron",
+        "SEM_ASSINATURA": "No se suscribieron",
+        "CANCELADO": "Cancelaron"
+      },
+      "contador": "{count} persona | {count} personas",
+      "status": {
+        "COM_ASSINATURA": "Se suscribió",
+        "SEM_ASSINATURA": "No se suscribió",
+        "CANCELADO": "Canceló"
+      },
+      "planos": {
+        "MENSAL": "Plan mensual",
+        "ANUAL": "Plan anual"
+      },
+      "assinouEm": "Se suscribió el {data}",
+      "entrouEm": "Entró el {data}",
+      "semNome": "Sin nombre en el registro",
+      "participacao": "de participación",
+      "carregarMais": "Cargar más",
+      "maisErro": "No pudimos cargar el resto de la lista.",
+      "erroCarregar": "No pudimos cargar la lista de referidos.",
+      "rodape": "Quien elimina su cuenta sale de la lista.",
+      "vazio": {
+        "titulo": "Nadie entró con su código todavía",
+        "corpo": "Cuando alguien se registre en PetJourney con su código o su QR, su nombre aparecerá aquí.",
+        "acao": "Ver mi código y QR"
+      },
+      "vazioFiltro": {
+        "COM_ASSINATURA": {
+          "titulo": "Nadie se suscribió todavía",
+          "corpo": "Quien entró con su código aún no contrató un plan."
+        },
+        "SEM_ASSINATURA": {
+          "titulo": "Todos ya se suscribieron",
+          "corpo": "Todos los que entraron con su código ya se suscribieron."
+        },
+        "CANCELADO": {
+          "titulo": "Nadie canceló",
+          "corpo": "Quien se suscribió con su código sigue suscrito."
+        }
+      },
+      "apenasDono": {
+        "titulo": "Solo el dueño de la cuenta ve esta lista",
+        "corpo": "La lista muestra nombres de clientes, por eso solo el dueño de la cuenta del socio puede verla."
+      },
+      "naoOperacional": {
+        "titulo": "Lista no disponible por ahora",
+        "corpo": "Su registro de socio no está activo en este momento. Cuando vuelva a estar activo, la lista aparecerá aquí."
+      },
+      "indisponivel": {
+        "titulo": "Lista aún no disponible",
+        "corpo": "Esta lista está por llegar. Intente de nuevo en unos días."
       }
     }
   },

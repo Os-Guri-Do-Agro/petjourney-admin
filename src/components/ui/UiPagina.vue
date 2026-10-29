@@ -41,6 +41,7 @@ const props = withDefaults(
     vazioTitulo?: string
     vazioDescricao?: string
     vazioAcao?: string
+    vazioAcaoIcone?: string
     vazioIcone?: string
     bloquearSeSuspenso?: boolean
     semAcessoDeParceiro?: boolean
@@ -63,6 +64,7 @@ const props = withDefaults(
     vazioTitulo: '',
     vazioDescricao: '',
     vazioAcao: '',
+    vazioAcaoIcone: 'ph ph-plus',
     vazioIcone: 'ph ph-tray',
     bloquearSeSuspenso: false,
     semAcessoDeParceiro: false,
@@ -369,7 +371,7 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
       <h2>{{ vazioTitulo || t('frame.emptyDefault') }}</h2>
       <p v-if="vazioDescricao">{{ vazioDescricao }}</p>
       <div v-if="vazioAcao" class="pagina__estado-acoes">
-        <Button icon="ph ph-plus" :label="vazioAcao" @click="emit('acaoDoVazio')" />
+        <Button :icon="vazioAcaoIcone" :label="vazioAcao" @click="emit('acaoDoVazio')" />
       </div>
     </div>
 

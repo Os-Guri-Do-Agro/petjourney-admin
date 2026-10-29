@@ -170,6 +170,7 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
 const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/programas': 'ph ph-squares-four',
   '/parceiro/divulgacao': 'ph ph-megaphone-simple',
+  '/parceiro/indicados': 'ph ph-user-list',
   '/parceiro/acessos': 'ph ph-key',
   '/parceiro/carteira': 'ph ph-wallet',
   '/parceiro/equipe': 'ph ph-users-three',

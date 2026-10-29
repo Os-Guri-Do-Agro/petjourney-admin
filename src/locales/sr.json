@@ -297,6 +297,7 @@
       "overview": "Početna",
       "programas": "Programi",
       "divulgacao": "Promocija",
+      "indicados": "Preporučeni",
       "acessos": "Pristupi",
       "financeiro": "Novčanik",
       "settings": "Podešavanja"
@@ -2171,6 +2172,66 @@
         "enviar": "Pošaljite poziv",
         "cancelar": "Otkažite",
         "reenviarPendente": "Ponovo pošaljite poziv na čekanju"
+      }
+    },
+    "indicados": {
+      "titulo": "Preporučeni",
+      "resumo": "Ko se pridružio PetJourney-ju uz vaš kod ili QR kod, da li se pretplatio i koliki udeo vam je doneo.",
+      "filtroRotulo": "Filtrirajte listu",
+      "filtros": {
+        "TODOS": "Sve",
+        "COM_ASSINATURA": "Pretplaćeni",
+        "SEM_ASSINATURA": "Bez pretplate",
+        "CANCELADO": "Otkazali"
+      },
+      "contador": "{count} osoba | {count} osobe | {count} osoba",
+      "status": {
+        "COM_ASSINATURA": "Pretplatnik",
+        "SEM_ASSINATURA": "Bez pretplate",
+        "CANCELADO": "Otkazano"
+      },
+      "planos": {
+        "MENSAL": "Mesečni plan",
+        "ANUAL": "Godišnji plan"
+      },
+      "assinouEm": "Pretplata od {data}",
+      "entrouEm": "Datum pridruživanja: {data}",
+      "semNome": "Ime nije uneto",
+      "participacao": "udeo",
+      "carregarMais": "Učitajte još",
+      "maisErro": "Nismo uspeli da učitamo ostatak liste.",
+      "erroCarregar": "Nismo uspeli da učitamo listu preporučenih.",
+      "rodape": "Ko izbriše nalog, nestaje sa liste.",
+      "vazio": {
+        "titulo": "Još se niko nije pridružio uz vaš kod",
+        "corpo": "Kada se neko registruje u PetJourney uz vaš kod ili QR kod, ime te osobe će se pojaviti ovde.",
+        "acao": "Prikaži moj kod i QR"
+      },
+      "vazioFiltro": {
+        "COM_ASSINATURA": {
+          "titulo": "Još nema pretplatnika",
+          "corpo": "Ljudi koji su se pridružili sa vašim kodom još nisu uzeli pretplatu."
+        },
+        "SEM_ASSINATURA": {
+          "titulo": "Svi su se pretplatili",
+          "corpo": "Svi koji su se pridružili sa vašim kodom već imaju pretplatu."
+        },
+        "CANCELADO": {
+          "titulo": "Niko nije otkazao",
+          "corpo": "Svi koji su se pretplatili sa vašim kodom i dalje su pretplaćeni."
+        }
+      },
+      "apenasDono": {
+        "titulo": "Samo vlasnik naloga vidi ovu listu",
+        "corpo": "Lista prikazuje imena klijenata, zato je može videti samo vlasnik partnerskog naloga."
+      },
+      "naoOperacional": {
+        "titulo": "Lista trenutno nije dostupna",
+        "corpo": "Vaša partnerska registracija trenutno nije aktivna. Kada ponovo postane aktivna, lista će se pojaviti ovde."
+      },
+      "indisponivel": {
+        "titulo": "Lista još nije dostupna",
+        "corpo": "Ova lista uskoro stiže. Pokušajte ponovo za nekoliko dana."
       }
     }
   },

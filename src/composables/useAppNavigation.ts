@@ -433,12 +433,22 @@ export function useAppNavigation() {
     const items: AppNavigationItem[] = [
       { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'ph ph-squares-four' },
       { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
-      {
-        label: t('nav.items.acessos'),
-        to: '/parceiro/acessos',
-        icon: 'ph ph-clipboard-text',
-      },
     ]
+
+    /* A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada. */
+    if (parceiroStore.isDono) {
+      items.push({
+        label: t('nav.items.indicados'),
+        to: '/parceiro/indicados',
+        icon: 'ph ph-user-list',
+      })
+    }
+
+    items.push({
+      label: t('nav.items.acessos'),
+      to: '/parceiro/acessos',
+      icon: 'ph ph-clipboard-text',
+    })
 
     if (parceiroStore.statusAfiliadoAtivo) {
       items.push({

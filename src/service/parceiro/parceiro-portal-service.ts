@@ -1,6 +1,7 @@
 import { apiFetch } from '../api'
 import type { ApiEnvelope, CursorPage, ExtratoPage } from '../api-envelope'
 import { updateAccessToken } from '../auth/auth-session'
+import type { IndicadoDoParceiroDto, PaginaIndicadosParceiroDto } from '../contrato/openapi'
 import type {
   Carteira,
   CupomParceiro,
@@ -230,6 +231,42 @@ export function getPortalResgates(params?: ParceiroQuery & { cursor?: string; li
   return unwrap(
     apiFetch<ApiEnvelope<CursorPage<ResgateParceiro>>>(
       `/parceiro/portal/resgates${query ? `?${query}` : ''}`,
+    ),
+  )
+}
+
+export type StatusDoIndicado = IndicadoDoParceiroDto['status']
+
+/**
+ * Quem entrou pelo código do parceiro. Só o DONO lê (OPERADOR recebe 403) e só com o parceiro
+ * operável (409). `COM_ASSINATURA` traz também quem assinou e cancelou; `meta.total` é do recorte.
+ */
+export function getPortalIndicados(
+  params?: ParceiroQuery & { status?: StatusDoIndicado; cursor?: string; limit?: number },
+) {
+  const search = new URLSearchParams()
+
+  if (params?.parceiroId) {
+    search.set('parceiroId', params.parceiroId)
+  }
+
+  if (params?.status) {
+    search.set('status', params.status)
+  }
+
+  if (params?.cursor) {
+    search.set('cursor', params.cursor)
+  }
+
+  if (params?.limit) {
+    search.set('limit', String(params.limit))
+  }
+
+  const query = search.toString()
+
+  return unwrap(
+    apiFetch<ApiEnvelope<PaginaIndicadosParceiroDto>>(
+      `/parceiro/portal/indicados${query ? `?${query}` : ''}`,
     ),
   )
 }

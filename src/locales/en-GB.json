@@ -297,6 +297,7 @@
       "overview": "Overview",
       "programas": "Programmes",
       "divulgacao": "Promotion",
+      "indicados": "Referrals",
       "acessos": "Access",
       "financeiro": "Wallet",
       "settings": "Settings"
@@ -2171,6 +2172,66 @@
         "enviar": "Send invitation",
         "cancelar": "Cancel",
         "reenviarPendente": "Resend the pending invitation"
+      }
+    },
+    "indicados": {
+      "titulo": "Referrals",
+      "resumo": "Who joined PetJourney with your code or QR, whether they subscribed and how much participation they earned you.",
+      "filtroRotulo": "Filter the list",
+      "filtros": {
+        "TODOS": "All",
+        "COM_ASSINATURA": "Subscribed",
+        "SEM_ASSINATURA": "Not subscribed",
+        "CANCELADO": "Cancelled"
+      },
+      "contador": "{count} person | {count} people",
+      "status": {
+        "COM_ASSINATURA": "Subscribed",
+        "SEM_ASSINATURA": "Not subscribed",
+        "CANCELADO": "Cancelled"
+      },
+      "planos": {
+        "MENSAL": "Monthly plan",
+        "ANUAL": "Yearly plan"
+      },
+      "assinouEm": "Subscribed on {data}",
+      "entrouEm": "Joined on {data}",
+      "semNome": "No name on file",
+      "participacao": "in participation",
+      "carregarMais": "Load more",
+      "maisErro": "We could not load the rest of the list.",
+      "erroCarregar": "We could not load your referrals.",
+      "rodape": "People who delete their account leave the list.",
+      "vazio": {
+        "titulo": "No one has joined with your code yet",
+        "corpo": "When someone signs up for PetJourney with your code or QR, their name shows up here.",
+        "acao": "See my code and QR"
+      },
+      "vazioFiltro": {
+        "COM_ASSINATURA": {
+          "titulo": "Nobody has subscribed yet",
+          "corpo": "The people who joined with your code have not subscribed yet."
+        },
+        "SEM_ASSINATURA": {
+          "titulo": "Everyone has subscribed",
+          "corpo": "Everyone who joined with your code has already subscribed."
+        },
+        "CANCELADO": {
+          "titulo": "Nobody cancelled",
+          "corpo": "Everyone who subscribed with your code is still subscribed."
+        }
+      },
+      "apenasDono": {
+        "titulo": "Only the account owner can see this list",
+        "corpo": "This list shows client names, so only the owner of the partner account can see it."
+      },
+      "naoOperacional": {
+        "titulo": "List unavailable right now",
+        "corpo": "Your partner registration is not active at the moment. Once it is active again, the list shows up here."
+      },
+      "indisponivel": {
+        "titulo": "List not available yet",
+        "corpo": "This list is on its way. Please try again in a few days."
       }
     }
   },
