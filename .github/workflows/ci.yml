@@ -1,0 +1,36 @@
+name: CI
+
+# Copie para .github/workflows/ci.yml no petjourney-admin (handoff qualidade-de-entrega).
+# Antes: scripts/lint-copy.mjs e scripts/conferir-rotas-no-contrato.mjs (da pasta
+# arquivos/ do handoff) e contrato/openapi.json (do petjourney-api).
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main]
+
+# So leitura: o CI nao escreve no repo.
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run type-check
+      - name: Testes
+        run: npm run test:unit -- --run
+      - name: Chaves de idioma
+        run: npm run check:i18n
+      - name: Lint de copy (travessao e "tutor" em pt)
+        run: node scripts/lint-copy.mjs src/locales
+      - name: Rotas existem no contrato da API
+        run: node scripts/conferir-rotas-no-contrato.mjs contrato/openapi.json src
