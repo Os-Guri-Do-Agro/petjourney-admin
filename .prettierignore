@@ -1,0 +1,2 @@
+# Gerado por scripts/gerar-contrato.mjs a partir do openapi.json da API.
+src/service/contrato/openapi.ts

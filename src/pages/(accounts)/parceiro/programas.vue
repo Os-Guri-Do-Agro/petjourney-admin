@@ -7,7 +7,6 @@ import Button from 'primevue/button'
 
 import ProgramasParticipacaoView from '@/components/parceiro/ProgramasParticipacaoView.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { EQUIPE_MENU_ENABLED } from '@/composables/useAppNavigation'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 
@@ -22,7 +21,7 @@ const LEGACY_ABA_REDIRECTS: Record<string, { path: string; hash?: string; aba?: 
   indicacao: { path: '/parceiro/divulgacao', hash: '#indicacao' },
   cupons: { path: '/parceiro/divulgacao', hash: '#cupons' },
   resgates: { path: '/parceiro/divulgacao', hash: '#resgates' },
-  equipe: { path: EQUIPE_MENU_ENABLED ? '/parceiro/equipe' : '/inicio' },
+  equipe: { path: '/parceiro/equipe' },
 }
 
 const { store, ensureContext } = useParceiroPortal()

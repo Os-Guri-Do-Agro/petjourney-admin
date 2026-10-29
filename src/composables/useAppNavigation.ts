@@ -161,9 +161,6 @@ const HOTEL_BLOCKS: readonly BlocoDeModulo[] = [
   },
 ]
 
-/** Equipe oculta no go-live até a operação do time estar pronta no portal. */
-export const EQUIPE_MENU_ENABLED = false
-
 /**
  * Seção de destino quando a rota atual não pertence a nenhuma — hoje só a visão geral.
  *
@@ -451,9 +448,7 @@ export function useAppNavigation() {
       })
     }
 
-    if (EQUIPE_MENU_ENABLED) {
-      items.push({ label: 'Equipe', to: '/parceiro/equipe', icon: 'ph ph-users' })
-    }
+    items.push({ label: t('parceiro.equipe.titulo'), to: '/parceiro/equipe', icon: 'ph ph-users' })
 
     if (parceiroStore.cadastroSuspenso) {
       return items.map((item) => ({ ...item, locked: true }))

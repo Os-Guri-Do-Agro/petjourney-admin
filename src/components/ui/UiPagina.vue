@@ -305,6 +305,9 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
         <RouterLink class="p-button p-component" to="/settings?aba=empresa">
           {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
+        <RouterLink class="p-button p-component p-button-secondary p-button-outlined" to="/parceiro/convite">
+          {{ t('frame.noAccess.ctaConvites') }}
+        </RouterLink>
         <RouterLink
           v-if="hasVeterinarioProfile()"
           class="p-button p-component p-button-secondary"

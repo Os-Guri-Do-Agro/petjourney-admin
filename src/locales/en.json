@@ -446,7 +446,8 @@
       "ctaPrograms": "Register my company",
       "ctaSettings": "Go to settings",
       "retry": "Check again",
-      "contactLabel": "Questions:"
+      "contactLabel": "Questions:",
+      "ctaConvites": "See my invites"
     },
     "accessRevoked": {
       "title": "Your portal access has ended",
@@ -2052,25 +2053,118 @@
       }
     },
     "convite": {
-      "subtitle": "Team",
-      "title": "Accept invite",
-      "body": "You've received an invite to join a PetJourney partner company's team. Open the invite link from the email to accept.",
-      "idLabel": "Company code",
-      "idHint": "The invite link from the email already fills this in.",
-      "idPlaceholder": "Code from the invite link",
-      "accept": "Accept invite",
-      "footnote": "After accepting, you operate in the portal with the role defined by the company owner.",
-      "toast": {
-        "warnTitle": "Enter the company",
-        "warnDetail": "The invite link must include the partner identifier.",
-        "success": "Invite accepted",
-        "successDetail": "You can now access the company portal.",
-        "error": "Could not accept",
-        "errorDetail": "Check the link or try again."
+      "title": "Team invite",
+      "link": {
+        "corpo": "You have been invited to the team of a PetJourney partner company. Once you accept, you can use its portal.",
+        "aceitar": "Accept invite",
+        "recusar": "Decline",
+        "semSessao": "Sign in to accept. If you do not have an account yet, create one: the invite will wait for you.",
+        "semPrevia": "We couldn't load which company sent this invite right now. You can still accept or decline it.",
+        "semSessaoCadastro": "Create your account to accept the invite. When you finish, you go straight back to it."
+      },
+      "recusado": {
+        "titulo": "Invite declined",
+        "corpo": "If you change your mind, ask the person who invited you for a new invite."
+      },
+      "aceito": "Invite accepted",
+      "aceitoDetalhe": "You are now part of the team.",
+      "naoVale": "This invite is no longer valid",
+      "irParaPortal": "Go to the portal",
+      "caixa": {
+        "titulo": "Your invites",
+        "vazio": "No pending invites",
+        "vazioDica": "Invites arrive by email, with the link to accept.",
+        "deQuem": "{nome} invited you as {papel}",
+        "semNome": "Invite as {papel}",
+        "abraOEmail": "To accept, open the link we sent to your email.",
+        "validoAte": "Valid until {data}",
+        "aceitar": "Accept",
+        "recusar": "Decline",
+        "erroCarregar": "Could not load your invites."
       }
     },
     "equipe": {
-      "titulo": "Team"
+      "titulo": "Team",
+      "resumo": "Who runs the partnership with you and what each person can do.",
+      "convidar": "Invite someone",
+      "pessoas": "People",
+      "voce": "You",
+      "desde": "On the team since {data}",
+      "convidadoPor": "invited by {nome}",
+      "papel": {
+        "DONO": "Owner",
+        "OPERADOR": "Operator"
+      },
+      "papelDica": {
+        "DONO": "Does everything: invites and removes people, manages the wallet, the PIX key and withdrawals.",
+        "OPERADOR": "Follows the partnership and handles day-to-day work. Does not change the team or the wallet."
+      },
+      "maisAcoes": "Actions for {nome}",
+      "tornarDono": "Make owner",
+      "tornarOperador": "Make operator",
+      "remover": "Remove from team",
+      "sair": "Leave team",
+      "soDono": "Only owners invite people, change roles and remove someone from the team.",
+      "erroCarregar": "Could not load the team.",
+      "convites": {
+        "titulo": "Pending invites",
+        "validoAte": "Valid until {data}",
+        "antigo": "Old invite, no expiry",
+        "enviadoEm": "Sent on {data}",
+        "reenviar": "Resend",
+        "cancelar": "Cancel"
+      },
+      "confirmar": {
+        "voltar": "Go back",
+        "remover": {
+          "titulo": "Remove {nome} from the team?",
+          "mensagem": "{nome} loses access to this company's portal right away. Coming back takes a new invite.",
+          "botao": "Remove"
+        },
+        "sair": {
+          "titulo": "Leave the team?",
+          "mensagem": "You lose access to this company's portal right away. Coming back takes a new invite.",
+          "botao": "Leave team"
+        },
+        "dono": {
+          "titulo": "Make {nome} an owner?",
+          "mensagem": "Owners invite and remove people, manage the wallet and the PIX key, and request withdrawals.",
+          "botao": "Make owner"
+        },
+        "operador": {
+          "titulo": "Make {nome} an operator?",
+          "mensagem": "{nome} keeps following the partnership, but can no longer change the team or the wallet.",
+          "botao": "Make operator"
+        },
+        "cancelarConvite": {
+          "titulo": "Cancel the invite to {email}?",
+          "mensagem": "The link sent to this email stops working.",
+          "botao": "Cancel invite"
+        }
+      },
+      "toast": {
+        "convidado": "Invite sent",
+        "convidadoDetalhe": "The link went to {email} and is valid for 14 days.",
+        "reenviado": "Invite resent",
+        "reenviadoDetalhe": "The previous link no longer works.",
+        "cancelado": "Invite cancelled",
+        "papelTrocado": "Role updated",
+        "papelTrocadoDetalhe": "{nome} is now {papel}.",
+        "removido": "Person removed from the team",
+        "saiu": "You left the team",
+        "erro": "That did not work"
+      },
+      "gaveta": {
+        "titulo": "Invite to the team",
+        "email": "Email",
+        "emailDica": "It can belong to someone who does not have a PetJourney account yet.",
+        "emailInvalido": "Check the email.",
+        "papel": "Role",
+        "comoFunciona": "The person gets a link by email and accepts through it. The link is valid for 14 days.",
+        "enviar": "Send invite",
+        "cancelar": "Cancel",
+        "reenviarPendente": "Resend the pending invite"
+      }
     }
   },
   "settings": {

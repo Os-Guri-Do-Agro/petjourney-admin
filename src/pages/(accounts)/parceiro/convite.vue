@@ -1,231 +1,490 @@
 <script setup lang="ts">
+/**
+ * O convite para a equipe (E0-01), em dois caminhos.
+ *
+ * Com o link do e-mail: a guarda do roteador já tirou o `token` da URL e o guardou
+ * (`convite-pendente.ts`). A tela pede a prévia (PJ-4BI7TE) para dizer de que empresa é o
+ * convite, quem convidou, com que papel e até quando vale; depois aceita ou recusa e esquece o
+ * token. Qualquer conta logada aceita: o token prova que a pessoa abriu o e-mail convidado.
+ *
+ * Sem o link: os convites que chegaram para esta conta (`meus-convites`). O convite novo só se
+ * aceita pelo link, então a linha dele só diz para abrir o e-mail; o antigo (`CAIXA`) ainda aceita
+ * aqui.
+ */
 import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
+import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { aceitarConviteEquipe } from '@/service/parceiro/parceiro-portal-service'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { ApiError } from '@/service/api'
+import type { ConviteAceitoDto, MeuConviteDto, PreviaConviteDto } from '@/service/contrato/openapi'
+import { esquecerTokenDoConvite, lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
+import {
+  aceitarConviteDaCaixa,
+  aceitarConvitePorLink,
+  listarMeusConvites,
+  previaDoConvitePorLink,
+  recusarConviteDaCaixa,
+  recusarConvitePorLink,
+} from '@/service/parceiro/equipe-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
-const { t } = useI18n()
+type Estado = 'link' | 'caixa' | 'recusado' | 'jaMembro'
+
+const { t, locale } = useI18n()
 const toast = useToast()
-const route = useRoute()
 const router = useRouter()
 const store = useParceiroStore()
 
-const parceiroIdInput = ref('')
-const accepting = ref(false)
-const accepted = ref(false)
+const token = ref(lerTokenDoConvite())
+const estado = ref<Estado>(token.value ? 'link' : 'caixa')
+/** A `message` da API quando o link não vale mais (expirado, usado, trocado por reenvio). */
+const avisoDoLink = ref('')
+const trabalhando = ref<string | null>(null)
 
-const parceiroIdFromQuery = computed(() =>
-  typeof route.query.parceiroId === 'string' ? route.query.parceiroId.trim() : '',
+/** `undefined` enquanto a prévia carrega; `null` quando ela falhou e o convite segue sem nome. */
+const previa = ref<PreviaConviteDto | null | undefined>(undefined)
+
+const convites = ref<MeuConviteDto[] | null>(null)
+const erroDaCaixa = ref('')
+
+const tituloDaTela = computed(() => {
+  if (estado.value === 'recusado') {
+    return t('parceiro.convite.recusado.titulo')
+  }
+
+  return estado.value === 'caixa' ? t('parceiro.convite.caixa.titulo') : t('parceiro.convite.title')
+})
+
+const resumoDaTela = computed(
+  () =>
+    ({
+      link: t('parceiro.convite.link.corpo'),
+      caixa: t('parceiro.convite.caixa.vazioDica'),
+      recusado: t('parceiro.convite.recusado.corpo'),
+      jaMembro: avisoDoLink.value,
+    })[estado.value],
 )
 
-async function handleAccept() {
-  const parceiroId = parceiroIdInput.value.trim() || parceiroIdFromQuery.value
+function formatarData(iso: string) {
+  return new Date(iso).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
+    day: 'numeric',
+    month: 'long',
+  })
+}
 
-  if (!parceiroId) {
-    toast.add({
-      severity: 'warn',
-      summary: t('parceiro.convite.toast.warnTitle'),
-      detail: t('parceiro.convite.toast.warnDetail'),
-      life: 4000,
-    })
+/** "Helena Prado convidou você como operador." ou, sem o nome de quem convidou, só o papel. */
+function deQuem(convite: Pick<MeuConviteDto, 'convidadoPorNome' | 'papel'>) {
+  const papel = t(`parceiro.equipe.papel.${convite.papel}`).toLowerCase()
+
+  return convite.convidadoPorNome
+    ? t('parceiro.convite.caixa.deQuem', { nome: convite.convidadoPorNome, papel })
+    : t('parceiro.convite.caixa.semNome', { papel })
+}
+
+async function entrarNaEquipe(aceito: ConviteAceitoDto) {
+  store.setParceiroId(aceito.parceiroId)
+  toast.add({
+    severity: 'success',
+    summary: t('parceiro.convite.aceito'),
+    detail: t('parceiro.convite.aceitoDetalhe'),
+    life: 4000,
+  })
+  await store.bootstrap(true).catch(() => undefined)
+  await router.replace(getDefaultLandingPath())
+}
+
+function avisarErro(err: unknown) {
+  toast.add({
+    severity: 'error',
+    summary: t('parceiro.equipe.toast.erro'),
+    detail: err instanceof Error ? err.message : undefined,
+    life: 6000,
+  })
+}
+
+/* ------------------------------------------------------------------------- pelo link */
+
+/**
+ * Link que não vale mais (expirado, já usado, cancelado ou trocado por um reenvio): o token sai,
+ * a tela diz o motivo com a mensagem da API e mostra os convites que ainda valem.
+ */
+function linkSemValor(err: unknown) {
+  const codigo = err instanceof ApiError ? err.codigo : undefined
+
+  if (codigo !== 'CONVITE_EXPIRADO' && codigo !== 'CONVITE_NAO_ENCONTRADO') {
+    return false
+  }
+
+  esquecerTokenDoConvite()
+  token.value = null
+  avisoDoLink.value = (err as Error).message
+  estado.value = 'caixa'
+  void carregarCaixa()
+  return true
+}
+
+async function carregarPrevia() {
+  const valor = token.value
+
+  if (!valor) {
     return
   }
 
-  accepting.value = true
+  try {
+    previa.value = await previaDoConvitePorLink(valor)
+  } catch (err) {
+    /* Outra falha (rede, servidor): o convite continua valendo, só sem dizer de quem é. */
+    if (!linkSemValor(err)) {
+      previa.value = null
+    }
+  }
+}
+
+async function decidirPeloLink(aceitar: boolean) {
+  const valor = token.value
+
+  if (!valor || trabalhando.value) {
+    return
+  }
+
+  trabalhando.value = aceitar ? 'aceitar' : 'recusar'
 
   try {
-    await aceitarConviteEquipe(parceiroId)
-    store.setParceiroId(parceiroId)
-    accepted.value = true
-    toast.add({
-      severity: 'success',
-      summary: t('parceiro.convite.toast.success'),
-      detail: t('parceiro.convite.toast.successDetail'),
-      life: 4000,
-    })
-    await store.bootstrap(true)
-    await router.replace(getDefaultLandingPath())
+    if (aceitar) {
+      const aceito = await aceitarConvitePorLink(valor)
+      esquecerTokenDoConvite()
+      await entrarNaEquipe(aceito)
+      return
+    }
+
+    await recusarConvitePorLink(valor)
+    esquecerTokenDoConvite()
+    estado.value = 'recusado'
   } catch (err) {
-    toast.add({
-      severity: 'error',
-      summary: t('parceiro.convite.toast.error'),
-      detail: err instanceof Error ? err.message : t('parceiro.convite.toast.errorDetail'),
-      life: 5000,
-    })
+    if (linkSemValor(err)) {
+      return
+    }
+
+    if (err instanceof ApiError && err.codigo === 'EQUIPE_JA_MEMBRO') {
+      esquecerTokenDoConvite()
+      avisoDoLink.value = err.message
+      estado.value = 'jaMembro'
+      return
+    }
+
+    avisarErro(err)
   } finally {
-    accepting.value = false
+    trabalhando.value = null
+  }
+}
+
+/* ------------------------------------------------------------------------- pela caixa */
+
+async function carregarCaixa() {
+  erroDaCaixa.value = ''
+
+  try {
+    convites.value = await listarMeusConvites()
+  } catch (err) {
+    erroDaCaixa.value =
+      err instanceof Error ? err.message : t('parceiro.convite.caixa.erroCarregar')
+  }
+}
+
+async function decidirPelaCaixa(convite: MeuConviteDto, aceitar: boolean) {
+  if (trabalhando.value) {
+    return
+  }
+
+  trabalhando.value = `${convite.conviteId}:${aceitar ? 'aceitar' : 'recusar'}`
+
+  try {
+    if (aceitar) {
+      await entrarNaEquipe(await aceitarConviteDaCaixa(convite.conviteId))
+      return
+    }
+
+    await recusarConviteDaCaixa(convite.conviteId)
+    await carregarCaixa()
+  } catch (err) {
+    avisarErro(err)
+    await carregarCaixa()
+  } finally {
+    trabalhando.value = null
   }
 }
 
 onMounted(() => {
-  if (parceiroIdFromQuery.value) {
-    parceiroIdInput.value = parceiroIdFromQuery.value
+  if (estado.value === 'link') {
+    void carregarPrevia()
+  } else {
+    void carregarCaixa()
   }
 })
 </script>
 
 <template>
-  <!--
-    O convite numa folha só, no meio da tela: o que é, o identificador da empresa (que já vem
-    preenchido quando a pessoa abre o link do e-mail) e o botão de aceitar.
-  -->
-  <UiPagina class="tela-convite" :titulo="t('parceiro.convite.title')">
-    <template #cabecalho>
-      <div class="centro-cabeca">
-        <span class="ui-ladrilho ui-ladrilho--lugar centro-cabeca__selo" aria-hidden="true">
-          <i :class="accepted ? 'ph ph-check-circle' : 'ph ph-envelope-open'" />
+  <UiPagina class="tela-convite" :titulo="tituloDaTela" :resumo="resumoDaTela">
+    <!--
+      Pelo link do e-mail: o convite numa linha, como os da Equipe. A empresa e quem convidou à
+      esquerda; recusar e aceitar à direita, os dois com contorno ou fundo à vista.
+    -->
+    <ul v-if="estado === 'link'" class="ui-lista ui-folha" aria-live="polite">
+      <li class="ui-linha convite-linha">
+        <template v-if="previa === undefined">
+          <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" aria-hidden="true" />
+          <span class="ui-linha__texto" aria-hidden="true">
+            <Skeleton width="14rem" height="1rem" border-radius="6px" />
+            <Skeleton width="20rem" height="0.85rem" border-radius="6px" />
+          </span>
+        </template>
+
+        <template v-else-if="previa">
+          <img
+            v-if="previa.parceiro.logoUrl"
+            class="convite-linha__logo"
+            :src="previa.parceiro.logoUrl"
+            alt=""
+          />
+          <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+            <i class="ph ph-buildings" />
+          </span>
+
+          <span class="ui-linha__texto">
+            <span class="ui-linha__titulo convite-linha__empresa">{{ previa.parceiro.nome }}</span>
+            <span class="ui-linha__meta">
+              {{ deQuem(previa) }}
+              ·
+              {{ t('parceiro.convite.caixa.validoAte', { data: formatarData(previa.expiraEm) }) }}
+            </span>
+          </span>
+        </template>
+
+        <template v-else>
+          <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+            <i class="ph ph-envelope-open" />
+          </span>
+          <span class="ui-linha__texto">
+            <span class="ui-linha__meta convite-linha__sem-previa">
+              {{ t('parceiro.convite.link.semPrevia') }}
+            </span>
+          </span>
+        </template>
+
+        <span class="ui-linha__fim convite-linha__acoes">
+          <Button
+            type="button"
+            :label="t('parceiro.convite.link.recusar')"
+            severity="secondary"
+            outlined
+            :loading="trabalhando === 'recusar'"
+            :disabled="previa === undefined || trabalhando !== null"
+            @click="decidirPeloLink(false)"
+          />
+          <Button
+            type="button"
+            icon="ph ph-check"
+            :label="t('parceiro.convite.link.aceitar')"
+            :loading="trabalhando === 'aceitar'"
+            :disabled="previa === undefined || trabalhando !== null"
+            @click="decidirPeloLink(true)"
+          />
         </span>
-        <h1 class="centro-cabeca__titulo">{{ t('parceiro.convite.title') }}</h1>
-        <p class="centro-cabeca__texto">{{ t('parceiro.convite.body') }}</p>
-      </div>
-    </template>
+      </li>
+    </ul>
 
-    <form class="convite ui-folha" novalidate @submit.prevent="handleAccept">
-      <div class="convite__campo">
-        <label for="convite-parceiro-id">{{ t('parceiro.convite.idLabel') }}</label>
-        <InputText
-          id="convite-parceiro-id"
-          v-model="parceiroIdInput"
-          class="convite__entrada"
-          :disabled="accepting"
-          :placeholder="t('parceiro.convite.idPlaceholder')"
-          autocomplete="off"
-          spellcheck="false"
-          aria-describedby="convite-parceiro-id-dica"
-        />
-        <small id="convite-parceiro-id-dica" class="convite__dica">
-          {{ t('parceiro.convite.idHint') }}
-        </small>
-      </div>
+    <div v-else-if="estado === 'jaMembro' || estado === 'recusado'">
+      <RouterLink class="p-button p-component" :to="getDefaultLandingPath()">
+        <i class="ph ph-house" aria-hidden="true" />
+        {{ t('parceiro.convite.irParaPortal') }}
+      </RouterLink>
+    </div>
 
-      <Button
-        type="submit"
-        class="convite__aceitar"
-        icon="ph ph-check"
-        :label="t('parceiro.convite.accept')"
-        :loading="accepting"
-      />
-
-      <p class="convite__rodape">
-        <i class="ph ph-users-three" aria-hidden="true" />
-        {{ t('parceiro.convite.footnote') }}
+    <!-- Sem o link: os convites desta conta. -->
+    <div v-else class="caixa">
+      <p v-if="avisoDoLink" class="caixa__aviso" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>
+          <strong>{{ t('parceiro.convite.naoVale') }}</strong>
+          {{ avisoDoLink }}
+        </span>
       </p>
-    </form>
+
+      <ul v-if="!convites && !erroDaCaixa" class="ui-lista ui-folha" aria-hidden="true">
+        <li v-for="n in 2" :key="n" class="ui-linha">
+          <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" />
+          <span class="ui-linha__texto">
+            <Skeleton width="12rem" height="0.95rem" border-radius="6px" />
+            <Skeleton width="18rem" height="0.8rem" border-radius="6px" />
+          </span>
+        </li>
+      </ul>
+
+      <div v-else-if="erroDaCaixa" class="caixa__erro ui-folha" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>{{ erroDaCaixa }}</span>
+        <Button
+          type="button"
+          icon="ph ph-arrow-clockwise"
+          :label="t('common.retry')"
+          severity="secondary"
+          outlined
+          size="small"
+          @click="carregarCaixa"
+        />
+      </div>
+
+      <ul v-else-if="convites" class="ui-lista ui-folha">
+        <li v-if="!convites.length" class="ui-linha">
+          <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+            <i class="ph ph-tray" />
+          </span>
+          <span class="ui-linha__texto">
+            <span class="ui-linha__titulo">{{ t('parceiro.convite.caixa.vazio') }}</span>
+          </span>
+        </li>
+
+        <li v-for="convite in convites" :key="convite.conviteId" class="ui-linha convite-linha">
+          <img
+            v-if="convite.parceiro.logoUrl"
+            class="convite-linha__logo"
+            :src="convite.parceiro.logoUrl"
+            alt=""
+          />
+          <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+            <i class="ph ph-buildings" />
+          </span>
+
+          <span class="ui-linha__texto">
+            <span class="ui-linha__titulo">{{ convite.parceiro.nome }}</span>
+            <span class="ui-linha__meta">
+              {{ deQuem(convite) }}
+              <template v-if="convite.expiraEm">
+                ·
+                {{
+                  t('parceiro.convite.caixa.validoAte', { data: formatarData(convite.expiraEm) })
+                }}
+              </template>
+            </span>
+            <span v-if="convite.aceitaPor === 'LINK'" class="ui-linha__meta caixa__dica">
+              <i class="ph ph-envelope-simple" aria-hidden="true" />
+              {{ t('parceiro.convite.caixa.abraOEmail') }}
+            </span>
+          </span>
+
+          <span v-if="convite.aceitaPor === 'CAIXA'" class="ui-linha__fim convite-linha__acoes">
+            <Button
+              type="button"
+              :label="t('parceiro.convite.caixa.recusar')"
+              severity="secondary"
+              outlined
+              size="small"
+              :loading="trabalhando === `${convite.conviteId}:recusar`"
+              :disabled="trabalhando !== null"
+              @click="decidirPelaCaixa(convite, false)"
+            />
+            <Button
+              type="button"
+              icon="ph ph-check"
+              :label="t('parceiro.convite.caixa.aceitar')"
+              size="small"
+              :loading="trabalhando === `${convite.conviteId}:aceitar`"
+              :disabled="trabalhando !== null"
+              @click="decidirPelaCaixa(convite, true)"
+            />
+          </span>
+        </li>
+      </ul>
+    </div>
   </UiPagina>
 </template>
 
 <style scoped>
-.centro-cabeca {
+.convite-linha {
+  flex-wrap: wrap;
+  row-gap: 12px;
+}
+
+.convite-linha__logo {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.convite-linha__logo--sem {
   display: grid;
-  width: 100%;
-  max-width: 30rem;
-  justify-items: center;
+  place-items: center;
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+  font-size: 20px;
+}
+
+.convite-linha__empresa {
+  font-size: 16px;
+}
+
+.convite-linha__sem-previa {
+  max-width: 60ch;
+  color: var(--tinta);
+}
+
+.convite-linha__acoes {
   gap: 8px;
-  margin: clamp(16px, 7vh, 80px) auto 0;
-  text-align: center;
+  margin-inline-start: auto;
 }
 
-.centro-cabeca__selo.ui-ladrilho {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
-  font-size: 28px;
-}
-
-.centro-cabeca__titulo {
-  margin: 12px 0 0;
-  color: var(--tinta);
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.centro-cabeca__texto {
-  max-width: 46ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.convite {
+.caixa {
   display: grid;
-  width: 100%;
-  max-width: 30rem;
-  gap: 18px;
-  margin: 8px auto 0;
-  padding: 26px 26px 22px;
+  gap: 14px;
 }
 
-.convite__campo {
-  display: grid;
-  gap: 6px;
-}
-
-.convite__campo label {
-  color: var(--tinta);
-  font-size: 13.5px;
-  font-weight: 550;
-}
-
-.convite__entrada.p-inputtext {
-  width: 100%;
-  min-height: 46px;
-  font-family: var(--font-dados);
-  font-size: 15.5px;
-}
-
-.convite__dica {
-  color: var(--tinta-2);
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.convite__aceitar.p-button {
-  width: 100%;
-  min-height: 46px;
-  font-size: 15px;
-}
-
-.convite__rodape {
+.caixa__aviso {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  max-width: 72ch;
   margin: 0;
-  padding: 12px 14px;
-  border: 1px solid var(--linha-suave);
-  border-radius: var(--raio-cartao-pequeno);
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 13.5px;
+  color: var(--tinta);
+  font-size: 14px;
   line-height: 1.5;
 }
 
-.convite__rodape i {
-  margin-top: 1px;
-  color: var(--tinta-3);
-  font-size: 17px;
+.caixa__aviso > i {
+  margin-top: 2px;
+  color: var(--risco-tinta);
+  font-size: 18px;
 }
 
-@media (max-width: 520px) {
-  .centro-cabeca {
-    margin-top: 8px;
-  }
+.caixa__aviso strong {
+  display: block;
+}
 
-  .centro-cabeca__titulo {
-    font-size: 24px;
-  }
+.caixa__erro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  color: var(--tinta);
+  font-size: 14px;
+}
 
-  .convite {
-    padding: 20px 16px;
-  }
+.caixa__erro > i {
+  color: var(--risco-tinta);
+  font-size: 18px;
+}
+
+.caixa__dica {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 </style>

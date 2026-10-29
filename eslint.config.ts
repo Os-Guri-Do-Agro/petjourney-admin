@@ -23,6 +23,8 @@ export default defineConfigWithVueTs(
     '**/src/_mocks/**',
     // Pasta de trabalho local da tradução sr/ar (fora do git).
     '.i18n-work/**',
+    // Gerado do openapi.json da API (`npm run contrato:gerar`).
+    'src/service/contrato/openapi.ts',
   ]),
 
   ...pluginVue.configs['flat/essential'],

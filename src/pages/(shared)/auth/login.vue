@@ -16,6 +16,7 @@ import {
   type ReactivateProfile,
 } from '@/service/user/inativacao-service'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
+import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const { t } = useI18n()
@@ -51,6 +52,8 @@ async function focarSenha() {
 const pendingReactivate = ref<ReactivateProfile[]>([])
 
 const route = useRoute()
+/** Quem chega pelo link do convite para a equipe vê por que precisa entrar (ver `convite-pendente.ts`). */
+const convitePendente = Boolean(lerTokenDoConvite())
 const router = useRouter()
 const toast = useToast()
 const usuarioPerfilStore = useUsuarioPerfilStore()
@@ -274,6 +277,11 @@ function cancelReactivate() {
     </div>
 
     <form v-else class="login-form" @submit.prevent="handleLogin">
+      <p v-if="convitePendente" class="login-convite" role="status">
+        <i class="ph ph-envelope-open" aria-hidden="true" />
+        {{ t('parceiro.convite.link.semSessao') }}
+      </p>
+
       <AuthTextField
         id="email"
         v-model="email"
@@ -349,6 +357,25 @@ function cancelReactivate() {
 .login-form {
   display: grid;
   gap: 20px;
+}
+
+.login-convite {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.login-convite i {
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
 .login-password-group {

@@ -15,7 +15,8 @@
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
-    "contrato:demo": "node scripts/gerar-demo-responsavel.mjs"
+    "contrato:demo": "node scripts/gerar-demo-responsavel.mjs",
+    "contrato:gerar": "node scripts/gerar-contrato.mjs"
   },
   "dependencies": {
     "@fontsource-variable/instrument-sans": "^5.2.8",

@@ -9,7 +9,6 @@ import type {
   IndicacaoMetricas,
   ModoParticipacao,
   ModoStatusBloco,
-  PapelParceiro,
   ParceiroCadastro,
   ParceiroCadastroPatchPayload,
   ParceiroCadastroPayload,
@@ -360,38 +359,4 @@ export function solicitarModo(modo: ModoParticipacao, params?: ParceiroQuery) {
       },
     ),
   )
-}
-
-export function convidarMembroEquipe(
-  payload: { email: string; papel: PapelParceiro },
-  params?: ParceiroQuery,
-) {
-  return unwrap(
-    apiFetch<
-      ApiEnvelope<{
-        parceiroId: string
-        usuarioId: string
-        papel: PapelParceiro
-        status: 'PENDENTE'
-      }>
-    >(`/parceiro/portal/equipe/convites${buildParceiroQuery(params)}`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    }),
-  )
-}
-
-export function aceitarConviteEquipe(parceiroId: string) {
-  return unwrap(
-    apiFetch<ApiEnvelope<{ parceiroId: string; status: 'ACEITO' }>>(
-      `/parceiro/portal/equipe/convites/aceitar?parceiroId=${encodeURIComponent(parceiroId)}`,
-      { method: 'PATCH' },
-    ),
-  )
-}
-
-export function removerMembroEquipe(usuarioId: string, params?: ParceiroQuery) {
-  return apiFetch<void>(`/parceiro/portal/equipe/${usuarioId}${buildParceiroQuery(params)}`, {
-    method: 'DELETE',
-  })
 }

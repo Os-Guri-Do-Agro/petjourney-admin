@@ -1,0 +1,149 @@
+/**
+ * A equipe do parceiro (E0-01): lista, convite por e-mail, convite aceito só pelo link, troca de
+ * papel, remoção e saída. Guias no Nevo: "Portal do parceiro, onda 0" e o handoff do PJ-4BI7TE
+ * (prévia do convite pelo token).
+ *
+ * O convite novo só se aceita pelo token do link do e-mail; a caixa (`meus-convites`) é aviso,
+ * e só o convite antigo (`aceitaPor: 'CAIXA'`) aceita por lá.
+ */
+import { apiFetch } from '../api'
+import type { ApiEnvelope } from '../api-envelope'
+import type {
+  ConviteAceitoDto,
+  ConviteCriadoDto,
+  EquipeParceiroDto,
+  MembroAtualizadoDto,
+  MeuConviteDto,
+  PreviaConviteDto,
+} from '../contrato/openapi'
+import type { PapelParceiro } from './types'
+
+type ParceiroQuery = {
+  parceiroId?: string | null
+}
+
+const BASE = '/parceiro/portal/equipe'
+
+function buildParceiroQuery(params?: ParceiroQuery) {
+  return params?.parceiroId ? `?parceiroId=${encodeURIComponent(params.parceiroId)}` : ''
+}
+
+async function unwrap<T>(promise: Promise<ApiEnvelope<T>>) {
+  const response = await promise
+
+  return response.data
+}
+
+/* O id do convite antigo é `legado:<id>`: os dois-pontos vão codificados no caminho. */
+function idNoCaminho(id: string) {
+  return encodeURIComponent(id)
+}
+
+export function listarEquipe(params?: ParceiroQuery) {
+  return unwrap(apiFetch<ApiEnvelope<EquipeParceiroDto>>(`${BASE}${buildParceiroQuery(params)}`))
+}
+
+export function convidarParaEquipe(
+  payload: { email: string; papel: PapelParceiro },
+  params?: ParceiroQuery,
+) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ConviteCriadoDto>>(`${BASE}/convites${buildParceiroQuery(params)}`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  )
+}
+
+export function cancelarConvite(conviteId: string, params?: ParceiroQuery) {
+  return apiFetch<void>(`${BASE}/convites/${idNoCaminho(conviteId)}${buildParceiroQuery(params)}`, {
+    method: 'DELETE',
+  })
+}
+
+export function reenviarConvite(conviteId: string, params?: ParceiroQuery) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ConviteCriadoDto>>(
+      `${BASE}/convites/${idNoCaminho(conviteId)}/reenviar${buildParceiroQuery(params)}`,
+      { method: 'POST', body: JSON.stringify({}) },
+    ),
+  )
+}
+
+export function trocarPapelDoMembro(
+  usuarioId: string,
+  papel: PapelParceiro,
+  params?: ParceiroQuery,
+) {
+  return unwrap(
+    apiFetch<ApiEnvelope<MembroAtualizadoDto>>(
+      `${BASE}/${idNoCaminho(usuarioId)}${buildParceiroQuery(params)}`,
+      { method: 'PATCH', body: JSON.stringify({ papel }) },
+    ),
+  )
+}
+
+export function removerDaEquipe(usuarioId: string, params?: ParceiroQuery) {
+  return apiFetch<void>(`${BASE}/${idNoCaminho(usuarioId)}${buildParceiroQuery(params)}`, {
+    method: 'DELETE',
+  })
+}
+
+export function sairDaEquipe(params?: ParceiroQuery) {
+  return apiFetch<void>(`${BASE}/sair${buildParceiroQuery(params)}`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+}
+
+/** Os convites que chegaram para a conta logada, mesmo sem ela ser membro de parceiro nenhum. */
+export function listarMeusConvites() {
+  return unwrap(apiFetch<ApiEnvelope<MeuConviteDto[]>>(`${BASE}/meus-convites`))
+}
+
+/** Só o convite antigo (`aceitaPor: 'CAIXA'`); o novo responde 403 `CONVITE_EXIGE_LINK`. */
+export function aceitarConviteDaCaixa(conviteId: string) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ConviteAceitoDto>>(
+      `${BASE}/meus-convites/${idNoCaminho(conviteId)}/aceitar`,
+      { method: 'POST', body: JSON.stringify({}) },
+    ),
+  )
+}
+
+export function recusarConviteDaCaixa(conviteId: string) {
+  return apiFetch<void>(`${BASE}/meus-convites/${idNoCaminho(conviteId)}/recusar`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+}
+
+/**
+ * De que empresa é o convite, antes do aceite (PJ-4BI7TE): empresa, papel, quem convidou e prazo.
+ * POST, e não GET, para o token não ir para o log de acesso. 404 `CONVITE_NAO_ENCONTRADO` e 410
+ * `CONVITE_EXPIRADO`, como o aceite.
+ */
+export function previaDoConvitePorLink(token: string) {
+  return unwrap(
+    apiFetch<ApiEnvelope<PreviaConviteDto>>(`${BASE}/convites/previa-por-link`, {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
+  )
+}
+
+export function aceitarConvitePorLink(token: string) {
+  return unwrap(
+    apiFetch<ApiEnvelope<ConviteAceitoDto>>(`${BASE}/convites/aceitar-por-link`, {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    }),
+  )
+}
+
+export function recusarConvitePorLink(token: string) {
+  return apiFetch<void>(`${BASE}/convites/recusar-por-link`, {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  })
+}

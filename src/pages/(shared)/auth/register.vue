@@ -10,6 +10,7 @@ import AuthLayout from '@/components/auth/AuthLayout.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
 import RegisterStepIndicator from '@/components/auth/RegisterStepIndicator.vue'
+import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
 import { checkEmailAvailability, registerUsuario } from '@/service/user/user-service'
 import { isPasswordValid } from '@/utils/validation/password'
 
@@ -30,6 +31,8 @@ const STEP_LABELS = computed(() => [
 ])
 
 const router = useRouter()
+/** Quem veio pelo link do convite para a equipe volta para ele, e não para o credenciamento. */
+const convitePendente = Boolean(lerTokenDoConvite())
 const toast = useToast()
 
 const currentStep = ref(1)
@@ -224,8 +227,11 @@ async function handleSubmit() {
       life: 4000,
     })
 
-    /* Todo cadastro novo entra no funil de credenciamento da empresa. */
-    await router.replace('/settings?aba=empresa')
+    /*
+     * Todo cadastro novo entra no funil de credenciamento da empresa, menos o de quem veio pelo
+     * convite da equipe: essa pessoa vai operar a empresa que convidou, não cadastrar a dela.
+     */
+    await router.replace(convitePendente ? '/parceiro/convite' : '/settings?aba=empresa')
   } catch (error) {
     globalError.value =
       error instanceof Error ? error.message : t('auth.register.errors.submitFailed')
@@ -251,6 +257,11 @@ async function handleSubmit() {
         :total-steps="TOTAL_STEPS"
         :list-label="t('auth.register.stepsAria')"
       />
+
+      <p v-if="convitePendente" class="register-convite" role="status">
+        <i class="ph ph-envelope-open" aria-hidden="true" />
+        {{ t('parceiro.convite.link.semSessaoCadastro') }}
+      </p>
 
       <!-- `novalidate`: a conferência é a da tela, embaixo de cada campo e no idioma do portal. O
            balão do navegador ("Preencha este campo.") tapava a lista de requisitos da senha. -->
@@ -419,6 +430,25 @@ async function handleSubmit() {
 .register-flow {
   display: grid;
   gap: 24px;
+}
+
+.register-convite {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.register-convite i {
+  margin-top: 2px;
+  color: var(--tinta-2);
+  font-size: 18px;
 }
 
 .register-form {
