@@ -2653,7 +2653,7 @@
       "anos": "{valor} year | {valor} years",
       "meses": "{valor} month | {valor} months",
       "anosMeses": "{anos}y {meses}m",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} day | {valor} days",
       "idadeDesconhecida": "age unknown",
       "kg": "kg"
@@ -7176,7 +7176,7 @@
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "House routine",

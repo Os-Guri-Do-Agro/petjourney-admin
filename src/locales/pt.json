@@ -2653,7 +2653,7 @@
       "anos": "{valor} ano | {valor} anos",
       "meses": "{valor} mês | {valor} meses",
       "anosMeses": "{anos}a {meses}m",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} dia | {valor} dias",
       "idadeDesconhecida": "idade não informada",
       "kg": "kg"
@@ -7176,7 +7176,7 @@
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "Rotina padrão da casa",

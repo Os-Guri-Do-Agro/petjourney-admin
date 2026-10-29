@@ -2653,7 +2653,7 @@
       "anos": "{valor} godina | {valor} godine | {valor} godina",
       "meses": "{valor} mesec | {valor} meseca | {valor} meseci",
       "anosMeses": "{anos} g. {meses} mes.",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} dan | {valor} dana | {valor} dana",
       "idadeDesconhecida": "starost nije navedena",
       "kg": "kg"
@@ -7176,7 +7176,7 @@
       "horas": "{valor} h",
       "horasMinutos": "{horas} h {minutos} min",
       "minutos": "{valor} min",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "Standardna rutina kuće",

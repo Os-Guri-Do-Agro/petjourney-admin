@@ -2653,7 +2653,7 @@
       "anos": "أقل من سنة | سنة واحدة | سنتان | {valor} سنوات | {valor} سنة | {valor} سنة",
       "meses": "أقل من شهر | شهر واحد | شهران | {valor} أشهر | {valor} شهرًا | {valor} شهر",
       "anosMeses": "السنوات: {anos}، الأشهر: {meses}",
-      "semvalor": "—",
+      "semvalor": "-",
       "dias": "{valor} يوم | يوم واحد | يومين | {valor} أيام | {valor} يومًا | {valor} يوم",
       "idadeDesconhecida": "العمر غير معروف",
       "kg": "kg"
@@ -7176,7 +7176,7 @@
       "horas": "{valor} ساعة",
       "horasMinutos": "{horas} ساعة و{minutos} دقيقة",
       "minutos": "{valor} دقيقة",
-      "semvalor": "—"
+      "semvalor": "-"
     },
     "gerenciar": {
       "padrao": "الروتين القياسي للدار",
