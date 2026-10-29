@@ -1825,8 +1825,8 @@
       "pix": {
         "title": "Chave PIX",
         "label": "Chave PIX",
-        "hint": "Necessária para solicitar saques.",
-        "invalida": "Esta não parece uma chave PIX. Use CPF, CNPJ, e-mail, celular com DDD ou a chave aleatória do banco.",
+        "hint": "Necessária para os saques. Celular vai com +55 e DDD: +55 11 98765-4321.",
+        "invalida": "Esta não parece uma chave PIX. Use CPF, CNPJ, e-mail, celular com +55 e DDD ou a chave aleatória do banco.",
         "placeholder": "email{'@'}empresa.com ou CNPJ",
         "save": "Salvar chave"
       },
@@ -2339,7 +2339,8 @@
         "currentRequired": "Informe a senha atual.",
         "newInvalid": "A nova senha não atende todos os requisitos.",
         "confirmRequired": "Confirme a nova senha.",
-        "mismatch": "As senhas não coincidem."
+        "mismatch": "As senhas não coincidem.",
+        "throttle": "Muitas tentativas. Aguarde alguns minutos e tente de novo."
       },
       "toasts": {
         "success": {

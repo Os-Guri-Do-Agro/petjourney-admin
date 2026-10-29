@@ -1825,8 +1825,8 @@
       "pix": {
         "title": "Clave PIX",
         "label": "Clave PIX",
-        "hint": "Necesaria para solicitar retiros.",
-        "invalida": "Esto no parece una clave PIX. Use CPF, CNPJ, correo, celular con código de área o la clave aleatoria del banco.",
+        "hint": "Necesaria para los retiros. El celular va con +55 y código de área: +55 11 98765-4321.",
+        "invalida": "Esto no parece una clave PIX. Use CPF, CNPJ, correo, celular con +55 y código de área o la clave aleatoria del banco.",
         "placeholder": "email{'@'}empresa.com o CNPJ",
         "save": "Guardar clave"
       },
@@ -2339,7 +2339,8 @@
         "currentRequired": "Indique la contraseña actual.",
         "newInvalid": "La nueva contraseña no cumple todos los requisitos.",
         "confirmRequired": "Confirme la nueva contraseña.",
-        "mismatch": "Las contraseñas no coinciden."
+        "mismatch": "Las contraseñas no coinciden.",
+        "throttle": "Demasiados intentos. Espere unos minutos e intente de nuevo."
       },
       "toasts": {
         "success": {

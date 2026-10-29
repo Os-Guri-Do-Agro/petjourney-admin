@@ -76,7 +76,10 @@ const error = ref('')
 const chavePix = ref('')
 const valorSaque = ref('')
 const savingPix = ref(false)
-/** A chave que não é CPF, CNPJ, e-mail, telefone nem aleatória: recusada antes de ir à API. */
+/**
+ * A chave que não é CPF, CNPJ, e-mail, telefone nem aleatória: recusada antes de ir à API, ou pela
+ * API (400 `CHAVE_PIX_INVALIDA`), e as duas aparecem no campo.
+ */
 const erroDaChave = ref('')
 
 watch(chavePix, () => {
@@ -245,6 +248,11 @@ async function savePix() {
     pixAberto.value = false
     await loadCarteira()
   } catch (err) {
+    if (err instanceof ApiError && err.codigo === 'CHAVE_PIX_INVALIDA') {
+      erroDaChave.value = err.message
+      return
+    }
+
     toast.add({
       severity: 'error',
       summary: t('carteira.toast.pixSaveError'),

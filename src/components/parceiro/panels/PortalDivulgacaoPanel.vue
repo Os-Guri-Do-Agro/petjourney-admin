@@ -428,10 +428,11 @@ watch(lastSuccessAt, (at) => {
           </span>
           <h2>{{ tituloDaEspera }}</h2>
           <!--
-            O `aviso` da API não entra: vem só em português e sem acento ("esta em analise"), e
-            diz o mesmo que a frase abaixo, que é traduzida.
+            O `aviso` da API diz o que falta em cada estado (cadastro em análise, recusado,
+            programa não pedido...) e vem no idioma da tela desde o PJ-4BI7TE. A frase fixa só
+            entra quando ele não vem.
           -->
-          <p>{{ t('divulgacao.shareKit.esperaHint') }}</p>
+          <p>{{ indicacao.aviso || t('divulgacao.shareKit.esperaHint') }}</p>
           <RouterLink class="p-button p-component estado__acao" :to="PROGRAMAS_ROUTE">
             <i class="ph ph-squares-four" aria-hidden="true" />
             {{ t('divulgacao.shareKit.esperaCta') }}

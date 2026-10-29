@@ -10,6 +10,7 @@ import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import PasswordRequirements from '@/components/auth/PasswordRequirements.vue'
+import { ApiError } from '@/service/api'
 import { changePasswordAuthenticated } from '@/service/auth/auth-service'
 import { isPasswordValid } from '@/utils/validation/password'
 
@@ -76,11 +77,27 @@ async function handleChangePassword() {
       life: 4000,
     })
   } catch (error) {
+    /* A senha atual que não confere é erro do campo; o 429 de tentativas segue no aviso. */
+    if (error instanceof ApiError && error.codigo === 'SENHA_ATUAL_INCORRETA') {
+      senhaAtualError.value = error.message
+      return
+    }
+
+    /*
+     * O 429 das senhas erradas (`SENHA_TENTATIVAS_EXCEDIDAS`) vem traduzido; o do limite da rota
+     * traz o texto técnico do servidor, em inglês.
+     */
+    const limiteDaRota =
+      error instanceof ApiError &&
+      error.statusCode === 429 &&
+      error.codigo !== 'SENHA_TENTATIVAS_EXCEDIDAS'
+
     toast.add({
       severity: 'error',
       summary: t('settings.seguranca.toasts.error.summary'),
-      detail:
-        error instanceof Error
+      detail: limiteDaRota
+        ? t('settings.seguranca.errors.throttle')
+        : error instanceof Error
           ? error.message
           : t('settings.seguranca.toasts.error.detailFallback'),
       life: 5000,

@@ -11,14 +11,49 @@ export class ApiError extends Error {
   readonly error?: string
   /** Código estável de erro do funil de parceiro (Parte 9). Roteie UX por ele, nunca pela message. */
   readonly reason?: string
+  /**
+   * Código estável das rotas novas do portal (equipe, módulos, Clínica, Hotel): decide a tela; a
+   * `message` só se mostra. String e não enum porque o `openapi.json` ainda não exporta a lista.
+   */
+  readonly codigo?: string
+  /** O resto do corpo de erro, que alguns códigos trazem: `faltando`, `permissao`, `campo`... */
+  readonly detalhes: Readonly<Record<string, unknown>>
 
-  constructor(message: string, statusCode: number, error?: string, reason?: string) {
+  constructor(
+    message: string,
+    statusCode: number,
+    error?: string,
+    reason?: string,
+    extra: { codigo?: string; detalhes?: Record<string, unknown> } = {},
+  ) {
     super(message)
     this.name = 'ApiError'
     this.statusCode = statusCode
     this.error = error
     this.reason = reason
+    this.codigo = extra.codigo
+    this.detalhes = extra.detalhes ?? {}
   }
+}
+
+/** O que sobra do corpo de erro depois dos campos que o `ApiError` já tem com nome. */
+function detalhesDoErro(corpo: Record<string, unknown> | null) {
+  if (!corpo) {
+    return {}
+  }
+
+  const {
+    message: _message,
+    statusCode: _statusCode,
+    error: _error,
+    reason: _reason,
+    codigo: _codigo,
+    timestamp: _timestamp,
+    path: _path,
+    ...detalhes
+  } = corpo
+
+  return detalhes
 }
 
 export function getApiUrl() {
@@ -68,9 +103,9 @@ function hasNoBody(response: Response) {
 
 export interface ApiFetchOpcoes {
   /**
-   * 401 que quer dizer "a senha digitada não confere", e não "a sessão caiu". A troca de senha
-   * responde 401 para a senha atual errada: limpar a sessão ali derrubava a pessoa no meio da tela,
-   * sem o menu e sem aviso.
+   * 401 que quer dizer "a senha digitada não confere", e não "a sessão caiu". A troca de senha da
+   * API anterior ao PJ-4BI7TE responde 401 para a senha atual errada: limpar a sessão ali derrubava
+   * a pessoa no meio da tela, sem o menu e sem aviso.
    */
   manterSessaoEm401?: boolean
 }
@@ -124,6 +159,10 @@ export async function apiFetch<T>(
       response.status,
       errorBody?.error,
       typeof errorBody?.reason === 'string' ? errorBody.reason : undefined,
+      {
+        codigo: typeof errorBody?.codigo === 'string' ? errorBody.codigo : undefined,
+        detalhes: detalhesDoErro(errorBody),
+      },
     )
   }
 

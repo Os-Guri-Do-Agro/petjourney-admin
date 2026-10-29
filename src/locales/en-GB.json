@@ -1825,8 +1825,8 @@
       "pix": {
         "title": "PIX key",
         "label": "PIX key",
-        "hint": "Required to request payouts.",
-        "invalida": "This doesn't look like a PIX key. Use a CPF, CNPJ, email, mobile number with area code, or the bank's random key.",
+        "hint": "Required for payouts. Mobile numbers need +55 and the area code: +55 11 98765-4321.",
+        "invalida": "This doesn't look like a PIX key. Use a CPF, CNPJ, email, mobile number with +55 and area code, or the bank's random key.",
         "placeholder": "email{'@'}company.com or CNPJ",
         "save": "Save key"
       },
@@ -2339,7 +2339,8 @@
         "currentRequired": "Enter the current password.",
         "newInvalid": "The new password does not meet all requirements.",
         "confirmRequired": "Confirm the new password.",
-        "mismatch": "Passwords do not match."
+        "mismatch": "Passwords do not match.",
+        "throttle": "Too many attempts. Wait a few minutes and try again."
       },
       "toasts": {
         "success": {

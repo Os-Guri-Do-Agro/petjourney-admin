@@ -1825,8 +1825,8 @@
       "pix": {
         "title": "PIX ključ",
         "label": "PIX ključ",
-        "hint": "Neophodan za zahteve za isplatu.",
-        "invalida": "Ovo ne liči na PIX ključ. Koristite CPF, CNPJ, imejl, broj mobilnog sa pozivnim brojem ili nasumični ključ banke.",
+        "hint": "Neophodan za isplate. Broj mobilnog ide sa +55 i pozivnim brojem: +55 11 98765-4321.",
+        "invalida": "Ovo ne liči na PIX ključ. Koristite CPF, CNPJ, imejl, broj mobilnog sa +55 i pozivnim brojem ili nasumični ključ banke.",
         "placeholder": "ime{'@'}firma.com ili CNPJ",
         "save": "Sačuvajte ključ"
       },
@@ -2339,7 +2339,8 @@
         "currentRequired": "Unesite trenutnu lozinku.",
         "newInvalid": "Nova lozinka ne ispunjava sve zahteve.",
         "confirmRequired": "Potvrdite novu lozinku.",
-        "mismatch": "Lozinke se ne podudaraju."
+        "mismatch": "Lozinke se ne podudaraju.",
+        "throttle": "Previše pokušaja. Sačekajte nekoliko minuta i pokušajte ponovo."
       },
       "toasts": {
         "success": {

@@ -80,6 +80,34 @@ describe('apiFetch', () => {
     })
   })
 
+  it('guarda o codigo e o resto do corpo de erro (PJ-4BI7TE)', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(
+        JSON.stringify({
+          statusCode: 429,
+          timestamp: '2026-10-28T22:00:00.000Z',
+          path: '/auth/reset-password-authenticated',
+          message: 'Muitas tentativas de senha. Aguarde alguns minutos e tente de novo.',
+          codigo: 'SENHA_TENTATIVAS_EXCEDIDAS',
+          tenteDeNovoEmSegundos: 840,
+        }),
+        { status: 429, headers: JSON_HEADERS },
+      ),
+    )
+
+    const error = await apiFetch('/auth/reset-password-authenticated', {
+      method: 'POST',
+      body: '{}',
+    }).catch((reason: unknown) => reason)
+
+    expect(error).toMatchObject({
+      statusCode: 429,
+      codigo: 'SENHA_TENTATIVAS_EXCEDIDAS',
+      detalhes: { tenteDeNovoEmSegundos: 840 },
+    })
+  })
+
   it('não tenta parsear corpo de erro quando o gateway devolve HTML', async () => {
     const { apiFetch } = await loadApi('https://api.exemplo.test')
     mockFetch(new Response('<html>502 Bad Gateway</html>', { status: 502, headers: HTML_HEADERS }))

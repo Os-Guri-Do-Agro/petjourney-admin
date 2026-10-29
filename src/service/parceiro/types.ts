@@ -132,6 +132,7 @@ export type PortalIndicacao = {
   /** URL da imagem PNG/JPG do QR para exibir e exportar. */
   qrImageUrl: string | null
   podeIndicar: boolean
+  /** No idioma do `Accept-Language` e com acento desde o PJ-4BI7TE (antes, só em português). */
   aviso?: string
 }
 

@@ -132,7 +132,10 @@ export async function login(data: LoginCredentials, options?: LoginOptions): Pro
 }
 
 export async function changePasswordAuthenticated(payload: ChangePasswordAuthenticatedPayload) {
-  /* A API responde 401 para a senha atual errada: é erro do campo, a sessão continua valendo. */
+  /*
+   * Senha atual errada: 400 `SENHA_ATUAL_INCORRETA` desde o PJ-4BI7TE. A API anterior, que ainda
+   * roda na produção, responde 401; até ela subir, esse 401 não derruba a sessão.
+   */
   return apiFetch<ApiEnvelope<unknown>>(
     '/auth/reset-password-authenticated',
     {
