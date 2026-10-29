@@ -1826,7 +1826,7 @@
       "pix": {
         "title": "PIX ključ",
         "label": "PIX ključ",
-        "hint": "Neophodan za isplate. Broj mobilnog ide sa +55 i pozivnim brojem: +55 11 98765-4321.",
+        "hint": "Neophodan za isplate. Broj mobilnog ide sa +55 i pozivnim brojem: {exemplo}.",
         "invalida": "Ovo ne liči na PIX ključ. Koristite CPF, CNPJ, imejl, broj mobilnog sa +55 i pozivnim brojem ili nasumični ključ banke.",
         "placeholder": "ime{'@'}firma.com ili CNPJ",
         "save": "Sačuvajte ključ"

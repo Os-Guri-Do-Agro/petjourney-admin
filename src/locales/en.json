@@ -1826,7 +1826,7 @@
       "pix": {
         "title": "PIX key",
         "label": "PIX key",
-        "hint": "Required for payouts. Mobile numbers need +55 and the area code: +55 11 98765-4321.",
+        "hint": "Required for payouts. Mobile numbers need +55 and the area code: {exemplo}.",
         "invalida": "This doesn't look like a PIX key. Use a CPF, CNPJ, email, mobile number with +55 and area code, or the bank's random key.",
         "placeholder": "email{'@'}company.com or CNPJ",
         "save": "Save key"

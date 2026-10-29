@@ -661,9 +661,18 @@ onBeforeUnmount(() => {
                 <i class="ph ph-warning-circle" aria-hidden="true" />
                 {{ erroDaChave }}
               </small>
-              <small v-else id="chave-pix-dica" class="cd__dica">
-                {{ t('carteira.visao.pix.hint') }}
-              </small>
+              <!-- O exemplo inteiro numa linha e da esquerda para a direita, também em árabe. -->
+              <i18n-t
+                v-else
+                id="chave-pix-dica"
+                keypath="carteira.visao.pix.hint"
+                tag="small"
+                class="cd__dica"
+              >
+                <template #exemplo>
+                  <bdi dir="ltr" class="cd__exemplo">+55 11 98765-4321</bdi>
+                </template>
+              </i18n-t>
             </div>
           </div>
 
@@ -1102,6 +1111,10 @@ onBeforeUnmount(() => {
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.45;
+}
+
+.cd__exemplo {
+  white-space: nowrap;
 }
 
 .cd__erro {

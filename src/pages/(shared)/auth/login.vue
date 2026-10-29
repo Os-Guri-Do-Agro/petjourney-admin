@@ -17,6 +17,7 @@ import {
 } from '@/service/user/inativacao-service'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
+import { ROTA_DO_CONVITE } from '@/router/convite-da-equipe'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
 const { t } = useI18n()
@@ -84,7 +85,8 @@ function getSafeRedirectPath() {
       : redirect
   }
 
-  return getDefaultLandingPath()
+  /* Quem passou pelo cadastro e voltou ao login perdeu o `?redirect=`: o convite guardado leva. */
+  return convitePendente ? ROTA_DO_CONVITE : getDefaultLandingPath()
 }
 
 function collectInactiveProfiles(flags: {
