@@ -1880,6 +1880,16 @@ type LotePlantado = {
    * — é ele que a demonstração abre no diálogo de aplicar para mostrar o frasco travado.
    */
   sobraGarantida?: number
+  /**
+   * O saldo em que o lote fecha hoje, qualquer que seja o sorteio da rotina.
+   *
+   * Pelo mesmo motivo da `sobraGarantida`: a rotina gasta de quatro a onze doses de FeLV conforme
+   * o dia, e com a quantidade fixa a vacina "zerada" e a "abaixo do mínimo" só apareciam em metade
+   * dos dias. Com `fechaEm`, a quantidade recebida passa a ser o que a rotina aplicou deste lote,
+   * mais as perdas, mais o saldo pedido: `'zero'` fecha vazio, `'abaixo-do-minimo'` fecha uma dose
+   * abaixo do `estoqueMinimo` da vacina.
+   */
+  fechaEm?: 'zero' | 'abaixo-do-minimo'
   /** O que este lote existe para demonstrar. */
   caso: string
 }
@@ -2013,6 +2023,7 @@ const LOTES_PLANTADOS: LotePlantado[] = [
     quantidade: 26,
     custoUnitario: 2790,
     perdas: [{ diasAtras: 120, quantidade: 3, motivo: 'temperatura' }],
+    fechaEm: 'abaixo-do-minimo',
     caso: 'abaixo do mínimo',
   },
 
@@ -2026,6 +2037,7 @@ const LOTES_PLANTADOS: LotePlantado[] = [
     quantidade: 6,
     custoUnitario: 4150,
     perdas: [{ diasAtras: 200, quantidade: 0, motivo: 'quebra' }],
+    fechaEm: 'zero',
     caso: 'zerado',
   },
 ]
@@ -2093,6 +2105,29 @@ function loteParaAplicacao(
   gasto.set(escolhido.codigo, (gasto.get(escolhido.codigo) ?? 0) + 1)
 
   return escolhido
+}
+
+/**
+ * Acerta a quantidade recebida dos lotes com `fechaEm`, depois que as aplicações já escolheram
+ * de que lote saíram. A conta é a do estoque: recebido = aplicado + perdas + saldo.
+ */
+function fecharLotesPlantados(
+  lotes: LoteDeVacina[],
+  aplicacoes: AplicacaoVacina[],
+): LoteDeVacina[] {
+  return lotes.map((lote) => {
+    const fechaEm = LOTES_PLANTADOS.find((plantado) => plantado.codigo === lote.codigo)?.fechaEm
+
+    if (!fechaEm) {
+      return lote
+    }
+
+    const aplicadas = aplicacoes.filter((aplicacao) => aplicacao.lote === lote.codigo).length
+    const minimo = vacinasFixture.find((vacina) => vacina.id === lote.vacinaId)?.estoqueMinimo ?? 1
+    const saldo = fechaEm === 'zero' ? 0 : Math.max(1, minimo - 1)
+
+    return { ...lote, quantidadeRecebida: aplicadas + perdasDoLotePlantado(lote) + saldo }
+  })
 }
 
 function perdasDoLotePlantado(lote: LoteDeVacina): number {
@@ -2994,6 +3029,53 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
    */
   const feriados = [...feriadosDoAno(ancora), diaFechadoProximo(ancora)]
   const duracaoDaConsulta = tipoPorId('tipo-consulta').duracaoMinutos
+  const internacao = gerarInternacoes(semente)
+
+  const clinic: Clinic = { ...clinicFixture, feriados }
+
+  const pets = [
+    ...petsFixture,
+    ...petsDoResumo(hoje),
+    ...petsDaVacinacao(hoje),
+    ...petsDaAdesao(hoje),
+  ].map((pet) => ({
+    ...pet,
+    alertas: [...pet.alertas],
+  }))
+  const tutores = tutorsFixture.map((tutor) => ({ ...tutor }))
+  const diario = gerarDiario(pets, hoje)
+  const adesao = gerarAdesao({ encounters, hoje, agora: clock.nowIso() })
+
+  /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
+  const lotesRecebidos = lotesDeVacinaPlantados(clock.today())
+  const daCarteirinha = aplicacoesDaVacinacao(clock.today(), iso)
+  const aplicacoesDeVacina = [
+    ...aplicacoesDeVacinaPlantadas(clock.today(), lotesRecebidos),
+    vacinaDaPerola(clock.today(), iso),
+    ...daCarteirinha,
+  ]
+  /* E voltam depois delas: o lote que fecha num saldo certo precisa saber quanto saiu dele. */
+  const lotesDeVacina = fecharLotesPlantados(lotesRecebidos, aplicacoesDeVacina)
+
+  /* Os pedidos vêm por último: o horário que eles escolhem precisa estar livre na agenda pronta. */
+  const agendamentoOnline = agendamentoOnlinePadrao()
+  const dosPedidos = semearPedidos({
+    hoje,
+    agora: clock.nowIso(),
+    clinic,
+    appointments: comStatus,
+    blocks,
+    pets,
+    configuracao: agendamentoOnline,
+  })
+
+  /*
+   * A vaga da Brunilda vem depois dos pedidos, conferida contra a agenda com eles. Antes ela era
+   * escolhida primeiro, e o telefonema que tomou o horário da Luna (15:00, no primeiro dia útil
+   * depois do âncora) caía em cima dela quando o âncora era sexta: o aceite da demonstração dava
+   * "vaga já preenchida".
+   */
+  const agendaComPedidos = [...comStatus, ...dosPedidos.atendimentos]
   let vagaDaBrunilda: { inicio: string; professionalId: string } | null = null
 
   for (let offset = 1; offset <= 14 && !vagaDaBrunilda; offset += 1) {
@@ -3014,7 +3096,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
           fim: iso(dia, minuto + duracaoDaConsulta),
         }
 
-        if (vagaLivre(comStatus, vaga)) {
+        if (vagaLivre(agendaComPedidos, vaga)) {
           vagaDaBrunilda = { inicio: vaga.inicio, professionalId: vaga.professionalId }
           break
         }
@@ -3034,44 +3116,6 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       ),
     )
   }
-
-  const internacao = gerarInternacoes(semente)
-
-  const clinic: Clinic = { ...clinicFixture, feriados }
-
-  const pets = [
-    ...petsFixture,
-    ...petsDoResumo(hoje),
-    ...petsDaVacinacao(hoje),
-    ...petsDaAdesao(hoje),
-  ].map((pet) => ({
-    ...pet,
-    alertas: [...pet.alertas],
-  }))
-  const tutores = tutorsFixture.map((tutor) => ({ ...tutor }))
-  const diario = gerarDiario(pets, hoje)
-  const adesao = gerarAdesao({ encounters, hoje, agora: clock.nowIso() })
-
-  /* Os lotes vêm antes das aplicações: é deles que sai o código que cada dose cita. */
-  const lotesDeVacina = lotesDeVacinaPlantados(clock.today())
-  const daCarteirinha = aplicacoesDaVacinacao(clock.today(), iso)
-  const aplicacoesDeVacina = [
-    ...aplicacoesDeVacinaPlantadas(clock.today(), lotesDeVacina),
-    vacinaDaPerola(clock.today(), iso),
-    ...daCarteirinha,
-  ]
-
-  /* Os pedidos vêm por último: o horário que eles escolhem precisa estar livre na agenda pronta. */
-  const agendamentoOnline = agendamentoOnlinePadrao()
-  const dosPedidos = semearPedidos({
-    hoje,
-    agora: clock.nowIso(),
-    clinic,
-    appointments: comStatus,
-    blocks,
-    pets,
-    configuracao: agendamentoOnline,
-  })
 
   return {
     semente,
