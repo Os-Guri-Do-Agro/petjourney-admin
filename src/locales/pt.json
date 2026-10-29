@@ -1859,7 +1859,7 @@
       },
       "ciclo": {
         "title": "Ciclo de pagamento",
-        "body": "Saque mínimo de R$ 50,00. Corte no dia 27 e liquidação orientativa até o dia 5. Acompanhe na aba Saques."
+        "body": "Saque mínimo de {valor}. Corte no dia 27 e liquidação orientativa até o dia 5. Acompanhe na aba Saques."
       },
       "footerPrefix": "Dúvidas?",
       "footerOrWhatsapp": "ou WhatsApp"
@@ -1870,7 +1870,7 @@
       "pixSaveError": "Erro ao salvar PIX",
       "tryAgain": "Tente novamente.",
       "invalidValue": "Valor inválido",
-      "minWithdraw": "O saque mínimo é R$ 50,00.",
+      "minWithdraw": "O saque mínimo é {valor}.",
       "insufficient": "Saldo insuficiente",
       "maxWithdraw": "O máximo sacável agora é {valor}.",
       "pixRequired": "PIX obrigatório",

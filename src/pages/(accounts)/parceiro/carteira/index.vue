@@ -15,7 +15,6 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { MIN_SAQUE_CENTAVOS } from '@/service/parceiro/regras-de-saque'
 import { formatCentavosToBrl } from '@/utils/format/money'
 
 /*
@@ -93,7 +92,7 @@ const fraseDoResumo = computed(() => {
   }
 
   return t(`inicio.saldo.capacidade.${atual.capacidade}`, {
-    minimo: formatBrl(MIN_SAQUE_CENTAVOS),
+    minimo: formatBrl(atual.saqueMinimoCentavos ?? 0),
   })
 })
 
@@ -178,7 +177,7 @@ onMounted(() => {
         <PortalCarteiraSaquesPanel v-else @needs-programas="goToProgramas" />
       </section>
 
-      <PortalCarteiraAjuda />
+      <PortalCarteiraAjuda :saque-minimo-centavos="estado?.saqueMinimoCentavos ?? null" />
     </div>
   </UiPagina>
 </template>

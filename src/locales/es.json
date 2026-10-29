@@ -1859,7 +1859,7 @@
       },
       "ciclo": {
         "title": "Ciclo de pago",
-        "body": "Retiro mínimo de R$ 50,00. Corte el día 27 y liquidación orientativa hasta el día 5. Sígalo en la pestaña Retiros."
+        "body": "Retiro mínimo de {valor}. Corte el día 27 y liquidación orientativa hasta el día 5. Sígalo en la pestaña Retiros."
       },
       "footerPrefix": "¿Dudas?",
       "footerOrWhatsapp": "o WhatsApp"
@@ -1870,7 +1870,7 @@
       "pixSaveError": "Error al guardar PIX",
       "tryAgain": "Inténtelo de nuevo.",
       "invalidValue": "Valor inválido",
-      "minWithdraw": "El retiro mínimo es R$ 50,00.",
+      "minWithdraw": "El retiro mínimo es {valor}.",
       "insufficient": "Saldo insuficiente",
       "maxWithdraw": "El máximo retirable ahora es {valor}.",
       "pixRequired": "PIX obligatorio",

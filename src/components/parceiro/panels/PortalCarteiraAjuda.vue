@@ -9,7 +9,15 @@ import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { formatCentavosToBrl } from '@/utils/format/money'
+
+const props = defineProps<{
+  /** O mínimo de saque que a API devolve na carteira; nulo enquanto ela não chegou. */
+  saqueMinimoCentavos: number | null
+}>()
+
+const { t, locale } = useI18n()
 
 const CONTACT_EMAIL = 'atendimento@petjourney.health'
 const CONTACT_WHATSAPP_DISPLAY = '55 67 9883-7848'
@@ -36,12 +44,19 @@ const itens = computed(() => [
     title: t('carteira.help.pix.title'),
     description: t('carteira.help.pix.body'),
   },
-  {
-    id: 'ciclo',
-    icon: 'ph ph-calendar-blank',
-    title: t('carteira.help.ciclo.title'),
-    description: t('carteira.help.ciclo.body'),
-  },
+  /* O ciclo cita o mínimo da API: sem ele, o bloco espera a carteira em vez de mostrar valor vazio. */
+  ...(props.saqueMinimoCentavos == null
+    ? []
+    : [
+        {
+          id: 'ciclo',
+          icon: 'ph ph-calendar-blank',
+          title: t('carteira.help.ciclo.title'),
+          description: t('carteira.help.ciclo.body', {
+            valor: formatCentavosToBrl(props.saqueMinimoCentavos, INTL_LOCALE[locale.value as Locale]),
+          }),
+        },
+      ]),
 ])
 </script>
 
