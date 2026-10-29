@@ -66,10 +66,26 @@ const resumoDaTela = computed(
     ({
       link: t('parceiro.convite.link.corpo'),
       caixa: t('parceiro.convite.caixa.vazioDica'),
-      recusado: t('parceiro.convite.recusado.corpo'),
-      jaMembro: avisoDoLink.value,
+      recusado: previa.value?.convidadoPorNome
+        ? t('parceiro.convite.recusado.corpoComNome', { nome: previa.value.convidadoPorNome })
+        : t('parceiro.convite.recusado.corpo'),
+      /* A `message` do EQUIPE_JA_MEMBRO é escrita para quem convida ("Esta pessoa já faz parte"). */
+      jaMembro: previa.value
+        ? t('parceiro.convite.jaMembroCorpoComEmpresa', { empresa: previa.value.parceiro.nome })
+        : t('parceiro.convite.jaMembroCorpo'),
     })[estado.value],
 )
+
+/** Conta sem empresa (o Início dela diz "Portal ainda não liberado"): o próximo passo é cadastrar a sua. */
+const semEmpresa = computed(() => store.semAcessoParceiro)
+
+/** Depois de recusar, os convites que ainda esperam esta conta, se houver. */
+const outrosConvites = computed(() =>
+  estado.value === 'recusado' && convites.value?.length ? convites.value : null,
+)
+
+/** A lista de convites aparece na caixa (sem link) e, depois de recusar, como "Outros convites". */
+const mostrarLista = computed(() => estado.value === 'caixa' || Boolean(outrosConvites.value))
 
 function formatarData(iso: string) {
   return new Date(iso).toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
@@ -166,6 +182,7 @@ async function decidirPeloLink(aceitar: boolean) {
     await recusarConvitePorLink(valor)
     esquecerTokenDoConvite()
     estado.value = 'recusado'
+    void carregarCaixa()
   } catch (err) {
     if (linkSemValor(err)) {
       return
@@ -173,7 +190,6 @@ async function decidirPeloLink(aceitar: boolean) {
 
     if (err instanceof ApiError && err.codigo === 'EQUIPE_JA_MEMBRO') {
       esquecerTokenDoConvite()
-      avisoDoLink.value = err.message
       estado.value = 'jaMembro'
       return
     }
@@ -231,184 +247,297 @@ onMounted(() => {
 
 <template>
   <UiPagina class="tela-convite" :titulo="tituloDaTela" :resumo="resumoDaTela">
-    <!--
+    <div class="convite-tela">
+      <!--
       Pelo link do e-mail: o convite numa linha, como os da Equipe. A empresa e quem convidou à
       esquerda; recusar e aceitar à direita, os dois com contorno ou fundo à vista.
     -->
-    <ul v-if="estado === 'link'" class="ui-lista ui-folha" aria-live="polite">
-      <li class="ui-linha convite-linha">
-        <template v-if="previa === undefined">
-          <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" aria-hidden="true" />
-          <span class="ui-linha__texto" aria-hidden="true">
-            <Skeleton width="14rem" height="1rem" border-radius="6px" />
-            <Skeleton width="20rem" height="0.85rem" border-radius="6px" />
-          </span>
-        </template>
-
-        <template v-else-if="previa">
-          <img
-            v-if="previa.parceiro.logoUrl"
-            class="convite-linha__logo"
-            :src="previa.parceiro.logoUrl"
-            alt=""
-          />
-          <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
-            <i class="ph ph-buildings" />
-          </span>
-
-          <span class="ui-linha__texto">
-            <span class="ui-linha__titulo convite-linha__empresa">{{ previa.parceiro.nome }}</span>
-            <span class="ui-linha__meta">
-              {{ deQuem(previa) }}
-              ·
-              {{ t('parceiro.convite.caixa.validoAte', { data: formatarData(previa.expiraEm) }) }}
+      <ul v-if="estado === 'link'" class="ui-lista ui-folha" aria-live="polite">
+        <li class="ui-linha convite-linha">
+          <template v-if="previa === undefined">
+            <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" aria-hidden="true" />
+            <span class="ui-linha__texto" aria-hidden="true">
+              <Skeleton width="14rem" height="1rem" border-radius="6px" />
+              <Skeleton width="20rem" height="0.85rem" border-radius="6px" />
             </span>
-          </span>
-        </template>
+          </template>
 
-        <template v-else>
-          <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
-            <i class="ph ph-envelope-open" />
-          </span>
-          <span class="ui-linha__texto">
-            <span class="ui-linha__meta convite-linha__sem-previa">
-              {{ t('parceiro.convite.link.semPrevia') }}
+          <template v-else-if="previa">
+            <img
+              v-if="previa.parceiro.logoUrl"
+              class="convite-linha__logo"
+              :src="previa.parceiro.logoUrl"
+              alt=""
+            />
+            <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+              <i class="ph ph-buildings" />
             </span>
-          </span>
-        </template>
 
-        <span class="ui-linha__fim convite-linha__acoes">
-          <Button
-            type="button"
-            :label="t('parceiro.convite.link.recusar')"
-            severity="secondary"
-            outlined
-            :loading="trabalhando === 'recusar'"
-            :disabled="previa === undefined || trabalhando !== null"
-            @click="decidirPeloLink(false)"
-          />
-          <Button
-            type="button"
-            icon="ph ph-check"
-            :label="t('parceiro.convite.link.aceitar')"
-            :loading="trabalhando === 'aceitar'"
-            :disabled="previa === undefined || trabalhando !== null"
-            @click="decidirPeloLink(true)"
-          />
-        </span>
-      </li>
-    </ul>
-
-    <div v-else-if="estado === 'jaMembro' || estado === 'recusado'">
-      <RouterLink class="p-button p-component" :to="getDefaultLandingPath()">
-        <i class="ph ph-house" aria-hidden="true" />
-        {{ t('parceiro.convite.irParaPortal') }}
-      </RouterLink>
-    </div>
-
-    <!-- Sem o link: os convites desta conta. -->
-    <div v-else class="caixa">
-      <p v-if="avisoDoLink" class="caixa__aviso" role="alert">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        <span>
-          <strong>{{ t('parceiro.convite.naoVale') }}</strong>
-          {{ avisoDoLink }}
-        </span>
-      </p>
-
-      <ul v-if="!convites && !erroDaCaixa" class="ui-lista ui-folha" aria-hidden="true">
-        <li v-for="n in 2" :key="n" class="ui-linha">
-          <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" />
-          <span class="ui-linha__texto">
-            <Skeleton width="12rem" height="0.95rem" border-radius="6px" />
-            <Skeleton width="18rem" height="0.8rem" border-radius="6px" />
-          </span>
-        </li>
-      </ul>
-
-      <div v-else-if="erroDaCaixa" class="caixa__erro ui-folha" role="alert">
-        <i class="ph ph-warning-circle" aria-hidden="true" />
-        <span>{{ erroDaCaixa }}</span>
-        <Button
-          type="button"
-          icon="ph ph-arrow-clockwise"
-          :label="t('common.retry')"
-          severity="secondary"
-          outlined
-          size="small"
-          @click="carregarCaixa"
-        />
-      </div>
-
-      <ul v-else-if="convites" class="ui-lista ui-folha">
-        <li v-if="!convites.length" class="ui-linha">
-          <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
-            <i class="ph ph-tray" />
-          </span>
-          <span class="ui-linha__texto">
-            <span class="ui-linha__titulo">{{ t('parceiro.convite.caixa.vazio') }}</span>
-          </span>
-        </li>
-
-        <li v-for="convite in convites" :key="convite.conviteId" class="ui-linha convite-linha">
-          <img
-            v-if="convite.parceiro.logoUrl"
-            class="convite-linha__logo"
-            :src="convite.parceiro.logoUrl"
-            alt=""
-          />
-          <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
-            <i class="ph ph-buildings" />
-          </span>
-
-          <span class="ui-linha__texto">
-            <span class="ui-linha__titulo">{{ convite.parceiro.nome }}</span>
-            <span class="ui-linha__meta">
-              {{ deQuem(convite) }}
-              <template v-if="convite.expiraEm">
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo convite-linha__empresa">{{
+                previa.parceiro.nome
+              }}</span>
+              <span class="ui-linha__meta">
+                {{ deQuem(previa) }}
                 ·
-                {{
-                  t('parceiro.convite.caixa.validoAte', { data: formatarData(convite.expiraEm) })
-                }}
-              </template>
+                {{ t('parceiro.convite.caixa.validoAte', { data: formatarData(previa.expiraEm) }) }}
+              </span>
             </span>
-            <span v-if="convite.aceitaPor === 'LINK'" class="ui-linha__meta caixa__dica">
-              <i class="ph ph-envelope-simple" aria-hidden="true" />
-              {{ t('parceiro.convite.caixa.abraOEmail') }}
-            </span>
-          </span>
+          </template>
 
-          <span v-if="convite.aceitaPor === 'CAIXA'" class="ui-linha__fim convite-linha__acoes">
+          <template v-else>
+            <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+              <i class="ph ph-envelope-open" />
+            </span>
+            <span class="ui-linha__texto">
+              <span class="ui-linha__meta convite-linha__sem-previa">
+                {{ t('parceiro.convite.link.semPrevia') }}
+              </span>
+            </span>
+          </template>
+
+          <span class="ui-linha__fim convite-linha__acoes">
             <Button
               type="button"
-              :label="t('parceiro.convite.caixa.recusar')"
+              :label="t('parceiro.convite.link.recusar')"
               severity="secondary"
               outlined
-              size="small"
-              :loading="trabalhando === `${convite.conviteId}:recusar`"
-              :disabled="trabalhando !== null"
-              @click="decidirPelaCaixa(convite, false)"
+              :loading="trabalhando === 'recusar'"
+              :disabled="previa === undefined || trabalhando !== null"
+              @click="decidirPeloLink(false)"
             />
             <Button
               type="button"
               icon="ph ph-check"
-              :label="t('parceiro.convite.caixa.aceitar')"
-              size="small"
-              :loading="trabalhando === `${convite.conviteId}:aceitar`"
-              :disabled="trabalhando !== null"
-              @click="decidirPelaCaixa(convite, true)"
+              :label="t('parceiro.convite.link.aceitar')"
+              :loading="trabalhando === 'aceitar'"
+              :disabled="previa === undefined || trabalhando !== null"
+              @click="decidirPeloLink(true)"
             />
           </span>
         </li>
       </ul>
+
+      <!--
+      Depois de recusar (ou de descobrir que já está na equipe): o convite continua na tela, na
+      mesma linha da prévia, com o selo do que aconteceu; embaixo, o próximo passo. Conta sem
+      empresa ganha o caminho de cadastrar a sua; quem tem empresa volta ao portal.
+    -->
+      <div v-else-if="estado === 'jaMembro' || estado === 'recusado'" class="desfecho">
+        <ul v-if="previa" class="ui-lista ui-folha">
+          <li class="ui-linha convite-linha">
+            <img
+              v-if="previa.parceiro.logoUrl"
+              class="convite-linha__logo"
+              :src="previa.parceiro.logoUrl"
+              alt=""
+            />
+            <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+              <i class="ph ph-buildings" />
+            </span>
+
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo convite-linha__empresa">{{
+                previa.parceiro.nome
+              }}</span>
+              <span class="ui-linha__meta">{{ deQuem(previa) }}</span>
+            </span>
+
+            <span class="ui-linha__fim">
+              <span v-if="estado === 'recusado'" class="ui-selo">
+                <i class="ph ph-x-circle" aria-hidden="true" />
+                {{ t('parceiro.convite.recusado.selo') }}
+              </span>
+              <span v-else class="ui-selo ui-selo--ok">
+                <i class="ph ph-check-circle" aria-hidden="true" />
+                {{ t('parceiro.convite.jaNaEquipe') }}
+              </span>
+            </span>
+          </li>
+        </ul>
+
+        <p v-if="estado === 'recusado' && semEmpresa" class="desfecho__nota">
+          {{ t('parceiro.convite.recusado.semEmpresa') }}
+        </p>
+
+        <div class="desfecho__acoes">
+          <RouterLink
+            v-if="estado === 'recusado' && semEmpresa"
+            class="p-button p-component"
+            to="/settings?aba=empresa"
+          >
+            <i class="ph ph-buildings" aria-hidden="true" />
+            {{ t('frame.noAccess.ctaPrograms') }}
+          </RouterLink>
+          <RouterLink
+            class="p-button p-component"
+            :class="{ 'p-button-secondary p-button-outlined': estado === 'recusado' && semEmpresa }"
+            :to="getDefaultLandingPath()"
+          >
+            <i class="ph ph-house" aria-hidden="true" />
+            {{ t('parceiro.convite.irParaPortal') }}
+          </RouterLink>
+        </div>
+      </div>
+
+      <!-- Os convites desta conta: a caixa (sem link) ou, depois de recusar, os que ainda esperam. -->
+      <section
+        v-if="mostrarLista"
+        class="caixa"
+        :aria-labelledby="outrosConvites ? 'convite-outros' : undefined"
+      >
+        <h2 v-if="outrosConvites" id="convite-outros" class="caixa__subtitulo">
+          {{ t('parceiro.convite.outros') }}
+          <span class="ui-num caixa__conta">{{ outrosConvites.length }}</span>
+        </h2>
+
+        <p v-if="avisoDoLink && estado === 'caixa'" class="caixa__aviso" role="alert">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          <span>
+            <strong>{{ t('parceiro.convite.naoVale') }}</strong>
+            {{ avisoDoLink }}
+          </span>
+        </p>
+
+        <ul v-if="!convites && !erroDaCaixa" class="ui-lista ui-folha" aria-hidden="true">
+          <li v-for="n in 2" :key="n" class="ui-linha">
+            <Skeleton width="2.75rem" height="2.75rem" border-radius="12px" />
+            <span class="ui-linha__texto">
+              <Skeleton width="12rem" height="0.95rem" border-radius="6px" />
+              <Skeleton width="18rem" height="0.8rem" border-radius="6px" />
+            </span>
+          </li>
+        </ul>
+
+        <div v-else-if="erroDaCaixa" class="caixa__erro ui-folha" role="alert">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          <span>{{ erroDaCaixa }}</span>
+          <Button
+            type="button"
+            icon="ph ph-arrow-clockwise"
+            :label="t('common.retry')"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="carregarCaixa"
+          />
+        </div>
+
+        <ul v-else-if="convites" class="ui-lista ui-folha">
+          <li v-if="!convites.length" class="ui-linha">
+            <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+              <i class="ph ph-tray" />
+            </span>
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo">{{ t('parceiro.convite.caixa.vazio') }}</span>
+            </span>
+          </li>
+
+          <li v-for="convite in convites" :key="convite.conviteId" class="ui-linha convite-linha">
+            <img
+              v-if="convite.parceiro.logoUrl"
+              class="convite-linha__logo"
+              :src="convite.parceiro.logoUrl"
+              alt=""
+            />
+            <span v-else class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
+              <i class="ph ph-buildings" />
+            </span>
+
+            <span class="ui-linha__texto">
+              <span class="ui-linha__titulo">{{ convite.parceiro.nome }}</span>
+              <span class="ui-linha__meta">
+                {{ deQuem(convite) }}
+                <template v-if="convite.expiraEm">
+                  ·
+                  {{
+                    t('parceiro.convite.caixa.validoAte', { data: formatarData(convite.expiraEm) })
+                  }}
+                </template>
+              </span>
+              <span v-if="convite.aceitaPor === 'LINK'" class="ui-linha__meta caixa__dica">
+                <i class="ph ph-envelope-simple" aria-hidden="true" />
+                {{ t('parceiro.convite.caixa.abraOEmail') }}
+              </span>
+            </span>
+
+            <span v-if="convite.aceitaPor === 'CAIXA'" class="ui-linha__fim convite-linha__acoes">
+              <Button
+                type="button"
+                :label="t('parceiro.convite.caixa.recusar')"
+                severity="secondary"
+                outlined
+                size="small"
+                :loading="trabalhando === `${convite.conviteId}:recusar`"
+                :disabled="trabalhando !== null"
+                @click="decidirPelaCaixa(convite, false)"
+              />
+              <Button
+                type="button"
+                icon="ph ph-check"
+                :label="t('parceiro.convite.caixa.aceitar')"
+                size="small"
+                :loading="trabalhando === `${convite.conviteId}:aceitar`"
+                :disabled="trabalhando !== null"
+                @click="decidirPelaCaixa(convite, true)"
+              />
+            </span>
+          </li>
+        </ul>
+      </section>
     </div>
   </UiPagina>
 </template>
 
 <style scoped>
+.convite-tela {
+  display: grid;
+  gap: 28px;
+}
+
 .convite-linha {
   flex-wrap: wrap;
   row-gap: 12px;
+}
+
+.desfecho {
+  display: grid;
+  gap: 16px;
+}
+
+.desfecho__nota {
+  max-width: 72ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.desfecho__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.desfecho__acoes .p-button {
+  gap: 8px;
+  text-decoration: none;
+}
+
+.caixa__subtitulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.caixa__conta {
+  color: var(--tinta-2);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .convite-linha__logo {

@@ -2064,12 +2064,19 @@
       },
       "recusado": {
         "titulo": "Convite recusado",
-        "corpo": "Se mudar de ideia, peça um convite novo a quem convidou você."
+        "corpo": "Se mudar de ideia, peça um convite novo a quem convidou você.",
+        "corpoComNome": "Se mudar de ideia, peça um convite novo a {nome}.",
+        "selo": "Recusado",
+        "semEmpresa": "Sua conta ainda não faz parte de nenhuma empresa. Cadastre a sua para usar o portal, ou aceite outro convite que chegar por e-mail."
       },
       "aceito": "Convite aceito",
       "aceitoDetalhe": "Você já faz parte da equipe.",
       "naoVale": "Este convite não vale mais",
       "irParaPortal": "Ir para o portal",
+      "jaNaEquipe": "Já está na equipe",
+      "jaMembroCorpo": "Você já faz parte desta equipe. É só seguir para o portal.",
+      "jaMembroCorpoComEmpresa": "Você já faz parte da equipe da {empresa}. É só seguir para o portal.",
+      "outros": "Outros convites",
       "caixa": {
         "titulo": "Seus convites",
         "vazio": "Nenhum convite pendente",

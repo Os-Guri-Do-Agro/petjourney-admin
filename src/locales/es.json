@@ -2064,12 +2064,19 @@
       },
       "recusado": {
         "titulo": "Invitación rechazada",
-        "corpo": "Si cambia de idea, pida una invitación nueva a quien lo invitó."
+        "corpo": "Si cambia de idea, pida una invitación nueva a quien lo invitó.",
+        "corpoComNome": "Si cambia de opinión, pida una invitación nueva a {nome}.",
+        "selo": "Rechazada",
+        "semEmpresa": "Su cuenta todavía no forma parte de ninguna empresa. Registre la suya para usar el portal, o acepte otra invitación que llegue por correo."
       },
       "aceito": "Invitación aceptada",
       "aceitoDetalhe": "Ya forma parte del equipo.",
       "naoVale": "Esta invitación ya no vale",
       "irParaPortal": "Ir al portal",
+      "jaNaEquipe": "Ya está en el equipo",
+      "jaMembroCorpo": "Usted ya forma parte de este equipo. Solo siga al portal.",
+      "jaMembroCorpoComEmpresa": "Usted ya forma parte del equipo de {empresa}. Solo siga al portal.",
+      "outros": "Otras invitaciones",
       "caixa": {
         "titulo": "Sus invitaciones",
         "vazio": "Ninguna invitación pendiente",

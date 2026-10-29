@@ -17,6 +17,7 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import i18n from '@/i18n'
 import { ApiError } from '@/service/api'
 import { guardarTokenDoConvite, lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
+import { useParceiroStore } from '@/stores/parceiro'
 
 import ConvitePage from '../convite.vue'
 
@@ -158,5 +159,84 @@ describe('convite pelo link', () => {
     expect(equipe.recusarConvitePorLink).toHaveBeenCalledWith('token-1')
     expect(lerTokenDoConvite()).toBeNull()
     expect(tela.find('h1').text()).toBe('Convite recusado')
+  })
+})
+
+describe('depois da decisão', () => {
+  async function recusar(outros: Awaited<ReturnType<Equipe['listarMeusConvites']>> = []) {
+    guardarTokenDoConvite('token-1')
+    equipe.previaDoConvitePorLink.mockResolvedValue(PREVIA)
+    equipe.recusarConvitePorLink.mockResolvedValue(undefined)
+    equipe.listarMeusConvites.mockResolvedValue(outros)
+
+    const tela = await abrirTela()
+    await botao(tela, 'Recusar').trigger('click')
+    await flushPromises()
+
+    return tela
+  }
+
+  it('o convite recusado fica na tela com o selo, e a faixa diz a quem pedir outro', async () => {
+    const tela = await recusar()
+
+    expect(tela.find('.desfecho .convite-linha__empresa').text()).toBe(
+      'Aurora Clínica e Hotel Veterinário',
+    )
+    expect(tela.find('.desfecho .ui-selo').text()).toBe('Recusado')
+    expect(tela.text()).toContain('Se mudar de ideia, peça um convite novo a Helena Prado.')
+    expect(tela.find('#convite-outros').exists()).toBe(false)
+  })
+
+  it('conta sem empresa: o próximo passo é cadastrar a sua', async () => {
+    useParceiroStore().semAcessoParceiro = true
+
+    const tela = await recusar()
+    const acoes = tela.findAll('.desfecho__acoes a').map((a) => a.text())
+
+    expect(tela.find('.desfecho__nota').exists()).toBe(true)
+    expect(acoes).toEqual(['Cadastrar minha empresa', 'Ir para o portal'])
+  })
+
+  it('conta com empresa: só volta ao portal', async () => {
+    const tela = await recusar()
+
+    expect(tela.find('.desfecho__nota').exists()).toBe(false)
+    expect(tela.findAll('.desfecho__acoes a').map((a) => a.text())).toEqual(['Ir para o portal'])
+  })
+
+  it('os convites que ainda esperam aparecem embaixo', async () => {
+    const tela = await recusar([
+      {
+        conviteId: 'convite-2',
+        parceiro: { id: 'parceiro-2', nome: 'Clínica Veterinária Boa Vista', logoUrl: null },
+        papel: 'OPERADOR',
+        convidadoPorNome: 'Bia Souza',
+        expiraEm: '2026-11-09T15:00:00.000Z',
+        aceitaPor: 'LINK',
+      },
+    ])
+
+    expect(tela.find('#convite-outros').text()).toContain('Outros convites')
+    expect(tela.find('.caixa').text()).toContain('Clínica Veterinária Boa Vista')
+  })
+
+  it('quem já está na equipe vê a empresa com o selo e a frase do lado de quem aceita', async () => {
+    guardarTokenDoConvite('token-1')
+    equipe.previaDoConvitePorLink.mockResolvedValue(PREVIA)
+    equipe.aceitarConvitePorLink.mockRejectedValue(
+      new ApiError('Esta pessoa já faz parte da equipe.', 409, undefined, undefined, {
+        codigo: 'EQUIPE_JA_MEMBRO',
+      }),
+    )
+
+    const tela = await abrirTela()
+    await botao(tela, 'Aceitar convite').trigger('click')
+    await flushPromises()
+
+    expect(tela.find('.desfecho .ui-selo').text()).toBe('Já está na equipe')
+    expect(tela.text()).toContain(
+      'Você já faz parte da equipe da Aurora Clínica e Hotel Veterinário.',
+    )
+    expect(tela.text()).not.toContain('Esta pessoa já faz parte da equipe.')
   })
 })

@@ -2064,12 +2064,19 @@
       },
       "recusado": {
         "titulo": "Poziv je odbijen",
-        "corpo": "Ako se predomislite, zatražite novi poziv od osobe koja vas je pozvala."
+        "corpo": "Ako se predomislite, zatražite novi poziv od osobe koja vas je pozvala.",
+        "corpoComNome": "Ako se predomislite, zatražite novi poziv od osobe {nome}.",
+        "selo": "Odbijen",
+        "semEmpresa": "Vaš nalog još nije deo nijedne firme. Registrujte svoju da biste koristili portal ili prihvatite drugi poziv koji stigne imejlom."
       },
       "aceito": "Poziv je prihvaćen",
       "aceitoDetalhe": "Sada ste deo tima.",
       "naoVale": "Ovaj poziv više ne važi",
       "irParaPortal": "Idite na portal",
+      "jaNaEquipe": "Već ste u timu",
+      "jaMembroCorpo": "Već ste u ovom timu. Samo nastavite na portal.",
+      "jaMembroCorpoComEmpresa": "Već ste u timu firme {empresa}. Samo nastavite na portal.",
+      "outros": "Drugi pozivi",
       "caixa": {
         "titulo": "Vaši pozivi",
         "vazio": "Nema poziva na čekanju",

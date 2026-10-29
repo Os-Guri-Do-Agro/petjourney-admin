@@ -2064,12 +2064,19 @@
       },
       "recusado": {
         "titulo": "Invitation declined",
-        "corpo": "If you change your mind, ask the person who invited you for a new invitation."
+        "corpo": "If you change your mind, ask the person who invited you for a new invitation.",
+        "corpoComNome": "If you change your mind, ask {nome} for a new invitation.",
+        "selo": "Declined",
+        "semEmpresa": "Your account isn't part of any company yet. Register yours to use the portal, or accept another invitation that arrives by email."
       },
       "aceito": "Invitation accepted",
       "aceitoDetalhe": "You are now part of the team.",
       "naoVale": "This invitation is no longer valid",
       "irParaPortal": "Go to the portal",
+      "jaNaEquipe": "Already on the team",
+      "jaMembroCorpo": "You're already on this team. Just go to the portal.",
+      "jaMembroCorpoComEmpresa": "You're already on the {empresa} team. Just go to the portal.",
+      "outros": "Other invitations",
       "caixa": {
         "titulo": "Your invitations",
         "vazio": "No pending invitations",
