@@ -41,15 +41,11 @@ const fraseDoResumo = computed(() => {
     return t('divulgacao.saudacao.semCodigo')
   }
 
-  if (estado.value.leituras == null) {
-    return ''
-  }
+  /* Sem leitura nenhuma, quem diz isso é o bloco das leituras, logo abaixo: a mesma frase no topo
+     e no bloco lia como repetição. */
+  const leituras = estado.value.leituras ?? 0
 
-  const leituras = estado.value.leituras
-
-  return leituras > 0
-    ? t('divulgacao.tela.resumo', { n: leituras }, leituras)
-    : t('divulgacao.tela.resumoZero')
+  return leituras > 0 ? t('divulgacao.tela.resumo', { n: leituras }, leituras) : ''
 })
 
 const { store, ensureContext } = useParceiroPortal()

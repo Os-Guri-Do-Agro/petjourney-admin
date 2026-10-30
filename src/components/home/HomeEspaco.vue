@@ -52,6 +52,8 @@ const props = defineProps<{
   atalho?: AtalhoDoEspaco | null
   /** `null`: nada parado — o pé diz isso em vez de inventar um passo. */
   passo: PassoDoEspaco | null
+  /** O passo ainda depende de dado que não chegou: o pé espera, em vez de dizer "Nada parado". */
+  passoCarregando?: boolean
   /** A barra fina do dia: quanto já foi feito. */
   andamento?: AndamentoDoEspaco | null
   /** Uma frase de aviso (agenda que não carregou, clínica fechada). */
@@ -131,7 +133,14 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
       </div>
 
       <div class="espaco__pe">
-        <template v-if="passo">
+        <Skeleton
+          v-if="passoCarregando"
+          class="espaco__passo-esqueleto"
+          width="100%"
+          height="2.625rem"
+          border-radius="12px"
+        />
+        <template v-else-if="passo">
           <RouterLink v-if="passo.to" class="passo" :to="passo.to">
             <i :class="passo.icone" class="passo__icone" aria-hidden="true" />
             <span class="passo__texto">{{ passo.rotulo }}</span>

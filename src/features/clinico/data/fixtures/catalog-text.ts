@@ -68,7 +68,7 @@ const INGLES: TextoDoCatalogo = {
     'DR-04': 'Flea allergy dermatitis',
     'DR-09': 'Bacterial otitis externa',
     'CV-02': 'Myxomatous mitral valve disease',
-    'UR-03': 'Chronic kidney disease — stage 2',
+    'UR-03': 'Chronic kidney disease, stage 2',
     'UR-07': 'Feline idiopathic cystitis',
     'LO-05': 'Hip dysplasia',
     'LO-11': 'Intervertebral disc disease',
@@ -197,7 +197,7 @@ const INGLES: TextoDoCatalogo = {
       ],
       efeitosAdversos: ['Vomiting', 'Melena', 'Rising urea and creatinine'],
       interacoes: [
-        'Corticosteroids — high ulcer risk',
+        'Corticosteroids: high ulcer risk',
         'Other NSAIDs',
         'Aminoglycosides and diuretics increase nephrotoxicity',
       ],
@@ -231,7 +231,7 @@ const INGLES: TextoDoCatalogo = {
         'Agranulocytosis (rare)',
         'Hypotension with rapid intravenous administration',
       ],
-      interacoes: ['Chlorpromazine — risk of severe hypothermia'],
+      interacoes: ['Chlorpromazine: risk of severe hypothermia'],
       observacao: 'Intravenous administration must be slow, over at least two minutes.',
       notas: {
         felina: 'Cats metabolize it slowly: lower dose, longer interval, short course.',
@@ -248,7 +248,7 @@ const INGLES: TextoDoCatalogo = {
       ],
       contraindicacoes: ['Epilepsy', 'Concurrent use of MAO inhibitors'],
       efeitosAdversos: ['Sedation', 'Dysphoria', 'Nausea', 'Mydriasis in cats'],
-      interacoes: ['Fluoxetine and trazodone — risk of serotonin syndrome'],
+      interacoes: ['Fluoxetine and trazodone: risk of serotonin syndrome'],
       observacao: 'Controlled-substance prescription in duplicate (Brazilian Ordinance 344/98).',
       notas: {
         felina: 'Very bitter: refusal is common with the oral form.',
@@ -274,7 +274,7 @@ const INGLES: TextoDoCatalogo = {
         'Immunosuppression',
         'Muscle atrophy with prolonged use',
       ],
-      interacoes: ['NSAIDs — high ulcer risk', 'Insulin becomes less effective'],
+      interacoes: ['NSAIDs: high ulcer risk', 'Insulin becomes less effective'],
       observacao: 'Always taper after more than seven days of use; never stop abruptly.',
       notas: {
         canina:
@@ -319,7 +319,7 @@ const INGLES: TextoDoCatalogo = {
       ],
       contraindicacoes: ['Hypersensitivity to the active ingredient'],
       efeitosAdversos: ['Mild sedation', 'Constipation'],
-      interacoes: ['Tramadol — may reduce the analgesic effect'],
+      interacoes: ['Tramadol: may reduce the analgesic effect'],
       observacao: 'It does not treat the cause: investigate the source of the vomiting in parallel.',
     },
     'med-maropitant': {
@@ -349,7 +349,7 @@ const INGLES: TextoDoCatalogo = {
       interacoes: [
         'NSAIDs reduce the diuretic effect',
         'Aminoglycosides increase ototoxicity',
-        'Digoxin — hypokalemia potentiates toxicity',
+        'Digoxin: hypokalemia potentiates toxicity',
       ],
       observacao: 'Recheck urea, creatinine and potassium five to seven days after starting.',
     },
@@ -374,7 +374,7 @@ const INGLES: TextoDoCatalogo = {
         'Priapism in horses',
       ],
       interacoes: [
-        'Metamizole — risk of severe hypothermia',
+        'Metamizole: risk of severe hypothermia',
         'Potentiates general anesthetics',
       ],
       observacao: 'It has no analgesic effect: sedation without analgesia masks pain.',
@@ -388,7 +388,7 @@ const INGLES: TextoDoCatalogo = {
       apresentacao: '1% injectable solution (10 mg/mL)',
       indicacoes: ['Sarcoptic mange', 'Demodectic mange', 'Endoparasite infestations'],
       contraindicacoes: [
-        'Breeds with the MDR1 mutation — Collie, Border Collie, Australian Shepherd, Shetland Sheepdog',
+        'Breeds with the MDR1 mutation: Collie, Border Collie, Australian Shepherd, Shetland Sheepdog',
         'Puppies under 6 weeks',
         'Heart patients with microfilaremia',
       ],
@@ -418,7 +418,7 @@ const ESPANHOL: TextoDoCatalogo = {
     'DR-04': 'Dermatitis alérgica a la picadura de pulga',
     'DR-09': 'Otitis externa bacteriana',
     'CV-02': 'Enfermedad mixomatosa de la válvula mitral',
-    'UR-03': 'Enfermedad renal crónica — estadio 2',
+    'UR-03': 'Enfermedad renal crónica, estadio 2',
     'UR-07': 'Cistitis idiopática felina',
     'LO-05': 'Displasia de cadera',
     'LO-11': 'Enfermedad del disco intervertebral',
@@ -547,7 +547,7 @@ const ESPANHOL: TextoDoCatalogo = {
       ],
       efeitosAdversos: ['Vómitos', 'Melena', 'Elevación de urea y creatinina'],
       interacoes: [
-        'Corticoides — riesgo alto de úlcera',
+        'Corticoides: riesgo alto de úlcera',
         'Otros AINE',
         'Los aminoglucósidos y diuréticos aumentan la nefrotoxicidad',
       ],
@@ -581,7 +581,7 @@ const ESPANHOL: TextoDoCatalogo = {
         'Agranulocitosis (rara)',
         'Hipotensión en aplicación intravenosa rápida',
       ],
-      interacoes: ['Clorpromazina — riesgo de hipotermia grave'],
+      interacoes: ['Clorpromazina: riesgo de hipotermia grave'],
       observacao: 'La aplicación intravenosa debe ser lenta, a lo largo de al menos dos minutos.',
       notas: {
         felina: 'Los gatos lo metabolizan despacio: dosis menor, intervalo mayor, uso corto.',
@@ -598,7 +598,7 @@ const ESPANHOL: TextoDoCatalogo = {
       ],
       contraindicacoes: ['Epilepsia', 'Uso concomitante de inhibidores de la MAO'],
       efeitosAdversos: ['Sedación', 'Disforia', 'Náuseas', 'Midriasis en gatos'],
-      interacoes: ['Fluoxetina y trazodona — riesgo de síndrome serotoninérgico'],
+      interacoes: ['Fluoxetina y trazodona: riesgo de síndrome serotoninérgico'],
       observacao: 'Receta de control especial por duplicado (Ordenanza brasileña 344/98).',
       notas: {
         felina: 'Muy amargo: el rechazo es común en la presentación oral.',
@@ -624,7 +624,7 @@ const ESPANHOL: TextoDoCatalogo = {
         'Inmunosupresión',
         'Atrofia muscular con uso prolongado',
       ],
-      interacoes: ['AINE — riesgo alto de úlcera', 'La insulina reduce su efecto'],
+      interacoes: ['AINE: riesgo alto de úlcera', 'La insulina reduce su efecto'],
       observacao: 'Retirada siempre gradual por encima de siete días de uso; nunca de golpe.',
       notas: {
         canina:
@@ -669,7 +669,7 @@ const ESPANHOL: TextoDoCatalogo = {
       ],
       contraindicacoes: ['Hipersensibilidad al principio activo'],
       efeitosAdversos: ['Sedación leve', 'Estreñimiento'],
-      interacoes: ['Tramadol — puede reducir el efecto analgésico'],
+      interacoes: ['Tramadol: puede reducir el efecto analgésico'],
       observacao: 'No trata la causa: investigar el origen de los vómitos en paralelo.',
     },
     'med-maropitant': {
@@ -699,7 +699,7 @@ const ESPANHOL: TextoDoCatalogo = {
       interacoes: [
         'Los AINE reducen el efecto diurético',
         'Los aminoglucósidos aumentan la ototoxicidad',
-        'Digoxina — la hipopotasemia potencia la toxicidad',
+        'Digoxina: la hipopotasemia potencia la toxicidad',
       ],
       observacao: 'Reevaluar urea, creatinina y potasio entre cinco y siete días tras iniciar.',
     },
@@ -724,7 +724,7 @@ const ESPANHOL: TextoDoCatalogo = {
         'Priapismo en equinos',
       ],
       interacoes: [
-        'Metamizol — riesgo de hipotermia grave',
+        'Metamizol: riesgo de hipotermia grave',
         'Potencia los anestésicos generales',
       ],
       observacao: 'No tiene efecto analgésico: la sedación sin analgesia enmascara el dolor.',
@@ -738,7 +738,7 @@ const ESPANHOL: TextoDoCatalogo = {
       apresentacao: 'Solución inyectable al 1% (10 mg/mL)',
       indicacoes: ['Sarna sarcóptica', 'Sarna demodécica', 'Endoparasitosis'],
       contraindicacoes: [
-        'Razas con mutación MDR1 — Collie, Border Collie, Pastor Australiano, Sheepdog',
+        'Razas con mutación MDR1: Collie, Border Collie, Pastor Australiano, Sheepdog',
         'Cachorros de menos de 6 semanas',
         'Cardiópatas con microfilaremia',
       ],

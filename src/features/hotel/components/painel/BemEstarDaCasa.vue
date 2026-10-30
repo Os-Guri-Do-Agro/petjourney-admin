@@ -73,8 +73,14 @@ const adaptacao = computed<GrupoDeAdaptacao[]>(() =>
   })).filter((grupo) => grupo.hospedes.length > 0),
 )
 
-const tranquilos = computed(
-  () => props.hospedes.filter((h) => h.hospedagem.adaptacao === 'tranquilo').length,
+/*
+ * Conta animais, como o "Na casa" do painel: a Amora divide a baia com a Mel e a estadia é uma só.
+ * Contando estadias, "1 estressado, 1 em adaptação e mais 3 tranquilos" somava 5 com 6 na casa.
+ */
+const tranquilos = computed(() =>
+  props.hospedes
+    .filter((h) => h.hospedagem.adaptacao === 'tranquilo')
+    .reduce((total, h) => total + (h.acompanhante ? 2 : 1), 0),
 )
 
 /**

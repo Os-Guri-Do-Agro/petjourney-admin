@@ -17,6 +17,7 @@ import {
   AdmissaoBloqueadaError,
   reservaRepository,
   VagaIndisponivelError,
+  type HospedeNovo,
   type MapaDoPeriodo,
   type ReservaDetalhada,
   type ReservaNaLista,
@@ -156,6 +157,7 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
   function simular(entrada: {
     acomodacaoId: string
     petId: string
+    porte?: PetPorte | null
     acompanhantePetId?: string | null
     inicio?: ISODateTime
     fim?: ISODateTime
@@ -220,6 +222,7 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
     servicos?: ServicoContratado[]
     observacao?: string
     autorizadosARetirar?: PessoaAutorizada[]
+    hospedeNovo?: HospedeNovo | null
   }) {
     const reserva = await mutar(() =>
       reservaRepository.criar({
@@ -230,6 +233,11 @@ export const useReservasStore = defineStore('hotel-reservas', () => {
     )
 
     if (reserva) {
+      /* O animal novo entrou no cadastro: as telas que leem nome e responsável pela store o veem. */
+      if (entrada.hospedeNovo) {
+        await hotelStore.carregar(true)
+      }
+
       await carregarMapa()
     }
 

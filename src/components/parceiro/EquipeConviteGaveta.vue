@@ -16,7 +16,6 @@ import { useI18n } from 'vue-i18n'
 
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
-import { isRTLLocale, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import type { PapelParceiro } from '@/service/parceiro/types'
 
@@ -40,7 +39,7 @@ const ICONE_DO_PAPEL: Record<PapelParceiro, string> = {
   DONO: 'ph ph-crown-simple',
 }
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const telaLarga = useTelaLarga()
 
 useSidePanelOffset(
@@ -48,7 +47,8 @@ useSidePanelOffset(
   LARGURA,
 )
 
-const drawerPosition = computed(() => (isRTLLocale(locale.value as Locale) ? 'left' : 'right'))
+/* "right" é o fim da linha nos dois sentidos de leitura: o árabe espelha no `main.css`. */
+const drawerPosition = 'right'
 
 const email = ref('')
 const papel = ref<PapelParceiro>('OPERADOR')

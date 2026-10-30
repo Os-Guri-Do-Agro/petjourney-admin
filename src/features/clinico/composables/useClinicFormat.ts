@@ -159,6 +159,22 @@ export function useClinicFormat() {
     }).format(new Date(`${mes}-15T12:00:00Z`))
   }
 
+  /**
+   * "ter., 27/10": dia da semana e data, no formato do idioma. Com o ano só quando não é o
+   * corrente. Para coluna de "quando foi", onde "há 41 h" obriga a fazer conta de cabeça.
+   */
+  function diaEData(data: ISODate): string {
+    const doAnoCorrente = data.slice(0, 4) === clock.today().slice(0, 4)
+
+    return new Intl.DateTimeFormat(localeIntl.value, {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      ...(doAnoCorrente ? {} : { year: 'numeric' as const }),
+      timeZone: 'UTC',
+    }).format(new Date(`${data}T12:00:00Z`))
+  }
+
   function diaDaSemanaCurto(data: ISODate): string {
     return new Intl.DateTimeFormat(localeIntl.value, {
       weekday: 'short',
@@ -261,6 +277,16 @@ export function useClinicFormat() {
   }
 
   /**
+   * Miligramas por administração, com as casas que a conta tem (até duas): "128 mg", "0,64 mg".
+   *
+   * Com uma casa fixa a dose por extenso dizia "0,6 mg" logo abaixo da conta "= 0,64 mg", e
+   * "128,0 mg" nos números redondos: duas doses diferentes para quem confere de cabeça.
+   */
+  function miligramas(valor: number): string {
+    return new Intl.NumberFormat(localeIntl.value, { maximumFractionDigits: 2 }).format(valor)
+  }
+
+  /**
    * Dinheiro, a partir de **centavos**.
    *
    * A entrada é inteira porque é assim que o valor é guardado: custo unitário em centavos, e a
@@ -312,7 +338,7 @@ export function useClinicFormat() {
     const casas = faixa?.precisao ?? 1
     const unidade = faixa?.unidade ?? unidadeAlternativa
 
-    return unidade ? `${numero(valor.valor, casas)} ${unidade}` : numero(valor.valor, casas)
+    return `${numero(valor.valor, casas)}${comUnidade(unidade)}`
   }
 
   function faixaDeReferencia(faixa: ReferenceRange | null): string {
@@ -320,7 +346,19 @@ export function useClinicFormat() {
       return t('clinico.prontuario.semReferencia')
     }
 
-    return `${numero(faixa.min, faixa.precisao)}–${numero(faixa.max, faixa.precisao)} ${faixa.unidade}`
+    return `${numero(faixa.min, faixa.precisao)}–${numero(faixa.max, faixa.precisao)}${comUnidade(faixa.unidade)}`
+  }
+
+  /**
+   * A unidade depois do número: com espaço ("38,6 °C", "112 bpm"), menos a que é parte da
+   * fração. O escore corporal é "5/9", e "5 /9" lia como dois números soltos.
+   */
+  function comUnidade(unidade: string): string {
+    if (!unidade) {
+      return ''
+    }
+
+    return unidade.startsWith('/') ? unidade : ` ${unidade}`
   }
 
   function percentual(valor: number): string {
@@ -392,6 +430,17 @@ export function useClinicFormat() {
             : conteudo
     }
 
+    /* "565 min, acima dos 480 min" é conta de sistema; o balcão lê "9 h 25 min, acima das 8 h". */
+    if (valor.kind === 'over-capacity') {
+      for (const chave of ['minutos', 'capacidade']) {
+        const conteudo = valor.params[chave]
+
+        if (typeof conteudo === 'number') {
+          params[chave] = duracao(conteudo)
+        }
+      }
+    }
+
     return t(`clinico.conflitos.${valor.kind}`, params)
   }
 
@@ -405,12 +454,15 @@ export function useClinicFormat() {
     dataCurtaComAno,
     mesCurto,
     mesPorExtenso,
+    diaEData,
     diaDaSemanaCurto,
     diaDaSemanaCurtoPorIndice,
     duracao,
     relativo,
     idade,
     numero,
+    miligramas,
+    comUnidade,
     moeda,
     peso,
     medicao,

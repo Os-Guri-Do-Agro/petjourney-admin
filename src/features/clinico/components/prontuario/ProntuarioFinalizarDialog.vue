@@ -592,12 +592,14 @@ const topo = computed(() =>
   font-weight: 700;
 }
 
+/*
+ * A linha quebra em vez de cortar: "Exame de imagem · espera há 11 mi…" escondia justamente
+ * quanto tempo o próximo está esperando, que é a informação da linha.
+ */
 .proximo__linha {
-  overflow: hidden;
   color: var(--tinta-2);
   font-size: 13.5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
 }
 
 .proximo__cartao :deep(.p-button) {

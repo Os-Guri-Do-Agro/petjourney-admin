@@ -38,6 +38,7 @@ import {
   agendamentoOnlineDoResponsavel,
   pedidoRepository,
 } from '@/features/clinico/data/agendamento-online'
+import { SLUG_DA_CLINICA } from '@/features/clinico/data/seed-pedidos'
 import { usePedidosStore } from '@/features/clinico/stores/pedidos'
 import { isAuthenticated } from '@/service/auth/auth-session'
 
@@ -56,8 +57,11 @@ const fluxo = criarFluxoDoPedido({
 proverFluxo(fluxo)
 
 const clinica = computed(() => fluxo.clinica.value)
-const encontrada = computed(
-  () => pedidoRepository.configuracao().slug === String(route.params.clinica ?? ''),
+/* O endereço antigo da demonstração continua abrindo: link divulgado não pode virar "não encontrada". */
+const encontrada = computed(() =>
+  [pedidoRepository.configuracao().slug, SLUG_DA_CLINICA].includes(
+    String(route.params.clinica ?? ''),
+  ),
 )
 
 const endereco = computed(

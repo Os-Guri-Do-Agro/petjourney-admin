@@ -25,7 +25,7 @@ import { ICONE_DO_BLOQUEIO } from './agenda-icones'
 import ClinicField from '../base/ClinicField.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
 import type { BlockReason, ISODate, WeekdayIndex } from '../../data/types'
-import { clockToMinutes } from '../../domain/clinic-time'
+import { clockToMinutes, minutesToClock } from '../../domain/clinic-time'
 import { ocupaHorario } from '../../domain/conflicts'
 import { useAgendaStore } from '../../stores/agenda'
 import { clinicClock, useClinicoStore } from '../../stores/clinico'
@@ -158,10 +158,48 @@ watch(
     detalhe.value = ''
     repete.value = false
     diasEscolhidos.value = []
-    inicio.value = '12:00'
-    fim.value = '13:00'
+
+    const janela = janelaInicial()
+
+    inicio.value = minutesToClock(janela.inicio)
+    fim.value = minutesToClock(janela.fim)
   },
 )
+
+/**
+ * A hora em que o formulário abre: a próxima meia hora livre de bloqueio, com uma hora de duração.
+ *
+ * Abria sempre em "Reunião, 12:00 às 13:00, clínica inteira": em cima do almoço que já existe, e
+ * no passado para quem bloqueava à tarde.
+ */
+function janelaInicial(): { inicio: number; fim: number } {
+  const MEIA_HORA = 30
+  const abre = clockToMinutes(agenda.dia?.expediente?.inicio ?? '08:00')
+  const fecha = clockToMinutes(agenda.dia?.expediente?.fim ?? '18:00')
+  const agora = clinicClock.now()
+  const partida =
+    agora.date === props.data
+      ? Math.max(abre, Math.ceil(agora.minutes / MEIA_HORA) * MEIA_HORA)
+      : abre
+
+  const bloqueiosQueValem = agenda.bloqueios.filter(
+    (bloqueio) =>
+      (bloqueio.professionalId === null && bloqueio.roomId === null) ||
+      (professionalId.value !== null && bloqueio.professionalId === professionalId.value),
+  )
+
+  for (let minuto = partida; minuto + MEIA_HORA <= fecha; minuto += MEIA_HORA) {
+    const ate = Math.min(minuto + 60, fecha)
+    const de = clinicClock.toIso(props.data, minuto)
+    const fimIso = clinicClock.toIso(props.data, ate)
+
+    if (!bloqueiosQueValem.some((bloqueio) => bloqueio.inicio < fimIso && bloqueio.fim > de)) {
+      return { inicio: minuto, fim: ate }
+    }
+  }
+
+  return { inicio: abre, fim: Math.min(abre + 60, fecha) }
+}
 
 async function confirmar() {
   if (!podeSalvar.value || enviando.value) {

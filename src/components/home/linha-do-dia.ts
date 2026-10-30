@@ -130,45 +130,37 @@ export type CompromissoDoDia =
   | { tipo: 'movimento'; movimento: MovimentoDoDia; atrasado: boolean }
 
 /**
- * Os compromissos do dia, na ordem de quem precisa de alguém antes.
+ * Os compromissos do dia, pela hora que a linha mostra.
  *
- * Com `agora` (o dia é hoje): quem está em atendimento, o movimento do hotel atrasado, quem espera
- * na recepção — o que chegou primeiro na frente — e, depois, o que ainda vem, clínica e hotel
- * misturados pela hora. O que já terminou (finalizado, falta) fica de fora: é o que ainda pede
- * alguém. Sem `agora` (outro dia), tudo o que está na agenda, pela hora.
+ * Com `agora` (o dia é hoje), o que já terminou (finalizado, falta) fica de fora: a lista é do que
+ * ainda pede alguém. Sem `agora` (outro dia), tudo o que está na agenda. Nos dois, clínica e hotel
+ * misturados pela hora. A urgência (em atendimento, atrasado, na recepção) vai no selo da linha, e
+ * o que é agora já está nos blocos dos espaços, no topo do Início: ordenar por ela fazia a lista
+ * começar às 17:45 e voltar para 09:30, e quem lia de relance achava que estava embaralhada.
  */
 export function compromissosDoDia(
   contas: readonly ContaDoDia[],
   movimentos: readonly MovimentoDoDia[],
   agora: string | null,
 ): CompromissoDoDia[] {
-  const itens: { compromisso: CompromissoDoDia; peso: number; hora: string }[] = []
+  const itens: { compromisso: CompromissoDoDia; hora: string }[] = []
 
   for (const conta of contas) {
-    const compromisso = { tipo: 'conta', conta } as const
+    const terminou = conta.estado === 'feito' || conta.estado === 'falta'
 
-    if (agora === null) {
-      itens.push({ compromisso, peso: 3, hora: conta.inicio })
-    } else if (conta.estado === 'agora') {
-      itens.push({ compromisso, peso: 0, hora: conta.inicio })
-    } else if (conta.estado === 'esperando') {
-      itens.push({ compromisso, peso: 2, hora: conta.chegadaEm ?? conta.inicio })
-    } else if (conta.estado === 'marcado') {
-      itens.push({ compromisso, peso: 3, hora: conta.inicio })
+    if (agora === null || !terminou) {
+      itens.push({ compromisso: { tipo: 'conta', conta }, hora: conta.inicio })
     }
   }
 
   for (const movimento of movimentos) {
-    const atrasado = movimentoAtrasado(movimento, agora)
-
     itens.push({
-      compromisso: { tipo: 'movimento', movimento, atrasado },
-      peso: atrasado ? 1 : 3,
+      compromisso: { tipo: 'movimento', movimento, atrasado: movimentoAtrasado(movimento, agora) },
       hora: movimento.quando,
     })
   }
 
   return itens
-    .sort((um, outro) => um.peso - outro.peso || um.hora.localeCompare(outro.hora))
+    .sort((um, outro) => um.hora.localeCompare(outro.hora))
     .map(({ compromisso }) => compromisso)
 }

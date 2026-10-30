@@ -34,6 +34,7 @@ import {
 } from '../domain/pedidos'
 
 import { appointmentTypesFixture, CLINIC_UTC_OFFSET, roomsFixture } from './fixtures'
+import { nomeDaConta, slugDoNome } from './identidade-da-conta'
 import type {
   AgendamentoOnline,
   Appointment,
@@ -48,8 +49,18 @@ import type {
 
 const clock: ClinicClock = createClinicClock(CLINIC_UTC_OFFSET)
 
-/** O endereço da página pública da clínica da demonstração. */
+/**
+ * O endereço da página pública da clínica da demonstração, quando o portal ainda não sabe o nome da
+ * empresa. Continua valendo como endereço antigo: link já divulgado não pode quebrar.
+ */
 export const SLUG_DA_CLINICA = 'petjourney-vila-madalena'
+
+/** O endereço da página pública: o nome da empresa que usa o portal, ou o da demonstração. */
+export function slugDaClinica(): string {
+  const nome = nomeDaConta()
+
+  return (nome && slugDoNome(nome)) || SLUG_DA_CLINICA
+}
 
 export const RESPONSAVEL_SEM_VINCULO = 'tutor-renata'
 export const PET_SEM_VINCULO = 'pet-fuba'
@@ -66,7 +77,7 @@ export function agendamentoOnlinePadrao(): AgendamentoOnline {
     antecedenciaMinimaHoras: 2,
     horizonteDias: 30,
     prazoDeRespostaHoras: 4,
-    slug: SLUG_DA_CLINICA,
+    slug: slugDaClinica(),
     emergencia: {
       telefone: '(11) 3555-0142',
       whatsapp: '(11) 95555-0142',

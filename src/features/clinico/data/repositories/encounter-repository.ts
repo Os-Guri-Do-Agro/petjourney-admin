@@ -56,7 +56,13 @@ export const encounterRepository = {
       let encounter = dataset.encounters.find((item) => item.appointmentId === appointmentId)
 
       if (!encounter) {
-        encounter = encounterVazio(appointment, agoraIso())
+        /*
+         * O atendimento começa quando o paciente entrou na sala, não quando o prontuário foi
+         * aberto. Com o Hoje dizendo "Na sala há 55 min", "Continuar atendimento" abria a capa
+         * com "Atendimento aberto às 10:40" (a hora do clique), e o atestado de comparecimento
+         * saía com essa entrada.
+         */
+        encounter = encounterVazio(appointment, appointment.iniciadoEm ?? agoraIso())
         dataset.encounters.push(encounter)
         appointment.encounterId = encounter.id
       }

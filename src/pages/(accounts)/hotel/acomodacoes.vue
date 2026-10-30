@@ -366,9 +366,22 @@ function quemCabe(acomodacao: Acomodacao) {
     .join(' · ')
 }
 
-/** A saída de quem está lá: "sai hoje às 16:30" ou "sai 24/10 · 10:00". */
+/**
+ * A saída de quem está lá: "sai hoje às 16:30" ou "sai 24/10 · 10:00". Passada a hora (com a meia
+ * hora de folga do Painel), o atraso: às 20h a casa dizia "sai hoje às 16:30" de quem ainda estava
+ * na baia.
+ */
 function saidaDe(hospede: HospedeNaCasa) {
   const saida = hospede.hospedagem.saidaPrevistaEm
+  const atraso = Math.floor((Date.parse(hotelClock.nowIso()) - Date.parse(saida)) / 60_000)
+
+  /* Curta, porque o cartão corta: "sai 16:30 · atrasou 3 h". */
+  if (atraso > 30) {
+    return `${t('hotel.hoje.hospedes.sai', { quando: formato.hora(saida) })} · ${t(
+      'hotel.hospedes.foco.atrasou',
+      { tempo: formato.duracao(atraso >= 60 ? Math.floor(atraso / 60) * 60 : atraso) },
+    )}`
+  }
 
   return t('hotel.hoje.hospedes.sai', {
     quando:
@@ -605,7 +618,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   :label="t('hotel.acomodacoes.nova')"
                   :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
                   severity="secondary"
-                  text
+                  outlined
                   size="small"
                   @click="abrirAcomodacao(null, grupo.bloco.id)"
                 />
@@ -616,7 +629,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                   :aria-label="t('hotel.casa.corredor.novaEm', { corredor: grupo.bloco.nome })"
                   :title="t('hotel.acomodacoes.nova')"
                   severity="secondary"
-                  text
+                  outlined
                   rounded
                   @click="abrirAcomodacao(null, grupo.bloco.id)"
                 />

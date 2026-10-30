@@ -97,6 +97,12 @@ const tratamentos = ref<ContagemDePendencia>(VAZIO)
  * consulta de amanhã, não a de agora, e a compra ainda dá tempo.
  */
 const estoque = ref<ContagemDePendencia>(VAZIO)
+/**
+ * Pacientes com falta ainda sem motivo: cada um é uma ligação a fazer. Conta paciente, não falta,
+ * como o recorte "A justificar" e a frase do topo da tela. Atenção, e não risco: ninguém está
+ * esperando do outro lado; é a apuração que fica para trás.
+ */
+const faltas = ref<ContagemDePendencia>(VAZIO)
 
 const carregando = ref(false)
 const carregado = ref(false)
@@ -117,6 +123,7 @@ async function apurar() {
     {
       encounterRepository,
       internacaoRepository,
+      patientRepository,
       tratamentoRepository,
       vacinaRepository,
       waitlistRepository,
@@ -133,7 +140,7 @@ async function apurar() {
     import('../domain/pedidos'),
   ])
 
-  const [entradas, mapa, rascunhos, retornos, chamada, emCasa, geladeira, abertos] =
+  const [entradas, mapa, rascunhos, retornos, chamada, emCasa, geladeira, abertos, ausencias] =
     await Promise.all([
       consultar(() => waitlistRepository.listar()),
       consultar(() => internacaoRepository.mapa()),
@@ -143,6 +150,7 @@ async function apurar() {
       consultar(() => tratamentoRepository.daClinica()),
       consultar(() => vacinaRepository.estoque()),
       consultar(() => pedidoRepository.pendentes()),
+      consultar(() => patientRepository.resumoDeFaltas()),
     ])
 
   /*
@@ -224,6 +232,11 @@ async function apurar() {
     estoque.value = { total: aComprar, tom: aComprar > 0 ? 'atencao' : 'neutro' }
   }
 
+  if (ausencias.ok) {
+    const aJustificar = ausencias.valor.filter((linha) => linha.semJustificativa > 0).length
+    faltas.value = { total: aJustificar, tom: aJustificar > 0 ? 'atencao' : 'neutro' }
+  }
+
   situacao.value = situacaoPelasFontes([
     entradas,
     mapa,
@@ -233,6 +246,7 @@ async function apurar() {
     emCasa,
     geladeira,
     abertos,
+    ausencias,
   ])
 
   if (situacao.value !== 'falhou') {
@@ -315,6 +329,7 @@ export function useClinicoPendencias(ativo: () => boolean) {
     vacinas: computed(() => (ativo() ? vacinas.value : VAZIO)),
     tratamentos: computed(() => (ativo() ? tratamentos.value : VAZIO)),
     estoque: computed(() => (ativo() ? estoque.value : VAZIO)),
+    faltas: computed(() => (ativo() ? faltas.value : VAZIO)),
     situacao: computed(() => (ativo() ? situacao.value : null)),
     conferidoEm: computed(() => conferidoEm.value),
     carregando: computed(() => carregando.value),
@@ -332,6 +347,7 @@ export function limparPendenciasClinicas() {
   vacinas.value = VAZIO
   tratamentos.value = VAZIO
   estoque.value = VAZIO
+  faltas.value = VAZIO
   conferidoEm.value = null
   situacao.value = null
   carregado.value = false

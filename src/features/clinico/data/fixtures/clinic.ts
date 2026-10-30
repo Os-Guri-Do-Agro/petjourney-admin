@@ -10,7 +10,7 @@ export const CLINIC_UTC_OFFSET = '-04:00'
 export const clinicFixture: Clinic = {
   id: 'clinic-petjourney',
   nome: 'PetJourney Clínica Veterinária',
-  endereco: 'Rua das Acácias, 421 — Vila Madalena, São Paulo/SP · CEP 05435-020',
+  endereco: 'Rua das Acácias, 421, Vila Madalena, São Paulo/SP · CEP 05435-020',
   telefone: '(11) 3555-0142',
   utcOffset: CLINIC_UTC_OFFSET,
   slotMinutos: 15,

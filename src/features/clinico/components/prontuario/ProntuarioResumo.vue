@@ -107,7 +107,7 @@ const prescricoes = computed(() =>
                 `clinico.prontuario.conduta.unidade.${medicamento.unidadeApresentacao}`,
                 calculo.quantidadeApresentacao,
               ),
-              mg: formato.numero(calculo.mgPorAdministracao, 1),
+              mg: formato.miligramas(calculo.mgPorAdministracao),
               frequencia: calculo.frequenciaHoras,
               duracao: calculo.duracaoDias,
               total: calculo.totalAdministracoes,
@@ -153,9 +153,21 @@ const catalogo = computed(() => [
     id: 'receituario' as DocumentoId,
     icone: 'ph ph-book-open',
     grupo: 'atendimento' as const,
-    disponivel: prescricoes.value.length > 0,
+    /*
+     * Com remédio em conflito com alergia e sem o aceite, o receituário não sai. "Assinar e
+     * emitir" já recusava (V-07 de 27/10), mas o "Imprimir" daqui soltava a folha com a
+     * dipirona da Nina e a linha de assinatura em branco: uma receita válida na farmácia.
+     */
+    disponivel: prescricoes.value.length > 0 && pendencias.value.length === 0,
+    /* Travado continua à vista, com o botão apagado e o porquê: sumir confundiria mais. */
+    travado: pendencias.value.length > 0,
     sugerido: prescricoes.value.length > 0,
-    detalhe: temControlado.value ? t('clinico.documentos.cartao.receituarioControle') : '',
+    detalhe:
+      pendencias.value.length > 0
+        ? t('clinico.documentos.cartao.receituarioAlergia')
+        : temControlado.value
+          ? t('clinico.documentos.cartao.receituarioControle')
+          : '',
   },
   {
     id: 'atestado-saude' as DocumentoId,
@@ -172,9 +184,13 @@ const catalogo = computed(() => [
     grupo: 'declaracoes' as const,
     disponivel: true,
     sugerido: false,
+    /* Em aberto, a saída é agora (é quando o papel sai), como no próprio atestado. */
     detalhe: formato.intervalo(
       props.encounter.abertoEm,
-      props.encounter.finalizadoEm ?? props.encounter.abertoEm,
+      props.encounter.finalizadoEm ??
+        (clinicClock.durationMinutes(props.encounter.abertoEm, clinicClock.nowIso()) > 0
+          ? clinicClock.nowIso()
+          : props.encounter.abertoEm),
     ),
   },
 
@@ -192,11 +208,18 @@ const catalogo = computed(() => [
     id: 'orientacoes' as DocumentoId,
     icone: 'ph ph-house',
     grupo: 'atendimento' as const,
+    /*
+     * A folha de casa lista os remédios para o responsável dar ("Dipirona: 0,26 mL a cada 8 h"):
+     * com alergia sem aceite, trava como o receituário. Dipirona se compra sem receita.
+     */
     disponivel:
-      Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0,
+      (Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0) &&
+      pendencias.value.length === 0,
+    travado: pendencias.value.length > 0,
     sugerido:
       Boolean(props.encounter.conduta.orientacoes.trim()) || prescricoes.value.length > 0,
-    detalhe: '',
+    detalhe:
+      pendencias.value.length > 0 ? t('clinico.documentos.cartao.receituarioAlergia') : '',
   },
   {
     id: 'encaminhamento' as DocumentoId,
@@ -290,7 +313,9 @@ const catalogo = computed(() => [
 
 /** O que este atendimento implica. Cartão grande, no topo. */
 const sugeridos = computed(() =>
-  catalogo.value.filter((documento) => documento.sugerido && documento.disponivel),
+  catalogo.value.filter(
+    (documento) => documento.sugerido && (documento.disponivel || documento.travado === true),
+  ),
 )
 
 /**
@@ -518,6 +543,7 @@ const noApp = computed(() => {
             outlined
             :label="t('clinico.prontuario.nova.documentos.imprimir')"
             :aria-label="`${t('clinico.prontuario.nova.documentos.imprimir')}: ${t(`clinico.documentos.cartao.${documento.id}.titulo`)}`"
+            :disabled="!documento.disponivel"
             @click="emit('emitir', documento.id)"
           />
         </li>

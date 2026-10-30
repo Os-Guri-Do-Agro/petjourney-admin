@@ -625,6 +625,27 @@ const prazoDoApp = computed(() => {
   list-style: none;
 }
 
+/*
+ * O conflito é uma frase ("Sobrepõe Maximiliano Bartholomeu…, das 09:45: 20 min em comum."): na
+ * gaveta ele quebra em linhas. Numa linha só, o selo media 613 px numa gaveta de 340 e a gaveta
+ * ganhava rolagem lateral, com o fim da frase fora da vista.
+ */
+.drawer__avisos li {
+  min-width: 0;
+}
+
+.drawer__avisos :deep(.chip) {
+  height: auto;
+  min-height: 24px;
+  align-items: flex-start;
+  padding-block: 4px;
+  white-space: normal;
+}
+
+.drawer__avisos :deep(.chip i) {
+  margin-block-start: 1px;
+}
+
 .drawer__avisos-enviados li {
   padding: 10px 12px;
   border: 1px solid var(--linha);

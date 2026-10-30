@@ -104,7 +104,7 @@ const prescricoesAnteriores = computed(() =>
     id: prescricao.id,
     nome: clinico.medicamento(prescricao.calculo.medicamentoId)?.nome ?? '',
     dose: t('clinico.prontuario.timeline.doseAnterior', {
-      mg: formato.numero(prescricao.calculo.mgPorAdministracao, 1),
+      mg: formato.miligramas(prescricao.calculo.mgPorAdministracao),
       frequencia: prescricao.calculo.frequenciaHoras,
       duracao: prescricao.calculo.duracaoDias,
     }),
@@ -151,7 +151,11 @@ const dataDaAnterior = computed(() =>
       </header>
 
       <p class="anterior__titulo">
-        {{ clinico.diagnosticoPrincipal(anterior) || anterior.anamnese.queixaPrincipal || '—' }}
+        {{
+          clinico.diagnosticoPrincipal(anterior) ||
+          anterior.anamnese.queixaPrincipal ||
+          t('clinico.formato.semvalor')
+        }}
       </p>
 
       <p v-if="anterior.conduta.orientacoes" class="anterior__texto">

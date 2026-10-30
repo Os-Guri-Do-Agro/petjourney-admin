@@ -34,6 +34,7 @@
     "login": {
       "title": "Dobro došli nazad",
       "erroCredenciais": "Imejl ili lozinka nisu tačni. Proverite i pokušajte ponovo.",
+      "erroSenhaVazia": "Unesite lozinku.",
       "sessaoExpirada": "Vaša sesija je istekla",
       "sessaoExpiradaDetalhe": "Prijavite se ponovo da nastavite gde ste stali.",
       "description": "Prijavite se na portal i podstaknite partnerstvo preporukama i rezultatima.",
@@ -500,7 +501,9 @@
     "api": {
       "missingBaseUrl": "Ova verzija portala nema podešenu adresu servera. Obratite se tehničkom timu.",
       "invalidResponse": "Server je odgovorio u neočekivanom formatu. Pokušajte ponovo za trenutak.",
-      "genericStatus": "Greška {status}"
+      "genericStatus": "Greška {status}",
+      "servidor": "Server trenutno nije mogao da obradi zahtev. Pokušajte ponovo za trenutak.",
+      "dadosRecusados": "Server nije prihvatio poslate podatke. Proverite ih i pokušajte ponovo."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -804,6 +807,7 @@
       "vazio": "Ništa nije zakazano za ovaj dan.",
       "hoje": "Danas",
       "aguardando": "Čeka",
+      "naoChegou": "Nije stigao",
       "pendencia": "Na čekanju",
       "chegadas": "{total} dolazak | {total} dolaska | {total} dolazaka",
       "compromissos": "Obaveze za dan",
@@ -904,7 +908,8 @@
         "description": "Ostvarite udeo od 5% na svaku pretplatu nastalu iz Vaše preporuke, iz meseca u mesec, najduže 18 meseci. Pratite stanje u novčaniku i isplatite ga preko PIX-a.",
         "feature1": "5% po pretplati, pri svakoj plaćenoj obnovi",
         "feature2": "Period od 18 meseci po preporučenom staratelju",
-        "feature3": "Isplata preko PIX-a od R$ 50,00"
+        "feature3": "Isplata preko PIX-a od {valor}",
+        "feature3SemValor": "Isplata preko PIX-a na ključ firme"
       },
       "participativo": {
         "title": "Participativni program",
@@ -1501,7 +1506,8 @@
       "vencemLogo": "{n} ističe za manje od jednog dana | {n} ističu za manje od jednog dana | {n} ističe za manje od jednog dana",
       "historico": "Nema ljubimaca u istoriji | {n} ljubimac u istoriji | {n} ljubimca u istoriji | {n} ljubimaca u istoriji",
       "historicoRecente": "Nedavni pristupi za {n} ljubimca | Nedavni pristupi za {n} ljubimca | Nedavni pristupi za {n} ljubimaca",
-      "encontrados": "Nije pronađen nijedan ljubimac | Pronađen je {n} ljubimac | Pronađena su {n} ljubimca | Pronađeno je {n} ljubimaca"
+      "encontrados": "Nije pronađen nijedan ljubimac | Pronađen je {n} ljubimac | Pronađena su {n} ljubimca | Pronađeno je {n} ljubimaca",
+      "encontradosAcessos": "Nije pronađen nijedan pristup | Pronađen je {n} pristup | Pronađena su {n} pristupa | Pronađeno je {n} pristupa"
     },
     "grupo": {
       "acessos": "{n} pristup | {n} pristupa | {n} pristupa",
@@ -1733,8 +1739,8 @@
         "body": "Svaki pripisani iznos čeka 14 dana pre nego što postane stanje za isplatu. To je rok za eventualni povraćaj novca za kupovinu."
       },
       "payout": {
-        "title": "Isplata od R$ 50,00",
-        "body": "Kada stanje za isplatu pređe minimum, zatražite isplatu u novčaniku i primite je na registrovani PIX ključ."
+        "title": "Isplata preko PIX-a",
+        "body": "Kada stanje za isplatu dostigne minimum u novčaniku, zatražite isplatu tamo i primite je na registrovani PIX ključ."
       },
       "requirement": {
         "title": "Važi od aktivacije",
@@ -1784,8 +1790,7 @@
       "acoes": "Radnje za deljenje"
     },
     "tela": {
-      "resumo": "{n} skeniranje QR koda do sada | {n} skeniranja QR koda do sada | {n} skeniranja QR koda do sada",
-      "resumoZero": "QR kod još nije skeniran. Odštampajte QR za pult i počnite da merite."
+      "resumo": "{n} skeniranje QR koda do sada | {n} skeniranja QR koda do sada | {n} skeniranja QR koda do sada"
     }
   },
   "carteira": {
@@ -1848,19 +1853,19 @@
       "contactWhatsapp": "WhatsApp",
       "comissao": {
         "title": "Kako se puni stanje",
-        "body": "Preporuke koje postanu pretplatnici donose udeo u novčaniku kada je afilijejt program aktivan."
+        "body": "Svaka plaćena pretplata staratelja koji je došao po vašoj preporuci donosi udeo u novčaniku, dok je Afilijejt program aktivan."
       },
       "saldos": {
         "title": "Ukupno stanje i stanje za isplatu",
-        "body": "Ukupno stanje sabira sve pripisane iznose; stanje za isplatu se oslobađa nakon bezbednosnog perioda od 14 dana za svaki iznos."
+        "body": "Ono što stigne čeka 14 dana pre nego što može da se isplati. Ukupno stanje prikazuje sve; stanje za isplatu samo ono što je prošlo taj rok."
       },
       "pix": {
-        "title": "PIX je obavezan",
-        "body": "Registrujte PIX ključ firme pre zahteva za isplatu. Samo vlasnik naloga može da menja PIX i traži isplate."
+        "title": "PIX ključ firme",
+        "body": "Isplata stiže na PIX ključ firme: registrujte ga pre prvog zahteva. Samo vlasnik naloga može da menja ključ i traži isplate."
       },
       "ciclo": {
-        "title": "Ciklus isplate",
-        "body": "Minimalna isplata je {valor}. Presek je 27. u mesecu, a okvirna isplata do 5. u mesecu. Status pratite na kartici „Isplate“."
+        "title": "Kada stiže isplata",
+        "body": "Isplata od {valor}. Zahtevi se zatvaraju 27. u mesecu, a isplata se očekuje do 5. narednog meseca. Status pratite na kartici „Isplate“."
       },
       "footerPrefix": "Imate pitanja?",
       "footerOrWhatsapp": "ili WhatsApp"
@@ -2073,6 +2078,7 @@
       "aceito": "Poziv je prihvaćen",
       "aceitoDetalhe": "Sada ste deo tima.",
       "naoVale": "Ovaj poziv više ne važi",
+      "linkIncompleto": "Link ovog poziva je nepotpun. Ponovo otvorite ceo link iz imejla ili zatražite novi poziv.",
       "irParaPortal": "Idite na portal",
       "jaNaEquipe": "Već ste u timu",
       "jaMembroCorpo": "Već ste u ovom timu. Samo nastavite na portal.",
@@ -2218,7 +2224,7 @@
         },
         "CANCELADO": {
           "titulo": "Niko nije otkazao",
-          "corpo": "Svi koji su se pretplatili sa vašim kodom i dalje su pretplaćeni."
+          "corpo": "Ako neko ko se pretplatio uz vaš kod otkaže pretplatu, ime te osobe pojaviće se ovde."
         }
       },
       "apenasDono": {
@@ -2249,15 +2255,15 @@
       },
       "seguranca": {
         "label": "Bezbednost",
-        "description": "Promena lozinke prijavljenog naloga."
+        "description": "Promenite lozinku."
       },
       "aparencia": {
         "label": "Izgled",
-        "description": "Tema, raspored bočnog menija i gustina lista."
+        "description": "Tema, navigacija, objašnjenja i jezik."
       },
       "conta": {
         "label": "Nalog",
-        "description": "Sesija, deaktivacija profila i buduće preferencije."
+        "description": "Odjava sa ovog računara, promena firme i pauziranje profila."
       }
     },
     "aparencia": {
@@ -2556,11 +2562,11 @@
           },
           "scope": {
             "title": "Samo profil",
-            "text": "Ne briše kliniku, partnera ni istoriju: samo pauzira aktivni profil."
+            "text": "Klinika, firma i istorija ostaju kakve jesu. Pauzira se samo vaš profil."
           },
           "notDelete": {
             "title": "Nije brisanje",
-            "text": "Trajno zatvaranje naloga (LGPD) je poseban postupak i ne prikazuje se ovde."
+            "text": "Trajno brisanje naloga je poseban zahtev i ne radi se ovde."
           }
         }
       },
@@ -2624,7 +2630,8 @@
         "vacinas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni",
         "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
         "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma",
-        "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
+        "faltas": "{total} pacijent ima izostanak bez razloga | {total} pacijenta imaju izostanke bez razloga | {total} pacijenata ima izostanke bez razloga",
+        "pedidos":"{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
       }
     },
     "busca": {
@@ -2726,7 +2733,7 @@
       "outside-hours": "Van radnog vremena, koje traje od {abre} do {fecha}.",
       "lunch-overlap": "Zalazi {minutos} min u pauzu za ručak.",
       "holiday-closed": "Klinika je zatvorena: {feriado}.",
-      "over-capacity": "Opterećenje dana raste na {minutos} min, iznad uobičajenih {capacidade} min.",
+      "over-capacity": "Opterećenje dana raste na {minutos}, iznad uobičajenih {capacidade}.",
       "type-room-mismatch": "Prostorija {sala} nije predviđena za tip termina „{tipo}“."
     },
     "paciente": {
@@ -3137,6 +3144,9 @@
       "filtroProfissionais": "Stručnjaci",
       "filtroSituacao": "Status",
       "semExpediente": "Klinika ne radi ovog dana.",
+      "fechadaSemNada": "Nema zakazanih termina. Hitan slučaj i dalje možete zakazati, uz potvrdu.",
+      "irParaDia": "Idi na {semana}, {data}",
+      "semanaDeAte": "Nedelja od {inicio} do {fim}",
       "drawer": {
         "irPara": "Otvori"
       },
@@ -3183,6 +3193,8 @@
       "estado": {
         "sala": "U sali već {tempo}",
         "espera": "Čeka već {tempo}",
+        "esperaAgora": "Upravo stigao",
+        "salaAgora": "Upravo ušao",
         "marcado": "Zakazano za {hora}"
       },
       "carrossel": {
@@ -3359,6 +3371,7 @@
       "passoSemReceita": "Proverite i izdajte potvrdu ili karton",
       "cartao": {
         "receituarioControle": "Štampa se na posebnom listu, u dva primerka",
+        "receituarioAlergia": "Potvrdite alergiju u terapiji da biste štampali.",
         "semPrescricao": "Na ovom pregledu nije propisan lek",
         "prontuario": {
           "titulo": "Kompletan medicinski karton",
@@ -3887,9 +3900,9 @@
           "congestas": "Kongestivne",
           "nao-avaliado": "Nisu procenjene"
         },
-        "hidratacaoRotulo": "Hidratacija",
+        "hidratacaoRotulo": "Dehidratacija",
         "hidratacao": {
-          "normal": "Normalna",
+          "normal": "Nema",
           "leve": "Blaga",
           "moderada": "Umerena",
           "grave": "Teška"
@@ -3964,13 +3977,12 @@
           "total": "3. {porDia}× dnevno × {dias} d = {total} (ukupan broj doza)"
         },
         "fracao": {
-          "inteiro": "Cele tablete po dozi: {inteiros}",
+          "inteiro": "{inteiros} cela tableta po dozi | {inteiros} cele tablete po dozi | {inteiros} celih tableta po dozi",
           "meio": "Pola tablete po dozi",
           "um-e-meio": "Jedna i po tableta po dozi",
           "quarto": "Četvrtina tablete po dozi",
           "tres-quartos": "Tri četvrtine tablete po dozi",
           "multiplo": "{quantidade} tablete po dozi",
-          "aproximado": "{quantidade} tablete po dozi",
           "arredondado": "proračun je dao {calculado}; potvrdite zaokruživanje"
         },
         "aCadaHoras": "na {horas} h",
@@ -4479,6 +4491,7 @@
       "controlada": "Kontrolisana supstanca · Pravilnik 344/98",
       "semPrescricao": "Nema terapije za izdavanje.",
       "confirmeAlergia": "Potvrdite alergiju u terapiji da biste potpisali.",
+      "desatualizada": "Terapija je promenjena posle ovog potpisa. Potpišite ponovo da biste poslali trenutnu verziju.",
       "vistaDoResponsavel": "Prikaz za vlasnika",
       "lembrete": "Postaje podsetnik u aplikaciji: {quantidade}, {frequencia}",
       "lembreteContinuo": "Trajni podsetnik, bez datuma završetka",
@@ -5011,7 +5024,8 @@
         "criar": "Propišite",
         "proxima": "Sledeća u {hora}",
         "feitas": "{total} primenjena doza | {total} primenjene doze | {total} primenjenih doza",
-        "por": "veterinar: {nome}",
+        "registradas": "{total} zapis | {total} zapisa | {total} zapisa",
+        "por": "propisuje: {nome}",
         "suspender": "Obustavite",
         "suspenderAlvo": "Obustavljanje: {item}. Ono što je već dato ostaje u evidenciji.",
         "motivo": "Razlog",
@@ -6890,6 +6904,8 @@
       "quemRetira": "Ko preuzima",
       "registrarPeso": "Upiši težinu",
       "saidaTardia": "Odlazak posle termina: dodatnih {percentual}% noćenja.",
+      "devolver": "Vratiti vlasniku",
+      "devolverNoBalcao": "Plaćeno je više od računa za iskorišćena noćenja: vratite razliku na pultu, pri predaji.",
       "saldo": "Saldo za naplatu",
       "titulo": "Odjava gosta {pet}",
       "voltarALista": "Nazad na listu",
@@ -7030,6 +7046,7 @@
         "saiu": "otišao",
         "saldo": "Saldo",
         "saldoDetalhe": "za naplatu pri odlasku",
+        "saldoDevolver": "za povraćaj pri odlasku",
         "semPesagem": "bez merenja pri odlasku"
       },
       "subtitulo": "Hotel",
@@ -7061,6 +7078,7 @@
           "receber": "Naplatiti {valor}",
           "quitado": "Ništa za naplatu",
           "saldoNoBalcao": "Naplaćuje se na pultu, pri predaji.",
+          "devolver": "Vratiti {valor}",
           "titulo": "Šta je preostalo pre predaje",
           "tituloEncerrada": "Odlazak",
           "descricao": "Odlazak planiran za {quando}.",
@@ -7400,6 +7418,7 @@
         "temporada": "Sezonski dodatak"
       },
       "pago": "Već plaćeno",
+      "devolvido": "Vraćeno vlasniku",
       "quantidade": "Kol.",
       "saldo": "Saldo za naplatu",
       "sinalSugerido": "Predložena kapara",
@@ -7534,7 +7553,7 @@
       "autorizados": "Ko može da preuzme",
       "avisoAdmissao": "Dokumentacija koju treba rešiti pre dolaska: {itens}",
       "checkInBloqueado": "Prijava je blokirana zbog dokumentacije koja nedostaje.",
-      "chegaAs": "stiže u",
+      "chegaAs": "Stiže u",
       "confirmarSinal": "Upiši kaparu i potvrdi",
       "criar": "Napravi rezervaciju",
       "diarias": "{total} noćenje | {total} noćenja | {total} noćenja",
@@ -7542,6 +7561,7 @@
         "abrir": "Promeni datume",
         "agora": "Trenutna rezervacija: {acomodacao}, {periodo}.",
         "conta": "Novi iznos: {novo} (pre {antes}).",
+        "feito": "Rezervacija izmenjena: {acomodacao}, {periodo}.",
         "datas": "Dolazak i odlazak",
         "escolha": "Izaberite smeštaj",
         "novaSaida": "Novi datum odlaska",
@@ -7552,7 +7572,17 @@
       },
       "animalJaReservado": "{pet} već ima rezervaciju u tom periodu ({acomodacao}, {periodo}). Izmenite ili otkažite tu pre nego što napravite novu.",
       "escolhaHospede": "Izaberite životinju",
-      "hospedeNaoEncontrado": "Nema životinje sa tim imenom u evidenciji hotela.",
+      "hospedeNaoEncontrado": "Nema životinje sa tim imenom u evidenciji hotela. Prvi put? Izaberite \"Nova životinja\".",
+      "novo": {
+        "abrir": "Nova životinja",
+        "voltar": "Izaberi iz evidencije",
+        "nome": "Ime životinje",
+        "especie": "Vrsta",
+        "porte": "Veličina",
+        "responsavel": "Vlasnik",
+        "celular": "Broj mobilnog telefona sa pozivnim brojem",
+        "dica": "Prvi put u hotelu: ostatak podataka (rasa, knjižica vakcinacije, veterinar) dopunjuje se pri prijemu."
+      },
       "exigencias": "Dokumentacija za prijem",
       "fazerCheckIn": "Prijavi gosta",
       "hospede": "Gost",
@@ -7566,8 +7596,9 @@
       "periodo": "Period",
       "porDiaria": " po noćenju",
       "quantasNoites": "Noćenja",
-      "saiAs": "odlazi u",
+      "saiAs": "Odlazi u",
       "saidaTardia": "Predviđeni odlazak je posle termina: {valor} dodatno na računu.",
+      "saidaAtrasada": "Predviđeni odlazak je prošao: ako se preda sada, {valor} dodatno na računu.",
       "semAcompanhante": "Bez pratioca",
       "semServico": "Bez usluga",
       "semVaga": "Ovaj smeštaj ne odgovara tom periodu: {motivo}",
@@ -7581,6 +7612,7 @@
         "naoEncontradaTitulo": "Rezervacija nije pronađena",
         "naoEncontradaDescricao": "Adresa je možda nepotpuna ili rezervacija više ne postoji. Vratite se na listu rezervacija.",
         "registrarComprovante": "Upiši potvrdu",
+        "mais": "Još radnji",
         "sinalConfirmar": "Upiši i potvrdi",
         "sinalSugerido": "Predložen avans: {valor}",
         "sinalValor": "Koliko je vlasnik platio avansa",
@@ -8448,7 +8480,8 @@
         "juntos": "Zajedno, u istom smeštaju",
         "semExtras": "Bez dodataka",
         "hotelEscolhe": "Hotel bira",
-        "semVaga": "{tipo}: nema slobodnih"
+        "semVaga": "{tipo}: nema slobodnih",
+        "jaTemReserva": "Već ima rezervaciju: {acomodacao}, {periodo}"
       },
       "gaveta": {
         "titulo": "Zahtev za: {nomes}",

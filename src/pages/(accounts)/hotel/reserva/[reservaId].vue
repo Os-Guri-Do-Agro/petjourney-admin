@@ -23,9 +23,12 @@ import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
+import Menu from 'primevue/menu'
+import type { MenuItem } from 'primevue/menuitem'
 import Message from 'primevue/message'
 import Popover from 'primevue/popover'
 import SelectButton from 'primevue/selectbutton'
+import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -63,6 +66,7 @@ const formato = useHotelFormat()
 const hotelStore = useHotelStore()
 const reservas = useReservasStore()
 const hospedagem = useHospedagemStore()
+const toast = useToast()
 const idCampo = useId()
 
 const reservaId = computed(() => String(route.params.reservaId ?? ''))
@@ -125,6 +129,11 @@ const ativa = computed(
  * É a regra que mais gera discussão, e discussão de balcão se resolve mostrando a regra na tela
  * antes de o cliente chegar.
  */
+/** A saída do quadro: a real depois do check-out, a prevista antes dele. */
+const saidaDoQuadro = computed(
+  () => detalhe.value?.saidaReal ?? reserva.value?.saidaPrevista ?? hotelClock.nowIso(),
+)
+
 const acrescimoDeSaida = computed(
   () =>
     reserva.value?.orcamento.linhas.find((linha) => linha.kind === 'meia-diaria')?.totalCentavos ??
@@ -400,6 +409,18 @@ async function salvarAlteracao(payload: {
 
   if (feita) {
     alterarAberto.value = false
+    /*
+     * A gaveta fechava em silêncio e só o quadro mudava: quem tem o responsável no telefone
+     * precisa ouvir de volta o que ficou gravado antes de desligar.
+     */
+    toast.add({
+      severity: 'success',
+      summary: t('hotel.reserva.alterar.feito', {
+        acomodacao: hotelStore.acomodacao(payload.acomodacaoId)?.nome ?? '',
+        periodo: formato.periodo(payload.inicio, payload.fim),
+      }),
+      life: 5000,
+    })
   }
 }
 
@@ -491,6 +512,45 @@ const acaoPrincipal = computed(() => {
 const checkInAoLado = computed(
   () => acaoPrincipal.value?.id === 'sinal' && podeFazerCheckIn.value,
 )
+
+/**
+ * O que não é o próximo passo nem mudar as datas: registrar o primeiro comprovante que falta, o
+ * check-in antes do sinal e cancelar. Cada documento também tem o "Registrar" na própria linha da
+ * lista, e o cancelamento pede confirmação no diálogo.
+ */
+const menuDoMais = ref<InstanceType<typeof Menu> | null>(null)
+
+const itensDoMais = computed<MenuItem[]>(() => {
+  const itens: MenuItem[] = []
+  const pendente = primeiraPendente.value
+
+  if (pendente && !detalhe.value?.hospedagemId && ativa.value) {
+    itens.push({
+      label: t('hotel.reserva.tela.registrarComprovante'),
+      icon: 'ph ph-file-plus',
+      command: () => (alvoDaExigencia.value = { kind: pendente.kind, modo: 'registrar' }),
+    })
+  }
+
+  if (checkInAoLado.value) {
+    itens.push({
+      label: t('hotel.reserva.fazerCheckIn'),
+      icon: 'ph ph-sign-in',
+      command: () => (checkInAberto.value = true),
+    })
+  }
+
+  if (ativa.value) {
+    itens.push({
+      label: t('hotel.reserva.tela.cancelar'),
+      icon: 'ph ph-x-circle',
+      class: 'reserva-menu__risco',
+      command: abrirCancelamento,
+    })
+  }
+
+  return itens
+})
 
 /**
  * O tutorial desta tela, na ordem em que se lê a página.
@@ -601,16 +661,33 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </div>
     </template>
 
+    <!--
+      Duas ações à vista, o próximo passo e mudar as datas, e o resto em "Mais". Eram seis botões
+      (com "Como usar"), em três linhas no tablet, com a ação principal sozinha embaixo; e o
+      "Cancelar reserva" era texto solto sobre a faixa.
+    -->
     <template v-if="reserva && detalhe && daRota" #acoes>
-      <Button
-        v-if="ativa"
-        type="button"
-        severity="secondary"
-        text
-        icon="ph ph-x-circle"
-        :label="t('hotel.reserva.tela.cancelar')"
-        @click="abrirCancelamento"
-      />
+      <template v-if="itensDoMais.length > 0">
+        <!-- Só o ícone, como o "Mais ações" da Agenda: com rótulo, a fileira não cabia em 1024. -->
+        <Button
+          type="button"
+          severity="secondary"
+          outlined
+          icon="ph ph-dots-three"
+          :aria-label="t('hotel.reserva.tela.mais')"
+          :title="t('hotel.reserva.tela.mais')"
+          aria-haspopup="menu"
+          :aria-controls="`${idCampo}-mais`"
+          @click="menuDoMais?.toggle($event)"
+        />
+        <Menu
+          :id="`${idCampo}-mais`"
+          ref="menuDoMais"
+          :model="itensDoMais"
+          popup
+          :pt="{ root: { class: 'clinic-overlay' } }"
+        />
+      </template>
       <Button
         v-if="podeAlterar"
         type="button"
@@ -623,24 +700,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             : t('hotel.reserva.alterar.abrir')
         "
         @click="abrirAlteracao"
-      />
-      <Button
-        v-if="primeiraPendente && !detalhe.hospedagemId && ativa"
-        type="button"
-        severity="secondary"
-        outlined
-        icon="ph ph-file-plus"
-        :label="t('hotel.reserva.tela.registrarComprovante')"
-        @click="alvoDaExigencia = { kind: primeiraPendente.kind, modo: 'registrar' }"
-      />
-      <Button
-        v-if="checkInAoLado"
-        type="button"
-        severity="secondary"
-        outlined
-        icon="ph ph-sign-in"
-        :label="t('hotel.reserva.fazerCheckIn')"
-        @click="checkInAberto = true"
       />
       <Button
         v-if="acaoPrincipal"
@@ -682,7 +741,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <Button
               type="button"
               severity="secondary"
-              text
+              outlined
               :label="t('hotel.comum.cancelar')"
               @click="popoverDoSinal?.hide()"
             />
@@ -766,12 +825,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
                 <i class="ph ph-sign-out" />
               </span>
             </dt>
+            <!-- Depois do check-out, a saída que aconteceu, e não a que estava prevista. -->
             <dd>
               <strong class="dado__grande ui-num">
-                {{ formato.data(dataDe(reserva.saidaPrevista)) }}
+                {{ formato.data(dataDe(saidaDoQuadro)) }}
               </strong>
               <small class="ui-num">
-                {{ semana(dataDe(reserva.saidaPrevista)) }} · {{ horaDe(reserva.saidaPrevista) }}
+                {{ semana(dataDe(saidaDoQuadro)) }} · {{ horaDe(saidaDoQuadro) }}
               </small>
             </dd>
           </div>
@@ -811,16 +871,24 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
         </dl>
 
         <div
-          v-if="acrescimoDeSaida > 0 || reserva.observacao"
+          v-if="(acrescimoDeSaida > 0 && !detalhe.saidaReal) || reserva.observacao"
           class="quadro__notas"
         >
           <!--
             A saída tardia é dita aqui, com o valor, e não no balcão. É a regra que mais gera
-            discussão — e discussão de balcão se resolve mostrando a regra antes.
+            discussão — e discussão de balcão se resolve mostrando a regra antes. Depois da saída,
+            ela já está na conta, linha a linha: "a saída prevista é depois do horário" não vale mais.
           -->
-          <p v-if="acrescimoDeSaida > 0" class="nota nota--atencao">
+          <p v-if="acrescimoDeSaida > 0 && !detalhe.saidaReal" class="nota nota--atencao">
             <i class="ph ph-clock-afternoon" aria-hidden="true" />
-            {{ t('hotel.reserva.saidaTardia', { valor: formato.moeda(acrescimoDeSaida) }) }}
+            {{
+              t(
+                detalhe.contaDaEntregaAgora
+                  ? 'hotel.reserva.saidaAtrasada'
+                  : 'hotel.reserva.saidaTardia',
+                { valor: formato.moeda(acrescimoDeSaida) },
+              )
+            }}
           </p>
 
           <p v-if="reserva.observacao" class="nota">
@@ -831,9 +899,10 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
       </section>
 
       <div class="colunas">
+        <!-- Depois da entrada não falta nada "para a entrada": a mesma lista vira a documentação. -->
         <UiSecao
           class="coluna-falta"
-          :titulo="t('hotel.reserva.tela.oQueFalta')"
+          :titulo="ativa ? t('hotel.reserva.tela.oQueFalta') : t('hotel.reservas.coluna.admissao')"
           :descricao="t('hotel.reserva.tela.oQueFaltaDescricao')"
           icone="ph ph-files"
         >
@@ -862,6 +931,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <OrcamentoTabela
               :orcamento="reserva.orcamento"
               :pago-centavos="reserva.pagoCentavos"
+              :devolvido-centavos="reserva.devolvidoCentavos ?? 0"
               sem-titulo
             />
 
@@ -961,7 +1031,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <span>{{ t('hotel.reserva.tela.naoCompareceu') }}</span>
           </label>
 
-          <p v-if="detalhe" class="cancelar__politica">
+          <!-- Sem sinal pago não há o que devolver: "não devolve o sinal" só confundia. -->
+          <p v-if="detalhe && reserva && reserva.pagoCentavos > 0" class="cancelar__politica">
             <i class="ph ph-info" aria-hidden="true" />
             {{
               detalhe.sinalDevolve
@@ -980,7 +1051,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             type="button"
             :label="t('hotel.reserva.tela.manter')"
             severity="secondary"
-            text
+            outlined
             @click="cancelarAberto = false"
           />
           <Button
@@ -1224,7 +1295,9 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   border-inline-start: 1px solid var(--linha);
 }
 
+/* O rótulo para antes do ícone do canto: "Saldo a receber" encostava nele em 1024. */
 .dado dt {
+  padding-inline-end: 34px;
   color: var(--tinta-2);
   font-size: 13px;
   font-weight: 600;
@@ -1396,5 +1469,13 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   .dado__grande {
     font-size: 21px;
   }
+}
+</style>
+
+<style>
+/* O menu "Mais" é teleportado: cancelar leva a tinta de risco na palavra e no ícone. */
+.reserva-menu__risco .p-menu-item-label,
+.reserva-menu__risco .p-menu-item-icon {
+  color: var(--risco-tinta);
 }
 </style>

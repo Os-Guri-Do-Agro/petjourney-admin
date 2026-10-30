@@ -107,7 +107,28 @@ export function useProntuarioTeclado(opcoes: {
     }
 
     const lista = focaveis(raiz)
-    const indice = lista.indexOf(atual)
+    let indice = lista.indexOf(atual)
+
+    /*
+     * Quem tem o foco pode não estar na lista: a opção de um grupo que não carrega a parada de
+     * Tab, ou um controle fora do atalho. Aí o próximo é o primeiro que vem depois dele no
+     * documento, e não o primeiro da etapa.
+     */
+    if (indice < 0) {
+      const seguinte = lista.findIndex(
+        (elemento) =>
+          (atual.compareDocumentPosition(elemento) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 &&
+          !atual.contains(elemento),
+      )
+
+      if (seguinte < 0) {
+        opcoes.acoes.proximaEtapa?.()
+
+        return
+      }
+
+      indice = seguinte - 1
+    }
 
     /*
      * No último campo, `Enter` passa para a etapa seguinte em vez de não fazer nada. É a
@@ -159,6 +180,25 @@ export function useProntuarioTeclado(opcoes: {
         !foraDoTeclado(alvo)
       ) {
         evento.preventDefault()
+        avancarCampo(alvo)
+
+        return
+      }
+
+      /*
+       * Opção de grupo (Evolução, Mucosas, os oito sistemas): o número escolhe e o `Enter`
+       * avança, como num campo. Sem isto o `Enter` virava clique na opção já escolhida e, no
+       * grupo que se desmarca, apagava a resposta que acabou de ser dada ("1", Enter: a evolução
+       * voltava a vazia e o foco ficava parado).
+       */
+      if (
+        alvo instanceof HTMLElement &&
+        alvo.getAttribute('role') === 'radio' &&
+        opcoes.raiz.value?.contains(alvo) &&
+        !foraDoTeclado(alvo)
+      ) {
+        evento.preventDefault()
+        evento.stopPropagation()
         avancarCampo(alvo)
       }
     }

@@ -53,6 +53,19 @@ const prescricoes = computed(() => props.encounter.conduta.prescricoes)
 const emitidas = computed(() => receitas.doAtendimento(props.encounter.id))
 
 /**
+ * A assinatura já não bate com a prescrição da tela.
+ *
+ * Com a divergência a linha diz o que houve e não oferece mais o envio, que mandaria ao app a
+ * versão antiga com a nova na tela. Vale para toda assinatura deste atendimento, também a
+ * anterior a uma reassinatura: ela continua na lista, e o "Enviar" dela mandava a versão velha.
+ */
+function desatualizada(receitaId: string): boolean {
+  const receita = emitidas.value.find((item) => item.id === receitaId)
+
+  return receita !== undefined && receitas.divergeDaConduta(receita, prescricoes.value)
+}
+
+/**
  * A última receita assinada **deste paciente**, de qualquer atendimento.
  *
  * É o que "repetir" oferece — e é de outro atendimento que ela costuma vir: o contínuo do mês
@@ -87,10 +100,11 @@ const vistaDoResponsavel = computed(() =>
       : null
 
     const quantidade = fracao
-      ? t(`clinico.prontuario.conduta.fracao.${fracao.kind}`, {
-          inteiros: fracao.inteiros,
-          quantidade: formato.numero(fracao.quantidade, 2),
-        })
+      ? t(
+          `clinico.prontuario.conduta.fracao.${fracao.nome}`,
+          { inteiros: fracao.inteiros, quantidade: formato.numero(fracao.quantidade, 2) },
+          fracao.quantidade,
+        )
       : t('clinico.prontuario.conduta.resumoQuantidade', {
           quantidade: formato.numero(prescricao.calculo.quantidadeApresentacao, 2),
           unidade: t(
@@ -280,6 +294,11 @@ function repetir() {
             severidade="atencao"
             :rotulo="t('clinico.receita.controlada')"
           />
+
+          <p v-if="desatualizada(doc.id)" class="emitida__desatualizada">
+            <i class="ph ph-warning" aria-hidden="true" />
+            {{ t('clinico.receita.desatualizada') }}
+          </p>
         </div>
 
         <span v-if="doc.enviadaEm" class="emitida__enviada">
@@ -288,7 +307,7 @@ function repetir() {
         </span>
 
         <Button
-          v-else
+          v-else-if="!desatualizada(doc.id)"
           type="button"
           :label="t('clinico.receita.enviar')"
           icon="ph ph-paper-plane-tilt"
@@ -530,6 +549,23 @@ function repetir() {
   color: var(--tinta);
   font-size: 14.5px;
   font-weight: 650;
+}
+
+/* A assinatura que já não bate com a tela: dita na tinta de atenção, com o ícone, sem caixa nova. */
+.emitida__desatualizada {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 0;
+  color: var(--atencao-tinta);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.emitida__desatualizada .ph {
+  flex: none;
+  margin-top: 1px;
+  font-size: 15px;
 }
 
 .emitida__enviada {

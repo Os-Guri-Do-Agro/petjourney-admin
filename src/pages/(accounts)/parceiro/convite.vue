@@ -132,14 +132,17 @@ function avisarErro(err: unknown) {
  */
 function linkSemValor(err: unknown) {
   const codigo = err instanceof ApiError ? err.codigo : undefined
+  /* 400 sem código: o validador recusou o token (link cortado ao copiar do e-mail). Antes a tela
+     oferecia "Aceitar convite" para um link que nunca ia funcionar. */
+  const incompleto = err instanceof ApiError && err.statusCode === 400 && !codigo
 
-  if (codigo !== 'CONVITE_EXPIRADO' && codigo !== 'CONVITE_NAO_ENCONTRADO') {
+  if (!incompleto && codigo !== 'CONVITE_EXPIRADO' && codigo !== 'CONVITE_NAO_ENCONTRADO') {
     return false
   }
 
   esquecerTokenDoConvite()
   token.value = null
-  avisoDoLink.value = (err as Error).message
+  avisoDoLink.value = incompleto ? t('parceiro.convite.linkIncompleto') : (err as Error).message
   estado.value = 'caixa'
   void carregarCaixa()
   return true

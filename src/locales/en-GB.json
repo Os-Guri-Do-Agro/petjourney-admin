@@ -34,6 +34,7 @@
     "login": {
       "title": "Welcome back",
       "erroCredenciais": "Email or password doesn't match. Check them and try again.",
+      "erroSenhaVazia": "Enter your password.",
       "sessaoExpirada": "Your session ended",
       "sessaoExpiradaDetalhe": "Sign in again to pick up where you left off.",
       "description": "Sign in to the portal and boost your partnership with referrals and results.",
@@ -500,7 +501,9 @@
     "api": {
       "missingBaseUrl": "This build of the portal has no server address configured. Please contact the technical team.",
       "invalidResponse": "The server replied in an unexpected format. Please try again in a moment.",
-      "genericStatus": "Error {status}"
+      "genericStatus": "Error {status}",
+      "servidor": "The server couldn't handle this right now. Please try again in a moment.",
+      "dadosRecusados": "The server didn't accept the data sent. Please check it and try again."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -804,6 +807,7 @@
       "vazio": "Nothing scheduled for this day.",
       "hoje": "Today",
       "aguardando": "Waiting",
+      "naoChegou": "Not here yet",
       "pendencia": "Pending",
       "chegadas": "{total} arrival | {total} arrivals",
       "compromissos": "The day's appointments",
@@ -904,7 +908,8 @@
         "description": "Earn 5% participation on every subscription born from your referral, month after month, for up to 18 months. Track the balance in your wallet and withdraw via PIX.",
         "feature1": "5% per subscription, on every paid renewal",
         "feature2": "18-month window per referred pet parent",
-        "feature3": "PIX payout from R$ 50.00"
+        "feature3": "PIX payout from {valor}",
+        "feature3SemValor": "PIX payout to the company key"
       },
       "participativo": {
         "title": "Participatory Programme",
@@ -1501,7 +1506,8 @@
       "vencemLogo": "1 ends in less than a day | {n} end in less than a day",
       "historico": "No pets in the history | 1 pet in the history | {n} pets in the history",
       "historicoRecente": "Recent accesses of 1 pet | Recent accesses of {n} pets",
-      "encontrados": "No pets found | 1 pet found | {n} pets found"
+      "encontrados": "No pets found | 1 pet found | {n} pets found",
+      "encontradosAcessos": "No access found | 1 access found | {n} accesses found"
     },
     "grupo": {
       "acessos": "{n} access | {n} accesses",
@@ -1733,8 +1739,8 @@
         "body": "Each credit waits 14 days before it becomes withdrawable balance. That is the refund window of the purchase."
       },
       "payout": {
-        "title": "Withdraw from R$ 50.00",
-        "body": "Once your withdrawable balance passes the minimum, request the payout in the Wallet and receive it on your registered PIX key."
+        "title": "PIX payout",
+        "body": "Once your withdrawable balance reaches the Wallet minimum, request the payout there and receive it on your registered PIX key."
       },
       "requirement": {
         "title": "Valid from activation",
@@ -1784,8 +1790,7 @@
       "acoes": "Referral actions"
     },
     "tela": {
-      "resumo": "{n} QR scan so far | {n} QR scans so far",
-      "resumoZero": "No QR scans yet. Print the QR for your front desk and start measuring."
+      "resumo": "{n} QR scan so far | {n} QR scans so far"
     }
   },
   "carteira": {
@@ -1847,20 +1852,20 @@
       "contactEmail": "Email",
       "contactWhatsapp": "WhatsApp",
       "comissao": {
-        "title": "How balance arrives",
-        "body": "Referrals that become subscribers generate wallet participation when the affiliate programme is active."
+        "title": "How the balance comes in",
+        "body": "Every paid subscription from a pet parent you referred earns participation in the wallet, while the Affiliate Programme is active."
       },
       "saldos": {
         "title": "Total and withdrawable balance",
-        "body": "Total accumulates credits; withdrawable unlocks after the 14-day security window per credit."
+        "body": "What comes in waits 14 days before it can be withdrawn. The total shows everything; withdrawable, only what has passed that period."
       },
       "pix": {
-        "title": "PIX required",
-        "body": "Register the company PIX key before requesting a payout. Only the account owner can change PIX and request payouts."
+        "title": "Company PIX key",
+        "body": "Payouts go to the company PIX key: register it before your first request. Only the account owner can change the key and request payouts."
       },
       "ciclo": {
-        "title": "Payment cycle",
-        "body": "Minimum payout of {valor}. Cut-off on the 27th and indicative settlement by the 5th. Track it on the Payouts tab."
+        "title": "When the payment arrives",
+        "body": "Payouts from {valor}. Requests close on the 27th, and payment is expected by the 5th of the following month. Track it on the Payouts tab."
       },
       "footerPrefix": "Questions?",
       "footerOrWhatsapp": "or WhatsApp"
@@ -2073,6 +2078,7 @@
       "aceito": "Invitation accepted",
       "aceitoDetalhe": "You are now part of the team.",
       "naoVale": "This invitation is no longer valid",
+      "linkIncompleto": "This invitation link is incomplete. Open the full link from the email again, or ask for a new invitation.",
       "irParaPortal": "Go to the portal",
       "jaNaEquipe": "Already on the team",
       "jaMembroCorpo": "You're already on this team. Just go to the portal.",
@@ -2218,7 +2224,7 @@
         },
         "CANCELADO": {
           "titulo": "Nobody cancelled",
-          "corpo": "Everyone who subscribed with your code is still subscribed."
+          "corpo": "If someone who subscribed with your code cancels, their name shows up here."
         }
       },
       "apenasDono": {
@@ -2249,15 +2255,15 @@
       },
       "seguranca": {
         "label": "Security",
-        "description": "Password change for the signed-in account."
+        "description": "Change your password."
       },
       "aparencia": {
         "label": "Appearance",
-        "description": "Theme, sidebar layout and list density."
+        "description": "Theme, navigation, explanations and language."
       },
       "conta": {
         "label": "Account",
-        "description": "Session, profile deactivation, and future preferences."
+        "description": "Sign out of this computer, switch company and pause your profile."
       }
     },
     "aparencia": {
@@ -2556,11 +2562,11 @@
           },
           "scope": {
             "title": "Profile only",
-            "text": "Does not delete clinic, partner, or history: it only pauses the active profile."
+            "text": "The clinic, the company and the history stay as they are. Only your profile is paused."
           },
           "notDelete": {
             "title": "Not deletion",
-            "text": "Permanent closure (LGPD) is a different flow and does not appear here."
+            "text": "Deleting the account for good is a separate request and is not done here."
           }
         }
       },
@@ -2624,6 +2630,7 @@
         "vacinas": "{total} overdue booster | {total} overdue boosters",
         "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
         "estoque": "{total} vaccine below minimum | {total} vaccines below minimum",
+        "faltas": "{total} patient with an unexplained no-show | {total} patients with unexplained no-shows",
         "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply"
       }
     },
@@ -2726,7 +2733,7 @@
       "outside-hours": "Outside opening hours, which run {abre} to {fecha}.",
       "lunch-overlap": "Crosses the lunch break by {minutos} min.",
       "holiday-closed": "The clinic is closed: {feriado}.",
-      "over-capacity": "The day's load rises to {minutos} min, above the usual {capacidade} min.",
+      "over-capacity": "The day's load rises to {minutos}, above the usual {capacidade}.",
       "type-room-mismatch": "Room {sala} is not the right one for {tipo}."
     },
     "paciente": {
@@ -3137,6 +3144,9 @@
       "filtroProfissionais": "Professionals",
       "filtroSituacao": "Status",
       "semExpediente": "The clinic is closed on this day.",
+      "fechadaSemNada": "No appointments booked. An emergency can still be booked, with confirmation.",
+      "irParaDia": "Go to {semana}, {data}",
+      "semanaDeAte": "Week of {inicio} to {fim}",
       "drawer": {
         "irPara": "Open"
       },
@@ -3183,6 +3193,8 @@
       "estado": {
         "sala": "In the room for {tempo}",
         "espera": "Waiting for {tempo}",
+        "esperaAgora": "Just arrived",
+        "salaAgora": "Just went in",
         "marcado": "Booked for {hora}"
       },
       "carrossel": {
@@ -3359,6 +3371,7 @@
       "passoSemReceita": "Review and issue certificate or record",
       "cartao": {
         "receituarioControle": "Printed on a separate sheet, in duplicate",
+        "receituarioAlergia": "Confirm the allergy in the prescription to print.",
         "semPrescricao": "No medication prescribed in this visit",
         "prontuario": {
           "titulo": "Full medical record",
@@ -3887,9 +3900,9 @@
           "congestas": "Congested",
           "nao-avaliado": "Not assessed"
         },
-        "hidratacaoRotulo": "Hydration",
+        "hidratacaoRotulo": "Dehydration",
         "hidratacao": {
-          "normal": "Normal",
+          "normal": "None",
           "leve": "Mild",
           "moderada": "Moderate",
           "grave": "Severe"
@@ -3964,13 +3977,12 @@
           "total": "3. {porDia}× a day × {dias} days = {total} doses"
         },
         "fracao": {
-          "inteiro": "{inteiros} whole tablet per dose",
+          "inteiro": "{inteiros} whole tablet per dose | {inteiros} whole tablets per dose",
           "meio": "Half a tablet per dose",
           "um-e-meio": "One and a half tablets per dose",
           "quarto": "A quarter of a tablet per dose",
           "tres-quartos": "Three quarters of a tablet per dose",
           "multiplo": "{quantidade} tablets per dose",
-          "aproximado": "{quantidade} tablets per dose",
           "arredondado": "the calculation gave {calculado}; confirm the rounding"
         },
         "aCadaHoras": "every {horas} h",
@@ -4479,6 +4491,7 @@
       "controlada": "Controlled substance · Ordinance 344/98",
       "semPrescricao": "No prescription to issue.",
       "confirmeAlergia": "Confirm the allergy in the prescription to sign.",
+      "desatualizada": "The prescription changed after this signature. Sign again to send the current version.",
       "vistaDoResponsavel": "What the owner sees",
       "lembrete": "Becomes an app reminder: {quantidade}, {frequencia}",
       "lembreteContinuo": "Ongoing reminder, no end date",
@@ -5011,7 +5024,8 @@
         "criar": "Prescribe",
         "proxima": "Next at {hora}",
         "feitas": "{total} given",
-        "por": "by {nome}",
+        "registradas": "{total} entry | {total} entries",
+        "por": "prescribed by {nome}",
         "suspender": "Stop",
         "suspenderAlvo": "Stop {item}. What was already given stays on the record.",
         "motivo": "Reason",
@@ -6890,6 +6904,8 @@
       "quemRetira": "Who is collecting",
       "registrarPeso": "Record weight",
       "saidaTardia": "Departure after check-out time: {percentual}% of a night extra.",
+      "devolver": "Refund the owner",
+      "devolverNoBalcao": "What was paid is more than the nights used: refund it at the desk, at hand-over.",
       "saldo": "Balance due",
       "titulo": "Check-out for {pet}",
       "voltarALista": "Back to the list",
@@ -7030,6 +7046,7 @@
         "saiu": "left",
         "saldo": "Balance",
         "saldoDetalhe": "due at departure",
+        "saldoDevolver": "to refund at departure",
         "semPesagem": "not weighed at departure"
       },
       "subtitulo": "Hotel",
@@ -7061,6 +7078,7 @@
           "receber": "Collect {valor}",
           "quitado": "Nothing to collect",
           "saldoNoBalcao": "Collected at the desk, at hand-over.",
+          "devolver": "Refund {valor}",
           "titulo": "What is left before release",
           "tituloEncerrada": "Departure",
           "descricao": "Departure expected on {quando}.",
@@ -7400,6 +7418,7 @@
         "temporada": "Season surcharge"
       },
       "pago": "Already paid",
+      "devolvido": "Refunded to the owner",
       "quantidade": "Qty",
       "saldo": "Balance due",
       "sinalSugerido": "Suggested deposit",
@@ -7534,7 +7553,7 @@
       "autorizados": "Who can collect",
       "avisoAdmissao": "Paperwork to sort out before arrival: {itens}",
       "checkInBloqueado": "Check-in is blocked by missing paperwork.",
-      "chegaAs": "arrives at",
+      "chegaAs": "Arrives at",
       "confirmarSinal": "Record deposit and confirm",
       "criar": "Create booking",
       "diarias": "{total} night | {total} nights",
@@ -7542,6 +7561,7 @@
         "abrir": "Change dates",
         "agora": "Current booking: {acomodacao}, {periodo}.",
         "conta": "New total: {novo} (was {antes}).",
+        "feito": "Booking updated: {acomodacao}, {periodo}.",
         "datas": "Arrival and departure",
         "escolha": "Choose the room",
         "novaSaida": "New departure date",
@@ -7552,7 +7572,17 @@
       },
       "animalJaReservado": "{pet} already has a booking in that period ({acomodacao}, {periodo}). Change or cancel that one before creating another.",
       "escolhaHospede": "Choose the animal",
-      "hospedeNaoEncontrado": "No animal with that name in the hotel records.",
+      "hospedeNaoEncontrado": "No animal with that name in the hotel records. First stay? Use \"New pet\".",
+      "novo": {
+        "abrir": "New pet",
+        "voltar": "Pick from the records",
+        "nome": "Pet's name",
+        "especie": "Species",
+        "porte": "Size",
+        "responsavel": "Owner",
+        "celular": "Mobile number with area code",
+        "dica": "First stay at the hotel: the rest of the record (breed, vaccination card, vet) is completed at check-in."
+      },
       "exigencias": "Admission paperwork",
       "fazerCheckIn": "Check in",
       "hospede": "Guest",
@@ -7566,8 +7596,9 @@
       "periodo": "Dates",
       "porDiaria": " per night",
       "quantasNoites": "Nights",
-      "saiAs": "leaves at",
+      "saiAs": "Leaves at",
       "saidaTardia": "The planned departure is after check-out time: {valor} extra.",
+      "saidaAtrasada": "Past the planned departure: checking out now adds {valor} to the bill.",
       "semAcompanhante": "No companion",
       "semServico": "No services",
       "semVaga": "This room does not fit that period: {motivo}",
@@ -7581,6 +7612,7 @@
         "naoEncontradaTitulo": "Booking not found",
         "naoEncontradaDescricao": "The address may be incomplete, or the booking no longer exists. Go back to the bookings list.",
         "registrarComprovante": "Record a document",
+        "mais": "More actions",
         "sinalConfirmar": "Record and confirm",
         "sinalSugerido": "Suggested deposit: {valor}",
         "sinalValor": "How much the owner paid as deposit",
@@ -8448,7 +8480,8 @@
         "juntos": "Together, in the same room",
         "semExtras": "No extras",
         "hotelEscolhe": "The hotel chooses",
-        "semVaga": "No {tipo} left"
+        "semVaga": "No {tipo} left",
+        "jaTemReserva": "Already booked: {acomodacao}, {periodo}"
       },
       "gaveta": {
         "titulo": "Request for {nomes}",

@@ -27,6 +27,20 @@ export function parseInstante(valor: string): number {
 }
 
 /**
+ * Quantos dias de calendário (no fuso de quem olha) separam `instanteMs` de `agoraMs`. É a conta
+ * de "ontem" e "anteontem": um acesso de 27/10 às 21h visto em 29/10 às 20h tem 47 horas, um dia
+ * cheio pela divisão por 24, mas foi anteontem, e a data ao lado diz 27.
+ */
+export function diasDeCalendarioEntre(instanteMs: number, agoraMs: number): number {
+  const dia = (ms: number) => {
+    const data = new Date(ms)
+    return Date.UTC(data.getFullYear(), data.getMonth(), data.getDate())
+  }
+
+  return Math.round((dia(agoraMs) - dia(instanteMs)) / 86_400_000)
+}
+
+/**
  * Tempo que falta até `expiraEm`. Trabalha com dois instantes absolutos, então o resultado
  * é o mesmo em qualquer fuso e atravessa horário de verão sem pular hora.
  *

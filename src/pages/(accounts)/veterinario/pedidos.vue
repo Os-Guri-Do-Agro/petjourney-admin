@@ -384,10 +384,11 @@ async function celularMudou() {
         fora dele, no escuro, o tema base os deixava apagados como se estivessem desabilitados.
       -->
       <div class="topo-acoes clinic-scope">
+        <!-- Contorno, como os vizinhos: em texto solto sobre a faixa sálvia, a tinta dava 3,8:1. -->
         <Button
           type="button"
           severity="secondary"
-          text
+          outlined
           icon="ph ph-device-mobile"
           :label="t('clinico.pedidos.tela.verComoPede')"
           :aria-expanded="appAberto"

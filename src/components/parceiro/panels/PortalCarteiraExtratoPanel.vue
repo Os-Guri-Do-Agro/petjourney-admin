@@ -497,6 +497,8 @@ onMounted(() => {
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
+  /* Sem "aqui." sozinho na última linha. */
+  text-wrap: balance;
 }
 
 @media (max-width: 640px) {

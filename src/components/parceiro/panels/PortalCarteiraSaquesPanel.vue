@@ -288,5 +288,6 @@ watch(drawerVisible, (open) => {
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
+  text-wrap: balance;
 }
 </style>

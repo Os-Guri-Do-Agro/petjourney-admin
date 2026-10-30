@@ -232,7 +232,10 @@ const passos = computed<PassoProntuario[]>(() => {
       resumo:
         (exame?.preenchidos ?? 0) > 0
           ? t('clinico.prontuario.passos.vitaisAferidos', {
-              preenchidos: exame?.preenchidos ?? 0,
+              /* "Aferidos" conta o que foi medido: o "não aferido" é registro, não medida. */
+              preenchidos: Object.values(atual.exameFisico.vitais).filter(
+                (vital) => !vital.naoAferido && vital.valor !== null,
+              ).length,
               total: exame?.total ?? 0,
             })
           : '',
@@ -1189,6 +1192,7 @@ onBeforeUnmount(() => {
           <ProntuarioDiagnostico
             v-else-if="etapa === 'diagnostico'"
             :valor="encounter.diagnosticos"
+            :especie="prontuario.pet?.especie ?? null"
             :somente-leitura="prontuario.somenteLeitura"
             :motivo-leitura="motivoDaFolha"
             @atualizar="prontuario.atualizar($event)"

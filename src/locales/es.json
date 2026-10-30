@@ -34,6 +34,7 @@
     "login": {
       "title": "Hola de nuevo",
       "erroCredenciais": "El correo o la contraseña no coinciden. Revíselos e intente de nuevo.",
+      "erroSenhaVazia": "Escriba su contraseña.",
       "sessaoExpirada": "Su sesión terminó",
       "sessaoExpiradaDetalhe": "Inicie sesión de nuevo para seguir donde estaba.",
       "description": "Acceda al portal e impulse su alianza con indicación y resultados.",
@@ -52,7 +53,7 @@
       "submit": "Iniciar sesión en el portal",
       "submitting": "Iniciando sesión...",
       "support": {
-        "prompt": "¿Aún no tienes cuenta?",
+        "prompt": "¿Aún no tiene cuenta?",
         "createAccount": "Crear cuenta"
       },
       "reactivate": {
@@ -500,7 +501,9 @@
     "api": {
       "missingBaseUrl": "Esta versión del panel no tiene configurada la dirección del servidor. Avise al equipo técnico.",
       "invalidResponse": "El servidor respondió en un formato inesperado. Vuelva a intentarlo en unos instantes.",
-      "genericStatus": "Error {status}"
+      "genericStatus": "Error {status}",
+      "servidor": "El servidor no pudo atender ahora. Vuelva a intentarlo en unos instantes.",
+      "dadosRecusados": "El servidor no aceptó los datos enviados. Revíselos y vuelva a intentarlo."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -804,6 +807,7 @@
       "vazio": "Nada agendado para este día.",
       "hoje": "Hoy",
       "aguardando": "En espera",
+      "naoChegou": "No llegó",
       "pendencia": "Pendiente",
       "chegadas": "{total} llegada | {total} llegadas",
       "compromissos": "Compromisos del día",
@@ -904,7 +908,8 @@
         "description": "Reciba 5% de participación por cada suscripción nacida de su indicación, mes a mes, por hasta 18 meses. Siga el saldo en la billetera y retire vía PIX.",
         "feature1": "5% por suscripción, en cada renovación pagada",
         "feature2": "Ventana de 18 meses por tutor referido",
-        "feature3": "Retiro vía PIX desde R$ 50,00"
+        "feature3": "Retiro vía PIX desde {valor}",
+        "feature3SemValor": "Retiro vía PIX a la clave de la empresa"
       },
       "participativo": {
         "title": "Programa Participativo",
@@ -1358,7 +1363,7 @@
       "profissional": "Profesional (opcional)",
       "profissionalPlaceholder": "Si queda vacío, usamos el nombre de su cuenta",
       "especialidade": "Área de actuación (opcional)",
-      "especialidadePlaceholder": "Elige el área",
+      "especialidadePlaceholder": "Elija el área",
       "especialidadeOutraPlaceholder": "Ej.: Acupuntura",
       "especialidadeNaoSalva": "La anotación se guardó, pero este servidor todavía no guarda el área de actuación.",
       "anexos": "Adjuntos (hasta {n})",
@@ -1501,7 +1506,8 @@
       "vencemLogo": "1 vence en menos de un día | {n} vencen en menos de un día",
       "historico": "Ninguna mascota en el historial | 1 mascota en el historial | {n} mascotas en el historial",
       "historicoRecente": "Accesos recientes de 1 mascota | Accesos recientes de {n} mascotas",
-      "encontrados": "Ninguna mascota encontrada | 1 mascota encontrada | {n} mascotas encontradas"
+      "encontrados": "Ninguna mascota encontrada | 1 mascota encontrada | {n} mascotas encontradas",
+      "encontradosAcessos": "Ningún acceso encontrado | 1 acceso encontrado | {n} accesos encontrados"
     },
     "grupo": {
       "acessos": "{n} acceso | {n} accesos",
@@ -1733,8 +1739,8 @@
         "body": "Cada crédito espera 14 días antes de convertirse en saldo retirable. Es la ventana de reembolso de la compra."
       },
       "payout": {
-        "title": "Retiro desde R$ 50,00",
-        "body": "Con saldo retirable por encima del mínimo, solicite el retiro en la Billetera y recíbalo en la clave PIX registrada."
+        "title": "Retiro vía PIX",
+        "body": "Cuando su saldo retirable alcance el mínimo de la Billetera, solicite el retiro allí y recíbalo en la clave PIX registrada."
       },
       "requirement": {
         "title": "Vale desde la activación",
@@ -1784,8 +1790,7 @@
       "acoes": "Acciones de difusión"
     },
     "tela": {
-      "resumo": "{n} lectura del QR hasta ahora | {n} lecturas del QR hasta ahora",
-      "resumoZero": "Todavía no hay lecturas del QR. Imprima el QR para el mostrador y empiece a medir."
+      "resumo": "{n} lectura del QR hasta ahora | {n} lecturas del QR hasta ahora"
     }
   },
   "carteira": {
@@ -1848,19 +1853,19 @@
       "contactWhatsapp": "WhatsApp",
       "comissao": {
         "title": "Cómo entra el saldo",
-        "body": "Los referidos que se convierten en suscriptores generan participación en la billetera cuando el programa afiliado está activo."
+        "body": "Cada suscripción pagada por un tutor que llegó por su recomendación genera participación en la billetera, mientras el Programa de Afiliados esté activo."
       },
       "saldos": {
         "title": "Saldo total y retirable",
-        "body": "El total acumula créditos; el retirable se libera después de la ventana de seguridad de 14 días por crédito."
+        "body": "Lo que entra espera 14 días antes de poder retirarse. El total muestra todo; el retirable, solo lo que ya cumplió ese plazo."
       },
       "pix": {
-        "title": "PIX obligatorio",
-        "body": "Registre la clave PIX de la empresa antes de pedir un retiro. Solo el dueño de la cuenta cambia el PIX y solicita retiros."
+        "title": "Clave PIX de la empresa",
+        "body": "El retiro se deposita en la clave PIX de la empresa: regístrela antes del primer pedido. Solo el dueño de la cuenta cambia la clave y solicita retiros."
       },
       "ciclo": {
-        "title": "Ciclo de pago",
-        "body": "Retiro mínimo de {valor}. Corte el día 27 y liquidación orientativa hasta el día 5. Sígalo en la pestaña Retiros."
+        "title": "Cuándo llega el pago",
+        "body": "Retiro desde {valor}. Los pedidos cierran el día 27, y el pago está previsto hasta el día 5 del mes siguiente. Sígalo en la pestaña Retiros."
       },
       "footerPrefix": "¿Dudas?",
       "footerOrWhatsapp": "o WhatsApp"
@@ -2073,6 +2078,7 @@
       "aceito": "Invitación aceptada",
       "aceitoDetalhe": "Ya forma parte del equipo.",
       "naoVale": "Esta invitación ya no vale",
+      "linkIncompleto": "El enlace de esta invitación llegó incompleto. Abra de nuevo el enlace completo del correo o pida una invitación nueva.",
       "irParaPortal": "Ir al portal",
       "jaNaEquipe": "Ya está en el equipo",
       "jaMembroCorpo": "Usted ya forma parte de este equipo. Solo siga al portal.",
@@ -2218,7 +2224,7 @@
         },
         "CANCELADO": {
           "titulo": "Nadie canceló",
-          "corpo": "Quien se suscribió con su código sigue suscrito."
+          "corpo": "Si alguien que se suscribió con su código cancela la suscripción, su nombre aparecerá aquí."
         }
       },
       "apenasDono": {
@@ -2249,15 +2255,15 @@
       },
       "seguranca": {
         "label": "Seguridad",
-        "description": "Cambio de contraseña de la cuenta autenticada."
+        "description": "Cambiar su contraseña."
       },
       "aparencia": {
         "label": "Apariencia",
-        "description": "Tema, formato del menú lateral y densidad de las listas."
+        "description": "Tema, navegación, explicaciones e idioma."
       },
       "conta": {
         "label": "Cuenta",
-        "description": "Sesión, desactivación de perfil y preferencias futuras."
+        "description": "Cerrar sesión en este equipo, cambiar de empresa y pausar su perfil."
       }
     },
     "aparencia": {
@@ -2556,11 +2562,11 @@
           },
           "scope": {
             "title": "Solo el perfil",
-            "text": "No borra clínica, socio ni historial: solo pausa el perfil activo."
+            "text": "La clínica, la empresa y el historial siguen como están. Solo su perfil queda en pausa."
           },
           "notDelete": {
             "title": "No es eliminación",
-            "text": "El cierre permanente (LGPD) es otro flujo y no aparece aquí."
+            "text": "Eliminar la cuenta de forma definitiva es otra solicitud y no se hace aquí."
           }
         }
       },
@@ -2624,6 +2630,7 @@
         "vacinas": "{total} refuerzo vencido | {total} refuerzos vencidos",
         "tratamentos": "{total} tratamiento crítico con la adherencia en caída | {total} tratamientos críticos con la adherencia en caída",
         "estoque": "{total} vacuna bajo el mínimo | {total} vacunas bajo el mínimo",
+        "faltas": "{total} paciente con falta sin motivo | {total} pacientes con faltas sin motivo",
         "pedidos": "{total} solicitud de cita esperando respuesta | {total} solicitudes de cita esperando respuesta"
       }
     },
@@ -2726,7 +2733,7 @@
       "outside-hours": "Fuera del horario, que va de {abre} a {fecha}.",
       "lunch-overlap": "Atraviesa el almuerzo por {minutos} min.",
       "holiday-closed": "La clínica está cerrada: {feriado}.",
-      "over-capacity": "La carga del día sube a {minutos} min, sobre los {capacidade} min habituales.",
+      "over-capacity": "La carga del día sube a {minutos}, por encima de las {capacidade} habituales.",
       "type-room-mismatch": "La sala {sala} no es la indicada para {tipo}."
     },
     "paciente": {
@@ -3137,6 +3144,9 @@
       "filtroProfissionais": "Profesionales",
       "filtroSituacao": "Estado",
       "semExpediente": "La clínica no abre este día.",
+      "fechadaSemNada": "No hay citas agendadas. Una emergencia aún se puede agendar, con confirmación.",
+      "irParaDia": "Ir al {semana}, {data}",
+      "semanaDeAte": "Semana del {inicio} al {fim}",
       "drawer": {
         "irPara": "Abrir"
       },
@@ -3161,8 +3171,8 @@
       "continuarCom": "Continuar con {pet}",
       "atenderCom": "Atender a {pet}",
       "resumo": {
-        "urgentes": "{total} asunto urgente requiere tu atención | {total} asuntos urgentes requieren tu atención",
-        "pendentes": "{total} asunto te espera | {total} asuntos te esperan",
+        "urgentes": "{total} asunto urgente requiere su atención | {total} asuntos urgentes requieren su atención",
+        "pendentes": "{total} asunto lo espera | {total} asuntos lo esperan",
         "emDia": "Nada detenido. El resto del día está en la agenda."
       },
       "pauta": {
@@ -3183,6 +3193,8 @@
       "estado": {
         "sala": "En la sala desde hace {tempo}",
         "espera": "Esperando desde hace {tempo}",
+        "esperaAgora": "Acaba de llegar",
+        "salaAgora": "Acaba de entrar",
         "marcado": "Agendado para las {hora}"
       },
       "carrossel": {
@@ -3359,6 +3371,7 @@
       "passoSemReceita": "Revisar y emitir certificado o historia clínica",
       "cartao": {
         "receituarioControle": "Sale en hoja separada y por duplicado",
+        "receituarioAlergia": "Confirme la alergia en la prescripción para imprimir.",
         "semPrescricao": "Sin medicamento prescrito en esta consulta",
         "prontuario": {
           "titulo": "Historia clínica completa",
@@ -3887,9 +3900,9 @@
           "congestas": "Congestivas",
           "nao-avaliado": "No evaluadas"
         },
-        "hidratacaoRotulo": "Hidratación",
+        "hidratacaoRotulo": "Deshidratación",
         "hidratacao": {
-          "normal": "Normal",
+          "normal": "Ausente",
           "leve": "Leve",
           "moderada": "Moderada",
           "grave": "Grave"
@@ -3964,13 +3977,12 @@
           "total": "3. {porDia}× al día × {dias} días = {total} administraciones"
         },
         "fracao": {
-          "inteiro": "{inteiros} comprimido entero por administración",
+          "inteiro": "{inteiros} comprimido entero por administración | {inteiros} comprimidos enteros por administración",
           "meio": "Medio comprimido por administración",
           "um-e-meio": "Un comprimido y medio por administración",
           "quarto": "Un cuarto de comprimido por administración",
           "tres-quartos": "Tres cuartos de comprimido por administración",
           "multiplo": "{quantidade} comprimidos por administración",
-          "aproximado": "{quantidade} comprimidos por administración",
           "arredondado": "el cálculo dio {calculado}; confirme el redondeo"
         },
         "aCadaHoras": "cada {horas} h",
@@ -4479,6 +4491,7 @@
       "controlada": "Control especial · Ordenanza 344/98",
       "semPrescricao": "Ninguna prescripción para emitir.",
       "confirmeAlergia": "Confirme la alergia en la prescripción para firmar.",
+      "desatualizada": "La prescripción cambió después de esta firma. Firme de nuevo para enviar la versión actual.",
       "vistaDoResponsavel": "Cómo lo ve el responsable",
       "lembrete": "Se convierte en recordatorio: {quantidade}, {frequencia}",
       "lembreteContinuo": "Recordatorio continuo, sin fecha de fin",
@@ -4542,7 +4555,7 @@
         "cobertura": "cobertura de {dias} d",
         "semCobertura": "sin salida en el período",
         "recebidoEm": "recibido el {data} · {total} dosis",
-        "saidas": "{aplicadas} aplicadas · {perdidas} perdidas",
+        "saidas": "aplicadas: {aplicadas} · perdidas: {perdidas}",
         "custoUnitario": "{valor} por dosis",
         "semConsumo": "Ninguna dosis aplicada en el período.",
         "semLotes": "Ningún lote registrado",
@@ -5010,8 +5023,9 @@
         "primeiraDica": "En cuántas horas, a partir de ahora.",
         "criar": "Prescribir",
         "proxima": "Siguiente a las {hora}",
-        "feitas": "{total} administradas",
-        "por": "por {nome}",
+        "feitas": "{total} administrada | {total} administradas",
+        "registradas": "{total} registro | {total} registros",
+        "por": "prescrito por {nome}",
         "suspender": "Suspender",
         "suspenderAlvo": "Suspender {item}. Lo ya administrado sigue en el registro.",
         "motivo": "Motivo",
@@ -6724,7 +6738,7 @@
         "daquiEmDiante": "Vale de ahora en adelante. Una reserva ya cerrada mantiene el precio al que se vendió.",
         "diarias": "Tarifa diaria por tamaño",
         "editar": "Editar tabla",
-        "emUso": "{total} alojamiento usa esta tabla. Cambia la suya antes. | {total} alojamientos usan esta tabla. Cambia la suya antes.",
+        "emUso": "{total} alojamiento usa esta tabla. Cambie la suya antes. | {total} alojamientos usan esta tabla. Cambie la suya antes.",
         "nome": "Nombre de la tabla",
         "nomeDica": "Estándar, Suite, Gatera…",
         "nova": "Nueva tabla",
@@ -6764,7 +6778,7 @@
       "tipo": {
         "desenho": "Símbolo",
         "editar": "Editar tipo",
-        "emUso": "{total} alojamiento usa este tipo. Cambia el suyo antes. | {total} alojamientos usan este tipo. Cambia el suyo antes.",
+        "emUso": "{total} alojamiento usa este tipo. Cambie el suyo antes. | {total} alojamientos usan este tipo. Cambie el suyo antes.",
         "nome": "Cómo lo llama la casa",
         "nomeDica": "Box, Suite, Cabaña, Jaula, Aviario…",
         "nomeExplica": "El nombre es tuyo. Es la etiqueta que aparece en todas las pantallas del hotel.",
@@ -6784,7 +6798,7 @@
       "ajusteCasaNaoFaz": "la casa no hace este servicio",
       "ajusteHorarios": "Horarios para este huésped",
       "ajusteServico": "Servicio de la casa",
-      "ajusteVazio": "Deja vacío para suspender este servicio solo para él.",
+      "ajusteVazio": "Deje vacío para suspender este servicio solo para él.",
       "cancelar": "Cancelar",
       "cuidadoIrParaMedicacao": "Registrar medicación",
       "cuidadoNaoEhRemedio": "El medicamento no entra aquí. Dosis y receta viven en Medicación, y de ahí sale el respaldo para administrar el medicamento de otra persona.",
@@ -6862,18 +6876,18 @@
       "veterinario": "Veterinario de la mascota",
       "via": "Vía",
       "quemBusca": "Quién puede retirar a {pet}",
-      "quemBuscaLede": "Marca quién vale para esta estancia. A la salida, recepción revisa el nombre y el documento.",
+      "quemBuscaLede": "Marque quién vale para esta estancia. A la salida, recepción revisa el nombre y el documento.",
       "vetNome": "Nombre",
       "vetClinica": "Clínica",
       "vetTelefone": "Teléfono",
       "vetDica": "Opcional. Es a quien la casa llama antes que a la guardia.",
       "vetDaUltimaVez": "Viene de la última estancia. Confírmalo con el responsable.",
       "vetSemTelefone": "Con el veterinario indicado, falta el teléfono.",
-      "vetTelefoneInvalido": "Teléfono incompleto. Revisa el prefijo y el número."
+      "vetTelefoneInvalido": "Teléfono incompleto. Revise el prefijo y el número."
     },
     "checkout": {
       "comoChegou": "Cómo llegó",
-      "comoChegouLede": "Registrado en el check-in. Compruébalo antes de entregar: es lo que responde \"ya llegó así\".",
+      "comoChegouLede": "Registrado en el check-in. Compruébelo antes de entregar: es lo que responde \"ya llegó así\".",
       "confirmar": "Cerrar estancia",
       "devolvido": "Devuelto",
       "fechamento": "Cierre",
@@ -6890,11 +6904,13 @@
       "quemRetira": "Quién se lo lleva",
       "registrarPeso": "Registrar peso",
       "saidaTardia": "Salida después del horario: {percentual}% de noche extra.",
+      "devolver": "Devolver al responsable",
+      "devolverNoBalcao": "Lo pagado supera la cuenta de las noches usadas: devuélvalo en el mostrador, al entregar.",
       "saldo": "Saldo por cobrar",
       "titulo": "Salida de {pet}",
       "voltarALista": "Volver a la lista",
-      "confiraDocumento": "Revisa el documento: {documento}",
-      "semDocumento": "Sin documento registrado. Pide uno con foto.",
+      "confiraDocumento": "Revise el documento: {documento}",
+      "semDocumento": "Sin documento registrado. Pida uno con foto.",
       "nova": {
         "pronto": "Todo revisado. Puede entregar a {pet}.",
         "falta": {
@@ -6942,7 +6958,7 @@
       "titulo": "Registrar en el diario de {pet}"
     },
     "erros": {
-      "acao": "No se pudo completar. Inténtalo de nuevo.",
+      "acao": "No se pudo completar. Inténtelo de nuevo.",
       "admissao": "La documentación de admisión impide la entrada.",
       "boletimRetido": "El parte solo sale después de la llamada al responsable.",
       "cadastro": {
@@ -7007,7 +7023,7 @@
       "medicacao": "Medicación",
       "ocorrencias": "Incidencias",
       "pertences": "Pertenencias",
-      "precisaLigar": "Llama a {nome} antes de que acabe el turno",
+      "precisaLigar": "Llame a {nome} antes de que acabe el turno",
       "racaoDaCasa": "Comida de la casa",
       "racaoTrazida": "Comida traída de casa",
       "registrar": "Registrar",
@@ -7030,6 +7046,7 @@
         "saiu": "salió",
         "saldo": "Saldo",
         "saldoDetalhe": "por cobrar a la salida",
+        "saldoDevolver": "por devolver a la salida",
         "semPesagem": "sin pesaje de salida"
       },
       "subtitulo": "Hotel",
@@ -7061,6 +7078,7 @@
           "receber": "Cobrar {valor}",
           "quitado": "Nada que cobrar",
           "saldoNoBalcao": "Se cobra en el mostrador, al entregar.",
+          "devolver": "Devolver {valor}",
           "titulo": "Lo que falta para liberar",
           "tituloEncerrada": "Salida",
           "descricao": "Salida prevista para {quando}.",
@@ -7143,14 +7161,14 @@
     "exigencias": {
       "apresentacao": "Fecha de aplicación o emisión",
       "apresentacaoDica": "La que figura en la cartilla o el documento, no la de hoy. La validez se cuenta desde ella.",
-      "escolhaAData": "Elige la fecha de la cartilla para ver la validez.",
+      "escolhaAData": "Elija la fecha de la cartilla para ver la validez.",
       "apresentadoEm": "Presentado el {data}",
       "autorizadaPor": "Autorizada por",
       "bloqueado": "{total} documento impide la entrada. | {total} documentos impiden la entrada.",
       "comAviso": "{total} documento pide atención. | {total} documentos piden atención.",
       "confirmarDispensa": "Dispensar de todos modos",
       "confirmarRegistro": "Registrar comprobante",
-      "dispensaAviso": "La dispensa queda registrada con tu nombre y el motivo escrito.",
+      "dispensaAviso": "La dispensa queda registrada con su nombre y el motivo escrito.",
       "dispensadaPor": "Dispensada por {nome}",
       "dispensar": "Dispensar",
       "dispensarTitulo": "Dispensar {item}",
@@ -7247,7 +7265,7 @@
         "ocorrencia": "Incidente grave sin contacto con {tutor}"
       },
       "irParaRotina": "Abrir rutina del turno",
-      "ninguemPrecisa": "Nadie te necesita ahora. La casa está al día.",
+      "ninguemPrecisa": "Nadie requiere su atención ahora. La casa está al día.",
       "ninguemSai": "Hoy no sale nadie.",
       "recorte": {
         "precisam": "Me necesitan",
@@ -7255,7 +7273,7 @@
         "todos": "Todos"
       },
       "recorteRotulo": "Mostrar",
-      "resumo": "{precisam} de {total} te necesita | {precisam} de {total} te necesitan",
+      "resumo": "{precisam} de {total} requiere su atención | {precisam} de {total} requieren su atención",
       "resumoEmDia": "La casa está al día",
       "subtitulo": "Hotel",
       "titulo": "Huéspedes en la casa",
@@ -7277,7 +7295,7 @@
     },
     "mapa": {
       "especie": "Especie",
-      "foraDaGrade": "El período buscado está fuera de las tres semanas a la vista. Usa las flechas para llegar.",
+      "foraDaGrade": "El período buscado está fuera de las tres semanas a la vista. Use las flechas para llegar.",
       "hoje": "Hoy",
       "ocupantes": "Animales",
       "periodo": "Fechas",
@@ -7294,7 +7312,7 @@
       "semanaSeguinte": "Semana siguiente",
       "subtitulo": "Hotel",
       "titulo": "Mapa de alojamientos",
-      "vazioDescricao": "Registra los alojamientos de la casa para empezar a vender noches.",
+      "vazioDescricao": "Registre los alojamientos de la casa para empezar a vender noches.",
       "vazioTitulo": "Ningún alojamiento registrado",
       "verReservas": "Ver reservas",
       "tela": {
@@ -7320,7 +7338,7 @@
       "descricaoDica": "Nombre y concentración, como está en la caja",
       "dose": "Dosis",
       "doseDica": "1 comprimido, 20 gotas, 2 ml",
-      "escolherHospede": "Elige el huésped",
+      "escolherHospede": "Elija el huésped",
       "faltaHorario": "Sin horario, el medicamento no se convierte en ninguna tarea.",
       "horarios": "Horarios",
       "horariosDica": "Como se dictan por teléfono: 8:00, 20:00",
@@ -7400,6 +7418,7 @@
         "temporada": "Recargo de temporada"
       },
       "pago": "Ya pagado",
+      "devolvido": "Devuelto al responsable",
       "quantidade": "Cant.",
       "saldo": "Saldo por cobrar",
       "sinalSugerido": "Seña sugerida",
@@ -7448,7 +7467,7 @@
       "semSaidas": "No hay salidas previstas para hoy.",
       "titulo": "Panel del día",
       "travaAdmissao": "{pet} llega hoy sin la documentación exigida.",
-      "travaAdmissaoAcao": "Pide el documento ahora, o dispénsalo con tu nombre.",
+      "travaAdmissaoAcao": "Pida el documento ahora, o dispénselo con su nombre.",
       "vazioDescricao": "No hay huéspedes en la casa ni llegadas previstas para hoy.",
       "vazioTitulo": "Nada que hacer hoy",
       "acoesRotulo": "Acciones del panel",
@@ -7492,7 +7511,7 @@
       "daFicha": "De la ficha",
       "descartadas": "{total} sugerencia descartada en la verificación | {total} sugerencias descartadas en la verificación",
       "descartar": "Descartar",
-      "escolherHospede": "Elige el huésped",
+      "escolherHospede": "Elija el huésped",
       "gerando": "Leyendo la ficha…",
       "lidaEm": "leída de la ficha a las {hora}",
       "motorLocal": "simulación local",
@@ -7534,7 +7553,7 @@
       "autorizados": "Quién puede retirar",
       "avisoAdmissao": "Documentación por resolver antes de la entrada: {itens}",
       "checkInBloqueado": "La entrada está bloqueada por documentación pendiente.",
-      "chegaAs": "llega a las",
+      "chegaAs": "Llega a las",
       "confirmarSinal": "Registrar seña y confirmar",
       "criar": "Crear reserva",
       "diarias": "{total} noche | {total} noches",
@@ -7542,6 +7561,7 @@
         "abrir": "Cambiar fechas",
         "agora": "Reserva actual: {acomodacao}, {periodo}.",
         "conta": "Nuevo total: {novo} (antes {antes}).",
+        "feito": "Reserva modificada: {acomodacao}, {periodo}.",
         "datas": "Entrada y salida",
         "escolha": "Elija el alojamiento",
         "novaSaida": "Nueva fecha de salida",
@@ -7551,8 +7571,18 @@
         "titulo": "Cambiar reserva"
       },
       "animalJaReservado": "{pet} ya tiene reserva en ese período ({acomodacao}, {periodo}). Ajuste o cancele esa antes de crear otra.",
-      "escolhaHospede": "Elige el animal",
-      "hospedeNaoEncontrado": "Ningún animal con ese nombre en el registro del hotel.",
+      "escolhaHospede": "Elija el animal",
+      "hospedeNaoEncontrado": "Ningún animal con ese nombre en el registro del hotel. ¿Primera vez? Use \"Animal nuevo\".",
+      "novo": {
+        "abrir": "Animal nuevo",
+        "voltar": "Elegir del registro",
+        "nome": "Nombre del animal",
+        "especie": "Especie",
+        "porte": "Tamaño",
+        "responsavel": "Responsable",
+        "celular": "Celular con código de área",
+        "dica": "Primera vez en el hotel: el resto del registro (raza, cartilla de vacunación, veterinario) se completa en el check-in."
+      },
       "exigencias": "Documentación de admisión",
       "fazerCheckIn": "Hacer la entrada",
       "hospede": "Huésped",
@@ -7566,8 +7596,9 @@
       "periodo": "Fechas",
       "porDiaria": " por noche",
       "quantasNoites": "Noches",
-      "saiAs": "sale a las",
+      "saiAs": "Sale a las",
       "saidaTardia": "La salida prevista es después del horario: {valor} más en la cuenta.",
+      "saidaAtrasada": "Ya pasó la salida prevista: si la entrega es ahora, son {valor} más en la cuenta.",
       "semAcompanhante": "Sin acompañante",
       "semServico": "Ningún servicio",
       "semVaga": "Este alojamiento no sirve para ese período: {motivo}",
@@ -7581,6 +7612,7 @@
         "naoEncontradaTitulo": "Reserva no encontrada",
         "naoEncontradaDescricao": "La dirección puede estar incompleta, o la reserva ya no existe. Vuelva a la lista de reservas.",
         "registrarComprovante": "Registrar comprobante",
+        "mais": "Más acciones",
         "sinalConfirmar": "Registrar y confirmar",
         "sinalSugerido": "Seña sugerida: {valor}",
         "sinalValor": "Cuánto pagó el responsable de seña",
@@ -7779,7 +7811,7 @@
       "aplicar": "Aplicar",
       "ativo": "La casa hace esto",
       "campoHorarios": "Horarios",
-      "campoHorariosDica": "Sepáralos con comas. Puedes escribir 8:00 o 08:00.",
+      "campoHorariosDica": "Sepárelos con comas. Puede escribir 8:00 o 08:00.",
       "cancelar": "Cancelar",
       "criadas": "{total} tarea nace | {total} tareas nacen",
       "desfazer": "Deshacer",
@@ -7882,7 +7914,7 @@
     "tour": {
       "acomodacoes": {
         "blocos": {
-          "texto": "Canil A, Canil B, Gatil, Jardín. Cada tarjeta dice el tipo, el tamaño que acepta, cuántos caben y qué tarifa cobra. Haz clic para editar.",
+          "texto": "Canil A, Canil B, Gatil, Jardín. Cada tarjeta dice el tipo, el tamaño que acepta, cuántos caben y qué tarifa cobra. Haga clic para editar.",
           "titulo": "Agrupadas por bloque"
         },
         "parada": {
@@ -7890,7 +7922,7 @@
           "titulo": "Fuera de operación, con fecha"
         },
         "pergunta": {
-          "texto": "Cómo está montada la casa. El sistema no adivina cuántas jaulas tienes: quien las registra es la operación, el día en que la casa cambia.",
+          "texto": "Cómo está montada la casa. El sistema no adivina cuántas jaulas tiene: quien las registra es la operación, el día en que la casa cambia.",
           "titulo": "La pregunta de esta pantalla"
         },
         "tarifas": {
@@ -7927,21 +7959,21 @@
           "titulo": "La línea que pide acción"
         },
         "linhas": {
-          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien te necesita. Haz clic en el título de la franja para abrirla y cerrarla.",
+          "texto": "Los tranquilos pasan a una lista fina al pie de la página, para que el espacio sea de quien requiere su atención. Haga clic en el título de la franja para abrirla y cerrarla.",
           "titulo": "Quien está al día queda recogido"
         },
         "pergunta": {
-          "texto": "Cómo está cada animal en la casa. Una tarjeta por huésped, ordenadas por quien te necesita primero.",
+          "texto": "Cómo está cada animal en la casa. Una tarjeta por huésped, ordenadas por quien requiere su atención primero.",
           "titulo": "La pregunta de esta pantalla"
         },
         "recortes": {
-          "texto": "Todos, los que te necesitan, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana.",
+          "texto": "Todos, los que requieren su atención, y los que salen hoy. El del medio se mira a mitad del turno; el de la derecha, al final de la mañana.",
           "titulo": "Tres recortes"
         }
       },
       "mapa": {
         "grade": {
-          "texto": "Cada fila es un alojamiento, cada columna una noche. Las barras son lo ya vendido, y el vacío entre ellas es donde cabe la próxima reserva. Haz clic en un vacío para reservar desde ese día.",
+          "texto": "Cada fila es un alojamiento, cada columna una noche. Las barras son lo ya vendido, y el vacío entre ellas es donde cabe la próxima reserva. Haga clic en un vacío para reservar desde ese día.",
           "titulo": "El calendario de la casa"
         },
         "legenda": {
@@ -7963,7 +7995,7 @@
       },
       "painel": {
         "colunas": {
-          "texto": "La misma información de la línea, en lista, con el sello de lo que impide. Haz clic en cualquier fila para abrir la reserva o la estadía.",
+          "texto": "La misma información de la línea, en lista, con el sello de lo que impide. Haga clic en cualquier fila para abrir la reserva o la estadía.",
           "titulo": "Quién llega y quién sale"
         },
         "pergunta": {
@@ -7976,7 +8008,7 @@
         },
         "travas": {
           "texto": "Abre la pantalla porque tiene plazo: una llamada pendiente, un boletín retenido detrás de ella, un animal que llega sin vacuna. Cada ítem es un botón que lleva al lugar donde se resuelve.",
-          "titulo": "Lo que te necesita ahora"
+          "titulo": "Lo que requiere su atención ahora"
         },
         "trilho": {
           "texto": "Llegadas arriba, salidas abajo, y una marca en \"ahora\". El triángulo al lado de un nombre significa que esa entrada o salida está trabada.",
@@ -8044,7 +8076,7 @@
         },
         "periodo": {
           "texto": "Abre en los últimos treinta días. Todo número y toda tarjeta de esta pantalla responde por el período elegido aquí, y por ningún otro.",
-          "titulo": "Elige el período"
+          "titulo": "Elija el período"
         }
       },
       "rotina": {
@@ -8160,10 +8192,10 @@
       "documento": "Documento",
       "documentoDica": "RG o CPF, si lo tiene",
       "adicionar": "Añadir",
-      "pendente": "Añade o cancela a esta persona antes de confirmar.",
+      "pendente": "Añada o cancele a esta persona antes de confirmar.",
       "erroNome": "Falta el nombre.",
       "erroTelefone": "Falta el teléfono.",
-      "erroTelefoneInvalido": "Teléfono incompleto. Revisa el prefijo y el número.",
+      "erroTelefoneInvalido": "Teléfono incompleto. Revise el prefijo y el número.",
       "erroTelefoneRepetido": "Este teléfono ya es de {nome}."
     },
     "pedidos": {
@@ -8448,7 +8480,8 @@
         "juntos": "Juntas, en el mismo alojamiento",
         "semExtras": "Sin extras",
         "hotelEscolhe": "El hotel elige",
-        "semVaga": "Sin {tipo} libre"
+        "semVaga": "Sin {tipo} libre",
+        "jaTemReserva": "Ya tiene reserva: {acomodacao}, {periodo}"
       },
       "gaveta": {
         "titulo": "Solicitud de {nomes}",
@@ -8527,7 +8560,7 @@
             "texto": "Hora de salida y lo que falta para liberar: pesar, revisar pertenencias, cobrar el saldo. El check-out se hace en la estadía."
           },
           "pauta": {
-            "titulo": "Lo que te necesita",
+            "titulo": "Lo que requiere su atención",
             "texto": "De la más grave a la menos: incidente sin contacto, llegada sin documento, parte retenido y rutina atrasada. Cada fila lleva adonde se resuelve."
           },
           "bemEstar": {
@@ -8559,7 +8592,7 @@
           },
           "recortes": {
             "titulo": "Tres recortes y la búsqueda",
-            "texto": "Todos, los que te necesitan y los que salen hoy. La búsqueda encuentra por el nombre del animal o del responsable."
+            "texto": "Todos, los que requieren su atención y los que salen hoy. La búsqueda encuentra por el nombre del animal o del responsable."
           },
           "corredores": {
             "titulo": "La casa por pasillo",

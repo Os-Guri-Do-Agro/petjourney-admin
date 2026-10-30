@@ -15,6 +15,7 @@ import {
   postUsersMeReactivate,
   type ReactivateProfile,
 } from '@/service/user/inativacao-service'
+import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
 import { ROTA_DO_CONVITE } from '@/router/convite-da-equipe'
@@ -32,20 +33,74 @@ const reactivating = ref(false)
  * E-mail ou senha que não conferem: o erro mora embaixo da senha, onde a pessoa está olhando, e o
  * foco volta para ela. No toast do canto ele chegava longe do formulário, em linguagem de sistema
  * ("Credenciais inválidas"), e o foco ia parar no X do aviso.
+ *
+ * Campo vazio e e-mail sem formato também ficam embaixo do campo, na língua do painel: antes era o
+ * balão do navegador, na língua do sistema. Guarda-se o motivo e não a frase, para o erro trocar
+ * de idioma junto com o seletor.
  */
-const erroDeCredencial = ref('')
+const erroDoEmail = ref<'' | 'vazio' | 'invalido'>('')
+const erroDaSenha = ref<'' | 'vazia' | 'credenciais'>('')
 
-watch([email, password], () => {
-  erroDeCredencial.value = ''
+const EMAIL_COM_FORMATO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const textoDoErroDoEmail = computed(() => {
+  if (erroDoEmail.value === 'vazio') {
+    return t('auth.forgot.errors.emailRequired')
+  }
+
+  return erroDoEmail.value === 'invalido' ? t('auth.forgot.errors.emailInvalid') : ''
 })
 
-async function focarSenha() {
+const textoDoErroDaSenha = computed(() => {
+  if (erroDaSenha.value === 'credenciais') {
+    return t('auth.login.erroCredenciais')
+  }
+
+  return erroDaSenha.value === 'vazia' ? t('auth.login.erroSenhaVazia') : ''
+})
+
+watch(email, () => {
+  erroDoEmail.value = ''
+
+  if (erroDaSenha.value === 'credenciais') {
+    erroDaSenha.value = ''
+  }
+})
+
+watch(password, () => {
+  erroDaSenha.value = ''
+})
+
+/** Confere o que dá para conferir antes de chamar a API; foca o primeiro campo com problema. */
+function conferirCampos() {
+  const digitado = email.value.trim()
+
+  erroDoEmail.value = !digitado ? 'vazio' : EMAIL_COM_FORMATO.test(digitado) ? '' : 'invalido'
+  erroDaSenha.value = password.value ? '' : 'vazia'
+
+  if (erroDoEmail.value) {
+    void focarCampo('email')
+    return false
+  }
+
+  if (erroDaSenha.value) {
+    void focarCampo('password')
+    return false
+  }
+
+  return true
+}
+
+async function focarCampo(id: 'email' | 'password', selecionar = false) {
   await nextTick()
-  const campo = document.getElementById('password')
+  const campo = document.getElementById(id)
 
   if (campo instanceof HTMLInputElement) {
     campo.focus()
-    campo.select()
+
+    if (selecionar) {
+      campo.select()
+    }
   }
 }
 
@@ -58,6 +113,7 @@ const convitePendente = Boolean(lerTokenDoConvite())
 const router = useRouter()
 const toast = useToast()
 const usuarioPerfilStore = useUsuarioPerfilStore()
+const parceiroStore = useParceiroStore()
 
 const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
 
@@ -113,11 +169,33 @@ function collectInactiveProfiles(flags: {
  */
 async function enterPanelAfterAuth() {
   usuarioPerfilStore.syncFromAuth()
+  await carregarEmpresaAntesDeEntrar()
   await router.replace(getSafeRedirectPath())
 }
 
+/** O teto da espera: com a API lenta, entra assim mesmo e a moldura termina de carregar. */
+const ESPERA_MAXIMA_DA_EMPRESA_MS = 4000
+
+/**
+ * A empresa (papel e programas) chega junto com o "Entrando...": o menu do Portal nasce inteiro.
+ * Sem isto, Indicados e Carteira entravam no menu um ou dois segundos depois dos outros itens.
+ * Falha aqui não impede a entrada; a moldura pede de novo e mostra o erro no lugar dela.
+ */
+async function carregarEmpresaAntesDeEntrar() {
+  let teto: ReturnType<typeof setTimeout> | undefined
+
+  await Promise.race([
+    parceiroStore.bootstrap().catch(() => undefined),
+    new Promise<void>((resolve) => {
+      teto = setTimeout(resolve, ESPERA_MAXIMA_DA_EMPRESA_MS)
+    }),
+  ])
+
+  clearTimeout(teto)
+}
+
 async function handleLogin() {
-  if (loading.value || reactivating.value) {
+  if (loading.value || reactivating.value || !conferirCampos()) {
     return
   }
 
@@ -145,9 +223,9 @@ async function handleLogin() {
     await enterPanelAfterAuth()
   } catch (error) {
     if (error instanceof ApiError && error.statusCode === 401) {
-      erroDeCredencial.value = t('auth.login.erroCredenciais')
+      erroDaSenha.value = 'credenciais'
       loading.value = false
-      void focarSenha()
+      void focarCampo('password', true)
       return
     }
 
@@ -278,7 +356,7 @@ function cancelReactivate() {
       </div>
     </div>
 
-    <form v-else class="login-form" @submit.prevent="handleLogin">
+    <form v-else class="login-form" novalidate @submit.prevent="handleLogin">
       <p v-if="convitePendente" class="login-convite" role="status">
         <i class="ph ph-envelope-open" aria-hidden="true" />
         {{ t('parceiro.convite.link.semSessao') }}
@@ -293,6 +371,7 @@ function cancelReactivate() {
         :placeholder="t('auth.login.email.placeholder')"
         required
         type="email"
+        :error="textoDoErroDoEmail"
       >
         <template #leading>
           <i class="ph ph-envelope-simple" aria-hidden="true" />
@@ -317,7 +396,7 @@ function cancelReactivate() {
           required
           revelavel
           type="password"
-          :error="erroDeCredencial"
+          :error="textoDoErroDaSenha"
         >
           <template #leading>
             <i class="ph ph-lock-simple" aria-hidden="true" />

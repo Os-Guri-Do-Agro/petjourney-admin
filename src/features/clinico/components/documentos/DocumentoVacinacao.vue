@@ -87,11 +87,11 @@ const vacinas = computed(() =>
       </thead>
       <tbody>
         <tr v-for="vacina in vacinas" :key="vacina.id">
-          <td>{{ formato.dataCurta(vacina.data) }}</td>
+          <td>{{ formato.dataCurtaComAno(vacina.data) }}</td>
           <td>{{ vacina.nome }}</td>
           <td>{{ vacina.lote }}</td>
           <td>{{ vacina.fabricante }}</td>
-          <td>{{ formato.dataCurta(vacina.proxima) }}</td>
+          <td>{{ formato.dataCurtaComAno(vacina.proxima) }}</td>
         </tr>
 
         <!--

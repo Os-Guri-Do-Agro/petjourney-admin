@@ -17,6 +17,7 @@ import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
 import type { Appointment, Pet } from '@/features/clinico/data/types'
 import { retornosVencidos, type RetornoPendente } from '@/features/clinico/domain/follow-up'
+import { umPorGrupo } from '@/features/clinico/domain/load'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
 import { useInternacaoStore } from '@/features/clinico/stores/internacao'
@@ -29,26 +30,6 @@ const ENCERRADOS: Appointment['status'][] = ['cancelado', 'falta', 'finalizado']
  * quem pega trânsito. Passou disso, é falta provável — e a falta tem tela própria.
  */
 const TOLERANCIA_DE_ATRASO_MS = 30 * 60 * 1000
-
-/**
- * Um atendimento ligado (a mesma cirurgia em duas salas, com dois profissionais) é um paciente
- * só: aparece uma vez, com os profissionais juntos na linha.
- */
-function umPorGrupo(lista: Appointment[]) {
-  const vistos = new Set<string>()
-
-  return lista.filter((item) => {
-    const chave = item.linkedGroupId ?? item.id
-
-    if (vistos.has(chave)) {
-      return false
-    }
-
-    vistos.add(chave)
-
-    return true
-  })
-}
 
 export function useMeuDia() {
   const { t, locale } = useI18n()
@@ -360,10 +341,13 @@ export function useMeuDia() {
       .join(', ')
   }
 
-  /** Quantos atendimentos do dia (sem os cancelados) já terminaram: a barra do resumo. */
+  /**
+   * Quantos atendimentos do dia já terminaram: a barra do resumo. Sem cancelados e sem faltas,
+   * a mesma conta do Início e da Agenda; com a falta no total, a barra nunca chegava ao fim.
+   */
   const progressoDoDia = computed(() => {
     const doDiaSemCancelados = umPorGrupo(
-      agenda.atendimentos.filter((item) => item.status !== 'cancelado'),
+      agenda.atendimentos.filter((item) => item.status !== 'cancelado' && item.status !== 'falta'),
     )
 
     return {

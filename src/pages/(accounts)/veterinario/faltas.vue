@@ -70,7 +70,12 @@ const erro = ref('')
 const politicaAtiva = ref(true)
 const idPolitica = useId()
 const idDetalhe = useId()
-const recorte = ref<Recorte>('reincidentes')
+/*
+ * Abre em "A justificar": é a fila de trabalho que o selo do menu conta, que a frase do topo
+ * resume e que "Justificar a próxima" percorre. Abrindo em Reincidentes, o selo dizia 15, a frase
+ * mandava começar pelo Açaí e a lista mostrava outros 8 pacientes, sem ele.
+ */
+const recorte = ref<Recorte>('pendentes')
 
 /**
  * O detalhe por responsável.
@@ -355,7 +360,7 @@ const colunas = computed<ColunaTabela<LinhaFalta>[]>(() => [
     id: 'ultima',
     rotulo: t('clinico.faltas.colunaUltima'),
     largura: '7.5rem',
-    /** Ordena pelo instante real, não pelo "há 3 dias" que a célula escreve. */
+    /** Ordena pelo instante real, não pelo "ter., 27/10" que a célula escreve. */
     ordenarPor: (linha) => linha.ultimaFaltaEm,
     ordemInicial: 'desc',
   },
@@ -519,8 +524,8 @@ async function carregar() {
     await clinico.carregar()
     linhas.value = await patientRepository.resumoDeFaltas()
 
-    /** Sem reincidente algum, abrir num recorte vazio seria esconder o que existe. */
-    if (reincidentes.value.length === 0) {
+    /** Sem nada a justificar, abrir num recorte vazio seria esconder o que existe. */
+    if (recorte.value === 'pendentes' && pendentes.value.length === 0) {
       recorte.value = 'todas'
     }
   } catch {
@@ -703,8 +708,12 @@ onMounted(carregar)
               </template>
 
               <template #celula-ultima="{ linha }">
+                <!--
+                  A data, e não o relativo: abaixo de dois dias o relativo fala em horas
+                  ("há 41 h"), e a coluna existe para dizer em que dia foi a última falta.
+                -->
                 <span v-if="linha.ultimaFaltaEm" class="ui-num">
-                  {{ formato.relativo(linha.ultimaFaltaEm) }}
+                  {{ formato.diaEData(clinicClock.dateOf(linha.ultimaFaltaEm)) }}
                 </span>
                 <span v-else class="faltas__meta">{{ t('clinico.formato.semvalor') }}</span>
               </template>

@@ -69,7 +69,12 @@ const roleHints = computed(() => {
     hints.push(t('settings.conta.roles.veterinario'))
   }
   if (store.loadState === 'ready' && store.parceiroNome) {
-    hints.push(store.isDono ? t('settings.conta.roles.dono') : t('settings.conta.roles.operador'))
+    /* O mesmo selo do Perfil: "Titular da empresa" lá e "Dono" aqui eram a mesma pessoa. */
+    hints.push(
+      store.isDono
+        ? t('settings.perfil.roles.donoParceiro')
+        : t('settings.perfil.roles.operadorParceiro'),
+    )
   }
   if (sessionUser.value?.isSystemAdmin) {
     hints.push(t('settings.conta.roles.admin'))
@@ -490,11 +495,10 @@ watch(showCustomReason, (allowed) => {
   text-decoration: none;
 }
 
-/* A desativação: separada, com o vermelho só no ícone e no botão — o resto é texto para ler. */
-.risco {
-  background: color-mix(in oklab, var(--risco-fundo) 60%, var(--superficie));
-}
-
+/*
+ * A desativação: separada pelo fio, na mesma folha da sessão. O risco fica no ladrilho e no botão;
+ * a faixa rosa de ponta a ponta pintava o aviso na superfície, o que a casa não faz.
+ */
 .risco__pontos {
   display: grid;
   gap: 12px;

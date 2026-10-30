@@ -23,7 +23,7 @@ import type {
 } from '../data/types'
 
 import { addDays, type ClinicClock, diffDays, isWeekend, weekdayOf } from './clinic-time'
-import { cargaDoDia } from './load'
+import { cargaDoDia, umPorGrupo } from './load'
 import { ocupaHorario } from './conflicts'
 
 export const PERIODOS = ['hoje', 'semana', 'semana-passada', 'trinta-dias'] as const
@@ -216,15 +216,17 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
     const doDia = noPeriodo.filter((item) => clock.dateOf(item.inicio) === data)
     const carga = cargaDoDia(data, doDia, clinic, equipe, clock)
     const feriado = clinic.feriados.some((item) => item.date === data)
+    /* A cirurgia com dois profissionais é um atendimento: a mesma conta da Agenda e do Hoje. */
+    const atendimentos = umPorGrupo(doDia)
 
     return {
       data,
-      finalizados: doDia.filter((item) => item.status === 'finalizado').length,
-      previstos: doDia.filter((item) =>
+      finalizados: atendimentos.filter((item) => item.status === 'finalizado').length,
+      previstos: atendimentos.filter((item) =>
         ['agendado', 'confirmado', 'aguardando', 'em-atendimento'].includes(item.status),
       ).length,
-      faltas: doDia.filter((item) => item.status === 'falta').length,
-      cancelados: doDia.filter((item) => item.status === 'cancelado').length,
+      faltas: atendimentos.filter((item) => item.status === 'falta').length,
+      cancelados: atendimentos.filter((item) => item.status === 'cancelado').length,
       ocupacao: carga.ocupacao,
       fechado: feriado || carga.capacidadeMinutos === 0,
     }
@@ -234,7 +236,7 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
   const finalizados = porDia.reduce((soma, ponto) => soma + ponto.finalizados, 0)
   const faltas = porDia.reduce((soma, ponto) => soma + ponto.faltas, 0)
 
-  const minutosAtendidos = noPeriodo
+  const minutosAtendidos = umPorGrupo(noPeriodo)
     .filter((item) => item.status === 'finalizado')
     .reduce((soma, item) => soma + clock.durationMinutes(item.inicio, item.fim), 0)
 
@@ -258,13 +260,21 @@ export function resumirClinica(entrada: EntradaDoResumo): ResumoDaClinica {
   const porOrigemContagem = new Map<string, number>()
   const porHoraContagem = new Map<string, number>()
 
+  /* Por profissional conta cada um que esteve na sala; tipo, origem e horário, o atendimento uma vez. */
+  const primeiraPerna = new Set(umPorGrupo(noPeriodo).map((item) => item.id))
+
   for (const appointment of noPeriodo) {
     if (appointment.status === 'cancelado') {
       continue
     }
 
-    incrementar(porTipoContagem, appointment.typeId)
     incrementar(porProfissionalContagem, appointment.professionalId)
+
+    if (!primeiraPerna.has(appointment.id)) {
+      continue
+    }
+
+    incrementar(porTipoContagem, appointment.typeId)
     incrementar(porOrigemContagem, appointment.origem)
 
     const data = clock.dateOf(appointment.inicio)

@@ -27,7 +27,7 @@ import {
   type TipoDisponivel,
 } from '../contrato/responsavel'
 import { avaliarAdmissao } from '../domain/admissao'
-import { avaliarVaga } from '../domain/disponibilidade'
+import { avaliarVaga, reservaDoAnimalNoPeriodo } from '../domain/disponibilidade'
 import { contarDiarias, dataDe, horaDe, instante, offsetDe } from '../domain/hotel-time'
 import {
   ehUrgente,
@@ -43,6 +43,7 @@ import { montarOrcamento } from '../domain/tarifas'
 
 import { HOTEL_UTC_OFFSET } from './fixtures'
 import { simularChamada } from './mock-runtime'
+import { VagaIndisponivelError } from './repositories/reserva-repository'
 import { agoraIso, getDataset, hojeIso, novoId } from './store'
 import type {
   Acomodacao,
@@ -994,6 +995,38 @@ export type PedidoDeReservaNaCaixa = {
   token: string | null
   /** Depois do aceite: a reserva criada. */
   reserva: { acomodacao: string; totalCentavos: number; status: Reserva['status'] } | null
+  /**
+   * Outra reserva viva do mesmo animal que cruza o período pedido (a Luna, reservada até 07/11 às
+   * 12:00, pedindo de 07/11 às 10:00). Aceitar daria duas baias ao mesmo cão: o balcão altera a
+   * reserva que existe, ou recusa este pedido.
+   */
+  reservaDoAnimal: {
+    id: string
+    acomodacao: string
+    entrada: ISODateTime
+    saida: ISODateTime
+  } | null
+}
+
+/** A reserva viva dos pets já cadastrados do pedido que cruza o período dele. */
+function reservaDoAnimalNoPedido(pedido: PedidoDeReserva) {
+  const dataset = getDataset()
+  const existente = reservaDoAnimalNoPeriodo(
+    dataset.reservas,
+    [pedido.petId ?? '', pedido.acompanhantePetId ?? ''],
+    pedido.entrada,
+    pedido.saida,
+  )
+
+  return existente
+    ? {
+        id: existente.id,
+        acomodacao:
+          dataset.acomodacoes.find((item) => item.id === existente.acomodacaoId)?.nome ?? '',
+        entrada: existente.entradaPrevista,
+        saida: existente.saidaPrevista,
+      }
+    : null
 }
 
 function caixa(): PedidoDeReservaNaCaixa[] {
@@ -1028,6 +1061,7 @@ function caixa(): PedidoDeReservaNaCaixa[] {
           )?.totalCentavos ?? null)
         : null,
       token: dataset.tokensDoLink[pedido.id] ?? null,
+      reservaDoAnimal: pendente ? reservaDoAnimalNoPedido(pedido) : null,
       reserva: reserva
         ? {
             acomodacao:
@@ -1187,6 +1221,18 @@ function aceitar(
 
   if (!acomodacao || !livre) {
     throw new ErroDaReservaOnline('SEM_VAGA_NO_TIPO')
+  }
+
+  /* O mesmo animal não dorme em duas baias: a mesma regra da reserva de balcão. */
+  if (
+    reservaDoAnimalNoPeriodo(
+      dataset.reservas,
+      [pedido.petId ?? '', pedido.acompanhantePetId ?? ''],
+      destino.inicio,
+      destino.fim,
+    )
+  ) {
+    throw new VagaIndisponivelError('animal-ja-reservado')
   }
 
   cadastrarSePreciso(pedido)

@@ -203,6 +203,19 @@ describe('indicadores', () => {
     expect(resumo.indicadores.horasAtendidas).toBeCloseTo(1.5)
   })
 
+  it('a cirurgia com dois profissionais é um atendimento, mas aparece para os dois', () => {
+    const perna = { data: ANCORA, hora: 9, status: 'finalizado' as const, duracao: 120, petId: 'pet-bento' }
+    const resumo = resumir([
+      { ...atendimento(perna), linkedGroupId: 'grupo-1' },
+      { ...atendimento({ ...perna, professionalId: 'prof-b' }), linkedGroupId: 'grupo-1' },
+    ])
+
+    expect(resumo.indicadores.finalizados).toBe(1)
+    expect(resumo.indicadores.horasAtendidas).toBeCloseTo(2)
+    expect(resumo.porTipo.map((fatia) => fatia.valor)).toEqual([1])
+    expect(resumo.porProfissional.map((fatia) => fatia.valor)).toEqual([1, 1])
+  })
+
   it('conta encaixes', () => {
     const resumo = resumir([
       atendimento({ data: ANCORA, hora: 9, status: 'finalizado', encaixe: true }),

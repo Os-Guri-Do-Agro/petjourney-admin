@@ -15,7 +15,7 @@ import { useI18n } from 'vue-i18n'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
-import { INTL_LOCALE, isRTLLocale, type Locale } from '@/i18n/locales'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { getSaqueDetalhe } from '@/service/parceiro/parceiro-portal-service'
 import type { SaqueDetalhe } from '@/service/parceiro/types'
 import { formatCentavosToBrl } from '@/utils/format/money'
@@ -53,12 +53,11 @@ const SELO_DO_SAQUE = {
 } as const
 
 /**
- * O PrimeVue posiciona o Drawer pelo lado físico. O painel fica no fim da linha de leitura (à
- * direita em LTR, à esquerda no árabe), do mesmo lado em que o `AppShell` abre espaço para ele.
+ * O painel fica no fim da linha de leitura, do mesmo lado em que o `AppShell` abre espaço para
+ * ele. "right" já é o fim da linha nos dois sentidos: o árabe espelha no `main.css`, para todas as
+ * gavetas; com `left` aqui, a regra comum o devolveria para a direita.
  */
-const drawerPosition = computed(() =>
-  isRTLLocale(locale.value as Locale) ? 'left' : 'right',
-)
+const drawerPosition = 'right'
 
 function formatDateTime(value: string) {
   return new Date(value).toLocaleString(INTL_LOCALE[locale.value as Locale], {

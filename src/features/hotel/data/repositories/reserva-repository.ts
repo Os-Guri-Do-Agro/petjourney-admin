@@ -137,6 +137,16 @@ export type ReservaNaLista = {
 
 export type ReservaDetalhada = {
   reserva: Reserva
+  /**
+   * O hóspede passou da hora prevista de saída e ainda está na casa: `reserva.orcamento` é a conta
+   * da entrega agora, a mesma da estadia e do check-out, e não a da saída prevista.
+   */
+  contaDaEntregaAgora: boolean
+  /**
+   * Quando o animal saiu de fato, depois do check-out. A reserva guarda a saída **prevista**; a
+   * estadia encerrada antes (ou depois) da data mostrava no quadro um dia em que ele já não estava.
+   */
+  saidaReal: ISODateTime | null
   admissao: AvaliacaoDeAdmissao
   comprovantes: Comprovante[]
   /** Vaga reavaliada agora: a acomodação pode ter saído de operação depois da venda. */
@@ -218,11 +228,125 @@ export type MapaDoPeriodo = {
   foraDeOperacao: number
 }
 
+/** Animal que o hotel ainda não conhece, cadastrado na venda de balcão. */
+export type HospedeNovo = {
+  petNome: string
+  especie: PetSpecies
+  /** Só cão tem porte; gato vai sem. */
+  porte: PetPorte | null
+  tutorNome: string
+  telefone: string
+}
+
+/**
+ * O cadastro mínimo de quem chega pelo telefone: o responsável e o animal, com o que decide onde
+ * ele cabe. O resto (raça, nascimento, carteira) vem no check-in, como no pedido pelo link.
+ */
+function cadastrarHospedeNovo(novo: HospedeNovo) {
+  const dataset = base()
+  const tutorId = novoId('tutor')
+  const nome = novo.petNome.trim()
+
+  dataset.tutores.push({
+    id: tutorId,
+    nome: novo.tutorNome.trim(),
+    telefone: novo.telefone.trim(),
+    telefoneSecundario: '',
+    email: '',
+    documento: '',
+    preferenciaContato: 'whatsapp',
+    endereco: null,
+  })
+
+  const pet = {
+    id: novoId('pet'),
+    nome,
+    especie: novo.especie,
+    raca: '',
+    sexo: null,
+    nascimento: null,
+    castrado: false,
+    porte: novo.porte,
+    pesoKg: null,
+    microchip: '',
+    pelagem: '',
+    tutorId,
+    alertas: [],
+    iniciais: nome.slice(0, 2).toUpperCase(),
+    fotoUrl: '',
+  }
+
+  dataset.pets.push(pet)
+
+  return pet
+}
+
 // ---------------------------------------------------------------------------
 // Leitura
 // ---------------------------------------------------------------------------
 
-function decorar(reserva: Reserva): ReservaNaLista {
+/**
+ * A conta de uma estadia que vai de `entrada` a `saida`, com a tarifa, as temporadas, os serviços
+ * e a política da casa. É a que o check-out grava quando `saida` é a hora real da entrega.
+ */
+export function contaDaEstadia(reserva: Reserva, entrada: ISODateTime, saida: ISODateTime) {
+  const dataset = base()
+  const acomodacao = dataset.acomodacoes.find((item) => item.id === reserva.acomodacaoId)
+  const tarifa = dataset.tarifas.find((item) => item.id === acomodacao?.tarifaId)
+
+  if (!tarifa) {
+    return null
+  }
+
+  const pet = dataset.pets.find((item) => item.id === reserva.petId)
+  const acompanhante = reserva.acompanhantePetId
+    ? dataset.pets.find((item) => item.id === reserva.acompanhantePetId)
+    : null
+
+  return montarOrcamento({
+    entrada,
+    saida,
+    tarifa,
+    porte: pet?.porte ?? null,
+    porteAcompanhante: acompanhante?.porte ?? null,
+    temporadas: dataset.temporadas,
+    servicos: reserva.servicos,
+    catalogoDeServicos: dataset.servicos,
+    politica: dataset.hotel.politica,
+    pagoCentavos: reserva.pagoCentavos,
+  })
+}
+
+/**
+ * O hóspede ainda na casa depois da hora prevista de saída: a conta que vale é a da entrega agora.
+ *
+ * A estadia e o check-out já cobravam assim (R$ 507,35 do Bento às 20h), e a reserva e a lista
+ * seguiam com a conta da saída prevista (R$ 437,85): a recepção via dois saldos para o mesmo
+ * hóspede. A reserva gravada não muda; só a resposta.
+ */
+function comContaDeAgora(reserva: Reserva): { reserva: Reserva; contaDeAgora: boolean } {
+  if (reserva.status !== 'hospedado') {
+    return { reserva, contaDeAgora: false }
+  }
+
+  const hospedagem = base().hospedagens.find(
+    (item) => item.reservaId === reserva.id && item.status === 'hospedado',
+  )
+  const agora = agoraIso()
+
+  if (!hospedagem || Date.parse(agora) <= Date.parse(hospedagem.saidaPrevistaEm)) {
+    return { reserva, contaDeAgora: false }
+  }
+
+  const orcamento = contaDaEstadia(reserva, hospedagem.entradaEm, agora)
+
+  return orcamento
+    ? { reserva: { ...reserva, orcamento }, contaDeAgora: true }
+    : { reserva, contaDeAgora: false }
+}
+
+function decorar(gravada: Reserva): ReservaNaLista {
+  const { reserva } = comContaDeAgora(gravada)
   const dataset = base()
   const pet = dataset.pets.find((item) => item.id === reserva.petId)
   const tutor = dataset.tutores.find((item) => item.id === reserva.tutorId)
@@ -323,9 +447,14 @@ export const reservaRepository = {
           })
         : null
 
+      const naResposta = comContaDeAgora(reserva)
+      const estadia = dataset.hospedagens.find((item) => item.reservaId === reserva.id)
+
       return {
         /* Sai como cópia pelo `simularChamada` (ver `comoResposta` no mock-runtime). */
-        reserva,
+        reserva: naResposta.reserva,
+        contaDaEntregaAgora: naResposta.contaDeAgora,
+        saidaReal: estadia?.saidaEm ?? null,
         admissao,
         comprovantes: dataset.comprovantes.filter((item) => item.petId === reserva.petId),
         vaga: vaga ?? {
@@ -334,7 +463,7 @@ export const reservaRepository = {
           impedimentos: ['inativa'],
           conflitos: [],
         },
-        hospedagemId: dataset.hospedagens.find((item) => item.reservaId === reserva.id)?.id ?? null,
+        hospedagemId: estadia?.id ?? null,
         sinalDevolve: sinalReembolsavel(
           dataDe(reserva.entradaPrevista),
           hojeIso(),
@@ -391,6 +520,8 @@ export const reservaRepository = {
   simular(entrada: {
     acomodacaoId: string
     petId: string
+    /** Animal novo, ainda sem cadastro: o porte vem do formulário. */
+    porte?: PetPorte | null
     acompanhantePetId?: string | null
     inicio: ISODateTime
     fim: ISODateTime
@@ -412,7 +543,7 @@ export const reservaRepository = {
       entrada: entrada.inicio,
       saida: entrada.fim,
       tarifa,
-      porte: pet?.porte ?? null,
+      porte: pet?.porte ?? entrada.porte ?? null,
       porteAcompanhante: acompanhante?.porte ?? null,
       temporadas: dataset.temporadas,
       servicos: entrada.servicos ?? [],
@@ -437,6 +568,9 @@ export const reservaRepository = {
     inicio: ISODateTime
     fim: ISODateTime
     petId?: string
+    /** Animal novo, ainda sem cadastro: porte e espécie vêm do formulário. */
+    porte?: PetPorte | null
+    especie?: PetSpecies | null
     ocupantes?: number
   }) {
     const dataset = base()
@@ -453,8 +587,8 @@ export const reservaRepository = {
       reservas: dataset.reservas,
       inicio: entrada.inicio,
       fim: entrada.fim,
-      porte: pet?.porte ?? null,
-      especie: pet?.especie ?? null,
+      porte: pet?.porte ?? entrada.porte ?? null,
+      especie: pet?.especie ?? entrada.especie ?? null,
       ocupantes: entrada.ocupantes ?? 1,
     })
   },
@@ -563,13 +697,19 @@ export const reservaRepository = {
      * ganha id aqui e entra no cadastro, para a próxima estadia já oferecê-la.
      */
     autorizadosARetirar?: PessoaAutorizada[]
+    /**
+     * O animal que o hotel ainda não conhece, cadastrado na própria venda (tutor novo ao telefone).
+     * Com ele, `petId` é ignorado.
+     */
+    hospedeNovo?: HospedeNovo | null
   }): Promise<Reserva> {
     return simularChamada('reserva.criar', () => {
       const dataset = base()
       const acomodacao = dataset.acomodacoes.find((item) => item.id === entrada.acomodacaoId)
-      const pet = dataset.pets.find((item) => item.id === entrada.petId)
+      const novo = entrada.hospedeNovo ?? null
+      const conhecido = novo ? null : dataset.pets.find((item) => item.id === entrada.petId)
 
-      if (!acomodacao || !pet) {
+      if (!acomodacao || (!conhecido && !novo)) {
         throw new VagaIndisponivelError('inativa')
       }
 
@@ -582,8 +722,8 @@ export const reservaRepository = {
         reservas: dataset.reservas,
         inicio: entrada.inicio,
         fim: entrada.fim,
-        porte: pet.porte,
-        especie: pet.especie,
+        porte: conhecido ? conhecido.porte : (novo?.porte ?? null),
+        especie: conhecido ? conhecido.especie : (novo?.especie ?? null),
         ocupantes: entrada.acompanhantePetId ? 2 : 1,
       })
 
@@ -593,15 +733,22 @@ export const reservaRepository = {
 
       /* O mesmo animal não dorme em duas baias: a segunda venda prenderia uma vaga vazia. */
       if (
+        conhecido &&
         reservaDoAnimalNoPeriodo(
           dataset.reservas,
-          [pet.id, entrada.acompanhantePetId ?? ''],
+          [conhecido.id, entrada.acompanhantePetId ?? ''],
           entrada.inicio,
           entrada.fim,
         )
       ) {
         throw new VagaIndisponivelError('animal-ja-reservado')
       }
+
+      /*
+       * O animal novo entra no cadastro só agora, com a vaga garantida: uma venda recusada não
+       * deixa para trás um hóspede sem reserva. Mesmo cadastro mínimo do pedido pelo link.
+       */
+      const pet = conhecido ?? cadastrarHospedeNovo(novo!)
 
       const tarifa = dataset.tarifas.find((item) => item.id === acomodacao.tarifaId)!
       const acompanhante = entrada.acompanhantePetId

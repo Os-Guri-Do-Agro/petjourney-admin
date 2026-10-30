@@ -14,5 +14,8 @@ export function rotuloDaEspecie(acesso: {
 }): string {
   const digitado = acesso.tipoEspecie?.trim()
 
-  return acesso.especie === 'OUTRO' && digitado ? digitado : acesso.especieLabel
+  /* Com inicial maiúscula, como "Cachorro" e "Gato" na linha de baixo: "furão" solto destoava. */
+  return acesso.especie === 'OUTRO' && digitado
+    ? digitado.charAt(0).toLocaleUpperCase() + digitado.slice(1)
+    : acesso.especieLabel
 }

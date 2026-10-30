@@ -87,9 +87,17 @@ export function passosDaConta(calculo: DoseCalc, medicamento: Medication): Passo
  * `fracao` traz o texto que a pessoa reconhece — "meio", "um e meio", "um quarto" —, e
  * `aproximado` marca quando a conta não cai numa fração que dê para partir na mão.
  */
+export type NomeDaFracao = 'inteiro' | 'meio' | 'um-e-meio' | 'quarto' | 'tres-quartos' | 'multiplo'
+
 export type Fracionamento = {
   /** `kind` traduzível da fração. */
-  kind: 'inteiro' | 'meio' | 'um-e-meio' | 'quarto' | 'tres-quartos' | 'multiplo' | 'aproximado'
+  kind: NomeDaFracao | 'aproximado'
+  /**
+   * Como dizer a `quantidade` partível, também quando a conta foi arredondada: 0,66 vira
+   * "três quartos" (com a marca de aproximado), e não "0,75 comprimidos". O `kind` continua
+   * dizendo `aproximado` para quem decide pela marca (a projeção do app, por exemplo).
+   */
+  nome: NomeDaFracao
   /** Número de comprimidos inteiros, quando faz sentido dizer. */
   inteiros: number
   quantidade: number
@@ -103,10 +111,30 @@ export type Fracionamento = {
   aproximado: boolean
 }
 
-/** As frações que um comprimido sulcado admite de verdade. Metade e quarto, nada além disso. */
-const FRACOES_PARTIVEIS = [0.25, 0.5, 0.75]
+/**
+ * As frações que um comprimido sulcado admite de verdade: metade e quarto, nada além disso. O
+ * inteiro de baixo e o de cima também contam: 0,99 é um comprimido, não três quartos.
+ */
+const FRACOES_PARTIVEIS = [0, 0.25, 0.5, 0.75, 1]
 /** Tolerância do arredondamento: 5% da dose, abaixo do que muda efeito clínico. */
 const TOLERANCIA = 0.05
+
+/** "meio", "um e meio", "três quartos"... A partir de dois comprimidos, o número diz. */
+function nomeDaQuantidade(inteiros: number, fracao: number): NomeDaFracao {
+  if (fracao === 0) {
+    return 'inteiro'
+  }
+
+  if (fracao === 0.5) {
+    return inteiros === 0 ? 'meio' : inteiros === 1 ? 'um-e-meio' : 'multiplo'
+  }
+
+  if (inteiros > 0) {
+    return 'multiplo'
+  }
+
+  return fracao === 0.25 ? 'quarto' : 'tres-quartos'
+}
 
 export function fracionar(quantidade: number, unidade: Medication['unidadeApresentacao']): Fracionamento | null {
   /* Líquido não se fraciona: mede-se. 2,37 mL é um número que a seringa mostra. */
@@ -114,55 +142,33 @@ export function fracionar(quantidade: number, unidade: Medication['unidadeAprese
     return null
   }
 
-  const inteiros = Math.floor(quantidade)
-  const resto = quantidade - inteiros
-
-  const perto = (alvo: number) => Math.abs(resto - alvo) <= TOLERANCIA
-
   /**
-   * `quantidade` devolvida é sempre a **partível**, não a calculada.
+   * `quantidade` devolvida é sempre a **partível**, não a calculada: a mais próxima da conta.
    *
    * Nomear "dois e meio" e devolver 2,48 faria a instrução e o número se contradizerem na
    * mesma linha da receita. Quem lê para dar o remédio segue a palavra; quem confere segue o
    * número; os dois têm de dizer a mesma coisa. A dose calculada continua no `DoseCalc`, para
-   * o vet conferir a conta original.
+   * o vet conferir a conta original. Zero comprimido não é dose: fica fora das candidatas.
    */
-  const encaixar = (alvo: number, kind: Fracionamento['kind']): Fracionamento => ({
-    kind,
-    inteiros,
-    quantidade: inteiros + alvo,
-    aproximado: Math.abs(resto - alvo) > 0.001,
-  })
-
-  if (perto(0)) {
-    return encaixar(0, 'inteiro')
-  }
-
-  if (perto(0.5)) {
-    return encaixar(0.5, inteiros === 0 ? 'meio' : inteiros === 1 ? 'um-e-meio' : 'multiplo')
-  }
-
-  if (perto(0.25)) {
-    return encaixar(0.25, inteiros === 0 ? 'quarto' : 'multiplo')
-  }
-
-  if (perto(0.75)) {
-    return encaixar(0.75, inteiros === 0 ? 'tres-quartos' : 'multiplo')
-  }
-
-  /*
-   * Não cai em nenhuma fração partível. É o caso que o requisito chama de "dose que exige
-   * fracionar comprimido": a tela precisa dizer isso ao vet, não esconder num decimal.
-   */
-  const maisProxima = FRACOES_PARTIVEIS.reduce((melhor, alvo) =>
-    Math.abs(resto - alvo) < Math.abs(resto - melhor) ? alvo : melhor,
-  )
+  const base = Math.floor(quantidade)
+  const alvo = FRACOES_PARTIVEIS.map((fracao) => base + fracao)
+    .filter((candidata) => candidata > 0)
+    .reduce((melhor, candidata) =>
+      Math.abs(quantidade - candidata) < Math.abs(quantidade - melhor) ? candidata : melhor,
+    )
+  const inteiros = Math.floor(alvo)
+  const nome = nomeDaQuantidade(inteiros, alvo - inteiros)
 
   return {
-    kind: 'aproximado',
+    /*
+     * Longe de qualquer fração partível é o caso que o requisito chama de "dose que exige
+     * fracionar comprimido": a tela precisa dizer isso ao vet, não esconder num decimal.
+     */
+    kind: Math.abs(quantidade - alvo) <= TOLERANCIA ? nome : 'aproximado',
+    nome,
     inteiros,
-    quantidade: inteiros + maisProxima,
-    aproximado: true,
+    quantidade: alvo,
+    aproximado: Math.abs(quantidade - alvo) > 0.001,
   }
 }
 

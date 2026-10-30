@@ -22,13 +22,15 @@ import { computed, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import ClinicForm from '../base/ClinicForm.vue'
-import type { Diagnosis, DiagnosisKind } from '../../data/types'
+import type { Diagnosis, DiagnosisKind, PetSpecies } from '../../data/types'
 import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
   valor: Diagnosis[]
   somenteLeitura: boolean
   motivoLeitura: string
+  /** Espécie do paciente: a busca não oferece diagnóstico que só existe na outra. */
+  especie?: PetSpecies | null
 }>()
 
 const emit = defineEmits<{ atualizar: [patch: { diagnosticos: Diagnosis[] }] }>()
@@ -49,15 +51,19 @@ const jaAdicionados = computed(() => new Set(props.valor.map((item) => item.codi
 const sugestoes = computed(() => {
   const alvo = termo.value.trim().toLowerCase()
 
-  return clinico.diagnosticos
-    .filter((item) => !jaAdicionados.value.has(item.codigo))
-    .filter(
-      (item) =>
-        !alvo ||
-        item.descricao.toLowerCase().includes(alvo) ||
-        item.codigo.toLowerCase().includes(alvo),
-    )
-    .slice(0, 6)
+  return (
+    clinico.diagnosticos
+      .filter((item) => !jaAdicionados.value.has(item.codigo))
+      /* "Cistite idiopática felina" na lista de uma cadela: a lista vinha do catálogo inteiro. */
+      .filter((item) => !props.especie || !item.especies || item.especies.includes(props.especie))
+      .filter(
+        (item) =>
+          !alvo ||
+          item.descricao.toLowerCase().includes(alvo) ||
+          item.codigo.toLowerCase().includes(alvo),
+      )
+      .slice(0, 6)
+  )
 })
 
 const campoDeBusca = ref<{ $el: HTMLElement } | null>(null)

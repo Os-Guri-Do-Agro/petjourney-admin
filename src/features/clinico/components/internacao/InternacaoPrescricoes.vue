@@ -158,6 +158,18 @@ function feitas(prescricao: PrescricaoDeInternacao): number {
   ).length
 }
 
+/**
+ * "5 administradas" cabe em remédio e fluido. Medir diurese, pesar e oferecer ração são
+ * registros, não administrações; e o plural vem da contagem ("1 administrada").
+ */
+function textoDasFeitas(prescricao: PrescricaoDeInternacao): string {
+  const total = feitas(prescricao)
+  const chave =
+    prescricao.kind === 'medicamento' || prescricao.kind === 'fluido' ? 'feitas' : 'registradas'
+
+  return t(`clinico.internacao.prescricao.${chave}`, { total }, total)
+}
+
 const podeCriar = computed(
   () => nova.value.descricao.trim().length > 0 && !props.salvando,
 )
@@ -282,15 +294,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
               </p>
 
               <p class="item__rodape">
-                <span class="ui-num">
-                  {{
-                    t(
-                      'clinico.internacao.prescricao.feitas',
-                      { total: feitas(prescricao) },
-                      feitas(prescricao),
-                    )
-                  }}
-                </span>
+                <span class="ui-num">{{ textoDasFeitas(prescricao) }}</span>
                 <span>
                   {{
                     t('clinico.internacao.prescricao.por', {
@@ -543,15 +547,7 @@ function aoEscolherMedicamento(medicamentoId: string) {
                     })
                   }}
                 </span>
-                <span class="ui-num">
-                  {{
-                    t(
-                      'clinico.internacao.prescricao.feitas',
-                      { total: feitas(prescricao) },
-                      feitas(prescricao),
-                    )
-                  }}
-                </span>
+                <span class="ui-num">{{ textoDasFeitas(prescricao) }}</span>
               </p>
             </div>
           </div>

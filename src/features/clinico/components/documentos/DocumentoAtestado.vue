@@ -107,6 +107,23 @@ const achados = computed(() => {
 })
 
 /**
+ * A hora de saída do comparecimento. Com o atendimento ainda aberto (o responsável pede o papel
+ * antes de ir embora), é a hora em que a folha sai, e não a de abertura: "das 16:00 às 16:00"
+ * declarava uma visita de zero minuto.
+ */
+const saida = computed(() => {
+  if (props.encounter.finalizadoEm) {
+    return props.encounter.finalizadoEm
+  }
+
+  const agora = clinicClock.nowIso()
+
+  return clinicClock.durationMinutes(props.encounter.abertoEm, agora) > 0
+    ? agora
+    : props.encounter.abertoEm
+})
+
+/**
  * A frase muda conforme o que o prontuário sabe — nunca conforme o que seria conveniente.
  */
 const declaracao = computed(() => {
@@ -116,7 +133,7 @@ const declaracao = computed(() => {
       paciente: props.pet?.nome ?? '',
       data: formato.dataPorExtenso(dataDoDocumento.value),
       entrada: formato.hora(props.encounter.abertoEm),
-      saida: formato.hora(props.encounter.finalizadoEm ?? props.encounter.abertoEm),
+      saida: formato.hora(saida.value),
     })
   }
 

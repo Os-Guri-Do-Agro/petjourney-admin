@@ -27,8 +27,8 @@ import {
   SaidaBloqueadaError,
   VagaIndisponivelError,
 } from '../repositories'
-import { getDataset, resetDataset } from '../store'
-import { instante } from '../../domain/hotel-time'
+import { agoraIso, getDataset, resetDataset } from '../store'
+import { instante, maisMinutos } from '../../domain/hotel-time'
 
 const OFFSET = '-04:00'
 
@@ -124,6 +124,52 @@ describe('venda: do mapa à reserva', () => {
 
     expect(esticada.diarias).toBe(6)
     expect(esticada.orcamento.totalCentavos).toBeGreaterThan(antes)
+  })
+
+  it('o animal novo entra no cadastro junto com a reserva de balcão, e só se a vaga passar', async () => {
+    const ancora = getDataset().ancora
+    const inicio = iso(addDays(ancora, 50), '08:00')
+    const fim = iso(addDays(ancora, 53), '12:00')
+    const petsAntes = getDataset().pets.length
+    const hospedeNovo = {
+      petNome: 'Pipoca',
+      especie: 'canina' as const,
+      porte: 'medio' as const,
+      tutorNome: 'Juliana Reis',
+      telefone: '(11) 98123-4567',
+    }
+
+    /* Gato numa baia do canil: recusado, e nada fica para trás no cadastro. */
+    await expect(
+      reservaRepository.criar({
+        petId: '',
+        acomodacaoId: 'acom-b2',
+        inicio,
+        fim,
+        origem: 'telefone',
+        hospedeNovo: { ...hospedeNovo, especie: 'felina', porte: null },
+      }),
+    ).rejects.toThrow(VagaIndisponivelError)
+    expect(getDataset().pets).toHaveLength(petsAntes)
+
+    const reserva = await reservaRepository.criar({
+      petId: '',
+      acomodacaoId: 'acom-b2',
+      inicio,
+      fim,
+      origem: 'telefone',
+      hospedeNovo,
+    })
+
+    const pet = getDataset().pets.find((item) => item.id === reserva.petId)!
+    const tutor = getDataset().tutores.find((item) => item.id === reserva.tutorId)!
+
+    expect(pet.nome).toBe('Pipoca')
+    expect(pet.porte).toBe('medio')
+    expect(pet.tutorId).toBe(tutor.id)
+    expect(tutor.nome).toBe('Juliana Reis')
+    expect(tutor.telefone).toBe('(11) 98123-4567')
+    expect(reserva.orcamento.totalCentavos).toBeGreaterThan(0)
   })
 })
 
@@ -368,14 +414,15 @@ describe('a estadia, de ponta a ponta', () => {
 
     /*
      * Cobrado no balcão, na entrega: a estadia fecha sem nada a receber, pelo valor que o diálogo
-     * mostrou. Saída antecipada pode deixar crédito (sinal maior que a estadia real): o saldo fica
-     * negativo, nunca positivo.
+     * mostrou. Saída antecipada pode deixar crédito (sinal maior que a estadia real): ele volta ao
+     * responsável e fica registrado como devolvido, e o saldo fecha em zero.
      */
-    expect(reserva.reserva.orcamento.saldoCentavos).toBeLessThanOrEqual(0)
-    expect(reserva.reserva.pagoCentavos).toBe(
-      Math.max(pagoAntes, reserva.reserva.orcamento.totalCentavos),
-    )
-    expect(antes.saldoNaSaidaCentavos).toBe(reserva.reserva.orcamento.totalCentavos - pagoAntes)
+    const total = reserva.reserva.orcamento.totalCentavos
+
+    expect(reserva.reserva.orcamento.saldoCentavos).toBe(0)
+    expect(reserva.reserva.pagoCentavos).toBe(total)
+    expect(reserva.reserva.devolvidoCentavos ?? 0).toBe(Math.max(0, pagoAntes - total))
+    expect(antes.saldoNaSaidaCentavos).toBe(total - pagoAntes)
 
     /* E a estadia encerrada some da prancheta: refeição pendente de quem foi embora é ruído. */
     const prancheta = await hospedagemRepository.rotina(getDataset().ancora)
@@ -410,6 +457,71 @@ describe('a estadia, de ponta a ponta', () => {
         retiradoPor: 'Responsável',
       }),
     ).resolves.toBeTruthy()
+  })
+
+  it('saída antes da data: o que passou da conta volta ao responsável e fica registrado', async () => {
+    const hospedagem = await internarZeus()
+    const gravada = getDataset().reservas.find((item) => item.id === 'res-zeus')!
+
+    /* O responsável pagou a estadia inteira e leva o cão no mesmo dia. */
+    gravada.pagoCentavos = gravada.orcamento.totalCentavos
+
+    for (const pertence of hospedagem.pertences) {
+      await hospedagemRepository.conferirPertence({
+        hospedagemId: hospedagem.id,
+        pertenceId: pertence.id,
+        devolvido: true,
+      })
+    }
+
+    await hospedagemRepository.pesarNaSaida(hospedagem.id, 19.6)
+
+    const antes = (await hospedagemRepository.abrir(hospedagem.id))!
+
+    /* O diálogo de saída mostra o que volta: um saldo negativo. */
+    expect(antes.saldoNaSaidaCentavos).toBeLessThan(0)
+
+    await hospedagemRepository.checkOut({
+      hospedagemId: hospedagem.id,
+      entreguePor: 'eq-bruna',
+      retiradoPor: 'Responsável',
+    })
+
+    const reserva = (await reservaRepository.abrir('res-zeus'))!
+
+    expect(reserva.reserva.devolvidoCentavos).toBe(-antes.saldoNaSaidaCentavos)
+    expect(reserva.reserva.pagoCentavos).toBe(reserva.reserva.orcamento.totalCentavos)
+    expect(reserva.reserva.orcamento.saldoCentavos).toBe(0)
+  })
+
+  it('passada a hora de saída, a reserva e a lista cobram o mesmo saldo que a estadia', async () => {
+    /*
+     * O Bento, previsto às 16:30 e ainda na casa às 20h: a estadia e o check-out diziam R$ 507,35
+     * (a diária da saída tardia já cheia) e a reserva e a lista, R$ 437,85.
+     */
+    const dataset = getDataset()
+    const hospedagem = dataset.hospedagens.find((item) => item.status === 'hospedado')!
+    const gravada = dataset.reservas.find((item) => item.id === hospedagem.reservaId)!
+    const saida = maisMinutos(agoraIso(), -180)
+
+    hospedagem.saidaPrevistaEm = saida
+    gravada.saidaPrevista = saida
+    const orcamentoGravado = structuredClone(gravada.orcamento)
+
+    const estadia = (await hospedagemRepository.abrir(hospedagem.id))!
+    const detalhe = (await reservaRepository.abrir(gravada.id))!
+    const naLista = (await reservaRepository.listar()).find(
+      (linha) => linha.reserva.id === gravada.id,
+    )!
+
+    expect(detalhe.contaDaEntregaAgora).toBe(true)
+    expect(detalhe.reserva.orcamento.saldoCentavos).toBe(estadia.saldoCentavos)
+    expect(naLista.reserva.orcamento.saldoCentavos).toBe(estadia.saldoCentavos)
+
+    /* Só a resposta muda: a reserva gravada segue com a conta da saída prevista. */
+    expect(getDataset().reservas.find((item) => item.id === gravada.id)!.orcamento).toEqual(
+      orcamentoGravado,
+    )
   })
 })
 

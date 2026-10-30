@@ -238,7 +238,7 @@ const metaNaRonda = computed(() =>
             class="tarefa__botao tarefa__pular"
             :label="t('hotel.rotina.pular')"
             severity="secondary"
-            text
+            outlined
             :disabled="salvando"
             @click="emit('marcar', { tarefaId: tarefa.id, status: 'pulada' })"
           />

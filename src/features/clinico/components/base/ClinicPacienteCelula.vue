@@ -63,11 +63,16 @@ function iniciaisDe(nome: string) {
   gap: 2px;
 }
 
+/*
+ * Sem lugar para os dois, o selo desce para baixo do nome em vez de passar por cima da coluna ao
+ * lado: "Maximiliano Bartholomeu…" com "Reincidente" encostava no número de faltas.
+ */
 .paciente__linha {
   display: flex;
   min-width: 0;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
 }
 
 /* O nome é o último a ceder: o selo ao lado encolhe antes de "Amora" virar "Am…". */

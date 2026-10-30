@@ -86,6 +86,32 @@ describe('emitir', () => {
   })
 
   /*
+   * Assinar congela; a tela precisa saber quando a conduta andou depois, senão "Enviar ao
+   * responsável" manda a versão de 24 h com a de 12 h na tela.
+   */
+  it('sabe quando a conduta mudou depois da assinatura', () => {
+    const store = useReceitasStore()
+    const atual = encounter()
+    const receita = store.emitir(atual, [prescricao()])!
+
+    expect(store.divergeDaConduta(receita, [prescricao()])).toBe(false)
+    expect(store.divergeDaConduta(receita, [prescricao({ observacao: 'Após a refeição.' })])).toBe(
+      false,
+    )
+
+    const de12Para8 = prescricao()
+    de12Para8.calculo = { ...de12Para8.calculo, frequenciaHoras: 8 }
+
+    expect(store.divergeDaConduta(receita, [de12Para8])).toBe(true)
+    expect(store.divergeDaConduta(receita, [prescricao({ medicamentoId: 'med-cefalexina' })])).toBe(
+      true,
+    )
+    expect(store.divergeDaConduta(receita, [prescricao(), prescricao({ id: 'presc-2' })])).toBe(
+      true,
+    )
+  })
+
+  /*
    * A Nina tem alergia registrada a dipirona. A prescrição pede o "Confirmo" explícito; assinar
    * não pode passar por cima dele (passava, e a receita saía assinada com a caixa desmarcada).
    */

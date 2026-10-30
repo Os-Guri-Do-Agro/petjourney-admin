@@ -198,11 +198,16 @@ function queContinuam(coluna: ColunaAgenda, minuto: number): CardAgenda[] {
   )
 }
 
-/** A primeira meia hora depois da que o atendimento começou: é nela que a faixa diz o nome. */
+/**
+ * A primeira meia hora **à vista** depois da que o atendimento começou: é nela que a faixa diz o
+ * nome. O banho das 11:30 às 13:00 atravessa o almoço; a meia hora das 12:00 vira a faixa do
+ * almoço, e o nome passa para a das 12:30. Antes ele se perdia ali e sobrava um bloco em branco.
+ */
 function primeiraContinuacao(card: CardAgenda, minuto: number) {
-  return (
-    Math.floor(card.inicioMin / LINHA_EM_MINUTOS) * LINHA_EM_MINUTOS + LINHA_EM_MINUTOS === minuto
-  )
+  const linhaDoInicio = Math.floor(card.inicioMin / LINHA_EM_MINUTOS) * LINHA_EM_MINUTOS
+  const primeira = linhas.value.find((linha) => linha.minuto > linhaDoInicio && !linha.fechada)
+
+  return primeira?.minuto === minuto
 }
 
 // ------------------------------------------------------------------ a linha de cada atendimento
@@ -1687,16 +1692,22 @@ tbody > .tabela__linha:first-child > * {
   border-radius: 0 0 3px 3px;
 }
 
-/* O rótulo leva o mesmo fundo do bloco: o fio do agora passa por trás, sem riscar o nome. */
+/*
+ * O rótulo leva o mesmo fundo do bloco: o fio do agora passa por trás, sem riscar o nome. Ele
+ * começa depois do traço da esquerda, que segue inteiro de cima a baixo (antes o rótulo o cortava
+ * e, no bloco branco do agendado, sobravam dois tocos soltos).
+ */
 .continua {
   display: flex;
   min-width: 0;
   align-items: baseline;
   justify-self: start;
   gap: 6px;
-  max-width: 100%;
+  max-width: calc(100% - 8px);
   overflow: hidden;
-  padding: 2px 8px 2px 12px;
+  margin-inline-start: 8px;
+  padding-block: 2px;
+  padding-inline: 4px 8px;
   border-radius: 6px;
   background: var(--estado-fundo);
   color: var(--tinta-2);

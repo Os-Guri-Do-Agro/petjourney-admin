@@ -15,6 +15,7 @@ import {
   pedidoDeReservaRepository,
   type PedidoDeReservaNaCaixa,
 } from '../data/reserva-online'
+import { VagaIndisponivelError } from '../data/repositories'
 import { agoraIso } from '../data/store'
 import type { ISODateTime, MotivoDaRecusaDaReserva, Reserva, ReservaOnline } from '../data/types'
 import { situacaoDoPrazoDaReserva } from '../domain/pedidos-de-reserva'
@@ -110,6 +111,9 @@ export const usePedidosDeReservaStore = defineStore('hotel-pedidos-de-reserva', 
 
       if (sabido) {
         resultado.value = sabido
+      } else if (causa instanceof VagaIndisponivelError) {
+        /* O animal já tem reserva no período: o motivo, e não o genérico "tente de novo". */
+        erro.value = `hotel.erros.vaga.${causa.kind}`
       } else {
         erro.value = 'hotel.pedidos.erros.responder'
       }

@@ -20,6 +20,7 @@ export {
   VagaIndisponivelError,
   type FaixaNaGrade,
   type GradeDeOcupacao,
+  type HospedeNovo,
   type LinhaDaGrade,
   type MapaDoPeriodo,
   type ReservaDetalhada,

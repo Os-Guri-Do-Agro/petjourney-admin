@@ -246,6 +246,23 @@ describe('carga do dia', () => {
     expect(carga.encaixes).toBe(1)
   })
 
+  it('a cirurgia com dois profissionais conta um atendimento, e ocupa as duas colunas', () => {
+    const carga = cargaDoDia(
+      DATA,
+      [
+        appointment('cir-a', 810, 120, { linkedGroupId: 'grupo-1' }),
+        appointment('cir-b', 810, 120, { linkedGroupId: 'grupo-1', professionalId: 'prof-helena' }),
+        appointment('c', 540, 30),
+      ],
+      clinic,
+      profissionais,
+      clock,
+    )
+
+    expect(carga.agendados).toBe(2)
+    expect(carga.ocupadoMinutos).toBe(270)
+  })
+
   it('classifica a ocupação em faixas legíveis', () => {
     expect(faixaDeOcupacao(0)).toBe('vazio')
     expect(faixaDeOcupacao(0.4)).toBe('tranquilo')

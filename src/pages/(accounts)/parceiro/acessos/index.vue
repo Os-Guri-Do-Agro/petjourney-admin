@@ -60,7 +60,11 @@ import {
   type ReivindicacaoAcesso,
   type TipoServicoPrestador,
 } from '@/service/parceiro/types'
-import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
+import {
+  calcularTempoRestante,
+  diasDeCalendarioEntre,
+  parseInstante,
+} from '@/utils/format/expiracao'
 import { rotuloDaEspecie } from '@/utils/parceiro/especie-do-acesso'
 import { modoDoVinculo } from '@/utils/parceiro/reivindicacoes'
 import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
@@ -525,7 +529,8 @@ function haQuantoTempo(iso: string) {
     return relativo.format(-horas, 'hour')
   }
 
-  const dias = Math.floor(horas / 24)
+  /* Dias de calendário, não blocos de 24 h: "ontem" ao lado de uma data de dois dias atrás. */
+  const dias = Math.max(1, diasDeCalendarioEntre(parseInstante(iso), agora.value))
 
   return dias < 60
     ? relativo.format(-dias, 'day')
@@ -810,6 +815,12 @@ const fraseDoResumo = computed(() => {
   }
 
   if (temFiltroAtivo.value) {
+    /* Nos ativos cada linha é um acesso: a mesma Paçoca com dois acessos não são "2 pets". */
+    if (activeTab.value === 'ativos') {
+      const n = items.value.length
+      return t('acessos.saudacao.encontradosAcessos', { n }, n)
+    }
+
     const pets = grupos.value.length
     return t('acessos.saudacao.encontrados', { n: pets }, pets)
   }
@@ -2291,6 +2302,8 @@ useRevalidarAoVoltar(() => {
   color: var(--tinta-2);
   font-size: 14.5px;
   line-height: 1.5;
+  /* Centrado, sem uma palavra sozinha na última linha ("…da sua / empresa."). */
+  text-wrap: balance;
 }
 
 .estado > :deep(.p-button) {

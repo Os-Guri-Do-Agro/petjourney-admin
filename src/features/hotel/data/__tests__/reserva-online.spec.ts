@@ -19,6 +19,7 @@ import {
   pedidoDeReservaRepository,
   reservaOnlineDoResponsavel as app,
 } from '../reserva-online'
+import { VagaIndisponivelError } from '../repositories'
 import { getDataset, hojeIso, resetDataset } from '../store'
 import { instante } from '../../domain/hotel-time'
 
@@ -65,7 +66,25 @@ describe('a caixa semeada', () => {
     expect(luna?.sugestao?.tipo.id).not.toBe('tipo-suite')
   })
 
-  it('Bento e Açaí vão para uma acomodação que comporta os dois', async () => {
+  it('a Luna já tem reserva que cruza o pedido: a linha avisa e o aceite recusa', async () => {
+    /*
+     * Reservada até 07/11 às 12:00 e pedindo de 07/11 às 10:00: aceitar dava a segunda baia ao
+     * mesmo cão, na mesma manhã.
+     */
+    const caixa = await pedidoDeReservaRepository.listar()
+    const luna = caixa.find((linha) => linha.pedido.id === 'pedido-res-luna')!
+
+    expect(luna.reservaDoAnimal?.id).toBe('res-luna')
+
+    const antes = getDataset().reservas.length
+
+    await expect(pedidoDeReservaRepository.aceitar('pedido-res-luna')).rejects.toThrow(
+      VagaIndisponivelError,
+    )
+    expect(getDataset().reservas).toHaveLength(antes)
+  })
+
+  it('Bento e Canela vão para uma acomodação que comporta os dois', async () => {
     const caixa = await pedidoDeReservaRepository.listar()
     const joao = caixa.find((linha) => linha.pedido.id === 'pedido-res-joao')
 

@@ -179,6 +179,38 @@ describe('store parceiro: a carga que a tela inteira pede junto', () => {
     useParceiroStore().reset()
     expect(window.localStorage.getItem('petjourney-parceiro-nome')).toBeNull()
   })
+
+  it('o menu nasce com Indicados e Carteira da última sessão, sem esperar o contexto', async () => {
+    const store = useParceiroStore()
+    expect(store.menuComIndicados).toBe(false)
+    expect(store.menuComCarteira).toBe(false)
+
+    respondeOk()
+    await store.bootstrap()
+
+    /* Recarga: store nova, contexto ainda não chegou, e o menu já tem a forma de antes. */
+    setActivePinia(createPinia())
+    const recarregada = useParceiroStore()
+    expect(recarregada.dashboard).toBeNull()
+    expect(recarregada.menuComIndicados).toBe(true)
+    expect(recarregada.menuComCarteira).toBe(true)
+
+    /* Quando o contexto chega, ele manda: OPERADOR sem afiliado perde os dois. */
+    getPortalDashboard.mockResolvedValue({
+      ...dashboardDe('p-vivo'),
+      papel: 'OPERADOR',
+    } as unknown as PortalDashboard)
+    getPortalStatus.mockResolvedValue({
+      ...STATUS_OK,
+      afiliado: { status: 'SOLICITADO', motivo: null, decididoEm: null, podeSolicitar: false },
+    } as unknown as PortalStatus)
+    await recarregada.bootstrap(true)
+    expect(recarregada.menuComIndicados).toBe(false)
+    expect(recarregada.menuComCarteira).toBe(false)
+
+    recarregada.reset()
+    expect(window.localStorage.getItem('petjourney-parceiro-menu')).toBeNull()
+  })
 })
 
 describe('store parceiro: aprovação vista pela primeira vez', () => {

@@ -33,6 +33,26 @@ const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
 const submitting = ref(false)
 const saldoSacavelCentavos = ref<number | null>(null)
+/** O mínimo de saque que a API manda na carteira, como na Carteira e no Início. */
+const saqueMinimoCentavos = ref<number | null>(null)
+const carregandoCarteira = ref(false)
+
+/**
+ * O saque do Afiliados cita o mínimo da API, não um valor escrito no texto, que mentiria quando o
+ * mínimo mudasse. Sem a carteira (programa não ativo, ou ela falhou), a frase vai sem o valor;
+ * enquanto ela chega, um esqueleto, para a linha não trocar de texto diante de quem lê (`null`).
+ */
+const featureDoSaque = computed<string | null>(() => {
+  if (carregandoCarteira.value) {
+    return null
+  }
+
+  return saqueMinimoCentavos.value == null
+    ? t('programas.card.afiliado.feature3SemValor')
+    : t('programas.card.afiliado.feature3', {
+        valor: formatCentavosToBrl(saqueMinimoCentavos.value, INTL_LOCALE[locale.value as Locale]),
+      })
+})
 
 const meta = computed(() => {
   const copy = getModoCardCopy(props.modo)
@@ -44,7 +64,11 @@ const meta = computed(() => {
     title: t(`${ns}.title`),
     subtitle: t(`${ns}.subtitle`),
     description: t(`${ns}.description`),
-    features: [t(`${ns}.feature1`), t(`${ns}.feature2`), t(`${ns}.feature3`)],
+    features: [
+      t(`${ns}.feature1`),
+      t(`${ns}.feature2`),
+      props.modo === 'afiliado' ? featureDoSaque.value : t(`${ns}.feature3`),
+    ],
   }
 })
 
@@ -117,8 +141,13 @@ const temPe = computed(
     mostraSoDono.value,
 )
 
+/**
+ * Desde quando o programa vale: a decisão dele, ou a do credenciamento quando a API não manda a
+ * do programa. Vale para os dois: só o de Afiliados dizia a data, e o Participativo, aprovado no
+ * mesmo dia, ficava com um "Ativo" seco ao lado.
+ */
 const ativoDesdeLabel = computed(() => {
-  const raw = store.status?.auditadoEm
+  const raw = modoBloco.value.decididoEm ?? store.status?.auditadoEm
 
   if (!raw) {
     return null
@@ -156,14 +185,21 @@ const decididoEmLabel = computed(() => {
 async function loadCarteiraResumo() {
   if (props.modo !== 'afiliado' || modoStatus.value !== 'ATIVO') {
     saldoSacavelCentavos.value = null
+    saqueMinimoCentavos.value = null
     return
   }
+
+  carregandoCarteira.value = true
 
   try {
     const carteira = await getCarteira(parceiroQuery())
     saldoSacavelCentavos.value = carteira.saldoSacavelCentavos
+    saqueMinimoCentavos.value = carteira.saqueMinimoCentavos ?? null
   } catch {
     saldoSacavelCentavos.value = null
+    saqueMinimoCentavos.value = null
+  } finally {
+    carregandoCarteira.value = false
   }
 }
 
@@ -286,7 +322,7 @@ watch(modoStatus, () => {
         <span class="ui-selo programa__selo" :class="badge.classe">
           <i :class="badge.icone" aria-hidden="true" />
           {{
-            modoStatus === 'ATIVO' && modo === 'afiliado' && ativoDesdeLabel
+            modoStatus === 'ATIVO' && ativoDesdeLabel
               ? t('programas.linha.ativoDesde', { data: ativoDesdeLabel })
               : badge.label
           }}
@@ -300,9 +336,16 @@ watch(modoStatus, () => {
       <div class="programa__da ui-poco">
         <h4 class="programa__rotulo">{{ t('programas.card.oQueDa') }}</h4>
         <ul class="programa__lista">
-          <li v-for="feature in meta.features" :key="feature">
+          <li v-for="(feature, indice) in meta.features" :key="indice">
             <i class="ph ph-check" aria-hidden="true" />
-            <span>{{ feature }}</span>
+            <Skeleton
+              v-if="feature === null"
+              class="programa__esqueleto"
+              width="12rem"
+              height="0.85rem"
+              border-radius="6px"
+            />
+            <span v-else>{{ feature }}</span>
           </li>
         </ul>
       </div>
@@ -474,6 +517,12 @@ watch(modoStatus, () => {
 .programa[data-status='ATIVO'] .programa__lista i {
   background: var(--ok-fundo);
   color: var(--ok-tinta);
+}
+
+/* O mínimo de saque chegando: na altura da linha de texto que vai ocupar o lugar. */
+.programa__esqueleto {
+  align-self: center;
+  max-width: 100%;
 }
 
 /* O estado em linha: ícone na tinta do estado, texto em tinta normal. */

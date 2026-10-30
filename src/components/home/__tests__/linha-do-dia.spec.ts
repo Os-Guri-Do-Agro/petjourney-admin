@@ -89,23 +89,23 @@ describe('compromissos do dia', () => {
     return lista.map((item) => (item.tipo === 'conta' ? item.conta.id : item.movimento.id))
   }
 
-  it('hoje: em atendimento, atraso do hotel, recepção e o que vem, sem o que já terminou', () => {
+  it('hoje: pela hora da linha, clínica e hotel juntos, sem o que já terminou', () => {
     const movimentos = [movimento('fim', '17:00'), movimento('manha', '09:00')]
 
     expect(ids(compromissosDoDia(contas, movimentos, iso('10:12')))).toEqual([
-      'atendendo',
       'manha',
+      'atendendo',
       'esperando',
       'depois',
       'fim',
     ])
   })
 
-  it('entre os que esperam, quem chegou primeiro vai primeiro', () => {
+  it('quem espera fica na hora marcada, não na hora em que chegou', () => {
     const cedo = { ...conta('cedo', '11:00', '11:30', 'esperando'), chegadaEm: iso('10:20') }
     const tarde = { ...conta('tarde', '10:40', '11:00', 'esperando'), chegadaEm: iso('10:35') }
 
-    expect(ids(compromissosDoDia([tarde, cedo], [], iso('10:50')))).toEqual(['cedo', 'tarde'])
+    expect(ids(compromissosDoDia([cedo, tarde], [], iso('10:50')))).toEqual(['tarde', 'cedo'])
   })
 
   it('o movimento atrasado vem marcado como atraso; o que ainda vem, não', () => {

@@ -197,7 +197,7 @@ function detalhe(item: ExigenciaAvaliada): string {
             v-if="item.bloqueia && (item.situacao === 'ausente' || item.situacao === 'vencido')"
             :label="t('hotel.exigencias.dispensar')"
             severity="secondary"
-            text
+            outlined
             size="small"
             @click="emit('dispensar', item.kind)"
           />

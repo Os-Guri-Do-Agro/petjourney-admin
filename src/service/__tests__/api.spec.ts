@@ -115,8 +115,62 @@ describe('apiFetch', () => {
     const error = await apiFetch('/auth/login').catch((reason: unknown) => reason)
 
     expect(error).toMatchObject({ statusCode: 502 })
-    // A message é traduzida; o que importa é o status interpolado, não o idioma do teste.
-    expect((error as Error).message).toContain('502')
+    // A message é a frase traduzida do servidor fora do ar, nunca o HTML do gateway.
+    expect((error as Error).message).not.toContain('<html>')
+    expect((error as Error).message).not.toBe('')
+  })
+
+  it('5xx genérico não mostra o texto do servidor em inglês', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(JSON.stringify({ statusCode: 500, message: 'Internal server error' }), {
+        status: 500,
+        headers: JSON_HEADERS,
+      }),
+    )
+
+    const error = await apiFetch('/parceiro/portal/dashboard').catch((reason: unknown) => reason)
+
+    expect(error).toMatchObject({ statusCode: 500 })
+    expect((error as Error).message).not.toContain('Internal server error')
+  })
+
+  it('5xx com codigo mantém a mensagem da API, que já vem traduzida', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(JSON.stringify({ message: 'Serviço de QR fora do ar.', codigo: 'QR_FORA' }), {
+        status: 503,
+        headers: JSON_HEADERS,
+      }),
+    )
+
+    await expect(apiFetch('/parceiro/portal/indicacao')).rejects.toMatchObject({
+      statusCode: 503,
+      codigo: 'QR_FORA',
+      message: 'Serviço de QR fora do ar.',
+    })
+  })
+
+  it('lista do validador (400) vira frase da casa, sem o texto técnico em inglês', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(
+        JSON.stringify({
+          statusCode: 400,
+          message: ['token must be longer than or equal to 16 characters'],
+          error: 'Bad Request',
+        }),
+        { status: 400, headers: JSON_HEADERS },
+      ),
+    )
+
+    const error = await apiFetch('/parceiro/portal/equipe/convites/previa-por-link', {
+      method: 'POST',
+      body: '{"token":"abc"}',
+    }).catch((reason: unknown) => reason)
+
+    expect(error).toMatchObject({ statusCode: 400, error: 'Bad Request' })
+    expect((error as Error).message).not.toContain('token must')
   })
 })
 

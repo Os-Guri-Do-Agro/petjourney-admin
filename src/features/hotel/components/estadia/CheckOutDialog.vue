@@ -269,6 +269,11 @@ const fraseDoQueFalta = computed(() => {
             </h3>
 
             <div class="pesagem">
+              <!--
+                O InputNumber só entrega o número ao sair do campo: digitado "32,1", o "Registrar
+                peso" seguia apagado até a pessoa clicar fora. O `@input` entrega a cada tecla, e o
+                Enter registra.
+              -->
               <InputNumber
                 :input-id="`${idCampo}-peso`"
                 v-model="peso"
@@ -277,6 +282,8 @@ const fraseDoQueFalta = computed(() => {
                 suffix=" kg"
                 :placeholder="t('hotel.checkout.pesoSaida')"
                 :aria-label="t('hotel.checkout.pesoSaida')"
+                @input="(evento) => (peso = typeof evento.value === 'number' ? evento.value : null)"
+                @keydown.enter.prevent="peso && pesar()"
               />
               <Button
                 type="button"
@@ -387,13 +394,27 @@ const fraseDoQueFalta = computed(() => {
         </li>
 
         <!-- 3. receber o saldo -->
-        <li class="passo" :class="{ 'passo--feito': saldoCentavos <= 0 }">
+        <li class="passo" :class="{ 'passo--feito': saldoCentavos === 0 }">
           <span class="passo__marca" aria-hidden="true">
-            <i v-if="saldoCentavos <= 0" class="ph ph-check" />
+            <i v-if="saldoCentavos === 0" class="ph ph-check" />
             <span v-else class="ui-num">3</span>
           </span>
 
-          <div class="passo__corpo">
+          <!--
+            Saída antes da data: o que foi pago pode passar da conta das noites usadas. Era "−R$ 50,00
+            · Nada a receber", e o dinheiro do responsável ficava sem ninguém dizer que voltava.
+            Agora o passo diz quanto devolver; fechar a estadia registra a devolução.
+          -->
+          <div v-if="saldoCentavos < 0" class="passo__corpo">
+            <h3 class="passo__titulo">{{ t('hotel.checkout.devolver') }}</h3>
+
+            <p class="saldo">
+              <strong class="ui-num">{{ formato.moeda(-saldoCentavos) }}</strong>
+              <span>{{ t('hotel.checkout.devolverNoBalcao') }}</span>
+            </p>
+          </div>
+
+          <div v-else class="passo__corpo">
             <h3 class="passo__titulo">{{ t('hotel.checkout.saldo') }}</h3>
 
             <p class="saldo">

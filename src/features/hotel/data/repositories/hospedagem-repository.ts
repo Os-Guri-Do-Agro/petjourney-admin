@@ -42,12 +42,12 @@ import {
   situacaoDaTarefa,
   tarefasDoDia,
 } from '../../domain/rotina'
-import { cobrancaDaSaida, montarOrcamento } from '../../domain/tarifas'
+import { cobrancaDaSaida } from '../../domain/tarifas'
 import { HOTEL_UTC_OFFSET } from '../fixtures'
 import { simularChamada } from '../mock-runtime'
 import { agoraIso, getDataset, hojeIso, novoId } from '../store'
 import { veterinarioInformado } from '../../domain/contatos'
-import { AdmissaoBloqueadaError, registrarAutorizados } from './reserva-repository'
+import { AdmissaoBloqueadaError, contaDaEstadia, registrarAutorizados } from './reserva-repository'
 import type {
   Adaptacao,
   Autorizacao,
@@ -316,37 +316,10 @@ export type PassagemDeTurno = {
  * cobrava um valor e o sistema registrava outro. As duas leituras saem daqui.
  */
 function orcamentoNaSaida(hospedagem: Hospedagem, agora: ISODateTime) {
-  const dataset = base()
-  const reserva = dataset.reservas.find((item) => item.id === hospedagem.reservaId)
+  const reserva = base().reservas.find((item) => item.id === hospedagem.reservaId)
 
-  if (!reserva) {
-    return null
-  }
-
-  const acomodacao = dataset.acomodacoes.find((item) => item.id === reserva.acomodacaoId)
-  const tarifa = dataset.tarifas.find((item) => item.id === acomodacao?.tarifaId)
-
-  if (!tarifa) {
-    return null
-  }
-
-  const pet = dataset.pets.find((item) => item.id === reserva.petId)
-  const acompanhante = reserva.acompanhantePetId
-    ? dataset.pets.find((item) => item.id === reserva.acompanhantePetId)
-    : null
-
-  return montarOrcamento({
-    entrada: hospedagem.entradaEm,
-    saida: agora,
-    tarifa,
-    porte: pet?.porte ?? null,
-    porteAcompanhante: acompanhante?.porte ?? null,
-    temporadas: dataset.temporadas,
-    servicos: reserva.servicos,
-    catalogoDeServicos: dataset.servicos,
-    politica: dataset.hotel.politica,
-    pagoCentavos: reserva.pagoCentavos,
-  })
+  /* A mesma conta que a reserva e a lista mostram (ver `contaDaEstadia`). */
+  return reserva ? contaDaEstadia(reserva, hospedagem.entradaEm, agora) : null
 }
 
 /** Ainda na casa depois da hora prevista de saída. */
@@ -1124,14 +1097,17 @@ export const hospedagemRepository = {
       const travadas = ocorrenciasTravadas(ocorrenciasDe(hospedagemId))
 
       const partes = [
-        `${pet?.nome ?? ''} está no ${dataset.hotel.nome}.`,
+        /* Sem artigo: "está no Aurora Clínica e Hotel Veterinário" erra o gênero do nome da casa. */
+        `${dataset.hotel.nome}: notícias de ${pet?.nome ?? ''}.`,
         refeicoes.length > 0
           ? `Comeu ${comeu} de ${refeicoes.length} refeições nas últimas 24 horas.`
           : '',
         ...registros.slice(0, 3).map((item) => item.texto),
-        travadas.length > 0
-          ? 'Houve uma ocorrência que precisamos conversar por telefone antes de qualquer coisa.'
-          : '',
+        /*
+         * O boletim retido só sai depois da ligação: quem lê já conversou com a casa. "Precisamos
+         * conversar por telefone antes de qualquer coisa" chegava ao responsável depois da conversa.
+         */
+        travadas.length > 0 ? 'Houve uma ocorrência, e falamos sobre ela por telefone.' : '',
       ].filter(Boolean)
 
       const boletim: Boletim = {
@@ -1326,10 +1302,21 @@ export const hospedagemRepository = {
            * isto, a estadia encerrada mostrava "Saldo R$ 507,35 · Nada a receber" e a lista de
            * reservas, "R$ 507,35 a receber", do mesmo hóspede que já tinha ido embora.
            */
-          reserva.pagoCentavos = Math.max(reserva.pagoCentavos, conta.totalCentavos)
+          /*
+           * Saída antes da data: o sinal pode passar da conta das noites usadas. A diferença volta
+           * ao responsável no balcão, e fica registrada como devolvida; antes, a estadia fechava
+           * com saldo negativo e a tela dizia "Quitado", sem ninguém saber que havia o que devolver.
+           */
+          const devolvido = Math.max(0, reserva.pagoCentavos - conta.totalCentavos)
+
+          if (devolvido > 0) {
+            reserva.devolvidoCentavos = (reserva.devolvidoCentavos ?? 0) + devolvido
+          }
+
+          reserva.pagoCentavos = conta.totalCentavos
           reserva.orcamento = {
             ...conta,
-            saldoCentavos: conta.totalCentavos - reserva.pagoCentavos,
+            saldoCentavos: 0,
           }
           reserva.diarias = contarDiarias(hospedagem.entradaEm, agora)
         }

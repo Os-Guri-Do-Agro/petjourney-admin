@@ -47,6 +47,7 @@ import type { PetSpecies } from '@/features/clinico/data/types'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
+import { getAuthUser } from '@/service/auth/auth-session'
 import {
   criarAnotacao,
   getAnexoSignedUrl,
@@ -60,7 +61,11 @@ import type {
   TipoDocumentoAnexo,
   TipoServicoPrestador,
 } from '@/service/parceiro/types'
-import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
+import {
+  calcularTempoRestante,
+  diasDeCalendarioEntre,
+  parseInstante,
+} from '@/utils/format/expiracao'
 import { classificarFalhaArquivo } from '@/utils/parceiro/arquivo-compartilhado'
 import { rotuloDaEspecie } from '@/utils/parceiro/especie-do-acesso'
 import {
@@ -103,6 +108,14 @@ const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 const { activeTab, setTab } = usePartnerTabs(DETALHE_TABS, 'resumo')
 const agora = useAgora()
+
+/**
+ * O campo vazio leva o nome da conta: o próprio nome em cinza diz isso sem frase. A frase longa
+ * ("Se vazio, usamos o nome da sua conta") cortava no meio da caixa em meia largura.
+ */
+const placeholderDoProfissional = computed(
+  () => getAuthUser()?.nome?.trim() || t('acessos.anotacao.profissionalPlaceholder'),
+)
 
 const detalhe = ref<CompartilhamentoDetalhe | null>(null)
 const loading = ref(true)
@@ -731,9 +744,13 @@ function haQuantoTempo(value: string) {
 
   const horas = Math.floor(minutos / 60)
 
+  /* Dias de calendário, não blocos de 24 h: 47 horas atrás é anteontem, não ontem. */
   return horas < 24
     ? relativo.format(-horas, 'hour')
-    : relativo.format(-Math.floor(horas / 24), 'day')
+    : relativo.format(
+        -Math.max(1, diasDeCalendarioEntre(parseInstante(value), agora.value)),
+        'day',
+      )
 }
 
 /** Quando o acesso acabou: a revogação tem data própria; o expirado acaba no prazo. */
@@ -1838,7 +1855,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       id="anot-profissional"
                       v-model="anotacaoForm.profissionalNome"
                       :maxlength="LIMITES_CAMPOS_LIVRES.profissionalNome"
-                      :placeholder="t('acessos.anotacao.profissionalPlaceholder')"
+                      :placeholder="placeholderDoProfissional"
                     />
                   </div>
 
@@ -2207,9 +2224,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 /* Os dados: blocos rentes na luz do cartão, cada um com o ladrilho do assunto. */
+/* Cada bloco com a altura do que tem: o do peso esticava até a do prazo (que tem a barra), com vão. */
 .capa__dados {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 12px;
   margin: 0;
 }
@@ -2629,9 +2648,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   padding: 12px 14px;
 }
 
+/* Pelo topo: ao lado de um "Para que serve" de três linhas, o "Diagnóstico" descia para o meio. */
 .pares div {
   display: grid;
   min-width: 0;
+  align-content: start;
   gap: 2px;
 }
 

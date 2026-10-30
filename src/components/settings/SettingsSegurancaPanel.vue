@@ -5,7 +5,7 @@
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
@@ -33,6 +33,27 @@ function clearPasswordErrors() {
   novaSenhaError.value = ''
   confirmarSenhaError.value = ''
 }
+
+/*
+ * O erro sai do campo assim que a pessoa mexe nele: com a senha já digitada, "Informe a senha
+ * atual" e "A nova senha não atende todos os requisitos" ao lado das quatro regras em verde
+ * diziam o contrário do que a tela mostrava.
+ */
+watch(senhaAtual, () => {
+  senhaAtualError.value = ''
+})
+
+watch(novaSenha, () => {
+  novaSenhaError.value = ''
+
+  if (confirmarSenhaError.value && confirmarSenha.value === novaSenha.value) {
+    confirmarSenhaError.value = ''
+  }
+})
+
+watch(confirmarSenha, () => {
+  confirmarSenhaError.value = ''
+})
 
 function validatePasswordForm() {
   clearPasswordErrors()

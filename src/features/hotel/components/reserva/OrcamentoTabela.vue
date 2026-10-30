@@ -21,12 +21,17 @@ const props = withDefaults(
   defineProps<{
     orcamento: Orcamento
     pagoCentavos?: number
+    /**
+     * O que voltou ao responsável no check-out (pagou mais do que a conta das noites usadas). A
+     * linha "Já pago" mostra o que entrou, e esta, o que saiu: a conta fecha em zero à vista.
+     */
+    devolvidoCentavos?: number
     /** Compacta: some a coluna de quantidade, para caber em cartão estreito. */
     densa?: boolean
     /** O título fica só para o leitor de tela: a seção em volta já diz o que é. */
     semTitulo?: boolean
   }>(),
-  { pagoCentavos: 0, densa: false, semTitulo: false },
+  { pagoCentavos: 0, devolvidoCentavos: 0, densa: false, semTitulo: false },
 )
 
 const { t } = useI18n()
@@ -39,6 +44,9 @@ function rotulo(linha: LinhaDoOrcamento): string {
 }
 
 const temPagamento = computed(() => props.pagoCentavos > 0)
+
+/** O que entrou de fato: o pago líquido mais o que já voltou ao responsável. */
+const entrou = computed(() => props.pagoCentavos + props.devolvidoCentavos)
 </script>
 
 <template>
@@ -77,7 +85,12 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 
       <tr v-if="temPagamento" class="orc__pago">
         <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.pago') }}</th>
-        <td class="orc__num ui-num">−{{ formato.moeda(pagoCentavos) }}</td>
+        <td class="orc__num ui-num">−{{ formato.moeda(entrou) }}</td>
+      </tr>
+
+      <tr v-if="devolvidoCentavos > 0" class="orc__devolvido">
+        <th scope="row" :colspan="densa ? 1 : 3">{{ t('hotel.orcamento.devolvido') }}</th>
+        <td class="orc__num ui-num">+{{ formato.moeda(devolvidoCentavos) }}</td>
       </tr>
 
       <!--
@@ -187,6 +200,11 @@ const temPagamento = computed(() => props.pagoCentavos > 0)
 .orc__pago th,
 .orc__pago td {
   color: var(--ok-tinta);
+}
+
+.orc__devolvido th,
+.orc__devolvido td {
+  color: var(--tinta-2);
 }
 
 .orc .orc__saldo th,

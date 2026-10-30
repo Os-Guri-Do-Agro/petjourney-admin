@@ -50,10 +50,11 @@ const medicacoes = computed(() =>
       id: prescricao.id,
       nome: medicamento?.nome ?? '',
       quantidade: fracao
-        ? t(`clinico.prontuario.conduta.fracao.${fracao.kind}`, {
-            inteiros: fracao.inteiros,
-            quantidade: formato.numero(fracao.quantidade, 2),
-          })
+        ? t(
+            `clinico.prontuario.conduta.fracao.${fracao.nome}`,
+            { inteiros: fracao.inteiros, quantidade: formato.numero(fracao.quantidade, 2) },
+            fracao.quantidade,
+          )
         : t('clinico.prontuario.conduta.resumoQuantidade', {
             quantidade: formato.numero(prescricao.calculo.quantidadeApresentacao, 2),
             unidade: t(
@@ -66,7 +67,16 @@ const medicacoes = computed(() =>
       }),
       duracao: prescricao.calculo.duracaoDias,
     }
-  }),
+  }).map((item) => ({
+    ...item,
+    instrucao: [
+      item.quantidade,
+      item.frequencia,
+      item.duracao !== null
+        ? t('clinico.prontuario.conduta.porDias', { dias: item.duracao }, item.duracao)
+        : t('clinico.documentos.orientacoes.contInuo'),
+    ].join(', '),
+  })),
 )
 
 const retorno = computed(() => props.encounter.conduta.retorno.emDias)
@@ -96,14 +106,13 @@ const retorno = computed(() => props.encounter.conduta.retorno.emDias)
       <ul class="medicacoes">
         <li v-for="item in medicacoes" :key="item.id">
           <span class="marca" aria-hidden="true" />
+          <!--
+            A instrução sai inteira de `instrucao` (no script): montada no template, a quebra de
+            linha antes de cada `<template>` virava espaço e a folha dizia "a cada 12 h , por 3
+            dias".
+          -->
           <span>
-            <strong>{{ item.nome }}</strong> — {{ item.quantidade }}, {{ item.frequencia }}
-            <template v-if="item.duracao !== null">
-              , {{ t('clinico.prontuario.conduta.porDias', { dias: item.duracao }, item.duracao) }}
-            </template>
-            <template v-else>
-              , {{ t('clinico.documentos.orientacoes.contInuo') }}
-            </template>
+            <strong>{{ item.nome }}</strong>: {{ item.instrucao }}
           </span>
         </li>
       </ul>

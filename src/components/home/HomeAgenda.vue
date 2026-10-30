@@ -7,9 +7,8 @@
  * andam de semana em semana), e embaixo os compromissos do dia escolhido numa lista — hora, rosto,
  * nome, de que espaço é e, quando importa, o estado num selo. Cada linha leva ao lugar dele.
  *
- * Hoje, a ordem é a de quem precisa de alguém antes (`compromissosDoDia`): quem está em
- * atendimento, o movimento do hotel atrasado, quem espera na recepção e o que ainda vem, clínica e
- * hotel misturados pela hora; o que já terminou sai. Em outro dia, tudo pela hora.
+ * A lista vai pela hora, clínica e hotel misturados (`compromissosDoDia`); a urgência fica no selo.
+ * Hoje, o que já terminou sai. Em outro dia, entra tudo.
  *
  * O dia de hoje vem do dia que a página carrega uma vez (`useDiaDaCasa`); outro dia é pedido quando
  * é escolhido, e guardado.
@@ -202,7 +201,8 @@ const resumo = computed(() => {
   const partes: string[] = []
 
   if (props.clinica && !estado.value.fechada) {
-    const total = estado.value.contas.length
+    /* A régua da Agenda e do Hoje: falta não conta como atendimento do dia. */
+    const total = estado.value.contas.filter((conta) => conta.estado !== 'falta').length
     partes.push(t('inicio.dia.atendimentos', { total }, total))
   }
 
@@ -234,8 +234,12 @@ const SELO_DA_CONTA: Partial<Record<ContaDoDia['estado'], { chave: string; tom: 
   feito: { chave: 'inicio.dia.estadoNome.feito', tom: 'neutro' },
 }
 
-function daConta(conta: ContaDoDia): Compromisso {
-  const selo = SELO_DA_CONTA[conta.estado]
+function daConta(conta: ContaDoDia, agora: string | null): Compromisso {
+  /* Na ordem da hora, um horário que passou sem o animal chegar parece que ainda vai acontecer. */
+  const naoChegou = agora !== null && conta.estado === 'marcado' && conta.inicio <= agora
+  const selo = naoChegou
+    ? { chave: 'inicio.agenda.naoChegou', tom: 'atencao' as const }
+    : SELO_DA_CONTA[conta.estado]
 
   return {
     id: conta.id,
@@ -295,7 +299,7 @@ const compromissos = computed<Compromisso[]>(() => {
     !props.hotel ? [] : agora === null ? chegadas : dia.hotel.value.movimentos,
     agora,
   ).map((item) =>
-    item.tipo === 'conta' ? daConta(item.conta) : doMovimento(item.movimento, item.atrasado),
+    item.tipo === 'conta' ? daConta(item.conta, agora) : doMovimento(item.movimento, item.atrasado),
   )
 })
 

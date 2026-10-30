@@ -10,7 +10,7 @@
  * enfeite da página, e ele também diz o que aconteceu.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
@@ -27,6 +27,19 @@ const router = useRouter()
 const logo = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
 const homePath = computed(() => (isAuthenticated() ? getDefaultLandingPath() : '/auth/login'))
+
+/*
+ * Fora da moldura, a página ficava com o desenho de antes da migração: botão verde-escuro e a pata
+ * num quadrado quase preto, ao lado de um portal inteiro em sálvia. A classe é a mesma que a
+ * entrada (`AuthLayout`) e a moldura põem no `<html>`.
+ */
+onMounted(() => {
+  document.documentElement.classList.add('moldura-app')
+})
+
+onBeforeUnmount(() => {
+  document.documentElement.classList.remove('moldura-app')
+})
 
 function goBack() {
   if (window.history.length > 1) {
@@ -135,7 +148,8 @@ function goBack() {
   height: 42px;
   place-items: center;
   border-radius: 13px;
-  background: var(--rail);
+  /* A sálvia do destaque do app, como o ladrilho da entrada e o topo da barra. */
+  background: var(--app-destaque, var(--rail));
   box-shadow:
     var(--sombra-1),
     inset 0 1px 0 rgb(255 255 255 / 12%);
@@ -180,15 +194,17 @@ function goBack() {
   margin-bottom: 12px;
 }
 
-/* As pegadas alternam de lado, como um bicho andando, e vão sumindo até parar. */
+/*
+ * As pegadas alternam de lado, como um bicho andando, e vão sumindo até parar. Paradas: a entrada
+ * escalonada (uma pegada a cada 110 ms, a interrogação aos 700 ms) era o movimento que a Regra 4
+ * do projeto recusa, o que só atrasa quem chega.
+ */
 .trilha__pegada {
   color: var(--salvia);
   font-size: 24px;
   opacity: calc(1 - (var(--passo) - 1) * 0.16);
   rotate: 90deg;
   translate: 0 -7px;
-  animation: pegada-chega 420ms var(--pj-curva-chega) both;
-  animation-delay: calc(var(--passo) * 110ms);
 }
 
 .trilha__pegada:nth-child(even) {
@@ -211,15 +227,6 @@ function goBack() {
   box-shadow: var(--sombra-xs);
   color: var(--musgo);
   font-size: 22px;
-  animation: pegada-chega 420ms var(--pj-curva-chega) both;
-  animation-delay: 700ms;
-}
-
-@keyframes pegada-chega {
-  from {
-    opacity: 0;
-    scale: 0.6;
-  }
 }
 
 /* ------------------------------------------------------------------ o texto */
@@ -292,13 +299,6 @@ function goBack() {
   .perdido__acoes {
     display: grid;
     width: 100%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .trilha__pegada,
-  .trilha__fim {
-    animation: none;
   }
 }
 </style>

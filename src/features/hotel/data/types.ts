@@ -537,6 +537,12 @@ export type Reserva = {
   orcamento: Orcamento
   /** Quanto já entrou. Sinal e pagamentos parciais somam aqui. */
   pagoCentavos: number
+  /**
+   * O que voltou ao responsável no check-out, quando o que ele pagou passou da conta das noites
+   * usadas (saída antes da data). Sem isto o crédito ficava só como um saldo negativo, sem dizer
+   * que alguém devolveu o dinheiro. Ausente ou zero: nada a devolver.
+   */
+  devolvidoCentavos?: number
   /** O que o responsável contou e não cabe em campo: "tem medo de trovão". */
   observacao: string
   /**

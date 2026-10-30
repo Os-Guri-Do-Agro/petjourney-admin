@@ -28,8 +28,19 @@ const PARCEIRO_NOME_STORAGE_KEY = 'petjourney-parceiro-nome'
  * portal: comparando com o que se viu antes, a moldura anuncia a aprovação uma vez só.
  */
 const PARCEIRO_AUDITORIA_STORAGE_KEY = 'petjourney-parceiro-auditoria'
+/**
+ * A forma do menu do Portal na última sessão: se a conta é dona (Indicados) e se o Programa de
+ * Afiliados estava ativo (Carteira). Sem ela, os dois itens entravam no menu de um a três
+ * segundos depois dos outros, a cada recarga, e o menu "pulava" diante de quem olhava.
+ */
+const PARCEIRO_MENU_STORAGE_KEY = 'petjourney-parceiro-menu'
 
 type LoadState = 'idle' | 'loading' | 'ready' | 'error'
+
+interface FormaDoMenu {
+  dono: boolean
+  afiliadoAtivo: boolean
+}
 
 function lerDoArmazenamento(chave: string) {
   if (typeof window === 'undefined') {
@@ -38,6 +49,18 @@ function lerDoArmazenamento(chave: string) {
 
   try {
     return window.localStorage.getItem(chave)
+  } catch {
+    return null
+  }
+}
+
+function lerFormaDoMenu(): FormaDoMenu | null {
+  try {
+    const guardada = JSON.parse(lerDoArmazenamento(PARCEIRO_MENU_STORAGE_KEY) ?? 'null')
+
+    return typeof guardada?.dono === 'boolean' && typeof guardada?.afiliadoAtivo === 'boolean'
+      ? { dono: guardada.dono, afiliadoAtivo: guardada.afiliadoAtivo }
+      : null
   } catch {
     return null
   }
@@ -63,6 +86,17 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const cadastroSuspenso = computed(() => statusAuditoria.value === 'SUSPENSO')
   const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
   const nomeGuardado = ref<string | null>(lerDoArmazenamento(PARCEIRO_NOME_STORAGE_KEY))
+  const formaGuardada = ref<FormaDoMenu | null>(lerFormaDoMenu())
+  /**
+   * O que o menu do Portal mostra antes de o contexto chegar: a forma da última sessão. Só o menu
+   * lê isto; permissão e tela continuam decidindo por `isDono` e `statusAfiliadoAtivo`.
+   */
+  const menuComIndicados = computed(() =>
+    dashboard.value ? isDono.value : (formaGuardada.value?.dono ?? false),
+  )
+  const menuComCarteira = computed(() =>
+    status.value ? statusAfiliadoAtivo.value : (formaGuardada.value?.afiliadoAtivo ?? false),
+  )
   /** Virou APROVADO desde a última vez que esta sessão olhou: a moldura avisa e zera. */
   const aprovacaoRecente = ref(false)
   const parceiroNome = computed(
@@ -128,6 +162,24 @@ export const useParceiroStore = defineStore('parceiro', () => {
     }
   }
 
+  function guardarFormaDoMenu(forma: FormaDoMenu | null) {
+    formaGuardada.value = forma
+
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      if (forma) {
+        window.localStorage.setItem(PARCEIRO_MENU_STORAGE_KEY, JSON.stringify(forma))
+      } else {
+        window.localStorage.removeItem(PARCEIRO_MENU_STORAGE_KEY)
+      }
+    } catch {
+      /* Sem armazenamento, o menu só espera o contexto, como antes. */
+    }
+  }
+
   function setParceiroId(id: string | null) {
     parceiroId.value = id
 
@@ -189,6 +241,10 @@ export const useParceiroStore = defineStore('parceiro', () => {
       status.value = statusData
       setParceiroId(dashboardData.parceiro.id)
       guardarNome(dashboardData.parceiro.nome)
+      guardarFormaDoMenu({
+        dono: dashboardData.papel === 'DONO',
+        afiliadoAtivo: statusData.afiliado?.status === 'ATIVO',
+      })
       anotarAuditoria(dashboardData.parceiro.id, statusData.statusAuditoria)
       loadState.value = 'ready'
     } catch (error) {
@@ -214,6 +270,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
         status.value = null
         setParceiroId(null)
         guardarNome(null)
+        guardarFormaDoMenu(null)
         errorMessage.value = String(
           i18n.global.t(
             acessoEncerrado.value
@@ -260,6 +317,10 @@ export const useParceiroStore = defineStore('parceiro', () => {
 
     if (dashboard.value) {
       anotarAuditoria(dashboard.value.parceiro.id, statusData.statusAuditoria)
+      guardarFormaDoMenu({
+        dono: isDono.value,
+        afiliadoAtivo: statusData.afiliado?.status === 'ATIVO',
+      })
     }
   }
 
@@ -306,6 +367,7 @@ export const useParceiroStore = defineStore('parceiro', () => {
     acessoEncerrado.value = false
     setParceiroId(null)
     guardarNome(null)
+    guardarFormaDoMenu(null)
   }
 
   return {
@@ -323,6 +385,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
     statusAuditoria,
     cadastroSuspenso,
     statusAfiliadoAtivo,
+    menuComIndicados,
+    menuComCarteira,
     parceiroNome,
     modoBloco,
     setParceiroId,

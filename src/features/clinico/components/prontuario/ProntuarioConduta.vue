@@ -164,6 +164,27 @@ function criarPrescricao(medicamento: Medication, escolha?: Partial<DoseSugerida
   })
 }
 
+/**
+ * Troca o remédio pelo campo, com a dose do remédio novo.
+ *
+ * O campo trocava só o identificador: o mg/kg, a frequência e a quantidade da escolha anterior
+ * ficavam. Da Dipirona (20 mg/kg, 0,26 mL) para o Meloxicam saía "128 mg ÷ 2 mg/mL = 0,26 mL",
+ * uma conta errada e cem vezes a dose. Agora vale o mesmo que a troca pelo bulário: a sugestão da
+ * espécie do paciente e a conta refeita.
+ */
+function trocarMedicamento(prescricao: Prescription, medicamentoId: string) {
+  const medicamento = clinico.medicamento(medicamentoId)
+
+  if (!medicamento || medicamentoId === prescricao.medicamentoId) {
+    return
+  }
+
+  aplicarMedicamento(prescricao.id, {
+    medicamento,
+    ...sugestaoDePrescricao(medicamento, props.pet),
+  })
+}
+
 function removerPrescricao(id: string) {
   aplicar({ prescricoes: props.valor.prescricoes.filter((item) => item.id !== id) })
 }
@@ -255,12 +276,14 @@ function abrirBulario(prescricaoId: string) {
  * canino para carprofeno mantinha 0,1 mg/kg, que é vinte vezes menos que a dose do carprofeno.
  * O bulário devolve a sugestão da espécie do paciente e o cálculo refaz a conta inteira.
  */
-function aplicarEscolhaDoBulario(escolha: {
+type EscolhaDeMedicamento = {
   medicamento: Medication
   mgPorKg: number
   frequenciaHoras: number
   duracaoDias: number
-}) {
+}
+
+function aplicarEscolhaDoBulario(escolha: EscolhaDeMedicamento) {
   const prescricaoId = prescricaoEmEdicao.value
 
   // Sem linha em edição, a escolha veio de "Adicionar medicamento": é ela que cria a linha.
@@ -273,6 +296,11 @@ function aplicarEscolhaDoBulario(escolha: {
     return
   }
 
+  aplicarMedicamento(prescricaoId, escolha)
+}
+
+/** Põe o remédio na linha com a dose dele e a conta refeita, venha do bulário ou do campo. */
+function aplicarMedicamento(prescricaoId: string, escolha: EscolhaDeMedicamento) {
   const calculo = calcularDose({
     medicamento: escolha.medicamento,
     pesoKg: props.pesoKg,
@@ -381,7 +409,7 @@ function resumoDaDose(prescricao: Prescription) {
       `clinico.prontuario.conduta.unidade.${medicamento.unidadeApresentacao}`,
       prescricao.calculo.quantidadeApresentacao,
     ),
-    mg: formato.numero(prescricao.calculo.mgPorAdministracao, 1),
+    mg: formato.miligramas(prescricao.calculo.mgPorAdministracao),
     frequencia: prescricao.calculo.frequenciaHoras,
     duracao: prescricao.calculo.duracaoDias,
     total: prescricao.calculo.totalAdministracoes,
@@ -484,12 +512,7 @@ function resumoDaDose(prescricao: Prescription) {
                   fluid
                   :disabled="somenteLeitura"
                   :pt="{ overlay: { class: 'clinic-overlay' } }"
-                  @update:model-value="
-                    aplicarPrescricao(prescricao.id, {
-                      medicamentoId: $event,
-                      alergiaConfirmada: false,
-                    })
-                  "
+                  @update:model-value="trocarMedicamento(prescricao, $event)"
                 />
 
                 <!--
@@ -577,7 +600,7 @@ function resumoDaDose(prescricao: Prescription) {
                   class="numero"
                   :model-value="prescricao.calculo.duracaoDias"
                   :disabled="somenteLeitura || ehContinuo(prescricao)"
-                  :placeholder="ehContinuo(prescricao) ? '—' : undefined"
+                  :placeholder="ehContinuo(prescricao) ? t('clinico.formato.semvalor') : undefined"
                   fluid
                   @update:model-value="recalcular(prescricao, { duracaoDias: $event ?? 1 })"
                 />
@@ -635,10 +658,14 @@ function resumoDaDose(prescricao: Prescription) {
           />
           <span>
             {{
-              t(`clinico.prontuario.conduta.fracao.${fracionamentoDe(prescricao)!.kind}`, {
-                inteiros: fracionamentoDe(prescricao)!.inteiros,
-                quantidade: formato.numero(fracionamentoDe(prescricao)!.quantidade, 2),
-              })
+              t(
+                `clinico.prontuario.conduta.fracao.${fracionamentoDe(prescricao)!.nome}`,
+                {
+                  inteiros: fracionamentoDe(prescricao)!.inteiros,
+                  quantidade: formato.numero(fracionamentoDe(prescricao)!.quantidade, 2),
+                },
+                fracionamentoDe(prescricao)!.quantidade,
+              )
             }}
             <template v-if="fracionamentoDe(prescricao)!.aproximado">
               ({{
@@ -659,8 +686,8 @@ function resumoDaDose(prescricao: Prescription) {
             severidade="atencao"
             :rotulo="
               t(`clinico.prontuario.conduta.avisoDose.${avisoDaDose(prescricao)}`, {
-                min: faixaDoAviso(prescricao).min,
-                max: faixaDoAviso(prescricao).max,
+                min: numeroDaConta(faixaDoAviso(prescricao).min),
+                max: numeroDaConta(faixaDoAviso(prescricao).max),
               })
             "
           />

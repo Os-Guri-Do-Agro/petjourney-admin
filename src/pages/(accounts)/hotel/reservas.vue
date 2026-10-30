@@ -59,9 +59,26 @@ const selecionados = ref<Record<string, string[]>>({})
  */
 const horizonte = ref<'proximas' | 'todas'>('proximas')
 
-/* Ontem, e não hoje: quem saiu ontem de manhã ainda é assunto do balcão hoje. */
+/*
+ * A leitura vem desde ontem, para não perder quem passou da saída e segue na casa. Mas "a partir
+ * de hoje" é a partir de hoje: o que já fechou antes de hoje (encerrada, cancelada, não compareceu)
+ * fica em "Tudo, com histórico". Antes, a lista abria em quatro estadias encerradas ontem sob o
+ * título "17 reservas a partir de hoje".
+ */
 const recorteDoHorizonte = computed(() =>
   horizonte.value === 'proximas' ? { de: addDays(hotelClock.today(), -1) } : undefined,
+)
+
+const FECHADAS: ReservaStatus[] = ['encerrada', 'cancelada', 'nao-compareceu']
+
+const lista = computed(() =>
+  horizonte.value === 'todas'
+    ? reservas.lista
+    : reservas.lista.filter(
+        (linha) =>
+          !FECHADAS.includes(linha.reserva.status) ||
+          dataDe(linha.reserva.saidaPrevista) >= hotelClock.today(),
+      ),
 )
 
 const opcoesDeHorizonte = computed(() => [
@@ -91,7 +108,7 @@ const grupos = computed(() => [
     ).map((status) => ({
       valor: status,
       rotulo: formato.statusDaReserva(status),
-      contagem: reservas.lista.filter((linha) => linha.reserva.status === status).length,
+      contagem: lista.value.filter((linha) => linha.reserva.status === status).length,
     })),
   },
   {
@@ -101,7 +118,7 @@ const grupos = computed(() => [
       (situacao) => ({
         valor: situacao,
         rotulo: formato.situacaoDaExigencia(situacao),
-        contagem: reservas.lista.filter((linha) => linha.admissao === situacao).length,
+        contagem: lista.value.filter((linha) => linha.admissao === situacao).length,
       }),
     ),
   },
@@ -111,7 +128,7 @@ const grupos = computed(() => [
     opcoes: hotelStore.blocos.map((bloco) => ({
       valor: bloco.id,
       rotulo: bloco.nome,
-      contagem: reservas.lista.filter((linha) => linha.blocoId === bloco.id).length,
+      contagem: lista.value.filter((linha) => linha.blocoId === bloco.id).length,
     })),
   },
 ])
@@ -119,7 +136,7 @@ const grupos = computed(() => [
 const linhas = computed(() => {
   const termo = busca.value.trim().toLocaleLowerCase('pt-BR')
 
-  return reservas.lista.filter((linha) => {
+  return lista.value.filter((linha) => {
     const status = selecionados.value.status ?? []
     const admissao = selecionados.value.admissao ?? []
     const bloco = selecionados.value.bloco ?? []
@@ -205,7 +222,7 @@ const colunas = computed<ColunaTabela<ReservaNaLista>[]>(() => [
   },
 ])
 
-const vazio = computed(() => !reservas.carregando && !reservas.erro && reservas.lista.length === 0)
+const vazio = computed(() => !reservas.carregando && !reservas.erro && lista.value.length === 0)
 
 /**
  * A véspera: o que chega nos próximos três dias e ainda não pode entrar.
@@ -215,7 +232,7 @@ const vazio = computed(() => !reservas.carregando && !reservas.erro && reservas.
  * avisaria tarde.
  */
 const vespera = computed(() =>
-  reservas.lista
+  lista.value
     .filter(
       (linha) =>
         linha.diasAteEntrada >= 0 &&
@@ -242,17 +259,17 @@ const ativas: ReservaStatus[] = ['pendente', 'confirmada']
 
 const fraseDoResumo = computed(() => {
   /* Com a leitura falhando, "0 reservas: ninguém chega nos próximos 7 dias" seria uma mentira. */
-  if ((reservas.carregando && reservas.lista.length === 0) || reservas.erro) {
+  if ((reservas.carregando && lista.value.length === 0) || reservas.erro) {
     return ''
   }
 
-  const total = reservas.lista.length
+  const total = lista.value.length
   const fraseDoTotal =
     horizonte.value === 'proximas'
       ? t('hotel.reservas.tela.resumoTotal', { n: total }, total)
       : t('hotel.reservas.tela.resumoTotalTodas', { n: total }, total)
 
-  const chegam = reservas.lista.filter(
+  const chegam = lista.value.filter(
     (linha) =>
       ativas.includes(linha.reserva.status) &&
       linha.diasAteEntrada >= 0 &&
@@ -264,7 +281,7 @@ const fraseDoResumo = computed(() => {
       ? t('hotel.reservas.tela.resumoNinguemChega')
       : t('hotel.reservas.tela.resumoChegam', { n: chegam }, chegam)
 
-  const semSinal = reservas.lista.filter(
+  const semSinal = lista.value.filter(
     (linha) => linha.reserva.status === 'pendente' && linha.reserva.pagoCentavos === 0,
   ).length
 
@@ -282,17 +299,17 @@ const fraseDoResumo = computed(() => {
  * o sinal e quem espera uma vaga. Os mesmos da frase de cima, para quem lê de relance.
  */
 const indicadores = computed(() => {
-  const chegamHoje = reservas.lista.filter(
+  const chegamHoje = lista.value.filter(
     (linha) => ativas.includes(linha.reserva.status) && linha.diasAteEntrada === 0,
   ).length
-  const semSinal = reservas.lista.filter(
+  const semSinal = lista.value.filter(
     (linha) => linha.reserva.status === 'pendente' && linha.reserva.pagoCentavos === 0,
   ).length
 
   return [
     {
       id: 'total',
-      valor: reservas.lista.length,
+      valor: lista.value.length,
       rotulo: t('hotel.reservas.titulo'),
       nota:
         horizonte.value === 'proximas'
@@ -456,7 +473,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   <UiPagina
     class="tela-reservas"
     :resumo="fraseDoResumo"
-    :carregando="reservas.carregando && reservas.lista.length === 0 && !reservas.erro"
+    :carregando="reservas.carregando && lista.length === 0 && !reservas.erro"
     :erro="reservas.erro ? t(reservas.erro) : ''"
     :vazio="vazio && horizonte === 'todas'"
     :vazio-titulo="t('hotel.reservas.vazioTitulo')"
@@ -588,12 +605,12 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           :chave="(linha: ReservaNaLista) => linha.reserva.id"
           :rotulo="t('hotel.reservas.titulo')"
           :vazio-titulo="
-            reservas.lista.length === 0
+            lista.length === 0
               ? t('hotel.reservas.vazioTitulo')
               : t('hotel.reservas.semResultadoTitulo')
           "
           :vazio-descricao="
-            reservas.lista.length === 0
+            lista.length === 0
               ? t('hotel.reservas.tela.semProximas')
               : t('hotel.reservas.semResultadoDescricao')
           "
@@ -815,6 +832,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+}
+
+/* Do tamanho da busca ao lado, como "Ativos / Histórico" de Acessos: em 16 px gritava mais que ela. */
+.horizonte :deep(.p-togglebutton-content) {
+  font-size: 14.5px;
 }
 
 .horizonte__rotulo {

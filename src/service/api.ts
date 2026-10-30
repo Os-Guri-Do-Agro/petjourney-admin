@@ -56,6 +56,31 @@ function detalhesDoErro(corpo: Record<string, unknown> | null) {
   return detalhes
 }
 
+/**
+ * A frase que a tela mostra. Erro com `codigo` traz a mensagem da API, já no idioma da sessão. Sem
+ * código, duas respostas eram texto de servidor, em inglês, na cara de quem usa: o 5xx genérico
+ * ("Internal server error") e a lista do validador ("token must be longer than..."). Essas viram
+ * frase da casa; `statusCode`, `error` e `codigo` continuam no erro para quem decide por eles.
+ */
+function mensagemDoErro(status: number, corpo: Record<string, unknown> | null) {
+  const temCodigo = typeof corpo?.codigo === 'string'
+  const mensagem = corpo?.message
+
+  if (status >= 500 && !temCodigo) {
+    return String(i18n.global.t('errors.api.servidor'))
+  }
+
+  if (Array.isArray(mensagem)) {
+    return String(i18n.global.t('errors.api.dadosRecusados'))
+  }
+
+  if (typeof mensagem === 'string' && mensagem) {
+    return mensagem
+  }
+
+  return String(i18n.global.t('errors.api.genericStatus', { status }))
+}
+
 export function getApiUrl() {
   return API_URL
 }
@@ -154,8 +179,7 @@ export async function apiFetch<T>(
     }
 
     throw new ApiError(
-      errorBody?.message ||
-        String(i18n.global.t('errors.api.genericStatus', { status: response.status })),
+      mensagemDoErro(response.status, errorBody),
       response.status,
       errorBody?.error,
       typeof errorBody?.reason === 'string' ? errorBody.reason : undefined,

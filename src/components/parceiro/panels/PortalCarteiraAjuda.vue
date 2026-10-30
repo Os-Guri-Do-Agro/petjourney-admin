@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { formatCentavosToBrl } from '@/utils/format/money'
+import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
 const props = defineProps<{
   /** O mínimo de saque que a API devolve na carteira; nulo enquanto ela não chegou. */
@@ -19,9 +20,10 @@ const props = defineProps<{
 
 const { t, locale } = useI18n()
 
-const CONTACT_EMAIL = 'atendimento@petjourney.health'
-const CONTACT_WHATSAPP_DISPLAY = '55 67 9883-7848'
-const CONTACT_WHATSAPP_HREF = 'https://wa.me/556798837848'
+/* Os mesmos canais do resto do portal: o número aparecia escrito de dois jeitos. */
+const CONTACT_EMAIL = SUPPORT_CONTACTS.email
+const CONTACT_WHATSAPP_DISPLAY = SUPPORT_CONTACTS.whatsappDisplay
+const CONTACT_WHATSAPP_HREF = SUPPORT_CONTACTS.whatsappHref
 
 const aberta = ref(false)
 

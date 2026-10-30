@@ -16,8 +16,9 @@
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { createClinicClock, setClockSkew } from '../../domain/clinic-time'
+import { alergiaConflitante } from '../../domain/dose'
 import { retornosVencidos } from '../../domain/follow-up'
-import { CLINIC_UTC_OFFSET, petsFixture } from '../fixtures'
+import { CLINIC_UTC_OFFSET, medicationsFixture, petsFixture } from '../fixtures'
 import { gerarDataset, type SeedResult } from '../seed'
 import type {
   AppointmentStatus,
@@ -283,5 +284,88 @@ describe('dataset de demonstração: nada vazio', () => {
         ),
       ),
     ).toBe(true)
+  })
+})
+
+/**
+ * O que uma veterinária lê na ficha e usa para julgar se o dado é de verdade.
+ *
+ * O sorteio antigo dava "Cistite idiopática felina" a uma cadela, furosemida para displasia,
+ * dipirona à paciente alérgica a dipirona, maropitant a cada 12 h e, depois das 16:00, dois
+ * prontuários com o mesmo id para a consulta da alergia.
+ */
+describe('dataset de demonstração: coerência clínica', () => {
+  /*
+   * Só os que não existem na outra espécie. Displasia em gata idosa é caso plantado de propósito
+   * (a Pérola, com meloxicam contínuo): existe, só não é o que se sorteia.
+   */
+  const SO_DA_ESPECIE: Record<string, PetSpecies[]> = {
+    'UR-07': ['felina'],
+    'CV-02': ['canina'],
+  }
+
+  it('não dá diagnóstico de outra espécie, a nenhuma hora', () => {
+    emCadaHora((dataset, hora) => {
+      const foraDaEspecie = dataset.encounters.flatMap((encounter) => {
+        const pet = dataset.pets.find((item) => item.id === encounter.petId)
+
+        return encounter.diagnosticos
+          .filter((diagnostico) => {
+            const especies = SO_DA_ESPECIE[diagnostico.codigo]
+
+            return especies !== undefined && pet !== undefined && !especies.includes(pet.especie)
+          })
+          .map((diagnostico) => `${diagnostico.descricao} em ${pet?.nome}`)
+      })
+
+      expect(foraDaEspecie, `às ${hora}h`).toEqual([])
+    })
+  })
+
+  it('prescreve com a dose da espécie, sem alergia e sem remédio proibido', () => {
+    emCadaHora((dataset) => {
+      for (const encounter of dataset.encounters.filter((item) => item.status === 'finalizado')) {
+        const pet = dataset.pets.find((item) => item.id === encounter.petId)
+
+        for (const prescricao of encounter.conduta.prescricoes) {
+          const medicamento = medicationsFixture.find(
+            (item) => item.id === prescricao.medicamentoId,
+          )
+          const dose = medicamento?.doses.find((item) => item.especie === pet?.especie)
+          const nome = `${medicamento?.nome} em ${pet?.nome}`
+          const { frequenciaHoras, mgPorKg } = prescricao.calculo
+          const alergia = pet && medicamento ? alergiaConflitante(pet, medicamento) : null
+
+          if (prescricao.alergiaConfirmada) {
+            continue
+          }
+
+          expect(dose, `${nome}: sem dose para a espécie`).toBeDefined()
+          expect(dose?.proibido ?? false, `${nome}: proibido`).toBe(false)
+          expect(frequenciaHoras, `${nome}: intervalo`).toBe(dose?.frequenciaHoras)
+          expect(mgPorKg, `${nome}: abaixo da faixa`).toBeGreaterThanOrEqual(dose?.mgPorKg.min ?? 0)
+          expect(mgPorKg, `${nome}: acima da faixa`).toBeLessThanOrEqual(dose?.mgPorKg.max ?? 0)
+          expect(alergia, `${nome}: alergia`).toBeNull()
+        }
+      }
+    })
+  })
+
+  it('a queixa é o que o responsável viu, não o nome do diagnóstico', () => {
+    const dataset = gerarDataset()
+
+    for (const encounter of dataset.encounters) {
+      for (const diagnostico of encounter.diagnosticos) {
+        expect(encounter.anamnese.queixaPrincipal).not.toBe(diagnostico.descricao)
+      }
+    }
+  })
+
+  it('cada prontuário tem um id só, a qualquer hora', () => {
+    emCadaHora((dataset, hora) => {
+      const ids = dataset.encounters.map((item) => item.id)
+
+      expect(new Set(ids).size, `às ${hora}h`).toBe(ids.length)
+    })
   })
 })

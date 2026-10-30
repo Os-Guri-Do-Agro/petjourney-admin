@@ -16,7 +16,12 @@ import pt from '@/locales/pt.json'
 import sr from '@/locales/sr.json'
 
 import { API_LOCALE, HTML_LANG, INTL_LOCALE, LOCALES, isRTLLocale } from '../locales'
-import { PLURAL_RULES, arabicPluralRule, serbianPluralRule } from '../plural'
+import {
+  PLURAL_RULES,
+  arabicPluralRule,
+  portuguesePluralRule,
+  serbianPluralRule,
+} from '../plural'
 import { matchLocaleTag } from '../resolve'
 
 type Catalogo = Record<string, unknown>
@@ -100,6 +105,17 @@ describe('regras de plural', () => {
     expect([0, 1, 2, 3, 10, 11, 99, 100, 101, 102].map(forma)).toEqual([
       0, 1, 2, 3, 3, 4, 4, 5, 5, 5,
     ])
+  })
+
+  it('português: inteiro como o vue-i18n; com decimais, a parte inteira decide', () => {
+    const duas = (n: number) => portuguesePluralRule(n, 2)
+    const tres = (n: number) => portuguesePluralRule(n, 3)
+
+    /* "comprimido | comprimidos": 0 e 2+ no plural, como sempre. */
+    expect([0, 1, 2, 5].map(duas)).toEqual([1, 0, 1, 1])
+    /* "0,66 comprimido", "1,5 comprimido", "2,5 comprimidos". */
+    expect([0.66, 1.5, 1.99, 2.5].map(duas)).toEqual([0, 0, 0, 1])
+    expect([0, 1, 2, 7, 0.5, 2.5].map(tres)).toEqual([0, 1, 2, 2, 1, 2])
   })
 })
 

@@ -35,6 +35,7 @@ import {
   pedidoDeReservaRepository,
   reservaOnlineDoResponsavel,
 } from '@/features/hotel/data/reserva-online'
+import { SLUG_DO_HOTEL } from '@/features/hotel/data/seed-pedidos-de-reserva'
 import { usePedidosDeReservaStore } from '@/features/hotel/stores/pedidos-de-reserva'
 import { isAuthenticated } from '@/service/auth/auth-session'
 
@@ -53,8 +54,11 @@ const fluxo = criarFluxoDaReserva({
 proverFluxoDaReserva(fluxo)
 
 const hotel = computed(() => fluxo.hotel.value)
-const encontrado = computed(
-  () => pedidoDeReservaRepository.configuracao().slug === String(route.params.hotel ?? ''),
+/* O endereço antigo da demonstração continua abrindo: link divulgado não pode virar "não encontrado". */
+const encontrado = computed(() =>
+  [pedidoDeReservaRepository.configuracao().slug, SLUG_DO_HOTEL].includes(
+    String(route.params.hotel ?? ''),
+  ),
 )
 const endereco = computed(
   () => `${window.location.origin}/reservar/${String(route.params.hotel ?? '')}`,

@@ -229,6 +229,8 @@ export function useHotelFormat() {
     return new Intl.NumberFormat(localeIntl.value, {
       style: 'currency',
       currency: 'BRL',
+      /* O símbolo, e não o código: em espanhol o saldo saía "507,35 BRL". */
+      currencyDisplay: 'narrowSymbol',
       maximumFractionDigits: 2,
     }).format(centavos / 100)
   }

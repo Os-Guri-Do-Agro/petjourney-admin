@@ -334,6 +334,15 @@ async function selectLocale(code: Locale | null) {
   inset-inline-end: 0;
 }
 
+/*
+ * No login e na página pública o gatilho também mora no fim da linha: crescendo para o fim, o
+ * painel passava da borda do botão e encostava na janela.
+ */
+.language-switcher--auth .language-switcher__select :deep(.language-switcher__panel) {
+  inset-inline-start: auto !important;
+  inset-inline-end: 0;
+}
+
 .language-switcher__select :deep(.p-select-list) {
   gap: 0.2rem;
   padding: 0.35rem;
@@ -363,7 +372,12 @@ async function selectLocale(code: Locale | null) {
   min-width: 0;
 }
 
+/*
+ * `dir="auto"` vira o nome árabe para a direita dentro da própria caixa; encolhida ao texto e
+ * presa ao começo da linha da tela, "العربية" fica alinhado com os outros nomes e com o código.
+ */
 .language-switcher__name {
+  justify-self: start;
   font-size: 0.875rem;
   font-weight: 650;
   line-height: 1.2;

@@ -5,7 +5,7 @@
  * - **Luna** — também quer suíte, mas pediu depois: com o Maximiliano na S2 e os dois pedidos
  *   anteriores segurando as outras, não sobra suíte. É o "esgotou enquanto eu pedia" do hotel, e a
  *   linha já sugere a baia que serve.
- * - **Bento e Açaí** — os dois da casa do João, na mesma acomodação, e o hotel escolhe.
+ * - **Bento e Canela** — os dois da casa do João, na mesma acomodação, e o hotel escolhe.
  * - **Bolota** — pelo link, de quem não tem o app: cadastro mínimo e primeira hospedagem.
  * - **Nina** e **Zeus** — respondidos hoje: uma reserva aceita esperando sinal, uma recusa por
  *   vacina vencida.
@@ -15,6 +15,7 @@
  */
 
 import { addDays, createClinicClock } from '@/features/clinico/domain/clinic-time'
+import { nomeDaConta, slugDoNome } from '@/features/clinico/data/identidade-da-conta'
 import { contasSoNoApp as contasDaClinica } from '@/features/clinico/data/seed-pedidos'
 
 import { prazoNoBalcao } from '../domain/pedidos-de-reserva'
@@ -39,7 +40,18 @@ import type {
 
 const clock = createClinicClock(HOTEL_UTC_OFFSET)
 
+/**
+ * O endereço da página pública do hotel da demonstração, quando o portal ainda não sabe o nome da
+ * empresa. Continua valendo como endereço antigo: link já divulgado não pode quebrar.
+ */
 export const SLUG_DO_HOTEL = 'petjourney-hotel'
+
+/** O endereço da página pública: o nome da empresa que usa o portal, ou o da demonstração. */
+export function slugDoHotel(): string {
+  const nome = nomeDaConta()
+
+  return (nome && slugDoNome(nome)) || SLUG_DO_HOTEL
+}
 
 export function reservaOnlinePadrao(): ReservaOnline {
   return {
@@ -51,7 +63,7 @@ export function reservaOnlinePadrao(): ReservaOnline {
     horizonteDias: 90,
     prazoDeRespostaHoras: 3,
     balcao: { abre: '08:00', fecha: '20:00' },
-    slug: SLUG_DO_HOTEL,
+    slug: slugDoHotel(),
     urgencia: {
       telefone: '(11) 3555-0188',
       whatsapp: '(11) 95555-0188',
@@ -59,6 +71,31 @@ export function reservaOnlinePadrao(): ReservaOnline {
         'Para hoje ou amanhã, ligue: a recepção vê na hora se há vaga e o que o pet precisa trazer. Carteira de vacinação em mãos ajuda.',
     },
   }
+}
+
+/**
+ * A Canela, segunda cadela do João, existe só no hotel.
+ *
+ * O pedido "os dois da casa" usava a Açaí, que na Clínica é o paciente de nome-teste (acentos
+ * densos, para pegar quebra de linha no cabeçalho); num pedido de hotel, "Açaí Nhoque Çãpeçã" lia
+ * como dado inventado. O cadastro da Clínica fica como está: a outra frente usa a Açaí.
+ */
+export const CANELA_DO_JOAO: Pet = {
+  id: 'pet-canela',
+  nome: 'Canela',
+  especie: 'canina',
+  raca: 'SRD',
+  sexo: 'femea',
+  nascimento: '2020-04-12',
+  castrado: true,
+  porte: 'medio',
+  pesoKg: 14.6,
+  microchip: '900215000664217',
+  pelagem: 'Caramelo, pelo curto',
+  tutorId: 'tutor-joao',
+  iniciais: 'CA',
+  fotoUrl: '',
+  alertas: [],
 }
 
 /**
@@ -167,7 +204,7 @@ export function semearPedidosDeReserva(entrada: Entrada): {
       canal: 'app',
       modo: 'hotel-escolhe',
       petId: 'pet-bento',
-      acompanhantePetId: 'pet-acai',
+      acompanhantePetId: CANELA_DO_JOAO.id,
       tutorId: 'tutor-joao',
       entrada: em(addDays(ancora, 5), 8),
       saida: em(addDays(ancora, 8), 17),

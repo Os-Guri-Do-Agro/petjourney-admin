@@ -26,6 +26,27 @@ import { ocupaHorario } from './conflicts'
  */
 export const CAPACIDADE_MINUTOS_POR_PROFISSIONAL = 8 * 60
 
+/**
+ * Um atendimento ligado (a mesma cirurgia com dois profissionais, em duas colunas) é um paciente
+ * só. Quem conta atendimentos conta o grupo uma vez: a Agenda dizia 36, o Hoje 37 e o Início 35
+ * para o mesmo dia, e a cirurgia do Bento era metade da diferença.
+ */
+export function umPorGrupo<T extends Pick<Appointment, 'id' | 'linkedGroupId'>>(lista: T[]): T[] {
+  const vistos = new Set<string>()
+
+  return lista.filter((item) => {
+    const chave = item.linkedGroupId ?? item.id
+
+    if (vistos.has(chave)) {
+      return false
+    }
+
+    vistos.add(chave)
+
+    return true
+  })
+}
+
 export function capacidadeDoDia(
   clinic: Clinic,
   data: ISODate,
@@ -66,7 +87,7 @@ export function cargaDoDia(
 
   return {
     data,
-    agendados: doDia.filter(ocupaHorario).length,
+    agendados: umPorGrupo(doDia.filter(ocupaHorario)).length,
     capacidadeMinutos: capacidade,
     ocupadoMinutos: ocupado,
     ocupacao: capacidade > 0 ? Math.min(ocupado / capacidade, 2) : 0,

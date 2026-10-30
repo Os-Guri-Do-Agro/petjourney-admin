@@ -39,6 +39,7 @@ import { useHotelFormat } from '../../composables/useHotelFormat'
 import { pedidoDeReservaRepository, type PedidoDeReservaNaCaixa } from '../../data/reserva-online'
 import { agoraIso, getDataset, hojeIso } from '../../data/store'
 import type { MotivoDaRecusaDaReserva } from '../../data/types'
+import { reservaDoAnimalNoPeriodo } from '../../domain/disponibilidade'
 import { contarDiarias, dataDe, horaDe, instante, offsetDe } from '../../domain/hotel-time'
 import {
   situacaoDoPrazoDaReserva,
@@ -305,6 +306,41 @@ function chaveDa(opcao: SugestaoDeAcomodacao) {
 const selecionada = computed(
   () => opcoes.value.find((opcao) => chaveDa(opcao) === escolhida.value) ?? null,
 )
+
+/**
+ * O mesmo animal com outra reserva viva no período que seria gravado.
+ *
+ * A Luna, reservada até 07/11 às 12:00, pedia de 07/11 às 10:00, e "Reservar Baia B1" criava a
+ * segunda baia para o mesmo cão. Aqui o motivo aparece antes do clique, com o caminho: alterar a
+ * reserva que já existe, ou recusar este pedido.
+ */
+const conflito = computed(() => {
+  const atual = pedido.value
+
+  if (!atual || !atual.petId) {
+    return null
+  }
+
+  const inicio = selecionada.value?.inicio ?? atual.entrada
+  const fim = selecionada.value?.fim ?? atual.saida
+  const existente = reservaDoAnimalNoPeriodo(
+    getDataset().reservas,
+    [atual.petId, atual.acompanhantePetId ?? ''],
+    inicio,
+    fim,
+  )
+
+  if (!existente) {
+    return null
+  }
+
+  return t('hotel.reserva.animalJaReservado', {
+    pet: petDoHotel(existente.petId)?.nome ?? '',
+    acomodacao:
+      getDataset().acomodacoes.find((item) => item.id === existente.acomodacaoId)?.nome ?? '',
+    periodo: formato.periodo(existente.entradaPrevista, existente.saidaPrevista),
+  })
+})
 
 async function carregarOpcoes() {
   const atual = pedido.value
@@ -585,6 +621,11 @@ function reservar() {
         <section class="gr__secao" aria-labelledby="gr-onde">
           <h3 id="gr-onde" class="gr__titulo">{{ t('hotel.pedidos.gaveta.onde') }}</h3>
 
+          <p v-if="conflito" class="gr__nenhuma" role="alert">
+            <i class="ph ph-calendar-x" aria-hidden="true" />
+            {{ conflito }}
+          </p>
+
           <p v-if="carregando" class="gr__linha" role="status">
             <i class="ph ph-circle-notch ph-spin" aria-hidden="true" />
             {{ t('hotel.pedidos.acomodacao.procurando') }}
@@ -707,7 +748,7 @@ function reservar() {
                 ? t('hotel.pedidos.reservarEm', { acomodacao: selecionada.acomodacao.nome })
                 : t('hotel.pedidos.gaveta.escolha')
             "
-            :disabled="!selecionada"
+            :disabled="!selecionada || Boolean(conflito)"
             :loading="salvando"
             @click="reservar"
           />

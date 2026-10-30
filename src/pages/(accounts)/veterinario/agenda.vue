@@ -47,8 +47,10 @@ import type {
   MotivoDeFalta,
   SlotSugestao,
 } from '@/features/clinico/data/types'
+import { addDays, weekdayOf } from '@/features/clinico/domain/clinic-time'
 import { ocupaHorario } from '@/features/clinico/domain/conflicts'
 import { motivoEncerraOCaso } from '@/features/clinico/domain/faltas'
+import { umPorGrupo } from '@/features/clinico/domain/load'
 import { useAgendaStore } from '@/features/clinico/stores/agenda'
 import { useAvisosStore } from '@/features/clinico/stores/avisos'
 import { clinicClock, useClinicoStore } from '@/features/clinico/stores/clinico'
@@ -125,9 +127,14 @@ watch(
 const fraseDoDia = computed(() => {
   /*
    * A mesma conta da fita da semana logo abaixo (`ocupaHorario`: sem cancelado nem falta). Com
-   * contas diferentes, a saudação dizia 38 e o dia escolhido na fita dizia 32.
+   * contas diferentes, a saudação dizia 38 e o dia escolhido na fita dizia 32. A cirurgia com dois
+   * profissionais conta uma vez, como no Hoje e no Início.
    */
-  const ativos = agenda.atendimentos.filter(ocupaHorario)
+  if (agenda.visao === 'semana') {
+    return fraseDaSemana.value
+  }
+
+  const ativos = umPorGrupo(agenda.atendimentos.filter(ocupaHorario))
 
   if (ativos.length === 0) {
     return t('clinico.agenda.frase.vazio')
@@ -159,6 +166,52 @@ function minusculaInicial(texto: string) {
 const semExpediente = computed(
   () => agenda.visao === 'dia' && agenda.clinicaFechada && !feriado.value?.fechado,
 )
+
+/**
+ * Dia fechado **e** sem nada marcado: a grade vazia, com "0%" em cada coluna e "Clique num horário
+ * livre para marcar", dizia o contrário do aviso logo acima. Vira um estado só, com o caminho para
+ * o próximo dia de expediente. Com emergência marcada, a grade volta, com o aviso.
+ */
+const fechadoSemNada = computed(
+  () => agenda.visao === 'dia' && agenda.clinicaFechada && agenda.vazio,
+)
+
+const proximoDiaAberto = computed(() => {
+  const horarios = clinico.clinic?.horarios ?? []
+
+  for (let dias = 1; dias <= 7; dias += 1) {
+    const data = addDays(agenda.data, dias)
+    const horario = horarios.find((item) => item.weekday === weekdayOf(data))
+
+    if (horario && !horario.fechado) {
+      return data
+    }
+  }
+
+  return null
+})
+
+/** Na visão Semana, o topo fala da semana: o dia aberto e a frase dele não estão na tela. */
+const rotuloDoTopo = computed(() => {
+  const dias = agenda.semanaDias
+
+  if (agenda.visao !== 'semana' || dias.length === 0) {
+    return formato.dataLonga(agenda.data)
+  }
+
+  return t('clinico.agenda.semanaDeAte', {
+    inicio: formato.dataCurta(dias[0]!.data),
+    fim: formato.dataCurta(dias.at(-1)!.data),
+  })
+})
+
+const fraseDaSemana = computed(() => {
+  const total = agenda.semanaDias.reduce((soma, dia) => soma + dia.agendados, 0)
+
+  return total > 0
+    ? t('clinico.agenda.frase.atendimentos', { total }, total)
+    : t('clinico.agenda.frase.vazio')
+})
 
 async function carregar() {
   await clinico.carregar()
@@ -634,7 +687,7 @@ useClinicShortcuts({
     @tentar-de-novo="carregar"
   >
     <template #resumo>
-      <span class="agenda__data">{{ formato.dataLonga(agenda.data) }}</span>
+      <span class="agenda__data">{{ rotuloDoTopo }}</span>
       <template v-if="agenda.dia">{{ ': ' }}<span aria-live="polite">{{ minusculaInicial(fraseDoDia) }}</span></template>
     </template>
 
@@ -655,14 +708,14 @@ useClinicShortcuts({
         @ajuda="ajudaAberta = true"
       />
 
-      <p v-if="semExpediente" class="agenda__fechada ui-folha" role="status">
+      <p v-if="semExpediente && !fechadoSemNada" class="agenda__fechada ui-folha" role="status">
         <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
           <i class="ph ph-moon" />
         </span>
         <span>{{ t('clinico.agenda.semExpediente') }}</span>
       </p>
 
-      <p v-if="feriado?.fechado" class="agenda__fechada ui-folha" role="status">
+      <p v-if="feriado?.fechado && !fechadoSemNada" class="agenda__fechada ui-folha" role="status">
         <span class="ui-ladrilho ui-ladrilho--atencao" aria-hidden="true">
           <i class="ph ph-calendar-x" />
         </span>
@@ -731,7 +784,37 @@ useClinicShortcuts({
       -->
       <AgendaLegenda v-if="agenda.visao === 'dia' && !agenda.clinicaFechada" />
 
-      <div v-if="vazio" class="agenda__vazio ui-folha">
+      <div v-if="fechadoSemNada" class="agenda__vazio ui-folha" role="status">
+        <span
+          class="ui-ladrilho"
+          :class="feriado?.fechado ? 'ui-ladrilho--atencao' : 'ui-ladrilho--neutro'"
+          aria-hidden="true"
+        >
+          <i :class="feriado?.fechado ? 'ph ph-calendar-x' : 'ph ph-moon'" />
+        </span>
+        <h2>{{ t('clinico.agenda.fechadaTitulo') }}</h2>
+        <p>
+          {{
+            feriado?.fechado
+              ? t('clinico.agenda.fechadaDescricao', { feriado: feriado.nome })
+              : `${t('clinico.agenda.semExpediente')} ${t('clinico.agenda.fechadaSemNada')}`
+          }}
+        </p>
+        <Button
+          v-if="proximoDiaAberto"
+          type="button"
+          icon="ph ph-calendar-blank"
+          :label="
+            t('clinico.agenda.irParaDia', {
+              semana: formato.diaDaSemanaCurto(proximoDiaAberto),
+              data: formato.dataCurta(proximoDiaAberto),
+            })
+          "
+          @click="agenda.irPara(proximoDiaAberto)"
+        />
+      </div>
+
+      <div v-else-if="vazio" class="agenda__vazio ui-folha">
         <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
           <i class="ph ph-calendar-blank" />
         </span>

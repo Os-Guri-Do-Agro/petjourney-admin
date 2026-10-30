@@ -155,15 +155,36 @@ const faltaPesar = computed(
   () => props.hospede.saiHoje && props.hospede.hospedagem.pesoSaidaKg === null,
 )
 
-const saida = computed(() =>
-  t('hotel.hoje.hospedes.sai', {
+/*
+ * Passada a hora (com a meia hora de folga do Painel), o atraso, como na Saída do Painel: às 20h o
+ * cartão dizia "sai hoje às 16:30" de quem ainda estava na baia.
+ */
+const atrasoDeSaida = computed(() => {
+  const minutos = Math.floor(
+    (Date.parse(props.agora) - Date.parse(props.hospede.hospedagem.saidaPrevistaEm)) / 60_000,
+  )
+
+  return minutos > 30 ? minutos : 0
+})
+
+const saida = computed(() => {
+  const prevista = props.hospede.hospedagem.saidaPrevistaEm
+
+  if (atrasoDeSaida.value > 0) {
+    const minutos = atrasoDeSaida.value
+
+    return `${t('hotel.hoje.hospedes.sai', { quando: formato.hora(prevista) })} · ${t(
+      'hotel.hospedes.foco.atrasou',
+      { tempo: formato.duracao(minutos >= 60 ? Math.floor(minutos / 60) * 60 : minutos) },
+    )}`
+  }
+
+  return t('hotel.hoje.hospedes.sai', {
     quando: props.hospede.saiHoje
-      ? t('hotel.hospedes.cartao.hojeAs', {
-          hora: formato.hora(props.hospede.hospedagem.saidaPrevistaEm),
-        })
-      : formato.quando(props.hospede.hospedagem.saidaPrevistaEm),
-  }),
-)
+      ? t('hotel.hospedes.cartao.hojeAs', { hora: formato.hora(prevista) })
+      : formato.quando(prevista),
+  })
+})
 
 const adaptacao = computed(() => props.hospede.hospedagem.adaptacao)
 

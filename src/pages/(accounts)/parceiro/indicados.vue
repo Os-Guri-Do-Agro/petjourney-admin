@@ -240,6 +240,14 @@ function metaDe(indicado: IndicadoDoParceiroDto) {
   return partes.join(' · ')
 }
 
+/**
+ * A coluna da participação só existe quando alguém da lista rendeu algo. Vazia em todas as linhas,
+ * ela empurrava o selo para o meio da linha, com um vão de 136 px à direita.
+ */
+const temParticipacao = computed(() =>
+  indicados.value.some((indicado) => indicado.participacaoCentavos > 0),
+)
+
 function participacaoDe(indicado: IndicadoDoParceiroDto) {
   return formatCentavosToBrl(indicado.participacaoCentavos, INTL_LOCALE[locale.value as Locale])
 }
@@ -324,7 +332,7 @@ onMounted(async () => {
               <i :class="SELO_DO_STATUS[indicado.status].icone" aria-hidden="true" />
               {{ t(`parceiro.indicados.status.${indicado.status}`) }}
             </span>
-            <span class="indicado__participacao">
+            <span v-if="temParticipacao" class="indicado__participacao">
               <template v-if="indicado.participacaoCentavos > 0">
                 <strong class="ui-num">{{ participacaoDe(indicado) }}</strong>
                 <small>{{ t('parceiro.indicados.participacao') }}</small>

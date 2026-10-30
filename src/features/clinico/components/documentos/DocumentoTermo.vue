@@ -53,10 +53,25 @@ const objeto = computed(() => {
     .filter((item) => item.kind !== 'diferencial')
     .map((item) => clinico.descricaoDoDiagnostico(item))
 
-  return diagnosticos.length > 0
-    ? diagnosticos.join(' · ')
-    : props.encounter.anamnese.queixaPrincipal
+  const texto =
+    diagnosticos.length > 0 ? diagnosticos.join(' · ') : props.encounter.anamnese.queixaPrincipal
+
+  return noMeioDaFrase(texto)
 })
+
+/**
+ * O objeto entra no meio de uma frase ("em razão de {objeto}, tendo sido informado"): sem o
+ * ponto final que a queixa costuma ter, e com inicial minúscula, menos em sigla. Antes saía
+ * "em razão de Claudicação em membro pélvico direito há 3 dias., tendo sido".
+ */
+function noMeioDaFrase(texto: string): string {
+  const limpo = texto.trim().replace(/[\s.;:!]+$/u, '')
+  const [primeira = '', segunda = ''] = limpo
+
+  return segunda && segunda === segunda.toLowerCase()
+    ? `${primeira.toLowerCase()}${limpo.slice(1)}`
+    : limpo
+}
 
 /** Os riscos que o texto obriga a declarar. Lista curta e por extenso, nunca "etc". */
 const itens = computed<string[]>(() => {

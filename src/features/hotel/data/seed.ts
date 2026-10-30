@@ -23,6 +23,7 @@
  */
 
 import { addDays, createClinicClock, diffDays } from '@/features/clinico/domain/clinic-time'
+import { nomeDaConta } from '@/features/clinico/data/identidade-da-conta'
 import type { Pet, Tutor } from '@/features/clinico/data/types'
 
 import { contatosDe } from '../domain/contatos'
@@ -32,6 +33,7 @@ import { planejarDia, ROTINA_PADRAO_INICIAL } from '../domain/rotina'
 import { montarOrcamento } from '../domain/tarifas'
 
 import {
+  CANELA_DO_JOAO,
   contasSoNoAppDoHotel,
   reservaOnlinePadrao,
   semearPedidosDeReserva,
@@ -661,6 +663,11 @@ function planoDe(pet: Pet | undefined) {
 export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   const ancora = clock.today()
   const agora = clock.nowIso()
+  /*
+   * O nome é o da empresa que usa o portal, como na clínica (ver `identidade-da-conta.ts`): a
+   * página pública dizia "PetJourney Hotel" para a conta da Aurora.
+   */
+  const hotel = { ...hotelFixture, nome: nomeDaConta() ?? hotelFixture.nome }
 
   /*
    * Dois geradores, e a razão está no cabeçalho do arquivo: `rngCasa` monta o que não depende do
@@ -931,7 +938,12 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
    * vazios entre as barras, que são a informação que aquela tela existe para dar: quem atende o
    * telefone procura o buraco, não a barra.
    */
-  const DIAS_DE_HISTORIA = 45
+  /*
+   * Cento e vinte, e não quarenta e cinco: o resumo oferece 90 dias, e com um mês e meio de passado
+   * os primeiros quarenta e cinco dias saíam vazios, a ocupação média caía para 21% e o retorno
+   * dava 0% (ninguém tinha vindo antes do início do período).
+   */
+  const DIAS_DE_HISTORIA = 120
 
   /**
    * A janela que o resumo abre por padrão. O recheio começa **antes** dela de propósito.
@@ -1085,9 +1097,15 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
    * abre. Ele entra pela lista dos de fora mesmo que o recheio não o tenha hospedado antes —
    * gato que tem veterinário próprio é exatamente o cliente que já veio.
    */
+  /* A clínica da casa é a da própria empresa: com a Aurora, "Clínica PetJourney" era outra casa. */
+  const veterinariaDaCasa: VeterinarioDoPet = {
+    ...VETERINARIA_DA_CASA,
+    clinica: nomeDaConta() ?? VETERINARIA_DA_CASA.clinica,
+  }
+
   const veterinariosDosPets = pets
     .filter((pet) => jaEstiveram.has(pet.id) || pet.id in VETERINARIOS_DE_FORA)
-    .map((pet) => ({ petId: pet.id, ...(VETERINARIOS_DE_FORA[pet.id] ?? VETERINARIA_DA_CASA) }))
+    .map((pet) => ({ petId: pet.id, ...(VETERINARIOS_DE_FORA[pet.id] ?? veterinariaDaCasa) }))
 
   /** O veterinário que a estadia guarda: uma cópia, sem o `petId` do cadastro. */
   function veterinarioDe(petId: string): VeterinarioDoPet {
@@ -1095,7 +1113,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
 
     return conhecido
       ? { nome: conhecido.nome, clinica: conhecido.clinica, telefone: conhecido.telefone }
-      : { ...VETERINARIA_DA_CASA }
+      : { ...veterinariaDaCasa }
   }
 
   // -------------------------------------------------------------------------
@@ -1293,18 +1311,32 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
    * tela, o Tofu apareceu com o diário **vazio**. O diário é o que o responsável de fato compra;
    * um protótipo que o mostra vazio vende a parte errada do produto.
    */
+  /*
+   * O gato tem o próprio texto. O Tofu, gato renal recusando a ração, aparecia no diário (e no
+   * boletim montado dele) "passeando no gramado" e "brincando de bolinha com o grupo da tarde"; e
+   * o cão "ronronava" no colo. Gato não passeia: o momento da manhã vira brincadeira de gatil.
+   */
   const MOMENTOS: {
     kind: RegistroDoDiario['kind']
+    /** O momento do gato, quando é outro. */
+    kindDoGato?: RegistroDoDiario['kind']
     hora: string
     variantes: readonly string[]
+    doGato: readonly string[]
   }[] = [
     {
       kind: 'passeio',
+      kindDoGato: 'brincadeira',
       hora: '10:15',
       variantes: [
         'Passeou no gramado por vinte minutos. Voltou cansado e bebeu água.',
         'Deu duas voltas na área externa e parou para cheirar cada canteiro.',
         'Preferiu andar devagar hoje. Voltou tranquilo e deitou na sombra.',
+      ],
+      doGato: [
+        'Subiu no arranhador alto e passou a manhã olhando a janela.',
+        'Brincou com a varinha de penas por dez minutos e voltou para a caminha.',
+        'Passou a manhã no esconderijo; saiu para beber água e voltou.',
       ],
     },
     {
@@ -1315,13 +1347,23 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
         'Passou a tarde com o brinquedo de corda, sozinho e contente.',
         'Correu atrás da bola até cansar. Bebeu bastante água depois.',
       ],
+      doGato: [
+        'Caçou a bolinha de papel pelo gatil até cansar.',
+        'Ficou um bom tempo observando os pássaros pela janela.',
+        'Brincou com o ratinho de pelúcia e cochilou em seguida.',
+      ],
     },
     {
       kind: 'carinho',
       hora: '17:00',
       variantes: [
-        'Ficou vinte minutos no colo. Ronronou o tempo todo.',
+        'Ficou vinte minutos no colo, de barriga para cima.',
         'Pediu carinho na grade assim que a gente passou.',
+        'Dormiu encostado na mão da Taís durante a escovação.',
+      ],
+      doGato: [
+        'Ficou vinte minutos no colo. Ronronou o tempo todo.',
+        'Aceitou carinho no queixo e pediu mais.',
         'Dormiu encostado na mão da Taís durante a escovação.',
       ],
     },
@@ -1330,6 +1372,11 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       hora: '22:30',
       variantes: [
         'Dormiu a noite inteira sem chorar.',
+        'Demorou a se acomodar, mas dormiu direto depois das onze.',
+        'Dormiu enroscado no cobertor que veio de casa.',
+      ],
+      doGato: [
+        'Dormiu a noite inteira na caminha.',
         'Demorou a se acomodar, mas dormiu direto depois das onze.',
         'Dormiu enroscado no cobertor que veio de casa.',
       ],
@@ -1353,12 +1400,14 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
          * mesmo texto dois dias seguidos, e dois hóspedes não contam a mesma tarde.
          */
         const semente = hashSeed(`${hospedagem.petId}-${dia}-${momento.kind}`)
-        const variante = momento.variantes[semente % momento.variantes.length]!
+        const gato = petPorId.get(hospedagem.petId)?.especie === 'felina'
+        const textos = gato ? momento.doGato : momento.variantes
+        const variante = textos[semente % textos.length]!
 
         diario.push({
           id: `diario-${sequenciaDeRegistro.toString(36)}`,
           hospedagemId: hospedagem.id,
-          kind: momento.kind,
+          kind: gato ? (momento.kindDoGato ?? momento.kind) : momento.kind,
           texto: variante,
           foto: semente % 3 === 0 ? (petPorId.get(hospedagem.petId)?.iniciais ?? null) : null,
           registradoEm,
@@ -1431,16 +1480,22 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
       (item) => item.hospedagemId === hospedagem.id && item.exigeContato && !item.contatoEm,
     )
 
+    /*
+     * O retido nasce depois da ocorrência que o trava (hoje, 07:40), e o texto é para o
+     * responsável ler depois da ligação: era "Precisamos falar com você antes de mandar o boletim",
+     * datado de ontem, e era isso que saía ao tocar em Enviar. O enviado não fala em "noite
+     * inteira" nem em "tranquilo": vale para cão e gato, macho e fêmea, e para quem chegou ontem.
+     */
     return [
       {
         id: `bol-${hospedagem.id}-1`,
         hospedagemId: hospedagem.id,
         status: travado ? 'retido' : 'enviado',
         texto: travado
-          ? `${pet?.nome ?? ''} recusou as refeições de hoje. Precisamos falar com você antes de mandar o boletim.`
-          : `${pet?.nome ?? ''} comeu bem, passeou e dormiu a noite inteira. Está tranquilo.`,
+          ? `${pet?.nome ?? ''} não aceitou as refeições desde ontem à noite. Está bebendo água, a ração vai aquecida e oferecida à mão, e a veterinária de retaguarda acompanha. Seguimos em contato.`
+          : `${pet?.nome ?? ''} comeu tudo hoje e aproveitou a recreação. Rotina sem novidades.`,
         fotos: pet?.iniciais ? [pet.iniciais] : [],
-        geradoEm: ontem,
+        geradoEm: travado ? iso(ancora, '07:55') : ontem,
         autorId: 'eq-helena',
         enviadoEm: travado ? null : ontem,
         exigeContato: travado,
@@ -1522,12 +1577,26 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     },
   ]
 
+  /*
+   * A Canela, do pedido do João, entra só agora: no começo, ela mudaria o sorteio da casa inteira
+   * (comprovantes, histórico das acomodações). A carteira é a do Bento, que vai junto ao
+   * veterinário; a casa ainda não a conhece, então não tem estadia anterior.
+   */
+  const canela = { ...CANELA_DO_JOAO }
+
+  pets.push(canela)
+  petPorId.set(canela.id, canela)
+
+  for (const item of comprovantes.filter((comp) => comp.petId === 'pet-bento')) {
+    comprovante(canela.id, item.kind, item.apresentadoEm, item.validoAte, item.documento)
+  }
+
   /* Os pedidos vêm por último: a vaga que eles disputam é a do mapa já montado. */
   const reservaOnline = reservaOnlinePadrao()
   const dosPedidos = semearPedidosDeReserva({
     ancora,
     agora,
-    hotel: hotelFixture,
+    hotel,
     configuracao: reservaOnline,
     acomodacoes,
     tarifas: tarifasFixture,
@@ -1541,7 +1610,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   return {
     semente,
     ancora,
-    hotel: hotelFixture,
+    hotel,
     blocos: blocosFixture,
     tiposDeAcomodacao: tiposDeAcomodacaoFixture.map((item) => ({ ...item })),
     acomodacoes,

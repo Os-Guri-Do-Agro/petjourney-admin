@@ -57,8 +57,9 @@ export function useRotulosDoTratamento() {
 
     const fracao = fracionar(quantidade, unidade)
 
-    if (fracao && ['meio', 'quarto', 'tres-quartos', 'um-e-meio'].includes(fracao.kind)) {
-      return t(`clinico.adesao.dose.${fracao.kind}`)
+    /* Pelo nome, não pelo `kind`: 0,66 arredondado a 0,75 também é "três quartos". */
+    if (fracao && ['meio', 'quarto', 'tres-quartos', 'um-e-meio'].includes(fracao.nome)) {
+      return t(`clinico.adesao.dose.${fracao.nome}`)
     }
 
     const inteiro = fracao?.quantidade ?? quantidade

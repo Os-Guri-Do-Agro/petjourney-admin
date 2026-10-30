@@ -376,6 +376,10 @@ export function useAppNavigation() {
       contagem: pendencias.estoque.value,
       frase: 'clinico.navegacao.selo.estoque',
     },
+    '/veterinario/faltas': {
+      contagem: pendencias.faltas.value,
+      frase: 'clinico.navegacao.selo.faltas',
+    },
     '/veterinario/tratamentos': {
       contagem: pendencias.tratamentos.value,
       frase: 'clinico.navegacao.selo.tratamentos',
@@ -435,8 +439,11 @@ export function useAppNavigation() {
       { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
     ]
 
-    /* A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada. */
-    if (parceiroStore.isDono) {
+    /*
+     * A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada.
+     * Antes do contexto chegar vale a forma da última sessão, para o item não entrar atrasado.
+     */
+    if (parceiroStore.menuComIndicados) {
       items.push({
         label: t('nav.items.indicados'),
         to: '/parceiro/indicados',
@@ -450,7 +457,7 @@ export function useAppNavigation() {
       icon: 'ph ph-clipboard-text',
     })
 
-    if (parceiroStore.statusAfiliadoAtivo) {
+    if (parceiroStore.menuComCarteira) {
       items.push({
         label: t('nav.items.financeiro'),
         to: '/parceiro/carteira',

@@ -72,7 +72,7 @@ function montarItem(prescricao: Prescription): Item | null {
         ? t('clinico.prontuario.conduta.resumoDose', {
             quantidade: formato.numero(calculo.quantidadeApresentacao, 2),
             unidade,
-            mg: formato.numero(calculo.mgPorAdministracao, 1),
+            mg: formato.miligramas(calculo.mgPorAdministracao),
             frequencia: calculo.frequenciaHoras,
             duracao: calculo.duracaoDias,
             total: calculo.totalAdministracoes,
@@ -163,7 +163,7 @@ const orientacoes = computed(() => props.encounter.conduta.orientacoes.trim())
           <p class="item__quantidade">{{ item.quantidade }}</p>
           <p class="item__posologia">
             <strong>{{ t('clinico.documentos.receita.usoRotulo') }}</strong>
-            {{ item.via }} — {{ item.posologia }}
+            {{ item.via }}, {{ item.posologia }}
           </p>
           <p v-if="item.observacao" class="item__observacao">{{ item.observacao }}</p>
         </li>

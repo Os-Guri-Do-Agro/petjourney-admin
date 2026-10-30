@@ -11,6 +11,10 @@
  *
  * O gate `check:i18n` barra quantidade de formas diferente disso.
  *
+ * O português usa as formas do vue-i18n, com uma diferença para quantidade com decimais: ali a
+ * parte inteira decide ("0,66 comprimido", "1,5 comprimido", "2,5 comprimidos"). O vue-i18n só
+ * deixa no singular o 1 exato, e saía "0,66 comprimidos".
+ *
  * Sem dependências do projeto: o validador de tradução (Node) importa este arquivo direto.
  */
 
@@ -49,7 +53,22 @@ export function arabicPluralRule(choice: number, choicesLength: number): number 
   return Math.abs(choice) === 1 ? 0 : Math.min(1, choicesLength - 1)
 }
 
+/**
+ * Inteiro: a regra do vue-i18n, que o catálogo inteiro pressupõe (`a | b`: só o 1 no singular;
+ * `zero | um | vários`: 0, 1 e o resto). Com decimais, parte inteira 0 ou 1 conta como um.
+ */
+export function portuguesePluralRule(choice: number, choicesLength: number): number {
+  const absoluto = Math.abs(choice)
+  const efetivo = Number.isInteger(absoluto) ? absoluto : Math.floor(absoluto) < 2 ? 1 : 2
+
+  if (choicesLength === 2) {
+    return efetivo === 1 ? 0 : 1
+  }
+  return Math.min(efetivo, 2)
+}
+
 export const PLURAL_RULES = {
+  pt: portuguesePluralRule,
   sr: serbianPluralRule,
   ar: arabicPluralRule,
 }

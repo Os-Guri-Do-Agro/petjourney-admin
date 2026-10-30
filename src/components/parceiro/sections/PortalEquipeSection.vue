@@ -300,8 +300,20 @@ function confirmar() {
 const menu = ref<InstanceType<typeof Menu> | null>(null)
 const membroDoMenu = ref<MembroEquipeDto | null>(null)
 
+/**
+ * A única dona não tem "Sair da equipe": a API recusa (`EQUIPE_ULTIMO_DONO`) e o menu oferecia a
+ * ação, pedia confirmação e só então dizia que não dava. Com outra pessoa dona, a saída volta.
+ */
+const donosNaEquipe = computed(
+  () => equipe.value?.membros.filter((membro) => membro.papel === 'DONO').length ?? 0,
+)
+
 function acoesDe(membro: MembroEquipeDto): MenuItem[] {
   if (membro.usuarioId === meuId.value) {
+    if (membro.papel === 'DONO' && donosNaEquipe.value <= 1) {
+      return []
+    }
+
     return [
       {
         label: t('parceiro.equipe.sair'),

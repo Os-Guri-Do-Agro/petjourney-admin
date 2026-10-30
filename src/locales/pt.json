@@ -34,6 +34,7 @@
     "login": {
       "title": "Olá de novo",
       "erroCredenciais": "E-mail ou senha não conferem. Confira e tente de novo.",
+      "erroSenhaVazia": "Digite a sua senha.",
       "sessaoExpirada": "Sua sessão terminou",
       "sessaoExpiradaDetalhe": "Entre de novo para continuar de onde parou.",
       "description": "Acesse o portal e impulsione sua parceria com indicação e resultados.",
@@ -500,7 +501,9 @@
     "api": {
       "missingBaseUrl": "Esta versão do painel não sabe o endereço do servidor. Avise o time técnico.",
       "invalidResponse": "O servidor respondeu em um formato inesperado. Tente de novo em instantes.",
-      "genericStatus": "Erro {status}"
+      "genericStatus": "Erro {status}",
+      "servidor": "O servidor não conseguiu atender agora. Tente de novo em instantes.",
+      "dadosRecusados": "O servidor não aceitou os dados enviados. Confira e tente de novo."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -804,6 +807,7 @@
       "vazio": "Nada marcado para este dia.",
       "hoje": "Hoje",
       "aguardando": "Aguardando",
+      "naoChegou": "Não chegou",
       "pendencia": "Pendente",
       "chegadas": "{total} chegada | {total} chegadas",
       "compromissos": "Compromissos do dia",
@@ -904,7 +908,8 @@
         "description": "Receba 5% de participação por cada assinatura que nasceu da sua indicação, mês a mês, por até 18 meses. Acompanhe o saldo na carteira e saque via PIX.",
         "feature1": "5% por assinatura, a cada renovação paga",
         "feature2": "Janela de 18 meses por responsável indicado",
-        "feature3": "Saque via PIX a partir de R$ 50,00"
+        "feature3": "Saque via PIX a partir de {valor}",
+        "feature3SemValor": "Saque via PIX na chave da empresa"
       },
       "participativo": {
         "title": "Programa Participativo",
@@ -1501,7 +1506,8 @@
       "vencemLogo": "1 vence em menos de um dia | {n} vencem em menos de um dia",
       "historico": "Nenhum pet no histórico | 1 pet no histórico | {n} pets no histórico",
       "historicoRecente": "Acessos recentes de 1 pet | Acessos recentes de {n} pets",
-      "encontrados": "Nenhum pet encontrado | 1 pet encontrado | {n} pets encontrados"
+      "encontrados": "Nenhum pet encontrado | 1 pet encontrado | {n} pets encontrados",
+      "encontradosAcessos": "Nenhum acesso encontrado | 1 acesso encontrado | {n} acessos encontrados"
     },
     "grupo": {
       "acessos": "{n} acesso | {n} acessos",
@@ -1733,8 +1739,8 @@
         "body": "Cada crédito espera 14 dias antes de virar saldo sacável. É a janela de estorno da compra."
       },
       "payout": {
-        "title": "Saque a partir de R$ 50,00",
-        "body": "Com saldo sacável acima do mínimo, você pede o saque na Carteira e recebe na chave PIX cadastrada."
+        "title": "Saque via PIX",
+        "body": "Quando o saldo sacável chega ao mínimo da Carteira, você pede o saque lá e recebe na chave PIX cadastrada."
       },
       "requirement": {
         "title": "Vale a partir da ativação",
@@ -1784,8 +1790,7 @@
       "acoes": "Ações da divulgação"
     },
     "tela": {
-      "resumo": "{n} leitura do QR até agora | {n} leituras do QR até agora",
-      "resumoZero": "Nenhuma leitura do QR ainda. Imprima o QR para o balcão e comece a medir."
+      "resumo": "{n} leitura do QR até agora | {n} leituras do QR até agora"
     }
   },
   "carteira": {
@@ -1847,20 +1852,20 @@
       "contactEmail": "E-mail",
       "contactWhatsapp": "WhatsApp",
       "comissao": {
-        "title": "Como entra saldo",
-        "body": "Indicações que viram assinantes geram participação na carteira, quando o programa afiliado está ativo."
+        "title": "Como o saldo entra",
+        "body": "Cada assinatura paga por um responsável que veio da sua indicação rende participação na carteira, enquanto o Programa de Afiliados estiver ativo."
       },
       "saldos": {
         "title": "Saldo total e sacável",
-        "body": "O total acumula créditos; o sacável libera após a janela de segurança de 14 dias por crédito."
+        "body": "O que entra espera 14 dias antes de poder ser sacado. O total mostra tudo; o sacável, só o que já passou desse prazo."
       },
       "pix": {
-        "title": "PIX obrigatório",
-        "body": "Cadastre a chave PIX da empresa antes de pedir saque. Só o dono da conta altera PIX e solicita saque."
+        "title": "Chave PIX da empresa",
+        "body": "O saque cai na chave PIX da empresa: cadastre a chave antes do primeiro pedido. Só o dono da conta troca a chave e pede saque."
       },
       "ciclo": {
-        "title": "Ciclo de pagamento",
-        "body": "Saque mínimo de {valor}. Corte no dia 27 e liquidação orientativa até o dia 5. Acompanhe na aba Saques."
+        "title": "Quando o pagamento cai",
+        "body": "Saque a partir de {valor}. Os pedidos fecham no dia 27, e o pagamento está previsto até o dia 5 do mês seguinte. Acompanhe na aba Saques."
       },
       "footerPrefix": "Dúvidas?",
       "footerOrWhatsapp": "ou WhatsApp"
@@ -2073,6 +2078,7 @@
       "aceito": "Convite aceito",
       "aceitoDetalhe": "Você já faz parte da equipe.",
       "naoVale": "Este convite não vale mais",
+      "linkIncompleto": "O link deste convite chegou incompleto. Abra de novo o link do e-mail, inteiro, ou peça um convite novo.",
       "irParaPortal": "Ir para o portal",
       "jaNaEquipe": "Já está na equipe",
       "jaMembroCorpo": "Você já faz parte desta equipe. É só seguir para o portal.",
@@ -2218,7 +2224,7 @@
         },
         "CANCELADO": {
           "titulo": "Ninguém cancelou",
-          "corpo": "Quem assinou pelo seu código continua assinando."
+          "corpo": "Se alguém que assinou pelo seu código cancelar a assinatura, o nome aparece aqui."
         }
       },
       "apenasDono": {
@@ -2249,15 +2255,15 @@
       },
       "seguranca": {
         "label": "Segurança",
-        "description": "Troca de senha da conta autenticada."
+        "description": "Trocar a sua senha."
       },
       "aparencia": {
         "label": "Aparência",
-        "description": "Tema, formato do menu lateral e densidade das listas."
+        "description": "Tema, navegação, explicações e idioma."
       },
       "conta": {
         "label": "Conta",
-        "description": "Sessão, desativação de perfil e preferências futuras."
+        "description": "Sair deste computador, trocar de empresa e pausar o perfil."
       }
     },
     "aparencia": {
@@ -2556,11 +2562,11 @@
           },
           "scope": {
             "title": "Só o perfil",
-            "text": "Não apaga clínica, parceiro nem histórico: só pausa o perfil ativo."
+            "text": "A clínica, a empresa e o histórico continuam como estão. Só o seu perfil fica pausado."
           },
           "notDelete": {
             "title": "Não é exclusão",
-            "text": "Encerramento permanente (LGPD) é outro fluxo e não aparece aqui."
+            "text": "Excluir a conta de vez é outro pedido e não se faz por aqui."
           }
         }
       },
@@ -2624,6 +2630,7 @@
         "vacinas": "{total} reforço vencido | {total} reforços vencidos",
         "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda",
         "estoque": "{total} vacina abaixo do mínimo | {total} vacinas abaixo do mínimo",
+        "faltas": "{total} paciente com falta sem motivo | {total} pacientes com falta sem motivo",
         "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta"
       }
     },
@@ -2726,7 +2733,7 @@
       "outside-hours": "Fora do expediente, que vai das {abre} às {fecha}.",
       "lunch-overlap": "Atravessa o intervalo de almoço por {minutos} min.",
       "holiday-closed": "A clínica está fechada: {feriado}.",
-      "over-capacity": "Carga do dia sobe para {minutos} min, acima dos {capacidade} min usuais.",
+      "over-capacity": "Carga do dia sobe para {minutos}, acima das {capacidade} usuais.",
       "type-room-mismatch": "A sala {sala} não é a indicada para {tipo}."
     },
     "paciente": {
@@ -3137,6 +3144,9 @@
       "filtroProfissionais": "Profissionais",
       "filtroSituacao": "Situação",
       "semExpediente": "A clínica não abre neste dia.",
+      "fechadaSemNada": "Nenhum atendimento marcado. Uma emergência ainda pode ser marcada, com confirmação.",
+      "irParaDia": "Ir para {semana}, {data}",
+      "semanaDeAte": "Semana de {inicio} a {fim}",
       "drawer": {
         "irPara": "Abrir"
       },
@@ -3183,6 +3193,8 @@
       "estado": {
         "sala": "Na sala há {tempo}",
         "espera": "Esperando há {tempo}",
+        "esperaAgora": "Chegou agora",
+        "salaAgora": "Entrou agora",
         "marcado": "Marcado para {hora}"
       },
       "carrossel": {
@@ -3359,6 +3371,7 @@
       "passoSemReceita": "Conferir e emitir atestado ou prontuário",
       "cartao": {
         "receituarioControle": "Sai em folha separada e em duas vias",
+        "receituarioAlergia": "Confirme a alergia na prescrição para imprimir.",
         "semPrescricao": "Sem medicamento prescrito nesta consulta",
         "prontuario": {
           "titulo": "Prontuário completo",
@@ -3887,9 +3900,9 @@
           "congestas": "Congestas",
           "nao-avaliado": "Não avaliadas"
         },
-        "hidratacaoRotulo": "Hidratação",
+        "hidratacaoRotulo": "Desidratação",
         "hidratacao": {
-          "normal": "Normal",
+          "normal": "Ausente",
           "leve": "Leve",
           "moderada": "Moderada",
           "grave": "Grave"
@@ -3964,13 +3977,12 @@
           "total": "3. {porDia}× ao dia × {dias} dias = {total} administrações"
         },
         "fracao": {
-          "inteiro": "{inteiros} comprimido inteiro por administração",
+          "inteiro": "{inteiros} comprimido inteiro por administração | {inteiros} comprimidos inteiros por administração",
           "meio": "Meio comprimido por administração",
           "um-e-meio": "Um comprimido e meio por administração",
           "quarto": "Um quarto de comprimido por administração",
           "tres-quartos": "Três quartos de comprimido por administração",
-          "multiplo": "{quantidade} comprimidos por administração",
-          "aproximado": "{quantidade} comprimidos por administração",
+          "multiplo": "{quantidade} comprimido por administração | {quantidade} comprimidos por administração",
           "arredondado": "a conta deu {calculado}; confirme o arredondamento"
         },
         "aCadaHoras": "a cada {horas} h",
@@ -4479,6 +4491,7 @@
       "controlada": "Controle especial · Portaria 344/98",
       "semPrescricao": "Nenhuma prescrição para emitir.",
       "confirmeAlergia": "Confirme a alergia na prescrição para assinar.",
+      "desatualizada": "A prescrição mudou depois desta assinatura. Assine de novo para enviar a versão atual.",
       "vistaDoResponsavel": "Como o responsável vê",
       "lembrete": "Vira lembrete no app: {quantidade}, {frequencia}",
       "lembreteContinuo": "Lembrete contínuo, sem data de fim",
@@ -4542,7 +4555,7 @@
         "cobertura": "cobertura de {dias} d",
         "semCobertura": "sem saída no período",
         "recebidoEm": "recebido em {data} · {total} doses",
-        "saidas": "{aplicadas} aplicadas · {perdidas} perdidas",
+        "saidas": "aplicadas: {aplicadas} · perdidas: {perdidas}",
         "custoUnitario": "{valor} por dose",
         "semConsumo": "Nenhuma dose aplicada no período.",
         "semLotes": "Nenhum lote registrado",
@@ -5010,8 +5023,9 @@
         "primeiraDica": "Em quantas horas, a partir de agora.",
         "criar": "Prescrever",
         "proxima": "Próxima às {hora}",
-        "feitas": "{total} administradas",
-        "por": "por {nome}",
+        "feitas": "{total} administrada | {total} administradas",
+        "registradas": "{total} registro | {total} registros",
+        "por": "prescrito por {nome}",
         "suspender": "Suspender",
         "suspenderAlvo": "Suspender {item}. O que já foi dado continua no registro.",
         "motivo": "Motivo",
@@ -6890,6 +6904,8 @@
       "quemRetira": "Quem está levando",
       "registrarPeso": "Registrar peso",
       "saidaTardia": "Saída depois do horário: {percentual}% de diária a mais.",
+      "devolver": "Devolver ao responsável",
+      "devolverNoBalcao": "O que foi pago passou da conta das noites usadas: devolva no balcão, na hora da entrega.",
       "saldo": "Saldo a receber",
       "titulo": "Check-out de {pet}",
       "voltarALista": "Voltar à lista",
@@ -7030,6 +7046,7 @@
         "saiu": "saiu",
         "saldo": "Saldo",
         "saldoDetalhe": "a receber na saída",
+        "saldoDevolver": "a devolver na saída",
         "semPesagem": "sem pesagem de saída"
       },
       "subtitulo": "Hotel",
@@ -7061,6 +7078,7 @@
           "receber": "Receber {valor}",
           "quitado": "Nada a receber",
           "saldoNoBalcao": "Cobrado no balcão, na hora da entrega.",
+          "devolver": "Devolver {valor}",
           "titulo": "O que falta para liberar",
           "tituloEncerrada": "Saída",
           "descricao": "Saída prevista para {quando}.",
@@ -7400,6 +7418,7 @@
         "temporada": "Acréscimo de temporada"
       },
       "pago": "Já pago",
+      "devolvido": "Devolvido ao responsável",
       "quantidade": "Qtd.",
       "saldo": "Saldo a receber",
       "sinalSugerido": "Sinal sugerido",
@@ -7534,7 +7553,7 @@
       "autorizados": "Quem pode buscar",
       "avisoAdmissao": "Documentação a resolver antes da entrada: {itens}",
       "checkInBloqueado": "O check-in está bloqueado pela documentação pendente.",
-      "chegaAs": "chega às",
+      "chegaAs": "Chega às",
       "confirmarSinal": "Registrar sinal e confirmar",
       "criar": "Criar reserva",
       "diarias": "{total} diária | {total} diárias",
@@ -7542,6 +7561,7 @@
         "abrir": "Alterar datas",
         "agora": "Reserva atual: {acomodacao}, {periodo}.",
         "conta": "Nova conta: {novo} (antes {antes}).",
+        "feito": "Reserva alterada: {acomodacao}, {periodo}.",
         "datas": "Entrada e saída",
         "escolha": "Escolha a acomodação",
         "novaSaida": "Nova data de saída",
@@ -7553,7 +7573,17 @@
       "animalJaReservado": "{pet} já tem reserva nesse período ({acomodacao}, {periodo}). Ajuste ou cancele aquela antes de criar outra.",
       "escolhaHospede": "Escolha o animal",
       "exigencias": "Documentação de admissão",
-      "hospedeNaoEncontrado": "Nenhum animal com esse nome no cadastro do hotel.",
+      "hospedeNaoEncontrado": "Nenhum animal com esse nome no cadastro do hotel. Primeira vez? Use \"Animal novo\".",
+      "novo": {
+        "abrir": "Animal novo",
+        "voltar": "Escolher do cadastro",
+        "nome": "Nome do animal",
+        "especie": "Espécie",
+        "porte": "Porte",
+        "responsavel": "Responsável",
+        "celular": "Celular com DDD",
+        "dica": "Primeira vez no hotel: o resto do cadastro (raça, carteira de vacinação, veterinário) fica para o check-in."
+      },
       "fazerCheckIn": "Fazer check-in",
       "hospede": "Hóspede",
       "irParaEstadia": "Abrir estadia",
@@ -7566,8 +7596,9 @@
       "periodo": "Período",
       "porDiaria": " por diária",
       "quantasNoites": "Noites",
-      "saiAs": "sai às",
+      "saiAs": "Sai às",
       "saidaTardia": "A saída prevista é depois do horário: {valor} a mais na conta.",
+      "saidaAtrasada": "Passou da saída prevista: entregando agora, são {valor} a mais na conta.",
       "semAcompanhante": "Sem acompanhante",
       "semServico": "Nenhum serviço",
       "semVaga": "Esta acomodação não serve para esse período: {motivo}",
@@ -7581,6 +7612,7 @@
         "naoEncontradaTitulo": "Reserva não encontrada",
         "naoEncontradaDescricao": "O endereço pode estar incompleto, ou a reserva não existe mais. Volte para a lista de reservas.",
         "registrarComprovante": "Registrar comprovante",
+        "mais": "Mais ações",
         "sinalConfirmar": "Registrar e confirmar",
         "sinalSugerido": "Sinal sugerido: {valor}",
         "sinalValor": "Quanto o responsável pagou de sinal",
@@ -8448,7 +8480,8 @@
         "juntos": "Juntos, na mesma acomodação",
         "semExtras": "Sem extras",
         "hotelEscolhe": "O hotel escolhe",
-        "semVaga": "Sem {tipo} livre"
+        "semVaga": "Sem {tipo} livre",
+        "jaTemReserva": "Já tem reserva: {acomodacao}, {periodo}"
       },
       "gaveta": {
         "titulo": "Pedido de {nomes}",

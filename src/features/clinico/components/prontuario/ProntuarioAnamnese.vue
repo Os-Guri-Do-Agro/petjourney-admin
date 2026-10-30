@@ -128,6 +128,35 @@ function adicionarAntecedente() {
   novoQuando.value = ''
 }
 
+const campoDescricao = ref<{ $el: HTMLInputElement } | null>(null)
+const campoQuando = ref<{ $el: HTMLInputElement } | null>(null)
+
+/**
+ * `Enter` na descrição vai para o "Quando", e é o `Enter` do "Quando" que adiciona.
+ *
+ * Antes a descrição já adicionava: o antecedente entrava sem data, o foco caía no "Quando" da
+ * linha nova e a data digitada ficava lá, órfã, sem antecedente. Sem descrição não há o que
+ * adicionar, e o `Enter` não faz nada.
+ */
+function enterNaDescricao() {
+  if (!podeAdicionar.value) {
+    return
+  }
+
+  campoQuando.value?.$el.focus()
+}
+
+function enterNoQuando() {
+  if (!podeAdicionar.value) {
+    campoDescricao.value?.$el.focus()
+
+    return
+  }
+
+  adicionarAntecedente()
+  campoDescricao.value?.$el.focus()
+}
+
 function removerAntecedente(id: string) {
   emit('atualizar', {
     antecedentes: props.valor.antecedentes.filter((item) => item.id !== id),
@@ -401,18 +430,20 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
           :pt="{ overlay: { class: 'clinic-overlay' } }"
         />
         <InputText
+          ref="campoDescricao"
           v-model="novaDescricao"
           :placeholder="t('clinico.prontuario.anamnese.antecedenteExemplo')"
           :aria-label="t('clinico.prontuario.nova.anamnese.descricaoDoAntecedente')"
           class="novo__descricao"
-          @keydown.enter.prevent="adicionarAntecedente"
+          @keydown.enter.prevent.stop="enterNaDescricao"
         />
         <InputText
+          ref="campoQuando"
           v-model="novoQuando"
           :placeholder="t('clinico.prontuario.anamnese.antecedenteQuando')"
           :aria-label="t('clinico.prontuario.anamnese.antecedenteQuando')"
           class="novo__quando"
-          @keydown.enter.prevent="adicionarAntecedente"
+          @keydown.enter.prevent.stop="enterNoQuando"
         />
         <Button
           type="button"

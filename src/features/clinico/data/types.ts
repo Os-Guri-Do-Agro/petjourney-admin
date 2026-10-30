@@ -1510,6 +1510,8 @@ export type DiagnosisCatalogItem = {
   codigo: string
   descricao: string
   sistema: SystemKey | null
+  /** Só para o diagnóstico que não existe em toda espécie. Sem a lista, vale para qualquer uma. */
+  especies?: PetSpecies[]
 }
 
 export type ExamCatalogItem = {

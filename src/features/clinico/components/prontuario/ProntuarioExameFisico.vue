@@ -40,7 +40,7 @@ import type {
   VitalKey,
 } from '../../data/types'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import { medicaoPreenchida, statusDaMedicao } from '../../domain/ranges'
+import { statusDaMedicao } from '../../domain/ranges'
 import { useClinicoStore } from '../../stores/clinico'
 
 const props = defineProps<{
@@ -104,7 +104,18 @@ const opcoesAchado = computed(() =>
   })),
 )
 
-const aferidos = computed(() => VITAIS.filter((vital) => medicaoPreenchida(medicao(vital))).length)
+/**
+ * Aferido é o que foi medido. O "não aferido" é registro (completa a etapa), mas contá-lo aqui
+ * dava "7 de 7 aferidos" com a pressão marcada como não aferida logo abaixo.
+ */
+const aferidos = computed(
+  () =>
+    VITAIS.filter((vital) => {
+      const atual = medicao(vital)
+
+      return !atual.naoAferido && atual.valor !== null
+    }).length,
+)
 
 const alterados = computed(
   () =>
@@ -269,36 +280,49 @@ function situacaoDe(vital: VitalKey) {
             :model-value="medicao(vital).valor"
             :min-fraction-digits="casasDe(vital)"
             :max-fraction-digits="casasDe(vital)"
-            :suffix="unidadeDe(vital) ? ` ${unidadeDe(vital)}` : undefined"
+            :suffix="unidadeDe(vital) ? formato.comUnidade(unidadeDe(vital)) : undefined"
             :placeholder="medicao(vital).naoAferido ? t('clinico.prontuario.naoAferido') : ''"
             :disabled="somenteLeitura || medicao(vital).naoAferido"
             fluid
             @update:model-value="aplicarVital(vital, { valor: $event ?? null })"
           />
 
+          <!--
+            O rodapé tem duas colunas: a leitura (julgamento e faixa), que quebra linha dentro
+            da dela, e o "não medir", sempre na primeira linha à direita. Solto no mesmo fluxo,
+            ele descia para a linha de baixo em uns vitais e não em outros, conforme o tamanho
+            da faixa.
+          -->
           <span class="vital__rodape">
-            <span
-              v-if="situacaoDe(vital) === 'acima' || situacaoDe(vital) === 'abaixo'"
-              class="ui-selo ui-selo--risco vital__situacao"
-            >
-              <i
-                :class="situacaoDe(vital) === 'acima' ? 'ph ph-arrow-up' : 'ph ph-arrow-down'"
-                aria-hidden="true"
-              />
-              {{ formato.statusDeFaixa(situacaoDe(vital)!) }}
-            </span>
-            <span v-else-if="situacaoDe(vital) === 'dentro'" class="vital__ok">
-              <i class="ph ph-check" aria-hidden="true" />
-              {{ formato.statusDeFaixa('dentro') }}
-            </span>
-            <span v-if="faixaDe(vital)" class="vital__faixa ui-num">
-              {{ formato.faixaDeReferencia(faixaDe(vital)) }}
+            <span class="vital__leitura">
+              <span
+                v-if="situacaoDe(vital) === 'acima' || situacaoDe(vital) === 'abaixo'"
+                class="ui-selo ui-selo--risco vital__situacao"
+              >
+                <i
+                  :class="situacaoDe(vital) === 'acima' ? 'ph ph-arrow-up' : 'ph ph-arrow-down'"
+                  aria-hidden="true"
+                />
+                {{ formato.statusDeFaixa(situacaoDe(vital)!) }}
+              </span>
+              <span v-else-if="situacaoDe(vital) === 'dentro'" class="vital__ok">
+                <i class="ph ph-check" aria-hidden="true" />
+                {{ formato.statusDeFaixa('dentro') }}
+              </span>
+              <span v-if="faixaDe(vital)" class="vital__faixa ui-num">
+                {{ formato.faixaDeReferencia(faixaDe(vital)) }}
+              </span>
             </span>
 
-            <!-- Depois do campo, no DOM e na tela: o Tab e o Enter passam pelo número primeiro. -->
+            <!--
+              Depois do campo no DOM: o Tab passa pelo número primeiro. Fora do avanço por
+              Enter: com ele na sequência, "8,3 Enter 38,6 Enter" caía aqui e o segundo Enter
+              apagava o peso e o marcava como não aferido.
+            -->
             <button
               type="button"
               class="vital__marcar"
+              data-fora-do-teclado
               :aria-pressed="medicao(vital).naoAferido"
               :disabled="somenteLeitura"
               @click="
@@ -549,7 +573,16 @@ function situacaoDe(vital: VitalKey) {
 }
 
 .vital__rodape {
+  display: grid;
+  min-height: 22px;
+  align-items: start;
+  gap: 4px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.vital__leitura {
   display: flex;
+  min-width: 0;
   min-height: 22px;
   flex-wrap: wrap;
   align-items: center;
@@ -643,14 +676,24 @@ function situacaoDe(vital: VitalKey) {
   font-weight: 500;
 }
 
+/*
+ * A nota desce para a linha de baixo, sob a escolha, e vai até a borda. Na terceira coluna ela
+ * ficava com o que sobrava depois do grupo (130 px com o histórico aberto) e o achado escrito
+ * ("Dor à extensão do quadril esquerdo, sem crepitação") se lia como "aveta negativo".
+ */
 .sistema__nota.p-inputtext {
   width: 100%;
   padding-block: 7px;
+  grid-column: 2 / -1;
 }
 
 @media (max-width: 900px) {
   .sistema {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sistema__nota.p-inputtext {
+    grid-column: 1 / -1;
   }
 }
 </style>

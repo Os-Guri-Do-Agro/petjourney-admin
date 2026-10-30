@@ -187,8 +187,14 @@ const legendaDoPrazo = computed(() => {
 
 const sugestao = computed(() => props.linha.sugestao)
 
+/*
+ * O animal já tem reserva que cruza o pedido: o botão cheio sumia a reserva de lá para cá, e o
+ * aceite criava a segunda baia para o mesmo cão. Fica só o Responder, com o porquê na linha.
+ */
+const jaReservado = computed(() => props.linha.reservaDoAnimal)
+
 const acaoPrincipal = computed(() => {
-  if (!sugestao.value) {
+  if (!sugestao.value || jaReservado.value) {
     return null
   }
 
@@ -286,7 +292,19 @@ const rotuloDoCanal = computed(() => t(`hotel.pedidos.canal.${pedido.value.canal
         />
       </span>
 
-      <span v-if="semVagaNoTipo" class="pedido__detalhe pedido__detalhe--atencao">
+      <span
+        v-if="jaReservado"
+        class="pedido__detalhe pedido__detalhe--atencao pedido__detalhe--quebra"
+      >
+        <i class="ph ph-calendar-x" aria-hidden="true" />
+        {{
+          t('hotel.pedidos.linha.jaTemReserva', {
+            acomodacao: jaReservado.acomodacao,
+            periodo: formato.periodo(jaReservado.entrada, jaReservado.saida),
+          })
+        }}
+      </span>
+      <span v-else-if="semVagaNoTipo" class="pedido__detalhe pedido__detalhe--atencao">
         <i class="ph ph-warning-circle" aria-hidden="true" />
         {{ t('hotel.pedidos.linha.semVaga', { tipo: tipoPedido }) }}
       </span>
@@ -429,9 +447,12 @@ const rotuloDoCanal = computed(() => t(`hotel.pedidos.canal.${pedido.value.canal
   flex: none;
 }
 
-/* Dois pets da mesma casa: os rostos se sobrepõem, como uma ficha só. */
+/*
+ * Dois pets da mesma casa: os rostos se sobrepõem, como uma ficha só. Só a borda: com 12 px o
+ * segundo cobria a última letra do primeiro ("BE" lia "B").
+ */
 .pedido__rostos--grupo > * + * {
-  margin-inline-start: -12px;
+  margin-inline-start: -8px;
   border-radius: 50%;
   box-shadow: 0 0 0 2px var(--superficie);
 }
@@ -518,6 +539,12 @@ const rotuloDoCanal = computed(() => t(`hotel.pedidos.canal.${pedido.value.canal
   font-size: 13px;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* O motivo que trava o aceite não pode sumir no corte: quebra em duas linhas. */
+.pedido__detalhe.pedido__detalhe--quebra {
+  align-items: flex-start;
+  white-space: normal;
 }
 
 .pedido__detalhe--atencao {

@@ -417,14 +417,15 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
 
     <!--
       Nenhuma ação cheia no alto: a ação desta tela é responder, e ela mora em cada linha. Em cima
-      ficam as duas portas da configuração e, mais leve, a prévia do celular.
+      ficam a prévia do celular e as duas portas da configuração, as três em contorno.
     -->
     <template #acoes>
+      <!-- Contorno, como os vizinhos: em texto solto sobre a faixa sálvia, a tinta dava 3,8:1. -->
       <Button
         type="button"
         class="pedidos__celular"
         severity="secondary"
-        text
+        outlined
         icon="ph ph-device-mobile"
         :label="t('clinico.pedidos.tela.verComoPede')"
         :aria-expanded="appAberto"

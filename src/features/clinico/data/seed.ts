@@ -36,6 +36,7 @@ import {
   petsFixture,
   tutorsFixture,
   professionalsFixture,
+  referenceRangesFixture,
   roomsFixture,
 } from './fixtures'
 import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
@@ -69,6 +70,7 @@ import {
   gerarDiario,
   petsDoResumo,
 } from './seed-resumo'
+import { nomeDaConta } from './identidade-da-conta'
 import { planosDeEstoquePlantados } from './seed-estoque'
 import { agendamentoOnlinePadrao, contasSoNoApp, semearPedidos } from './seed-pedidos'
 import { aplicacoesDaVacinacao, eventosDaVacinacao, petsDaVacinacao } from './seed-vacinacao'
@@ -97,6 +99,7 @@ import type {
   PedidoDeHorario,
   PesagemDeCasa,
   Pet,
+  PetSpecies,
   PlanoDeEstoque,
   Prescription,
   Professional,
@@ -533,7 +536,9 @@ function feriadosDoAno(ancora: ISODate): Holiday[] {
     { date: `${ano}-05-01`, nome: 'Dia do Trabalho', fechado: true },
     { date: `${ano}-09-07`, nome: 'Independência', fechado: true },
     { date: `${ano}-10-12`, nome: 'Nossa Senhora Aparecida', fechado: true },
+    { date: `${ano}-11-02`, nome: 'Finados', fechado: true },
     { date: `${ano}-11-15`, nome: 'Proclamação da República', fechado: true },
+    { date: `${ano}-11-20`, nome: 'Consciência Negra', fechado: true },
     { date: `${ano}-12-25`, nome: 'Natal', fechado: true },
   ]
 }
@@ -612,42 +617,230 @@ export function encounterVazio(appointment: Appointment, abertoEm: string): Enco
   }
 }
 
+/**
+ * O que cada diagnóstico do catálogo traz junto: em que paciente ele existe, como o responsável
+ * conta o problema, o que o exame acha e o que se prescreve.
+ *
+ * Antes o diagnóstico era sorteado do catálogo inteiro e o resto não conversava com ele: a Açaí
+ * (cadela) tinha "Cistite idiopática felina", o Jack saía da displasia com furosemida, a Nina
+ * (alérgica a dipirona) recebia dipirona, todo exame achava dor no abdome e a queixa principal
+ * era o nome da doença. Uma veterinária lê a ficha e conclui que o dado é inventado.
+ */
+type PerfilDoDiagnostico = {
+  especies: readonly PetSpecies[]
+  /** Raças em que o diagnóstico faz sentido; sem a lista, qualquer uma da espécie. */
+  racas?: readonly string[]
+  /** A queixa é o sinal que o responsável viu, não o nome da doença. */
+  queixa: string
+  /** O achado do exame no sistema do diagnóstico. Nulo: exame sem alteração. */
+  achado: string | null
+  /** Só doença que costuma vir com febre leva a temperatura acima da faixa. */
+  febre: boolean
+  /** O que trata o caso, na ordem em que se pensa nele. */
+  medicamentos: readonly string[]
+}
+
+const TODAS_AS_ESPECIES: readonly PetSpecies[] = [
+  'canina',
+  'felina',
+  'ave',
+  'roedor',
+  'reptil',
+  'equina',
+]
+
+const PERFIS: Record<string, PerfilDoDiagnostico> = {
+  'GE-01': {
+    especies: TODAS_AS_ESPECIES,
+    queixa: 'Vômito e fezes amolecidas desde ontem',
+    achado: 'Dor à palpação em abdome cranial.',
+    febre: true,
+    medicamentos: ['med-maropitant', 'med-ondansetrona', 'med-omeprazol', 'med-metronidazol'],
+  },
+  'DR-04': {
+    especies: ['canina', 'felina'],
+    queixa: 'Coceira intensa no dorso e na base da cauda',
+    achado: 'Pápulas e crostas na região lombossacra; pulgas visíveis.',
+    febre: false,
+    medicamentos: ['med-prednisolona', 'med-cefalexina'],
+  },
+  'DR-09': {
+    especies: ['canina', 'felina'],
+    queixa: 'Balança a cabeça e coça a orelha',
+    achado: 'Conduto auditivo eritematoso, com secreção e odor.',
+    febre: false,
+    medicamentos: ['med-amoxicilina', 'med-prednisolona'],
+  },
+  'CV-02': {
+    especies: ['canina'],
+    queixa: 'Tosse à noite e cansaço nos passeios',
+    achado: 'Sopro sistólico em foco mitral.',
+    febre: false,
+    medicamentos: ['med-furosemida'],
+  },
+  'UR-03': {
+    especies: ['canina', 'felina'],
+    queixa: 'Bebe muita água e está emagrecendo',
+    achado: 'Rins pequenos e irregulares à palpação.',
+    febre: false,
+    medicamentos: ['med-maropitant', 'med-omeprazol'],
+  },
+  'UR-07': {
+    especies: ['felina'],
+    queixa: 'Vai muitas vezes à caixa de areia e urina pouco',
+    achado: 'Bexiga pequena e dolorida à palpação.',
+    febre: false,
+    medicamentos: ['med-tramadol'],
+  },
+  'LO-05': {
+    especies: ['canina'],
+    queixa: 'Manca da pata traseira ao levantar',
+    achado: 'Dor à extensão do quadril, sem crepitação.',
+    febre: false,
+    medicamentos: ['med-meloxicam', 'med-carprofeno', 'med-dipirona'],
+  },
+  'LO-11': {
+    especies: ['canina'],
+    queixa: 'Dor nas costas, evita pular no sofá',
+    achado: 'Dor à palpação toracolombar; propriocepção preservada.',
+    febre: false,
+    medicamentos: ['med-meloxicam', 'med-tramadol', 'med-dipirona'],
+  },
+  'RE-02': {
+    especies: ['canina', 'felina'],
+    racas: ['Bulldog Francês', 'Shih Tzu', 'Lhasa Apso', 'Persa', 'Pug', 'Boxer'],
+    queixa: 'Ronco alto e cansaço no calor',
+    achado: 'Narinas estenóticas e estridor inspiratório.',
+    febre: false,
+    medicamentos: ['med-prednisolona'],
+  },
+  'NE-06': {
+    especies: ['canina', 'felina', 'roedor'],
+    queixa: 'Cabeça inclinada e anda em círculos',
+    achado: 'Inclinação de cabeça e nistagmo horizontal.',
+    febre: false,
+    medicamentos: ['med-maropitant'],
+  },
+  'LF-01': {
+    especies: ['canina', 'felina'],
+    queixa: 'Apareceu um caroço no pescoço',
+    achado: 'Linfonodos submandibulares aumentados, móveis e indolores.',
+    febre: true,
+    medicamentos: ['med-amoxicilina', 'med-cefalexina'],
+  },
+  'GN-00': {
+    especies: TODAS_AS_ESPECIES,
+    queixa: 'Check-up anual',
+    achado: null,
+    febre: false,
+    medicamentos: [],
+  },
+}
+
+function perfilDe(codigo: string): PerfilDoDiagnostico {
+  return PERFIS[codigo] ?? PERFIS['GN-00']!
+}
+
+function cabeNoPaciente(codigo: string, pet: Pet): boolean {
+  const perfil = perfilDe(codigo)
+
+  return (
+    perfil.especies.includes(pet.especie) &&
+    (perfil.racas === undefined || perfil.racas.includes(pet.raca))
+  )
+}
+
+/**
+ * Sinal vital típico da espécie, pela faixa de referência dela; com febre, um pouco acima.
+ *
+ * Cão e gato mantêm os números de sempre. Ave, roedor e equino recebem o meio da faixa deles (um
+ * cavalo com 104 bpm ou uma calopsita com 38,4 °C saíam marcados como fora da faixa); sem faixa
+ * cadastrada (réptil), o vital fica como não aferido.
+ */
+function vitalTipico(
+  vital: 'temperatura' | 'frequenciaCardiaca' | 'frequenciaRespiratoria',
+  pet: Pet,
+  febre: boolean,
+): Measurement {
+  const comuns: Record<string, Record<typeof vital, number>> = {
+    canina: {
+      temperatura: febre ? 39.9 : 38.4,
+      frequenciaCardiaca: 104,
+      frequenciaRespiratoria: 28,
+    },
+    felina: {
+      temperatura: febre ? 40.1 : 38.6,
+      frequenciaCardiaca: 180,
+      frequenciaRespiratoria: 28,
+    },
+  }
+
+  const conhecido = comuns[pet.especie]?.[vital]
+
+  if (conhecido !== undefined) {
+    return medicao(conhecido)
+  }
+
+  const faixa = referenceRangesFixture.find(
+    (item) =>
+      item.vital === vital &&
+      item.especie === pet.especie &&
+      item.porte === undefined &&
+      item.faixaEtaria === undefined,
+  )
+
+  if (!faixa) {
+    return medicao(null, true)
+  }
+
+  const casas = 10 ** faixa.precisao
+  const valor = vital === 'temperatura' && febre ? faixa.max + 0.7 : (faixa.min + faixa.max) / 2
+
+  return medicao(Math.round(valor * casas) / casas)
+}
+
 function encounterPreenchido(appointment: Appointment, pet: Pet, rng: () => number): Encounter {
   const base = encounterVazio(appointment, appointment.inicio)
 
   /**
    * Cirurgia sorteia entre os diagnósticos que levam alguém à mesa. Sorteando do catálogo
    * inteiro saía "Cirurgia — Dermatite alérgica a pulgas", e quem entende do assunto para de
-   * ler a tela ali.
+   * ler a tela ali. E nenhum sorteio sai da espécie (e da raça, quando ela importa) do paciente.
    */
+  const doPaciente = diagnosisCatalogFixture.filter((item) => cabeNoPaciente(item.codigo, pet))
+  const daMesa = doPaciente.filter((item) => item.sistema === 'locomotor')
   const catalogo =
-    tipoPorId(appointment.typeId).kind === 'cirurgia'
-      ? diagnosisCatalogFixture.filter((item) => item.sistema === 'locomotor')
-      : diagnosisCatalogFixture
+    tipoPorId(appointment.typeId).kind === 'cirurgia' && daMesa.length > 0 ? daMesa : doPaciente
 
   const diagnostico = pickFrom(rng, catalogo, diagnosisCatalogFixture[0]!)
+  const perfil = perfilDe(diagnostico.codigo)
   const foraDaFaixa = rng() < 0.35
+  const comFebre = foraDaFaixa && perfil.febre
+
+  const sistemas: ExameFisico['sistemas'] = {
+    ...base.exameFisico.sistemas,
+    cardiovascular: { status: 'normal', nota: '' },
+    digestorio: { status: 'normal', nota: '' },
+  }
+
+  /* O exame acha o que sustenta o diagnóstico, no sistema dele. */
+  if (perfil.achado && diagnostico.sistema) {
+    sistemas[diagnostico.sistema] = { status: 'alterado', nota: perfil.achado }
+  }
 
   const exameFisico: ExameFisico = {
     ...base.exameFisico,
     vitais: {
       ...base.exameFisico.vitais,
       peso: medicao(pet.pesoKg),
-      temperatura: medicao(foraDaFaixa ? 39.9 : 38.4),
-      frequenciaCardiaca: medicao(pet.especie === 'felina' ? 180 : 104),
-      frequenciaRespiratoria: medicao(28),
+      temperatura: vitalTipico('temperatura', pet, comFebre),
+      frequenciaCardiaca: vitalTipico('frequenciaCardiaca', pet, false),
+      frequenciaRespiratoria: vitalTipico('frequenciaRespiratoria', pet, false),
       tempoPreenchimentoCapilar: medicao(null, true),
       escoreCorporal: medicao(intBetween(rng, 3, 7)),
       pressaoSistolica: medicao(null, true),
     },
-    sistemas: {
-      ...base.exameFisico.sistemas,
-      cardiovascular: { status: 'normal', nota: '' },
-      digestorio: {
-        status: foraDaFaixa ? 'alterado' : 'normal',
-        nota: foraDaFaixa ? 'Dor à palpação em abdome cranial.' : '',
-      },
-    },
+    sistemas,
     observacao: '',
   }
 
@@ -669,9 +862,14 @@ function encounterPreenchido(appointment: Appointment, pet: Pet, rng: () => numb
 
   /** Um segundo diagnóstico em parte dos casos, para a coluna "+1" da lista existir. */
   if (rng() < 0.3) {
-    const outro = pickFrom(rng, diagnosisCatalogFixture, diagnosisCatalogFixture[0]!)
+    const outro = pickFrom(rng, doPaciente, diagnosisCatalogFixture[0]!)
 
-    if (outro.codigo !== diagnostico.codigo) {
+    /* Diferencial é hipótese de doença: "check-up sem alterações" não é nem tem diferencial. */
+    if (
+      outro.codigo !== diagnostico.codigo &&
+      outro.codigo !== 'GN-00' &&
+      diagnostico.codigo !== 'GN-00'
+    ) {
       diagnosticos.push({
         id: `diag-${appointment.id}-2`,
         codigo: outro.codigo,
@@ -687,7 +885,7 @@ function encounterPreenchido(appointment: Appointment, pet: Pet, rng: () => numb
     finalizadoEm: appointment.fim,
     anamnese: {
       ...base.anamnese,
-      queixaPrincipal: diagnostico.descricao,
+      queixaPrincipal: perfil.queixa,
       historia: 'Responsável relata início dos sinais há poucos dias, sem outros animais afetados.',
       duracaoSintomas: `${intBetween(rng, 1, 9)} dias`,
       apetite: rng() < 0.5 ? 'reduzido' : 'normal',
@@ -703,11 +901,12 @@ function encounterPreenchido(appointment: Appointment, pet: Pet, rng: () => numb
       ...condutaVazia(),
       orientacoes: orientacaoDe(diagnostico.codigo),
       /**
-       * Toda consulta finalizada sai com prescrição. Antes nenhuma saía, e o bloco de
+       * Consulta finalizada sai com a prescrição do caso. Antes nenhuma saía, e o bloco de
        * medicamentos — o mais delicado do prontuário, com dose calculada e conferência de
-       * alergia — nunca aparecia numa demonstração nem numa folha impressa.
+       * alergia — nunca aparecia numa demonstração nem numa folha impressa. O check-up sem
+       * alterações sai sem remédio, como sairia de verdade.
        */
-      prescricoes: montarPrescricoes(appointment, pet, rng),
+      prescricoes: montarPrescricoes(appointment, pet, perfil, rng),
       examesSolicitados: sortearExames(rng),
       retorno: {
         emDias: pickFrom(rng, [7, 15, 30, null], 15),
@@ -749,16 +948,40 @@ function orientacaoDe(codigo: string): string {
  * Prescrição com a dose já calculada pelo mesmo domínio que a tela usa — nada de número
  * inventado no dado de mentira, senão a demonstração mostra uma conta que o produto não faz.
  *
- * Quando o paciente tem alergia registrada ao princípio ativo sorteado, a prescrição nasce
- * **confirmada**: no histórico ela já foi decidida. O caso pendente de confirmação é plantado à
- * parte, no rascunho de hoje, que é onde a interface precisa cobrar a decisão.
+ * O remédio sai do que trata o diagnóstico, e a dose, o intervalo e a duração saem da linha da
+ * espécie no bulário. Antes eram sorteados do catálogo inteiro, com intervalo de 8, 12 ou 24 h
+ * à sorte: furosemida para displasia, maropitant a cada 12 h, carprofeno para gato (que o próprio
+ * bulário proíbe). Remédio sem dose para a espécie, proibido nela ou ao qual o paciente é
+ * alérgico não entra: o caso da alergia a confirmar é plantado à parte, no rascunho de hoje.
  */
-function montarPrescricoes(appointment: Appointment, pet: Pet, rng: () => number): Prescription[] {
-  const quantidade = rng() < 0.35 ? 2 : 1
+function montarPrescricoes(
+  appointment: Appointment,
+  pet: Pet,
+  perfil: PerfilDoDiagnostico,
+  rng: () => number,
+): Prescription[] {
+  const candidatos = perfil.medicamentos
+    .map((id) => medicationsFixture.find((item) => item.id === id))
+    .filter((medicamento): medicamento is Medication => {
+      if (!medicamento) {
+        return false
+      }
+
+      const dose = medicamento.doses.find((item) => item.especie === pet.especie)
+
+      return (
+        dose !== undefined &&
+        !dose.proibido &&
+        dose.mgPorKg.max > 0 &&
+        alergiaConflitante(pet, medicamento) === null
+      )
+    })
+
+  const quantidade = Math.min(rng() < 0.35 ? 2 : 1, candidatos.length)
   const escolhidos: Medication[] = []
 
   while (escolhidos.length < quantidade) {
-    const candidato = pickFrom(rng, medicationsFixture, medicationsFixture[0] as Medication)
+    const candidato = pickFrom(rng, candidatos, candidatos[0] as Medication)
 
     if (!escolhidos.some((item) => item.id === candidato.id)) {
       escolhidos.push(candidato)
@@ -766,11 +989,10 @@ function montarPrescricoes(appointment: Appointment, pet: Pet, rng: () => number
   }
 
   return escolhidos.map((medicamento, indice) => {
-    const mgPorKg =
-      medicamento.doseUsualMgKg.min +
-      (medicamento.doseUsualMgKg.max - medicamento.doseUsualMgKg.min) * rng()
-    const frequencia = pickFrom(rng, [8, 12, 24], 12)
-    const duracao = pickFrom(rng, [5, 7, 10], 7)
+    const dose = medicamento.doses.find((item) => item.especie === pet.especie)!
+    const mgPorKg = dose.mgPorKg.min + (dose.mgPorKg.max - dose.mgPorKg.min) * rng()
+    const frequencia = dose.frequenciaHoras
+    const duracao = dose.duracaoUsualDias > 0 ? dose.duracaoUsualDias : 7
 
     const calculo = calcularDose({
       medicamento,
@@ -783,7 +1005,10 @@ function montarPrescricoes(appointment: Appointment, pet: Pet, rng: () => number
     return {
       id: `presc-${appointment.id}-${indice}`,
       medicamentoId: medicamento.id,
-      via: pickFrom(rng, medicamento.viasPermitidas, 'oral'),
+      /* Receita de consulta é para dar em casa: pela boca sempre que o remédio permite. */
+      via: medicamento.viasPermitidas.includes('oral')
+        ? 'oral'
+        : (medicamento.viasPermitidas[0] ?? 'oral'),
       calculo: calculo ?? {
         medicamentoId: medicamento.id,
         mgPorKg,
@@ -1792,7 +2017,7 @@ function atosPlantados(encounters: Encounter[], hoje: ISODate): AtoClinico[] {
       kind: 'medicamento',
       origem: 'clinica',
       medicamentoId: 'med-furosemida',
-      descricao: 'Furosemida — primeira dose supervisionada',
+      descricao: 'Furosemida, primeira dose supervisionada',
       via: 'oral',
       doseTexto: '35 mg',
       diasAtras: 60,
@@ -2573,6 +2798,16 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   )
 
   const outrosDias: Appointment[] = []
+  /*
+   * Feriado fechado não ganha atendimento de fundo: a agenda dizia "Clínica fechada" em Finados e
+   * no feriado municipal com a grade cheia. Cada dia tem o seu sorteio, então pular um não mexe
+   * nos outros. O dia âncora não passa por aqui: é a demonstração.
+   */
+  const diasFechados = new Set(
+    [...feriadosDoAno(ancora), diaFechadoProximo(ancora)]
+      .filter((feriado) => feriado.fechado)
+      .map((feriado) => feriado.date),
+  )
 
   for (let offset = -21; offset <= 21; offset += 1) {
     if (offset === 0) {
@@ -2581,7 +2816,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
 
     const data = addDays(ancora, offset)
 
-    if (isWeekend(data) && weekdayOf(data) === 0) {
+    if ((isWeekend(data) && weekdayOf(data) === 0) || diasFechados.has(data)) {
       continue
     }
 
@@ -2617,7 +2852,16 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   const encounters: Encounter[] = []
 
   for (const appointment of comStatus) {
-    if (appointment.status === 'finalizado' && rngEncounter() < 0.55) {
+    /*
+     * A consulta da alergia tem o prontuário plantado logo abaixo. Depois das 16:00 ela já está
+     * "finalizada" na agenda e, sem esta exceção, podia ganhar também um prontuário sorteado com
+     * o mesmo id: a rota abria o sorteado (finalizado, sem a dipirona) no lugar do caso.
+     */
+    if (
+      appointment.status === 'finalizado' &&
+      appointment.id !== 'apt-alergia' &&
+      rngEncounter() < 0.55
+    ) {
       encounters.push(encounterPreenchido(appointment, petPorId(appointment.petId), rngEncounter))
       appointment.encounterId = `enc-${appointment.id}`
     }
@@ -3031,7 +3275,8 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
   const duracaoDaConsulta = tipoPorId('tipo-consulta').duracaoMinutos
   const internacao = gerarInternacoes(semente)
 
-  const clinic: Clinic = { ...clinicFixture, feriados }
+  /* O nome é o da empresa que usa o portal (ver `identidade-da-conta.ts`). */
+  const clinic: Clinic = { ...clinicFixture, nome: nomeDaConta() ?? clinicFixture.nome, feriados }
 
   const pets = [
     ...petsFixture,

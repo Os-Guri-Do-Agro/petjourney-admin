@@ -174,36 +174,71 @@ const icone = computed(() => {
 /*
  * Os seis tons.
  *
- * Todos com contraste suficiente para texto branco, e todos dentro da paleta do portal — um avatar
- * roxo ou laranja ao lado de um selo âmbar diria "isto é um estado", e não é.
+ * Pastel, como toda cor do portal: o fundo claro da família com a tinta escura dela por cima
+ * (7,3:1 ou mais), e no escuro o inverso (8,3:1 ou mais). Eram cores cheias com letra branca, e
+ * seis discos fortes numa lista gritavam mais que os selos de estado ao lado.
+ *
+ * Os matizes são os de antes (sálvia, azul, lavanda, areia, musgo, barro), para a Mel não mudar de
+ * cor; a saturação fica abaixo da dos selos (oklch 0,045 contra 0,055 a 0,075), para o avatar não
+ * passar por "isto é um estado".
  */
 .avatar--tom-0 {
-  --avatar-fundo: #456a60;
-  --avatar-tinta: #f4f9f8;
+  --avatar-fundo: #bbe3d8;
+  --avatar-tinta: #004b3e;
 }
 
 .avatar--tom-1 {
-  --avatar-fundo: #3d6f8f;
-  --avatar-tinta: #f2f8fb;
+  --avatar-fundo: #bfdef4;
+  --avatar-tinta: #144460;
 }
 
 .avatar--tom-2 {
-  --avatar-fundo: #6b6a8f;
-  --avatar-tinta: #f6f5fb;
+  --avatar-fundo: #d6d6f6;
+  --avatar-tinta: #3c3a63;
 }
 
 .avatar--tom-3 {
-  --avatar-fundo: #7a6a4a;
-  --avatar-tinta: #faf7f0;
+  --avatar-fundo: #e7d7b8;
+  --avatar-tinta: #513c09;
 }
 
 .avatar--tom-4 {
-  --avatar-fundo: #5f7a52;
-  --avatar-tinta: #f5faf2;
+  --avatar-fundo: #cce0c3;
+  --avatar-tinta: #2e4821;
 }
 
 .avatar--tom-5 {
-  --avatar-fundo: #8a5f57;
-  --avatar-tinta: #fbf4f2;
+  --avatar-fundo: #f6cfc7;
+  --avatar-tinta: #5f3028;
+}
+
+.app-dark .avatar--tom-0 {
+  --avatar-fundo: #1e4239;
+  --avatar-tinta: #bce9dc;
+}
+
+.app-dark .avatar--tom-1 {
+  --avatar-fundo: #233e4f;
+  --avatar-tinta: #c0e4fc;
+}
+
+.app-dark .avatar--tom-2 {
+  --avatar-fundo: #383751;
+  --avatar-tinta: #dadaff;
+}
+
+.app-dark .avatar--tom-3 {
+  --avatar-fundo: #46391e;
+  --avatar-tinta: #eedcb9;
+}
+
+.app-dark .avatar--tom-4 {
+  --avatar-fundo: #304028;
+  --avatar-tinta: #d0e6c5;
+}
+
+.app-dark .avatar--tom-5 {
+  --avatar-fundo: #4f322c;
+  --avatar-tinta: #fed3ca;
 }
 </style>

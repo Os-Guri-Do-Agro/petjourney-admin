@@ -31,7 +31,7 @@ import AgendaDialogoTopo from './AgendaDialogoTopo.vue'
 import ClinicField from '../base/ClinicField.vue'
 import PacienteNovoForm from '../pacientes/PacienteNovoForm.vue'
 import { useClinicFormat } from '../../composables/useClinicFormat'
-import type { ISODate, Pet } from '../../data/types'
+import type { Conflict, ISODate, Pet } from '../../data/types'
 import { clockToMinutes, minutesToClock } from '../../domain/clinic-time'
 import { ordenarConflitos, severidadeMaxima } from '../../domain/conflicts'
 import { buscarAlternativas } from '../../domain/slots'
@@ -241,22 +241,67 @@ const rotuloDoBotao = computed(() =>
     : t('clinico.agenda.criar.agendarMesmoAssim'),
 )
 
+/** A sala de partida de quem atende: a dele, se o tipo aceita; senão a primeira que aceita. */
+function salaPara(profissional: string | null): string | null {
+  const doProfissional = profissional ? clinico.profissional(profissional)?.salaPadraoId : null
+  const permitida = opcoesSalas.value.find((opcao) => opcao.valor === doProfissional)
+
+  return permitida?.valor ?? opcoesSalas.value[0]?.valor ?? null
+}
+
 /**
- * Onde a hora começa ao abrir: no início do expediente, ou — hoje, com o dia já andando — no
+ * O que torna um horário tomado. Carga alta e sala de outro tipo continuam só avisos: abrir o
+ * formulário já num desses seria propor "Agendar mesmo assim" a quem nem escolheu nada.
+ */
+const TOMAM_O_HORARIO = new Set<Conflict['kind']>([
+  'professional-overlap',
+  'room-overlap',
+  'pet-double-book',
+  'block-invasion',
+  'lunch-overlap',
+  'outside-hours',
+  'holiday-closed',
+])
+
+/**
+ * Onde a hora começa ao abrir: no início do expediente, ou, hoje, com o dia já andando, no
  * próximo passo da agenda. Abrir às 17h30 com "08:00" preenchido marcava no passado quem não
- * conferisse a hora.
+ * conferisse a hora. Dali, anda até o primeiro horário livre de quem atende e da sala: a
+ * manutenção do Consultório 1 ou a consulta em curso não são proposta de horário.
  */
 function primeiroHorario(): number {
   const expediente = clockToMinutes(agenda.dia?.expediente?.inicio ?? '09:00')
+  const fimDoExpediente = clockToMinutes(agenda.dia?.expediente?.fim ?? '18:00')
   const agora = clinicClock.now()
+  const passo = clinico.clinic?.slotMinutos ?? 15
+  const partida =
+    agora.date !== props.data
+      ? expediente
+      : Math.max(expediente, Math.ceil(agora.minutes / passo) * passo)
 
-  if (agora.date !== props.data) {
-    return expediente
+  if (!professionalId.value || !typeId.value || agenda.clinicaFechada) {
+    return partida
   }
 
-  const passo = clinico.clinic?.slotMinutos ?? 15
+  const sala = salaPara(professionalId.value)
 
-  return Math.max(expediente, Math.ceil(agora.minutes / passo) * passo)
+  for (let minuto = partida; minuto + duracao.value <= fimDoExpediente; minuto += passo) {
+    const conflitos = agenda.conflitosDe({
+      petId: petId.value ?? '',
+      professionalId: professionalId.value,
+      roomIds: sala ? [sala] : [],
+      typeId: typeId.value,
+      inicio: clinicClock.toIso(props.data, minuto),
+      fim: clinicClock.toIso(props.data, minuto + duracao.value),
+      linkedGroupId: null,
+    })
+
+    if (!conflitos.some((conflito) => TOMAM_O_HORARIO.has(conflito.kind))) {
+      return minuto
+    }
+  }
+
+  return partida
 }
 
 /** Reabrir precisa começar limpo — formulário que guarda a escolha da vez passada agenda errado. */
@@ -272,6 +317,7 @@ watch(
     cadastrandoPaciente.value = false
     typeId.value = props.sugestaoTipo ?? clinico.tipos[0]?.id ?? null
     professionalId.value = props.sugestaoProfissional ?? clinico.profissionais[0]?.id ?? null
+    roomId.value = salaPara(professionalId.value)
 
     hora.value = minutesToClock(props.minutoInicial ?? primeiroHorario())
   },
@@ -279,13 +325,7 @@ watch(
 
 /** Trocar o tipo troca a sala: consultório não serve para cirurgia. */
 watch(typeId, () => {
-  const doProfissional = professionalId.value
-    ? clinico.profissional(professionalId.value)?.salaPadraoId
-    : null
-
-  const permitida = opcoesSalas.value.find((opcao) => opcao.valor === doProfissional)
-
-  roomId.value = permitida?.valor ?? opcoesSalas.value[0]?.valor ?? null
+  roomId.value = salaPara(professionalId.value)
 })
 
 /** O paciente recém-cadastrado já entra escolhido: ninguém o procuraria de novo na lista. */

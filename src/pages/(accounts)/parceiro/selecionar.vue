@@ -29,6 +29,20 @@ const mostrarCadastro = computed(
   () => !loading.value && !errorMessage.value && podeCadastrarNovaEmpresa(parceiros.value),
 )
 
+/**
+ * A frase da faixa. Com uma empresa só, "participa de mais de uma" não era verdade: o menu da conta
+ * leva aqui sempre, pelo "Trocar de empresa".
+ */
+const resumo = computed(() => {
+  if (loading.value) {
+    return ''
+  }
+
+  return opcoes.value.length === 1
+    ? t('parceiro.selecionar.bodyUma')
+    : t('parceiro.selecionar.body')
+})
+
 /** As iniciais do nome da empresa, para o rosto da linha ("Clínica Vida Animal" → "CV"). */
 function iniciais(nome: string) {
   return nome
@@ -100,12 +114,13 @@ onMounted(() => {
 
 <template>
   <!--
-    Uma pergunta só, no meio da tela: qual empresa operar agora. Cada empresa é uma linha inteira
-    clicável, com o papel na conta e o estado do cadastro; a que já está em uso diz isso.
+    Uma pergunta só: qual empresa operar agora. Cada empresa é uma linha inteira clicável, com o
+    papel na conta e o estado do cadastro; a que já está em uso diz isso.
   -->
   <UiPagina
     class="tela-selecionar"
-    :titulo="t('parceiro.selecionar.title')"
+    :titulo="t('shell.user.trocarEmpresa')"
+    :resumo="resumo"
     :carregando="loading"
     :erro="errorMessage"
     :vazio="!opcoes.length && !mostrarCadastro"
@@ -114,22 +129,6 @@ onMounted(() => {
     vazio-icone="ph ph-buildings"
     @tentar-de-novo="carregarPerfis"
   >
-    <template #cabecalho>
-      <div class="centro-cabeca">
-        <span class="ui-ladrilho ui-ladrilho--lugar centro-cabeca__selo" aria-hidden="true"><i class="ph ph-buildings" /></span>
-        <h1 class="centro-cabeca__titulo">{{ t('parceiro.selecionar.title') }}</h1>
-        <!-- Com uma empresa só, "participa de mais de uma" não era verdade: o menu da conta leva
-             aqui sempre, pelo "Trocar de empresa". -->
-        <p class="centro-cabeca__texto">
-          {{
-            !loading && opcoes.length === 1
-              ? t('parceiro.selecionar.bodyUma')
-              : t('parceiro.selecionar.body')
-          }}
-        </p>
-      </div>
-    </template>
-
     <div class="selecionar">
       <ul v-if="opcoes.length" class="ui-lista ui-folha selecionar__lista">
         <li v-for="opcao in opcoes" :key="opcao.parceiroId">
@@ -188,47 +187,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* A pergunta no centro: o selo, o título e a frase, alinhados à coluna da lista. */
-.centro-cabeca {
-  display: grid;
-  width: 100%;
-  max-width: 34rem;
-  justify-items: center;
-  gap: 8px;
-  margin: clamp(16px, 7vh, 80px) auto 0;
-  text-align: center;
-}
-
-.centro-cabeca__selo.ui-ladrilho {
-  width: 60px;
-  height: 60px;
-  border-radius: 18px;
-  font-size: 28px;
-}
-
-.centro-cabeca__titulo {
-  margin: 12px 0 0;
-  color: var(--tinta);
-  font-size: 28px;
-  font-weight: 650;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-.centro-cabeca__texto {
-  max-width: 44ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 15px;
-  line-height: 1.5;
-}
-
+/*
+ * A faixa de sempre em cima (título e frase) e a lista na largura da tela, como as outras listas
+ * do portal. Antes era uma coluna de 34rem no meio, com as bordas vazias dos dois lados.
+ */
 .selecionar {
   display: grid;
   width: 100%;
-  max-width: 34rem;
   gap: 14px;
-  margin: 8px auto 0;
 }
 
 .selecionar__lista {
@@ -245,13 +211,7 @@ onMounted(() => {
   opacity: 0.6;
 }
 
-.empresa--ativa.ui-linha {
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie));
-}
-
-.empresa--ativa.ui-linha:hover {
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 75%, var(--superficie));
-}
+/* A empresa em uso diz isso no selo "Em uso", à direita: a linha não se pinta inteira. */
 
 /* O rosto da empresa: o degradê do Portal para o seu negócio, papel claro para a equipe. */
 .empresa__rosto {

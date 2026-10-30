@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import { calcularTempoRestante, parseInstante } from '@/utils/format/expiracao'
+import {
+  calcularTempoRestante,
+  diasDeCalendarioEntre,
+  parseInstante,
+} from '@/utils/format/expiracao'
 
 const EXPIRA = '2026-08-15T17:47:49.810Z'
 
@@ -93,5 +97,23 @@ describe('calcularTempoRestante', () => {
     const agora = Date.parse('2026-08-12T17:48:49.810Z')
 
     expect(calcularTempoRestante(EXPIRA, agora)).toEqual({ estado: 'dias', dias: 2, horas: 23 })
+  })
+})
+
+describe('diasDeCalendarioEntre', () => {
+  /** Datas montadas no fuso local: a conta é de calendário de quem olha, não de UTC. */
+  const local = (dia: number, hora: number, minuto = 0) =>
+    new Date(2026, 9, dia, hora, minuto).getTime()
+
+  it('47 horas atrás, de 27 às 21h para 29 às 20h, são dois dias: anteontem, não ontem', () => {
+    expect(diasDeCalendarioEntre(local(27, 21, 13), local(29, 20))).toBe(2)
+  })
+
+  it('de ontem à noite para hoje cedo é um dia, mesmo com menos de 24 horas', () => {
+    expect(diasDeCalendarioEntre(local(28, 23), local(29, 8))).toBe(1)
+  })
+
+  it('o mesmo dia é zero', () => {
+    expect(diasDeCalendarioEntre(local(29, 0, 5), local(29, 23, 50))).toBe(0)
   })
 })

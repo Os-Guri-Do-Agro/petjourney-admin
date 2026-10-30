@@ -161,6 +161,30 @@ export const useReceitasStore = defineStore('clinico-receitas', () => {
     }
   }
 
+  /**
+   * A conduta mudou depois da assinatura?
+   *
+   * Assinar congela (ver `emitir`), e é isso que protege o papel que já saiu. Mas a tela seguia
+   * dizendo "Assinada" e oferecendo "Enviar ao responsável" com a prescrição já diferente: trocar
+   * 24 h por 12 h depois de assinar mandava ao app a versão de 24 h, sem aviso. Compara o que
+   * chega a quem dá o remédio: o remédio, a via e os números da dose.
+   */
+  function divergeDaConduta(receita: Receita, prescricoes: Prescription[]): boolean {
+    const chave = (lista: Prescription[]) =>
+      JSON.stringify(
+        lista.map((item) => [
+          item.medicamentoId,
+          item.via,
+          item.calculo.mgPorKg,
+          item.calculo.frequenciaHoras,
+          item.calculo.duracaoDias,
+          Math.round(item.calculo.quantidadeApresentacao * 100),
+        ]),
+      )
+
+    return chave(receita.prescricoes) !== chave(prescricoes)
+  }
+
   /** Entrega ao responsável no app. Só receita assinada é enviável. */
   function enviar(receitaId: string): Receita | null {
     const receita = receitas.value.find((item) => item.id === receitaId)
@@ -186,6 +210,7 @@ export const useReceitasStore = defineStore('clinico-receitas', () => {
   return {
     receitas,
     salvando,
+    divergeDaConduta,
     total,
     doPaciente,
     doAtendimento,

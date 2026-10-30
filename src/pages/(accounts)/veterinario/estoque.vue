@@ -75,6 +75,16 @@ const clinico = useClinicoStore()
 const formato = useClinicFormat()
 const rotulos = useRotulosDoEstoque()
 
+/**
+ * A data do lote leva o ano quando não é deste: "recebido em 03/12" lido em outubro parecia
+ * dezembro que vem, e a validade "26/02" não dizia de que ano era.
+ */
+function dataDoLote(data: string) {
+  return data.slice(0, 4) === clinicClock.today().slice(0, 4)
+    ? formato.dataCurta(data)
+    : formato.dataCurtaComAno(data)
+}
+
 const aba = ref<Aba>('geladeira')
 const estoque = ref<ResumoDoEstoque | null>(null)
 const painel = ref<PainelDeMetas | null>(null)
@@ -884,7 +894,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
               <span class="celula__meta">
                 {{
                   t('clinico.vacinas.estoque.recebidoEm', {
-                    data: formato.dataCurta(linha.recebidoEm),
+                    data: dataDoLote(linha.recebidoEm),
                     total: linha.quantidadeRecebida,
                   })
                 }}
@@ -913,7 +923,7 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                 <i :class="ICONE_DO_LOTE[linha.situacao]" aria-hidden="true" />
                 {{ prazoDoLote(linha) }}
               </span>
-              <span class="celula__meta ui-num">{{ formato.dataCurta(linha.validade) }}</span>
+              <span class="celula__meta ui-num">{{ dataDoLote(linha.validade) }}</span>
             </template>
 
             <template #celula-valor="{ linha }">

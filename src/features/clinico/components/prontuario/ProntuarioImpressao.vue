@@ -37,6 +37,16 @@ const { t } = useI18n()
 const clinico = useClinicoStore()
 const formato = useClinicFormat()
 
+/**
+ * "Referência" no cabeçalho da tabela. A chave é a minúscula da tela ("38,6 °C · referência
+ * 37,5–39,2 °C"); como título de coluna saía "Valor | referência | Situação".
+ */
+const cabecalhoReferencia = computed(() => {
+  const texto = t('clinico.prontuario.referencia')
+
+  return texto.charAt(0).toLocaleUpperCase() + texto.slice(1)
+})
+
 const VITAIS: VitalKey[] = [
   'peso',
   'temperatura',
@@ -162,7 +172,7 @@ function resumoDaDose(prescricaoId: string) {
       `clinico.prontuario.conduta.unidade.${medicamento.unidadeApresentacao}`,
       prescricao.calculo.quantidadeApresentacao,
     ),
-    mg: formato.numero(prescricao.calculo.mgPorAdministracao, 1),
+    mg: formato.miligramas(prescricao.calculo.mgPorAdministracao),
     frequencia: prescricao.calculo.frequenciaHoras,
     duracao: prescricao.calculo.duracaoDias,
     total: prescricao.calculo.totalAdministracoes,
@@ -246,7 +256,7 @@ function nomeDoExame(id: string) {
 
       <p class="campo">
         <span class="campo__rotulo">{{ t('clinico.prontuario.anamnese.queixaPrincipal') }}</span>
-        <span>{{ encounter.anamnese.queixaPrincipal || '—' }}</span>
+        <span>{{ encounter.anamnese.queixaPrincipal || t('clinico.formato.semvalor') }}</span>
       </p>
 
       <p v-if="encounter.anamnese.duracaoSintomas" class="campo">
@@ -292,7 +302,7 @@ function nomeDoExame(id: string) {
           <tr>
             <th>{{ t('clinico.prontuario.exameFisico.vitais') }}</th>
             <th class="tabela__numero">{{ t('clinico.prontuario.impressao.valor') }}</th>
-            <th class="tabela__numero">{{ t('clinico.prontuario.referencia') }}</th>
+            <th class="tabela__numero">{{ cabecalhoReferencia }}</th>
             <th>{{ t('clinico.prontuario.filtro.situacao') }}</th>
           </tr>
         </thead>
@@ -309,7 +319,7 @@ function nomeDoExame(id: string) {
               }}
             </td>
             <td class="tabela__numero">
-              {{ faixaDe(vital) ? formato.faixaDeReferencia(faixaDe(vital)) : '—' }}
+              {{ faixaDe(vital) ? formato.faixaDeReferencia(faixaDe(vital)) : t('clinico.formato.semvalor') }}
             </td>
             <!--
               Sem faixa cadastrada, a coluna de situação fica vazia em vez de repetir "sem

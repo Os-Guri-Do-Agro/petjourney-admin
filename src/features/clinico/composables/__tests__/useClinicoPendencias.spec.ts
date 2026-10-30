@@ -65,6 +65,18 @@ describe('useClinicoPendencias', () => {
     expect(pendencias.conferidoEm.value).toBeNull()
   })
 
+  it('conta os pacientes com falta sem motivo, a mesma régua do recorte "A justificar"', async () => {
+    const { patientRepository } = await import('../../data/repositories')
+    const resumo = await patientRepository.resumoDeFaltas()
+    const aJustificar = resumo.filter((linha) => linha.semJustificativa > 0).length
+
+    const pendencias = useClinicoPendencias(() => true)
+    await pendencias.recarregar()
+
+    expect(aJustificar).toBeGreaterThan(0)
+    expect(pendencias.faltas.value).toEqual({ total: aJustificar, tom: 'atencao' })
+  })
+
   it('com o módulo desligado, não há situação a mostrar', () => {
     const pendencias = useClinicoPendencias(() => false)
 

@@ -514,19 +514,24 @@ const passosDaSaida = computed<PassoDaSaida[]>(() => {
 
   const saldo = estadia.value.saldoCentavos
 
+  /* Negativo é o que volta ao responsável (pagou mais do que a conta): dito como devolução. */
   passos.push({
     id: 'saldo',
-    tom: saldo > 0 ? 'neutro' : 'ok',
-    feito: saldo <= 0,
+    tom: saldo === 0 ? 'ok' : 'neutro',
+    feito: saldo === 0,
     icone: 'ph ph-money',
     titulo:
       saldo > 0
         ? t('hotel.estadia.nova.saida.receber', { valor: formato.moeda(saldo) })
-        : t('hotel.estadia.nova.saida.quitado'),
+        : saldo < 0
+          ? t('hotel.estadia.nova.saida.devolver', { valor: formato.moeda(-saldo) })
+          : t('hotel.estadia.nova.saida.quitado'),
     detalhe:
-      estadia.value.acrescimoDeSaida > 0
-        ? t('hotel.checkout.saidaTardia', { percentual: estadia.value.acrescimoDeSaida })
-        : t('hotel.estadia.nova.saida.saldoNoBalcao'),
+      saldo < 0
+        ? t('hotel.checkout.devolverNoBalcao')
+        : estadia.value.acrescimoDeSaida > 0
+          ? t('hotel.checkout.saidaTardia', { percentual: estadia.value.acrescimoDeSaida })
+          : t('hotel.estadia.nova.saida.saldoNoBalcao'),
   })
 
   return passos
@@ -1076,13 +1081,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
             <dd>
               <strong class="dado__grande ui-num">{{ acomodacao?.nome ?? '' }}</strong>
               <small>
+                <!-- Corredor e tipo com o mesmo nome ("Gatil · Gatil") aparecem uma vez só. -->
                 {{
                   [
-                    acomodacao ? hotelStore.bloco(acomodacao.blocoId)?.nome : '',
-                    acomodacao ? hotelStore.tipoDeAcomodacao(acomodacao.tipoId)?.nome : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' · ')
+                    ...new Set(
+                      [
+                        acomodacao ? hotelStore.bloco(acomodacao.blocoId)?.nome : '',
+                        acomodacao ? hotelStore.tipoDeAcomodacao(acomodacao.tipoId)?.nome : '',
+                      ].filter(Boolean),
+                    ),
+                  ].join(' · ')
                 }}
               </small>
             </dd>
@@ -1173,10 +1181,16 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               </span>
             </dt>
             <dd>
-              <strong class="dado__grande ui-num">{{ formato.moeda(estadia.saldoCentavos) }}</strong>
+              <strong class="dado__grande ui-num">
+                {{ formato.moeda(Math.abs(estadia.saldoCentavos)) }}
+              </strong>
               <small>
                 {{
-                  encerrada ? t('hotel.estadia.nova.saida.quitado') : t('hotel.estadia.stat.saldoDetalhe')
+                  encerrada
+                    ? t('hotel.estadia.nova.saida.quitado')
+                    : estadia.saldoCentavos < 0
+                      ? t('hotel.estadia.stat.saldoDevolver')
+                      : t('hotel.estadia.stat.saldoDetalhe')
                 }}
               </small>
             </dd>

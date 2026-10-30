@@ -16,19 +16,23 @@ import Button from 'primevue/button'
 import Dialog from 'primevue/dialog'
 import InputMask from 'primevue/inputmask'
 import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
 import { computed, ref, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { formatPhone } from '@/utils/format/phone'
 
 import OrcamentoTabela from './OrcamentoTabela.vue'
 import QuemPodeBuscar from './QuemPodeBuscar.vue'
 import { tomDaAdmissao, useHotelFormat } from '../../composables/useHotelFormat'
 import { avaliarAdmissao, situacaoParaSelo } from '../../domain/admissao'
 import { addDays, contarDiarias, dataDe, horaDe, instante } from '../../domain/hotel-time'
-import { reservaRepository } from '../../data/repositories'
+import { reservaRepository, type HospedeNovo } from '../../data/repositories'
 import { HOTEL_UTC_OFFSET } from '../../data/fixtures'
 import type {
   Acomodacao,
@@ -36,6 +40,8 @@ import type {
   ISODateTime,
   Orcamento,
   PessoaAutorizada,
+  PetPorte,
+  PetSpecies,
   ReservaOrigem,
   ServicoContratado,
 } from '../../data/types'
@@ -68,6 +74,8 @@ const emit = defineEmits<{
       observacao: string
       /** Gente nova vai com id provisório; o repositório dá o definitivo. */
       autorizadosARetirar: PessoaAutorizada[]
+      /** O animal que o hotel ainda não conhecia; com ele, `petId` vai vazio. */
+      hospedeNovo: HospedeNovo | null
     },
   ]
 }>()
@@ -158,6 +166,79 @@ const contatosConhecidos = computed(() =>
 
 const aberto = computed(() => props.acomodacao !== null)
 
+/**
+ * O animal que o hotel ainda não conhece.
+ *
+ * A busca só achava quem já estava no cadastro ("Nenhum animal com esse nome no cadastro do
+ * hotel."), e o tutor novo ao telefone tinha de ser mandado para o link ou para a clínica. Aqui ele
+ * entra com o mínimo que decide a venda: o nome, a espécie e o porte (onde cabe e quanto custa), e
+ * quem responde por ele. O resto do cadastro fica para o check-in, como no pedido pelo link.
+ */
+const novo = ref(false)
+const novoPet = ref<{
+  petNome: string
+  especie: PetSpecies
+  porte: PetPorte | null
+  tutorNome: string
+  telefone: string
+}>({ petNome: '', especie: 'canina', porte: null, tutorNome: '', telefone: '' })
+
+const PORTES: PetPorte[] = ['mini', 'pequeno', 'medio', 'grande', 'gigante']
+
+/** Só as espécies que a acomodação recebe: gato não entra na baia do canil. */
+const especiesDoNovo = computed(() =>
+  (['canina', 'felina'] as const)
+    .filter(
+      (especie) =>
+        !props.acomodacao ||
+        props.acomodacao.especiesAceitas.length === 0 ||
+        props.acomodacao.especiesAceitas.includes(especie),
+    )
+    .map((valor) => ({ valor, rotulo: formato.especie(valor) })),
+)
+
+const portesDoNovo = computed(() =>
+  PORTES.map((valor) => ({ valor, rotulo: formato.porte(valor) })),
+)
+
+/** O cadastro mínimo, completo; `null` enquanto falta o nome, o porte, o responsável ou o celular. */
+const hospedeNovo = computed<HospedeNovo | null>(() => {
+  if (!novo.value) {
+    return null
+  }
+
+  const dados = novoPet.value
+  const caoSemPorte = dados.especie === 'canina' && !dados.porte
+  const celular = dados.telefone.replace(/\D/g, '')
+
+  if (!dados.petNome.trim() || !dados.tutorNome.trim() || celular.length < 10 || caoSemPorte) {
+    return null
+  }
+
+  return {
+    petNome: dados.petNome.trim(),
+    especie: dados.especie,
+    porte: dados.especie === 'canina' ? dados.porte : null,
+    tutorNome: dados.tutorNome.trim(),
+    telefone: dados.telefone,
+  }
+})
+
+/** Há de quem é a reserva: um animal do cadastro, ou o novo com o mínimo preenchido. */
+const temHospede = computed(() => (novo.value ? hospedeNovo.value !== null : Boolean(petId.value)))
+
+function alternarNovo() {
+  novo.value = !novo.value
+  petId.value = ''
+  novoPet.value = {
+    petNome: '',
+    especie: especiesDoNovo.value[0]?.valor ?? 'canina',
+    porte: null,
+    tutorNome: '',
+    telefone: '',
+  }
+}
+
 const ORIGENS: ReservaOrigem[] = ['balcao', 'telefone', 'whatsapp', 'app', 'retorno', 'indicacao']
 
 /**
@@ -234,16 +315,18 @@ const contratados = computed<ServicoContratado[]>(() =>
 /** O aviso de admissão, calculado contra a **saída** — a regra R1, desde a criação. */
 const admissao = computed(() => {
   const pet = hotelStore.pet(petId.value)
+  /* O animal novo não tem comprovante nenhum: o aviso já diz o que pedir para o dia da entrada. */
+  const especie = pet?.especie ?? (novo.value ? novoPet.value.especie : null)
 
-  if (!pet) {
+  if (!especie) {
     return null
   }
 
   return avaliarAdmissao({
     exigencias: hotelStore.exigencias,
     comprovantes: props.comprovantes,
-    petId: pet.id,
-    especie: pet.especie,
+    petId: pet?.id ?? '',
+    especie,
     saidaPrevista: dataDe(fimEscolhido.value),
     hoje: props.hoje,
   })
@@ -257,6 +340,7 @@ function limpar() {
   observacao.value = ''
   autorizados.value = []
   cadastroPendente.value = false
+  novo.value = false
   /* As horas nascem na política da casa, que é o caso comum — e mudam com um toque. */
   horaEntrada.value = horaDe(props.inicio)
   horaSaida.value = horaDe(props.fim)
@@ -276,13 +360,14 @@ function limpar() {
  * a divergência apareceria como o cliente sendo cobrado a mais do que ouviu.
  */
 const orcamento = computed<Orcamento | null>(() => {
-  if (!props.acomodacao || !petId.value) {
+  if (!props.acomodacao || !temHospede.value) {
     return null
   }
 
   return reservas.simular({
     acomodacaoId: props.acomodacao.id,
     petId: petId.value,
+    porte: hospedeNovo.value?.porte ?? null,
     acompanhantePetId: acompanhanteId.value,
     inicio: inicioEscolhido.value,
     fim: fimEscolhido.value,
@@ -307,6 +392,8 @@ const vaga = computed(() => {
     inicio: inicioEscolhido.value,
     fim: fimEscolhido.value,
     petId: petId.value || undefined,
+    porte: hospedeNovo.value?.porte ?? null,
+    especie: novo.value ? novoPet.value.especie : null,
     ocupantes: acompanhanteId.value ? 2 : 1,
   })
 })
@@ -363,7 +450,7 @@ watch(petId, () => {
 function confirmar() {
   if (
     !props.acomodacao ||
-    !petId.value ||
+    !temHospede.value ||
     semVaga.value ||
     reservaJaExistente.value ||
     cadastroPendente.value
@@ -381,6 +468,7 @@ function confirmar() {
     servicos: contratados.value,
     observacao: observacao.value,
     autorizadosARetirar: autorizados.value,
+    hospedeNovo: hospedeNovo.value,
   })
 }
 </script>
@@ -475,8 +563,29 @@ function confirmar() {
 
       <div class="nova__grade">
         <div class="campo">
-          <label :for="`${idCampo}-pet`">{{ t('hotel.reserva.hospede') }}</label>
+          <div class="campo__cabeca">
+            <label :for="novo ? `${idCampo}-novo-nome` : `${idCampo}-pet`">
+              {{ novo ? t('hotel.reserva.novo.nome') : t('hotel.reserva.hospede') }}
+            </label>
+            <Button
+              type="button"
+              size="small"
+              severity="secondary"
+              outlined
+              :icon="novo ? 'ph ph-list-magnifying-glass' : 'ph ph-plus'"
+              :label="novo ? t('hotel.reserva.novo.voltar') : t('hotel.reserva.novo.abrir')"
+              @click="alternarNovo"
+            />
+          </div>
+          <InputText
+            v-if="novo"
+            :id="`${idCampo}-novo-nome`"
+            v-model="novoPet.petNome"
+            autocomplete="off"
+            fluid
+          />
           <Select
+            v-else
             :input-id="`${idCampo}-pet`"
             v-model="petId"
             :options="candidatos"
@@ -489,6 +598,68 @@ function confirmar() {
             fluid
           />
         </div>
+
+        <!-- O cadastro mínimo do animal novo: o que decide onde ele cabe e quem responde por ele. -->
+        <template v-if="novo">
+          <div class="campo">
+            <span :id="`${idCampo}-novo-especie`" class="campo__rotulo">
+              {{ t('hotel.reserva.novo.especie') }}
+            </span>
+            <!-- Acomodação de uma espécie só: não há o que escolher, só o que confirmar. -->
+            <p v-if="especiesDoNovo.length === 1" class="campo__fixo">
+              {{ especiesDoNovo[0]!.rotulo }}
+            </p>
+            <SelectButton
+              v-else
+              v-model="novoPet.especie"
+              :options="especiesDoNovo"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              :aria-labelledby="`${idCampo}-novo-especie`"
+            />
+          </div>
+
+          <div v-if="novoPet.especie === 'canina'" class="campo">
+            <label :for="`${idCampo}-novo-porte`">{{ t('hotel.reserva.novo.porte') }}</label>
+            <Select
+              :input-id="`${idCampo}-novo-porte`"
+              v-model="novoPet.porte"
+              :options="portesDoNovo"
+              option-label="rotulo"
+              option-value="valor"
+              fluid
+            />
+          </div>
+
+          <div class="campo">
+            <label :for="`${idCampo}-novo-tutor`">{{ t('hotel.reserva.novo.responsavel') }}</label>
+            <InputText
+              :id="`${idCampo}-novo-tutor`"
+              v-model="novoPet.tutorNome"
+              autocomplete="off"
+              fluid
+            />
+          </div>
+
+          <div class="campo">
+            <label :for="`${idCampo}-novo-celular`">{{ t('hotel.reserva.novo.celular') }}</label>
+            <InputText
+              :id="`${idCampo}-novo-celular`"
+              :model-value="novoPet.telefone"
+              inputmode="tel"
+              placeholder="(11) 98765-4321"
+              maxlength="15"
+              fluid
+              @update:model-value="(valor) => (novoPet.telefone = formatPhone(valor ?? ''))"
+            />
+          </div>
+
+          <p class="campo--largo novo__dica">
+            <i class="ph ph-info" aria-hidden="true" />
+            {{ t('hotel.reserva.novo.dica') }}
+          </p>
+        </template>
 
         <!-- Logo abaixo do hóspede, que é o que a pessoa acabou de escolher e o que precisa mudar. -->
         <Message v-if="reservaJaExistente" severity="error" :closable="false" class="campo--largo">
@@ -614,7 +785,7 @@ function confirmar() {
         :label="t('hotel.reserva.criar')"
         icon="ph ph-check"
         :loading="salvando"
-        :disabled="!petId || cadastroPendente || !!reservaJaExistente"
+        :disabled="!temHospede || cadastroPendente || !!reservaJaExistente"
         @click="confirmar"
       />
     </template>
@@ -642,6 +813,39 @@ function confirmar() {
 
 .campo--largo {
   grid-column: 1 / -1;
+}
+
+/* O rótulo do hóspede com a troca para "Animal novo" ao lado, na mesma linha. */
+.campo__cabeca {
+  display: flex;
+  min-height: 32px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 10px;
+}
+
+.campo__fixo {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 15px;
+}
+
+.novo__dica {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.novo__dica .ph {
+  margin-top: 2px;
 }
 
 .campo label,

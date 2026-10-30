@@ -194,6 +194,34 @@ html:has(> body.p-overflow-hidden) {
 }
 
 /*
+ * Árabe: a gaveta abre do lado em que a linha de leitura termina, como no português. O PrimeVue
+ * fixa o lado físico (`.p-drawer-mask:dir(rtl)` com `row-reverse`), e as gavetas com
+ * `position="right"` abriam à direita também no árabe, por cima do começo da linha. Aqui "right"
+ * passa a ser o fim da linha e "left" o começo, para todas as gavetas do portal de uma vez; o
+ * empurrão da página (`padding-inline-end`) e os cantos arredondados já são lógicos.
+ */
+[dir='rtl'] .p-drawer-mask.p-drawer-right,
+[dir='rtl'] .p-drawer-mask.p-drawer-left {
+  flex-direction: row;
+}
+
+[dir='rtl'] .p-drawer-right .p-drawer-enter-active {
+  animation-name: p-animate-drawer-enter-left;
+}
+
+[dir='rtl'] .p-drawer-right .p-drawer-leave-active {
+  animation-name: p-animate-drawer-leave-left;
+}
+
+[dir='rtl'] .p-drawer-left .p-drawer-enter-active {
+  animation-name: p-animate-drawer-enter-right;
+}
+
+[dir='rtl'] .p-drawer-left .p-drawer-leave-active {
+  animation-name: p-animate-drawer-leave-right;
+}
+
+/*
  * RTL: ícones direcionais espelham na horizontal. Usa a propriedade individual `scale` (e não
  * `transform`) para compor com rotações que os componentes já aplicam.
  */

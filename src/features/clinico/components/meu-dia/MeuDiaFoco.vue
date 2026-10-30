@@ -118,18 +118,26 @@ const numeros = computed(() =>
   props.dia.indicadores.filter((indicador) => indicador.id !== 'a-seguir'),
 )
 
+/**
+ * "Esperando há 4 min", e no primeiro minuto "Chegou agora": "há 0 min" lia como conta errada, e
+ * a lista "O que pede ação" ao lado já dizia "esperando agora".
+ */
+function tempoDesde(desde: string | null, chave: 'sala' | 'espera') {
+  const minutos = props.dia.minutosDesde(desde) ?? 0
+
+  return minutos < 1
+    ? t(`clinico.meuDia.estado.${chave}Agora`)
+    : t(`clinico.meuDia.estado.${chave}`, { tempo: formato.duracao(minutos) })
+}
+
 /** O estado do paciente do cartão, na pílula em véu ao lado do nome. */
 function estadoDe(item: Appointment) {
   if (item.status === 'em-atendimento') {
-    return t('clinico.meuDia.estado.sala', {
-      tempo: formato.duracao(props.dia.minutosDesde(item.iniciadoEm ?? item.inicio) ?? 0),
-    })
+    return tempoDesde(item.iniciadoEm ?? item.inicio, 'sala')
   }
 
   if (item.status === 'aguardando') {
-    return t('clinico.meuDia.estado.espera', {
-      tempo: formato.duracao(props.dia.minutosDesde(item.chegadaEm) ?? 0),
-    })
+    return tempoDesde(item.chegadaEm, 'espera')
   }
 
   return t('clinico.meuDia.estado.marcado', { hora: formato.hora(item.inicio) })
@@ -429,11 +437,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
               </span>
 
               <span v-if="estado === 'espera'" class="pilula-fria">
-                {{
-                  t('clinico.meuDia.estado.espera', {
-                    tempo: formato.duracao(dia.minutosDesde(item.chegadaEm) ?? 0),
-                  })
-                }}
+                {{ tempoDesde(item.chegadaEm, 'espera') }}
               </span>
               <!-- A hora no quadradinho em véu, como a lista de consultas da home do app. -->
               <span v-else class="linha__hora" :title="formato.status(item.status)">

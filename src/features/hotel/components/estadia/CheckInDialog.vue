@@ -430,6 +430,7 @@ function confirmar() {
               {{ t('hotel.checkin.peso') }}
               <span class="campo__obrigatorio" aria-hidden="true">*</span>
             </label>
+            <!-- A cada tecla, e não só ao sair do campo: o aviso do rodapé some enquanto se digita. -->
             <InputNumber
               :input-id="`${idCampo}-peso`"
               v-model="peso"
@@ -438,6 +439,7 @@ function confirmar() {
               suffix=" kg"
               :aria-required="true"
               fluid
+              @input="(evento) => (peso = typeof evento.value === 'number' ? evento.value : null)"
             />
             <small v-if="pesoCadastroKg !== null" class="campo__dica">
               {{ t('hotel.checkin.pesoCadastro', { valor: formato.peso(pesoCadastroKg) }) }}

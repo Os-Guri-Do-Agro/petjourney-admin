@@ -169,12 +169,25 @@ const legendaDoPrazo = computed(() => {
 /** O botão cheio: aceita o escolhido, ou marca o melhor horário que a clínica tem. */
 const acaoPrincipal = computed(() => {
   if (props.linha.horarioLivre) {
-    return { rotulo: t('clinico.pedidos.aceitar'), escolha: null }
+    return { rotulo: t('clinico.pedidos.aceitar'), titulo: undefined, escolha: null }
   }
 
   if (sugestao.value) {
+    /*
+     * A hora sozinha só basta quando o dia é o que o responsável pediu. Na janela "30/10 a 02/11",
+     * "Marcar 08:00" não dizia em qual dos quatro dias: o botão leva o dia junto.
+     */
+    const inicio = sugestao.value.inicio
+    const dia = clinicClock.dateOf(inicio)
+    const mesmoDia = quando.value?.ate === null && dia === quando.value.dia
+
     return {
-      rotulo: t('clinico.pedidos.marcarEm', { hora: formato.hora(sugestao.value.inicio) }),
+      rotulo: t('clinico.pedidos.marcarEm', {
+        hora: mesmoDia
+          ? formato.hora(inicio)
+          : `${formato.diaDaSemanaCurto(dia)} ${formato.hora(inicio)}`,
+      }),
+      titulo: rotulos.quando(inicio),
       escolha: { professionalId: sugestao.value.professionalId, inicio: sugestao.value.inicio },
     }
   }
@@ -306,6 +319,7 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
         size="small"
         icon="ph ph-check"
         :label="acaoPrincipal.rotulo"
+        :title="acaoPrincipal.titulo"
         :loading="respondendo"
         :disabled="ocupado && !respondendo"
         @click.stop="emit('aceitar', acaoPrincipal.escolha)"
@@ -323,7 +337,8 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
   gap: 10px 22px;
   /* Larguras fixas no começo e no fim: cada linha é uma grade própria, e colunas medidas pelo
      conteúdo desalinhavam as horas e os botões de uma linha para a outra. */
-  grid-template-columns: 6.5rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 15rem;
+  /* Os botões cabem inteiros com o dia no "Marcar sex. 08:00" ao lado de "Responder". */
+  grid-template-columns: 6.5rem minmax(0, 1.15fr) minmax(0, 1fr) 11.5rem 17rem;
   padding: 14px 24px 14px 18px;
   cursor: pointer;
   transition: background-color var(--pj-tempo-curto) ease-out;

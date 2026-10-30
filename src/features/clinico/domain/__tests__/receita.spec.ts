@@ -118,6 +118,42 @@ describe('fracionar', () => {
     expect(resultado?.aproximado).toBe(true)
   })
 
+  it('dá nome à fração também quando a conta foi arredondada', () => {
+    /** 0,66 vira "três quartos" com a marca de aproximado, não "0,75 comprimidos". */
+    expect(fracionar(0.66, 'comprimido')).toMatchObject({
+      kind: 'aproximado',
+      nome: 'tres-quartos',
+      quantidade: 0.75,
+      aproximado: true,
+    })
+    expect(fracionar(0.37, 'comprimido')?.nome).toBe('quarto')
+    expect(fracionar(1.62, 'comprimido')?.nome).toBe('um-e-meio')
+    expect(fracionar(2.4, 'comprimido')?.nome).toBe('multiplo')
+    /* No exato, o nome é o próprio `kind`. */
+    expect(fracionar(0.5, 'comprimido')?.nome).toBe('meio')
+    expect(fracionar(3, 'comprimido')?.nome).toBe('inteiro')
+  })
+
+  it('arredonda também para o inteiro, quando ele é o mais perto', () => {
+    /** 0,99 é um comprimido, não "três quartos"; 3,95 são quatro, não três e três quartos. */
+    expect(fracionar(0.99, 'comprimido')).toMatchObject({
+      kind: 'inteiro',
+      inteiros: 1,
+      quantidade: 1,
+      aproximado: true,
+    })
+    expect(fracionar(3.95, 'comprimido')).toMatchObject({ kind: 'inteiro', inteiros: 4 })
+    /* Longe da tolerância, continua aproximado, mas com o inteiro como alvo. */
+    expect(fracionar(0.9, 'comprimido')).toMatchObject({
+      kind: 'aproximado',
+      nome: 'inteiro',
+      quantidade: 1,
+    })
+    expect(fracionar(2.1, 'comprimido')).toMatchObject({ nome: 'inteiro', quantidade: 2 })
+    /* Zero comprimido não é dose: 0,04 vira um quarto, com a marca de aproximado. */
+    expect(fracionar(0.04, 'comprimido')).toMatchObject({ nome: 'quarto', aproximado: true })
+  })
+
   it('devolve nulo para quantidade inexistente', () => {
     expect(fracionar(0, 'comprimido')).toBeNull()
   })

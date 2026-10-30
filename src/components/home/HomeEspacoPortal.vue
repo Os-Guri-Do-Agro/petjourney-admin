@@ -326,6 +326,7 @@ const atalho = computed<AtalhoDoEspaco | null>(() => {
     :numeros="numeros"
     :atalho="atalho"
     :passo="passo"
+    :passo-carregando="!pronto || Boolean(indicacao?.carregando)"
     :aviso="falhou ? t('inicio.saldo.falhou') : ''"
     :pode-tentar="falhou"
     @passo="emit('compartilhar')"

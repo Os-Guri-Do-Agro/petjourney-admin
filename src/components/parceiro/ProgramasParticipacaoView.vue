@@ -18,6 +18,21 @@ const { store } = useParceiroPortal()
 
 const isLoading = computed(() => store.loadState === 'loading' || store.loadState === 'idle')
 
+/**
+ * Com os dois programas ativos não há o que ativar: "Como um programa é ativado" vira explicação e
+ * só aparece com as explicações ligadas. Antes ficava sempre, embaixo de dois selos "Ativo".
+ */
+const mostraAtivacao = computed(
+  () =>
+    isGuidanceVisible.value ||
+    isLoading.value ||
+    store.modoBloco('afiliado').status !== 'ATIVO' ||
+    store.modoBloco('participativo').status !== 'ATIVO',
+)
+
+/** "Somente o dono pode solicitar" é para quem não é dono: para a própria dona, não diz nada. */
+const mostraNotaDoDono = computed(() => store.semAcessoParceiro || !store.isDono)
+
 const activationSteps = computed(() => [
   {
     id: 'solicitar',
@@ -61,6 +76,7 @@ const activationSteps = computed(() => [
     </section>
 
     <section
+      v-if="mostraAtivacao"
       id="programas-ativacao"
       class="ativacao ui-folha ui-cartao"
       aria-labelledby="programas-ativacao-titulo"
@@ -97,7 +113,7 @@ const activationSteps = computed(() => [
         </ol>
       </div>
 
-      <p class="ui-cartao__pe etapas__nota">
+      <p v-if="mostraNotaDoDono" class="ui-cartao__pe etapas__nota">
         <i class="ph ph-info" aria-hidden="true" />
         <template v-if="store.semAcessoParceiro">
           {{ t('programas.activation.noteNoAccess') }}
