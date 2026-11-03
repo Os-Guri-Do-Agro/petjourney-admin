@@ -236,7 +236,7 @@ html:has(.shell--moldura-app) {
 
 .shell.shell--moldura-app .mapa__inicio:hover,
 .shell.shell--moldura-app .destino:hover,
-.shell.shell--moldura-app .espaco__cabeca:hover {
+.shell.shell--moldura-app .mapa .espaco__cabeca:hover {
   background: var(--app-toque);
   color: var(--app-tinta);
 }
@@ -257,15 +257,19 @@ html:has(.shell--moldura-app) {
 }
 
 /*
+ * Presas ao `.mapa`: o bloco de cada espaço no Início usa os mesmos nomes (`.espaco`,
+ * `.espaco__cabeca`, `.espaco__icone`) e herdava o recuo de 6 px, o quadradinho de 40 e o hover
+ * da barra, com o ícone colado no canto do cartão.
+ *
  * Cada espaço abre com o ícone dele no quadradinho cheio, na cor da área (a mesma dos cartões do
  * Início: Clínica azul, Hotel lilás, Portal âmbar), e o nome em negrito. A cor aqui é categoria,
  * não enfeite: diz de que área são os destinos de baixo. O título recolhe e abre a seção.
  */
-.shell.shell--moldura-app .espaco {
+.shell.shell--moldura-app .mapa .espaco {
   margin-top: 8px;
 }
 
-.shell.shell--moldura-app .espaco__cabeca {
+.shell.shell--moldura-app .mapa .espaco__cabeca {
   min-height: 50px;
   gap: 14px;
   padding: 0 10px 0 6px;
@@ -275,7 +279,7 @@ html:has(.shell--moldura-app) {
   font-weight: 700;
 }
 
-.shell.shell--moldura-app .espaco__cabeca .espaco__icone {
+.shell.shell--moldura-app .mapa .espaco__cabeca .espaco__icone {
   width: 40px;
   height: 40px;
   border-radius: 13px;
@@ -285,18 +289,18 @@ html:has(.shell--moldura-app) {
   font-size: 19px;
 }
 
-.shell.shell--moldura-app .espaco__seta {
+.shell.shell--moldura-app .mapa .espaco__seta {
   color: var(--app-texto-2);
   font-size: 12px;
 }
 
-.shell.shell--moldura-app .espaco__cabeca--alterna:focus-visible {
+.shell.shell--moldura-app .mapa .espaco__cabeca--alterna:focus-visible {
   outline: 2px solid var(--app-salvia-texto);
   outline-offset: -2px;
 }
 
 /* Os destinos ficam um degrau para dentro, numa guia fina que nasce no ícone do espaço. */
-.shell.shell--moldura-app .espaco__destinos {
+.shell.shell--moldura-app .mapa .espaco__destinos {
   gap: 2px;
   margin: 2px 0 6px 20px;
   padding: 0 0 0 12px;
@@ -392,7 +396,7 @@ html:has(.shell--moldura-app) {
  */
 .shell.shell--moldura-app.shell--densa .mapa__inicio,
 .shell.shell--moldura-app.shell--densa .destino,
-.shell.shell--moldura-app.shell--densa .espaco__cabeca {
+.shell.shell--moldura-app.shell--densa .mapa .espaco__cabeca {
   min-height: 40px;
   gap: 12px;
   border-radius: 13px;
@@ -401,14 +405,14 @@ html:has(.shell--moldura-app) {
 
 .shell.shell--moldura-app.shell--densa .mapa__ladrilho,
 .shell.shell--moldura-app.shell--densa .destino .destino__icone,
-.shell.shell--moldura-app.shell--densa .espaco__cabeca .espaco__icone {
+.shell.shell--moldura-app.shell--densa .mapa .espaco__cabeca .espaco__icone {
   width: 30px;
   height: 30px;
   border-radius: 10px;
   font-size: 16px;
 }
 
-.shell.shell--moldura-app.shell--densa .espaco {
+.shell.shell--moldura-app.shell--densa .mapa .espaco {
   margin-top: 4px;
 }
 
