@@ -317,6 +317,39 @@ html:has(.shell--moldura-app) {
   border-inline-start: 0;
 }
 
+/*
+ * A coluna recolhida na medida do app. Com 72 px sobravam 43 de miolo para um destino de 54 (o
+ * quadradinho de 40 e o respiro): o ícone vazava da pílula do ativo e saía do eixo. Com 80, os
+ * 14 de margem e a linha de 52 põem o centro em x = 40, onde o quadradinho já está com a barra
+ * aberta: ao recolher, as palavras somem e os ícones não se mexem.
+ */
+.shell.shell--moldura-app.shell--recolhida {
+  --barra-largura: 80px;
+}
+
+.shell.shell--moldura-app .mapa--recolhida .destino {
+  padding-inline: 6px 10px;
+}
+
+/* O avatar de 34 no mesmo eixo: 12 do pé, 1 da borda e 10 de respiro. */
+.shell.shell--moldura-app .barra .conta__botao--recolhida {
+  padding-inline-start: 10px;
+}
+
+/*
+ * O selo no canto do ícone, com um aro da cor do menu para não se fundir com o quadradinho. O
+ * `.mapa` a mais vence a regra do componente, que prende o selo pela esquerda.
+ */
+.shell.shell--moldura-app .mapa.mapa--recolhida .mapa__selo {
+  top: 1px;
+  inset-inline: auto 1px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-shadow: 0 0 0 2px var(--app-fundo);
+  font-size: 10.5px;
+}
+
 /* O destino aberto: pílula cheia na cor do perfil, texto e ícone brancos, como a aba ativa. */
 .shell.shell--moldura-app .destino.destino--ativo,
 .shell.shell--moldura-app .destino.destino--ativo:hover,
@@ -374,9 +407,18 @@ html:has(.shell--moldura-app) {
   color: var(--app-tinta);
 }
 
+/* O quadradinho de 40 do menu, no mesmo eixo dos de cima (x = 40), aberta ou recolhida. */
+.shell.shell--moldura-app .barra__cupom {
+  height: 48px;
+}
+
 .shell.shell--moldura-app .barra__cupom-icone {
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
   background: var(--app-veu);
   color: var(--app-salvia-texto);
+  font-size: 19px;
 }
 
 .shell.shell--moldura-app .barra .conta__botao {
@@ -416,6 +458,33 @@ html:has(.shell--moldura-app) {
   margin-top: 4px;
 }
 
+.shell.shell--moldura-app.shell--densa .barra__cupom {
+  height: 40px;
+}
+
+.shell.shell--moldura-app.shell--densa .barra__cupom-icone {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+/*
+ * Recolhida e compacta: o quadradinho de 30 em x = 20 tem o centro em 35, então a coluna é de 70.
+ * O criar (44) pede 2 px a menos de margem para caber no miolo, e o avatar, 5 de respiro.
+ */
+.shell.shell--moldura-app.shell--densa.shell--recolhida {
+  --barra-largura: 70px;
+}
+
+.shell.shell--moldura-app.shell--densa.shell--recolhida .barra__ferramentas {
+  padding-inline: 12px;
+}
+
+.shell.shell--moldura-app.shell--densa .barra .conta__botao--recolhida {
+  padding-inline-start: 5px;
+}
+
 /*
  * Avisos em ponto (Configurações → Aparência): o selo encolhe para um ponto na cor do estado. O
  * número continua no texto, para o leitor de tela; só deixa de ser desenhado.
@@ -443,6 +512,17 @@ html:has(.shell--moldura-app) {
 
 .shell.shell--moldura-app.shell--selo-ponto .destino--ativo .mapa__selo {
   background: #fff;
+}
+
+/* Recolhida, o ponto vai para o canto do quadradinho, com o mesmo aro do selo de número. */
+.shell.shell--moldura-app.shell--selo-ponto .mapa.mapa--recolhida .mapa__selo {
+  top: 4px;
+  inset-inline-end: 4px;
+  width: 10px;
+  min-width: 0;
+  height: 10px;
+  padding: 0;
+  font-size: 0;
 }
 
 /* ======================================================================================
