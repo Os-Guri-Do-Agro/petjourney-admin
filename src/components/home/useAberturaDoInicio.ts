@@ -5,7 +5,7 @@
  * São os números dos blocos de cada espaço, na mesma ordem e com a mesma régua — o painel só os
  * reúne no alto. Com Clínica e Hotel, os dois primeiros de cada (quem espera na recepção, quem está
  * em consulta, quem está na casa, quem chega hoje); com um espaço só, os quatro dele. A conta só com
- * o Portal não ganha número no alto: o bloco do Portal já é o resumo inteiro.
+ * o Portal não ganha número no alto: as áreas do Portal, logo embaixo, já são o resumo inteiro.
  */
 
 import { computed } from 'vue'

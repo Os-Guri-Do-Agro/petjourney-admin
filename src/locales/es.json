@@ -576,6 +576,29 @@
       "emptyFilter": "No se encontró ninguna pantalla para “{q}”."
     },
     "ledePauta": "Sus ganancias por referidos y lo que está pendiente en cada módulo. Cada línea lo lleva directo a la pantalla donde está el trabajo.",
+    "areas": {
+      "rotulo": "El Portal de su empresa",
+      "acessos": {
+        "ativos": "Acceso activo | Accesos activos",
+        "novosHoje": "{total} nuevo hoy | {total} nuevos hoy"
+      },
+      "indicados": {
+        "total": "Registro con su código | Registros con su código"
+      },
+      "equipe": {
+        "pessoas": "Persona en el equipo | Personas en el equipo",
+        "convites": "{total} invitación pendiente | {total} invitaciones pendientes"
+      },
+      "bloqueio": {
+        "titulo": "Bloqueado",
+        "texto": "Se libera con el Programa de Afiliados activo.",
+        "emAnalise": "Se libera cuando el Programa de Afiliados sea aprobado.",
+        "liberar": "Liberar",
+        "acompanhar": "Seguir"
+      },
+      "falhou": "No se pudo cargar ahora.",
+      "mais": "y {total} más"
+    },
     "saldo": {
       "total": "Saldo total",
       "retido": "En la ventana de seguridad",
@@ -849,7 +872,9 @@
         "retido": "En la ventana de seguridad",
         "leituras": "Lectura del QR en 7 días | Lecturas del QR en 7 días",
         "leiturasTotal": "{total} en total",
-        "leiturasIndisponiveis": "No disponible ahora"
+        "leiturasIndisponiveis": "No disponible ahora",
+        "liberadoNaLinha": "{valor} liberado",
+        "retidoNaLinha": "{valor} en la ventana de seguridad"
       }
     },
     "passo": {

@@ -42,7 +42,6 @@ import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
-import type { PetSpecies } from '@/features/clinico/data/types'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -65,6 +64,7 @@ import {
   diasDeCalendarioEntre,
   parseInstante,
 } from '@/utils/format/expiracao'
+import { ESPECIE_DO_AVATAR, ICONE_DO_SERVICO } from '@/utils/parceiro/acesso-na-lista'
 import { rotuloDaEspecie } from '@/utils/parceiro/especie-do-acesso'
 import { modoDoVinculo } from '@/utils/parceiro/reivindicacoes'
 import { carimboDoResumo } from '@/utils/parceiro/snapshot-compartilhado'
@@ -92,25 +92,6 @@ const TIPOS_SERVICO: TipoServicoPrestador[] = [
   'OUTRO',
 ]
 const ORDENACOES: OrdenacaoPacientes[] = ['recentes', 'nome', 'expiraEm']
-
-/** A silhueta do avatar: só cão e gato têm desenho, o resto fica nas iniciais. */
-const ESPECIE_DO_AVATAR: Partial<Record<string, PetSpecies>> = {
-  CACHORRO: 'canina',
-  GATO: 'felina',
-  AVE: 'ave',
-  ROEDOR: 'roedor',
-  REPTIL: 'reptil',
-}
-
-/** O mesmo ícone do serviço que a folha da anotação usa. */
-const ICONE_DO_SERVICO: Record<TipoServicoPrestador, string> = {
-  CONSULTA: 'ph ph-stethoscope',
-  EXAME: 'ph ph-microscope',
-  BANHO: 'ph ph-drop',
-  TOSA: 'ph ph-scissors',
-  HOTEL: 'ph ph-bed',
-  OUTRO: 'ph ph-paw-print',
-}
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -937,11 +918,17 @@ onMounted(() => {
     return
   }
 
+  /* `?vincular` sem código (o atalho "Vincular código" do Início): abre o modal com as caixas vazias. */
+  const pediuVinculo = route.query[PARAMETRO_VINCULAR] !== undefined
   const codigoLido = tirarCodigoDaUrl()
 
   // Os avisos esperam o contexto do parceiro pelo mesmo motivo do link: o `parceiroId` vem dele.
   void loadFirstPage().then(() => {
-    abrirVinculoDoLink(codigoLido)
+    if (codigoLido) {
+      abrirVinculoDoLink(codigoLido)
+    } else if (pediuVinculo && podeAbrirVinculo.value) {
+      vincularVisible.value = true
+    }
     void carregarReivindicacoes()
   })
 })

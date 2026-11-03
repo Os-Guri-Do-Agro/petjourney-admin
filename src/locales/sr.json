@@ -576,6 +576,29 @@
       "emptyFilter": "Nema ekrana za „{q}“."
     },
     "ledePauta": "Vaša zarada od preporuka i ono što čeka u svakom modulu. Svaki red vodi pravo na ekran gde je posao.",
+    "areas": {
+      "rotulo": "Portal vaše kompanije",
+      "acessos": {
+        "ativos": "Aktivan pristup | Aktivna pristupa | Aktivnih pristupa",
+        "novosHoje": "{total} nov danas | {total} nova danas | {total} novih danas"
+      },
+      "indicados": {
+        "total": "Registracija uz vaš kod | Registracije uz vaš kod | Registracija uz vaš kod"
+      },
+      "equipe": {
+        "pessoas": "Osoba u timu | Osobe u timu | Osoba u timu",
+        "convites": "{total} pozivnica na čekanju | {total} pozivnice na čekanju | {total} pozivnica na čekanju"
+      },
+      "bloqueio": {
+        "titulo": "Zaključano",
+        "texto": "Otključava se kada je afilijejt program aktivan.",
+        "emAnalise": "Otključava se kada afilijejt program bude odobren.",
+        "liberar": "Otključaj",
+        "acompanhar": "Prati"
+      },
+      "falhou": "Trenutno nije moguće učitati.",
+      "mais": "i još {total}"
+    },
     "saldo": {
       "total": "Ukupno stanje",
       "retido": "U sigurnosnom periodu",
@@ -849,7 +872,9 @@
         "retido": "U sigurnosnom periodu",
         "leituras": "Skeniranje QR koda za 7 dana | Skeniranja QR koda za 7 dana | Skeniranja QR koda za 7 dana",
         "leiturasTotal": "Ukupno {total}",
-        "leiturasIndisponiveis": "Trenutno nedostupno"
+        "leiturasIndisponiveis": "Trenutno nedostupno",
+        "liberadoNaLinha": "{valor} oslobođeno",
+        "retidoNaLinha": "{valor} u sigurnosnom periodu"
       }
     },
     "passo": {

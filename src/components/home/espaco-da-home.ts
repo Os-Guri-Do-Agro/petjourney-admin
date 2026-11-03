@@ -37,11 +37,3 @@ export type AndamentoDoEspaco = {
   texto: string
   percentual: number
 }
-
-/** O que a seção do código (`HomeIndique`) sabe e o bloco do Portal mostra. */
-export type IndicacaoNoBloco = {
-  carregando: boolean
-  podeIndicar: boolean
-  temQr: boolean
-  resumo: { semana: number | null; total: number | null; indisponivel: boolean }
-}

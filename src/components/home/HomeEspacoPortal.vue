@@ -1,408 +1,215 @@
 <script setup lang="ts">
 /**
- * O Portal no Início: quanto a parceria rendeu, se dá para sacar e quantas vezes o QR foi lido.
+ * O Portal no pé do Início, numa linha, para quem tem a Clínica ou o Hotel.
  *
- * ## Os números
+ * Até 03/11/2026 o Portal era um bloco ao lado da Clínica e do Hotel, com o código de indicação e
+ * o QR na faixa do alto. Código, QR, leituras e "Compartilhar código" na mesma altura do trabalho
+ * do dia faziam o Início parecer um programa de recrutamento. A linha diz só o saldo (ou em que pé
+ * está o programa) e só ganha botão quando há algo a resolver: o saque, a chave PIX, o bloqueio, o
+ * programa recusado ou suspenso. O resto continua no próprio Portal.
  *
- * - **liberado** — o que já saiu da janela de segurança. A frase embaixo diz a situação real do
- *   saque, decidida pela API (`capacidadeDeSaque`): pronto, falta a chave PIX, abaixo do mínimo,
- *   bloqueado. "Liberado"
- *   não é "dá para sacar", e o número não promete o que a tela de saque recusaria.
- * - **na janela de segurança** — o retido, só quando há; leva ao extrato.
- * - **leituras do QR em 7 dias** — quantas pessoas apontaram a câmera para o código, com o total.
- *   Vêm de `HomeIndique` (a seção do código, mais abaixo), que as pede uma vez para as duas.
- *
- * ## O próximo passo
- *
- * O que resolve a situação do saque, quando há (pedir o saque, cadastrar a chave PIX, ver o
- * bloqueio); senão, divulgar o código — é o que gera o próximo ganho.
- *
- * ## Sem o programa ativo
- *
- * Sem afiliação ativa não há carteira. O bloco diz em que pé está o programa, com o motivo que o
- * backend mandou, e o passo é ver os programas.
+ * Quem só tem o Portal vê as áreas dele (`HomePortalAreas`), não esta linha.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import Button from 'primevue/button'
+import Skeleton from 'primevue/skeleton'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
-import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { Espaco } from '@/navegacao/espacos'
-import { getCarteira } from '@/service/parceiro/parceiro-portal-service'
-import {
-  capacidadeDaCarteira,
-  type CapacidadeDeSaque,
-} from '@/service/parceiro/capacidade-de-saque'
-import type { Carteira, StatusModoParceiro } from '@/service/parceiro/types'
-import { formatCentavosToBrl } from '@/utils/format/money'
 
-import type {
-  AtalhoDoEspaco,
-  IndicacaoNoBloco,
-  NumeroDoEspaco,
-  PassoDoEspaco,
-  TomDoNumero,
-} from './espaco-da-home'
-import HomeEspaco from './HomeEspaco.vue'
+import { useCarteiraDoInicio, useProgramasDoParceiro, type AcaoDoPortal } from './portal-no-inicio'
 
-const props = defineProps<{ espaco: Espaco; indicacao: IndicacaoNoBloco | null }>()
+defineProps<{ espaco: Espaco }>()
 
-const emit = defineEmits<{ compartilhar: [] }>()
+const { t } = useI18n()
+const {
+  carteira,
+  falhou,
+  pronto,
+  afiliadoAtivo,
+  retidoCentavos,
+  capacidade,
+  acao: acaoDoSaque,
+  quantia,
+  carregar,
+} = useCarteiraDoInicio()
+const { pedidos: programas } = useProgramasDoParceiro()
 
-const { t, locale } = useI18n()
-const { store, ensureContext, parceiroQuery } = useParceiroPortal()
+/** O saldo numa frase: o liberado e, quando há, o que ainda está na janela de segurança. */
+const resumo = computed(() => {
+  if (falhou.value) return t('inicio.saldo.falhou')
+  if (!carteira.value) return ''
+  if (capacidade.value === 'bloqueado') return t('inicio.saldo.capacidade.bloqueado')
 
-const carteira = ref<Carteira | null>(null)
-const carregando = ref(true)
-const falhou = ref(false)
-
-const contextoPronto = computed(() => store.loadState !== 'loading' && store.loadState !== 'idle')
-const afiliadoAtivo = computed(() => store.statusAfiliadoAtivo)
-
-function brl(centavos: number) {
-  return formatCentavosToBrl(centavos, INTL_LOCALE[locale.value as Locale])
-}
-
-/** Quantia dentro de frase: isolada, para o "R$" não se inverter no árabe. */
-function quantia(centavos: number) {
-  return `⁦${brl(centavos)}⁩`
-}
-
-async function carregar() {
-  falhou.value = false
-  carregando.value = true
-
-  try {
-    await ensureContext()
-
-    if (!store.statusAfiliadoAtivo) {
-      carteira.value = null
-      return
-    }
-
-    carteira.value = await getCarteira(parceiroQuery())
-  } catch {
-    carteira.value = null
-    falhou.value = true
-  } finally {
-    carregando.value = false
-  }
-}
-
-/* Troca de parceiro ou afiliação aprovada no meio da sessão: o extrato é outro. */
-watch(afiliadoAtivo, (agora, antes) => {
-  if (agora !== antes) {
-    void carregar()
-  }
-})
-
-onMounted(() => {
-  void carregar()
-})
-
-const pronto = computed(() => !carregando.value && contextoPronto.value)
-
-const retidoCentavos = computed(() => {
-  if (!carteira.value) return 0
-
-  return Math.max(0, carteira.value.saldoTotalCentavos - carteira.value.saldoSacavelCentavos)
-})
-
-/** O que impede (ou não) o saque agora, como a API decidiu para quem está logado. */
-const capacidade = computed<CapacidadeDeSaque | null>(() =>
-  carteira.value ? capacidadeDaCarteira(carteira.value) : null,
-)
-
-const TOM_DA_CAPACIDADE: Record<CapacidadeDeSaque, TomDoNumero> = {
-  liberado: 'ok',
-  semChavePix: 'atencao',
-  bloqueado: 'risco',
-  abaixoDoMinimo: 'neutro',
-  soDono: 'neutro',
-  tudoRetido: 'apagado',
-  semSaldo: 'apagado',
-}
-
-/** A frase curta embaixo do valor. As longas (sem saldo, tudo retido) ficam com o resto do bloco. */
-function fraseDaCapacidade(atual: CapacidadeDeSaque) {
-  switch (atual) {
-    case 'abaixoDoMinimo':
-      return t('inicio.saldo.capacidade.abaixoDoMinimo', {
-        minimo: quantia(carteira.value?.saqueMinimoCentavos ?? 0),
-      })
-    case 'tudoRetido':
-    case 'semSaldo':
-      return ''
-    default:
-      return t(`inicio.saldo.capacidade.${atual}`)
-  }
-}
-
-const numeros = computed<NumeroDoEspaco[]>(() => {
-  if (pronto.value && !afiliadoAtivo.value) {
-    return []
-  }
-
-  const lista: NumeroDoEspaco[] = []
-  const atual = capacidade.value
-
-  lista.push({
-    id: 'liberado',
-    valor: !pronto.value ? null : carteira.value ? brl(carteira.value.saldoSacavelCentavos) : '–',
-    rotulo: atual === 'bloqueado' ? t('inicio.saldo.bloqueadoRotulo') : t('inicio.saldo.liberado'),
-    meta: atual ? fraseDaCapacidade(atual) : '',
-    tom: atual ? TOM_DA_CAPACIDADE[atual] : 'neutro',
-    to: '/parceiro/carteira',
-  })
+  const partes = [
+    t('inicio.espacos.portal.liberadoNaLinha', {
+      valor: quantia(carteira.value.saldoSacavelCentavos),
+    }),
+  ]
 
   if (retidoCentavos.value > 0) {
-    lista.push({
-      id: 'retido',
-      valor: brl(retidoCentavos.value),
-      rotulo: t('inicio.espacos.portal.retido'),
-      tom: 'neutro',
-      to: { path: '/parceiro/carteira', query: { aba: 'extrato' } },
-    })
+    partes.push(t('inicio.espacos.portal.retidoNaLinha', { valor: quantia(retidoCentavos.value) }))
   }
 
-  const leituras = props.indicacao?.resumo
-  const semana = leituras?.semana ?? 0
-
-  if (!props.indicacao || props.indicacao.carregando || props.indicacao.podeIndicar) {
-    lista.push({
-      id: 'leituras',
-      valor: leituras?.indisponivel ? '–' : (leituras?.semana ?? null),
-      rotulo: t('inicio.espacos.portal.leituras', { total: semana }, semana),
-      meta: leituras?.indisponivel
-        ? t('inicio.espacos.portal.leiturasIndisponiveis')
-        : leituras?.total != null
-          ? t('inicio.espacos.portal.leiturasTotal', { total: leituras.total }, leituras.total)
-          : '',
-      tom: semana > 0 ? 'lugar' : 'apagado',
-      to: '/parceiro/divulgacao',
-    })
-  }
-
-  return lista
+  return partes.join(' · ')
 })
-
-/* ------------------------------------------------------------ programa não ativo */
-
-const statusDoPrograma = computed<StatusModoParceiro>(
-  () => store.status?.afiliado.status ?? 'NAO_SOLICITADO',
-)
-
-function tomDoStatus(status: StatusModoParceiro) {
-  switch (status) {
-    case 'REJEITADO':
-    case 'SUSPENSO':
-      return 'risco'
-    case 'SOLICITADO':
-      return 'atencao'
-    default:
-      return 'neutro'
-  }
-}
 
 /**
- * Os programas pedidos, cada um com o seu selo. O de Afiliados sempre (é ele que abre a carteira e
- * o código); o Participativo só quando foi pedido. Antes só o de Afiliados aparecia, e quem pediu
- * os dois no cadastro achava que o outro tinha se perdido.
+ * O botão da linha, só quando há o que resolver. Divulgar o código nunca é o passo aqui: a linha
+ * existe para não empurrar indicação.
  */
-const programas = computed(() => {
-  const lista = [
-    {
-      id: 'afiliado',
-      titulo: t('inicio.programa.titulo'),
-      status: statusDoPrograma.value,
-      motivo: store.status?.afiliado.motivo?.trim() ?? '',
-    },
-  ]
-  const participativo = store.status?.participativo
-
-  if (participativo && participativo.status !== 'NAO_SOLICITADO') {
-    lista.push({
-      id: 'participativo',
-      titulo: t('programas.card.participativo.title'),
-      status: participativo.status,
-      motivo: participativo.motivo?.trim() ?? '',
-    })
-  }
-
-  return lista.map((programa) => ({ ...programa, tom: tomDoStatus(programa.status) }))
-})
-
-/** A frase do bloco: a do programa de Afiliados, ou uma só para os dois em análise juntos. */
-const textoDoPrograma = computed(() =>
-  programas.value.length > 1 && programas.value.every((p) => p.status === 'SOLICITADO')
-    ? t('inicio.programa.textoAmbosEmAnalise')
-    : t(`inicio.programa.texto.${statusDoPrograma.value}`),
-)
-
-/** A frase longa do saldo, quando a curta não cabe embaixo do número. */
-const fraseLonga = computed(() => {
-  if (capacidade.value === 'semSaldo' || capacidade.value === 'tudoRetido') {
-    return t(`inicio.saldo.capacidade.${capacidade.value}`)
-  }
-
-  return ''
-})
-
-/* ------------------------------------------------------------ passo e atalho */
-
-const podeCompartilhar = computed(() => Boolean(props.indicacao?.temQr))
-
-const passo = computed<PassoDoEspaco | null>(() => {
-  if (!pronto.value) return null
+const acao = computed<AcaoDoPortal | null>(() => {
+  if (!pronto.value || falhou.value) return null
 
   if (!afiliadoAtivo.value) {
-    return {
-      rotulo: t('inicio.programa.cta'),
-      icone: 'ph ph-squares-four',
-      to: '/parceiro/programas',
-    }
+    const resolver = programas.value.some(
+      (programa) => programa.status === 'REJEITADO' || programa.status === 'SUSPENSO',
+    )
+
+    return resolver
+      ? { rotulo: t('inicio.programa.cta'), icone: 'ph ph-squares-four', to: '/parceiro/programas' }
+      : null
   }
 
-  switch (capacidade.value) {
-    case 'liberado':
-      return {
-        rotulo: t('inicio.saldo.acao.liberado'),
-        icone: 'ph ph-hand-coins',
-        to: '/parceiro/carteira',
-      }
-    case 'semChavePix':
-      return {
-        rotulo: t('inicio.saldo.acao.semChavePix'),
-        icone: 'ph ph-key',
-        to: '/parceiro/carteira',
-      }
-    case 'bloqueado':
-      return {
-        rotulo: t('inicio.saldo.acao.bloqueado'),
-        icone: 'ph ph-lock',
-        to: '/parceiro/carteira',
-      }
-    default:
-      break
-  }
-
-  if (falhou.value) {
-    return { rotulo: t('nav.items.financeiro'), icone: 'ph ph-wallet', to: '/parceiro/carteira' }
-  }
-
-  if (podeCompartilhar.value) {
-    return { rotulo: t('inicio.acoes.compartilhar'), icone: 'ph ph-qr-code' }
-  }
-
-  return {
-    rotulo: t('inicio.indique.abrir'),
-    icone: 'ph ph-megaphone-simple',
-    to: '/parceiro/divulgacao',
-  }
-})
-
-/** O atalho do título: compartilhar o código — a não ser que já seja o próximo passo. */
-const atalho = computed<AtalhoDoEspaco | null>(() => {
-  const passoCompartilha = passo.value && !passo.value.to
-
-  if (podeCompartilhar.value && !passoCompartilha) {
-    return { rotulo: t('inicio.acoes.compartilhar'), icone: 'ph ph-qr-code' }
-  }
-
-  return {
-    rotulo: t('nav.items.divulgacao'),
-    icone: 'ph ph-megaphone-simple',
-    to: '/parceiro/divulgacao',
-  }
+  return acaoDoSaque.value
 })
 </script>
 
 <template>
-  <HomeEspaco
-    lugar="portal"
-    :titulo="espaco.rotulo"
-    :icone="espaco.icone"
-    :to="espaco.to"
-    :numeros="numeros"
-    :atalho="atalho"
-    :passo="passo"
-    :passo-carregando="!pronto || Boolean(indicacao?.carregando)"
-    :aviso="falhou ? t('inicio.saldo.falhou') : ''"
-    :pode-tentar="falhou"
-    @passo="emit('compartilhar')"
-    @atalho="emit('compartilhar')"
-    @tentar="carregar"
-  >
-    <p v-if="fraseLonga" class="portal__frase">{{ fraseLonga }}</p>
+  <section class="portal-linha" aria-labelledby="inicio-portal-linha">
+    <span class="portal-linha__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
 
-    <div v-if="pronto && !afiliadoAtivo" class="programa">
-      <ul class="programa__lista">
-        <li v-for="programa in programas" :key="programa.id" class="programa__item">
-          <span class="programa__titulo">
-            {{ programa.titulo }}
-            <span class="ui-selo" :class="`ui-selo--${programa.tom}`">
-              {{ t(`inicio.programa.selo.${programa.status}`) }}
-            </span>
+    <div class="portal-linha__texto">
+      <h2 id="inicio-portal-linha" class="portal-linha__titulo">
+        <RouterLink class="portal-linha__nome" :to="espaco.to">
+          {{ espaco.rotulo }}
+          <i class="ph ph-caret-right portal-linha__caret" aria-hidden="true" />
+        </RouterLink>
+      </h2>
+
+      <Skeleton v-if="!pronto" width="14rem" height="0.85rem" border-radius="6px" />
+      <p v-else-if="!afiliadoAtivo" class="portal-linha__resumo">
+        <span v-for="programa in programas" :key="programa.id" class="portal-linha__programa">
+          {{ programa.titulo }}
+          <span class="ui-selo" :class="`ui-selo--${programa.tom}`">
+            {{ t(`inicio.programa.selo.${programa.status}`) }}
           </span>
-          <p v-if="programa.motivo" class="programa__motivo">
-            {{ t('inicio.programa.motivo', { motivo: programa.motivo }) }}
-          </p>
-        </li>
-      </ul>
-      <p class="programa__texto">{{ textoDoPrograma }}</p>
+        </span>
+      </p>
+      <p v-else class="portal-linha__resumo" :role="falhou ? 'status' : undefined">
+        {{ resumo }}
+      </p>
     </div>
-  </HomeEspaco>
+
+    <Button
+      v-if="falhou"
+      type="button"
+      size="small"
+      severity="secondary"
+      icon="ph ph-arrow-clockwise"
+      :label="t('inicio.saldo.tentar')"
+      @click="carregar"
+    />
+    <Button
+      v-else-if="acao"
+      :as="RouterLink"
+      :to="acao.to"
+      size="small"
+      severity="secondary"
+      :icon="acao.icone"
+      :label="acao.rotulo"
+    />
+  </section>
 </template>
 
 <style scoped>
-.portal__frase {
-  max-width: 46ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.programa {
-  display: grid;
-  gap: 6px;
-  padding-top: 4px;
-}
-
-.programa__lista {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.programa__item {
-  display: grid;
-  gap: 2px;
-}
-
-.programa__titulo {
+.portal-linha {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  color: var(--tinta);
-  font-size: 14.5px;
-  font-weight: 600;
+  gap: 10px 14px;
 }
 
-.programa__texto,
-.programa__motivo {
-  max-width: 52ch;
+/* O quadradinho do espaço em pastel, como na barra: identidade, não chamariz. */
+.portal-linha__icone {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--portal-fundo);
+  color: var(--portal-tinta);
+  font-size: 17px;
+}
+
+.portal-linha__texto {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 16rem;
+  justify-items: start;
+  gap: 3px;
+}
+
+.portal-linha__titulo {
   margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-.programa__motivo {
+.portal-linha__nome {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 6px;
+  color: var(--tinta);
+  text-decoration: none;
+}
+
+.portal-linha__nome:hover {
+  color: var(--portal-tinta);
+}
+
+.portal-linha__nome:focus-visible {
+  outline: 2px solid var(--portal);
+  outline-offset: 2px;
+}
+
+.portal-linha__caret {
   color: var(--tinta-3);
   font-size: 13px;
+  transition: translate var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.portal-linha__nome:hover .portal-linha__caret {
+  translate: 2px 0;
+}
+
+[dir='rtl'] .portal-linha__caret {
+  scale: -1 1;
+}
+
+.portal-linha__resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.portal-linha__programa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-linha__caret {
+    transition: none;
+  }
 }
 </style>

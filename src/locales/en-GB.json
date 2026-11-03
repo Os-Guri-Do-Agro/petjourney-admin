@@ -576,6 +576,29 @@
       "emptyFilter": "No screens found for “{q}”."
     },
     "ledePauta": "Your referral earnings and what's waiting in each module. Each line takes you straight to the screen where the work is.",
+    "areas": {
+      "rotulo": "Your company's Portal",
+      "acessos": {
+        "ativos": "Active access | Active accesses",
+        "novosHoje": "{total} new today | {total} new today"
+      },
+      "indicados": {
+        "total": "Sign-up with your code | Sign-ups with your code"
+      },
+      "equipe": {
+        "pessoas": "Person on the team | People on the team",
+        "convites": "{total} pending invite | {total} pending invites"
+      },
+      "bloqueio": {
+        "titulo": "Locked",
+        "texto": "Unlocks with the Affiliate Programme active.",
+        "emAnalise": "Unlocks when the Affiliate Programme is approved.",
+        "liberar": "Unlock",
+        "acompanhar": "Follow up"
+      },
+      "falhou": "Couldn't load right now.",
+      "mais": "and {total} more"
+    },
     "saldo": {
       "total": "Total balance",
       "retido": "In the security window",
@@ -849,7 +872,9 @@
         "retido": "In the security window",
         "leituras": "QR scan in 7 days | QR scans in 7 days",
         "leiturasTotal": "{total} in total",
-        "leiturasIndisponiveis": "Unavailable right now"
+        "leiturasIndisponiveis": "Unavailable right now",
+        "liberadoNaLinha": "{valor} released",
+        "retidoNaLinha": "{valor} in the security window"
       }
     },
     "passo": {

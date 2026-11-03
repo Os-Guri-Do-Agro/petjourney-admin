@@ -576,6 +576,29 @@
       "emptyFilter": "Nenhuma tela encontrada para “{q}”."
     },
     "ledePauta": "Seus ganhos de indicação e o que está esperando em cada módulo. Cada linha leva direto à tela onde está o trabalho.",
+    "areas": {
+      "rotulo": "O Portal da sua empresa",
+      "acessos": {
+        "ativos": "Acesso ativo | Acessos ativos",
+        "novosHoje": "{total} novo hoje | {total} novos hoje"
+      },
+      "indicados": {
+        "total": "Cadastro com o seu código | Cadastros com o seu código"
+      },
+      "equipe": {
+        "pessoas": "Pessoa na equipe | Pessoas na equipe",
+        "convites": "{total} convite pendente | {total} convites pendentes"
+      },
+      "bloqueio": {
+        "titulo": "Bloqueado",
+        "texto": "Libera com o Programa de Afiliados ativo.",
+        "emAnalise": "Libera quando o Programa de Afiliados for aprovado.",
+        "liberar": "Liberar",
+        "acompanhar": "Acompanhar"
+      },
+      "falhou": "Não foi possível carregar agora.",
+      "mais": "e mais {total}"
+    },
     "saldo": {
       "total": "Saldo total",
       "retido": "Na janela de segurança",
@@ -849,7 +872,9 @@
         "retido": "Na janela de segurança",
         "leituras": "Leitura do QR em 7 dias | Leituras do QR em 7 dias",
         "leiturasTotal": "{total} no total",
-        "leiturasIndisponiveis": "Indisponível agora"
+        "leiturasIndisponiveis": "Indisponível agora",
+        "liberadoNaLinha": "{valor} liberado",
+        "retidoNaLinha": "{valor} na janela de segurança"
       }
     },
     "passo": {

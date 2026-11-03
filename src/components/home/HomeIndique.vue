@@ -7,19 +7,20 @@
  * Uma seção calma, embaixo: o QR pequeno (clicável), o código em letra grande para ser ditado ao
  * telefone e as duas ações de quem vai divulgar — copiar o código e abrir o painel com o resto.
  * Sem cadastro aprovado ou sem o Programa de Afiliados ativo não há código, e a seção não aparece:
- * o bloco do Portal, lá em cima, já diz em que pé está o programa.
+ * as áreas do Portal já dizem em que pé está o programa.
  *
- * ## Na faixa (`forma="destaque"`)
+ * ## Só o painel (`forma="painel"`)
  *
- * Desde 26/10/2026 o Início põe o código na faixa do alto, ao lado da saudação: o QR grande o
- * bastante para ser lido da tela, o código, as leituras da semana e as mesmas duas ações. Embaixo,
- * na seção calma, ele ficava pequeno e longe, e a faixa ficava com o meio vazio.
+ * Nada na página: só a gaveta e as leituras, para a área de Divulgação do Início (`HomePortalAreas`)
+ * abrir com "Compartilhar código". É a forma do Início desde 03/11/2026. De 26/10 até ali o código ficava num cartão de papel na
+ * faixa do alto, ao lado da saudação; em destaque daquele jeito, o Início parecia um programa de
+ * recrutamento, e o cartão saiu.
  *
  * ## O painel lateral
  *
  * Tudo o que a indicação tem: o QR grande para mostrar ou imprimir, o código e o link para copiar,
  * as leituras do QR nos últimos dias e como a participação funciona. Abre pelo QR, pelo botão da
- * seção e pelo atalho "Compartilhar código" do bloco do Portal (`abrirQr`). Sem a imagem do QR
+ * seção e pelo atalho "Compartilhar código" da área de Divulgação (`abrirQr`). Sem a imagem do QR
  * (serviço de imagem fora), o painel abre do mesmo jeito, só sem o quadro.
  *
  * O QR fica sempre sobre papel claro (`--sobre-rail`, igual nos dois temas): leitor de QR precisa
@@ -27,7 +28,7 @@
  *
  * ## As leituras
  *
- * São pedidas junto com o código, e não só quando o painel abre: o bloco do Portal mostra quantas
+ * São pedidas junto com o código, e não só quando o painel abre: a área de Divulgação mostra quantas
  * leituras houve na semana (`resumo`, exposto para a página).
  */
 import Button from 'primevue/button'
@@ -52,8 +53,8 @@ import { resolveMetricasErro, type MetricasEstadoErro } from '@/utils/parceiro/i
 
 withDefaults(
   defineProps<{
-    /** `secao`: o bloco calmo do pé do Início. `destaque`: o cartão de papel na faixa do alto. */
-    forma?: 'secao' | 'destaque'
+    /** `secao`: o bloco calmo do pé do Início. `painel`: só a gaveta, aberta por `abrirQr`. */
+    forma?: 'secao' | 'painel'
   }>(),
   { forma: 'secao' },
 )
@@ -190,7 +191,7 @@ function diaLocal(data: Date) {
 }
 
 /**
- * O que o bloco do Portal mostra: as leituras dos últimos sete dias (hoje incluído) e o total.
+ * O que a área de Divulgação mostra: as leituras dos últimos sete dias (hoje incluído) e o total.
  * `null` enquanto carrega; `indisponivel` quando a fonte não respondeu.
  */
 const resumo = computed(() => {
@@ -230,95 +231,12 @@ watch(
   },
 )
 
-defineExpose({ abrirQr, temQr, podeIndicar, visivel, resumo, carregando })
+defineExpose({ abrirQr, copiar, codigo, qrUrl, temQr, podeIndicar, visivel, resumo, carregando })
 </script>
 
 <template>
-  <!-- Na faixa: o QR grande ao lado do código, das leituras e das duas ações. -->
-  <section
-    v-if="forma === 'destaque' && visivel"
-    class="cartaz"
-    :aria-label="t('inicio.indique.titulo')"
-    :aria-busy="carregando || undefined"
-  >
-    <template v-if="carregando">
-      <Skeleton class="cartaz__esqueleto" width="7.5rem" height="7.5rem" border-radius="16px" />
-      <span class="cartaz__texto">
-        <Skeleton width="7rem" height="0.8rem" border-radius="6px" />
-        <Skeleton width="9rem" height="1.8rem" border-radius="8px" />
-        <Skeleton width="12rem" height="0.8rem" border-radius="6px" />
-      </span>
-    </template>
-
-    <template v-else-if="falhou">
-      <span class="cartaz__marca" aria-hidden="true"><i class="ph ph-qr-code" /></span>
-      <span class="cartaz__texto" role="alert">
-        <span class="cartaz__leituras">{{ t('inicio.indique.falhou') }}</span>
-        <span class="cartaz__acoes">
-          <Button
-            type="button"
-            size="small"
-            severity="secondary"
-            icon="ph ph-arrow-clockwise"
-            :label="t('inicio.saldo.tentar')"
-            @click="carregar"
-          />
-        </span>
-      </span>
-    </template>
-
-    <template v-else>
-      <Button
-        v-if="temQr"
-        unstyled
-        type="button"
-        class="cartaz__qr"
-        :aria-label="t('inicio.indique.ampliarQr')"
-        :title="t('inicio.indique.ampliarQr')"
-        @click="abrirQr"
-      >
-        <img
-          :src="qrUrl"
-          alt=""
-          class="cartaz__qr-imagem"
-          referrerpolicy="no-referrer"
-          @error="qrFalhou = true"
-        />
-        <span class="cartaz__ampliar" aria-hidden="true">
-          <i class="ph ph-arrows-out-simple" />
-        </span>
-      </Button>
-      <span v-else class="cartaz__marca" aria-hidden="true"><i class="ph ph-qr-code" /></span>
-
-      <span class="cartaz__texto">
-        <span class="cartaz__rotulo">{{ t('inicio.indique.seuCodigo') }}</span>
-        <bdi class="cartaz__codigo ui-num" dir="ltr">{{ codigo }}</bdi>
-        <span v-if="resumo.semana !== null" class="cartaz__leituras">
-          {{ t('inicio.indique.leiturasSemana', { total: resumo.semana }, resumo.semana) }}
-        </span>
-        <span class="cartaz__acoes">
-          <Button
-            type="button"
-            size="small"
-            icon="ph ph-copy"
-            :label="t('inicio.indique.copiar')"
-            @click="copiar"
-          />
-          <Button
-            type="button"
-            size="small"
-            severity="secondary"
-            :icon="temQr ? 'ph ph-qr-code' : 'ph ph-link'"
-            :label="t('inicio.indique.maisDoCodigo')"
-            @click="abrirPainel"
-          />
-        </span>
-      </span>
-    </template>
-  </section>
-
   <UiSecao
-    v-else-if="forma === 'secao' && visivel"
+    v-if="forma === 'secao' && visivel"
     id="inicio-indique"
     class="indique"
     :titulo="t('inicio.indique.titulo')"
@@ -646,189 +564,6 @@ defineExpose({ abrirQr, temQr, podeIndicar, visivel, resumo, carregando })
 
 [dir='rtl'] .indique__seta {
   scale: -1 1;
-}
-
-/* ------------------------------------------------------------------ na faixa
- * O cartão de papel sobre a sálvia, como os do Hoje. A faixa troca os tokens do Trilha para branco e
- * vidro (`UiPagina`); dentro do papel eles voltam aos do app, botões inclusive.
- */
-.cartaz {
-  --tinta: var(--app-tinta);
-  --tinta-2: var(--app-texto-2);
-  --tinta-3: var(--app-apagado);
-  --linha: var(--app-regua);
-  --superficie: var(--app-cartao);
-  --superficie-2: var(--app-veu);
-  --p-button-primary-background: var(--app-botao);
-  --p-button-primary-hover-background: var(--app-botao-hover);
-  --p-button-primary-active-background: var(--app-botao-hover);
-  --p-button-primary-border-color: var(--app-botao);
-  --p-button-primary-hover-border-color: var(--app-botao-hover);
-  --p-button-primary-active-border-color: var(--app-botao-hover);
-  --p-button-primary-color: #fff;
-  --p-button-primary-hover-color: #fff;
-  --p-button-primary-active-color: #fff;
-  --p-button-secondary-background: var(--app-veu-forte);
-  --p-button-secondary-hover-background: var(--app-regua);
-  --p-button-secondary-active-background: var(--app-regua);
-  --p-button-secondary-color: var(--app-salvia-texto);
-  --p-button-secondary-hover-color: var(--app-salvia-texto);
-  --p-button-secondary-active-color: var(--app-salvia-texto);
-
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  height: 100%;
-  padding: 18px 22px 18px 18px;
-  border-radius: 22px;
-  background: var(--app-cartao);
-  color: var(--app-tinta);
-}
-
-.app-dark .cartaz {
-  --p-button-primary-color: #10302a;
-  --p-button-primary-hover-color: #10302a;
-  --p-button-primary-active-color: #10302a;
-}
-
-/* O QR sobre papel claro nos dois temas: leitor de QR precisa de zona quieta clara. */
-.cartaz__qr {
-  position: relative;
-  display: grid;
-  width: 7.5rem;
-  height: 7.5rem;
-  flex: none;
-  place-items: center;
-  padding: 8px;
-  border: 1px solid var(--app-regua);
-  border-radius: 16px;
-  background: #fff;
-  cursor: zoom-in;
-  transition: border-color var(--pj-tempo-curto) ease;
-}
-
-.cartaz__qr:hover {
-  border-color: var(--app-salvia);
-}
-
-.cartaz__qr:focus-visible {
-  outline: 2px solid var(--app-botao);
-  outline-offset: 2px;
-}
-
-.cartaz__qr-imagem {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.cartaz__ampliar {
-  position: absolute;
-  inset-block-end: -7px;
-  inset-inline-end: -7px;
-  display: grid;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border-radius: 999px;
-  background: var(--portal-fundo);
-  box-shadow: 0 0 0 3px var(--app-cartao);
-  color: var(--portal-tinta);
-  font-size: 13px;
-}
-
-.cartaz__marca {
-  display: grid;
-  width: 7.5rem;
-  height: 7.5rem;
-  flex: none;
-  place-items: center;
-  border-radius: 16px;
-  background: var(--portal-fundo);
-  color: var(--portal-tinta);
-  font-size: 44px;
-}
-
-.cartaz__texto {
-  display: grid;
-  min-width: 0;
-  justify-items: start;
-  gap: 4px;
-}
-
-.cartaz__rotulo,
-.cartaz__leituras {
-  color: var(--app-texto-2);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.cartaz__codigo {
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--app-tinta);
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cartaz__acoes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.cartaz__acoes :deep(.p-button) {
-  white-space: nowrap;
-}
-
-/*
- * Com a faixa empilhada (a mesma régua do `UiAbertura`: 1180 px de faixa, 1440 de tela), o cartaz
- * deita na largura toda: o código fica à esquerda e as ações vão para a ponta, sem deixar a metade
- * direita do cartão vazia. A régua é a da faixa porque o cartaz, lado a lado, mede pelo conteúdo e
- * não pode ser contêiner dele mesmo.
- */
-@container faixa (min-width: 640px) and (max-width: 1180px) {
-  .cartaz__texto {
-    flex: 1;
-    align-items: center;
-    column-gap: 24px;
-    grid-template-areas:
-      'rotulo acoes'
-      'codigo acoes'
-      'leituras acoes';
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .cartaz__rotulo {
-    grid-area: rotulo;
-  }
-
-  .cartaz__codigo {
-    grid-area: codigo;
-  }
-
-  .cartaz__leituras {
-    grid-area: leituras;
-  }
-
-  .cartaz__acoes {
-    align-self: center;
-    justify-self: end;
-    margin-top: 0;
-    grid-area: acoes;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cartaz__qr {
-    transition: none;
-  }
 }
 
 /* ------------------------------------------------------------------ painel lateral

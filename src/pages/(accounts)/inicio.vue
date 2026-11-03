@@ -10,13 +10,27 @@
  *
  * 1. **A saudação e uma frase de estado.** "Boa tarde, Carla" e, embaixo, a data e o que pede
  *    atenção em todos os espaços — "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1
- *    no Hotel." Embaixo dela, numa fileira, os números de cada espaço (`useAberturaDoInicio`); à
- *    direita, o código de indicação com o QR, em destaque (`HomeIndique` na forma `destaque`).
- * 2. **Um bloco por espaço que a empresa tem**, na cor dele (Clínica maré, Hotel lavanda, Portal
- *    mel), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo. Quem
- *    não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
+ *    no Hotel." Embaixo dela, numa fileira, os números de cada espaço (`useAberturaDoInicio`).
+ * 2. **Um bloco por espaço de trabalho que a empresa tem**, na cor dele (Clínica maré, Hotel
+ *    lavanda), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo.
+ *    Quem não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
  * 3. **O que pede ação**, a lista do sistema (`UiPauta`), agrupada por espaço.
- * 4. **O resto, calmo, embaixo**: a agenda da semana e a marca.
+ * 4. **O resto, calmo, embaixo**: a agenda da semana, o Portal numa linha e a marca.
+ *
+ * ## O Portal fica no pé (03/11/2026)
+ *
+ * O código de indicação com o QR na faixa do alto e o bloco do Portal (saldo, leituras do QR,
+ * "Compartilhar código") ao lado da Clínica e do Hotel davam à indicação o mesmo peso do trabalho
+ * do dia, e o Início lia como programa de recrutamento. Com a Clínica ou o Hotel na empresa, o
+ * Portal é uma linha no pé (`HomeEspacoPortal`): o saldo e, só quando há o que
+ * resolver, um botão. Código, QR e divulgação moram no próprio Portal, pela barra.
+ *
+ * ## Só o Portal (03/11/2026)
+ *
+ * Sem a Clínica e o Hotel, o Portal é a empresa inteira, e um bloco só deixava a tela vazia. No
+ * lugar dos blocos entram as áreas do Portal (`HomePortalAreas`): Acessos, Carteira, Indicados,
+ * Divulgação, Equipe e Programas, cada uma com o seu número. A que depende de um programa ainda
+ * não ativo fica turva, com o aviso e o botão que leva aos Programas.
  *
  * A grade de módulos que existia saiu: a barra lateral já é o mapa. As ações rápidas do alto
  * ("Agenda de hoje", "Mapa de vagas", "Compartilhar código") foram para o título de cada bloco,
@@ -35,10 +49,9 @@ import HomeAgenda from '@/components/home/HomeAgenda.vue'
 import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
 import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
 import HomeEspacoPortal from '@/components/home/HomeEspacoPortal.vue'
-import HomeIndique from '@/components/home/HomeIndique.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
 import HomePauta from '@/components/home/HomePauta.vue'
-import type { IndicacaoNoBloco } from '@/components/home/espaco-da-home'
+import HomePortalAreas from '@/components/home/HomePortalAreas.vue'
 import { useAberturaDoInicio } from '@/components/home/useAberturaDoInicio'
 import { CHAVE_DO_DIA, useLinhaDoDia } from '@/components/home/useLinhaDoDia'
 import { usePautaDaHome } from '@/components/home/usePautaDaHome'
@@ -67,8 +80,6 @@ provide(CHAVE_DO_DIA, dia)
 /** Os números à direita da abertura, como no Hoje de cada espaço. */
 const indicadores = useAberturaDoInicio(dia)
 
-const indique = ref<InstanceType<typeof HomeIndique> | null>(null)
-
 const now = ref(new Date())
 let clockId: ReturnType<typeof setInterval> | undefined
 
@@ -77,11 +88,14 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 /** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
 const temModulos = computed(() => hasClinicalProfile.value || hasHotelProfile.value)
 
-/** Os blocos são os espaços da barra, na mesma ordem: Clínica, Hotel, Portal. */
+const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'portal') ?? null)
+
+/**
+ * Os blocos são os espaços de trabalho da barra, na mesma ordem: Clínica e Hotel. O Portal desce
+ * para uma linha no pé, ou, sozinho, abre as áreas dele no lugar dos blocos.
+ */
 const blocos = computed(() =>
-  espacos.value.filter(
-    (espaco) => espaco.id === 'clinica' || espaco.id === 'hotel' || espaco.id === 'portal',
-  ),
+  espacos.value.filter((espaco) => espaco.id === 'clinica' || espaco.id === 'hotel'),
 )
 
 // ------------------------------------------------------------------------------ a saudação
@@ -184,24 +198,6 @@ const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
-// ------------------------------------------------------------------------------ o Portal
-
-/** O que a seção do código sabe e o bloco do Portal mostra (leituras do QR, se há QR). */
-const indicacao = computed<IndicacaoNoBloco | null>(() =>
-  indique.value
-    ? {
-        carregando: indique.value.carregando,
-        podeIndicar: indique.value.podeIndicar,
-        temQr: indique.value.temQr,
-        resumo: indique.value.resumo,
-      }
-    : null,
-)
-
-function compartilhar() {
-  indique.value?.abrirQr()
-}
-
 onMounted(() => {
   void ensureContext()
   clockId = setInterval(() => {
@@ -236,29 +232,21 @@ onUnmounted(() => {
         <template #resumo>
           <span aria-live="polite">{{ fraseDoResumo }}</span>
         </template>
-        <template #lado>
-          <HomeIndique ref="indique" forma="destaque" />
-        </template>
       </UiAbertura>
     </template>
 
     <div class="inicio">
       <PartnerOperabilityBanner />
 
-      <section class="espacos" :aria-label="t('inicio.espacos.rotulo')">
+      <section v-if="blocos.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
         <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
           <template v-for="espaco in blocos" :key="espaco.id">
             <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
-            <HomeEspacoHotel v-else-if="espaco.id === 'hotel'" :espaco="espaco" />
-            <HomeEspacoPortal
-              v-else
-              :espaco="espaco"
-              :indicacao="indicacao"
-              @compartilhar="compartilhar"
-            />
+            <HomeEspacoHotel v-else :espaco="espaco" />
           </template>
         </div>
       </section>
+      <HomePortalAreas v-else-if="portal" />
 
       <HomePauta v-if="temModulos" />
 
@@ -269,6 +257,7 @@ onUnmounted(() => {
           :clinica="hasClinicalProfile"
           :hotel="hasHotelProfile"
         />
+        <HomeEspacoPortal v-if="temModulos && portal" :espaco="portal" />
         <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->
         <HomeMarca class="calma__marca" />
       </div>
@@ -325,9 +314,8 @@ onUnmounted(() => {
 /* ------------------------------------------------------------------ o resto, calmo */
 
 /*
- * A agenda na largura toda, como a pauta acima dela; a marca fecha a página numa faixa baixa. Com o
- * código de indicação lá em cima, a marca sozinha numa coluna ao lado da agenda deixava um vão alto
- * embaixo dela.
+ * A agenda na largura toda, como a pauta acima dela; o Portal numa linha e a marca fecha a página
+ * numa faixa baixa. A marca sozinha numa coluna ao lado da agenda deixava um vão alto embaixo dela.
  */
 .calma {
   display: grid;

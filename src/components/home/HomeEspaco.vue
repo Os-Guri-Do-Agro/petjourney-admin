@@ -2,13 +2,14 @@
 /**
  * O bloco de um espaço no Início: a Clínica, o Hotel ou o Portal, na cor dele.
  *
- * É a moldura que os três dividem, para que a pergunta "como está cada parte da empresa agora" se
+ * É a moldura que os dois dividem, para que a pergunta "como está cada parte da empresa agora" se
  * responda do mesmo jeito em todas: o nome do espaço (que leva à primeira tela dele, a mesma da
  * barra), um atalho de trabalho à direita, de dois a quatro **números do agora** — cada um leva à
  * tela onde ele se resolve — e, no pé, **o próximo passo**: a coisa que vale fazer primeiro ali.
  *
- * Quem decide os números e o passo é o bloco de cada espaço (`HomeEspacoClinica`, `HomeEspacoHotel`,
- * `HomeEspacoPortal`); este componente só desenha.
+ * Quem decide os números e o passo é o bloco de cada espaço (`HomeEspacoClinica`,
+ * `HomeEspacoHotel`); este componente só desenha. O Portal não é bloco: vai numa linha no pé ou,
+ * sozinho, nas áreas dele (`HomePortalAreas`).
  *
  * ## A cor
  *
@@ -290,12 +291,16 @@ const idDoTitulo = `inicio-espaco-${props.lugar}`
   padding: 14px 18px 14px;
 }
 
+/*
+ * `auto-fit`: com Clínica e Hotel dividindo a linha (o Portal desceu para o pé), cabem mais colunas
+ * do que números, e `auto-fill` guardava colunas vazias à direita.
+ */
 .espaco__numeros {
   display: grid;
   gap: 12px 14px;
   margin: 0;
   padding: 0;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 112px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 112px), 1fr));
   list-style: none;
 }
 
