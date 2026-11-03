@@ -57,6 +57,21 @@ describe('apiFetch', () => {
     expect(fetchMock).toHaveBeenCalledWith('https://api.exemplo.test/auth/login', expect.anything())
   })
 
+  it('completa com https a base sem protocolo, em vez de cair na origem do painel', async () => {
+    const { apiFetch } = await loadApi('api.exemplo.test/')
+    const fetchMock = mockFetch(new Response('{"ok":true}', { headers: JSON_HEADERS }))
+
+    await apiFetch('/auth/login')
+
+    expect(fetchMock).toHaveBeenCalledWith('https://api.exemplo.test/auth/login', expect.anything())
+  })
+
+  it('mantém o protocolo que a base já traz', async () => {
+    const { getApiUrl } = await loadApi('http://localhost:3000')
+
+    expect(getApiUrl()).toBe('http://localhost:3000')
+  })
+
   it('aceita resposta sem corpo (204 de DELETE)', async () => {
     const { apiFetch } = await loadApi('https://api.exemplo.test')
     mockFetch(new Response(null, { status: 204 }))

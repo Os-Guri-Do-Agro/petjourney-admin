@@ -3,8 +3,23 @@ import { API_LOCALE, DEFAULT_LOCALE, isLocale } from '@/i18n/locales'
 
 import { clearAuthSession, getAccessToken } from './auth/auth-session'
 
+/**
+ * A base da API. Endereço sem protocolo ("api.exemplo.com") virava caminho relativo: o fetch ia para
+ * a origem do painel, o S3 devolvia o index.html e o login caía em "formato inesperado". A API só
+ * existe em https, então é esse o protocolo que falta.
+ */
+function baseDaApi(valor: string | undefined) {
+  const limpo = (valor ?? '').trim().replace(/\/+$/, '')
+
+  if (!limpo || /^[a-z][a-z\d+.-]*:\/\//i.test(limpo)) {
+    return limpo
+  }
+
+  return `https://${limpo.replace(/^\/+/, '')}`
+}
+
 // Fonte única: o Vite escolhe .env.development no dev e .env.production no build.
-const API_URL = (import.meta.env.VITE_API_URL ?? '').trim().replace(/\/+$/, '')
+const API_URL = baseDaApi(import.meta.env.VITE_API_URL)
 
 export class ApiError extends Error {
   readonly statusCode: number
