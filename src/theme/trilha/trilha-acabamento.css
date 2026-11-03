@@ -186,6 +186,16 @@ html.trilha .p-multiselect {
   min-height: var(--altura-controle);
 }
 
+/*
+ * O texto no meio da caixa. A altura mínima vale também para o `size="small"`, mas o rótulo dele
+ * guarda o respiro de pequeno (6 px) e, esticado, ficava encostado no alto. A seta continua
+ * ocupando a altura toda.
+ */
+html.trilha .p-select .p-select-label,
+html.trilha .p-multiselect .p-multiselect-label-container {
+  align-self: center;
+}
+
 html.trilha .p-inputtext:enabled:focus,
 html.trilha .p-textarea:enabled:focus,
 html.trilha .p-select.p-focus,
