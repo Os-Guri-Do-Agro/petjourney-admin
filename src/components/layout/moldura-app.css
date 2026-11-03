@@ -560,15 +560,43 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
 }
 
 /*
- * O botão de perigo cheio ficou pastel: texto branco por cima dava 2:1 ("Cancelar atendimento").
- * Passa à tinta, como o de atenção já fazia: cerca de 6:1 no repouso e 5:1 no hover. Vale também
- * dentro do `.hc-tema` (os diálogos da clínica), que redefine os botões para o branco.
+ * Os botões de perigo e de atenção cheios ficaram pastel, e o texto branco por cima dava 2:1
+ * ("Cancelar atendimento"). Eles chegaram a usar a tinta geral, mas aqui ela é o azul-marinho do
+ * app: azul sobre vermelho não diz nada ("Cancelar convite", 03/11/2026). O texto agora é a tinta
+ * da própria cor, um pouco mais funda (a `--*-tinta` pura dá 3,5:1 sobre o pastel), e o hover
+ * escurece para o lado dela — antes ele misturava o azul e puxava para o roxo.
+ *
+ * Contraste medido: perigo 5,6:1 no repouso, 5,2 no hover, 4,7 ao clicar; atenção 6,2 / 5,7 / 5,1.
+ * O perigo vale também dentro do `.hc-tema` (os diálogos da clínica), que redefine os botões; a
+ * atenção de lá tem cor própria e fica como está.
  */
 :root.trilha.moldura-app:not(.app-dark),
 :root.trilha.moldura-app:not(.app-dark) .hc-tema {
-  --p-button-danger-color: var(--tinta);
-  --p-button-danger-hover-color: var(--tinta);
-  --p-button-danger-active-color: var(--tinta);
+  --p-button-danger-background: var(--risco);
+  --p-button-danger-hover-background: color-mix(in oklab, var(--risco) 92%, var(--risco-tinta));
+  --p-button-danger-active-background: color-mix(in oklab, var(--risco) 84%, var(--risco-tinta));
+  --p-button-danger-border-color: var(--risco);
+  --p-button-danger-hover-border-color: color-mix(in oklab, var(--risco) 92%, var(--risco-tinta));
+  --p-button-danger-active-border-color: color-mix(in oklab, var(--risco) 84%, var(--risco-tinta));
+  --p-button-danger-color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
+  --p-button-danger-hover-color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
+  --p-button-danger-active-color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
+}
+
+:root.trilha.moldura-app:not(.app-dark) {
+  --p-button-warn-background: var(--atencao);
+  --p-button-warn-hover-background: color-mix(in oklab, var(--atencao) 92%, var(--atencao-tinta));
+  --p-button-warn-active-background: color-mix(in oklab, var(--atencao) 84%, var(--atencao-tinta));
+  --p-button-warn-border-color: var(--atencao);
+  --p-button-warn-hover-border-color: color-mix(in oklab, var(--atencao) 92%, var(--atencao-tinta));
+  --p-button-warn-active-border-color: color-mix(
+    in oklab,
+    var(--atencao) 84%,
+    var(--atencao-tinta)
+  );
+  --p-button-warn-color: color-mix(in oklab, var(--atencao-tinta) 75%, #000);
+  --p-button-warn-hover-color: color-mix(in oklab, var(--atencao-tinta) 75%, #000);
+  --p-button-warn-active-color: color-mix(in oklab, var(--atencao-tinta) 75%, #000);
 }
 
 /* O que punha texto branco sobre a cor cheia passa à tinta da família, que lê sobre o pastel. */
