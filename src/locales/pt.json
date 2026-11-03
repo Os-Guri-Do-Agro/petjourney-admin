@@ -3191,7 +3191,6 @@
       "titulo": "Hoje na clínica",
       "semProximo": "Nada mais marcado para hoje.",
       "esperando": "Já chegaram",
-      "esperaDe": "esperando {valor}",
       "marcarRetorno": "Marcar retorno",
       "continuarCom": "Continuar {pet}",
       "atenderCom": "Atender {pet}",
@@ -3203,13 +3202,10 @@
       "pauta": {
         "boletim": "Boletim de {pet} aguarda contato com o responsável",
         "doses": "{total} dose atrasada | {total} doses atrasadas",
-        "naRecepcao": "{pet} espera na recepção",
-        "alerta": "{pet} às {hora}",
         "retornos": "{total} retorno sem horário marcado | {total} retornos sem horário marcado",
         "eMais": "{nomes} e mais {total}",
         "mostrarMais": "Mostrar mais {total}",
-        "mostrarMenos": "Mostrar menos",
-        "ondeAgenda": "Agenda"
+        "mostrarMenos": "Mostrar menos"
       },
       "abertura": {
         "internados": "Internado | Internados",

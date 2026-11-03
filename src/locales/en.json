@@ -3191,7 +3191,6 @@
       "titulo": "Today at the clinic",
       "semProximo": "Nothing else booked for today.",
       "esperando": "Already here",
-      "esperaDe": "waiting {valor}",
       "marcarRetorno": "Book follow-up",
       "continuarCom": "Continue {pet}",
       "atenderCom": "See {pet}",
@@ -3203,13 +3202,10 @@
       "pauta": {
         "boletim": "{pet}'s update is waiting on contact with the owner",
         "doses": "{total} overdue dose | {total} overdue doses",
-        "naRecepcao": "{pet} is waiting at reception",
-        "alerta": "{pet} at {hora}",
         "retornos": "{total} follow-up with no slot booked | {total} follow-ups with no slot booked",
         "eMais": "{nomes} and {total} more",
         "mostrarMais": "Show {total} more",
-        "mostrarMenos": "Show less",
-        "ondeAgenda": "Schedule"
+        "mostrarMenos": "Show less"
       },
       "abertura": {
         "internados": "Inpatient | Inpatients",

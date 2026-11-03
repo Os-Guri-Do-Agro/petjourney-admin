@@ -3191,7 +3191,6 @@
       "titulo": "Danas u klinici",
       "semProximo": "Za danas nema više zakazanih termina.",
       "esperando": "Već su stigli",
-      "esperaDe": "dolazak: {valor}",
       "marcarRetorno": "Zakažite kontrolu",
       "continuarCom": "Nastavite: {pet}",
       "atenderCom": "Primite: {pet}",
@@ -3203,13 +3202,10 @@
       "pauta": {
         "boletim": "Izveštaj za {pet} čeka kontakt sa vlasnikom",
         "doses": "{total} doza kasni | {total} doze kasne | {total} doza kasni",
-        "naRecepcao": "{pet} čeka na recepciji",
-        "alerta": "{pet} u {hora}",
         "retornos": "{total} kontrola bez termina | {total} kontrole bez termina | {total} kontrola bez termina",
         "eMais": "{nomes} i još {total}",
         "mostrarMais": "Prikaži još {total}",
-        "mostrarMenos": "Prikaži manje",
-        "ondeAgenda": "Raspored"
+        "mostrarMenos": "Prikaži manje"
       },
       "abertura": {
         "internados": "Hospitalizovan | Hospitalizovana | Hospitalizovanih",

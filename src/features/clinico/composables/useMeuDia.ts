@@ -25,12 +25,6 @@ import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 
 const ENCERRADOS: Appointment['status'][] = ['cancelado', 'falta', 'finalizado']
 
-/**
- * Até quanto tempo depois do horário marcado alguém que não chegou ainda "vem": o atraso comum de
- * quem pega trânsito. Passou disso, é falta provável — e a falta tem tela própria.
- */
-const TOLERANCIA_DE_ATRASO_MS = 30 * 60 * 1000
-
 export function useMeuDia() {
   const { t, locale } = useI18n()
   const router = useRouter()
@@ -81,8 +75,8 @@ export function useMeuDia() {
   )
 
   /**
-   * Alerta que muda conduta hoje: de quem **ainda vem**, e só de risco e atenção. Quem já foi
-   * atendido sai; quem está na recepção leva o alerta na própria linha.
+   * Alerta que muda conduta hoje: só de risco e atenção. Cada paciente da fila leva os seus na
+   * própria linha; a pauta ao lado não os repete.
    */
   function alertasRelevantes(pet: Pet | null | undefined) {
     return pet ? pet.alertas.filter((alerta) => alerta.severidade !== 'info') : []
@@ -93,31 +87,6 @@ export function useMeuDia() {
       ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
       : formato.alerta(alerta.kind)
   }
-
-  const alertasDeQuemVem = computed(() => {
-    const vistos = new Set<string>()
-    const limite = Date.parse(clinicClock.nowIso()) - TOLERANCIA_DE_ATRASO_MS
-
-    return agenda.atendimentos
-      .filter(
-        (item) =>
-          (item.status === 'agendado' || item.status === 'confirmado') &&
-          Date.parse(item.inicio) >= limite,
-      )
-      .sort((a, b) => a.inicio.localeCompare(b.inicio))
-      .flatMap((item) => {
-        const pet = clinico.pet(item.petId)
-        const alertas = alertasRelevantes(pet)
-
-        if (!pet || alertas.length === 0 || vistos.has(pet.id)) {
-          return []
-        }
-
-        vistos.add(pet.id)
-
-        return [{ pet, alertas, appointment: item }]
-      })
-  })
 
   /** Os internados que cobram alguma coisa **agora**: boletim retido primeiro, depois doses. */
   const internadosComPendencia = computed(() =>
@@ -160,10 +129,14 @@ export function useMeuDia() {
       : undefined
   }
 
+  /**
+   * O que pede ação e **não está na fila**: a internação (boletim retido, doses atrasadas) e os
+   * retornos vencidos. Quem espera na recepção e o alerta de quem vem já estão na lista "Quem vem
+   * depois", ao lado, com a mesma informação; repetir os dois aqui dobrava o texto da tela (03/11).
+   */
   const linhasDaPauta = computed<LinhaDaTabela[]>(() => {
     const linhas: LinhaDaTabela[] = []
     const ondeInternacao = t('inicio.pauta.onde.internacao')
-    const ondeAgenda = t('clinico.meuDia.pauta.ondeAgenda')
 
     for (const item of internadosComPendencia.value) {
       const to = `/veterinario/internacao/${item.internacao!.id}`
@@ -194,42 +167,6 @@ export function useMeuDia() {
       )
     }
 
-    for (const item of naRecepcao.value) {
-      const pet = clinico.pet(item.petId)
-      const partes = [clinico.profissional(item.professionalId)?.nome ?? '']
-
-      if (item.chegadaEm) {
-        partes.push(t('clinico.meuDia.esperaDe', { valor: formato.relativo(item.chegadaEm) }))
-      }
-
-      partes.push(...alertasRelevantes(pet).map(textoDoAlerta))
-
-      linhas.push({
-        id: `espera-${item.id}`,
-        to: focoNaAgenda(item.id),
-        frase: t('clinico.meuDia.pauta.naRecepcao', { pet: pet?.nome ?? '' }),
-        detalhe: partes.filter(Boolean).join(' · '),
-        tom: 'atencao',
-        onde: ondeAgenda,
-        pet: rostoDe(pet),
-      })
-    }
-
-    for (const { pet, alertas, appointment } of alertasDeQuemVem.value) {
-      linhas.push({
-        id: `alerta-${pet.id}`,
-        to: focoNaAgenda(appointment.id),
-        frase: t('clinico.meuDia.pauta.alerta', {
-          pet: pet.nome,
-          hora: formato.hora(appointment.inicio),
-        }),
-        detalhe: alertas.map(textoDoAlerta).join(' · '),
-        tom: 'atencao',
-        onde: ondeAgenda,
-        pet: rostoDe(pet),
-      })
-    }
-
     const retornos = retornosPendentes.value.length
 
     if (retornos > 0) {
@@ -250,8 +187,9 @@ export function useMeuDia() {
 
   const urgentes = computed(() => linhasDaPauta.value.filter((linha) => linha.tom === 'risco'))
 
+  /** O que espera por alguém nesta tela: a pauta ao lado e quem está na recepção, na fila. */
   const fraseDoResumo = computed(() => {
-    const total = linhasDaPauta.value.length
+    const total = linhasDaPauta.value.length + naRecepcao.value.length
 
     if (urgentes.value.length > 0) {
       return t(
@@ -323,6 +261,17 @@ export function useMeuDia() {
 
   function linhaDoAtendimento(item: Appointment) {
     return [clinico.tipo(item.typeId)?.nome, profissionaisDe(item)].filter(Boolean).join(' · ')
+  }
+
+  /**
+   * O atendimento do cartão do destaque numa linha curta: o serviço, o primeiro profissional (com
+   * "+1" quando a cirurgia tem equipe) e a sala. Os nomes inteiros moram no prontuário.
+   */
+  function linhaCurtaDoAtendimento(item: Appointment) {
+    const nomes = profissionaisDe(item).split(', ').filter(Boolean)
+    const equipe = nomes.length > 1 ? `${nomes[0]} +${nomes.length - 1}` : (nomes[0] ?? '')
+
+    return [clinico.tipo(item.typeId)?.nome, equipe, salasDe(item)].filter(Boolean).join(' · ')
   }
 
   /** "Cão · Shih-tzu · 6 anos": quem é o paciente, numa linha. */
@@ -452,6 +401,7 @@ export function useMeuDia() {
     textoDoAlerta,
     minutosDesde,
     linhaDoAtendimento,
+    linhaCurtaDoAtendimento,
     linhaDoPaciente,
     salasDe,
     focoNaAgenda,
