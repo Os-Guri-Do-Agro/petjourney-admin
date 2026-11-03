@@ -800,11 +800,15 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   background: var(--app-toque);
 }
 
-/* A folha sem assunto (formulário, resumo, aviso) é o painel do app: véu, sem borda nem sombra. */
+/*
+ * A folha sem assunto (formulário, resumo, aviso) é o painel do app: véu, sem borda nem sombra. A
+ * tela que empilha painéis e precisa de mais contraste com o branco troca o `--app-painel` (a ficha
+ * da internação).
+ */
 :root.trilha.moldura-app .ui-folha:where(:not(.ui-cartao)) {
   border: 0;
   border-radius: 22px;
-  background: var(--app-veu);
+  background: var(--app-painel, var(--app-veu));
   box-shadow: none;
 }
 

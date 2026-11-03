@@ -800,6 +800,21 @@ async function encerrar(entrada: {
   gap: 20px;
 }
 
+/*
+ * Quadro, aviso e checklist num véu sálvia mais denso que o do resto do portal (24% contra 9%): a
+ * ficha empilha três painéis, e no véu claro eles se fundiam com o papel branco e a tela inteira
+ * lia como um bloco só. As faixas rentes (textos do quadro, o que já foi registrado) clareiam por
+ * cima do painel, e os fios entre células sobem junto para não sumir no véu. O cinza mais fraco
+ * dava 3,9:1 no véu denso e passa a ser o segundo (4,7:1). No escuro o véu de sempre já destaca os
+ * painéis do fundo, e tudo fica como está.
+ */
+:root:not(.app-dark) .internado {
+  --app-painel: rgb(132 165 157 / 24%);
+  --painel-faixa: rgb(255 255 255 / 45%);
+  --painel-fio: rgb(132 165 157 / 38%);
+  --tinta-3: var(--tinta-2);
+}
+
 /* ------------------------------------------------------------------ topo */
 
 .voltar .ph {
@@ -863,8 +878,8 @@ async function encerrar(entrada: {
   margin-block-start: -1px;
   margin-inline-start: -1px;
   padding: 18px 24px;
-  border-block-start: 1px solid var(--linha);
-  border-inline-start: 1px solid var(--linha);
+  border-block-start: 1px solid var(--painel-fio, var(--linha));
+  border-inline-start: 1px solid var(--painel-fio, var(--linha));
 }
 
 .dado dt {
@@ -925,8 +940,8 @@ async function encerrar(entrada: {
   margin: 0;
   padding: 14px 24px 16px;
   gap: 12px 28px;
-  border-top: 1px solid var(--linha-suave);
-  background: color-mix(in oklab, var(--superficie-2) 55%, var(--superficie));
+  border-top: 1px solid var(--painel-fio, var(--linha-suave));
+  background: var(--painel-faixa, color-mix(in oklab, var(--superficie-2) 55%, var(--superficie)));
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
 }
 
@@ -984,7 +999,7 @@ async function encerrar(entrada: {
   display: flex;
   gap: 4px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--linha);
+  border-bottom: 1px solid var(--painel-fio, var(--linha));
   scroll-margin-top: 16px;
   scrollbar-width: none;
 }

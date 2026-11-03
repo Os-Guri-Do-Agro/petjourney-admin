@@ -481,9 +481,9 @@ function registrarAntes(administracaoId: string) {
   gap: 4px 10px;
   margin: -6px -18px 0;
   padding: 10px 18px;
-  border-bottom: 1px solid var(--linha-suave);
+  border-bottom: 1px solid var(--painel-fio, var(--linha-suave));
   border-radius: calc(var(--raio-cartao) - 1px) calc(var(--raio-cartao) - 1px) 0 0;
-  background: color-mix(in oklab, var(--superficie-2) 70%, var(--superficie));
+  background: var(--painel-faixa, color-mix(in oklab, var(--superficie-2) 70%, var(--superficie)));
   color: var(--tinta-2);
   font-size: 14px;
 }
@@ -594,7 +594,7 @@ function registrarAntes(administracaoId: string) {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: var(--linha);
+  background: var(--painel-fio, var(--linha));
   content: '';
 }
 
@@ -652,17 +652,21 @@ function registrarAntes(administracaoId: string) {
   right: 12px;
   left: 58px;
   height: 1px;
-  background: var(--linha);
+  background: var(--painel-fio, var(--linha));
   content: '';
 }
 
-/* O atrasado ganha um véu de risco, além da marca e do selo: é o que não pode passar batido. */
+/*
+ * O atrasado ganha um véu de risco, além da marca e do selo: é o que não pode passar batido. A
+ * mistura é com o papel, e não com o transparente, para o tom não sujar quando o painel por baixo
+ * é mais denso.
+ */
 .item--atrasada {
-  background: color-mix(in oklab, var(--risco-fundo) 60%, transparent);
+  background: color-mix(in oklab, var(--risco-fundo) 60%, var(--superficie));
 }
 
 .item--na-janela {
-  background: color-mix(in oklab, var(--atencao-fundo) 60%, transparent);
+  background: color-mix(in oklab, var(--atencao-fundo) 60%, var(--superficie));
 }
 
 .item__icone {
