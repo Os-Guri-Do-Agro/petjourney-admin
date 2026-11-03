@@ -3834,6 +3834,8 @@
         "historia": "História clínica",
         "duracaoSintomas": "Há quanto tempo",
         "duracaoExemplo": "Ex.: 3 dias",
+        "queixaExemplo": "Ex.: vômito e falta de apetite",
+        "historiaExemplo": "Como começou, o que mudou desde então e o que já foi feito em casa",
         "apetite": "Apetite",
         "hidratacao": "Hidratação",
         "evacuacao": "Evacuação",

@@ -3834,6 +3834,8 @@
         "historia": "Clinical history",
         "duracaoSintomas": "How long",
         "duracaoExemplo": "e.g. 3 days",
+        "queixaExemplo": "e.g. vomiting and loss of appetite",
+        "historiaExemplo": "How it started, what has changed since and what was already done at home",
         "apetite": "Appetite",
         "hidratacao": "Hydration",
         "evacuacao": "Defecation",

@@ -239,6 +239,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
             :id="id"
             :model-value="valor.queixaPrincipal"
             :disabled="somenteLeitura"
+            :placeholder="t('clinico.prontuario.anamnese.queixaExemplo')"
             fluid
             @update:model-value="definir('queixaPrincipal', $event ?? '')"
           />
@@ -291,6 +292,7 @@ function inserirComando(chave: (typeof COMANDOS)[number]) {
             auto-resize
             fluid
             :disabled="somenteLeitura"
+            :placeholder="t('clinico.prontuario.anamnese.historiaExemplo')"
             @input="aoDigitarHistoria"
             @keydown.esc="comandosAbertos = false"
           />

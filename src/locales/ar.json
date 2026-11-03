@@ -3834,6 +3834,8 @@
         "historia": "التاريخ السريري",
         "duracaoSintomas": "منذ متى",
         "duracaoExemplo": "مثال: 3 أيام",
+        "queixaExemplo": "مثال: قيء وفقدان الشهية",
+        "historiaExemplo": "كيف بدأت الحالة، وما الذي تغيّر منذ ذلك الحين، وما الذي تم فعله في المنزل",
         "apetite": "الشهية",
         "hidratacao": "الترطيب",
         "evacuacao": "التبرز",
