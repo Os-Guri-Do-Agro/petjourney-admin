@@ -2122,6 +2122,7 @@
         "recusar": "Recusar",
         "semSessao": "Entre na sua conta para aceitar. Se ainda não tem conta, crie uma: o convite continua esperando por você.",
         "semPrevia": "Não deu para ver agora de que empresa é o convite. Você ainda pode aceitar ou recusar.",
+        "empresaSemNome": "Empresa parceira do PetJourney",
         "semSessaoCadastro": "Crie a sua conta para aceitar o convite. Assim que terminar, você volta para ele."
       },
       "recusado": {

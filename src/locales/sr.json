@@ -2122,6 +2122,7 @@
         "recusar": "Odbijte",
         "semSessao": "Prijavite se da biste prihvatili. Ako još nemate nalog, napravite ga: poziv vas čeka.",
         "semPrevia": "Trenutno ne možemo da prikažemo od koje firme je poziv. I dalje možete da ga prihvatite ili odbijete.",
+        "empresaSemNome": "Partnerska firma PetJourney-ja",
         "semSessaoCadastro": "Napravite nalog da biste prihvatili poziv. Kada završite, vraćate se na njega."
       },
       "recusado": {

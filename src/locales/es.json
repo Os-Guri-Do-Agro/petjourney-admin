@@ -2122,6 +2122,7 @@
         "recusar": "Rechazar",
         "semSessao": "Inicie sesión para aceptar. Si aún no tiene cuenta, cree una: la invitación lo seguirá esperando.",
         "semPrevia": "No pudimos ver ahora de qué empresa es la invitación. Aún puede aceptarla o rechazarla.",
+        "empresaSemNome": "Empresa socia de PetJourney",
         "semSessaoCadastro": "Cree su cuenta para aceptar la invitación. Al terminar, vuelve directo a ella."
       },
       "recusado": {

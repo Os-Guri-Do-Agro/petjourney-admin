@@ -2122,6 +2122,7 @@
         "recusar": "Decline",
         "semSessao": "Sign in to accept. If you do not have an account yet, create one: the invite will wait for you.",
         "semPrevia": "We couldn't load which company sent this invite right now. You can still accept or decline it.",
+        "empresaSemNome": "PetJourney partner company",
         "semSessaoCadastro": "Create your account to accept the invite. When you finish, you go straight back to it."
       },
       "recusado": {

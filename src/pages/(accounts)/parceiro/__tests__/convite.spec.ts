@@ -126,9 +126,9 @@ describe('convite pelo link', () => {
     const tela = await abrirTela()
 
     expect(equipe.previaDoConvitePorLink).toHaveBeenCalledWith('token-1')
-    expect(tela.find('.convite-linha__empresa').text()).toBe('Aurora Clínica e Hotel Veterinário')
-    expect(tela.find('.convite-linha').text()).toContain('Helena Prado convidou você como operador')
-    expect(tela.find('.convite-linha').text()).toContain('Vale até 11 de novembro')
+    expect(tela.find('.bilhete__empresa').text()).toBe('Aurora Clínica e Hotel Veterinário')
+    expect(tela.find('.bilhete__quem').text()).toContain('Helena Prado convidou você como operador')
+    expect(tela.find('.canhoto__prazo').text()).toBe('Vale até 11 de novembro')
     expect(botao(tela, 'Aceitar convite').attributes('disabled')).toBeUndefined()
   })
 
@@ -160,7 +160,7 @@ describe('convite pelo link', () => {
 
     const tela = await abrirTela()
 
-    expect(tela.find('.convite-linha__sem-previa').exists()).toBe(true)
+    expect(tela.find('.bilhete__sem-previa').exists()).toBe(true)
 
     await botao(tela, 'Aceitar convite').trigger('click')
     await flushPromises()
@@ -225,10 +225,8 @@ describe('depois da decisão', () => {
   it('o convite recusado fica na tela com o selo, e a faixa diz a quem pedir outro', async () => {
     const tela = await recusar()
 
-    expect(tela.find('.desfecho .convite-linha__empresa').text()).toBe(
-      'Aurora Clínica e Hotel Veterinário',
-    )
-    expect(tela.find('.desfecho .ui-selo').text()).toBe('Recusado')
+    expect(tela.find('.bilhete__empresa').text()).toBe('Aurora Clínica e Hotel Veterinário')
+    expect(tela.find('.canhoto .carimbo').text()).toBe('Recusado')
     expect(tela.text()).toContain('Se mudar de ideia, peça um convite novo a Helena Prado.')
     expect(tela.find('#convite-outros').exists()).toBe(false)
   })
@@ -237,17 +235,17 @@ describe('depois da decisão', () => {
     useParceiroStore().semAcessoParceiro = true
 
     const tela = await recusar()
-    const acoes = tela.findAll('.desfecho__acoes a').map((a) => a.text())
+    const acoes = tela.findAll('.canhoto__acoes a').map((a) => a.text())
 
-    expect(tela.find('.desfecho__nota').exists()).toBe(true)
+    expect(tela.find('.canhoto__nota').exists()).toBe(true)
     expect(acoes).toEqual(['Cadastrar minha empresa', 'Ir para o portal'])
   })
 
   it('conta com empresa: só volta ao portal', async () => {
     const tela = await recusar()
 
-    expect(tela.find('.desfecho__nota').exists()).toBe(false)
-    expect(tela.findAll('.desfecho__acoes a').map((a) => a.text())).toEqual(['Ir para o portal'])
+    expect(tela.find('.canhoto__nota').exists()).toBe(false)
+    expect(tela.findAll('.canhoto__acoes a').map((a) => a.text())).toEqual(['Ir para o portal'])
   })
 
   it('os convites que ainda esperam aparecem embaixo', async () => {
@@ -282,10 +280,10 @@ describe('conta que já é da equipe', () => {
       'Você entrou com uma conta que já faz parte da equipe da Aurora Clínica e Hotel Veterinário',
     )
     expect(tela.findAll('button').some((b) => b.text().includes('Aceitar convite'))).toBe(false)
-    expect(tela.find('.desfecho .ui-selo').exists()).toBe(false)
-    expect(tela.find('.desfecho .convite-linha').text()).toContain('Convite como operador')
-    expect(tela.find('.desfecho .convite-linha').text()).not.toContain('convidou você')
-    expect(tela.find('.desfecho__acoes a').text()).toBe('Ir para o portal')
+    expect(tela.find('.canhoto .carimbo').exists()).toBe(false)
+    expect(tela.find('.bilhete__face').text()).toContain('Convite como operador')
+    expect(tela.find('.bilhete__face').text()).not.toContain('convidou você')
+    expect(tela.find('.canhoto__acoes a').text()).toBe('Ir para o portal')
 
     await botao(tela, 'Entrar com outra conta').trigger('click')
     await flushPromises()
@@ -328,7 +326,7 @@ describe('conta que já é da equipe', () => {
 
     const tela = await abrirTela()
 
-    expect(tela.find('.desfecho .ui-selo').text()).toBe('Já está na equipe')
+    expect(tela.find('.canhoto .carimbo').text()).toBe('Já está na equipe')
     expect(tela.text()).toContain(
       'Você já faz parte da equipe da Aurora Clínica e Hotel Veterinário.',
     )
