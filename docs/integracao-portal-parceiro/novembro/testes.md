@@ -141,3 +141,22 @@ Veterinária Bem-Estar, que já está preenchida e no ar). Portal › Estabeleci
 8. **Tirar do ar** e publicar de novo.
 9. **Como OPERADOR** (troque para outra empresa em que a conta é equipe): "Só o dono edita o
    estabelecimento" e nenhum botão de editar.
+
+## PJ-UFRXH6 · Auditoria da equipe (E1-05)
+
+**Preparar:** a conta DONO de uma empresa com o módulo Clínica ligado (ex.: `dr10572931@gmail.com`,
+Clínica Veterinária Bem-Estar, Clínica em TESTE até 04/12, paciente Bolota com um alerta). Portal ›
+Equipe › aba **Auditoria**.
+
+1. **Lista:** os eventos por dia ("Hoje, quarta-feira, 4 de novembro"), com a hora, o ícone da ação e
+   a frase "Daniel Rocha criou um alerta de paciente". Criação e exclusão aparecem como "criou" e
+   "excluiu", nunca como "alterou ... campos: criado".
+2. **O que a API grava hoje:** alerta do paciente (criar, mudar, retirar), troca de responsável e
+   óbito. Cadastrar e abrir um paciente ainda não entra na trilha.
+3. **Filtros:** Ação, Pessoa (a lista da equipe) e Período (um dia ou um intervalo). "Limpar filtros"
+   volta à lista toda. Filtro sem resultado mostra o vazio com o botão de limpar.
+4. **Mais de 50 eventos:** "Ver eventos anteriores" no pé busca a página seguinte.
+5. **Selos:** evento do suporte sai como "Suporte PetJourney", com o selo "Suporte" e o protocolo
+   embaixo da frase; evento do sistema leva o selo "Automático".
+6. **Como OPERADOR** sem a permissão `auditoria.ler` (só dono e gestão têm): a aba Auditoria não
+   aparece em Equipe.
