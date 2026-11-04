@@ -46,6 +46,7 @@ const PREVIA = {
   papel: 'OPERADOR' as const,
   convidadoPorNome: 'Helena Prado',
   expiraEm: '2026-11-11T15:00:00.000Z',
+  contaConectada: { jaFazParte: false, papelAtual: null, paraEstaConta: null },
 }
 
 async function abrirTela() {
@@ -134,7 +135,11 @@ describe('convite pelo link', () => {
   it('prévia fora do ar: o convite segue, sem o nome, e o aceite funciona', async () => {
     guardarTokenDoConvite('token-1')
     equipe.previaDoConvitePorLink.mockRejectedValue(new ApiError('Internal server error', 500))
-    equipe.aceitarConvitePorLink.mockResolvedValue({ parceiroId: 'parceiro-1', papel: 'OPERADOR' })
+    equipe.aceitarConvitePorLink.mockResolvedValue({
+      parceiroId: 'parceiro-1',
+      papel: 'OPERADOR',
+      jaEraMembro: false,
+    })
 
     const tela = await abrirTela()
 
