@@ -5,15 +5,16 @@
  * Cada aba é um link de verdade (a URL da tela), então abrir em outra guia, voltar e favoritar
  * funcionam como em qualquer link.
  *
- * `vidro`: dentro do cabeçalho do app, as abas são pílulas de vidro com texto branco, e a aberta é
- * papel branco com a tinta escura (o filtro do app: a escolhida cheia, as outras em véu, sem borda).
+ * `vidro`: dentro do cabeçalho do app, as abas moram numa trilha só de vidro, com texto branco, e a
+ * aberta é papel branco com a tinta escura (o seletor de modo do app, no validar cupom).
  */
+import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import type { Aba } from '@/navegacao/espacos'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{ abas: Aba[]; atual: string | null; rotulo: string; vidro?: boolean }>(),
   {
     vidro: false,
@@ -21,13 +22,63 @@ withDefaults(
 )
 
 const { t } = useI18n()
+
+/*
+ * Quando as abas não cabem (tablet, sérvio, cinco abas), a fileira rola de lado. O lado cortado
+ * esmaece, para dizer que há mais, e a aba aberta entra na vista: sem isso a última aba sumia atrás
+ * da ponta arredondada da trilha, e a fileira parecia acabar ali.
+ */
+const nav = ref<HTMLElement | null>(null)
+const cortaInicio = ref(false)
+const cortaFim = ref(false)
+
+function medir() {
+  const el = nav.value
+  if (!el) return
+  const sobra = el.scrollWidth - el.clientWidth
+  // No RTL o scrollLeft vai de 0 para negativo; o módulo é a distância andada desde o início.
+  const andado = Math.abs(el.scrollLeft)
+  cortaInicio.value = andado > 2
+  cortaFim.value = andado < sobra - 2
+}
+
+// No centro, e não rente: a primeira e a última aba levam a fileira até a ponta, sem esmaecido.
+function mostrarAtual() {
+  nav.value
+    ?.querySelector<HTMLElement>('.abas__aba--atual')
+    ?.scrollIntoView?.({ block: 'nearest', inline: 'center' })
+  medir()
+}
+
+let observador: ResizeObserver | null = null
+
+onMounted(() => {
+  mostrarAtual()
+  if (nav.value && typeof ResizeObserver !== 'undefined') {
+    observador = new ResizeObserver(medir)
+    observador.observe(nav.value)
+  }
+})
+
+onBeforeUnmount(() => observador?.disconnect())
+
+watch(
+  () => [props.atual, props.abas.length],
+  () => nextTick(mostrarAtual),
+)
 </script>
 
 <template>
   <nav
+    ref="nav"
     class="abas"
-    :class="{ 'abas--vidro': vidro }"
+    :class="{
+      'abas--vidro': vidro,
+      'abas--corta-inicio': cortaInicio,
+      'abas--corta-fim': cortaFim,
+    }"
     :aria-label="t('espacos.abasAria', { destino: rotulo })"
+    @scroll.passive="medir"
   >
     <RouterLink
       v-for="aba in abas"
@@ -61,6 +112,43 @@ const { t } = useI18n()
 
 .abas::-webkit-scrollbar {
   display: none;
+}
+
+/* O lado que continua fora da vista esmaece nos últimos 48 px (no RTL o início fica à direita). */
+.abas--corta-fim {
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+}
+
+.abas--corta-inicio {
+  mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent);
+}
+
+.abas--corta-inicio.abas--corta-fim {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent
+  );
+}
+
+[dir='rtl'] .abas--corta-fim {
+  mask-image: linear-gradient(to left, #000 calc(100% - 48px), transparent);
+}
+
+[dir='rtl'] .abas--corta-inicio {
+  mask-image: linear-gradient(to right, #000 calc(100% - 48px), transparent);
+}
+
+[dir='rtl'] .abas--corta-inicio.abas--corta-fim {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 48px,
+    #000 calc(100% - 48px),
+    transparent
+  );
 }
 
 .abas__aba {
@@ -168,19 +256,31 @@ const { t } = useI18n()
   color: var(--risco-tinta);
 }
 
-/* ----------------------------------------------------------- pílulas de vidro (cabeçalho) */
+/* ----------------------------------------------------------- trilha de vidro (cabeçalho)
+ * O seletor do app: uma trilha só, em vidro, com as abas dentro; a aberta é papel branco e as
+ * outras ficam transparentes sobre a trilha. Uma pílula de vidro solta por aba, cada uma com o seu
+ * selo colorido, lia como uma fileira de filtros, e não como as telas de um mesmo lugar.
+ *
+ * O vidro aqui é mais fundo que o `--app-vidro` (18% contra 13%): é o que leva o texto branco de
+ * 14 px a 4,6:1 sobre a sálvia do cabeçalho.
+ */
 
 .abas--vidro {
-  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  gap: 4px;
+  padding: 4px;
   border-bottom: 0;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 18%);
 }
 
 .abas--vidro .abas__aba,
 .abas--vidro .abas__aba:first-child {
-  height: 40px;
-  padding: 0 16px;
+  height: 38px;
+  padding: 0 14px;
   border-radius: 999px;
-  background: var(--app-vidro);
+  background: transparent;
   color: #fff;
   font-weight: 600;
   transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
@@ -191,7 +291,7 @@ const { t } = useI18n()
 }
 
 .abas--vidro .abas__aba:hover {
-  background: var(--app-vidro-forte);
+  background: rgb(0 0 0 / 12%);
   color: #fff;
 }
 
@@ -200,10 +300,36 @@ const { t } = useI18n()
   display: none;
 }
 
+/* Com 4 px entre as abas, o anel fica por dentro para não encostar na vizinha. */
 .abas--vidro .abas__aba:focus-visible {
   border-radius: 999px;
   outline: 2px solid #fff;
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+/*
+ * O número de cada aba é neutro, num vidro um tom mais fundo que a trilha: cinco selos pêssego
+ * enfileirados eram ruído, já que quase toda aba com algo parado é "atenção". Só o risco fica com a
+ * cor dele, que é o que precisa saltar.
+ */
+.abas--vidro .abas__selo {
+  background: rgb(0 0 0 / 20%);
+  color: #fff;
+}
+
+.abas--vidro .abas__selo--risco {
+  background: var(--risco-fundo);
+  color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
+}
+
+.abas--vidro .abas__aba--atual .abas__selo {
+  background: var(--neutro-fundo);
+  color: var(--neutro-tinta);
+}
+
+.abas--vidro .abas__aba--atual .abas__selo--risco {
+  background: var(--risco-fundo);
+  color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
 }
 
 .abas--vidro .abas__aba.abas__aba--atual,
@@ -225,5 +351,11 @@ const { t } = useI18n()
 
 .app-dark .abas--vidro .abas__aba--atual .abas__icone {
   color: var(--app-tinta);
+}
+
+/* No escuro o rosa do risco é tinta clara sobre fundo fundo: escurecer só derrubaria o contraste. */
+.app-dark .abas--vidro .abas__selo--risco,
+.app-dark .abas--vidro .abas__aba--atual .abas__selo--risco {
+  color: var(--risco-tinta);
 }
 </style>
