@@ -23,6 +23,7 @@ export type AuthUser = {
 
 const ACCESS_TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
+/** Só para limpar sessões antigas: o token não traz mais veterinarioId (E1-07). */
 const VETERINARIO_ID_KEY = 'veterinario_id'
 const EXPIRATION_SKEW_SECONDS = 30
 
@@ -106,10 +107,6 @@ export function setAuthSession(tokens: AuthTokens, rememberAccess = true) {
   storage.setItem(ACCESS_TOKEN_KEY, tokens.access_token)
   storage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token)
 
-  if (payload.veterinarioId) {
-    storage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
-  }
-
   notifyAuthSessionChange()
 }
 
@@ -133,10 +130,6 @@ export function updateAccessToken(accessToken: string) {
   }
 
   currentStorage.setItem(ACCESS_TOKEN_KEY, accessToken)
-
-  if (payload.veterinarioId) {
-    currentStorage.setItem(VETERINARIO_ID_KEY, payload.veterinarioId)
-  }
 
   notifyAuthSessionChange()
 }
@@ -170,20 +163,6 @@ export function getRefreshToken() {
   return null
 }
 
-export function getVeterinarioId() {
-  for (const storage of getAvailableStorages()) {
-    const veterinarioId = storage.getItem(VETERINARIO_ID_KEY)
-
-    if (veterinarioId) {
-      return veterinarioId
-    }
-  }
-
-  const user = getAuthUser()
-
-  return user?.veterinarioId ?? null
-}
-
 export function getAuthUser() {
   const token = getAccessToken()
 
@@ -192,10 +171,6 @@ export function getAuthUser() {
 
 export function isAuthenticated() {
   return Boolean(getAccessToken())
-}
-
-export function hasVeterinarioProfile() {
-  return Boolean(getVeterinarioId())
 }
 
 export function isSystemAdmin() {

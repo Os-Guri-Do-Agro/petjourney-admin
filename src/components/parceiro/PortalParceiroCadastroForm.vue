@@ -70,7 +70,7 @@ const form = reactive({
   cnpj: '',
   telefoneComercial: '',
   /* Sem campos visíveis: preservados do GET para a re-submissão não apagar (semântica replace).
-     CRMV é gerenciado só no Perfil do usuário; o backend copia do veterinarioPerfil se ausente. */
+     O CRMV do parceiro vai no corpo (campo crmv); a API não copia mais do perfil antigo (E1-07). */
   crmv: null as string | null,
   logoUrl: null as string | null,
 })

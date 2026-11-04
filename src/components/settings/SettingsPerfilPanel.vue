@@ -4,7 +4,7 @@
  *
  * Em cima, a capa: a foto grande — clicar nela ou em "Trocar foto" abre a escolha do arquivo, e a
  * foto nova sobe e já fica salva —, o nome, o e-mail, os papéis e a empresa. Embaixo, os dados em
- * quatro seções (identidade, contato, documento, perfil veterinário) e o "Salvar perfil" no
+ * quatro seções (identidade, contato, documento e onde fica o CRMV) e o "Salvar perfil" no
  * rodapé da folha.
  */
 import Button from 'primevue/button'
@@ -12,6 +12,7 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -51,16 +52,12 @@ const nome = ref('')
 const telefone = ref('')
 const telefoneWhatsApp = ref('')
 const cpf = ref('')
-const crmv = ref('')
-const especialidade = ref('')
 const fotoUrl = ref('')
 
 const nomeError = ref('')
 const telefoneError = ref('')
 const telefoneWhatsAppError = ref('')
 const cpfError = ref('')
-const crmvError = ref('')
-const especialidadeError = ref('')
 
 const sessionUser = computed(() => {
   void authSessionVersion.value
@@ -69,14 +66,13 @@ const sessionUser = computed(() => {
 
 const cpfLocked = computed(() => Boolean(profile.value?.cpf?.trim()))
 
-const hasVetPerfil = computed(
-  () => Boolean(sessionUser.value?.veterinarioId) || Boolean(profile.value?.veterinarioPerfil),
+/**
+ * Veterinário não é perfil de conta (E1-07): é função na equipe. O CRMV mora na ficha do
+ * profissional (Equipe › Profissionais) e o do parceiro no cadastro; aqui fica só a foto.
+ */
+const veterinarioNaEquipe = computed(
+  () => store.eu?.papeisOperacionais?.includes('VETERINARIO') ?? false,
 )
-
-/** CRMV/especialidade são opcionais no produto: preencher um exige o par (cria o perfil clínico). */
-const vetFieldsFilled = computed(() => Boolean(crmv.value.trim() || especialidade.value.trim()))
-
-const vetFieldsRequired = computed(() => hasVetPerfil.value || vetFieldsFilled.value)
 
 const initials = computed(() => {
   const source = nome.value.trim() || sessionUser.value?.nome || sessionUser.value?.email || '?'
@@ -98,7 +94,7 @@ const avatarUrl = computed(() => {
 const roleChips = computed(() => {
   const chips: string[] = []
 
-  if (sessionUser.value?.veterinarioId) {
+  if (veterinarioNaEquipe.value) {
     chips.push(t('settings.perfil.roles.veterinario'))
   }
 
@@ -139,8 +135,6 @@ function applyProfileToForm(data: UsuarioProfile) {
   telefone.value = data.telefone ? formatPhone(data.telefone) : ''
   telefoneWhatsApp.value = data.telefoneWhatsApp ? formatPhone(data.telefoneWhatsApp) : ''
   cpf.value = data.cpf ? formatCpf(data.cpf) : ''
-  crmv.value = data.veterinarioPerfil?.crmv ?? ''
-  especialidade.value = data.veterinarioPerfil?.especialidade ?? ''
   fotoUrl.value = data.veterinarioPerfil?.foto ?? ''
 
   syncHeaderProfile(data)
@@ -160,8 +154,6 @@ function clearProfileErrors() {
   telefoneError.value = ''
   telefoneWhatsAppError.value = ''
   cpfError.value = ''
-  crmvError.value = ''
-  especialidadeError.value = ''
 }
 
 function onTelefoneInput(value: string) {
@@ -189,14 +181,6 @@ watch(nome, () => {
   nomeError.value = ''
 })
 
-watch(crmv, () => {
-  crmvError.value = ''
-})
-
-watch(especialidade, () => {
-  especialidadeError.value = ''
-})
-
 function validateProfileForm() {
   clearProfileErrors()
 
@@ -221,24 +205,7 @@ function validateProfileForm() {
     }
   }
 
-  if (vetFieldsRequired.value) {
-    if (!crmv.value.trim()) {
-      crmvError.value = t('settings.perfil.errors.crmvRequired')
-    }
-
-    if (!especialidade.value.trim()) {
-      especialidadeError.value = t('settings.perfil.errors.especialidadeRequired')
-    }
-  }
-
-  return (
-    !nomeError.value &&
-    !telefoneError.value &&
-    !telefoneWhatsAppError.value &&
-    !cpfError.value &&
-    !crmvError.value &&
-    !especialidadeError.value
-  )
+  return !nomeError.value && !telefoneError.value && !telefoneWhatsAppError.value && !cpfError.value
 }
 
 function buildUpdatePayload(extraFoto?: string): UpdateUsuarioPayload {
@@ -261,24 +228,13 @@ function buildUpdatePayload(extraFoto?: string): UpdateUsuarioPayload {
 
   const trimmedFoto = (extraFoto ?? fotoUrl.value).trim()
 
-  if (hasVetPerfil.value || vetFieldsFilled.value || (trimmedFoto && sessionUser.value?.veterinarioId)) {
-    payload.veterinario = {}
-
-    const crmvValue = crmv.value.trim() || profile.value?.veterinarioPerfil?.crmv || ''
-    const especialidadeValue =
-      especialidade.value.trim() || profile.value?.veterinarioPerfil?.especialidade || ''
-
-    if (crmvValue) {
-      payload.veterinario.crmv = crmvValue
-    }
-
-    if (especialidadeValue) {
-      payload.veterinario.especialidade = especialidadeValue
-    }
-
-    if (trimmedFoto) {
-      payload.veterinario.foto = trimmedFoto
-    }
+  /*
+   * A foto da conta vai no bloco `veterinario`, o único campo dele que a API ainda grava (E1-07):
+   * CRMV, especialidade, bio e número comercial são ignorados. Antes a foto só ia para quem tinha o
+   * perfil antigo, e conta nova nunca gravava a sua.
+   */
+  if (trimmedFoto) {
+    payload.veterinario = { foto: trimmedFoto }
   }
 
   return payload
@@ -544,7 +500,9 @@ onMounted(() => {
           <Button
             type="button"
             icon="ph ph-camera"
-            :label="avatarUrl ? t('settings.perfil.foto.trocar') : t('settings.perfil.foto.escolher')"
+            :label="
+              avatarUrl ? t('settings.perfil.foto.trocar') : t('settings.perfil.foto.escolher')
+            "
             severity="secondary"
             outlined
             :loading="uploadingPhoto"
@@ -664,29 +622,18 @@ onMounted(() => {
         <h3 id="perfil-secao-vet" class="cfg-secao__titulo">
           {{ t('settings.perfil.sections.vet') }}
         </h3>
-        <p v-if="!hasVetPerfil" class="cfg-secao__descricao">
-          {{ t('settings.perfil.sections.vetOptionalHint') }}
+        <p class="cfg-secao__descricao">
+          {{ t('settings.perfil.sections.vetNaFicha') }}
         </p>
       </header>
-      <div class="cfg-secao__corpo cfg-grade">
-        <AuthTextField
-          id="settings-perfil-crmv"
-          v-model="crmv"
-          :label="t('settings.perfil.fields.crmv.label')"
-          :placeholder="t('settings.perfil.fields.crmv.placeholder')"
-          :required="vetFieldsRequired"
-          :disabled="savingProfile"
-          :error="crmvError"
-        />
-        <AuthTextField
-          id="settings-perfil-especialidade"
-          v-model="especialidade"
-          :label="t('settings.perfil.fields.especialidade.label')"
-          :placeholder="t('settings.perfil.fields.especialidade.placeholder')"
-          :required="vetFieldsRequired"
-          :disabled="savingProfile"
-          :error="especialidadeError"
-        />
+      <div class="cfg-secao__corpo">
+        <RouterLink
+          class="p-button p-component p-button-secondary p-button-outlined perfil__ficha"
+          to="/parceiro/profissionais"
+        >
+          <i class="ph ph-stethoscope" aria-hidden="true" />
+          {{ t('settings.perfil.actions.abrirFicha') }}
+        </RouterLink>
       </div>
     </section>
 
@@ -704,6 +651,12 @@ onMounted(() => {
 
 <style scoped>
 /* A capa: a foto e quem é, sobre a luz do lugar, como a cabeça dos cartões de estado. */
+.perfil__ficha {
+  justify-self: start;
+  gap: 8px;
+  text-decoration: none;
+}
+
 .perfil__capa {
   display: flex;
   flex-wrap: wrap;

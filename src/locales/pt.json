@@ -449,7 +449,6 @@
       "body": "Sua conta ainda não está vinculada a uma empresa parceira. Cadastre sua empresa em Configurações, na aba Empresa: o cadastro nasce em análise e a equipe PetJourney aprova.",
       "hint": "Se você já enviou o cadastro, aguarde a análise ou verifique novamente em instantes. Também é possível aceitar um convite de equipe.",
       "ctaPrograms": "Cadastrar minha empresa",
-      "ctaSettings": "Ir para configurações",
       "retry": "Verificar novamente",
       "contactLabel": "Dúvidas:",
       "ctaConvites": "Ver meus convites"
@@ -2536,8 +2535,8 @@
         "identidade": "Identidade",
         "contato": "Contato",
         "documento": "Documento",
-        "vet": "Perfil veterinário",
-        "vetOptionalHint": "Opcional. Preencha CRMV e especialidade apenas se você atua como veterinário."
+        "vet": "CRMV",
+        "vetNaFicha": "O CRMV e a especialidade ficam na sua ficha de profissional, na Equipe. O CRMV da empresa fica no cadastro dela."
       },
       "fields": {
         "nome": {
@@ -2561,27 +2560,18 @@
           "placeholder": "000.000.000-00",
           "hintLocked": "Já cadastrado, não pode ser alterado.",
           "hintOptional": "Opcional. Depois de salvo, fica bloqueado."
-        },
-        "crmv": {
-          "label": "CRMV",
-          "placeholder": "CRMV-SP 12345"
-        },
-        "especialidade": {
-          "label": "Especialidade",
-          "placeholder": "Clínica geral"
         }
       },
       "actions": {
         "save": "Salvar perfil",
-        "retry": "Tentar novamente"
+        "retry": "Tentar novamente",
+        "abrirFicha": "Abrir as fichas da equipe"
       },
       "errors": {
         "nomeMin": "Informe pelo menos 3 caracteres.",
         "telefone": "Informe um telefone válido com DDD.",
         "whatsapp": "Informe um WhatsApp válido com DDD.",
         "cpf": "CPF inválido.",
-        "crmvRequired": "CRMV é obrigatório para o perfil veterinário.",
-        "especialidadeRequired": "Informe a especialidade.",
         "sessionUnavailable": "Sessão indisponível. Faça login novamente.",
         "loadFailed": "Não foi possível carregar o perfil.",
         "loadTitle": "Não foi possível carregar"

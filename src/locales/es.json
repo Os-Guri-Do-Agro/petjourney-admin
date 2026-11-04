@@ -449,7 +449,6 @@
       "body": "Su cuenta aún no está vinculada a una empresa socia. Registre su empresa en Configuración, en la pestaña Empresa: el registro nace en análisis y el equipo PetJourney lo aprueba.",
       "hint": "Si ya envió el registro, espere el análisis o verifique de nuevo en unos instantes. También puede aceptar una invitación de equipo.",
       "ctaPrograms": "Registrar mi empresa",
-      "ctaSettings": "Ir a configuración",
       "retry": "Verificar de nuevo",
       "contactLabel": "Consultas:",
       "ctaConvites": "Ver mis invitaciones"
@@ -2536,8 +2535,8 @@
         "identidade": "Identidad",
         "contato": "Contacto",
         "documento": "Documento",
-        "vet": "Perfil veterinario",
-        "vetOptionalHint": "Opcional. Complete CRMV y especialidad solo si actúa como veterinario."
+        "vet": "CRMV",
+        "vetNaFicha": "El CRMV y la especialidad están en su ficha de profesional, en Equipo. El CRMV de la empresa está en su registro."
       },
       "fields": {
         "nome": {
@@ -2561,27 +2560,18 @@
           "placeholder": "000.000.000-00",
           "hintLocked": "Ya registrado, no puede modificarse.",
           "hintOptional": "Opcional. Después de guardar, queda bloqueado."
-        },
-        "crmv": {
-          "label": "CRMV",
-          "placeholder": "CRMV-SP 12345"
-        },
-        "especialidade": {
-          "label": "Especialidad",
-          "placeholder": "Clínica general"
         }
       },
       "actions": {
         "save": "Guardar perfil",
-        "retry": "Intentar de nuevo"
+        "retry": "Intentar de nuevo",
+        "abrirFicha": "Abrir las fichas del equipo"
       },
       "errors": {
         "nomeMin": "Indique al menos 3 caracteres.",
         "telefone": "Indique un teléfono válido con código de área.",
         "whatsapp": "Indique un WhatsApp válido con código de área.",
         "cpf": "CPF inválido.",
-        "crmvRequired": "El CRMV es obligatorio para el perfil veterinario.",
-        "especialidadeRequired": "Indique la especialidad.",
         "sessionUnavailable": "Sesión no disponible. Inicie sesión de nuevo.",
         "loadFailed": "No fue posible cargar el perfil.",
         "loadTitle": "No fue posible cargar"

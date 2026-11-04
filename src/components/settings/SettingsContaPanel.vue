@@ -65,7 +65,8 @@ const empresa = computed(() =>
 
 const roleHints = computed(() => {
   const hints: string[] = []
-  if (sessionUser.value?.veterinarioId) {
+  /* Veterinário é função na equipe (E1-07), não perfil da conta: vem do /parceiro/portal/eu. */
+  if (store.eu?.papeisOperacionais?.includes('VETERINARIO')) {
     hints.push(t('settings.conta.roles.veterinario'))
   }
   if (store.loadState === 'ready' && store.parceiroNome) {

@@ -29,7 +29,6 @@ import { useLogout } from '@/composables/useLogout'
 import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { type Aba, useEspacos } from '@/navegacao/espacos'
 import { rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
-import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import type { NomeDoModulo } from '@/service/parceiro/acesso-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
@@ -371,13 +370,6 @@ const avisoDeConsulta = computed(() => {
           to="/parceiro/convite"
         >
           {{ t('frame.noAccess.ctaConvites') }}
-        </RouterLink>
-        <RouterLink
-          v-if="hasVeterinarioProfile()"
-          class="p-button p-component p-button-secondary"
-          to="/settings?aba=perfil"
-        >
-          {{ t('frame.noAccess.ctaSettings') }}
         </RouterLink>
         <Button
           :label="t('frame.noAccess.retry')"

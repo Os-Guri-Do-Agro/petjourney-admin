@@ -449,7 +449,6 @@
       "body": "Vaš nalog još nije povezan sa partnerskom firmom. Registrujte firmu na kartici „Firma“ u odeljku „Podešavanja“: registracija prvo ide na proveru, a zatim je tim PetJourney odobrava.",
       "hint": "Ako ste već poslali registraciju, sačekajte proveru ili proverite ponovo za nekoliko trenutaka. Možete i da prihvatite poziv u tim.",
       "ctaPrograms": "Registrujte firmu",
-      "ctaSettings": "Idite na podešavanja",
       "retry": "Proverite ponovo",
       "contactLabel": "Pitanja:",
       "ctaConvites": "Pogledajte svoje pozive"
@@ -2536,8 +2535,8 @@
         "identidade": "Identitet",
         "contato": "Kontakt",
         "documento": "Dokument",
-        "vet": "Veterinarski profil",
-        "vetOptionalHint": "Opciono. Popunite CRMV i specijalnost samo ako radite kao veterinar."
+        "vet": "CRMV",
+        "vetNaFicha": "CRMV i specijalnost su na vašoj kartici profesionalca, u Timu. CRMV firme je u njenoj registraciji."
       },
       "fields": {
         "nome": {
@@ -2561,27 +2560,18 @@
           "placeholder": "000.000.000-00",
           "hintLocked": "Već je registrovan i ne može da se menja.",
           "hintOptional": "Opciono. Nakon čuvanja se zaključava."
-        },
-        "crmv": {
-          "label": "CRMV",
-          "placeholder": "CRMV-SP 12345"
-        },
-        "especialidade": {
-          "label": "Specijalnost",
-          "placeholder": "Opšta praksa"
         }
       },
       "actions": {
         "save": "Sačuvajte profil",
-        "retry": "Pokušajte ponovo"
+        "retry": "Pokušajte ponovo",
+        "abrirFicha": "Otvorite kartice tima"
       },
       "errors": {
         "nomeMin": "Unesite najmanje 3 znaka.",
         "telefone": "Unesite važeći broj telefona sa pozivnim brojem.",
         "whatsapp": "Unesite važeći WhatsApp broj sa pozivnim brojem.",
         "cpf": "Nevažeći CPF.",
-        "crmvRequired": "CRMV je obavezan za veterinarski profil.",
-        "especialidadeRequired": "Unesite specijalnost.",
         "sessionUnavailable": "Sesija nije dostupna. Prijavite se ponovo.",
         "loadFailed": "Učitavanje profila nije uspelo.",
         "loadTitle": "Učitavanje nije uspelo"

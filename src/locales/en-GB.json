@@ -449,7 +449,6 @@
       "body": "Your account is not yet linked to a partner company. Register your company in Settings, under the Company tab: the registration starts under review and the PetJourney team approves it.",
       "hint": "If you already submitted the registration, wait for review or check again shortly. You can also accept a team invite.",
       "ctaPrograms": "Register my company",
-      "ctaSettings": "Go to settings",
       "retry": "Check again",
       "contactLabel": "Questions:",
       "ctaConvites": "See my invitations"
@@ -2536,8 +2535,8 @@
         "identidade": "Identity",
         "contato": "Contact",
         "documento": "Document",
-        "vet": "Veterinarian profile",
-        "vetOptionalHint": "Optional. Fill in CRMV and specialty only if you practise as a veterinarian."
+        "vet": "CRMV",
+        "vetNaFicha": "Your CRMV and specialty are kept in your professional record, under Team. The company CRMV is kept in its registration."
       },
       "fields": {
         "nome": {
@@ -2561,27 +2560,18 @@
           "placeholder": "000.000.000-00",
           "hintLocked": "Already registered, cannot be changed.",
           "hintOptional": "Optional. Once saved, it is locked."
-        },
-        "crmv": {
-          "label": "CRMV",
-          "placeholder": "CRMV-SP 12345"
-        },
-        "especialidade": {
-          "label": "Specialty",
-          "placeholder": "General practice"
         }
       },
       "actions": {
         "save": "Save profile",
-        "retry": "Try again"
+        "retry": "Try again",
+        "abrirFicha": "Open the team records"
       },
       "errors": {
         "nomeMin": "Enter at least 3 characters.",
         "telefone": "Enter a valid phone number with area code.",
         "whatsapp": "Enter a valid WhatsApp number with area code.",
         "cpf": "Invalid CPF.",
-        "crmvRequired": "CRMV is required for the veterinarian profile.",
-        "especialidadeRequired": "Enter the specialty.",
         "sessionUnavailable": "Session unavailable. Sign in again.",
         "loadFailed": "Could not load the profile.",
         "loadTitle": "Could not load"
