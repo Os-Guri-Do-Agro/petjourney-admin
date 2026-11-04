@@ -1,8 +1,13 @@
 # 12 · Base importada — visão do responsável (protótipo no app)
 
-**Para:** o agente que trabalha no `petjourney-app` (`D:\PROJETOS\petjourney-app`).
-**De:** o `petjourney-admin`, onde o migrador de dados da clínica já existe como protótipo
+**Para:** quem trabalha no `petjourney-app`.
+**De:** o `petjourney-admin`, onde o migrador de dados da clínica existiu primeiro como protótipo
 ([11-migrador-de-dados.md](./11-migrador-de-dados.md)).
+
+> **Atualização (22/10/2026): o contrato agora é o OpenAPI da API.** Como no doc 09: os tipos saem
+> do `contrato/openapi.json` do `develop` do `petjourney-api`, e a referência de cada tela é o guia
+> de handoff da onda (vínculo e consentimento: guia da E2). Onde este texto e o guia divergirem,
+> vale o guia.
 
 A clínica agora traz a base de outro sistema: centenas de responsáveis e pacientes entram de uma
 vez, a partir de uma planilha. Isso cria uma situação que o app ainda não conhece — **a clínica
@@ -15,20 +20,20 @@ diz "este é o Thor, do Eduardo", e só o Eduardo pode dizer "sim, é o meu Thor
 a tela e o fluxo em que ele diz isso.
 
 Onde está escrito **Decisão**, é um padrão escolhido aqui para você não precisar perguntar. Dá
-para mudar — mas a mudança começa no contrato do admin, não só no app.
+para mudar, mas a mudança começa na API (a spec e o `contrato/openapi.json`), não no admin nem só no
+app.
 
 ---
 
 ## 0. Antes de começar
 
-1. **Recopie o contrato.** Fonte: `D:\PROJETOS\petjourney-admin\src\features\clinico\contrato\responsavel.ts`
-   → `src/features/clinica/contrato.ts`, sem editar, como no doc 09. A seção nova é a última:
-   **"Vínculo proposto pela clínica"**.
+1. **Gere os tipos do contrato da API**, como no doc 09. O que este documento chamava de seção
+   **"Vínculo proposto pela clínica"** do contrato do admin agora está nas rotas de vínculo do
+   OpenAPI.
 2. **Nada da seção nova quebra o build.** A notificação `VINCULO_PROPOSTO` e os erros
    `VINCULO_INCOMPLETO` / `VINCULO_EXPIRADO` estão **fora** de `TIPOS_DE_NOTIFICACAO_CLINICA` e de
    `CodigoDeErroClinico` de propósito: aqueles registros são fechados no app e obrigariam tudo a
-   entrar na mesma leva. Quando esta tela for feita, eles entram lá — no admin primeiro, e
-   recopiados.
+   entrar na mesma leva. Quando esta tela for feita, eles entram lá pelo OpenAPI da API.
 3. **Nada disto existe na API.** Protótipo com dados imaginários, atrás da mesma chave de mock do
    doc 09 (seção 16).
 4. **Seis idiomas**, como sempre: `pt`, `en`, `en-GB`, `es`, `sr`, `ar` (RTL).
