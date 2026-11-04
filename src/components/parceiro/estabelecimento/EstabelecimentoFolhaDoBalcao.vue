@@ -5,9 +5,9 @@
  * cartão branco que avança sobre a faixa; os três passos para quem nunca leu um QR; o endereço e,
  * no pé, o nome PetJourney.
  *
- * Não é tela: fica escondida e só aparece enquanto a página imprime (`html.imprimindo-folha`, que a
- * gaveta do QR liga e desliga). Imprimir daqui, e não de uma janela nova, mantém as fontes, os
- * desenhos e a pata da marca, e não esbarra em bloqueio de janela.
+ * Não é tela: fica escondida e só aparece no papel, enquanto a página imprime
+ * (`html.imprimindo-folha`, que a gaveta do QR liga e desliga). Imprimir daqui, e não de uma janela
+ * nova, mantém as fontes, os desenhos e a pata da marca, e não esbarra em bloqueio de janela.
  */
 import { useI18n } from 'vue-i18n'
 
@@ -34,6 +34,10 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
       <article class="fb__folha">
         <header class="fb__faixa">
           <UiRabiscos />
+          <!--
+            A pata da marca é creme com o sálvia dentro: num círculo branco o creme sumia. O círculo
+            é o sálvia mais escuro (o "cartão dentro do destaque" do app), com um aro creme.
+          -->
           <span class="fb__selo"><img src="/pata.png" alt="" /></span>
           <h1 class="fb__nome">{{ nome }}</h1>
           <p class="fb__chamada">{{ t(`parceiro.estabelecimento.qr.folha.chamada.${tipo}`) }}</p>
@@ -66,29 +70,9 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   outras impressões do portal.
 -->
 <style>
+/* Na tela, nunca: a prévia do navegador já mostra a folha, e uma cópia atrás dela só atrapalhava. */
 .fb {
   display: none;
-}
-
-html.imprimindo-folha .fb {
-  display: block;
-}
-
-/* Na tela, só durante a impressão: a folha aparece por trás da janela do navegador. */
-@media screen {
-  html.imprimindo-folha .fb {
-    position: fixed;
-    z-index: 10000;
-    inset: 0;
-    overflow: auto;
-    padding: 24px;
-    background: rgb(16 48 42 / 55%);
-  }
-
-  html.imprimindo-folha .fb__folha {
-    margin: 0 auto;
-    box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
-  }
 }
 
 @media print {
@@ -153,16 +137,19 @@ html.imprimindo-folha .fb {
 
 .fb__selo {
   display: grid;
-  width: 24mm;
-  height: 24mm;
+  width: 26mm;
+  height: 26mm;
+  box-sizing: border-box;
   flex: none;
   place-items: center;
+  border: 0.8mm solid #faf9f6;
   border-radius: 50%;
-  background: #fff;
+  background: #5c736e;
 }
 
 .fb__selo img {
-  width: 16mm;
+  display: block;
+  width: 17mm;
   height: auto;
 }
 
