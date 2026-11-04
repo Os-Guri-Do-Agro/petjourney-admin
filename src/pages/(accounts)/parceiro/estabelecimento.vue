@@ -646,9 +646,9 @@ async function salvarSlug(slug: string) {
             />
           </template>
 
-          <div class="pagina">
-            <p class="pagina__situacao" :class="`pagina__situacao--${situacao}`">
-              <span class="pagina__icone" aria-hidden="true"
+          <div class="publica">
+            <p class="publica__situacao" :class="`publica__situacao--${situacao}`">
+              <span class="publica__icone" aria-hidden="true"
                 ><i :class="ICONE_DA_SITUACAO[situacao]"
               /></span>
               <span>
@@ -1116,36 +1116,41 @@ async function salvarSlug(slug: string) {
 
 /* ---------------------------------------------------------------------- a página pública */
 
-.pagina {
+/*
+ * "publica", e não "pagina": o `.pagina` com escopo daqui pegava também a raiz do UiPagina (a raiz
+ * do filho herda o escopo do pai), trocava o recuo dele de 36 para 20 px, e a faixa sálvia passava da
+ * tela e perdia os cantos arredondados.
+ */
+.publica {
   display: grid;
   gap: 16px;
   padding: 18px 20px;
 }
 
-.pagina__situacao {
+.publica__situacao {
   display: flex;
   align-items: center;
   gap: 12px;
   margin: 0;
 }
 
-.pagina__situacao > span:last-child {
+.publica__situacao > span:last-child {
   display: grid;
   gap: 2px;
 }
 
-.pagina__situacao strong {
+.publica__situacao strong {
   color: var(--tinta);
   font-size: 14.5px;
   font-weight: 650;
 }
 
-.pagina__situacao small {
+.publica__situacao small {
   color: var(--tinta-2);
   font-size: 13px;
 }
 
-.pagina__icone {
+.publica__icone {
   display: grid;
   width: 36px;
   height: 36px;
@@ -1157,12 +1162,12 @@ async function salvarSlug(slug: string) {
   font-size: 18px;
 }
 
-.pagina__situacao--noAr .pagina__icone {
+.publica__situacao--noAr .publica__icone {
   background: color-mix(in oklab, var(--ok-fundo, var(--superficie-2)) 80%, var(--superficie));
   color: var(--ok-tinta, var(--musgo));
 }
 
-.pagina__situacao--foraDoAr .pagina__icone {
+.publica__situacao--foraDoAr .publica__icone {
   background: color-mix(in oklab, var(--atencao-fundo, var(--superficie-2)) 80%, var(--superficie));
   color: var(--atencao-tinta);
 }
