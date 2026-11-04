@@ -2,9 +2,9 @@
  * As páginas do portal que abrem sem conta: o agendamento online da clínica e a reserva do hotel.
  *
  * São do responsável, que não tem login no portal — por isso não passam pelo "sem sessão vai para
- * o login" nem pelo "com sessão sai da página pública". E são do módulo oculto (dados de
- * demonstração): só abrem com o módulo ligado, pelo mesmo `?clinico=on` / `?hotel=on` de sempre,
- * que funciona também sem sessão.
+ * o login" nem pelo "com sessão sai da página pública". Ainda rodam sobre os dados locais: só
+ * abrem no modo demonstração (build de desenvolvimento), até a E3-05 e a E7-03 ligarem as duas
+ * páginas às rotas `/public` da API.
  *
  * Moram fora da moldura do portal (`App.vue`): quem chega pelo link da clínica não vê menu de
  * parceiro.

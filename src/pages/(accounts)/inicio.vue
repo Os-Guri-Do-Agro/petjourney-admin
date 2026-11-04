@@ -49,6 +49,7 @@ import HomeAgenda from '@/components/home/HomeAgenda.vue'
 import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
 import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
 import HomeEspacoPortal from '@/components/home/HomeEspacoPortal.vue'
+import HomeModulos from '@/components/home/HomeModulos.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
 import HomePauta from '@/components/home/HomePauta.vue'
 import HomePortalAreas from '@/components/home/HomePortalAreas.vue'
@@ -66,13 +67,13 @@ import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
-const { espacos, hasClinicalProfile, hasHotelProfile } = useEspacos()
+const { espacos, clinicaNaDemonstracao, hotelNaDemonstracao } = useEspacos()
 const perfil = useUsuarioPerfilStore()
 const { resumo, modulos } = usePautaDaHome()
 
 const dia = useLinhaDoDia({
-  clinica: () => hasClinicalProfile.value,
-  hotel: () => hasHotelProfile.value,
+  clinica: () => clinicaNaDemonstracao.value,
+  hotel: () => hotelNaDemonstracao.value,
 })
 
 provide(CHAVE_DO_DIA, dia)
@@ -86,7 +87,7 @@ let clockId: ReturnType<typeof setInterval> | undefined
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
 /** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
-const temModulos = computed(() => hasClinicalProfile.value || hasHotelProfile.value)
+const temModulos = computed(() => clinicaNaDemonstracao.value || hotelNaDemonstracao.value)
 
 const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'portal') ?? null)
 
@@ -95,7 +96,12 @@ const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'port
  * para uma linha no pé, ou, sozinho, abre as áreas dele no lugar dos blocos.
  */
 const blocos = computed(() =>
-  espacos.value.filter((espaco) => espaco.id === 'clinica' || espaco.id === 'hotel'),
+  espacos.value.filter(
+    (espaco) =>
+      /* O "Hoje" de Clínica e Hotel ainda conta sobre os dados locais: só na demonstração. */
+      (espaco.id === 'clinica' && clinicaNaDemonstracao.value) ||
+      (espaco.id === 'hotel' && hotelNaDemonstracao.value),
+  ),
 )
 
 // ------------------------------------------------------------------------------ a saudação
@@ -248,14 +254,16 @@ onUnmounted(() => {
       </section>
       <HomePortalAreas v-else-if="portal" />
 
+      <HomeModulos />
+
       <HomePauta v-if="temModulos" />
 
       <div class="calma">
         <HomeAgenda
           v-if="temModulos"
           class="calma__agenda"
-          :clinica="hasClinicalProfile"
-          :hotel="hasHotelProfile"
+          :clinica="clinicaNaDemonstracao"
+          :hotel="hotelNaDemonstracao"
         />
         <HomeEspacoPortal v-if="temModulos && portal" :espaco="portal" />
         <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->

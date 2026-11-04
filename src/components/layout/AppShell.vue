@@ -47,7 +47,7 @@ const { t } = useI18n()
 const route = useRoute()
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
-const { espacos, aqui, lugar, navigationSections, hasClinicalProfile, hasHotelProfile } =
+const { espacos, aqui, lugar, navigationSections, clinicaNaDemonstracao, hotelNaDemonstracao } =
   oferecerEspacos()
 const { open: abrirResgate, canOpen: podeResgatar } = useCupomResgateModal()
 const { visible: cupomEmBreveVisivel, open: abrirCupomEmBreve } = useCupomComingSoon()
@@ -121,7 +121,7 @@ function aoTeclar(evento: KeyboardEvent) {
    * anamnese e precisa conferir o histórico do paciente não vai clicar fora antes.
    */
   if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'k') {
-    if (!hasClinicalProfile.value) {
+    if (!clinicaNaDemonstracao.value) {
       return
     }
 
@@ -155,14 +155,14 @@ const atalhoDaBusca = computed(() =>
  */
 const mostrarFita = computed(
   () =>
-    hasClinicalProfile.value &&
+    clinicaNaDemonstracao.value &&
     lugar.value === 'clinica' &&
     !route.path.startsWith('/clinica/agenda'),
 )
 
 /** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
 const mostrarFitaDaCasa = computed(
-  () => hasHotelProfile.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
+  () => hotelNaDemonstracao.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
@@ -370,7 +370,7 @@ onUnmounted(() => {
 
         <div class="barra__ferramentas">
           <button
-            v-if="hasClinicalProfile"
+            v-if="clinicaNaDemonstracao"
             type="button"
             class="barra__busca"
             :title="t('clinico.busca.abrir')"
@@ -381,7 +381,7 @@ onUnmounted(() => {
             <span class="barra__busca-texto shell-rotulo">{{ t('clinico.busca.abrirCurto') }}</span>
             <kbd class="shell-rotulo">{{ atalhoDaBusca }}</kbd>
           </button>
-          <ShellCriar :recolhida="barraRecolhida" :clinica="hasClinicalProfile" />
+          <ShellCriar :recolhida="barraRecolhida" :clinica="clinicaNaDemonstracao" />
         </div>
 
         <ShellNavegacao
@@ -429,7 +429,7 @@ onUnmounted(() => {
         /></span>
         <strong class="topo__titulo">{{ tituloNoTopo }}</strong>
         <button
-          v-if="hasClinicalProfile"
+          v-if="clinicaNaDemonstracao"
           type="button"
           class="topo__menu"
           :aria-label="t('clinico.busca.abrir')"
@@ -459,7 +459,7 @@ onUnmounted(() => {
     <FeedbackSaqueDialog />
 
     <ClinicBuscaGlobal
-      v-if="hasClinicalProfile"
+      v-if="clinicaNaDemonstracao"
       :aberto="buscaAberta"
       :secoes="navigationSections"
       @fechar="buscaAberta = false"

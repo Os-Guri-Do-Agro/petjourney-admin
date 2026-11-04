@@ -11,10 +11,11 @@ import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import { useLogout } from '@/composables/useLogout'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { changeLocale } from '@/i18n'
 import { BANDEIRA_DO_IDIOMA, NOME_NATIVO_DO_IDIOMA } from '@/i18n/idiomas'
 import { LOCALES, type Locale } from '@/i18n/locales'
@@ -27,6 +28,9 @@ defineProps<{ recolhida: boolean }>()
 const { t, locale } = useI18n()
 const perfil = useUsuarioPerfilStore()
 const { logout } = useLogout()
+const router = useRouter()
+const demonstracao = useModoDemonstracao()
+const demonstracaoAtiva = demonstracao.ativo
 
 const menu = ref<InstanceType<typeof Popover> | null>(null)
 const menuAberto = ref(false)
@@ -63,6 +67,13 @@ function alternarTema(escuro: boolean) {
   if (escuro !== isDarkMode.value) {
     toggleColorMode()
   }
+}
+
+/** Desligar estando numa tela de mock deixaria a pessoa nela: o guard decide na próxima navegação. */
+function alternarDemonstracao(valor: boolean) {
+  demonstracao.definir(valor)
+  fechar()
+  void router.replace(valor ? router.currentRoute.value.fullPath : '/inicio')
 }
 
 function pedirSaida() {
@@ -169,7 +180,11 @@ async function sair() {
           :inert="!idiomasAbertos || undefined"
         >
           <div class="conta__idiomas-dobra">
-            <div class="conta__idiomas-lista" role="group" :aria-label="t('languageSwitcher.label')">
+            <div
+              class="conta__idiomas-lista"
+              role="group"
+              :aria-label="t('languageSwitcher.label')"
+            >
               <button
                 v-for="codigo in LOCALES"
                 :key="codigo"
@@ -180,8 +195,14 @@ async function sair() {
                 :aria-checked="codigo === idiomaAtual"
                 @click="escolherIdioma(codigo)"
               >
-                <span class="conta__bandeira" aria-hidden="true" v-html="BANDEIRA_DO_IDIOMA[codigo]" />
-                <span class="conta__opcao-nome" dir="auto">{{ NOME_NATIVO_DO_IDIOMA[codigo] }}</span>
+                <span
+                  class="conta__bandeira"
+                  aria-hidden="true"
+                  v-html="BANDEIRA_DO_IDIOMA[codigo]"
+                />
+                <span class="conta__opcao-nome" dir="auto">{{
+                  NOME_NATIVO_DO_IDIOMA[codigo]
+                }}</span>
                 <span class="conta__opcao-codigo">{{ t(`languageSwitcher.${codigo}`) }}</span>
                 <i
                   v-if="codigo === idiomaAtual"
@@ -195,11 +216,26 @@ async function sair() {
 
         <div class="conta__linha" role="none">
           <i class="ph ph-moon-stars" aria-hidden="true" />
-          <label class="conta__linha-rotulo" for="conta-tema">{{ t('shell.theme.darkTitle') }}</label>
+          <label class="conta__linha-rotulo" for="conta-tema">{{
+            t('shell.theme.darkTitle')
+          }}</label>
           <ToggleSwitch
             input-id="conta-tema"
             :model-value="isDarkMode"
             @update:model-value="alternarTema"
+          />
+        </div>
+
+        <!-- Só no build de desenvolvimento: Clínica e Hotel sobre os dados locais. -->
+        <div v-if="demonstracao.disponivel" class="conta__linha" role="none">
+          <i class="ph ph-presentation-chart" aria-hidden="true" />
+          <label class="conta__linha-rotulo" for="conta-demonstracao">
+            {{ t('shell.demonstracao.rotulo') }}
+          </label>
+          <ToggleSwitch
+            input-id="conta-demonstracao"
+            :model-value="demonstracaoAtiva"
+            @update:model-value="alternarDemonstracao"
           />
         </div>
 
@@ -289,7 +325,9 @@ async function sair() {
 .conta__avatar--grande {
   width: 42px;
   height: 42px;
-  box-shadow: 0 0 0 3px var(--superficie), 0 0 0 4px var(--linha);
+  box-shadow:
+    0 0 0 3px var(--superficie),
+    0 0 0 4px var(--linha);
   font-size: 15px;
 }
 

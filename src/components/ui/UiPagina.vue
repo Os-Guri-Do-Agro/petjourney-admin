@@ -19,15 +19,18 @@
 import Button from 'primevue/button'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 import { molduraPedida } from '@/components/layout/moldura'
 import UiAbas from '@/components/ui/UiAbas.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { type Aba, useEspacos } from '@/navegacao/espacos'
+import { rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
+import type { NomeDoModulo } from '@/service/parceiro/acesso-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
@@ -171,6 +174,37 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 
 /** O cabeçalho do app: a faixa sálvia com o cartão do título. Na moldura do portal, o de antes. */
 const comFaixa = computed(() => molduraPedida.value === 'app')
+
+const rotaAtual = useRoute()
+const { ativo: demonstracao } = useModoDemonstracao()
+
+/**
+ * Tela de módulo com o módulo só para consulta (suspenso, desligado, prazo vencido, parceiro não
+ * operável): uma linha dizendo por quê, embaixo do título. A API já recusa a escrita com
+ * `MODULO_SOMENTE_LEITURA`; a linha evita que a pessoa descubra isso tentando.
+ */
+const avisoDeConsulta = computed(() => {
+  const rota = demonstracao.value ? null : rotaDoModulo(rotaAtual.path)
+
+  if (!rota) {
+    return ''
+  }
+
+  const nomes: NomeDoModulo[] = rota.modulo === 'QUALQUER' ? ['CLINICA', 'HOTEL'] : [rota.modulo]
+  const legiveis = nomes.flatMap((nome) => {
+    const modulo = parceiroStore.modulo(nome)
+
+    return modulo?.podeLer ? [modulo] : []
+  })
+
+  if (!legiveis.length || legiveis.some((modulo) => modulo.podeEscrever)) {
+    return ''
+  }
+
+  const motivo = legiveis[0]?.motivoSomenteLeitura
+
+  return motivo ? t(`inicio.modulos.somenteLeitura.${motivo}`) : ''
+})
 </script>
 
 <template>
@@ -291,6 +325,12 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
       />
     </header>
 
+    <!-- Fora dos dois cabeçalhos (faixa do app e o de antes): vale nos dois. -->
+    <p v-if="avisoDeConsulta" class="pagina__consulta" role="status">
+      <i class="ph ph-eye" aria-hidden="true" />
+      {{ avisoDeConsulta }}
+    </p>
+
     <div v-if="carregando" class="pagina__estado" role="status" aria-live="polite">
       <span class="pagina__girando" aria-hidden="true" />
       <p>{{ t('frame.loading') }}</p>
@@ -326,7 +366,10 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
         <RouterLink class="p-button p-component" to="/settings?aba=empresa">
           {{ t('frame.noAccess.ctaPrograms') }}
         </RouterLink>
-        <RouterLink class="p-button p-component p-button-secondary p-button-outlined" to="/parceiro/convite">
+        <RouterLink
+          class="p-button p-component p-button-secondary p-button-outlined"
+          to="/parceiro/convite"
+        >
           {{ t('frame.noAccess.ctaConvites') }}
         </RouterLink>
         <RouterLink
@@ -346,7 +389,9 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
     </div>
 
     <div v-else-if="erro" class="pagina__estado pagina__estado--erro" role="alert">
-      <span class="pagina__estado-icone" aria-hidden="true"><i class="ph ph-warning-circle" /></span>
+      <span class="pagina__estado-icone" aria-hidden="true"
+        ><i class="ph ph-warning-circle"
+      /></span>
       <h2>{{ t('frame.error.title') }}</h2>
       <p>{{ erro }}</p>
       <div class="pagina__estado-acoes">
@@ -670,6 +715,23 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
 
 .pagina__abas {
   margin-top: 4px;
+}
+
+/* Só consulta: linha com o ícone na tinta do estado, sem faixa pintada. */
+.pagina__consulta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pagina__consulta i {
+  margin-top: 2px;
+  color: var(--atencao-tinta);
+  font-size: 17px;
 }
 
 /* Estados: uma folha só, centrada, com o ícone num disco e no máximo duas ações. */
