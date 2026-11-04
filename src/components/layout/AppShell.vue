@@ -600,7 +600,8 @@ onUnmounted(() => {
   height: 36px;
   place-items: center;
   border-radius: 11px;
-  background: var(--sobre-rail);
+  /* Sálvia, e não papel: o contorno da pata é claro e sumia no fundo claro. */
+  background: #76938d;
   box-shadow: 0 6px 14px -6px rgb(0 0 0 / 60%);
 }
 

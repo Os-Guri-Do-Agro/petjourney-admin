@@ -138,8 +138,13 @@ html:has(.shell--moldura-app) {
   color: #fff;
 }
 
+/*
+ * O ladrilho da pata em vidro, como o botão de recolher ao lado. Em papel branco o contorno claro da
+ * pata sumia no fundo, e só sobrava o miolo sálvia, que não lê como pata.
+ */
 .shell.shell--moldura-app .barra__pata {
-  background: rgb(255 255 255 / 92%);
+  background: var(--app-vidro);
+  box-shadow: none;
 }
 
 .shell.shell--moldura-app .barra__recolher {
