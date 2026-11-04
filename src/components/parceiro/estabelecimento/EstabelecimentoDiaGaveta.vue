@@ -150,7 +150,7 @@ function salvar() {
 
     <form id="estabelecimento-dia" class="eg" novalidate @submit.prevent="salvar">
       <section class="eg__secao">
-        <span id="dia-data-rotulo" class="eg__rotulo">{{
+        <span id="dia-data-rotulo" class="eg__rotulo dia-data__rotulo">{{
           t('parceiro.estabelecimento.dia.data')
         }}</span>
         <DatePicker
@@ -265,7 +265,11 @@ function salvar() {
   text-align: center;
 }
 
-/* O calendário no meio da gaveta: preso à esquerda, ele deixava um vão do lado direito. */
+/* O calendário e o rótulo dele no meio da gaveta: presos à esquerda, deixavam um vão do lado direito. */
+.dia-data__rotulo {
+  justify-self: center;
+}
+
 .eg__secao :deep(.p-datepicker) {
   justify-self: center;
 }
