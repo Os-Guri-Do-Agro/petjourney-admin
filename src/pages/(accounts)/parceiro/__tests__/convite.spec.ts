@@ -5,6 +5,10 @@
  * quando vale, e só então libera aceitar e recusar. Link vencido ou já usado sai da tela com a
  * mensagem da API e mostra os convites que ainda valem. Prévia que falha por outro motivo não
  * impede o aceite: o convite continua, só sem o nome da empresa.
+ *
+ * Conta que já é da equipe (PJ-VK5P13): com um convite que foi para outro e-mail, a tela diz que o
+ * convite é para outra conta e troca de conta sem perder o token; com o próprio convite, seguir
+ * para o portal fecha o convite.
  */
 
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
@@ -34,6 +38,19 @@ vi.mock('@/service/parceiro/equipe-service', async (importOriginal) => ({
   ...(await importOriginal<Equipe>()),
   ...equipe,
 }))
+
+const avisos = vi.hoisted(() => ({
+  add: vi.fn<
+    (aviso: { severity: string; summary: string; detail?: string; life?: number }) => void
+  >(),
+}))
+
+vi.mock('primevue/usetoast', () => ({ useToast: () => avisos }))
+
+/** O aviso de sucesso do aceite: o que a pessoa lê depois de entrar na equipe. */
+function ultimoAviso() {
+  return avisos.add.mock.lastCall?.[0]
+}
 
 i18n.global.locale.value = 'pt'
 
@@ -150,6 +167,30 @@ describe('convite pelo link', () => {
 
     expect(equipe.aceitarConvitePorLink).toHaveBeenCalledWith('token-1')
     expect(lerTokenDoConvite()).toBeNull()
+    expect(ultimoAviso()).toMatchObject({
+      summary: 'Convite aceito',
+      detail: 'Agora você faz parte da equipe.',
+    })
+  })
+
+  it('quem entra agora lê o nome da empresa no aviso', async () => {
+    guardarTokenDoConvite('token-1')
+    equipe.previaDoConvitePorLink.mockResolvedValue(PREVIA)
+    equipe.aceitarConvitePorLink.mockResolvedValue({
+      parceiroId: 'parceiro-1',
+      papel: 'OPERADOR',
+      jaEraMembro: false,
+    })
+
+    const tela = await abrirTela()
+    await botao(tela, 'Aceitar convite').trigger('click')
+    await flushPromises()
+
+    expect(ultimoAviso()).toMatchObject({
+      summary: 'Convite aceito',
+      detail: 'Agora você faz parte da equipe da Aurora Clínica e Hotel Veterinário.',
+    })
+    expect(useParceiroStore().parceiroId).toBe('parceiro-1')
   })
 
   it('recusar esquece o token e mostra que o convite foi recusado', async () => {
@@ -224,13 +265,42 @@ describe('depois da decisão', () => {
     expect(tela.find('#convite-outros').text()).toContain('Outros convites')
     expect(tela.find('.caixa').text()).toContain('Clínica Veterinária Boa Vista')
   })
+})
 
-  it('quem já está na equipe vê a empresa com o selo e a frase do lado de quem aceita', async () => {
+describe('conta que já é da equipe', () => {
+  it('convite para outro e-mail: diz que é para outra conta, sem aceitar, e troca de conta sem perder o token', async () => {
     guardarTokenDoConvite('token-1')
-    equipe.previaDoConvitePorLink.mockResolvedValue(PREVIA)
+    equipe.previaDoConvitePorLink.mockResolvedValue({
+      ...PREVIA,
+      contaConectada: { jaFazParte: true, papelAtual: 'DONO', paraEstaConta: false },
+    })
+
+    const tela = await abrirTela()
+
+    expect(tela.find('h1').text()).toBe('Este convite é para outra conta')
+    expect(tela.text()).toContain(
+      'Você entrou com uma conta que já faz parte da equipe da Aurora Clínica e Hotel Veterinário',
+    )
+    expect(tela.findAll('button').some((b) => b.text().includes('Aceitar convite'))).toBe(false)
+    expect(tela.find('.desfecho .ui-selo').exists()).toBe(false)
+    expect(tela.find('.desfecho .convite-linha').text()).toContain('Convite como operador')
+    expect(tela.find('.desfecho .convite-linha').text()).not.toContain('convidou você')
+    expect(tela.find('.desfecho__acoes a').text()).toBe('Ir para o portal')
+
+    await botao(tela, 'Entrar com outra conta').trigger('click')
+    await flushPromises()
+
+    expect(tela.vm.$router.currentRoute.value.path).toBe('/auth/login')
+    expect(lerTokenDoConvite()).toBe('token-1')
+    expect(equipe.aceitarConvitePorLink).not.toHaveBeenCalled()
+  })
+
+  it('sem prévia, o 409 do aceite leva à mesma tela, sem o nome da empresa, e o token fica', async () => {
+    guardarTokenDoConvite('token-1')
+    equipe.previaDoConvitePorLink.mockRejectedValue(new ApiError('Internal server error', 500))
     equipe.aceitarConvitePorLink.mockRejectedValue(
-      new ApiError('Esta pessoa já faz parte da equipe.', 409, undefined, undefined, {
-        codigo: 'EQUIPE_JA_MEMBRO',
+      new ApiError('Este convite é para outra conta.', 409, undefined, undefined, {
+        codigo: 'CONVITE_CONTA_JA_NA_EQUIPE',
       }),
     )
 
@@ -238,10 +308,41 @@ describe('depois da decisão', () => {
     await botao(tela, 'Aceitar convite').trigger('click')
     await flushPromises()
 
+    expect(tela.find('h1').text()).toBe('Este convite é para outra conta')
+    expect(tela.text()).toContain('já faz parte desta equipe, e o convite foi enviado para outro')
+    expect(lerTokenDoConvite()).toBe('token-1')
+    expect(avisos.add).not.toHaveBeenCalled()
+  })
+
+  it('o próprio convite: diz que já faz parte, e ir para o portal fecha o convite', async () => {
+    guardarTokenDoConvite('token-1')
+    equipe.previaDoConvitePorLink.mockResolvedValue({
+      ...PREVIA,
+      contaConectada: { jaFazParte: true, papelAtual: 'OPERADOR', paraEstaConta: true },
+    })
+    equipe.aceitarConvitePorLink.mockResolvedValue({
+      parceiroId: 'parceiro-1',
+      papel: 'OPERADOR',
+      jaEraMembro: true,
+    })
+
+    const tela = await abrirTela()
+
     expect(tela.find('.desfecho .ui-selo').text()).toBe('Já está na equipe')
     expect(tela.text()).toContain(
       'Você já faz parte da equipe da Aurora Clínica e Hotel Veterinário.',
     )
-    expect(tela.text()).not.toContain('Esta pessoa já faz parte da equipe.')
+    expect(tela.findAll('button').some((b) => b.text().includes('Aceitar convite'))).toBe(false)
+
+    await botao(tela, 'Ir para o portal').trigger('click')
+    await flushPromises()
+
+    expect(equipe.aceitarConvitePorLink).toHaveBeenCalledWith('token-1')
+    expect(lerTokenDoConvite()).toBeNull()
+    expect(ultimoAviso()).toMatchObject({
+      summary: 'Já está na equipe',
+      detail:
+        'Você já fazia parte desta equipe. O convite foi fechado e seu acesso continua o mesmo.',
+    })
   })
 })

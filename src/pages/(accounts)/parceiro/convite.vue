@@ -7,6 +7,12 @@
  * convite, quem convidou, com que papel e até quando vale; depois aceita ou recusa e esquece o
  * token. Qualquer conta logada aceita: o token prova que a pessoa abriu o e-mail convidado.
  *
+ * A prévia também diz quem está conectado (`contaConectada`, PJ-VK5P13). Conta que já é da equipe
+ * e abriu um convite que foi para outro e-mail (o dono testando no próprio navegador) vê "Este
+ * convite é para outra conta" e entra com a conta certa sem perder o token: o logout não apaga o
+ * `sessionStorage` do convite, e o login volta para cá quando há um guardado. Conta que já é da
+ * equipe e abriu o próprio convite vê "Você já faz parte", e o "Ir para o portal" fecha o convite.
+ *
  * Sem o link: os convites que chegaram para esta conta (`meus-convites`). O convite novo só se
  * aceita pelo link, então a linha dele só diz para abrir o e-mail; o antigo (`CAIXA`) ainda aceita
  * aqui.
@@ -19,6 +25,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import { useLogout } from '@/composables/useLogout'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import type { ConviteAceitoDto, MeuConviteDto, PreviaConviteDto } from '@/service/contrato/openapi'
@@ -34,12 +41,13 @@ import {
 import { useParceiroStore } from '@/stores/parceiro'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
-type Estado = 'link' | 'caixa' | 'recusado' | 'jaMembro'
+type Estado = 'link' | 'caixa' | 'recusado' | 'jaMembro' | 'contaErrada'
 
 const { t, locale } = useI18n()
 const toast = useToast()
 const router = useRouter()
 const store = useParceiroStore()
+const { logout } = useLogout()
 
 const token = ref(lerTokenDoConvite())
 const estado = ref<Estado>(token.value ? 'link' : 'caixa')
@@ -58,6 +66,10 @@ const tituloDaTela = computed(() => {
     return t('parceiro.convite.recusado.titulo')
   }
 
+  if (estado.value === 'contaErrada') {
+    return t('parceiro.convite.contaErrada.titulo')
+  }
+
   return estado.value === 'caixa' ? t('parceiro.convite.caixa.titulo') : t('parceiro.convite.title')
 })
 
@@ -69,10 +81,13 @@ const resumoDaTela = computed(
       recusado: previa.value?.convidadoPorNome
         ? t('parceiro.convite.recusado.corpoComNome', { nome: previa.value.convidadoPorNome })
         : t('parceiro.convite.recusado.corpo'),
-      /* A `message` do EQUIPE_JA_MEMBRO é escrita para quem convida ("Esta pessoa já faz parte"). */
       jaMembro: previa.value
         ? t('parceiro.convite.jaMembroCorpoComEmpresa', { empresa: previa.value.parceiro.nome })
         : t('parceiro.convite.jaMembroCorpo'),
+      /* Sem prévia (ela falhou e o aceite deu 409), a tela não sabe o nome da empresa. */
+      contaErrada: previa.value
+        ? t('parceiro.convite.contaErrada.corpo', { empresa: previa.value.parceiro.nome })
+        : t('parceiro.convite.contaErrada.corpoSemEmpresa'),
     })[estado.value],
 )
 
@@ -94,23 +109,45 @@ function formatarData(iso: string) {
   })
 }
 
-/** "Helena Prado convidou você como operador." ou, sem o nome de quem convidou, só o papel. */
+/**
+ * "Helena Prado convidou você como operador." ou, sem o nome de quem convidou, só o papel. Na conta
+ * errada também só o papel: o convite não é para quem está vendo, e "convidou você" contradiria o
+ * título.
+ */
 function deQuem(convite: Pick<MeuConviteDto, 'convidadoPorNome' | 'papel'>) {
   const papel = t(`parceiro.equipe.papel.${convite.papel}`).toLowerCase()
 
-  return convite.convidadoPorNome
+  return convite.convidadoPorNome && estado.value !== 'contaErrada'
     ? t('parceiro.convite.caixa.deQuem', { nome: convite.convidadoPorNome, papel })
     : t('parceiro.convite.caixa.semNome', { papel })
 }
 
-async function entrarNaEquipe(aceito: ConviteAceitoDto) {
+/**
+ * O aviso diz o que aconteceu: entrou agora na equipe da empresa, ou já estava nela e o convite só
+ * foi fechado (`jaEraMembro`). `empresa` vem da prévia ou da linha da caixa; sem ela, a frase
+ * genérica.
+ */
+async function entrarNaEquipe(aceito: ConviteAceitoDto, empresa?: string) {
   store.setParceiroId(aceito.parceiroId)
-  toast.add({
-    severity: 'success',
-    summary: t('parceiro.convite.aceito'),
-    detail: t('parceiro.convite.aceitoDetalhe'),
-    life: 4000,
-  })
+
+  if (aceito.jaEraMembro) {
+    toast.add({
+      severity: 'success',
+      summary: t('parceiro.convite.jaNaEquipe'),
+      detail: t('parceiro.convite.jaEraMembroDetalhe'),
+      life: 4000,
+    })
+  } else {
+    toast.add({
+      severity: 'success',
+      summary: t('parceiro.convite.aceito'),
+      detail: empresa
+        ? t('parceiro.convite.aceitoDetalheComEmpresa', { empresa })
+        : t('parceiro.convite.aceitoDetalhe'),
+      life: 4000,
+    })
+  }
+
   await store.bootstrap(true).catch(() => undefined)
   await router.replace(getDefaultLandingPath())
 }
@@ -157,6 +194,16 @@ async function carregarPrevia() {
 
   try {
     previa.value = await previaDoConvitePorLink(valor)
+
+    /*
+     * Conta que já é da equipe: o convite foi para o e-mail dela (fecha ao seguir para o portal) ou
+     * para outro (troca de conta, sem o botão de aceitar). `paraEstaConta` só vem quando `jaFazParte`.
+     */
+    const conta = previa.value.contaConectada
+
+    if (conta?.jaFazParte) {
+      estado.value = conta.paraEstaConta ? 'jaMembro' : 'contaErrada'
+    }
   } catch (err) {
     /* Outra falha (rede, servidor): o convite continua valendo, só sem dizer de quem é. */
     if (!linkSemValor(err)) {
@@ -178,7 +225,7 @@ async function decidirPeloLink(aceitar: boolean) {
     if (aceitar) {
       const aceito = await aceitarConvitePorLink(valor)
       esquecerTokenDoConvite()
-      await entrarNaEquipe(aceito)
+      await entrarNaEquipe(aceito, previa.value?.parceiro.nome)
       return
     }
 
@@ -191,13 +238,34 @@ async function decidirPeloLink(aceitar: boolean) {
       return
     }
 
-    if (err instanceof ApiError && err.codigo === 'EQUIPE_JA_MEMBRO') {
-      esquecerTokenDoConvite()
-      estado.value = 'jaMembro'
+    /*
+     * Conta da equipe com um convite que foi para outro e-mail. Acontece quando a prévia falhou e
+     * a tela não sabia. O convite continua valendo para quem foi convidado: o token fica.
+     */
+    if (err instanceof ApiError && err.codigo === 'CONVITE_CONTA_JA_NA_EQUIPE') {
+      estado.value = 'contaErrada'
       return
     }
 
     avisarErro(err)
+  } finally {
+    trabalhando.value = null
+  }
+}
+
+/**
+ * "Entrar com outra conta": sai da sessão sem esquecer o token. O logout só apaga a sessão, e o
+ * login, achando um convite guardado, volta para esta tela com a conta nova.
+ */
+async function trocarDeConta() {
+  if (trabalhando.value) {
+    return
+  }
+
+  trabalhando.value = 'trocar'
+
+  try {
+    await logout()
   } finally {
     trabalhando.value = null
   }
@@ -225,7 +293,7 @@ async function decidirPelaCaixa(convite: MeuConviteDto, aceitar: boolean) {
 
   try {
     if (aceitar) {
-      await entrarNaEquipe(await aceitarConviteDaCaixa(convite.conviteId))
+      await entrarNaEquipe(await aceitarConviteDaCaixa(convite.conviteId), convite.parceiro.nome)
       return
     }
 
@@ -322,11 +390,15 @@ onMounted(() => {
       </ul>
 
       <!--
-      Depois de recusar (ou de descobrir que já está na equipe): o convite continua na tela, na
-      mesma linha da prévia, com o selo do que aconteceu; embaixo, o próximo passo. Conta sem
-      empresa ganha o caminho de cadastrar a sua; quem tem empresa volta ao portal.
+      Depois de recusar, de descobrir que já está na equipe ou de abrir o convite com a conta
+      errada: o convite continua na tela, na mesma linha da prévia, com o selo do que aconteceu;
+      embaixo, o próximo passo. Conta sem empresa ganha o caminho de cadastrar a sua; quem tem
+      empresa volta ao portal; a conta errada troca de conta.
     -->
-      <div v-else-if="estado === 'jaMembro' || estado === 'recusado'" class="desfecho">
+      <div
+        v-else-if="estado === 'jaMembro' || estado === 'recusado' || estado === 'contaErrada'"
+        class="desfecho"
+      >
         <ul v-if="previa" class="ui-lista ui-folha">
           <li class="ui-linha convite-linha">
             <img
@@ -346,7 +418,7 @@ onMounted(() => {
               <span class="ui-linha__meta">{{ deQuem(previa) }}</span>
             </span>
 
-            <span class="ui-linha__fim">
+            <span v-if="estado !== 'contaErrada'" class="ui-linha__fim">
               <span v-if="estado === 'recusado'" class="ui-selo">
                 <i class="ph ph-x-circle" aria-hidden="true" />
                 {{ t('parceiro.convite.recusado.selo') }}
@@ -363,7 +435,37 @@ onMounted(() => {
           {{ t('parceiro.convite.recusado.semEmpresa') }}
         </p>
 
-        <div class="desfecho__acoes">
+        <div v-if="estado === 'contaErrada'" class="desfecho__acoes">
+          <Button
+            type="button"
+            icon="ph ph-sign-in"
+            :label="t('parceiro.convite.contaErrada.trocarConta')"
+            :loading="trabalhando === 'trocar'"
+            :disabled="trabalhando !== null"
+            @click="trocarDeConta"
+          />
+          <RouterLink
+            class="p-button p-component p-button-secondary p-button-outlined"
+            :to="getDefaultLandingPath()"
+          >
+            <i class="ph ph-house" aria-hidden="true" />
+            {{ t('parceiro.convite.irParaPortal') }}
+          </RouterLink>
+        </div>
+
+        <!-- Já é da equipe e o convite foi para esta conta: seguir para o portal fecha o convite. -->
+        <div v-else-if="estado === 'jaMembro' && token" class="desfecho__acoes">
+          <Button
+            type="button"
+            icon="ph ph-house"
+            :label="t('parceiro.convite.irParaPortal')"
+            :loading="trabalhando === 'aceitar'"
+            :disabled="trabalhando !== null"
+            @click="decidirPeloLink(true)"
+          />
+        </div>
+
+        <div v-else class="desfecho__acoes">
           <RouterLink
             v-if="estado === 'recusado' && semEmpresa"
             class="p-button p-component"

@@ -2101,7 +2101,15 @@
         "semEmpresa": "Sua conta ainda não faz parte de nenhuma empresa. Cadastre a sua para usar o portal, ou aceite outro convite que chegar por e-mail."
       },
       "aceito": "Convite aceito",
-      "aceitoDetalhe": "Você já faz parte da equipe.",
+      "aceitoDetalhe": "Agora você faz parte da equipe.",
+      "aceitoDetalheComEmpresa": "Agora você faz parte da equipe da {empresa}.",
+      "jaEraMembroDetalhe": "Você já fazia parte desta equipe. O convite foi fechado e seu acesso continua o mesmo.",
+      "contaErrada": {
+        "titulo": "Este convite é para outra conta",
+        "corpo": "Você entrou com uma conta que já faz parte da equipe da {empresa}, e o convite foi enviado para outro e-mail. Para aceitar, entre com a conta desse e-mail.",
+        "corpoSemEmpresa": "Você entrou com uma conta que já faz parte desta equipe, e o convite foi enviado para outro e-mail. Para aceitar, entre com a conta desse e-mail.",
+        "trocarConta": "Entrar com outra conta"
+      },
       "naoVale": "Este convite não vale mais",
       "linkIncompleto": "O link deste convite chegou incompleto. Abra de novo o link do e-mail, inteiro, ou peça um convite novo.",
       "irParaPortal": "Ir para o portal",

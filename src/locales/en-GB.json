@@ -2102,6 +2102,14 @@
       },
       "aceito": "Invitation accepted",
       "aceitoDetalhe": "You are now part of the team.",
+      "aceitoDetalheComEmpresa": "You are now part of the {empresa} team.",
+      "jaEraMembroDetalhe": "You were already part of this team. The invitation is now closed and your access stays the same.",
+      "contaErrada": {
+        "titulo": "This invitation is for another account",
+        "corpo": "You are signed in with an account that is already part of the {empresa} team, and the invitation was sent to a different email address. To accept it, sign in with the account for that email address.",
+        "corpoSemEmpresa": "You are signed in with an account that is already part of this team, and the invitation was sent to a different email address. To accept it, sign in with the account for that email address.",
+        "trocarConta": "Sign in with another account"
+      },
       "naoVale": "This invitation is no longer valid",
       "linkIncompleto": "This invitation link is incomplete. Open the full link from the email again, or ask for a new invitation.",
       "irParaPortal": "Go to the portal",

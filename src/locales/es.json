@@ -2101,7 +2101,15 @@
         "semEmpresa": "Su cuenta todavía no forma parte de ninguna empresa. Registre la suya para usar el portal, o acepte otra invitación que llegue por correo."
       },
       "aceito": "Invitación aceptada",
-      "aceitoDetalhe": "Ya forma parte del equipo.",
+      "aceitoDetalhe": "Ahora forma parte del equipo.",
+      "aceitoDetalheComEmpresa": "Ahora forma parte del equipo de {empresa}.",
+      "jaEraMembroDetalhe": "Usted ya formaba parte de este equipo. La invitación se cerró y su acceso sigue igual.",
+      "contaErrada": {
+        "titulo": "Esta invitación es para otra cuenta",
+        "corpo": "Entró con una cuenta que ya forma parte del equipo de {empresa}, y la invitación se envió a otro correo. Para aceptarla, entre con la cuenta de ese correo.",
+        "corpoSemEmpresa": "Entró con una cuenta que ya forma parte de este equipo, y la invitación se envió a otro correo. Para aceptarla, entre con la cuenta de ese correo.",
+        "trocarConta": "Entrar con otra cuenta"
+      },
       "naoVale": "Esta invitación ya no vale",
       "linkIncompleto": "El enlace de esta invitación llegó incompleto. Abra de nuevo el enlace completo del correo o pida una invitación nueva.",
       "irParaPortal": "Ir al portal",

@@ -2102,6 +2102,14 @@
       },
       "aceito": "Poziv je prihvaćen",
       "aceitoDetalhe": "Sada ste deo tima.",
+      "aceitoDetalheComEmpresa": "Sada ste deo tima: {empresa}.",
+      "jaEraMembroDetalhe": "Već ste bili deo ovog tima. Pozivnica je zatvorena, a vaš pristup ostaje isti.",
+      "contaErrada": {
+        "titulo": "Ova pozivnica je za drugi nalog",
+        "corpo": "Prijavljeni ste nalogom koji je već deo tima {empresa}, a pozivnica je poslata na drugu e-poštu. Da biste je prihvatili, prijavite se nalogom te e-pošte.",
+        "corpoSemEmpresa": "Prijavljeni ste nalogom koji je već deo ovog tima, a pozivnica je poslata na drugu e-poštu. Da biste je prihvatili, prijavite se nalogom te e-pošte.",
+        "trocarConta": "Prijavite se drugim nalogom"
+      },
       "naoVale": "Ovaj poziv više ne važi",
       "linkIncompleto": "Link ovog poziva je nepotpun. Ponovo otvorite ceo link iz imejla ili zatražite novi poziv.",
       "irParaPortal": "Idite na portal",
@@ -2655,7 +2663,7 @@
         "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
         "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma",
         "faltas": "{total} pacijent ima izostanak bez razloga | {total} pacijenta imaju izostanke bez razloga | {total} pacijenata ima izostanke bez razloga",
-        "pedidos":"{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
+        "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
       }
     },
     "busca": {
