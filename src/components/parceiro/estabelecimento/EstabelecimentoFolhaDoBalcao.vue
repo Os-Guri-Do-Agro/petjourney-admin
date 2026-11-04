@@ -96,6 +96,14 @@ html.imprimindo-folha .fb {
     display: none !important;
   }
 
+  /*
+   * A impressão da Clínica (`clinic-tokens.css`) esconde tudo o que não é `.clinic-print-root`,
+   * também com `!important`. Este seletor pesa mais que o dela, e a folha volta a aparecer.
+   */
+  html.imprimindo-folha body > .fb {
+    display: block !important;
+  }
+
   html.imprimindo-folha,
   html.imprimindo-folha body {
     height: auto !important;
