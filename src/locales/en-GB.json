@@ -2415,6 +2415,11 @@
     },
     "estabelecimento": {
       "titulo": "Establishment",
+      "abas": {
+        "pagina": "Public page",
+        "perfil": "Profile and address",
+        "horarios": "Opening hours"
+      },
       "erroCarregar": "Couldn't load the establishment.",
       "publicar": "Publish page",
       "publicarFalta": "Before publishing, fill in what the public page lists as missing.",
@@ -2434,13 +2439,17 @@
         "titulo": "Public page",
         "desde": "Published on {data}",
         "foraDoArDica": "It comes back on its own once the registration is approved and active.",
-        "falta": "Still missing before publishing:"
+        "precisa": "It goes live once everything below is ready."
       },
-      "pendencia": {
-        "APROVACAO": "approval of the registration by the PetJourney team",
-        "nomePublico": "the public name",
-        "fusoHorario": "the time zone",
-        "telefone": "a phone number (public, WhatsApp or on-call)"
+      "requisito": {
+        "APROVACAO": "Registration approved by PetJourney",
+        "nomePublico": "Public name",
+        "fusoHorario": "Time zone",
+        "telefone": "A contact phone",
+        "feito": "(done)",
+        "falta": "(missing)",
+        "emAnalise": "Under review",
+        "preencher": "Fill in"
       },
       "slug": {
         "rotulo": "Page address",
@@ -2464,42 +2473,57 @@
         "soBairro": "The page shows only the neighbourhood, city and state.",
         "semCoordenadas": "No map location.",
         "mapaDesligado": "The map doesn't appear on the page.",
-        "mapaLigado": "The map appears on the page."
+        "mapaLigado": "The map appears on the page.",
+        "conferirNoMapa": "Check on the map"
       },
       "horario": {
-        "titulo": "Opening hours",
         "noFuso": "Hours in the {fuso} time zone.",
-        "vazio": "No opening hours on file. Without them, the page can't say whether you're open.",
-        "aberto": "Open",
+        "vazio": "Without hours, the page can't say whether you're open.",
         "fechado": "Closed",
         "abertoAgora": "Open now",
         "abertoFechaAs": "Open now, closes at {hora}",
         "fechadoAgora": "Closed now",
         "fechadoAbreAs": "Closed now, opens at {hora}",
         "fechadoAbreEm": "Closed now, opens {dia} at {hora}",
-        "regras": "Open 24 hours: from 00:00 to 24:00. If it runs past midnight, split it into two days.",
         "ate": "to",
-        "abreAs": "{dia}: opens at",
-        "fechaAs": "{dia}: closes at",
-        "copiar": "Use {dia}'s hours on the other open days",
-        "intervalo": "Break",
-        "intervaloDe": "{dia}: break starts at",
-        "intervaloAte": "{dia}: break ends at",
-        "comIntervalo": "Break",
-        "semIntervalo": "No break",
+        "hoje": "today",
+        "vazioTitulo": "No hours yet",
+        "cadastrar": "Add opening hours",
+        "editor": {
+          "comoFunciona": "Mark the days for each set of hours. A day that isn't in any of them stays closed.",
+          "horario": "Hours {numero}",
+          "tirar": "Remove hours {numero}",
+          "dias": "Days with these hours",
+          "das": "From",
+          "as": "to",
+          "abreAs": "Opens at",
+          "fechaAs": "Closes at",
+          "fechadoDas": "Closed from",
+          "pausaComeca": "Break starts at",
+          "pausaTermina": "Break ends at",
+          "tirarPausa": "Remove the break",
+          "comPausa": "Closes mid-day",
+          "vinteEQuatro": "Open 24 hours",
+          "outro": "More hours",
+          "fechadoEm": "Closed: {dias}.",
+          "semFechado": "Open every day.",
+          "tudoFechado": "Closed every day: the page won't say when you open.",
+          "meiaNoite": "Past midnight? Close the day at 24:00 and open the next one at 00:00, in another set of hours."
+        },
         "problema": {
           "HORA_INVALIDA": "Invalid time. Use 00:00 to 23:59; 24:00 only for closing.",
           "ABRE_E_FECHA_OBRIGATORIOS": "Enter the opening and closing times.",
           "ABRE_DEPOIS_DE_FECHA": "The start must come before the end.",
           "INTERVALO_INCOMPLETO": "The break needs a start and an end.",
           "INTERVALO_FORA_DO_EXPEDIENTE": "The break must fit within opening hours.",
-          "SEMANA_INCOMPLETA": "The week needs all 7 days."
+          "SEMANA_INCOMPLETA": "The week needs all 7 days.",
+          "SEM_DIAS": "Mark at least one day, or remove these hours."
         }
       },
       "dia": {
         "titulo": "Special days",
-        "feriados": "Bank holidays",
-        "feriadosDe": "Copy the {ano} holidays",
+        "umDia": "A special day",
+        "feriadosDe": "Bank holidays of {ano}",
         "adicionar": "Add day",
         "vazio": "No special days. Holidays and days with different hours go here and replace the weekly hours.",
         "remover": "Remove {nome}",
@@ -2512,7 +2536,10 @@
         "abre": "Opens at",
         "fecha": "Closes at",
         "fechadoDica": "Turn off to set different hours for that day.",
-        "abertoDica": "On that day these hours apply instead of the weekly ones."
+        "abertoDica": "On that day these hours apply instead of the weekly ones.",
+        "nenhumProximo": "No special days coming up.",
+        "mostrarPassados": "Show {total} past day | Show {total} past days",
+        "esconderPassados": "Hide past days"
       },
       "mensagens": {
         "titulo": "Messages to pet parents"
@@ -2551,7 +2578,7 @@
         "nomePublico": "Public name",
         "descricao": "Description",
         "fusoHorario": "Time zone",
-        "idiomaDosTextos": "Language of the texts",
+        "idiomaDosTextos": "Language you write in",
         "telefonePublico": "Phone",
         "whatsappPublico": "WhatsApp",
         "telefonePlantao": "On-call phone",
@@ -2591,7 +2618,7 @@
         "opcional": "(optional)",
         "buscarFuso": "Search city or region",
         "fusoDica": "Your opening hours, the schedule and \"open now\" all use this time zone.",
-        "idiomaDica": "The language you write the description and messages in. The page doesn't translate these texts.",
+        "idiomaDica": "Applies to the description and the messages. The page shows these texts as you wrote them, without translating.",
         "contatos": "Contacts on the page",
         "contatosDica": "To publish, one of the three phone numbers is enough.",
         "plantaoDica": "For outside opening hours. Empty means no on-call service.",

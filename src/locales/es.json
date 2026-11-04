@@ -2415,6 +2415,11 @@
     },
     "estabelecimento": {
       "titulo": "Establecimiento",
+      "abas": {
+        "pagina": "Página pública",
+        "perfil": "Perfil y dirección",
+        "horarios": "Horarios"
+      },
       "erroCarregar": "No se pudo cargar el establecimiento.",
       "publicar": "Publicar página",
       "publicarFalta": "Antes de publicar, complete lo que la página pública indica como faltante.",
@@ -2434,13 +2439,17 @@
         "titulo": "Página pública",
         "desde": "Publicada el {data}",
         "foraDoArDica": "Vuelve sola cuando el registro esté aprobado y activo.",
-        "falta": "Para publicar, falta:"
+        "precisa": "Se publica cuando todo lo de abajo esté listo."
       },
-      "pendencia": {
-        "APROVACAO": "la aprobación del registro por el equipo PetJourney",
-        "nomePublico": "el nombre público",
-        "fusoHorario": "la zona horaria",
-        "telefone": "un teléfono (público, WhatsApp o de guardia)"
+      "requisito": {
+        "APROVACAO": "Registro aprobado por PetJourney",
+        "nomePublico": "Nombre público",
+        "fusoHorario": "Zona horaria",
+        "telefone": "Un teléfono de contacto",
+        "feito": "(listo)",
+        "falta": "(falta)",
+        "emAnalise": "En revisión",
+        "preencher": "Completar"
       },
       "slug": {
         "rotulo": "Dirección de la página",
@@ -2464,42 +2473,57 @@
         "soBairro": "La página muestra solo el barrio, la ciudad y el estado.",
         "semCoordenadas": "Sin ubicación en el mapa.",
         "mapaDesligado": "El mapa no aparece en la página.",
-        "mapaLigado": "El mapa aparece en la página."
+        "mapaLigado": "El mapa aparece en la página.",
+        "conferirNoMapa": "Ver en el mapa"
       },
       "horario": {
-        "titulo": "Horarios",
         "noFuso": "Horarios en la zona {fuso}.",
-        "vazio": "No hay horarios registrados. Sin ellos, la página no dice si el negocio está abierto.",
-        "aberto": "Abierto",
+        "vazio": "Sin horario, la página no dice si el lugar está abierto.",
         "fechado": "Cerrado",
         "abertoAgora": "Abierto ahora",
         "abertoFechaAs": "Abierto ahora, cierra a las {hora}",
         "fechadoAgora": "Cerrado ahora",
         "fechadoAbreAs": "Cerrado ahora, abre a las {hora}",
         "fechadoAbreEm": "Cerrado ahora, abre el {dia} a las {hora}",
-        "regras": "Abierto 24 horas: de 00:00 a 24:00. Si pasa de la medianoche, divídalo en dos días.",
         "ate": "a",
-        "abreAs": "{dia}: abre a las",
-        "fechaAs": "{dia}: cierra a las",
-        "copiar": "Usar el horario del {dia} en los otros días abiertos",
-        "intervalo": "Pausa",
-        "intervaloDe": "{dia}: la pausa empieza a las",
-        "intervaloAte": "{dia}: la pausa termina a las",
-        "comIntervalo": "Pausa",
-        "semIntervalo": "Sin pausa",
+        "hoje": "hoy",
+        "vazioTitulo": "Ningún horario registrado",
+        "cadastrar": "Registrar horarios",
+        "editor": {
+          "comoFunciona": "Marque los días de cada horario. El día que no esté en ninguno queda cerrado.",
+          "horario": "Horario {numero}",
+          "tirar": "Quitar el horario {numero}",
+          "dias": "Días de este horario",
+          "das": "De",
+          "as": "a",
+          "abreAs": "Abre a las",
+          "fechaAs": "Cierra a las",
+          "fechadoDas": "Cerrado de",
+          "pausaComeca": "La pausa empieza a las",
+          "pausaTermina": "La pausa termina a las",
+          "tirarPausa": "Quitar la pausa",
+          "comPausa": "Cierra al mediodía",
+          "vinteEQuatro": "Abierto 24 horas",
+          "outro": "Otro horario",
+          "fechadoEm": "Cerrado: {dias}.",
+          "semFechado": "Abierto todos los días.",
+          "tudoFechado": "Cerrado todos los días: la página no dirá cuándo abre.",
+          "meiaNoite": "¿Pasa de la medianoche? Cierre el día a las 24:00 y abra el siguiente a las 00:00, en otro horario."
+        },
         "problema": {
           "HORA_INVALIDA": "Hora no válida. Use de 00:00 a 23:59; 24:00 solo para cerrar.",
           "ABRE_E_FECHA_OBRIGATORIOS": "Indique la hora de apertura y la de cierre.",
           "ABRE_DEPOIS_DE_FECHA": "El inicio debe ser antes del fin.",
           "INTERVALO_INCOMPLETO": "La pausa necesita inicio y fin.",
           "INTERVALO_FORA_DO_EXPEDIENTE": "La pausa debe caber dentro del horario de atención.",
-          "SEMANA_INCOMPLETA": "La semana necesita los 7 días."
+          "SEMANA_INCOMPLETA": "La semana necesita los 7 días.",
+          "SEM_DIAS": "Marque al menos un día, o quite este horario."
         }
       },
       "dia": {
         "titulo": "Días especiales",
-        "feriados": "Feriados nacionales",
-        "feriadosDe": "Copiar los feriados de {ano}",
+        "umDia": "Un día especial",
+        "feriadosDe": "Feriados nacionales de {ano}",
         "adicionar": "Agregar día",
         "vazio": "No hay días especiales. Los feriados y los días con otro horario van aquí y reemplazan al de la semana.",
         "remover": "Quitar {nome}",
@@ -2512,7 +2536,10 @@
         "abre": "Abre a las",
         "fecha": "Cierra a las",
         "fechadoDica": "Desactívelo para dar un horario distinto ese día.",
-        "abertoDica": "Ese día vale este horario y no el de la semana."
+        "abertoDica": "Ese día vale este horario y no el de la semana.",
+        "nenhumProximo": "Ningún día especial por delante.",
+        "mostrarPassados": "Mostrar {total} día que ya pasó | Mostrar {total} días que ya pasaron",
+        "esconderPassados": "Ocultar los que ya pasaron"
       },
       "mensagens": {
         "titulo": "Mensajes al tutor"
@@ -2551,7 +2578,7 @@
         "nomePublico": "Nombre público",
         "descricao": "Descripción",
         "fusoHorario": "Zona horaria",
-        "idiomaDosTextos": "Idioma de los textos",
+        "idiomaDosTextos": "Idioma en que escribe",
         "telefonePublico": "Teléfono",
         "whatsappPublico": "WhatsApp",
         "telefonePlantao": "Teléfono de guardia",
@@ -2591,7 +2618,7 @@
         "opcional": "(opcional)",
         "buscarFuso": "Buscar ciudad o región",
         "fusoDica": "Los horarios del negocio, la agenda y el \"abierto ahora\" se cuentan en esta zona.",
-        "idiomaDica": "El idioma en que escribe la descripción y los mensajes. La página no traduce estos textos.",
+        "idiomaDica": "Vale para la descripción y los mensajes. La página muestra estos textos como usted los escribió, sin traducir.",
         "contatos": "Contactos en la página",
         "contatosDica": "Para publicar, basta uno de los tres teléfonos.",
         "plantaoDica": "Para fuera del horario. Vacío significa sin guardia.",

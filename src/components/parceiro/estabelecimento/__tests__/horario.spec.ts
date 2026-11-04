@@ -1,13 +1,20 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  agruparSemana,
+  diasSemGrupo,
+  eVinteEQuatroHoras,
   faixasDoDia,
+  faixasEmMinutos,
   hojeNoFuso,
   horaDoInstante,
   offsetDoFuso,
   problemaNoDia,
+  problemaNoGrupo,
   semanaCompleta,
+  semanaDosGrupos,
   temHorario,
+  type GrupoDeHorario,
 } from '../horario'
 import { paraSlug, slugValido } from '../slug'
 
@@ -63,6 +70,68 @@ describe('semana', () => {
       '13:00–18:00',
     ])
     expect(faixasDoDia({ fechado: true, abre: null, fecha: null })).toEqual([])
+  })
+})
+
+describe('horários em grupo', () => {
+  const comercial = (diaSemana: number) => ({
+    ...aberto({ intervaloInicio: '12:00', intervaloFim: '13:00' }),
+    diaSemana,
+  })
+  const sabado = { ...aberto({ fecha: '12:00' }), diaSemana: 6 }
+
+  it('junta os dias de mesmo horário, a partir da segunda, e deixa o resto fechado', () => {
+    const semana = semanaCompleta([1, 2, 3, 4, 5].map(comercial).concat(sabado))
+    const grupos = agruparSemana(semana)
+
+    expect(grupos).toEqual([
+      {
+        dias: [1, 2, 3, 4, 5],
+        abre: '08:00',
+        fecha: '18:00',
+        comPausa: true,
+        pausaInicio: '12:00',
+        pausaFim: '13:00',
+      },
+      { dias: [6], abre: '08:00', fecha: '12:00', comPausa: false, pausaInicio: '', pausaFim: '' },
+    ])
+    expect(diasSemGrupo(grupos)).toEqual([0])
+  })
+
+  it('volta para os 7 dias da API sem perder nada', () => {
+    const semana = semanaCompleta([1, 2, 3, 4, 5].map(comercial).concat(sabado))
+
+    expect(semanaDosGrupos(agruparSemana(semana))).toEqual(semana)
+    expect(semanaDosGrupos([]).every((dia) => dia.fechado)).toBe(true)
+  })
+
+  it('grupo sem dia é problema; o horário segue a régua do dia', () => {
+    const grupo: GrupoDeHorario = {
+      dias: [],
+      abre: '08:00',
+      fecha: '18:00',
+      comPausa: false,
+      pausaInicio: '',
+      pausaFim: '',
+    }
+
+    expect(problemaNoGrupo(grupo)).toBe('SEM_DIAS')
+    expect(problemaNoGrupo({ ...grupo, dias: [1] })).toBeNull()
+    expect(problemaNoGrupo({ ...grupo, dias: [1], abre: '19:00' })).toBe('ABRE_DEPOIS_DE_FECHA')
+    expect(problemaNoGrupo({ ...grupo, dias: [1], comPausa: true, pausaInicio: '12:00' })).toBe(
+      'INTERVALO_INCOMPLETO',
+    )
+  })
+
+  it('reconhece o dia inteiro e mede as faixas para a régua', () => {
+    expect(eVinteEQuatroHoras({ abre: '00:00', fecha: '24:00', comPausa: false })).toBe(true)
+    expect(eVinteEQuatroHoras({ abre: '00:00', fecha: '23:59', comPausa: false })).toBe(false)
+    expect(faixasEmMinutos(comercial(1))).toEqual([
+      [480, 720],
+      [780, 1080],
+    ])
+    expect(faixasEmMinutos({ ...aberto({ abre: '00:00', fecha: '24:00' }) })).toEqual([[0, 1440]])
+    expect(faixasEmMinutos({ fechado: true, abre: null, fecha: null })).toEqual([])
   })
 })
 

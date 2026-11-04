@@ -446,6 +446,28 @@ function salvar() {
             />
           </section>
 
+          <!--
+            Logo depois da descrição, que é o texto de que ele fala: longe dela, parecia um seletor
+            que traduz a descrição.
+          -->
+          <section class="eg__secao">
+            <span id="est-idioma-rotulo" class="eg__rotulo">{{
+              t('parceiro.estabelecimento.campo.idiomaDosTextos')
+            }}</span>
+            <Select
+              v-model="form.idiomaDosTextos"
+              :options="idiomaOptions"
+              option-label="rotulo"
+              option-value="valor"
+              aria-labelledby="est-idioma-rotulo"
+              aria-describedby="est-idioma-dica"
+              :disabled="salvando"
+            />
+            <p id="est-idioma-dica" class="eg__dica">
+              {{ t('parceiro.estabelecimento.gaveta.idiomaDica') }}
+            </p>
+          </section>
+
           <section class="eg__secao">
             <span id="est-fuso-rotulo" class="eg__rotulo">{{
               t('parceiro.estabelecimento.campo.fusoHorario')
@@ -462,21 +484,6 @@ function salvar() {
               :disabled="salvando"
             />
             <p class="eg__dica">{{ t('parceiro.estabelecimento.gaveta.fusoDica') }}</p>
-          </section>
-
-          <section class="eg__secao">
-            <span id="est-idioma-rotulo" class="eg__rotulo">{{
-              t('parceiro.estabelecimento.campo.idiomaDosTextos')
-            }}</span>
-            <Select
-              v-model="form.idiomaDosTextos"
-              :options="idiomaOptions"
-              option-label="rotulo"
-              option-value="valor"
-              aria-labelledby="est-idioma-rotulo"
-              :disabled="salvando"
-            />
-            <p class="eg__dica">{{ t('parceiro.estabelecimento.gaveta.idiomaDica') }}</p>
           </section>
         </div>
 

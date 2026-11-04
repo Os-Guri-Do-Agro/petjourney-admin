@@ -26,6 +26,8 @@ import './gaveta.css'
 const props = defineProps<{
   /** Hoje no fuso do estabelecimento, `AAAA-MM-DD`: o calendário começa nele. */
   hoje: string
+  /** As datas que já têm dia especial (`AAAA-MM-DD`): a API recusa a mesma data duas vezes. */
+  ocupadas?: string[]
   salvando: boolean
   erro: Error | null
 }>()
@@ -78,6 +80,15 @@ const minimo = computed(() => {
 
   return new Date(hoje.getUTCFullYear(), hoje.getUTCMonth(), hoje.getUTCDate())
 })
+
+/** As datas ocupadas ficam apagadas no calendário, em vez de virar erro depois de enviar. */
+const datasOcupadas = computed(() =>
+  (props.ocupadas ?? []).map((texto) => {
+    const data = dataCivil(texto)
+
+    return new Date(data.getUTCFullYear(), data.getUTCMonth(), data.getUTCDate())
+  }),
+)
 
 const problemaDoHorario = computed(() =>
   problemaNoDia({ fechado: fechado.value, abre: abre.value || null, fecha: fecha.value || null }),
@@ -146,6 +157,7 @@ function salvar() {
           v-model="data"
           inline
           :min-date="minimo"
+          :disabled-dates="datasOcupadas"
           aria-labelledby="dia-data-rotulo"
           :disabled="salvando"
         />

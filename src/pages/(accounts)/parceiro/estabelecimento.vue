@@ -4,10 +4,17 @@
  *
  * ## A forma
  *
- * No alto, a página pública: se está no ar, o que falta para publicar e o endereço dela. Embaixo, o
- * que a página mostra, em seções de leitura: o perfil e os contatos, o endereço, os horários da
- * semana, os dias especiais e as mensagens ao responsável. Cada seção edita na sua gaveta, uma por
- * vez, e "Publicar" fica no alto da tela, porque é a ação desta tela.
+ * Três abas, cada uma com duas seções lado a lado (empilhadas na tela estreita), e o mesmo endereço
+ * com `?aba=`:
+ *
+ * - **Página pública** (sem `?aba`): se está no ar, o link e o QR, ou o que falta para publicar,
+ *   cada falta com o atalho para preencher; ao lado, as mensagens que a página mostra ao
+ *   responsável.
+ * - **Perfil e endereço**: o perfil com os contatos e, ao lado, o endereço.
+ * - **Horários**: a semana numa régua de 0 h a 24 h e, ao lado, os dias especiais.
+ *
+ * Cada seção edita na sua gaveta, uma por vez, e "Publicar" fica no alto, porque é a ação da tela
+ * em qualquer aba.
  *
  * Qualquer membro lê. Só o DONO edita (`podeEditar` vem pronto da API); com o cadastro suspenso
  * ninguém edita, mas o dono ainda tira a página do ar.
@@ -24,6 +31,7 @@ import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EstabelecimentoDiaGaveta from '@/components/parceiro/estabelecimento/EstabelecimentoDiaGaveta.vue'
@@ -32,6 +40,7 @@ import EstabelecimentoLinkPublico from '@/components/parceiro/estabelecimento/Es
 import EstabelecimentoPerfilGaveta, {
   type ParteDoPerfil,
 } from '@/components/parceiro/estabelecimento/EstabelecimentoPerfilGaveta.vue'
+import EstabelecimentoSemana from '@/components/parceiro/estabelecimento/EstabelecimentoSemana.vue'
 import EstabelecimentoSlugGaveta from '@/components/parceiro/estabelecimento/EstabelecimentoSlugGaveta.vue'
 import {
   dataCivil,
@@ -41,13 +50,13 @@ import {
   horaDoInstante,
   nomeDoFuso,
   offsetDoFuso,
-  semanaCompleta,
   temHorario,
 } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import type { Aba } from '@/navegacao/espacos'
 import { ApiError } from '@/service/api'
 import {
   copiarFeriadosNacionais,
@@ -70,6 +79,8 @@ import { linksDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
 const { t, locale } = useI18n()
 const toast = useToast()
+const route = useRoute()
+const router = useRouter()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
 
 const estabelecimento = ref<Estabelecimento | null>(null)
@@ -140,6 +151,46 @@ function avisarSucesso(chave: string, detalhe?: string) {
   })
 }
 
+/* --------------------------------------------------------------------------------- abas */
+
+const ABAS = ['pagina', 'perfil', 'horarios'] as const
+type AbaDaTela = (typeof ABAS)[number]
+
+const ICONE_DA_ABA: Record<AbaDaTela, string> = {
+  pagina: 'ph ph-browser',
+  perfil: 'ph ph-storefront',
+  horarios: 'ph ph-clock',
+}
+
+const aba = computed<AbaDaTela>(() => {
+  const pedida = route.query.aba
+
+  return ABAS.includes(pedida as AbaDaTela) ? (pedida as AbaDaTela) : 'pagina'
+})
+
+/** A aba é a mesma URL com outro `?aba=`; a página pública é a tela sem o parâmetro. */
+function destinoDa(alvo: AbaDaTela) {
+  const query = { ...route.query }
+
+  if (alvo === 'pagina') {
+    delete query.aba
+  } else {
+    query.aba = alvo
+  }
+
+  return { path: route.path, query }
+}
+
+const abas = computed<Aba[]>(() =>
+  ABAS.map((id) => ({
+    rotulo: t(`parceiro.estabelecimento.abas.${id}`),
+    icone: ICONE_DA_ABA[id],
+    to: router.resolve(destinoDa(id)).fullPath,
+  })),
+)
+
+const abaAtual = computed(() => router.resolve(destinoDa(aba.value)).fullPath)
+
 /* ---------------------------------------------------------------------- a página pública */
 
 type Situacao = 'noAr' | 'foraDoAr' | 'naoPublicada'
@@ -186,6 +237,22 @@ const publicadaEm = computed(() =>
 )
 
 const aguardandoAprovacao = computed(() => pendencias.value.includes('APROVACAO'))
+
+/**
+ * O que a página precisa para ir ao ar, inteiro: o que já está feito ganha o visto, o que falta
+ * (a lista da API) ganha o atalho para a gaveta onde se preenche. A aprovação é da equipe
+ * PetJourney: ela não tem atalho.
+ */
+const REQUISITOS = ['APROVACAO', 'nomePublico', 'fusoHorario', 'telefone'] as const
+
+const requisitos = computed(() =>
+  REQUISITOS.map((id) => ({ id, feito: !pendencias.value.includes(id) })),
+)
+
+function resolver() {
+  void router.push(destinoDa('perfil'))
+  abrirPerfil('perfil')
+}
 
 const acao = ref<'publicar' | 'despublicar' | 'feriados' | null>(null)
 
@@ -309,6 +376,18 @@ const mapa = computed(() => {
   return t('parceiro.estabelecimento.endereco.mapaLigado')
 })
 
+/**
+ * As coordenadas abertas no mapa, para conferir se o ponto é a casa: copiadas à mão, um sinal
+ * trocado põe o pino em outro continente.
+ */
+const linkDoMapa = computed(() => {
+  const atual = perfil.value
+
+  if (atual?.latitude == null || atual.longitude == null) return ''
+
+  return `https://www.google.com/maps/search/?api=1&query=${atual.latitude},${atual.longitude}`
+})
+
 /* ------------------------------------------------------------------------------ horários */
 
 const horariosAbertos = ref(false)
@@ -335,29 +414,6 @@ async function salvarSemana(dias: HorarioDoDia[]) {
     salvandoHorarios.value = false
   }
 }
-
-/** Segunda primeiro, domingo por último, como a semana de quem atende. */
-const ORDEM_DA_SEMANA = [1, 2, 3, 4, 5, 6, 0] as const
-const UM_DOMINGO = '2026-10-18'
-
-function nomeDoDia(diaSemana: number, formato: 'long' | 'short' = 'long') {
-  const data = dataCivil(UM_DOMINGO)
-  data.setUTCDate(data.getUTCDate() + diaSemana)
-
-  const nome = data.toLocaleDateString(intl.value, { weekday: formato, timeZone: 'UTC' })
-
-  return nome.charAt(0).toLocaleUpperCase() + nome.slice(1)
-}
-
-const semana = computed(() => {
-  const dias = semanaCompleta(estabelecimento.value?.horarios ?? [])
-
-  return ORDEM_DA_SEMANA.map((diaSemana) => {
-    const dia = dias.find((item) => item.diaSemana === diaSemana)!
-
-    return { diaSemana, nome: nomeDoDia(diaSemana), faixas: faixasDoDia(dia) }
-  })
-})
 
 const comHorario = computed(() => temHorario(estabelecimento.value?.horarios ?? []))
 
@@ -434,14 +490,32 @@ const diasEspeciais = computed(() =>
   ),
 )
 
-function dataDoDia(dia: DiaEspecial) {
-  return dataCivil(dia.data).toLocaleDateString(intl.value, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: dia.data.slice(0, 4) === hoje.value.slice(0, 4) ? undefined : 'numeric',
-    timeZone: 'UTC',
-  })
+/** Os que já passaram ficam recolhidos: a lista é para o que vem. */
+const proximosDias = computed(() => diasEspeciais.value.filter((dia) => dia.data >= hoje.value))
+const diasQuePassaram = computed(() =>
+  diasEspeciais.value.filter((dia) => dia.data < hoje.value).reverse(),
+)
+const mostrarPassados = ref(false)
+
+function folhinha(dia: DiaEspecial) {
+  const data = dataCivil(dia.data)
+  const mesmoAno = dia.data.slice(0, 4) === hoje.value.slice(0, 4)
+
+  return {
+    numero: data.getUTCDate(),
+    mes: data
+      .toLocaleDateString(intl.value, { month: 'short', timeZone: 'UTC' })
+      .replace(/\.$/, ''),
+    semana: data.toLocaleDateString(intl.value, {
+      weekday: 'long',
+      year: mesmoAno ? undefined : 'numeric',
+      timeZone: 'UTC',
+    }),
+  }
+}
+
+function horarioDoDiaEspecial(dia: DiaEspecial) {
+  return dia.fechado ? t('parceiro.estabelecimento.horario.fechado') : faixasDoDia(dia).join(' · ')
 }
 
 const diaParaRemover = ref<DiaEspecial | null>(null)
@@ -472,7 +546,7 @@ async function remover() {
   }
 }
 
-const menuDeFeriados = ref<InstanceType<typeof Menu> | null>(null)
+const menuDeAdicionar = ref<InstanceType<typeof Menu> | null>(null)
 
 /** O catálogo da API tem o ano corrente e o próximo; outro ano ela recusa. */
 const anosDeFeriado = computed(() => {
@@ -481,13 +555,23 @@ const anosDeFeriado = computed(() => {
   return [ano, ano + 1]
 })
 
-const itensDeFeriado = computed<MenuItem[]>(() =>
-  anosDeFeriado.value.map((ano) => ({
+/**
+ * Um botão "Adicionar" só, com o dia avulso e os feriados nacionais dentro: os dois botões lado a
+ * lado não cabiam ao lado do título na coluna estreita.
+ */
+const itensDeAdicionar = computed<MenuItem[]>(() => [
+  {
+    label: t('parceiro.estabelecimento.dia.umDia'),
+    icon: 'ph ph-calendar-plus',
+    command: abrirDia,
+  },
+  { separator: true },
+  ...anosDeFeriado.value.map((ano) => ({
     label: t('parceiro.estabelecimento.dia.feriadosDe', { ano }),
-    icon: 'ph ph-calendar-check',
+    icon: 'ph ph-flag',
     command: () => void copiarFeriados(ano),
   })),
-)
+])
 
 async function copiarFeriados(ano: number) {
   acao.value = 'feriados'
@@ -548,6 +632,8 @@ async function salvarSlug(slug: string) {
     :erro="loadError"
     :carregando="!estabelecimento && !loadError"
     :sem-acesso-de-parceiro="store.semAcessoParceiro"
+    :abas-da-tela="abas"
+    :aba-atual="abaAtual"
     @tentar-de-novo="carregar"
   >
     <template #acoes>
@@ -572,302 +658,421 @@ async function salvarSlug(slug: string) {
         }}
       </p>
 
-      <!-- ------------------------------------------------------------- a página pública -->
-      <UiSecao :titulo="t('parceiro.estabelecimento.pagina.titulo')" icone="ph ph-browser" folha>
-        <template v-if="podeDespublicar" #acoes>
-          <Button
-            icon="ph ph-cloud-slash"
-            :label="t('parceiro.estabelecimento.despublicar')"
-            severity="secondary"
-            outlined
-            size="small"
-            :loading="acao === 'despublicar'"
-            @click="confirmarDespublicar = true"
-          />
-        </template>
-
-        <div class="pagina">
-          <p class="pagina__situacao" :class="`pagina__situacao--${situacao}`">
-            <span class="pagina__icone" aria-hidden="true"
-              ><i :class="ICONE_DA_SITUACAO[situacao]"
-            /></span>
-            <span>
-              <strong>{{ t(`parceiro.estabelecimento.situacao.${situacao}`) }}</strong>
-              <small v-if="situacao === 'noAr' && publicadaEm">
-                {{ t('parceiro.estabelecimento.pagina.desde', { data: publicadaEm }) }}
-              </small>
-              <small v-else-if="situacao === 'foraDoAr'">
-                {{ t('parceiro.estabelecimento.pagina.foraDoArDica') }}
-              </small>
-            </span>
-          </p>
-
-          <div v-if="situacao === 'naoPublicada' && pendencias.length > 0" class="falta">
-            <p class="falta__titulo">{{ t('parceiro.estabelecimento.pagina.falta') }}</p>
-            <ul class="falta__lista">
-              <li v-for="pendencia in pendencias" :key="pendencia">
-                <i class="ph ph-circle-dashed" aria-hidden="true" />
-                <span>{{ t(`parceiro.estabelecimento.pendencia.${pendencia}`) }}</span>
-              </li>
-            </ul>
-          </div>
-
-          <EstabelecimentoLinkPublico
-            v-if="linksPublicos.length && estabelecimento.slug"
-            :links="linksPublicos"
-            :slug="estabelecimento.slug"
-          />
-
-          <div class="endereco-da-pagina">
-            <span class="dado__rotulo">{{ t('parceiro.estabelecimento.slug.rotulo') }}</span>
-            <template v-if="estabelecimento.slug">
-              <code class="endereco-da-pagina__slug" dir="ltr">{{ estabelecimento.slug }}</code>
-              <Button
-                v-if="podeEditar"
-                :label="t('parceiro.estabelecimento.slug.trocar')"
-                severity="secondary"
-                outlined
-                size="small"
-                @click="abrirSlug"
-              />
-            </template>
-            <span v-else class="dado__vazio">
-              {{
-                aguardandoAprovacao
-                  ? t('parceiro.estabelecimento.slug.depoisDaAprovacao')
-                  : t('parceiro.estabelecimento.slug.nasceDoNome')
-              }}
-            </span>
-          </div>
-        </div>
-      </UiSecao>
-
-      <!-- ------------------------------------------------------------ perfil e contatos -->
-      <UiSecao
-        :titulo="t('parceiro.estabelecimento.perfil.titulo')"
-        icone="ph ph-identification-card"
-        folha
-      >
-        <template v-if="podeEditar && perfil" #acoes>
-          <Button
-            icon="ph ph-pencil-simple"
-            :label="t('parceiro.estabelecimento.editar')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirPerfil('perfil')"
-          />
-        </template>
-
-        <div v-if="!perfil" class="comeco">
-          <p class="comeco__texto">
-            <strong>{{ t('parceiro.estabelecimento.perfil.comecoTitulo') }}</strong>
-            {{ t('parceiro.estabelecimento.perfil.comeco') }}
-          </p>
-          <Button
-            v-if="podeEditar"
-            icon="ph ph-pencil-simple"
-            :label="t('parceiro.estabelecimento.perfil.preencher')"
-            @click="abrirPerfil('perfil')"
-          />
-        </div>
-
-        <template v-else>
-          <p v-if="perfil.descricao" class="descricao">{{ perfil.descricao }}</p>
-          <dl class="dados">
-            <div v-for="linha in linhasDoPerfil" :key="linha.id" class="dado">
-              <dt class="dado__rotulo">{{ t(`parceiro.estabelecimento.campo.${linha.id}`) }}</dt>
-              <dd :class="{ dado__vazio: !linha.valor }">
-                {{ linha.valor || t('parceiro.estabelecimento.naoInformado') }}
-              </dd>
-            </div>
-          </dl>
-        </template>
-      </UiSecao>
-
-      <!--
-        Endereço e mensagens só existem depois do perfil: o salvamento deles leva o nome e o fuso
-        junto, e duas caixas dizendo "preencha o perfil primeiro" só repetiam o que o perfil já diz.
-      -->
-      <!-- --------------------------------------------------------------------- endereço -->
-      <UiSecao
-        v-if="perfil"
-        :titulo="t('parceiro.estabelecimento.endereco.titulo')"
-        icone="ph ph-map-pin"
-        folha
-      >
-        <template v-if="podeEditar" #acoes>
-          <Button
-            icon="ph ph-pencil-simple"
-            :label="t('parceiro.estabelecimento.editar')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirPerfil('endereco')"
-          />
-        </template>
-
-        <div class="endereco">
-          <address v-if="enderecoEmLinhas.length" class="endereco__linhas">
-            <span v-for="linha in enderecoEmLinhas" :key="linha">{{ linha }}</span>
-          </address>
-          <p v-else class="dado__vazio">{{ t('parceiro.estabelecimento.endereco.vazio') }}</p>
-          <ul class="endereco__na-pagina">
-            <li>
-              <i
-                :class="perfil.mostrarEndereco ? 'ph ph-eye' : 'ph ph-eye-slash'"
-                aria-hidden="true"
-              />
-              {{
-                perfil.mostrarEndereco
-                  ? t('parceiro.estabelecimento.endereco.mostraRua')
-                  : t('parceiro.estabelecimento.endereco.soBairro')
-              }}
-            </li>
-            <li>
-              <i class="ph ph-map-trifold" aria-hidden="true" />
-              {{ mapa }}
-            </li>
-          </ul>
-        </div>
-      </UiSecao>
-
-      <!-- --------------------------------------------------------------------- horários -->
-      <UiSecao :titulo="t('parceiro.estabelecimento.horario.titulo')" icone="ph ph-clock" folha>
-        <template v-if="podeEditar" #acoes>
-          <Button
-            icon="ph ph-pencil-simple"
-            :label="t('parceiro.estabelecimento.editar')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirHorarios"
-          />
-        </template>
-
-        <div class="horarios">
-          <p v-if="agora" class="agora" :class="{ 'agora--aberto': agora.aberto }">
-            <span class="agora__ponto" aria-hidden="true" />
-            {{ agora.texto }}
-          </p>
-          <p v-if="fuso" class="dado__vazio">
-            {{ t('parceiro.estabelecimento.horario.noFuso', { fuso: nomeDoFuso(fuso) }) }}
-          </p>
-
-          <p v-if="!comHorario" class="dado__vazio">
-            {{ t('parceiro.estabelecimento.horario.vazio') }}
-          </p>
-          <dl v-else class="semana">
-            <div v-for="dia in semana" :key="dia.diaSemana" class="semana__dia">
-              <dt>{{ dia.nome }}</dt>
-              <dd v-if="dia.faixas.length" class="ui-num">{{ dia.faixas.join(' · ') }}</dd>
-              <dd v-else class="dado__vazio">
-                {{ t('parceiro.estabelecimento.horario.fechado') }}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      </UiSecao>
-
-      <!-- --------------------------------------------------------------- dias especiais -->
-      <UiSecao
-        :titulo="t('parceiro.estabelecimento.dia.titulo')"
-        :contagem="diasEspeciais.length || null"
-        icone="ph ph-calendar-star"
-        folha
-      >
-        <template v-if="podeEditar" #acoes>
-          <Button
-            icon="ph ph-flag"
-            :label="t('parceiro.estabelecimento.dia.feriados')"
-            severity="secondary"
-            outlined
-            size="small"
-            aria-haspopup="true"
-            aria-controls="menu-feriados"
-            :loading="acao === 'feriados'"
-            @click="menuDeFeriados?.toggle($event)"
-          />
-          <Menu id="menu-feriados" ref="menuDeFeriados" :model="itensDeFeriado" popup />
-          <Button
-            icon="ph ph-plus"
-            :label="t('parceiro.estabelecimento.dia.adicionar')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirDia"
-          />
-        </template>
-
-        <p v-if="diasEspeciais.length === 0" class="dado__vazio">
-          {{ t('parceiro.estabelecimento.dia.vazio') }}
-        </p>
-        <ul v-else class="especiais">
-          <li
-            v-for="dia in diasEspeciais"
-            :key="dia.id"
-            class="especial"
-            :class="{ 'especial--passou': dia.data < hoje }"
-          >
-            <span class="especial__data ui-num">{{ dataDoDia(dia) }}</span>
-            <span class="especial__nome">{{ dia.nome }}</span>
-            <span class="especial__horario ui-num">
-              {{
-                dia.fechado
-                  ? t('parceiro.estabelecimento.horario.fechado')
-                  : faixasDoDia(dia).join(' · ')
-              }}
-            </span>
+      <!-- ================================================================ página pública -->
+      <div v-if="aba === 'pagina'" class="aba" :class="{ 'aba--uma': !perfil }">
+        <UiSecao :titulo="t('parceiro.estabelecimento.pagina.titulo')" icone="ph ph-browser" folha>
+          <template v-if="podeDespublicar" #acoes>
             <Button
-              v-if="podeEditar"
-              icon="ph ph-trash"
+              icon="ph ph-cloud-slash"
+              :label="t('parceiro.estabelecimento.despublicar')"
               severity="secondary"
               outlined
               size="small"
-              :aria-label="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-              :title="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-              :loading="removendo === dia.id"
-              @click="pedirRemocao(dia)"
+              :loading="acao === 'despublicar'"
+              @click="confirmarDespublicar = true"
             />
-          </li>
-        </ul>
-      </UiSecao>
+          </template>
 
-      <!-- -------------------------------------------------------------------- mensagens -->
-      <UiSecao
-        v-if="perfil"
-        :titulo="t('parceiro.estabelecimento.mensagens.titulo')"
-        icone="ph ph-chat-text"
-        folha
-      >
-        <template v-if="podeEditar" #acoes>
-          <Button
-            icon="ph ph-pencil-simple"
-            :label="t('parceiro.estabelecimento.editar')"
-            severity="secondary"
-            outlined
-            size="small"
-            @click="abrirPerfil('mensagens')"
-          />
-        </template>
+          <div class="pagina">
+            <p class="pagina__situacao" :class="`pagina__situacao--${situacao}`">
+              <span class="pagina__icone" aria-hidden="true"
+                ><i :class="ICONE_DA_SITUACAO[situacao]"
+              /></span>
+              <span>
+                <strong>{{ t(`parceiro.estabelecimento.situacao.${situacao}`) }}</strong>
+                <small v-if="situacao === 'noAr' && publicadaEm">
+                  {{ t('parceiro.estabelecimento.pagina.desde', { data: publicadaEm }) }}
+                </small>
+                <small v-else-if="situacao === 'foraDoAr'">
+                  {{ t('parceiro.estabelecimento.pagina.foraDoArDica') }}
+                </small>
+                <small v-else>{{ t('parceiro.estabelecimento.pagina.precisa') }}</small>
+              </span>
+            </p>
 
-        <dl class="dados dados--texto">
-          <div
-            v-for="campo in ['mensagemForaDoHorario', 'orientacaoEmergencia'] as const"
-            :key="campo"
-            class="dado"
-          >
-            <dt class="dado__rotulo">{{ t(`parceiro.estabelecimento.campo.${campo}`) }}</dt>
-            <dd :class="{ dado__vazio: !perfil[campo] }">
-              {{ perfil[campo] || t('parceiro.estabelecimento.naoInformado') }}
-            </dd>
+            <!-- O que a página precisa para ir ao ar: o feito com visto, o que falta com atalho. -->
+            <ul v-if="situacao === 'naoPublicada'" class="requisitos">
+              <li
+                v-for="requisito in requisitos"
+                :key="requisito.id"
+                class="requisito"
+                :class="{ 'requisito--feito': requisito.feito }"
+              >
+                <i
+                  :class="requisito.feito ? 'ph ph-check-circle' : 'ph ph-circle-dashed'"
+                  aria-hidden="true"
+                />
+                <span class="requisito__nome">
+                  {{ t(`parceiro.estabelecimento.requisito.${requisito.id}`) }}
+                  <span class="sr-only">
+                    {{
+                      requisito.feito
+                        ? t('parceiro.estabelecimento.requisito.feito')
+                        : t('parceiro.estabelecimento.requisito.falta')
+                    }}
+                  </span>
+                </span>
+                <span
+                  v-if="!requisito.feito && requisito.id === 'APROVACAO'"
+                  class="requisito__estado"
+                >
+                  {{ t('parceiro.estabelecimento.requisito.emAnalise') }}
+                </span>
+                <Button
+                  v-else-if="!requisito.feito && podeEditar"
+                  :label="t('parceiro.estabelecimento.requisito.preencher')"
+                  icon="ph ph-arrow-right"
+                  icon-pos="right"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  @click="resolver"
+                />
+              </li>
+            </ul>
+
+            <EstabelecimentoLinkPublico
+              v-if="linksPublicos.length && estabelecimento.slug"
+              :links="linksPublicos"
+              :slug="estabelecimento.slug"
+            />
+
+            <div class="endereco-da-pagina">
+              <span class="dado__rotulo">{{ t('parceiro.estabelecimento.slug.rotulo') }}</span>
+              <template v-if="estabelecimento.slug">
+                <code class="endereco-da-pagina__slug" dir="ltr">{{ estabelecimento.slug }}</code>
+                <Button
+                  v-if="podeEditar"
+                  :label="t('parceiro.estabelecimento.slug.trocar')"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  @click="abrirSlug"
+                />
+              </template>
+              <span v-else class="dado__vazio">
+                {{
+                  aguardandoAprovacao
+                    ? t('parceiro.estabelecimento.slug.depoisDaAprovacao')
+                    : t('parceiro.estabelecimento.slug.nasceDoNome')
+                }}
+              </span>
+            </div>
           </div>
-        </dl>
-      </UiSecao>
+        </UiSecao>
+
+        <!--
+          Endereço e mensagens só existem depois do perfil: o salvamento deles leva o nome e o fuso
+          junto, e duas caixas dizendo "preencha o perfil primeiro" só repetiam o que o perfil já diz.
+        -->
+        <UiSecao
+          v-if="perfil"
+          :titulo="t('parceiro.estabelecimento.mensagens.titulo')"
+          icone="ph ph-chat-text"
+          folha
+        >
+          <template v-if="podeEditar" #acoes>
+            <Button
+              icon="ph ph-pencil-simple"
+              :label="t('parceiro.estabelecimento.editar')"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="abrirPerfil('mensagens')"
+            />
+          </template>
+
+          <dl class="dados dados--texto">
+            <div
+              v-for="campo in ['mensagemForaDoHorario', 'orientacaoEmergencia'] as const"
+              :key="campo"
+              class="dado"
+            >
+              <dt class="dado__rotulo">{{ t(`parceiro.estabelecimento.campo.${campo}`) }}</dt>
+              <dd v-if="perfil[campo]">{{ perfil[campo] }}</dd>
+              <dd v-else class="dado__vazio">
+                {{ t('parceiro.estabelecimento.naoInformado') }}.
+                {{
+                  campo === 'mensagemForaDoHorario'
+                    ? t('parceiro.estabelecimento.gaveta.foraDoHorarioDica')
+                    : t('parceiro.estabelecimento.gaveta.emergenciaDica')
+                }}
+              </dd>
+            </div>
+          </dl>
+        </UiSecao>
+      </div>
+
+      <!-- ============================================================= perfil e endereço -->
+      <div v-else-if="aba === 'perfil'" class="aba" :class="{ 'aba--uma': !perfil }">
+        <UiSecao
+          :titulo="t('parceiro.estabelecimento.perfil.titulo')"
+          icone="ph ph-identification-card"
+          folha
+        >
+          <template v-if="podeEditar && perfil" #acoes>
+            <Button
+              icon="ph ph-pencil-simple"
+              :label="t('parceiro.estabelecimento.editar')"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="abrirPerfil('perfil')"
+            />
+          </template>
+
+          <div v-if="!perfil" class="comeco">
+            <p class="comeco__texto">
+              <strong>{{ t('parceiro.estabelecimento.perfil.comecoTitulo') }}</strong>
+              {{ t('parceiro.estabelecimento.perfil.comeco') }}
+            </p>
+            <Button
+              v-if="podeEditar"
+              icon="ph ph-pencil-simple"
+              :label="t('parceiro.estabelecimento.perfil.preencher')"
+              @click="abrirPerfil('perfil')"
+            />
+          </div>
+
+          <template v-else>
+            <p v-if="perfil.descricao" class="descricao">{{ perfil.descricao }}</p>
+            <dl class="dados">
+              <div v-for="linha in linhasDoPerfil" :key="linha.id" class="dado">
+                <dt class="dado__rotulo">{{ t(`parceiro.estabelecimento.campo.${linha.id}`) }}</dt>
+                <dd :class="{ dado__vazio: !linha.valor }">
+                  {{ linha.valor || t('parceiro.estabelecimento.naoInformado') }}
+                </dd>
+              </div>
+            </dl>
+          </template>
+        </UiSecao>
+
+        <UiSecao
+          v-if="perfil"
+          :titulo="t('parceiro.estabelecimento.endereco.titulo')"
+          icone="ph ph-map-pin"
+          folha
+        >
+          <template v-if="podeEditar" #acoes>
+            <Button
+              icon="ph ph-pencil-simple"
+              :label="t('parceiro.estabelecimento.editar')"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="abrirPerfil('endereco')"
+            />
+          </template>
+
+          <div class="endereco">
+            <address v-if="enderecoEmLinhas.length" class="endereco__linhas">
+              <span v-for="linha in enderecoEmLinhas" :key="linha">{{ linha }}</span>
+            </address>
+            <p v-else class="dado__vazio">{{ t('parceiro.estabelecimento.endereco.vazio') }}</p>
+            <ul class="endereco__na-pagina">
+              <li>
+                <i
+                  :class="perfil.mostrarEndereco ? 'ph ph-eye' : 'ph ph-eye-slash'"
+                  aria-hidden="true"
+                />
+                {{
+                  perfil.mostrarEndereco
+                    ? t('parceiro.estabelecimento.endereco.mostraRua')
+                    : t('parceiro.estabelecimento.endereco.soBairro')
+                }}
+              </li>
+              <li>
+                <i class="ph ph-map-trifold" aria-hidden="true" />
+                {{ mapa }}
+              </li>
+            </ul>
+            <Button
+              v-if="linkDoMapa"
+              as="a"
+              :href="linkDoMapa"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="endereco__mapa"
+              icon="ph ph-arrow-square-out"
+              icon-pos="right"
+              :label="t('parceiro.estabelecimento.endereco.conferirNoMapa')"
+              severity="secondary"
+              outlined
+              size="small"
+            />
+          </div>
+        </UiSecao>
+      </div>
+
+      <!-- ====================================================================== horários -->
+      <div v-else class="aba">
+        <UiSecao
+          :titulo="t('parceiro.estabelecimento.gaveta.titulo.horarios')"
+          icone="ph ph-clock"
+          folha
+        >
+          <template v-if="podeEditar && comHorario" #acoes>
+            <Button
+              icon="ph ph-pencil-simple"
+              :label="t('parceiro.estabelecimento.editar')"
+              severity="secondary"
+              outlined
+              size="small"
+              @click="abrirHorarios"
+            />
+          </template>
+
+          <div class="horarios">
+            <div v-if="comHorario" class="horarios__agora">
+              <p v-if="agora" class="agora" :class="{ 'agora--aberto': agora.aberto }">
+                <span class="agora__ponto" aria-hidden="true" />
+                {{ agora.texto }}
+              </p>
+              <p v-if="fuso" class="dado__vazio">
+                {{ t('parceiro.estabelecimento.horario.noFuso', { fuso: nomeDoFuso(fuso) }) }}
+              </p>
+            </div>
+
+            <EstabelecimentoSemana
+              v-if="comHorario"
+              :horarios="estabelecimento.horarios"
+              :hoje="hoje"
+            />
+
+            <div v-else class="comeco">
+              <p class="comeco__texto">
+                <strong>{{ t('parceiro.estabelecimento.horario.vazioTitulo') }}</strong>
+                {{ t('parceiro.estabelecimento.horario.vazio') }}
+              </p>
+              <Button
+                v-if="podeEditar"
+                icon="ph ph-clock"
+                :label="t('parceiro.estabelecimento.horario.cadastrar')"
+                severity="secondary"
+                outlined
+                @click="abrirHorarios"
+              />
+            </div>
+          </div>
+        </UiSecao>
+
+        <UiSecao
+          :titulo="t('parceiro.estabelecimento.dia.titulo')"
+          :contagem="proximosDias.length || null"
+          icone="ph ph-calendar-star"
+          folha
+        >
+          <template v-if="podeEditar" #acoes>
+            <Button
+              icon="ph ph-plus"
+              :label="t('parceiro.estabelecimento.dia.adicionar')"
+              severity="secondary"
+              outlined
+              size="small"
+              aria-haspopup="true"
+              aria-controls="menu-adicionar-dia"
+              :loading="acao === 'feriados'"
+              @click="menuDeAdicionar?.toggle($event)"
+            />
+            <Menu id="menu-adicionar-dia" ref="menuDeAdicionar" :model="itensDeAdicionar" popup />
+          </template>
+
+          <div class="especiais">
+            <p v-if="proximosDias.length === 0" class="dado__vazio">
+              {{
+                diasQuePassaram.length
+                  ? t('parceiro.estabelecimento.dia.nenhumProximo')
+                  : t('parceiro.estabelecimento.dia.vazio')
+              }}
+            </p>
+
+            <ul v-else class="especiais__lista">
+              <li v-for="dia in proximosDias" :key="dia.id" class="especial">
+                <span class="folhinha" aria-hidden="true">
+                  <strong class="ui-num">{{ folhinha(dia).numero }}</strong>
+                  <small>{{ folhinha(dia).mes }}</small>
+                </span>
+                <span class="especial__texto">
+                  <span class="especial__nome" :title="dia.nome">{{ dia.nome }}</span>
+                  <span class="especial__meta">
+                    <span class="sr-only">{{ folhinha(dia).numero }} {{ folhinha(dia).mes }},</span>
+                    {{ folhinha(dia).semana }} ·
+                    <bdi class="ui-num" dir="ltr">{{ horarioDoDiaEspecial(dia) }}</bdi>
+                  </span>
+                </span>
+                <Button
+                  v-if="podeEditar"
+                  icon="ph ph-trash"
+                  severity="secondary"
+                  outlined
+                  size="small"
+                  :aria-label="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
+                  :title="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
+                  :loading="removendo === dia.id"
+                  @click="pedirRemocao(dia)"
+                />
+              </li>
+            </ul>
+
+            <template v-if="diasQuePassaram.length">
+              <Button
+                class="especiais__passados"
+                :icon="mostrarPassados ? 'ph ph-caret-up' : 'ph ph-caret-down'"
+                :label="
+                  mostrarPassados
+                    ? t('parceiro.estabelecimento.dia.esconderPassados')
+                    : t(
+                        'parceiro.estabelecimento.dia.mostrarPassados',
+                        { total: diasQuePassaram.length },
+                        diasQuePassaram.length,
+                      )
+                "
+                :aria-expanded="mostrarPassados"
+                severity="secondary"
+                text
+                size="small"
+                @click="mostrarPassados = !mostrarPassados"
+              />
+              <ul v-if="mostrarPassados" class="especiais__lista especiais__lista--passados">
+                <li v-for="dia in diasQuePassaram" :key="dia.id" class="especial">
+                  <span class="folhinha" aria-hidden="true">
+                    <strong class="ui-num">{{ folhinha(dia).numero }}</strong>
+                    <small>{{ folhinha(dia).mes }}</small>
+                  </span>
+                  <span class="especial__texto">
+                    <span class="especial__nome" :title="dia.nome">{{ dia.nome }}</span>
+                    <span class="especial__meta">
+                      <span class="sr-only"
+                        >{{ folhinha(dia).numero }} {{ folhinha(dia).mes }},</span
+                      >
+                      {{ folhinha(dia).semana }} ·
+                      <bdi class="ui-num" dir="ltr">{{ horarioDoDiaEspecial(dia) }}</bdi>
+                    </span>
+                  </span>
+                  <Button
+                    v-if="podeEditar"
+                    icon="ph ph-trash"
+                    severity="secondary"
+                    outlined
+                    size="small"
+                    :aria-label="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
+                    :title="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
+                    :loading="removendo === dia.id"
+                    @click="pedirRemocao(dia)"
+                  />
+                </li>
+              </ul>
+            </template>
+          </div>
+        </UiSecao>
+      </div>
     </div>
 
     <div v-else-if="!loadError" class="estabelecimento" aria-hidden="true">
-      <Skeleton v-for="n in 3" :key="n" height="9rem" border-radius="16px" />
+      <div class="aba">
+        <Skeleton height="14rem" border-radius="16px" />
+        <Skeleton height="10rem" border-radius="16px" />
+      </div>
     </div>
 
     <template #sempre>
@@ -891,6 +1096,7 @@ async function salvarSlug(slug: string) {
       <EstabelecimentoDiaGaveta
         v-model:visible="diaAberto"
         :hoje="hoje"
+        :ocupadas="diasEspeciais.map((dia) => dia.data)"
         :salvando="salvandoDia"
         :erro="erroDoDia"
         @salvar="adicionarDia"
@@ -930,8 +1136,29 @@ async function salvarSlug(slug: string) {
 
 <style scoped>
 .estabelecimento {
+  container-type: inline-size;
   display: grid;
+  gap: 20px;
+}
+
+/*
+ * Duas seções por aba: a principal à esquerda, mais larga, e a outra ao lado. A altura de cada uma
+ * vem do conteúdo (`start`): esticar a menor só abriria um vão no pé dela.
+ */
+.aba {
+  display: grid;
+  align-items: start;
   gap: 28px;
+}
+
+@container (min-width: 960px) {
+  .aba {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+
+  .aba--uma {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .consulta {
@@ -947,7 +1174,7 @@ async function salvarSlug(slug: string) {
 
 .dados {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
   gap: 16px 24px;
   margin: 0;
   padding: 18px 20px;
@@ -983,6 +1210,7 @@ async function salvarSlug(slug: string) {
   margin: 0;
   color: var(--tinta-3);
   font-size: 13.5px;
+  line-height: 1.45;
 }
 
 .descricao {
@@ -1004,6 +1232,10 @@ async function salvarSlug(slug: string) {
   padding: 18px 20px;
 }
 
+.horarios .comeco {
+  padding: 0;
+}
+
 .comeco__texto {
   display: grid;
   gap: 4px;
@@ -1016,11 +1248,6 @@ async function salvarSlug(slug: string) {
 
 .comeco__texto strong {
   color: var(--tinta);
-}
-
-.secao__corpo > .dado__vazio,
-:deep(.secao__corpo) > .dado__vazio {
-  padding: 18px 20px;
 }
 
 /* ---------------------------------------------------------------------- a página pública */
@@ -1076,36 +1303,50 @@ async function salvarSlug(slug: string) {
   color: var(--atencao-tinta);
 }
 
-.falta {
+/* A lista do que a página precisa: uma linha por item, o atalho na ponta. */
+.requisitos {
   display: grid;
-  gap: 8px;
-}
-
-.falta__titulo {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.falta__lista {
-  display: grid;
-  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.falta__lista li {
+.requisito {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--tinta-2);
-  font-size: 13.5px;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 0;
+  border-top: 1px solid var(--linha);
+  color: var(--tinta);
+  font-size: 14px;
 }
 
-.falta__lista i {
+.requisito:first-child {
+  border-top: 0;
+}
+
+.requisito > i {
   color: var(--atencao-tinta);
+  font-size: 18px;
+}
+
+.requisito--feito {
+  color: var(--tinta-2);
+}
+
+.requisito--feito > i {
+  color: var(--ok-tinta, var(--musgo));
+}
+
+.requisito__nome {
+  flex: 1;
+  min-width: 0;
+}
+
+.requisito__estado {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .endereco-da-pagina {
@@ -1130,7 +1371,7 @@ async function salvarSlug(slug: string) {
 
 .endereco {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   padding: 18px 20px;
 }
 
@@ -1159,12 +1400,24 @@ async function salvarSlug(slug: string) {
   gap: 8px;
 }
 
+.endereco__mapa {
+  justify-self: start;
+}
+
 /* ----------------------------------------------------------------------------- horários */
 
 .horarios {
   display: grid;
-  gap: 12px;
-  padding: 18px 20px;
+  gap: 14px;
+  padding: 18px 20px 14px;
+}
+
+.horarios__agora {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 16px;
 }
 
 .agora {
@@ -1173,7 +1426,7 @@ async function salvarSlug(slug: string) {
   gap: 8px;
   margin: 0;
   color: var(--tinta);
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
 }
 
@@ -1188,76 +1441,89 @@ async function salvarSlug(slug: string) {
   background: var(--ok-tinta, var(--musgo));
 }
 
-.semana {
-  display: grid;
-  gap: 0;
-  margin: 0;
-}
-
-.semana__dia {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 8px 0;
-  border-top: 1px solid var(--linha);
-  font-size: 14px;
-}
-
-.semana__dia:first-child {
-  border-top: 0;
-}
-
-.semana__dia dt {
-  color: var(--tinta);
-}
-
-.semana__dia dd {
-  margin: 0;
-  color: var(--tinta);
-  text-align: end;
-}
-
 /* ------------------------------------------------------------------------ dias especiais */
 
 .especiais {
   display: grid;
+  gap: 4px;
+  padding: 10px 20px 12px;
+}
+
+.especiais > .dado__vazio {
+  padding: 8px 0;
+}
+
+.especiais__lista {
+  display: grid;
   margin: 0;
-  padding: 6px 20px;
+  padding: 0;
   list-style: none;
 }
 
+.especiais__lista--passados {
+  opacity: 0.7;
+}
+
 .especial {
-  display: grid;
-  grid-template-columns: 9rem minmax(0, 1fr) auto auto;
+  display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 0;
   border-top: 1px solid var(--linha);
-  font-size: 14px;
 }
 
 .especial:first-child {
   border-top: 0;
 }
 
-.especial__data {
-  color: var(--tinta-2);
-  font-size: 13px;
+/* A data como folhinha de calendário: o dia grande o bastante para achar, o mês embaixo. */
+.folhinha {
+  display: grid;
+  width: 44px;
+  flex: none;
+  justify-items: center;
+  padding: 4px 0 5px;
+  border-radius: 10px;
+  background: var(--app-veu, var(--superficie-2));
+  line-height: 1.1;
+}
+
+.folhinha strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.folhinha small {
+  color: var(--app-salvia-texto, var(--musgo));
+  font-size: 11px;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+.especial__texto {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
 }
 
 .especial__nome {
   overflow: hidden;
   color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.especial__horario {
+.especial__meta {
   color: var(--tinta-2);
   font-size: 13px;
 }
 
-.especial--passou {
-  opacity: 0.6;
+.especiais__passados {
+  justify-self: start;
+  margin-top: 4px;
 }
 </style>

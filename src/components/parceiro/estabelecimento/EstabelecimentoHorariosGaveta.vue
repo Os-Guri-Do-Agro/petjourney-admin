@@ -1,15 +1,19 @@
 <script setup lang="ts">
 /**
- * Os horários da semana, numa gaveta: um dia por linha, aberto ou fechado, com o intervalo
- * recolhido até alguém pedir. A semana vai inteira (os 7 dias) a cada salvamento, como a API pede.
+ * Os horários da semana, numa gaveta, do jeito que a casa fala deles: "de segunda a sexta, das
+ * 08:00 às 18:00; sábado, das 08:00 às 12:00". Cada horário é um bloco com os dias em que vale; o
+ * dia que não está em nenhum fica fechado. A semana típica cabe em dois blocos, em vez de sete dias
+ * com os mesmos campos repetidos.
  *
- * A conferência é a da API (`horario.ts`): o dia errado fica marcado antes de enviar e, se a API
- * recusar mesmo assim (`ESTABELECIMENTO_HORARIO_INVALIDO`), o dia que ela apontar é o marcado.
+ * A API continua recebendo os 7 dias (`semanaDosGrupos`), e a conferência é a dela (`horario.ts`):
+ * o bloco errado fica marcado antes de enviar e, se a API recusar mesmo assim
+ * (`ESTABELECIMENTO_HORARIO_INVALIDO`), o bloco do dia que ela apontar é o marcado.
  */
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import Drawer from 'primevue/drawer'
 import InputMask from 'primevue/inputmask'
-import ToggleSwitch from 'primevue/toggleswitch'
+import ToggleButton from 'primevue/togglebutton'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -20,10 +24,20 @@ import { ApiError } from '@/service/api'
 import type { HorarioDoDia } from '@/service/parceiro/estabelecimento-service'
 
 import {
+  ABRE_24H,
+  FECHA_24H,
+  ORDEM_DA_SEMANA,
+  agruparSemana,
   dataCivil,
+  diasSemGrupo,
+  eVinteEQuatroHoras,
+  naOrdemDaSemana,
   nomeDoFuso,
-  problemaNoDia,
+  problemaNoGrupo,
   semanaCompleta,
+  semanaDosGrupos,
+  temHorario,
+  type GrupoDeHorario,
   type ProblemaDeHorario,
 } from './horario'
 import './gaveta.css'
@@ -41,21 +55,20 @@ const visible = defineModel<boolean>('visible', { default: false })
 
 const LARGURA = '32rem'
 
-/** A semana de trabalho começa na segunda; domingo fecha a lista. */
-const ORDEM = [1, 2, 3, 4, 5, 6, 0] as const
-
 /** Um domingo qualquer, para o nome de cada dia sair do `Intl` no idioma da sessão. */
 const UM_DOMINGO = '2026-10-18'
 
-type DiaEditavel = {
-  diaSemana: number
-  aberto: boolean
-  abre: string
-  fecha: string
-  comIntervalo: boolean
-  intervaloInicio: string
-  intervaloFim: string
+/** O primeiro horário de quem ainda não cadastrou nada: o comercial, para ajustar. */
+const SEMANA_COMERCIAL: GrupoDeHorario = {
+  dias: [1, 2, 3, 4, 5],
+  abre: '08:00',
+  fecha: '18:00',
+  comPausa: false,
+  pausaInicio: '',
+  pausaFim: '',
 }
+
+type GrupoEditavel = GrupoDeHorario & { id: number; vinteEQuatro: boolean }
 
 const { t, locale } = useI18n()
 const telaLarga = useTelaLarga()
@@ -67,62 +80,108 @@ useSidePanelOffset(
 
 const drawerPosition = computed(() => (isRTLLocale(locale.value as Locale) ? 'left' : 'right'))
 
-const dias = ref<DiaEditavel[]>([])
+const grupos = ref<GrupoEditavel[]>([])
 const tentouSalvar = ref(false)
+let proximoId = 0
+
+function editavel(grupo: GrupoDeHorario): GrupoEditavel {
+  return {
+    ...grupo,
+    dias: [...grupo.dias],
+    id: proximoId++,
+    vinteEQuatro: eVinteEQuatroHoras(grupo),
+  }
+}
 
 watch(visible, (aberta) => {
   if (!aberta) return
 
-  dias.value = semanaCompleta(props.horarios).map((dia) => ({
-    diaSemana: dia.diaSemana,
-    aberto: !dia.fechado,
-    abre: dia.abre ?? '',
-    fecha: dia.fecha ?? '',
-    comIntervalo: Boolean(dia.intervaloInicio || dia.intervaloFim),
-    intervaloInicio: dia.intervaloInicio ?? '',
-    intervaloFim: dia.intervaloFim ?? '',
-  }))
+  const semana = semanaCompleta(props.horarios)
+
+  grupos.value = (temHorario(semana) ? agruparSemana(semana) : [SEMANA_COMERCIAL]).map(editavel)
   tentouSalvar.value = false
 })
 
-const diasNaOrdem = computed(() =>
-  ORDEM.map((diaSemana) => dias.value.find((dia) => dia.diaSemana === diaSemana)!).filter(Boolean),
-)
+/* --------------------------------------------------------------------------- os dias */
 
-/** O nome do dia no idioma da sessão; com maiúscula só quando abre a frase ("de segunda-feira"). */
-function nomeDoDia(diaSemana: number, abreAFrase = true) {
+function nomeDoDia(diaSemana: number, formato: 'long' | 'short' = 'long') {
   const data = dataCivil(UM_DOMINGO)
   data.setUTCDate(data.getUTCDate() + diaSemana)
 
-  const nome = data.toLocaleDateString(INTL_LOCALE[locale.value as Locale], {
-    weekday: 'long',
-    timeZone: 'UTC',
-  })
+  const nome = data
+    .toLocaleDateString(INTL_LOCALE[locale.value as Locale], { weekday: formato, timeZone: 'UTC' })
+    .replace(/\.$/, '')
 
-  return abreAFrase ? nome.charAt(0).toLocaleUpperCase() + nome.slice(1) : nome
+  return nome.charAt(0).toLocaleUpperCase() + nome.slice(1)
 }
 
-function paraEnviar(dia: DiaEditavel): HorarioDoDia {
-  if (!dia.aberto) {
-    return {
-      diaSemana: dia.diaSemana,
-      fechado: true,
-      abre: null,
-      fecha: null,
-      intervaloInicio: null,
-      intervaloFim: null,
-    }
+/** Marcar um dia de outro horário o traz para este: um dia tem um horário só. */
+function alternarDia(grupo: GrupoEditavel, diaSemana: number) {
+  if (grupo.dias.includes(diaSemana)) {
+    grupo.dias = grupo.dias.filter((dia) => dia !== diaSemana)
+    return
   }
 
-  return {
-    diaSemana: dia.diaSemana,
-    fechado: false,
-    abre: dia.abre || null,
-    fecha: dia.fecha || null,
-    intervaloInicio: dia.comIntervalo ? dia.intervaloInicio || null : null,
-    intervaloFim: dia.comIntervalo ? dia.intervaloFim || null : null,
+  for (const outro of grupos.value) {
+    if (outro !== grupo) outro.dias = outro.dias.filter((dia) => dia !== diaSemana)
+  }
+
+  grupo.dias = naOrdemDaSemana([...grupo.dias, diaSemana])
+}
+
+function alternarVinteEQuatro(grupo: GrupoEditavel, ligado: boolean) {
+  grupo.vinteEQuatro = ligado
+
+  if (ligado) {
+    grupo.abre = ABRE_24H
+    grupo.fecha = FECHA_24H
+    grupo.comPausa = false
+  } else if (grupo.abre === ABRE_24H && grupo.fecha === FECHA_24H) {
+    grupo.abre = '08:00'
+    grupo.fecha = '18:00'
   }
 }
+
+function alternarPausa(grupo: GrupoEditavel) {
+  grupo.comPausa = !grupo.comPausa
+
+  if (grupo.comPausa && !grupo.pausaInicio && !grupo.pausaFim) {
+    grupo.pausaInicio = '12:00'
+    grupo.pausaFim = '13:00'
+  }
+}
+
+/** Outro horário começa com os dias que ainda estão fechados. */
+function adicionarGrupo() {
+  grupos.value.push(
+    editavel({ ...SEMANA_COMERCIAL, abre: '08:00', fecha: '12:00', dias: [...fechados.value] }),
+  )
+}
+
+function tirarGrupo(grupo: GrupoEditavel) {
+  grupos.value = grupos.value.filter((item) => item !== grupo)
+}
+
+const fechados = computed(() => diasSemGrupo(grupos.value))
+
+/** "Fechado: sábado e domingo." Lista na forma do idioma (`Intl.ListFormat`). */
+const fraseDosFechados = computed(() => {
+  if (grupos.value.length === 0 || fechados.value.length === 7) {
+    return t('parceiro.estabelecimento.horario.editor.tudoFechado')
+  }
+
+  if (fechados.value.length === 0) return t('parceiro.estabelecimento.horario.editor.semFechado')
+
+  const nomes = fechados.value.map((dia) => nomeDoDia(dia).toLocaleLowerCase())
+  const lista = new Intl.ListFormat(INTL_LOCALE[locale.value as Locale], {
+    style: 'long',
+    type: 'conjunction',
+  }).format(nomes)
+
+  return t('parceiro.estabelecimento.horario.editor.fechadoEm', { dias: lista })
+})
+
+/* ------------------------------------------------------------------------- conferência */
 
 /** O problema que a API apontou, no dia que ela apontou. */
 const problemaDaApi = computed<{ diaSemana: number; problema: ProblemaDeHorario } | null>(() => {
@@ -137,60 +196,40 @@ const problemaDaApi = computed<{ diaSemana: number; problema: ProblemaDeHorario 
     : null
 })
 
-function problemaDe(dia: DiaEditavel): ProblemaDeHorario | null {
-  const local = tentouSalvar.value ? problemaNoDia(paraEnviar(dia)) : null
+function problemaDe(grupo: GrupoEditavel) {
+  const local = tentouSalvar.value ? problemaNoGrupo(grupo) : null
 
   if (local) return local
-  if (problemaDaApi.value?.diaSemana === dia.diaSemana) return problemaDaApi.value.problema
+  if (problemaDaApi.value && grupo.dias.includes(problemaDaApi.value.diaSemana)) {
+    return problemaDaApi.value.problema
+  }
 
   return null
 }
 
-function aoAbrirDia(dia: DiaEditavel, aberto: boolean) {
-  dia.aberto = aberto
+/** Grupo sem dia não tem hora errada: só o horário com problema pinta os campos de vermelho. */
+function horarioInvalido(grupo: GrupoEditavel) {
+  const problema = problemaDe(grupo)
 
-  /* Um dia que abre pela primeira vez já vem com um expediente comum, para ajustar. */
-  if (aberto && !dia.abre && !dia.fecha) {
-    dia.abre = '08:00'
-    dia.fecha = '18:00'
-  }
+  return problema !== null && problema !== 'SEM_DIAS'
 }
 
-function alternarIntervalo(dia: DiaEditavel) {
-  dia.comIntervalo = !dia.comIntervalo
+/** "Horário 2: fecha às": com dois blocos, o leitor de tela precisa saber de qual é o campo. */
+function rotuloDoCampo(
+  indice: number,
+  campo: 'abreAs' | 'fechaAs' | 'pausaComeca' | 'pausaTermina',
+) {
+  const bloco = t('parceiro.estabelecimento.horario.editor.horario', { numero: indice + 1 })
 
-  if (dia.comIntervalo && !dia.intervaloInicio && !dia.intervaloFim) {
-    dia.intervaloInicio = '12:00'
-    dia.intervaloFim = '13:00'
-  }
+  return `${bloco}: ${t(`parceiro.estabelecimento.horario.editor.${campo}`)}`
 }
-
-/** Repete o horário deste dia nos outros dias abertos: a semana costuma ser igual. */
-function copiarParaOsAbertos(origem: DiaEditavel) {
-  for (const dia of dias.value) {
-    if (dia === origem || !dia.aberto) continue
-
-    dia.abre = origem.abre
-    dia.fecha = origem.fecha
-    dia.comIntervalo = origem.comIntervalo
-    dia.intervaloInicio = origem.intervaloInicio
-    dia.intervaloFim = origem.intervaloFim
-  }
-}
-
-const outrosAbertos = computed(() => dias.value.filter((dia) => dia.aberto).length > 1)
 
 function salvar() {
   tentouSalvar.value = true
 
-  const semana = dias.value
-    .slice()
-    .sort((um, outro) => um.diaSemana - outro.diaSemana)
-    .map(paraEnviar)
+  if (props.salvando || grupos.value.some((grupo) => problemaNoGrupo(grupo))) return
 
-  if (props.salvando || semana.some((dia) => problemaNoDia(dia))) return
-
-  emit('salvar', semana)
+  emit('salvar', semanaDosGrupos(grupos.value))
 }
 </script>
 
@@ -215,136 +254,157 @@ function salvar() {
 
     <form id="estabelecimento-horarios" class="eg" novalidate @submit.prevent="salvar">
       <p class="eg__dica">
+        {{ t('parceiro.estabelecimento.horario.editor.comoFunciona') }}
         <template v-if="fuso">
           {{ t('parceiro.estabelecimento.horario.noFuso', { fuso: nomeDoFuso(fuso) }) }}
         </template>
-        {{ t('parceiro.estabelecimento.horario.regras') }}
       </p>
 
-      <ul class="semana">
+      <ol class="grupos">
         <li
-          v-for="dia in diasNaOrdem"
-          :key="dia.diaSemana"
-          class="dia"
-          :class="{ 'dia--fechado': !dia.aberto }"
+          v-for="(grupo, indice) in grupos"
+          :key="grupo.id"
+          class="grupo"
+          :class="{ 'grupo--invalido': !!problemaDe(grupo) }"
         >
-          <div class="dia__cabeca">
-            <label class="dia__nome" :for="`dia-${dia.diaSemana}-aberto`">
-              {{ nomeDoDia(dia.diaSemana) }}
-            </label>
-            <span class="dia__estado" aria-hidden="true">
-              {{
-                dia.aberto
-                  ? t('parceiro.estabelecimento.horario.aberto')
-                  : t('parceiro.estabelecimento.horario.fechado')
-              }}
+          <div class="grupo__cabeca">
+            <span :id="`grupo-${grupo.id}-titulo`" class="grupo__titulo">
+              {{ t('parceiro.estabelecimento.horario.editor.horario', { numero: indice + 1 }) }}
             </span>
-            <ToggleSwitch
-              :model-value="dia.aberto"
-              :input-id="`dia-${dia.diaSemana}-aberto`"
+            <Button
+              type="button"
+              icon="ph ph-trash"
+              severity="secondary"
+              outlined
+              size="small"
+              :aria-label="
+                t('parceiro.estabelecimento.horario.editor.tirar', { numero: indice + 1 })
+              "
+              :title="t('parceiro.estabelecimento.horario.editor.tirar', { numero: indice + 1 })"
               :disabled="salvando"
-              @update:model-value="aoAbrirDia(dia, $event)"
+              @click="tirarGrupo(grupo)"
             />
           </div>
 
-          <template v-if="dia.aberto">
-            <div class="dia__faixa">
-              <InputMask
-                v-model="dia.abre"
-                mask="99:99"
-                placeholder="08:00"
-                :aria-label="
-                  t('parceiro.estabelecimento.horario.abreAs', { dia: nomeDoDia(dia.diaSemana) })
-                "
-                :invalid="!!problemaDe(dia)"
-                :disabled="salvando"
-              />
-              <span class="dia__ate">{{ t('parceiro.estabelecimento.horario.ate') }}</span>
-              <InputMask
-                v-model="dia.fecha"
-                mask="99:99"
-                placeholder="18:00"
-                :aria-label="
-                  t('parceiro.estabelecimento.horario.fechaAs', { dia: nomeDoDia(dia.diaSemana) })
-                "
-                :invalid="!!problemaDe(dia)"
-                :disabled="salvando"
-              />
-              <Button
-                v-if="outrosAbertos"
-                type="button"
-                icon="ph ph-copy"
-                severity="secondary"
-                outlined
-                size="small"
-                :aria-label="
-                  t('parceiro.estabelecimento.horario.copiar', {
-                    dia: nomeDoDia(dia.diaSemana, false),
-                  })
-                "
-                :title="
-                  t('parceiro.estabelecimento.horario.copiar', {
-                    dia: nomeDoDia(dia.diaSemana, false),
-                  })
-                "
-                :disabled="salvando"
-                @click="copiarParaOsAbertos(dia)"
-              />
-            </div>
+          <div
+            class="grupo__dias"
+            role="group"
+            :aria-label="t('parceiro.estabelecimento.horario.editor.dias')"
+          >
+            <ToggleButton
+              v-for="diaSemana in ORDEM_DA_SEMANA"
+              :key="diaSemana"
+              :model-value="grupo.dias.includes(diaSemana)"
+              :on-label="nomeDoDia(diaSemana, 'short')"
+              :off-label="nomeDoDia(diaSemana, 'short')"
+              :aria-label="nomeDoDia(diaSemana)"
+              :disabled="salvando"
+              class="grupo__dia"
+              @update:model-value="alternarDia(grupo, diaSemana)"
+            />
+          </div>
 
-            <div v-if="dia.comIntervalo" class="dia__faixa dia__faixa--intervalo">
-              <span class="dia__intervalo-rotulo">{{
-                t('parceiro.estabelecimento.horario.intervalo')
-              }}</span>
-              <InputMask
-                v-model="dia.intervaloInicio"
-                mask="99:99"
-                placeholder="12:00"
-                :aria-label="
-                  t('parceiro.estabelecimento.horario.intervaloDe', {
-                    dia: nomeDoDia(dia.diaSemana),
-                  })
-                "
-                :invalid="!!problemaDe(dia)"
-                :disabled="salvando"
-              />
-              <span class="dia__ate">{{ t('parceiro.estabelecimento.horario.ate') }}</span>
-              <InputMask
-                v-model="dia.intervaloFim"
-                mask="99:99"
-                placeholder="13:00"
-                :aria-label="
-                  t('parceiro.estabelecimento.horario.intervaloAte', {
-                    dia: nomeDoDia(dia.diaSemana),
-                  })
-                "
-                :invalid="!!problemaDe(dia)"
-                :disabled="salvando"
-              />
-            </div>
+          <div v-if="!grupo.vinteEQuatro" class="grupo__faixa">
+            <span class="grupo__texto">{{ t('parceiro.estabelecimento.horario.editor.das') }}</span>
+            <InputMask
+              v-model="grupo.abre"
+              mask="99:99"
+              placeholder="08:00"
+              :aria-label="rotuloDoCampo(indice, 'abreAs')"
+              :invalid="horarioInvalido(grupo)"
+              :disabled="salvando"
+            />
+            <span class="grupo__texto">{{ t('parceiro.estabelecimento.horario.editor.as') }}</span>
+            <InputMask
+              v-model="grupo.fecha"
+              mask="99:99"
+              placeholder="18:00"
+              :aria-label="rotuloDoCampo(indice, 'fechaAs')"
+              :invalid="horarioInvalido(grupo)"
+              :disabled="salvando"
+            />
+          </div>
 
+          <div v-if="grupo.comPausa && !grupo.vinteEQuatro" class="grupo__faixa">
+            <span class="grupo__texto">{{
+              t('parceiro.estabelecimento.horario.editor.fechadoDas')
+            }}</span>
+            <InputMask
+              v-model="grupo.pausaInicio"
+              mask="99:99"
+              placeholder="12:00"
+              :aria-label="rotuloDoCampo(indice, 'pausaComeca')"
+              :invalid="horarioInvalido(grupo)"
+              :disabled="salvando"
+            />
+            <span class="grupo__texto">{{ t('parceiro.estabelecimento.horario.editor.as') }}</span>
+            <InputMask
+              v-model="grupo.pausaFim"
+              mask="99:99"
+              placeholder="13:00"
+              :aria-label="rotuloDoCampo(indice, 'pausaTermina')"
+              :invalid="horarioInvalido(grupo)"
+              :disabled="salvando"
+            />
             <Button
               type="button"
-              class="dia__alternar"
-              size="small"
+              icon="ph ph-x"
               severity="secondary"
               outlined
-              :icon="dia.comIntervalo ? 'ph ph-minus' : 'ph ph-plus'"
-              :label="
-                dia.comIntervalo
-                  ? t('parceiro.estabelecimento.horario.semIntervalo')
-                  : t('parceiro.estabelecimento.horario.comIntervalo')
-              "
+              size="small"
+              :aria-label="t('parceiro.estabelecimento.horario.editor.tirarPausa')"
+              :title="t('parceiro.estabelecimento.horario.editor.tirarPausa')"
               :disabled="salvando"
-              @click="alternarIntervalo(dia)"
+              @click="alternarPausa(grupo)"
             />
-          </template>
+          </div>
 
-          <p v-if="problemaDe(dia)" class="eg__invalido" role="alert">
-            {{ t(`parceiro.estabelecimento.horario.problema.${problemaDe(dia)}`) }}
+          <div class="grupo__opcoes">
+            <Button
+              v-if="!grupo.comPausa && !grupo.vinteEQuatro"
+              type="button"
+              icon="ph ph-plus"
+              :label="t('parceiro.estabelecimento.horario.editor.comPausa')"
+              severity="secondary"
+              outlined
+              size="small"
+              :disabled="salvando"
+              @click="alternarPausa(grupo)"
+            />
+            <label class="grupo__24h">
+              <Checkbox
+                :model-value="grupo.vinteEQuatro"
+                binary
+                :disabled="salvando"
+                @update:model-value="alternarVinteEQuatro(grupo, $event)"
+              />
+              {{ t('parceiro.estabelecimento.horario.editor.vinteEQuatro') }}
+            </label>
+          </div>
+
+          <p v-if="problemaDe(grupo)" class="eg__invalido" role="alert">
+            {{ t(`parceiro.estabelecimento.horario.problema.${problemaDe(grupo)}`) }}
           </p>
         </li>
-      </ul>
+      </ol>
+
+      <Button
+        type="button"
+        class="grupos__adicionar"
+        icon="ph ph-plus"
+        :label="t('parceiro.estabelecimento.horario.editor.outro')"
+        severity="secondary"
+        outlined
+        :disabled="salvando"
+        @click="adicionarGrupo"
+      />
+
+      <p class="fechados">
+        <i class="ph ph-moon" aria-hidden="true" />
+        {{ fraseDosFechados }}
+      </p>
+
+      <p class="eg__dica">{{ t('parceiro.estabelecimento.horario.editor.meiaNoite') }}</p>
 
       <p v-if="erro && !problemaDaApi" class="eg__erro" role="alert">
         <i class="ph ph-warning-circle" aria-hidden="true" />
@@ -375,74 +435,127 @@ function salvar() {
 </template>
 
 <style scoped>
-/* Uma linha por dia, separadas por um fio: sete cartões empilhados pesavam mais que a semana. */
-.semana {
+.grupos {
   display: grid;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.dia {
+/* Cada horário num véu: o bloco é a unidade que se edita, sem borda nem sombra. */
+.grupo {
   display: grid;
-  gap: 10px;
-  padding: 14px 0;
-  border-top: 1px solid var(--linha);
+  gap: 12px;
+  padding: 14px 16px 16px;
+  border-radius: 16px;
+  background: var(--app-veu, var(--superficie-2));
 }
 
-.dia:first-child {
-  border-top: 0;
-  padding-top: 4px;
+.grupo--invalido {
+  box-shadow: inset 0 0 0 1px var(--risco-tinta);
 }
 
-.dia--fechado .dia__nome {
-  color: var(--tinta-2);
-  font-weight: 500;
-}
-
-.dia__cabeca {
+.grupo__cabeca {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.dia__nome {
-  flex: 1;
+.grupo__titulo {
   color: var(--tinta);
-  font-size: 14px;
+  font-size: 13.5px;
+  font-weight: 650;
+}
+
+.grupo__dias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Os dias como pílulas soltas: marcada na cor do botão principal, as outras no papel. */
+.grupo__dias :deep(.p-togglebutton) {
+  min-width: 3.1rem;
+  padding: 0;
+  border: 1px solid var(--linha-media, var(--linha));
+  border-radius: 999px;
+  background: var(--app-cartao, var(--superficie));
+  color: var(--tinta);
+}
+
+.grupo__dias :deep(.p-togglebutton .p-togglebutton-content) {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: 13px;
   font-weight: 600;
 }
 
-.dia__estado {
-  color: var(--tinta-2);
-  font-size: 12.5px;
+.grupo__dias :deep(.p-togglebutton.p-togglebutton-checked) {
+  border-color: var(--p-button-primary-background);
+  background: var(--p-button-primary-background);
+  color: var(--p-button-primary-color);
 }
 
-.dia__faixa {
+.grupo__dias :deep(.p-togglebutton:not(.p-togglebutton-checked):not(:disabled):hover) {
+  border-color: var(--app-salvia-texto, var(--musgo));
+}
+
+.grupo__faixa {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
 
-.dia__faixa :deep(.p-inputmask) {
+.grupo__faixa :deep(.p-inputmask) {
   width: 5.5rem;
   font-family: var(--font-dados);
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
 
-.dia__ate,
-.dia__intervalo-rotulo {
+.grupo__texto {
   color: var(--tinta-2);
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
-.dia__intervalo-rotulo {
-  min-width: 4.5rem;
+.grupo__opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
 }
 
-.dia__alternar {
+.grupo__24h {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tinta);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.grupos__adicionar {
   justify-self: start;
+}
+
+.fechados {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.fechados i {
+  color: var(--tinta-2);
+  font-size: 16px;
 }
 </style>

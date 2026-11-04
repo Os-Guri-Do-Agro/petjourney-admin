@@ -2415,6 +2415,11 @@
     },
     "estabelecimento": {
       "titulo": "Objekat",
+      "abas": {
+        "pagina": "Javna stranica",
+        "perfil": "Profil i adresa",
+        "horarios": "Radno vreme"
+      },
       "erroCarregar": "Objekat nije mogao da se učita.",
       "publicar": "Objavi stranicu",
       "publicarFalta": "Pre objavljivanja popunite ono što javna stranica navodi kao nedostajuće.",
@@ -2434,13 +2439,17 @@
         "titulo": "Javna stranica",
         "desde": "Objavljena {data}",
         "foraDoArDica": "Vraća se sama kada registracija bude odobrena i aktivna.",
-        "falta": "Za objavljivanje nedostaje:"
+        "precisa": "Objavljuje se kada sve ispod bude spremno."
       },
-      "pendencia": {
-        "APROVACAO": "odobrenje registracije od strane tima PetJourney",
-        "nomePublico": "javni naziv",
-        "fusoHorario": "vremenska zona",
-        "telefone": "jedan telefon (javni, WhatsApp ili dežurni)"
+      "requisito": {
+        "APROVACAO": "Registracija koju je odobrio PetJourney",
+        "nomePublico": "Javni naziv",
+        "fusoHorario": "Vremenska zona",
+        "telefone": "Kontakt telefon",
+        "feito": "(gotovo)",
+        "falta": "(nedostaje)",
+        "emAnalise": "Na proveri",
+        "preencher": "Popuni"
       },
       "slug": {
         "rotulo": "Adresa stranice",
@@ -2464,42 +2473,57 @@
         "soBairro": "Stranica prikazuje samo naselje, grad i državu.",
         "semCoordenadas": "Bez lokacije na mapi.",
         "mapaDesligado": "Mapa se ne prikazuje na stranici.",
-        "mapaLigado": "Mapa se prikazuje na stranici."
+        "mapaLigado": "Mapa se prikazuje na stranici.",
+        "conferirNoMapa": "Proveri na mapi"
       },
       "horario": {
-        "titulo": "Radno vreme",
         "noFuso": "Radno vreme u zoni {fuso}.",
-        "vazio": "Nema unetog radnog vremena. Bez njega stranica ne može da kaže da li je objekat otvoren.",
-        "aberto": "Otvoreno",
+        "vazio": "Bez radnog vremena, stranica ne može da kaže da li je otvoreno.",
         "fechado": "Zatvoreno",
         "abertoAgora": "Sada otvoreno",
         "abertoFechaAs": "Sada otvoreno, zatvara se u {hora}",
         "fechadoAgora": "Sada zatvoreno",
         "fechadoAbreAs": "Sada zatvoreno, otvara se u {hora}",
         "fechadoAbreEm": "Sada zatvoreno, otvara se {dia} u {hora}",
-        "regras": "Otvoreno 24 sata: od 00:00 do 24:00. Ako prelazi ponoć, podelite na dva dana.",
         "ate": "do",
-        "abreAs": "{dia}: otvara se u",
-        "fechaAs": "{dia}: zatvara se u",
-        "copiar": "Primeni radno vreme za {dia} na ostale otvorene dane",
-        "intervalo": "Pauza",
-        "intervaloDe": "{dia}: pauza počinje u",
-        "intervaloAte": "{dia}: pauza se završava u",
-        "comIntervalo": "Pauza",
-        "semIntervalo": "Bez pauze",
+        "hoje": "danas",
+        "vazioTitulo": "Radno vreme nije uneto",
+        "cadastrar": "Unesi radno vreme",
+        "editor": {
+          "comoFunciona": "Označite dane za svako radno vreme. Dan koji nije ni u jednom ostaje zatvoren.",
+          "horario": "Radno vreme {numero}",
+          "tirar": "Ukloni radno vreme {numero}",
+          "dias": "Dani sa ovim radnim vremenom",
+          "das": "Od",
+          "as": "do",
+          "abreAs": "Otvara u",
+          "fechaAs": "Zatvara u",
+          "fechadoDas": "Zatvoreno od",
+          "pausaComeca": "Pauza počinje u",
+          "pausaTermina": "Pauza se završava u",
+          "tirarPausa": "Ukloni pauzu",
+          "comPausa": "Zatvara se tokom dana",
+          "vinteEQuatro": "Otvoreno 24 sata",
+          "outro": "Drugo radno vreme",
+          "fechadoEm": "Zatvoreno: {dias}.",
+          "semFechado": "Otvoreno svakog dana.",
+          "tudoFechado": "Zatvoreno svakog dana: stranica neće reći kada otvarate.",
+          "meiaNoite": "Prelazi ponoć? Zatvorite dan u 24:00 i otvorite sledeći u 00:00, u drugom radnom vremenu."
+        },
         "problema": {
           "HORA_INVALIDA": "Neispravno vreme. Koristite od 00:00 do 23:59; 24:00 samo za zatvaranje.",
           "ABRE_E_FECHA_OBRIGATORIOS": "Unesite vreme otvaranja i zatvaranja.",
           "ABRE_DEPOIS_DE_FECHA": "Početak mora biti pre kraja.",
           "INTERVALO_INCOMPLETO": "Pauzi su potrebni početak i kraj.",
           "INTERVALO_FORA_DO_EXPEDIENTE": "Pauza mora da stane u radno vreme.",
-          "SEMANA_INCOMPLETA": "Nedelji je potrebno svih 7 dana."
+          "SEMANA_INCOMPLETA": "Nedelji je potrebno svih 7 dana.",
+          "SEM_DIAS": "Označite bar jedan dan ili uklonite ovo radno vreme."
         }
       },
       "dia": {
         "titulo": "Posebni dani",
-        "feriados": "Državni praznici",
-        "feriadosDe": "Kopiraj praznike za {ano}",
+        "umDia": "Jedan poseban dan",
+        "feriadosDe": "Državni praznici za {ano}.",
         "adicionar": "Dodaj dan",
         "vazio": "Nema posebnih dana. Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme.",
         "remover": "Ukloni {nome}",
@@ -2512,7 +2536,10 @@
         "abre": "Otvara se u",
         "fecha": "Zatvara se u",
         "fechadoDica": "Isključite da biste tog dana zadali drugačije radno vreme.",
-        "abertoDica": "Tog dana važi ovo radno vreme, a ne nedeljno."
+        "abertoDica": "Tog dana važi ovo radno vreme, a ne nedeljno.",
+        "nenhumProximo": "Nema predstojećih posebnih dana.",
+        "mostrarPassados": "Prikaži {total} prošli dan | Prikaži {total} prošla dana | Prikaži {total} prošlih dana",
+        "esconderPassados": "Sakrij prošle dane"
       },
       "mensagens": {
         "titulo": "Poruke staratelju"
@@ -2551,7 +2578,7 @@
         "nomePublico": "Javni naziv",
         "descricao": "Opis",
         "fusoHorario": "Vremenska zona",
-        "idiomaDosTextos": "Jezik tekstova",
+        "idiomaDosTextos": "Jezik na kome pišete",
         "telefonePublico": "Telefon",
         "whatsappPublico": "WhatsApp",
         "telefonePlantao": "Dežurni telefon",
@@ -2591,7 +2618,7 @@
         "opcional": "(opciono)",
         "buscarFuso": "Pretraži grad ili region",
         "fusoDica": "Radno vreme, raspored i \"sada otvoreno\" računaju se u ovoj zoni.",
-        "idiomaDica": "Jezik na kome pišete opis i poruke. Stranica ne prevodi ove tekstove.",
+        "idiomaDica": "Važi za opis i poruke. Stranica prikazuje ove tekstove onako kako ste ih napisali, bez prevoda.",
         "contatos": "Kontakti na stranici",
         "contatosDica": "Za objavljivanje je dovoljan jedan od tri telefona.",
         "plantaoDica": "Za vreme van radnog vremena. Prazno znači bez dežurstva.",

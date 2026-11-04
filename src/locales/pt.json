@@ -2415,6 +2415,11 @@
     },
     "estabelecimento": {
       "titulo": "Estabelecimento",
+      "abas": {
+        "pagina": "Página pública",
+        "perfil": "Perfil e endereço",
+        "horarios": "Horários"
+      },
       "erroCarregar": "Não foi possível carregar o estabelecimento.",
       "publicar": "Publicar página",
       "publicarFalta": "Antes de publicar, preencha o que a página pública lista como faltando.",
@@ -2434,13 +2439,17 @@
         "titulo": "Página pública",
         "desde": "Publicada em {data}",
         "foraDoArDica": "Ela volta sozinha quando o cadastro estiver aprovado e ativo.",
-        "falta": "Para publicar, falta:"
+        "precisa": "Ela vai ao ar quando tudo abaixo estiver pronto."
       },
-      "pendencia": {
-        "APROVACAO": "a aprovação do cadastro pela equipe PetJourney",
-        "nomePublico": "o nome público",
-        "fusoHorario": "o fuso horário",
-        "telefone": "um telefone (público, WhatsApp ou plantão)"
+      "requisito": {
+        "APROVACAO": "Cadastro aprovado pela PetJourney",
+        "nomePublico": "Nome público",
+        "fusoHorario": "Fuso horário",
+        "telefone": "Um telefone de contato",
+        "feito": "(pronto)",
+        "falta": "(falta)",
+        "emAnalise": "Em análise",
+        "preencher": "Preencher"
       },
       "slug": {
         "rotulo": "Endereço da página",
@@ -2464,42 +2473,57 @@
         "soBairro": "A página mostra só o bairro, a cidade e a UF.",
         "semCoordenadas": "Sem localização no mapa.",
         "mapaDesligado": "O mapa não aparece na página.",
-        "mapaLigado": "O mapa aparece na página."
+        "mapaLigado": "O mapa aparece na página.",
+        "conferirNoMapa": "Conferir no mapa"
       },
       "horario": {
-        "titulo": "Horários",
         "noFuso": "Horários no fuso {fuso}.",
-        "vazio": "Nenhum horário cadastrado. Sem horário, a página não diz se a casa está aberta.",
-        "aberto": "Aberto",
+        "vazio": "Sem horário, a página não diz se a casa está aberta.",
         "fechado": "Fechado",
         "abertoAgora": "Aberto agora",
         "abertoFechaAs": "Aberto agora, fecha às {hora}",
         "fechadoAgora": "Fechado agora",
         "fechadoAbreAs": "Fechado agora, abre às {hora}",
         "fechadoAbreEm": "Fechado agora, abre {dia} às {hora}",
-        "regras": "Aberto 24 horas: das 00:00 às 24:00. Se passa da meia-noite, divida em dois dias.",
         "ate": "até",
-        "abreAs": "{dia}: abre às",
-        "fechaAs": "{dia}: fecha às",
-        "copiar": "Usar o horário de {dia} nos outros dias abertos",
-        "intervalo": "Intervalo",
-        "intervaloDe": "{dia}: o intervalo começa às",
-        "intervaloAte": "{dia}: o intervalo termina às",
-        "comIntervalo": "Intervalo",
-        "semIntervalo": "Sem intervalo",
+        "hoje": "hoje",
+        "vazioTitulo": "Nenhum horário cadastrado",
+        "cadastrar": "Cadastrar horários",
+        "editor": {
+          "comoFunciona": "Marque os dias de cada horário. O dia que não estiver em nenhum fica fechado.",
+          "horario": "Horário {numero}",
+          "tirar": "Tirar o horário {numero}",
+          "dias": "Dias deste horário",
+          "das": "Das",
+          "as": "às",
+          "abreAs": "Abre às",
+          "fechaAs": "Fecha às",
+          "fechadoDas": "Fechado das",
+          "pausaComeca": "A pausa começa às",
+          "pausaTermina": "A pausa termina às",
+          "tirarPausa": "Tirar a pausa",
+          "comPausa": "Fecha no meio do dia",
+          "vinteEQuatro": "Aberto 24 horas",
+          "outro": "Outro horário",
+          "fechadoEm": "Fechado: {dias}.",
+          "semFechado": "Aberto todos os dias.",
+          "tudoFechado": "Fechado todos os dias: a página não vai dizer quando a casa abre.",
+          "meiaNoite": "Passa da meia-noite? Feche o dia às 24:00 e abra o seguinte às 00:00, em outro horário."
+        },
         "problema": {
           "HORA_INVALIDA": "Hora inválida. Use de 00:00 a 23:59; 24:00 só para fechar.",
           "ABRE_E_FECHA_OBRIGATORIOS": "Diga a hora de abrir e a de fechar.",
           "ABRE_DEPOIS_DE_FECHA": "O começo precisa vir antes do fim.",
           "INTERVALO_INCOMPLETO": "O intervalo precisa de começo e fim.",
           "INTERVALO_FORA_DO_EXPEDIENTE": "O intervalo precisa caber dentro do expediente.",
-          "SEMANA_INCOMPLETA": "A semana precisa dos 7 dias."
+          "SEMANA_INCOMPLETA": "A semana precisa dos 7 dias.",
+          "SEM_DIAS": "Marque pelo menos um dia, ou tire este horário."
         }
       },
       "dia": {
         "titulo": "Dias especiais",
-        "feriados": "Feriados nacionais",
-        "feriadosDe": "Copiar os feriados de {ano}",
+        "umDia": "Um dia especial",
+        "feriadosDe": "Feriados nacionais de {ano}",
         "adicionar": "Adicionar dia",
         "vazio": "Nenhum dia especial. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
         "remover": "Remover {nome}",
@@ -2512,7 +2536,10 @@
         "abre": "Abre às",
         "fecha": "Fecha às",
         "fechadoDica": "Desligue para dar um horário diferente nesse dia.",
-        "abertoDica": "Nesse dia vale este horário, e não o da semana."
+        "abertoDica": "Nesse dia vale este horário, e não o da semana.",
+        "nenhumProximo": "Nenhum dia especial pela frente.",
+        "mostrarPassados": "Mostrar {total} dia que já passou | Mostrar {total} dias que já passaram",
+        "esconderPassados": "Esconder os que já passaram"
       },
       "mensagens": {
         "titulo": "Mensagens ao responsável"
@@ -2551,7 +2578,7 @@
         "nomePublico": "Nome público",
         "descricao": "Descrição",
         "fusoHorario": "Fuso horário",
-        "idiomaDosTextos": "Idioma dos textos",
+        "idiomaDosTextos": "Idioma em que você escreve",
         "telefonePublico": "Telefone",
         "whatsappPublico": "WhatsApp",
         "telefonePlantao": "Telefone de plantão",
@@ -2591,7 +2618,7 @@
         "opcional": "(opcional)",
         "buscarFuso": "Buscar cidade ou região",
         "fusoDica": "Os horários da casa, a agenda e o \"aberto agora\" contam neste fuso.",
-        "idiomaDica": "O idioma em que você escreve a descrição e as mensagens. A página não traduz esses textos.",
+        "idiomaDica": "Vale para a descrição e as mensagens. A página mostra esses textos como você escreveu, sem traduzir.",
         "contatos": "Contatos na página",
         "contatosDica": "Para publicar, basta um dos três telefones.",
         "plantaoDica": "Para fora do expediente. Vazio quer dizer sem plantão.",

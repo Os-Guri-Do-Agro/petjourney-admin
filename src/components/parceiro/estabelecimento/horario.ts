@@ -98,6 +98,134 @@ export function faixasDoDia(dia: {
   return [`${dia.abre}–${dia.fecha}`]
 }
 
+/* ----------------------------------------------------------------------- horários em grupo */
+
+/** Segunda primeiro, domingo por último, como a semana de quem atende. */
+export const ORDEM_DA_SEMANA = [1, 2, 3, 4, 5, 6, 0] as const
+
+/**
+ * Um horário e os dias em que ele vale ("seg a sex, das 08:00 às 18:00"). É como a casa descreve a
+ * própria semana, e é assim que a gaveta edita: a API continua recebendo os 7 dias, um a um.
+ */
+export type GrupoDeHorario = {
+  /** `diaSemana` da API, na ordem da semana de quem atende. */
+  dias: number[]
+  abre: string
+  fecha: string
+  /** Fechado das `pausaInicio` às `pausaFim` (o intervalo da API). */
+  comPausa: boolean
+  pausaInicio: string
+  pausaFim: string
+}
+
+export const ABRE_24H = '00:00'
+export const FECHA_24H = '24:00'
+
+export function eVinteEQuatroHoras(grupo: Pick<GrupoDeHorario, 'abre' | 'fecha' | 'comPausa'>) {
+  return grupo.abre === ABRE_24H && grupo.fecha === FECHA_24H && !grupo.comPausa
+}
+
+function posicaoNaSemana(diaSemana: number) {
+  return ORDEM_DA_SEMANA.indexOf(diaSemana as (typeof ORDEM_DA_SEMANA)[number])
+}
+
+export function naOrdemDaSemana(dias: readonly number[]) {
+  return [...dias].sort((um, outro) => posicaoNaSemana(um) - posicaoNaSemana(outro))
+}
+
+/** Os dias abertos com o mesmo horário viram um grupo; o primeiro grupo é o da segunda. */
+export function agruparSemana(horarios: readonly HorarioDoDia[]): GrupoDeHorario[] {
+  const grupos = new Map<string, GrupoDeHorario>()
+
+  for (const diaSemana of ORDEM_DA_SEMANA) {
+    const dia = horarios.find((item) => item.diaSemana === diaSemana)
+
+    if (!dia || dia.fechado) continue
+
+    const comPausa = Boolean(dia.intervaloInicio || dia.intervaloFim)
+    const grupo: GrupoDeHorario = {
+      dias: [],
+      abre: dia.abre ?? '',
+      fecha: dia.fecha ?? '',
+      comPausa,
+      pausaInicio: comPausa ? (dia.intervaloInicio ?? '') : '',
+      pausaFim: comPausa ? (dia.intervaloFim ?? '') : '',
+    }
+    const chave = [grupo.abre, grupo.fecha, grupo.pausaInicio, grupo.pausaFim].join('|')
+    const existente = grupos.get(chave) ?? grupo
+
+    existente.dias.push(diaSemana)
+    grupos.set(chave, existente)
+  }
+
+  return [...grupos.values()]
+}
+
+/** O dia como a API recebe, a partir do horário do grupo. */
+export function diaDoGrupo(diaSemana: number, grupo: GrupoDeHorario): HorarioDoDia {
+  return {
+    diaSemana,
+    fechado: false,
+    abre: grupo.abre || null,
+    fecha: grupo.fecha || null,
+    intervaloInicio: grupo.comPausa ? grupo.pausaInicio || null : null,
+    intervaloFim: grupo.comPausa ? grupo.pausaFim || null : null,
+  }
+}
+
+/** A semana inteira para a API: o dia que não está em nenhum grupo fica fechado. */
+export function semanaDosGrupos(grupos: readonly GrupoDeHorario[]): HorarioDoDia[] {
+  return DIAS_DA_SEMANA.map((diaSemana) => {
+    const grupo = grupos.find((item) => item.dias.includes(diaSemana))
+
+    return grupo
+      ? diaDoGrupo(diaSemana, grupo)
+      : {
+          diaSemana,
+          fechado: true,
+          abre: null,
+          fecha: null,
+          intervaloInicio: null,
+          intervaloFim: null,
+        }
+  })
+}
+
+/** Os dias que nenhum grupo tem, na ordem da semana: são os fechados. */
+export function diasSemGrupo(grupos: readonly GrupoDeHorario[]) {
+  return ORDEM_DA_SEMANA.filter((diaSemana) => !grupos.some((g) => g.dias.includes(diaSemana)))
+}
+
+/** O que está errado num grupo: sem dia nenhum, ou o horário (a régua do dia). */
+export function problemaNoGrupo(grupo: GrupoDeHorario): ProblemaDeHorario | 'SEM_DIAS' | null {
+  if (grupo.dias.length === 0) return 'SEM_DIAS'
+
+  return problemaNoDia(diaDoGrupo(grupo.dias[0]!, grupo))
+}
+
+/**
+ * As faixas do dia em minutos, de 0 a 1440, para desenhar a régua da semana: `[[480, 720], [840,
+ * 1080]]` para 08:00–12:00 e 14:00–18:00.
+ */
+export function faixasEmMinutos(dia: {
+  fechado: boolean
+  abre: string | null
+  fecha: string | null
+  intervaloInicio?: string | null
+  intervaloFim?: string | null
+}): [number, number][] {
+  if (dia.fechado || !dia.abre || !dia.fecha) return []
+
+  if (dia.intervaloInicio && dia.intervaloFim) {
+    return [
+      [minutos(dia.abre), minutos(dia.intervaloInicio)],
+      [minutos(dia.intervaloFim), minutos(dia.fecha)],
+    ]
+  }
+
+  return [[minutos(dia.abre), minutos(dia.fecha)]]
+}
+
 /** A hora de parede de um instante que a API mandou com offset (`2026-10-21T18:00:00-04:00`). */
 export function horaDoInstante(iso: string) {
   return /T(\d{2}:\d{2})/.exec(iso)?.[1] ?? ''
