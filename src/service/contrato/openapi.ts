@@ -13807,12 +13807,12 @@ export interface components {
              * @description Se é o endereço principal
              * @default false
              */
-            principal: boolean;
+            principal?: boolean;
             /**
              * @description Se é um endereço comercial
              * @default false
              */
-            comercial: boolean;
+            comercial?: boolean;
             /** @description ID do usuário */
             usuarioId?: string;
             /** @description ID da clínica */
@@ -13864,7 +13864,7 @@ export interface components {
              * @default true
              * @example true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /** @description Dados do perfil de Tutor */
             tutor?: components["schemas"]["CreateTutorDto"];
             /**
@@ -14327,22 +14327,22 @@ export interface components {
              * @description Permite descrição customizada.
              * @default false
              */
-            isCustomAllowed: boolean;
+            isCustomAllowed?: boolean;
             /**
              * @description Permanente (óbito/doação): pet não volta na auto-reativação.
              * @default false
              */
-            permanente: boolean;
+            permanente?: boolean;
             /**
              * @description Ordem de exibição.
              * @default 0
              */
-            ordem: number;
+            ordem?: number;
             /**
              * @description Ativo no catálogo.
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
         };
         UpdateEnderecoDto: {
             /**
@@ -14384,12 +14384,12 @@ export interface components {
              * @description Se é o endereço principal
              * @default false
              */
-            principal: boolean;
+            principal?: boolean;
             /**
              * @description Se é um endereço comercial
              * @default false
              */
-            comercial: boolean;
+            comercial?: boolean;
             /** @description ID do usuário */
             usuarioId?: string;
             /** @description ID da clínica */
@@ -14434,7 +14434,7 @@ export interface components {
              * @description Dias de antecedência ao vencimento. Default: 7. Max: 365.
              * @default 7
              */
-            antecedenciaDias: number;
+            antecedenciaDias?: number;
             /** @description Título do lembrete. Default: gerado a partir do nome do documento. */
             titulo?: string;
         };
@@ -14738,7 +14738,7 @@ export interface components {
              * @default CONSULTA
              * @enum {string}
              */
-            tipo: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
+            tipo?: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
             clinicaNome?: string;
             veterinarioNome?: string;
             /** @description Especialidade de quem atendeu. Guarda a CHAVE quando e uma das opcoes da lista do app (CLINICO_GERAL, CARDIOLOGIA, ...) e o texto livre do tutor quando ele escolhe "Outra". Nao e enum de proposito: "Fisioterapia" e "Acupuntura" sao casos legitimos e um enum fechado transformaria cada um deles em 400. Quem traduz a chave e o app, no locale do leitor. */
@@ -14766,7 +14766,7 @@ export interface components {
              * @default CONSULTA
              * @enum {string}
              */
-            tipo: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
+            tipo?: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
             clinicaNome?: string;
             veterinarioNome?: string;
             /** @description Especialidade de quem atendeu. Guarda a CHAVE quando e uma das opcoes da lista do app (CLINICO_GERAL, CARDIOLOGIA, ...) e o texto livre do tutor quando ele escolhe "Outra". Nao e enum de proposito: "Fisioterapia" e "Acupuntura" sao casos legitimos e um enum fechado transformaria cada um deles em 400. Quem traduz a chave e o app, no locale do leitor. */
@@ -14909,7 +14909,7 @@ export interface components {
              * @description Se a dica está ativa
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /**
              * @description Traduções por locale (pt-BR é o principal, fora daqui). Ex.: { "en-US": { "titulo": "...", "descricao": "..." } }
              * @example {
@@ -14934,7 +14934,7 @@ export interface components {
              * @description Se a dica está ativa
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /**
              * @description Traduções por locale (pt-BR é o principal, fora daqui). Ex.: { "en-US": { "titulo": "...", "descricao": "..." } }
              * @example {
@@ -15822,7 +15822,7 @@ export interface components {
              * @description Permite motivo customizado junto
              * @default false
              */
-            isCustomAllowed: boolean;
+            isCustomAllowed?: boolean;
         };
         InactivateUserDto: {
             /** @description ID do motivo de inativação (tabela InactiveReason) */
@@ -15842,7 +15842,7 @@ export interface components {
              * @description Benefício ativo
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /**
              * @description Traduções por locale (pt-BR é o principal). Ex.: { "en-US": { "titulo": "..." } }
              * @example {
@@ -15863,7 +15863,7 @@ export interface components {
              * @description Benefício ativo
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /**
              * @description Traduções por locale (pt-BR é o principal). Ex.: { "en-US": { "titulo": "..." } }
              * @example {
@@ -15884,7 +15884,7 @@ export interface components {
              * @description Ordem de exibição (menor = mais acima)
              * @default 0
              */
-            ordem: number;
+            ordem?: number;
         };
         CarteiraPortalResponseDto: {
             /**
@@ -16652,7 +16652,7 @@ export interface components {
              * @description Ativo no resumo da Carteirinha. Default: true.
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
         };
         UpdateDiagnosticoDto: {
             /**
@@ -16670,7 +16670,7 @@ export interface components {
              * @description Ativo no resumo da Carteirinha. Default: true.
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
         };
         CreateAlergiaDto: {
             /** @description ID do pet */
@@ -16756,7 +16756,7 @@ export interface components {
              * @description Uso único por tutor (controle no resgate, v2)
              * @default false
              */
-            usoUnico: boolean;
+            usoUnico?: boolean;
             /**
              * @description Usos restantes (estoque de campanha, global). Omitir = ilimitado.
              * @example 100
@@ -16776,7 +16776,7 @@ export interface components {
              * @description Cupom ativo (false = não listar)
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /** @description Nível mínimo de plano para ver o cupom (1=Básico, 2=Pro, 3=Premium). Omitir = todos. Freemium (nível 4) vê tudo. */
             planoMinimoNivel?: number;
             /**
@@ -16830,7 +16830,7 @@ export interface components {
              * @description Uso único por tutor (controle no resgate, v2)
              * @default false
              */
-            usoUnico: boolean;
+            usoUnico?: boolean;
             /**
              * @description Usos restantes (estoque de campanha, global). Omitir = ilimitado.
              * @example 100
@@ -16850,7 +16850,7 @@ export interface components {
              * @description Cupom ativo (false = não listar)
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /** @description Nível mínimo de plano para ver o cupom (1=Básico, 2=Pro, 3=Premium). Omitir = todos. Freemium (nível 4) vê tudo. */
             planoMinimoNivel?: number;
             /**
@@ -16879,7 +16879,7 @@ export interface components {
              * @description Parceiro ativo
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /** @description Usuario que sera o DONO (cria membership ACEITO) */
             donoUsuarioId?: string;
             /** @description CNPJ do parceiro (unico quando presente) */
@@ -16908,7 +16908,7 @@ export interface components {
              * @description Parceiro ativo
              * @default true
              */
-            ativo: boolean;
+            ativo?: boolean;
             /** @description Usuario que sera o DONO (cria membership ACEITO) */
             donoUsuarioId?: string;
             /** @description CNPJ do parceiro (unico quando presente) */
@@ -17217,7 +17217,7 @@ export interface components {
              * @default NENHUM
              * @enum {string}
              */
-            conselho: "CRMV" | "OUTRO" | "NENHUM";
+            conselho?: "CRMV" | "OUTRO" | "NENHUM";
             /** @description Numero do registro; a API guarda so os digitos */
             registro?: string | null;
             /** @description UF do conselho, 2 letras */
@@ -17236,7 +17236,7 @@ export interface components {
              * @default NENHUM
              * @enum {string}
              */
-            conselho: "CRMV" | "OUTRO" | "NENHUM";
+            conselho?: "CRMV" | "OUTRO" | "NENHUM";
             /** @description Numero do registro; a API guarda so os digitos */
             registro?: string | null;
             /** @description UF do conselho, 2 letras */
@@ -17483,7 +17483,7 @@ export interface components {
              * @default WHATSAPP
              * @enum {string}
              */
-            contatoPreferido: "WHATSAPP" | "LIGACAO" | "EMAIL";
+            contatoPreferido?: "WHATSAPP" | "LIGACAO" | "EMAIL";
             cep?: string | null;
             logradouro?: string | null;
             numero?: string | null;
@@ -17610,7 +17610,7 @@ export interface components {
              * @default WHATSAPP
              * @enum {string}
              */
-            contatoPreferido: "WHATSAPP" | "LIGACAO" | "EMAIL";
+            contatoPreferido?: "WHATSAPP" | "LIGACAO" | "EMAIL";
             cep?: string | null;
             logradouro?: string | null;
             numero?: string | null;
@@ -17813,12 +17813,12 @@ export interface components {
             /** @description Vazio = qualquer sala */
             salasCompativeis?: ("CONSULTORIO" | "CIRURGIA" | "BANHO" | "INTERNACAO" | "EXAME")[];
             /** @default true */
-            permiteEncaixe: boolean;
+            permiteEncaixe?: boolean;
             /**
              * @description Aparece no pedido online. CIRURGIA e EMERGENCIA: 400 TIPO_NAO_OFERTAVEL_ONLINE
              * @default false
              */
-            ofertadoOnline: boolean;
+            ofertadoOnline?: boolean;
             /** @description Ordem da legenda; padrao: depois do ultimo */
             ordem?: number;
         };
@@ -17834,12 +17834,12 @@ export interface components {
             /** @description Vazio = qualquer sala */
             salasCompativeis?: ("CONSULTORIO" | "CIRURGIA" | "BANHO" | "INTERNACAO" | "EXAME")[];
             /** @default true */
-            permiteEncaixe: boolean;
+            permiteEncaixe?: boolean;
             /**
              * @description Aparece no pedido online. CIRURGIA e EMERGENCIA: 400 TIPO_NAO_OFERTAVEL_ONLINE
              * @default false
              */
-            ofertadoOnline: boolean;
+            ofertadoOnline?: boolean;
             /** @description Ordem da legenda; padrao: depois do ultimo */
             ordem?: number;
             /** @description false desativa (o tipo nunca se apaga); true reativa */
@@ -18308,7 +18308,7 @@ export interface components {
              * @default RECEPCAO
              * @enum {string}
              */
-            origem: "RECEPCAO" | "TELEFONE" | "ENCAIXE" | "RETORNO";
+            origem?: "RECEPCAO" | "TELEFONE" | "ENCAIXE" | "RETORNO";
             /** @description Marcado por cima da grade (padrao: so com origem ENCAIXE) */
             encaixe?: boolean;
             /** @description Interna da clinica: nunca vai ao app */
@@ -18534,7 +18534,7 @@ export interface components {
              * @default RESPONSAVEL_DESMARCOU
              * @enum {string}
              */
-            motivo: "RESPONSAVEL_DESMARCOU" | "PACIENTE_INDISPONIVEL" | "OUTRO";
+            motivo?: "RESPONSAVEL_DESMARCOU" | "PACIENTE_INDISPONIVEL" | "OUTRO";
         };
         FaltasEmLoteDto: {
             /**
@@ -19149,7 +19149,7 @@ export interface components {
              * @default NORMAL
              * @enum {string}
              */
-            prioridade: "NORMAL" | "PREFERENCIAL" | "URGENTE";
+            prioridade?: "NORMAL" | "PREFERENCIAL" | "URGENTE";
             /** @description Interna da clinica (ate 500 code points): nunca vai ao app */
             observacao?: string | null;
         };
@@ -20215,7 +20215,7 @@ export interface components {
              * @description Contraindicado na especie
              * @default false
              */
-            proibido: boolean;
+            proibido?: boolean;
             nota?: string | null;
             /** @description { "en-US": { campo: texto | [textos] }, ... } nos locales en-US, en-GB, es-419, sr-Latn e ar (pt-BR nos campos). en-GB ausente e derivado do en-US. So estes campos, com os mesmos limites do pt-BR: `nota` (texto, ate 300). Vazio = sem traducao. Campo de fora, tipo errado ou tamanho: 400 CATALOGO_TRADUCAO_INVALIDA com campo e motivo */
             traducoes?: {
@@ -20241,14 +20241,14 @@ export interface components {
              * @default NENHUM
              * @enum {string}
              */
-            controle: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
+            controle?: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
             /** @example C1 */
             listaControle?: string | null;
             /**
              * @description Preparacao magistral (manipulado). Parecer de 30/10: o controlado do MAPA manipulado fica fora do PDF
              * @default false
              */
-            manipulado: boolean;
+            manipulado?: boolean;
             viasPermitidas: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             /** @description Faixa geral, mg/kg */
             doseUsualMgKgMin: number;
@@ -20292,14 +20292,14 @@ export interface components {
              * @default NENHUM
              * @enum {string}
              */
-            controle: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
+            controle?: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
             /** @example C1 */
             listaControle?: string | null;
             /**
              * @description Preparacao magistral (manipulado). Parecer de 30/10: o controlado do MAPA manipulado fica fora do PDF
              * @default false
              */
-            manipulado: boolean;
+            manipulado?: boolean;
             viasPermitidas?: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             /** @description Faixa geral, mg/kg */
             doseUsualMgKgMin?: number;
@@ -20339,16 +20339,16 @@ export interface components {
             vias: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             intervaloReforcoDias: number;
             /** @default 28 */
-            intervaloEntreDosesDias: number;
+            intervaloEntreDosesDias?: number;
             /** @default false */
-            obrigatoria: boolean;
+            obrigatoria?: boolean;
             /** @default 0 */
-            estoqueMinimoPadrao: number;
+            estoqueMinimoPadrao?: number;
             /**
              * @default FIXA
              * @enum {string}
              */
-            modoSerieFilhote: "FIXA" | "ATE_IDADE_MINIMA";
+            modoSerieFilhote?: "FIXA" | "ATE_IDADE_MINIMA";
             /** @description Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA */
             idadeMinimaUltimaDoseFilhoteDias?: number | null;
             fonte?: string | null;
@@ -20370,16 +20370,16 @@ export interface components {
             vias?: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             intervaloReforcoDias?: number;
             /** @default 28 */
-            intervaloEntreDosesDias: number;
+            intervaloEntreDosesDias?: number;
             /** @default false */
-            obrigatoria: boolean;
+            obrigatoria?: boolean;
             /** @default 0 */
-            estoqueMinimoPadrao: number;
+            estoqueMinimoPadrao?: number;
             /**
              * @default FIXA
              * @enum {string}
              */
-            modoSerieFilhote: "FIXA" | "ATE_IDADE_MINIMA";
+            modoSerieFilhote?: "FIXA" | "ATE_IDADE_MINIMA";
             /** @description Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA */
             idadeMinimaUltimaDoseFilhoteDias?: number | null;
             fonte?: string | null;
@@ -20588,7 +20588,7 @@ export interface components {
             /** @example bpm */
             unidade: string;
             /** @default 0 */
-            precisao: number;
+            precisao?: number;
             fonte?: string | null;
         };
         AtualizarFaixaAdminDto: {
@@ -20611,7 +20611,7 @@ export interface components {
             /** @example bpm */
             unidade?: string;
             /** @default 0 */
-            precisao: number;
+            precisao?: number;
             fonte?: string | null;
             /** @description false desativa (nada se apaga); true reativa */
             ativo?: boolean;
@@ -20646,14 +20646,14 @@ export interface components {
              * @default NENHUM
              * @enum {string}
              */
-            controle: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
+            controle?: "NENHUM" | "MAPA_VETERINARIO" | "ANVISA_HUMANO" | "ANVISA_RETENCAO";
             /** @example C1 */
             listaControle?: string | null;
             /**
              * @description Preparacao magistral (manipulado). Parecer de 30/10: o controlado do MAPA manipulado fica fora do PDF
              * @default false
              */
-            manipulado: boolean;
+            manipulado?: boolean;
             viasPermitidas?: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             /** @description Faixa geral, mg/kg */
             doseUsualMgKgMin?: number;
@@ -20704,16 +20704,16 @@ export interface components {
             vias?: ("ORAL" | "SUBCUTANEA" | "INTRAMUSCULAR" | "INTRAVENOSA" | "TOPICA" | "OTOLOGICA" | "OFTALMICA" | "INTRANASAL")[];
             intervaloReforcoDias?: number;
             /** @default 28 */
-            intervaloEntreDosesDias: number;
+            intervaloEntreDosesDias?: number;
             /** @default false */
-            obrigatoria: boolean;
+            obrigatoria?: boolean;
             /** @default 0 */
-            estoqueMinimoPadrao: number;
+            estoqueMinimoPadrao?: number;
             /**
              * @default FIXA
              * @enum {string}
              */
-            modoSerieFilhote: "FIXA" | "ATE_IDADE_MINIMA";
+            modoSerieFilhote?: "FIXA" | "ATE_IDADE_MINIMA";
             /** @description Obrigatorio com ATE_IDADE_MINIMA (ex.: 112 = 16 semanas); proibido com FIXA */
             idadeMinimaUltimaDoseFilhoteDias?: number | null;
             fonte?: string | null;
@@ -21274,7 +21274,7 @@ export interface components {
              * @default CONSULTA
              * @enum {string}
              */
-            tipo: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
+            tipo?: "CONSULTA" | "RETORNO" | "EXAME" | "CIRURGIA" | "EMERGENCIA" | "VACINA";
             /** @description G5: o atendimento ANULADO do mesmo paciente que este retifica */
             retificaAtendimentoId?: string;
         };
@@ -21786,7 +21786,7 @@ export interface components {
              * @description G7: interno por padrao. Para o responsavel exige tambem `resumo.liberar` (decisao 4) e republica o resumo ja liberado
              * @default false
              */
-            paraOResponsavel: boolean;
+            paraOResponsavel?: boolean;
         };
         PaginaDeAdendosDto: {
             itens: components["schemas"]["AdendoDto"][];
@@ -21910,7 +21910,7 @@ export interface components {
              * @default CLINICA
              * @enum {string}
              */
-            origem: "CLINICA" | "AVULSO";
+            origem?: "CLINICA" | "AVULSO";
         };
         AnularAtoDto: {
             /** @description Fica no registro, com autor e hora */
@@ -22825,7 +22825,7 @@ export interface components {
              * @description D1: a clinica ve os registros deste tratamento. A tela diz isso antes do toque; vem ligada
              * @default true
              */
-            compartilharComAClinica: boolean;
+            compartilharComAClinica?: boolean;
         };
         LembreteCriadoDaReceitaDto: {
             itemId: string;
@@ -24987,7 +24987,7 @@ export interface components {
              * @default DMY
              * @enum {string}
              */
-            ordemDasDatas: "DMY" | "MDY";
+            ordemDasDatas?: "DMY" | "MDY";
         };
         ImportacaoDeBaseCriadaDto: {
             id: string;
@@ -26316,7 +26316,7 @@ export interface components {
              * @description Vazio (ou ausente) = vale para todas as especies. Ao contrario da acomodacao, vazio AQUI significa todas
              * @default []
              */
-            especies: components["schemas"]["Especie"][];
+            especies?: components["schemas"]["Especie"][];
             /** @description Meses de validade do comprovante (calendario). Nulo ou ausente = nao vence */
             validadeMeses?: number | null;
             /** @description Verdadeiro: sem o comprovante o hospede nao entra */
@@ -26327,14 +26327,14 @@ export interface components {
              * @description E7-04: a vacina LANCADA PELO RESPONSAVEL no app conta como comprovante na admissao. So nos kinds VACINA_* (422 EXIGENCIA_INVALIDA). Padrao falso: so a publicada por clinica conta
              * @default false
              */
-            aceitaDeclarada: boolean;
+            aceitaDeclarada?: boolean;
         };
         AtualizarExigenciaDto: {
             /**
              * @description Vazio (ou ausente) = vale para todas as especies. Ao contrario da acomodacao, vazio AQUI significa todas
              * @default []
              */
-            especies: components["schemas"]["Especie"][];
+            especies?: components["schemas"]["Especie"][];
             /** @description Meses de validade do comprovante (calendario). Nulo ou ausente = nao vence */
             validadeMeses?: number | null;
             /** @description Verdadeiro: sem o comprovante o hospede nao entra */
@@ -26345,7 +26345,7 @@ export interface components {
              * @description E7-04: a vacina LANCADA PELO RESPONSAVEL no app conta como comprovante na admissao. So nos kinds VACINA_* (422 EXIGENCIA_INVALIDA). Padrao falso: so a publicada por clinica conta
              * @default false
              */
-            aceitaDeclarada: boolean;
+            aceitaDeclarada?: boolean;
         };
         SalvarPoliticaDoHotelDto: {
             /**
@@ -26397,7 +26397,7 @@ export interface components {
             /** @description Ao menos uma (vazio: 422 ESPECIES_OBRIGATORIAS). OUTRO e especie aceita de verdade */
             especiesAceitas: components["schemas"]["Especie"][];
             /** @default [] */
-            recursos: components["schemas"]["RecursoAcomodacao"][];
+            recursos?: components["schemas"]["RecursoAcomodacao"][];
             /**
              * @description Minutos entre uma saida e a entrada seguinte
              * @example 60
@@ -26425,7 +26425,7 @@ export interface components {
             /** @description Ao menos uma (vazio: 422 ESPECIES_OBRIGATORIAS). OUTRO e especie aceita de verdade */
             especiesAceitas?: components["schemas"]["Especie"][];
             /** @default [] */
-            recursos: components["schemas"]["RecursoAcomodacao"][];
+            recursos?: components["schemas"]["RecursoAcomodacao"][];
             /**
              * @description Minutos entre uma saida e a entrada seguinte
              * @example 60
@@ -27237,7 +27237,7 @@ export interface components {
              * @description Sem receita: exige `motivoSemReceita` (registrado com quem)
              * @default false
              */
-            semReceita: boolean;
+            semReceita?: boolean;
             motivoSemReceita?: string;
             observacao?: string;
         };
@@ -27302,7 +27302,7 @@ export interface components {
             /** @description Quem nao esta na PetJourney. Nunca junto do id */
             veterinarioTexto?: components["schemas"]["VeterinarioEmTextoDto"];
             /** @default EM_ADAPTACAO */
-            adaptacao: components["schemas"]["AdaptacaoDoHospede"];
+            adaptacao?: components["schemas"]["AdaptacaoDoHospede"];
             /** @description INTERNA da casa; nunca vai ao app */
             observacao?: string;
         };
@@ -27776,7 +27776,7 @@ export interface components {
              * @description Por quanto tempo a oferta vale (informativo)
              * @default 24
              */
-            validadeHoras: number;
+            validadeHoras?: number;
         };
         HotelDaReservaDto: {
             nome: string;
@@ -28987,7 +28987,7 @@ export interface components {
              * @description Copia a observacao do responsavel (interna) para a reserva (P15)
              * @default false
              */
-            copiarObservacao: boolean;
+            copiarObservacao?: boolean;
         };
         ReservaDoAceiteDto: {
             id: string;
@@ -29152,7 +29152,7 @@ export interface components {
              * @description O hotel pode mover as duas pontas um dia (so -1 ou +1)
              * @default false
              */
-            aceitaMudarUmDia: boolean;
+            aceitaMudarUmDia?: boolean;
             servicos?: ("BANHO" | "TOSA" | "PASSEIO_EXTRA" | "RECREACAO_INDIVIDUAL" | "TRANSPORTE" | "ADESTRAMENTO" | "MEDICACAO_ASSISTIDA")[];
             /** @description Interna do hotel */
             observacao?: string | null;
@@ -29285,7 +29285,7 @@ export interface components {
              * @description O hotel pode mover as duas pontas um dia (so -1 ou +1)
              * @default false
              */
-            aceitaMudarUmDia: boolean;
+            aceitaMudarUmDia?: boolean;
             servicos?: ("BANHO" | "TOSA" | "PASSEIO_EXTRA" | "RECREACAO_INDIVIDUAL" | "TRANSPORTE" | "ADESTRAMENTO" | "MEDICACAO_ASSISTIDA")[];
             /** @description Interna do hotel */
             observacao?: string | null;
