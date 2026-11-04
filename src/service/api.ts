@@ -2,6 +2,7 @@ import i18n from '@/i18n'
 import { API_LOCALE, DEFAULT_LOCALE, isLocale } from '@/i18n/locales'
 
 import { clearAuthSession, getAccessToken } from './auth/auth-session'
+import type { CodigoClinico } from './contrato/openapi'
 
 /**
  * A base da API. Endereço sem protocolo ("api.exemplo.com") virava caminho relativo: o fetch ia para
@@ -28,9 +29,10 @@ export class ApiError extends Error {
   readonly reason?: string
   /**
    * Código estável das rotas novas do portal (equipe, módulos, Clínica, Hotel): decide a tela; a
-   * `message` só se mostra. String e não enum porque o `openapi.json` ainda não exporta a lista.
+   * `message` só se mostra (E1-04). A lista é o enum `CodigoClinico` do contrato; o `string` fica
+   * aberto para código que uma rota mais antiga mande fora dele.
    */
-  readonly codigo?: string
+  readonly codigo?: CodigoClinico | (string & {})
   /** O resto do corpo de erro, que alguns códigos trazem: `faltando`, `permissao`, `campo`... */
   readonly detalhes: Readonly<Record<string, unknown>>
 
