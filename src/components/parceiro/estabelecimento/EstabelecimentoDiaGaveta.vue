@@ -265,7 +265,8 @@ function salvar() {
   text-align: center;
 }
 
+/* O calendário no meio da gaveta: preso à esquerda, ele deixava um vão do lado direito. */
 .eg__secao :deep(.p-datepicker) {
-  justify-self: start;
+  justify-self: center;
 }
 </style>
