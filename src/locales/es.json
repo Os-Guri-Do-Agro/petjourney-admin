@@ -2521,11 +2521,11 @@
         }
       },
       "dia": {
-        "titulo": "Días especiales",
-        "umDia": "Un día especial",
+        "titulo": "Feriados",
+        "umDia": "Un feriado",
         "feriadosDe": "Feriados nacionales de {ano}",
-        "adicionar": "Agregar día",
-        "vazio": "No hay días especiales. Los feriados y los días con otro horario van aquí y reemplazan al de la semana.",
+        "adicionar": "Agregar feriado",
+        "vazio": "No hay feriados. Los feriados y los días con otro horario van aquí y reemplazan al de la semana.",
         "remover": "Quitar {nome}",
         "data": "Fecha",
         "faltaData": "Elija la fecha en el calendario.",
@@ -2537,7 +2537,7 @@
         "fecha": "Cierra a las",
         "fechadoDica": "Desactívelo para dar un horario distinto ese día.",
         "abertoDica": "Ese día vale este horario y no el de la semana.",
-        "nenhumProximo": "Ningún día especial por delante.",
+        "nenhumProximo": "Ningún feriado por delante.",
         "mostrarPassados": "Mostrar {total} día que ya pasó | Mostrar {total} días que ya pasaron",
         "esconderPassados": "Ocultar los que ya pasaron",
         "apagarVarios": "Eliminar varios",
@@ -2556,12 +2556,12 @@
           "botao": "Quitar de línea"
         },
         "remover": {
-          "titulo": "¿Quitar el día especial?",
+          "titulo": "¿Quitar el feriado?",
           "mensagem": "{nome} sale de la lista y el horario de la semana vuelve a valer en esa fecha.",
           "botao": "Quitar"
         },
         "removerVarios": {
-          "titulo": "¿Eliminar {total} día especial? | ¿Eliminar {total} días especiales?",
+          "titulo": "¿Eliminar {total} feriado? | ¿Eliminar {total} feriados?",
           "mensagem": "Salen de la lista y el horario de la semana vuelve a valer en esas fechas.",
           "botao": "Eliminar"
         }
@@ -2576,13 +2576,13 @@
           "mensagens": "Mensajes guardados",
           "horarios": "Horarios guardados"
         },
-        "diaAdicionado": "Día especial agregado",
-        "diaRemovido": "Día especial quitado",
+        "diaAdicionado": "Feriado agregado",
+        "diaRemovido": "Feriado quitado",
         "feriadosCopiados": "Feriados copiados",
         "slugTrocado": "Dirección cambiada",
         "feriadosNovos": "Ningún feriado nuevo. | {total} feriado nuevo. | {total} feriados nuevos.",
         "feriadosJaExistiam": "{total} ya estaba en la lista. | {total} ya estaban en la lista.",
-        "diasRemovidos": "Días especiales eliminados",
+        "diasRemovidos": "Feriados eliminados",
         "diasRemovidosDetalhe": "{total} día salió de la lista. | {total} días salieron de la lista.",
         "diasRemovidosEmParte": "{total} día eliminado | {total} días eliminados",
         "diasNaoRemovidos": "{total} no se pudo eliminar; intente de nuevo. | {total} no se pudieron eliminar; intente de nuevo."
@@ -2625,7 +2625,7 @@
           "endereco": "Dirección",
           "mensagens": "Mensajes al tutor",
           "horarios": "Horarios de la semana",
-          "dia": "Nuevo día especial",
+          "dia": "Nuevo feriado",
           "slug": "Dirección de la página"
         },
         "opcional": "(opcional)",

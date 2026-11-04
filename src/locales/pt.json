@@ -2521,11 +2521,11 @@
         }
       },
       "dia": {
-        "titulo": "Dias especiais",
-        "umDia": "Um dia especial",
+        "titulo": "Feriados",
+        "umDia": "Um feriado",
         "feriadosDe": "Feriados nacionais de {ano}",
-        "adicionar": "Adicionar dia",
-        "vazio": "Nenhum dia especial. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
+        "adicionar": "Adicionar feriado",
+        "vazio": "Nenhum feriado cadastrado. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
         "remover": "Remover {nome}",
         "data": "Data",
         "faltaData": "Escolha a data no calendário.",
@@ -2537,8 +2537,8 @@
         "fecha": "Fecha às",
         "fechadoDica": "Desligue para dar um horário diferente nesse dia.",
         "abertoDica": "Nesse dia vale este horário, e não o da semana.",
-        "nenhumProximo": "Nenhum dia especial pela frente.",
-        "mostrarPassados": "Mostrar {total} dia que já passou | Mostrar {total} dias que já passaram",
+        "nenhumProximo": "Nenhum feriado pela frente.",
+        "mostrarPassados": "Mostrar {total} que já passou | Mostrar {total} que já passaram",
         "esconderPassados": "Esconder os que já passaram",
         "apagarVarios": "Apagar vários",
         "marcados": "{total} marcado | {total} marcados",
@@ -2556,12 +2556,12 @@
           "botao": "Tirar do ar"
         },
         "remover": {
-          "titulo": "Remover o dia especial?",
+          "titulo": "Remover o feriado?",
           "mensagem": "{nome} sai da lista e o horário da semana volta a valer nessa data.",
           "botao": "Remover"
         },
         "removerVarios": {
-          "titulo": "Apagar {total} dia especial? | Apagar {total} dias especiais?",
+          "titulo": "Apagar {total} feriado? | Apagar {total} feriados?",
           "mensagem": "Eles saem da lista e o horário da semana volta a valer nessas datas.",
           "botao": "Apagar"
         }
@@ -2576,13 +2576,13 @@
           "mensagens": "Mensagens salvas",
           "horarios": "Horários salvos"
         },
-        "diaAdicionado": "Dia especial adicionado",
-        "diaRemovido": "Dia especial removido",
+        "diaAdicionado": "Feriado adicionado",
+        "diaRemovido": "Feriado removido",
         "feriadosCopiados": "Feriados copiados",
         "slugTrocado": "Endereço trocado",
         "feriadosNovos": "Nenhum feriado novo. | {total} feriado novo. | {total} feriados novos.",
         "feriadosJaExistiam": "{total} já estava na lista. | {total} já estavam na lista.",
-        "diasRemovidos": "Dias especiais removidos",
+        "diasRemovidos": "Feriados removidos",
         "diasRemovidosDetalhe": "{total} dia saiu da lista. | {total} dias saíram da lista.",
         "diasRemovidosEmParte": "{total} dia removido | {total} dias removidos",
         "diasNaoRemovidos": "{total} não saiu; tente de novo. | {total} não saíram; tente de novo."
@@ -2625,7 +2625,7 @@
           "endereco": "Endereço",
           "mensagens": "Mensagens ao responsável",
           "horarios": "Horários da semana",
-          "dia": "Novo dia especial",
+          "dia": "Novo feriado",
           "slug": "Endereço da página"
         },
         "opcional": "(opcional)",

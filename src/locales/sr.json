@@ -2521,11 +2521,11 @@
         }
       },
       "dia": {
-        "titulo": "Posebni dani",
-        "umDia": "Jedan poseban dan",
+        "titulo": "Praznici",
+        "umDia": "Jedan praznik",
         "feriadosDe": "Državni praznici za {ano}.",
-        "adicionar": "Dodaj dan",
-        "vazio": "Nema posebnih dana. Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme.",
+        "adicionar": "Dodaj praznik",
+        "vazio": "Nema praznika. Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme.",
         "remover": "Ukloni {nome}",
         "data": "Datum",
         "faltaData": "Izaberite datum u kalendaru.",
@@ -2537,7 +2537,7 @@
         "fecha": "Zatvara se u",
         "fechadoDica": "Isključite da biste tog dana zadali drugačije radno vreme.",
         "abertoDica": "Tog dana važi ovo radno vreme, a ne nedeljno.",
-        "nenhumProximo": "Nema predstojećih posebnih dana.",
+        "nenhumProximo": "Nema predstojećih praznika.",
         "mostrarPassados": "Prikaži {total} prošli dan | Prikaži {total} prošla dana | Prikaži {total} prošlih dana",
         "esconderPassados": "Sakrij prošle dane",
         "apagarVarios": "Obriši više",
@@ -2556,12 +2556,12 @@
           "botao": "Skloni sa mreže"
         },
         "remover": {
-          "titulo": "Ukloniti poseban dan?",
+          "titulo": "Ukloniti praznik?",
           "mensagem": "{nome} izlazi sa liste i za taj datum ponovo važi nedeljno radno vreme.",
           "botao": "Ukloni"
         },
         "removerVarios": {
-          "titulo": "Obrisati {total} poseban dan? | Obrisati {total} posebna dana? | Obrisati {total} posebnih dana?",
+          "titulo": "Obrisati {total} praznik? | Obrisati {total} praznika? | Obrisati {total} praznika?",
           "mensagem": "Uklanjaju se sa liste i na te datume ponovo važi nedeljno radno vreme.",
           "botao": "Obriši"
         }
@@ -2576,13 +2576,13 @@
           "mensagens": "Poruke su sačuvane",
           "horarios": "Radno vreme je sačuvano"
         },
-        "diaAdicionado": "Poseban dan je dodat",
-        "diaRemovido": "Poseban dan je uklonjen",
+        "diaAdicionado": "Praznik je dodat",
+        "diaRemovido": "Praznik je uklonjen",
         "feriadosCopiados": "Praznici su kopirani",
         "slugTrocado": "Adresa je promenjena",
         "feriadosNovos": "Nema novih praznika. | {total} novi praznik. | {total} nova praznika. | {total} novih praznika.",
         "feriadosJaExistiam": "{total} je već bio na listi. | {total} su već bila na listi. | {total} je već bilo na listi.",
-        "diasRemovidos": "Posebni dani su obrisani",
+        "diasRemovidos": "Praznici su obrisani",
         "diasRemovidosDetalhe": "{total} dan je uklonjen sa liste. | {total} dana su uklonjena sa liste. | {total} dana je uklonjeno sa liste.",
         "diasRemovidosEmParte": "{total} dan obrisan | {total} dana obrisana | {total} dana obrisano",
         "diasNaoRemovidos": "{total} nije obrisan; pokušajte ponovo. | {total} nisu obrisana; pokušajte ponovo. | {total} nije obrisano; pokušajte ponovo."
@@ -2625,7 +2625,7 @@
           "endereco": "Adresa",
           "mensagens": "Poruke staratelju",
           "horarios": "Nedeljno radno vreme",
-          "dia": "Novi poseban dan",
+          "dia": "Novi praznik",
           "slug": "Adresa stranice"
         },
         "opcional": "(opciono)",

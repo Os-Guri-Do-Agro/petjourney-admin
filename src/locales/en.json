@@ -2521,11 +2521,11 @@
         }
       },
       "dia": {
-        "titulo": "Special days",
-        "umDia": "A special day",
+        "titulo": "Holidays",
+        "umDia": "A holiday",
         "feriadosDe": "National holidays of {ano}",
-        "adicionar": "Add day",
-        "vazio": "No special days. Holidays and days with different hours go here and replace the weekly hours.",
+        "adicionar": "Add holiday",
+        "vazio": "No holidays yet. Holidays and days with different hours go here and replace the weekly hours.",
         "remover": "Remove {nome}",
         "data": "Date",
         "faltaData": "Pick the date on the calendar.",
@@ -2537,7 +2537,7 @@
         "fecha": "Closes at",
         "fechadoDica": "Turn off to set different hours for that day.",
         "abertoDica": "On that day these hours apply instead of the weekly ones.",
-        "nenhumProximo": "No special days coming up.",
+        "nenhumProximo": "No holidays coming up.",
         "mostrarPassados": "Show {total} past day | Show {total} past days",
         "esconderPassados": "Hide past days",
         "apagarVarios": "Delete several",
@@ -2556,12 +2556,12 @@
           "botao": "Take offline"
         },
         "remover": {
-          "titulo": "Remove the special day?",
+          "titulo": "Remove the holiday?",
           "mensagem": "{nome} leaves the list and the weekly hours apply again on that date.",
           "botao": "Remove"
         },
         "removerVarios": {
-          "titulo": "Delete {total} special day? | Delete {total} special days?",
+          "titulo": "Delete {total} holiday? | Delete {total} holidays?",
           "mensagem": "They leave the list and the weekly hours apply again on those dates.",
           "botao": "Delete"
         }
@@ -2576,13 +2576,13 @@
           "mensagens": "Messages saved",
           "horarios": "Hours saved"
         },
-        "diaAdicionado": "Special day added",
-        "diaRemovido": "Special day removed",
+        "diaAdicionado": "Holiday added",
+        "diaRemovido": "Holiday removed",
         "feriadosCopiados": "Holidays copied",
         "slugTrocado": "Address changed",
         "feriadosNovos": "No new holidays. | {total} new holiday. | {total} new holidays.",
         "feriadosJaExistiam": "{total} was already on the list. | {total} were already on the list.",
-        "diasRemovidos": "Special days deleted",
+        "diasRemovidos": "Holidays deleted",
         "diasRemovidosDetalhe": "{total} day left the list. | {total} days left the list.",
         "diasRemovidosEmParte": "{total} day deleted | {total} days deleted",
         "diasNaoRemovidos": "{total} could not be deleted; try again. | {total} could not be deleted; try again."
@@ -2625,7 +2625,7 @@
           "endereco": "Address",
           "mensagens": "Messages to pet parents",
           "horarios": "Weekly hours",
-          "dia": "New special day",
+          "dia": "New holiday",
           "slug": "Page address"
         },
         "opcional": "(optional)",
