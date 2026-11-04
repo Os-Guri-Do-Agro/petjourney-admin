@@ -83,3 +83,35 @@ site (lacuna N5).
    Hotel voltam ao menu e ao Início com os dados de exemplo, como antes. Desligue e eles somem.
 5. **Build de produção.** `npm run build` + `npm run preview`: o menu da conta não tem a chave da
    demonstração.
+
+---
+
+## PJ-2VAFXX · Profissionais e funções da equipe (E1-03)
+
+**Preparar:** conta DONO na API de dev, com pelo menos mais uma pessoa na equipe.
+
+1. **Funções.** Equipe › Pessoas › "…" de um membro › funções: marque Veterinário e Recepção e
+   salve. A linha passa a mostrar as funções.
+2. **Ficha nova.** Equipe › Profissionais › "Cadastrar profissional": CRMV com número e UF, uma
+   especialidade, uma cor e o login de alguém da equipe. A ficha aparece com "CRMV a conferir".
+   - CRMV sem número ou sem UF: o campo pede antes de salvar.
+   - O mesmo CRMV e UF de novo: a mensagem de duplicado.
+3. **Selo.** Uma ficha conferida no CMS mostra "CRMV conferido"; uma conferida há mais de 365
+   dias, "Conferência vencida".
+4. **Aviso antes de salvar.** Numa ficha conferida: trocar o número ou a UF avisa que o selo sai;
+   trocar o login para "Sem login" avisa "Desligar o login desta ficha tira o selo de conferido".
+5. **Desativar e reativar.** "…" › Desativar: a ficha vai para a lista recolhida, de onde volta com
+   "Reativar ficha".
+6. **Como OPERADOR.** Entre com a outra conta: vê a lista, edita só a cor e as especialidades da
+   própria ficha e não cadastra fichas.
+
+---
+
+## PJ-2OPCOW (parte do portal) · Sem o perfil veterinário antigo (E1-07c)
+
+1. **Login.** Entre com uma conta que tinha perfil de veterinário: cai no portal normalmente.
+2. **Configurações › Perfil.** Não há mais CRMV nem especialidade; a seção "CRMV" diz que eles
+   ficam na ficha e tem "Abrir as fichas da equipe". O selo "Veterinário" aparece só para quem tem
+   essa função na equipe.
+3. **Foto.** Troque a foto e recarregue: ela fica (inclusive numa conta criada agora).
+4. **Configurações › Conta.** O selo "Veterinário" segue a mesma regra do Perfil.

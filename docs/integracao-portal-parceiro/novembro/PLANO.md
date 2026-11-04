@@ -18,6 +18,8 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 0.4 PJ-TYT5JY docs do lado do responsável | `c2f0d35` | Em teste |
 | 04/11 | 0.5 PJ-49U4QS Idempotency-Key e código do erro (E1-04) | `e291e95` | Em teste |
 | 04/11 | 0.6 PJ-IWQ1F4 módulos pelo servidor (E1-02) | `7e8646a` | Em teste |
+| 04/11 | 0.7 PJ-2VAFXX profissionais e funções (E1-03) | `846c6b1` | Em teste |
+| 04/11 | 0.8 PJ-2OPCOW parte do portal (E1-07c) | `bb4debe` | Em andamento (faltam app e CMS) |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 
