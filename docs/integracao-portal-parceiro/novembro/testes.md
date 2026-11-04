@@ -115,3 +115,29 @@ site (lacuna N5).
    essa função na equipe.
 3. **Foto.** Troque a foto e recarregue: ela fica (inclusive numa conta criada agora).
 4. **Configurações › Conta.** O selo "Veterinário" segue a mesma regra do Perfil.
+
+---
+
+## PJ-DXT9T5 e PJ-KE667M (parte do portal) · Meu estabelecimento e a página pública
+
+**Preparar:** a conta DONO de uma empresa aprovada (ex.: `dr10572931@gmail.com`, Clínica
+Veterinária Bem-Estar, que já está preenchida e no ar). Portal › Estabelecimento.
+
+1. **Antes de preencher:** a página diz "A página ainda não foi publicada" e lista o que falta (nome
+   público, fuso, um telefone). "Publicar página" fica desligado.
+2. **Perfil:** "Preencher o perfil": nome, descrição, fuso (vem o do navegador), telefone e WhatsApp.
+   Salvar: o endereço da página nasce do nome.
+3. **Endereço:** CEP, rua, número, bairro, cidade, UF, latitude e longitude. As duas chaves (rua na
+   página e mapa).
+4. **Horários:** ligar os dias, mudar um horário, "Intervalo" e o botão de copiar para os outros dias.
+   Depois de salvar, "Aberto agora, fecha às..." aparece no fuso da casa.
+5. **Dias especiais:** "Feriados nacionais" › 2026 (aviso com quantos entraram); "Adicionar dia";
+   remover um.
+6. **Publicar:** a página fica "no ar", com o QR, o link `petjourney.health/agendar/<slug>`, "Copiar
+   link" e "Baixar QR" (PNG grande para imprimir). Casa de hotel mostra `/reservar/<slug>`.
+7. **Trocar endereço:** o link e o QR mudam; o endereço antigo continua abrindo a página (a página do
+   site ainda não existe: confira pela API, `GET /public/estabelecimentos/<slug antigo>` devolve
+   `slugAtual`).
+8. **Tirar do ar** e publicar de novo.
+9. **Como OPERADOR** (troque para outra empresa em que a conta é equipe): "Só o dono edita o
+   estabelecimento" e nenhum botão de editar.

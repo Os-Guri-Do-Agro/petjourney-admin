@@ -20,6 +20,8 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 0.6 PJ-IWQ1F4 módulos pelo servidor (E1-02) | `7e8646a` | Em teste |
 | 04/11 | 0.7 PJ-2VAFXX profissionais e funções (E1-03) | `846c6b1` | Em teste |
 | 04/11 | 0.8 PJ-2OPCOW parte do portal (E1-07c) | `bb4debe` | Em andamento (faltam app e CMS) |
+| 04/11 | 1.1 PJ-DXT9T5 Meu estabelecimento (E1-01) | este commit | Em teste |
+| 04/11 | 1.2 PJ-KE667M parte do portal (link e QR) | este commit | Em andamento (falta a página no site) |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 

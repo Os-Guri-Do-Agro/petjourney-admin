@@ -25,6 +25,7 @@ import type {
   DadosDoProfissional,
   Profissional,
 } from '@/service/parceiro/profissionais-service'
+import { UFS } from '@/utils/brasil/ufs'
 
 const props = defineProps<{
   /** A ficha que se edita; nula para cadastrar. */
@@ -44,35 +45,6 @@ const visible = defineModel<boolean>('visible', { default: false })
 
 const LARGURA = '28rem'
 const CORES = [0, 1, 2, 3, 4, 5] as const
-const UFS = [
-  'AC',
-  'AL',
-  'AM',
-  'AP',
-  'BA',
-  'CE',
-  'DF',
-  'ES',
-  'GO',
-  'MA',
-  'MG',
-  'MS',
-  'MT',
-  'PA',
-  'PB',
-  'PE',
-  'PI',
-  'PR',
-  'RJ',
-  'RN',
-  'RO',
-  'RR',
-  'RS',
-  'SC',
-  'SE',
-  'SP',
-  'TO',
-]
 const MAX_ESPECIALIDADES = 5
 /* O Select do PrimeVue lê `null` como "nada escolhido": "sem login" precisa de um valor de verdade. */
 const SEM_LOGIN = 'sem-login'
