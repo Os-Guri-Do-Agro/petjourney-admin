@@ -1,9 +1,9 @@
 <script setup lang="ts">
 /**
  * A folha do balcão: uma A4 com a cara da PetJourney para colar na recepção. No alto, a faixa
- * sálvia com os desenhos de traço do app e a pata da marca, o nome da casa e a chamada; o QR num
- * cartão branco que avança sobre a faixa; os três passos para quem nunca leu um QR; o endereço e,
- * no pé, o nome PetJourney.
+ * sálvia com os desenhos de traço do app, o nome da casa e a chamada; o QR grande num cartão branco
+ * que avança sobre a faixa; os três passos para quem nunca leu um QR; o endereço; e, no pé, outra
+ * faixa sálvia com a logo da PetJourney em creme.
  *
  * Não é tela: fica escondida e só aparece no papel, enquanto a página imprime
  * (`html.imprimindo-folha`, que a gaveta do QR liga e desliga). Imprimir daqui, e não de uma janela
@@ -11,7 +11,7 @@
  */
 import { useI18n } from 'vue-i18n'
 
-import nomePetJourney from '@/assets/Logos/logo-clara-em-row.png'
+import logoEmCreme from '@/assets/Logos/logo-pata-e-nome-creme.png'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import type { LinkDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
@@ -34,11 +34,6 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
       <article class="fb__folha">
         <header class="fb__faixa">
           <UiRabiscos />
-          <!--
-            A pata da marca é creme com o sálvia dentro: num círculo branco o creme sumia. O círculo
-            é o sálvia mais escuro (o "cartão dentro do destaque" do app), com um aro creme.
-          -->
-          <span class="fb__selo"><img src="/pata.png" alt="" /></span>
           <h1 class="fb__nome">{{ nome }}</h1>
           <p class="fb__chamada">{{ t(`parceiro.estabelecimento.qr.folha.chamada.${tipo}`) }}</p>
         </header>
@@ -56,8 +51,10 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
 
         <p class="fb__endereco" dir="ltr">{{ endereco }}</p>
 
+        <!-- A logo é creme (a pata com o sálvia dentro): pede o fundo sálvia, no papel branco sumia. -->
         <footer class="fb__pe">
-          <img :src="nomePetJourney" alt="PetJourney" class="fb__marca" />
+          <UiRabiscos />
+          <img :src="logoEmCreme" alt="PetJourney" class="fb__marca" />
         </footer>
       </article>
     </div>
@@ -122,12 +119,12 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   position: relative;
   display: flex;
   width: 100%;
-  height: 112mm;
+  height: 84mm;
   box-sizing: border-box;
   flex: none;
   flex-direction: column;
   align-items: center;
-  padding: 16mm 18mm 0;
+  padding: 20mm 18mm 0;
   overflow: hidden;
   isolation: isolate;
   border-radius: 0 0 12mm 12mm;
@@ -135,28 +132,10 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   color: #fff;
 }
 
-.fb__selo {
-  display: grid;
-  width: 26mm;
-  height: 26mm;
-  box-sizing: border-box;
-  flex: none;
-  place-items: center;
-  border: 0.8mm solid #faf9f6;
-  border-radius: 50%;
-  background: #5c736e;
-}
-
-.fb__selo img {
-  display: block;
-  width: 17mm;
-  height: auto;
-}
-
 .fb__nome {
   display: -webkit-box;
   max-width: 170mm;
-  margin: 7mm 0 0;
+  margin: 0;
   overflow: hidden;
   font-size: 34px;
   font-weight: 700;
@@ -177,7 +156,7 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   position: relative;
   z-index: 1;
   display: grid;
-  margin-top: -30mm;
+  margin-top: -28mm;
   padding: 7mm;
   place-items: center;
   border: 0.4mm solid #dbe5e2;
@@ -187,8 +166,8 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
 
 .fb__qr {
   display: block;
-  width: 100mm;
-  height: 100mm;
+  width: 116mm;
+  height: 116mm;
 }
 
 .fb__passos {
@@ -196,7 +175,7 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   width: 170mm;
   grid-template-columns: repeat(3, 1fr);
   gap: 6mm;
-  margin: 14mm 0 0;
+  margin: 12mm 0 0;
   padding: 0;
   list-style: none;
 }
@@ -223,7 +202,7 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
 }
 
 .fb__endereco {
-  margin: 12mm 0 0;
+  margin: 9mm 0 0;
   color: #3f5c55;
   font-family: var(--font-dados, var(--font-texto, system-ui, sans-serif));
   font-size: 16px;
@@ -231,15 +210,26 @@ const PASSOS = ['abrir', 'apontar', 'tocar'] as const
   letter-spacing: 0.01em;
 }
 
+/* O pé espelha o topo: a mesma sálvia com os desenhos, os cantos de cima arredondados. */
 .fb__pe {
-  display: flex;
+  --rabiscos-forca: 0.2;
+
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 40mm;
+  flex: none;
   margin-top: auto;
-  padding-bottom: 14mm;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 12mm 12mm 0 0;
+  background: #76938d;
 }
 
 .fb__marca {
   display: block;
-  width: 44mm;
+  width: 76mm;
   height: auto;
 }
 </style>
