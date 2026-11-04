@@ -12,8 +12,9 @@ um card, reconfira se o guia dele foi reanexado.
 |---|---|---|---|
 | 04/11 | Contrato da API de 03/11 (762 rotas) | `f56f34e` | (sem card) |
 | 04/11 | Teste da Pérola que falhava de manhã | `3b016d1` | (sem card) |
-| 04/11 | 0.1 PJ-VK5P13 convite com a conta errada | `f867aa4` | Em andamento: falta o teste com um convite real (o token só vem por e-mail) |
+| 04/11 | 0.1 PJ-VK5P13 convite com a conta errada | `f867aa4` | Em teste (fluxo de equipe e envio já testado pelo Luís; roteiro em `testes.md`) |
 | 04/11 | 0.2 PJ-XOI9HR merge da `redesign/portal` | já estava no `main` | Em teste |
+| 04/11 | 0.3 PJ-RWQBMT `/veterinario` vira `/clinica` | `14da2a4`, `b3c297b` (só formatação) | Em teste |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 
