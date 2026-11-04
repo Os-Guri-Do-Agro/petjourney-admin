@@ -6,17 +6,20 @@
  *
  * Conta não é espaço da barra (mora no menu da pessoa, no pé dela), então a tela não tem destino:
  * o título é "Configurações", e a frase de estado diz com que e-mail e em que empresa se entrou.
- * As cinco partes — Perfil, Empresa, Segurança, Aparência e Conta — são abas desta tela, com o
- * desenho das abas de destino (sublinhado, ícone e nome). Cada aba é um link de verdade
- * (`?aba=…`, como antes), então voltar, favoritar e abrir em outra guia funcionam, e os
- * redirecionamentos antigos para `?aba=empresa` continuam caindo no lugar certo.
+ * As cinco partes — Perfil, Empresa, Segurança, Aparência e Conta — são abas desta tela, na mesma
+ * trilha de vidro do cabeçalho que as abas de destino (desde 03/11/2026; antes eram uma fileira
+ * sublinhada embaixo da faixa, a única do portal). Cada aba é um link de verdade (`?aba=…`, como
+ * antes), então voltar, favoritar e abrir em outra guia funcionam, e os redirecionamentos antigos
+ * para `?aba=empresa` continuam caindo no lugar certo.
+ *
+ * A tela é de leitura: título, abas e folhas numa coluna centralizada (`largura="leitura"`).
  *
  * Cada aba é uma folha com seções: o nome e uma frase da seção à esquerda, os campos à direita,
  * e o "Salvar" no rodapé da folha.
  */
 import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import SettingsAparenciaPanel from '@/components/settings/SettingsAparenciaPanel.vue'
 import SettingsContaPanel from '@/components/settings/SettingsContaPanel.vue'
@@ -25,6 +28,7 @@ import SettingsPerfilPanel from '@/components/settings/SettingsPerfilPanel.vue'
 import SettingsSegurancaPanel from '@/components/settings/SettingsSegurancaPanel.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
+import type { Aba } from '@/navegacao/espacos'
 import { authSessionVersion, getAuthUser } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
@@ -71,15 +75,20 @@ function destinoDa(aba: SettingsTab) {
   return { path: '/settings', query }
 }
 
-const tabs = computed(() =>
+/*
+ * As abas no formato das de destino: o endereço é o caminho inteiro, com o `?aba=` de cada uma, e
+ * a frase de cada parte vai no `title` (o campo do selo, que estas abas não têm).
+ */
+const abas = computed<Aba[]>(() =>
   SETTINGS_TABS.map((id) => ({
-    id,
-    label: t(`settings.tabs.${id}.label`),
-    description: t(`settings.tabs.${id}.description`),
+    rotulo: t(`settings.tabs.${id}.label`),
     icone: ICONE_DA_ABA[id],
-    to: destinoDa(id),
+    to: router.resolve(destinoDa(id)).fullPath,
+    tituloDoSelo: t(`settings.tabs.${id}.description`),
   })),
 )
+
+const abaAtual = computed(() => router.resolve(destinoDa(activeTab.value)).fullPath)
 
 /** "Você entrou como carla@… em Clínica Vida Animal." */
 const resumo = computed(() => {
@@ -137,25 +146,9 @@ watch(
     :resumo="resumo"
     largura="leitura"
     icone="ph ph-gear-six"
+    :abas-da-tela="abas"
+    :aba-atual="abaAtual"
   >
-    <nav class="conta-abas" :aria-label="t('settings.abasAria')">
-      <RouterLink
-        v-for="aba in tabs"
-        :key="aba.id"
-        class="conta-abas__aba"
-        :class="{ 'conta-abas__aba--atual': aba.id === activeTab }"
-        :to="aba.to"
-        replace
-        active-class=""
-        exact-active-class=""
-        :aria-current="aba.id === activeTab ? 'page' : undefined"
-        :title="aba.description"
-      >
-        <i :class="aba.icone" aria-hidden="true" />
-        <span>{{ aba.label }}</span>
-      </RouterLink>
-    </nav>
-
     <SettingsPerfilPanel v-if="activeTab === 'perfil'" />
     <SettingsEmpresaPanel v-else-if="activeTab === 'empresa'" />
     <SettingsSegurancaPanel v-else-if="activeTab === 'seguranca'" />
@@ -163,92 +156,3 @@ watch(
     <SettingsContaPanel v-else />
   </UiPagina>
 </template>
-
-<style scoped>
-/* As abas da conta, no desenho das abas de destino: sublinhado de 3 px na cor do lugar. */
-.conta-abas {
-  display: flex;
-  gap: 4px;
-  margin: -6px 0 24px;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--linha);
-  scrollbar-width: none;
-}
-
-.conta-abas::-webkit-scrollbar {
-  display: none;
-}
-
-.conta-abas__aba {
-  position: relative;
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  height: 46px;
-  padding: 0 14px;
-  color: var(--tinta-2);
-  font-size: 14.5px;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.conta-abas__aba:first-child {
-  padding-inline-start: 2px;
-}
-
-.conta-abas__aba i {
-  font-size: 18px;
-}
-
-.conta-abas__aba:hover {
-  color: var(--tinta);
-}
-
-.conta-abas__aba:focus-visible {
-  border-radius: 6px;
-  outline: 2px solid var(--pj-lugar);
-  outline-offset: -4px;
-}
-
-.conta-abas__aba--atual {
-  color: var(--tinta);
-  font-weight: 600;
-}
-
-.conta-abas__aba--atual i {
-  color: var(--pj-lugar-tinta);
-}
-
-.conta-abas__aba--atual::after {
-  position: absolute;
-  right: 14px;
-  bottom: -1px;
-  left: 14px;
-  height: 3px;
-  border-radius: 3px 3px 0 0;
-  background: var(--pj-lugar);
-  content: '';
-}
-
-.conta-abas__aba--atual:first-child::after {
-  left: 2px;
-}
-
-[dir='rtl'] .conta-abas__aba--atual:first-child::after {
-  right: 2px;
-  left: 14px;
-}
-
-@media (max-width: 900px) {
-  .conta-abas {
-    margin-inline: -16px;
-    padding-inline: 16px;
-  }
-
-  .conta-abas__aba {
-    padding: 0 10px;
-  }
-}
-</style>

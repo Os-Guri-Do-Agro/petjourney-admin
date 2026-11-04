@@ -26,7 +26,7 @@ import UiAbas from '@/components/ui/UiAbas.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
-import { useEspacos } from '@/navegacao/espacos'
+import { type Aba, useEspacos } from '@/navegacao/espacos'
 import { hasVeterinarioProfile } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
@@ -50,7 +50,13 @@ const props = withDefaults(
     /** Botão de tour das telas do portal. */
     tour?: boolean
     semAbas?: boolean
-    /** `leitura` limita a largura para texto corrido e formulários. */
+    /**
+     * Abas da própria tela, para quem não mora num destino da barra (as Configurações): entram na
+     * mesma trilha de vidro do cabeçalho que as abas de destino.
+     */
+    abasDaTela?: Aba[]
+    abaAtual?: string | null
+    /** `leitura` limita a largura para texto corrido e formulários, numa coluna centralizada. */
     largura?: 'cheia' | 'leitura'
     /** Ícone do ladrilho ao lado do título; por padrão, o do destino aberto. */
     icone?: string
@@ -71,6 +77,8 @@ const props = withDefaults(
     guia: false,
     tour: false,
     semAbas: false,
+    abasDaTela: () => [],
+    abaAtual: null,
     largura: 'cheia',
     icone: '',
   },
@@ -93,10 +101,21 @@ const iconeDaTela = computed(() => props.icone || aqui.value.destino?.icone || '
  * mora no destino mas não é aba: ela tem a navegação dela, e uma fileira de abas sem nenhuma
  * acesa só confundiria.
  */
-const abas = computed(() =>
-  !props.semAbas && aqui.value.aba && aqui.value.destino && aqui.value.destino.abas.length > 1
+const abas = computed(() => {
+  if (props.abasDaTela.length > 1) {
+    return props.abasDaTela
+  }
+
+  return !props.semAbas &&
+    aqui.value.aba &&
+    aqui.value.destino &&
+    aqui.value.destino.abas.length > 1
     ? aqui.value.destino.abas
-    : [],
+    : []
+})
+
+const abaAtual = computed(() =>
+  props.abasDaTela.length > 1 ? props.abaAtual : (aqui.value.aba?.to ?? null),
 )
 
 const acessoEncerrado = computed(() => props.semAcessoDeParceiro && parceiroStore.acessoEncerrado)
@@ -206,7 +225,7 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
               vidro
               class="faixa__abas"
               :abas="abas"
-              :atual="aqui.aba?.to ?? null"
+              :atual="abaAtual"
               :rotulo="tituloDaTela"
             />
           </header>
@@ -267,7 +286,7 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
         v-if="abas.length"
         class="pagina__abas"
         :abas="abas"
-        :atual="aqui.aba?.to ?? null"
+        :atual="abaAtual"
         :rotulo="tituloDaTela"
       />
     </header>
@@ -411,8 +430,21 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
   padding-top: 0;
 }
 
+/*
+ * Tela de leitura (formulário, como as Configurações): a faixa continua de ponta a ponta, e o que
+ * vai nela e embaixo dela — título, abas e conteúdo — fica numa coluna só, no meio. Preso à
+ * esquerda, o formulário deixava a metade direita da tela vazia; esticado, virava caixa de texto de
+ * 1.300 px. Até ~1.300 px de área a coluna já ocupa tudo, e só nas telas largas sobra margem igual
+ * dos dois lados.
+ */
 .pagina--faixa.pagina--leitura .pagina__corpo {
-  max-width: 1120px;
+  max-width: 1200px;
+  margin-inline: auto;
+}
+
+.pagina--faixa.pagina--leitura .faixa__miolo {
+  max-width: calc(1200px + var(--pagina-margem) * 2);
+  margin-inline: auto;
 }
 
 .faixa {
