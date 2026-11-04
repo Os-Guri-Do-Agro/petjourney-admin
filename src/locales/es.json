@@ -2541,7 +2541,7 @@
         "mostrarPassados": "Mostrar {total} día que ya pasó | Mostrar {total} días que ya pasaron",
         "esconderPassados": "Ocultar los que ya pasaron",
         "apagarVarios": "Eliminar varios",
-        "marcados": "Ninguno marcado | {total} marcado | {total} marcados",
+        "marcados": "{total} marcado | {total} marcados",
         "marcarPassados": "Marcar los que ya pasaron",
         "apagarMarcados": "Eliminar | Eliminar {total} | Eliminar {total}"
       },

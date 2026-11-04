@@ -2541,7 +2541,7 @@
         "mostrarPassados": "Prikaži {total} prošli dan | Prikaži {total} prošla dana | Prikaži {total} prošlih dana",
         "esconderPassados": "Sakrij prošle dane",
         "apagarVarios": "Obriši više",
-        "marcados": "Ništa nije označeno | Označen {total} | Označena {total} | Označeno {total}",
+        "marcados": "Označen {total} | Označena {total} | Označeno {total}",
         "marcarPassados": "Označi prošle dane",
         "apagarMarcados": "Obriši | Obriši {total} | Obriši {total} | Obriši {total}"
       },

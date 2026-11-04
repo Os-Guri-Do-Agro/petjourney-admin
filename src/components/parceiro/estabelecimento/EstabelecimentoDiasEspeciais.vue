@@ -225,6 +225,7 @@ const grupos = computed(() => [
         </label>
         <Button
           v-if="passados.length"
+          class="selecao__passados"
           :label="t('parceiro.estabelecimento.dia.marcarPassados')"
           icon="ph ph-clock-counter-clockwise"
           severity="secondary"
@@ -389,6 +390,7 @@ const grupos = computed(() => [
 
 <style scoped>
 .especiais {
+  container: especiais / inline-size;
   display: grid;
   gap: 4px;
   padding: 10px 20px 12px;
@@ -402,20 +404,38 @@ const grupos = computed(() => [
   line-height: 1.45;
 }
 
-/* A barra da seleção, no véu: é o que está acontecendo com a lista agora. */
+/*
+ * A barra da seleção, no véu: é o que está acontecendo com a lista agora.
+ *
+ * O arranjo depende só da largura da coluna, nunca da contagem: com quebra livre, "1 marcado" cabia
+ * numa linha e "2 marcados" empurrava os botões para baixo a cada clique. Na coluna estreita são
+ * sempre duas linhas (a contagem, cancelar e apagar; embaixo, o atalho dos que já passaram); na
+ * larga, uma. A contagem fica sozinha do lado do vão: crescer ou encolher não mexe em botão nenhum.
+ */
 .selecao {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-areas:
+    'todos . acoes'
+    'passados passados passados';
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 8px 12px;
+  gap: 8px 10px;
   margin: 2px 0 6px;
   padding: 10px 12px;
   border-radius: 12px;
   background: var(--app-veu, var(--superficie-2));
 }
 
+@container especiais (min-width: 600px) {
+  .selecao {
+    grid-template-areas: 'todos . passados acoes';
+    grid-template-columns: auto 1fr auto auto;
+  }
+}
+
 .selecao__todos {
   display: inline-flex;
+  grid-area: todos;
   align-items: center;
   gap: 8px;
   color: var(--tinta);
@@ -424,10 +444,35 @@ const grupos = computed(() => [
   cursor: pointer;
 }
 
+/*
+ * A contagem cresce e encolhe ("0 marcados", "12 marcados") no vão: os botões ficam ancorados. Em
+ * uma linha só: quebrada, ela mudava a altura da barra.
+ */
+.selecao__todos > span {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.selecao__passados {
+  grid-area: passados;
+  justify-self: start;
+}
+
+/* Rótulo de botão em uma linha: quebrado, ele mudava a altura da barra. */
+.selecao :deep(.p-button-label) {
+  white-space: nowrap;
+}
+
 .selecao__acoes {
   display: inline-flex;
+  grid-area: acoes;
+  justify-self: end;
   gap: 8px;
-  margin-inline-start: auto;
+}
+
+/* "Apagar 1" e "Apagar 12" com a mesma largura: o botão não salta ao marcar. */
+.selecao__acoes > .p-button-danger {
+  min-width: 7.5rem;
 }
 
 .especiais__lista {

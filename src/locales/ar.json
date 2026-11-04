@@ -2541,7 +2541,7 @@
         "mostrarPassados": "لا أيام سابقة | عرض يوم سابق واحد | عرض يومين سابقين | عرض {total} أيام سابقة | عرض {total} يومًا سابقًا | عرض {total} يوم سابق",
         "esconderPassados": "إخفاء الأيام السابقة",
         "apagarVarios": "حذف عدة أيام",
-        "marcados": "لا شيء محدد | محدد واحد | محددان | {total} محددة | {total} محددًا | {total} محدد",
+        "marcados": "{total} محدد | محدد واحد | محددان | {total} محددة | {total} محددًا | {total} محدد",
         "marcarPassados": "تحديد الأيام السابقة",
         "apagarMarcados": "حذف | حذف {total} | حذف {total} | حذف {total} | حذف {total} | حذف {total}"
       },

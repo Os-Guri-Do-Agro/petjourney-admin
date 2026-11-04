@@ -2541,7 +2541,7 @@
         "mostrarPassados": "Show {total} past day | Show {total} past days",
         "esconderPassados": "Hide past days",
         "apagarVarios": "Delete several",
-        "marcados": "None selected | {total} selected | {total} selected",
+        "marcados": "{total} selected | {total} selected",
         "marcarPassados": "Select past days",
         "apagarMarcados": "Delete | Delete {total} | Delete {total}"
       },
