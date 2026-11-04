@@ -20,8 +20,8 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 0.6 PJ-IWQ1F4 módulos pelo servidor (E1-02) | `7e8646a` | Em teste |
 | 04/11 | 0.7 PJ-2VAFXX profissionais e funções (E1-03) | `846c6b1` | Em teste |
 | 04/11 | 0.8 PJ-2OPCOW parte do portal (E1-07c) | `bb4debe` | Em andamento (faltam app e CMS) |
-| 04/11 | 1.1 PJ-DXT9T5 Meu estabelecimento (E1-01) | `779153a` | Em teste |
-| 04/11 | 1.2 PJ-KE667M parte do portal (link e QR) | `779153a` | Em andamento (falta a página no site) |
+| 04/11 | 1.1 PJ-DXT9T5 Meu estabelecimento (E1-01) | `779153a`; melhorias `2f02761`, `e75462c`, `5537d33`, `a080ac2`, `c01a0c5`, `379d51c`, `3d57a85`, `fdd6c6a`, `dbd091e` | **Concluído** (testado pelo Luís em 04/11; a rota de lote dos dias especiais é a PJ-I98ATI, do Nicolas) |
+| 04/11 | 1.2 PJ-KE667M parte do portal (link e QR) | `779153a`, QR com PNG, SVG e folha do balcão | Em andamento (portal testado pelo Luís em 04/11; falta a página no site) |
 | 04/11 | 1.3 PJ-UFRXH6 auditoria da equipe (E1-05) | `fccd243` | Em teste |
 | 04/11 | 1.4 PJ-1HX14U selos, pauta do Início e sino pela API (E1-06) | `420ae3e` | Em teste |
 | 04/11 | 1.5 PJ-W8TOBS identidade da pessoa, selo e CNPJ alfanumérico (E1-08) | `e4ce0fc` | Em andamento (o aviso nos botões de assinar entra com as telas de assinar, ondas 4 e 5) |
