@@ -6,6 +6,17 @@ subtarefas, os guias anexados e os comentários do Nicolas até 04/11.
 versão mais nova de cada guia de front). O Nevo continua sendo a fonte da verdade: antes de começar
 um card, reconfira se o guia dele foi reanexado.
 
+## Andamento
+
+| Data | Item | Commit | Status no Nevo |
+|---|---|---|---|
+| 04/11 | Contrato da API de 03/11 (762 rotas) | `f56f34e` | (sem card) |
+| 04/11 | Teste da Pérola que falhava de manhã | `3b016d1` | (sem card) |
+| 04/11 | 0.1 PJ-VK5P13 convite com a conta errada | `f867aa4` | Em andamento: falta o teste com um convite real (o token só vem por e-mail) |
+| 04/11 | 0.2 PJ-XOI9HR merge da `redesign/portal` | já estava no `main` | Em teste |
+
+Lacunas e decisões provisórias: `lacunas.md`.
+
 ---
 
 ## 1. O quadro em números

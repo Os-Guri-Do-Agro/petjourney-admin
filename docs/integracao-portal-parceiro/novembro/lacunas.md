@@ -1,0 +1,10 @@
+# Lacunas e perguntas de novembro
+
+O que os guias não cobrem ou o que o front decidiu sozinho, para o Nicolas confirmar. Erro da API não
+se conserta no front: vem para cá e vira tarefa "🔴 NICOLAS RESPONDE" no Nevo.
+
+| # | Card | O quê | Decisão provisória | Tarefa no Nevo |
+|---|---|---|---|---|
+| N1 | PJ-VK5P13 | Os textos em espanhol do guia usam "tú" ("Entraste", "formas parte"); o `es.json` do portal é todo em "usted" (72 textos contra 3). | Mesmo sentido, no "usted": "Entró con una cuenta...", "Ahora forma parte del equipo de {empresa}." | a criar se ele quiser mudar o registro |
+| N2 | PJ-VK5P13 | Na conta errada, a linha do convite dizia "{nome} convidou você", contradizendo o título "Este convite é para outra conta". | A linha usa o texto que já existe sem o "você": "Convite como {papel}". | não precisa |
+| N3 | E4 | O guia da E4 tem a anamnese por voz (E4-07, seções 12, 13 e 15), mas não há card dela para o Luís em novembro. | Nada feito até ele dizer se falta o card. | a criar antes da onda 4 |
