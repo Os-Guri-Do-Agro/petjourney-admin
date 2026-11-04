@@ -2600,6 +2600,15 @@
         "mostrarEnderecoDica": "Kada je isključeno, stranica prikazuje samo naselje, grad i državu, bez mape.",
         "mostrarMapaDica": "Prikazuje se samo uz vidljivu ulicu i uz geografsku širinu i dužinu.",
         "coordenadasDica": "Kopirajte ih sa mape koju koristite: obe, sa decimalnom tačkom.",
+        "buscaCep": {
+          "dica": "Uz poštanski broj, ulica, naselje i grad se popunjavaju sami.",
+          "buscando": "Tražimo adresu za poštanski broj...",
+          "preenchido": "Adresa je popunjena prema poštanskom broju. Proverite broj.",
+          "cidadeInteira": "Ovaj poštanski broj važi za ceo grad: unesite ulicu i naselje.",
+          "naoEncontrado": "Poštanski broj nije pronađen. Proverite cifre ili unesite adresu ručno.",
+          "falhou": "Trenutno ne možemo da pronađemo poštanski broj. Unesite adresu ručno."
+        },
+        "coordenadasConferir": "Adresa se promenila: proverite da li geografska širina i dužina i dalje pokazuju na ovo mesto.",
         "foraDoHorarioDica": "Prikazuje se kada je objekat zatvoren.",
         "emergenciaDica": "Šta uraditi u hitnom slučaju van radnog vremena: druga adresa, drugi telefon.",
         "semTraducao": "Ovi tekstovi se prikazuju onako kako ih napišete, na jeziku izabranom u profilu.",

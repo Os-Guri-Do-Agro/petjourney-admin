@@ -2600,6 +2600,15 @@
         "mostrarEnderecoDica": "Desactivado, la página muestra solo barrio, ciudad y estado, sin mapa.",
         "mostrarMapaDica": "Solo aparece con la calle visible y con latitud y longitud.",
         "coordenadasDica": "Cópielas del mapa que usa: las dos, con punto decimal.",
+        "buscaCep": {
+          "dica": "Con el código postal, la calle, el barrio y la ciudad se completan solos.",
+          "buscando": "Buscando la dirección del código postal...",
+          "preenchido": "Dirección completada con el código postal. Revise el número.",
+          "cidadeInteira": "Este código postal es de toda la ciudad: complete la calle y el barrio.",
+          "naoEncontrado": "Código postal no encontrado. Revise los números o complete la dirección a mano.",
+          "falhou": "No se pudo buscar el código postal ahora. Complete la dirección a mano."
+        },
+        "coordenadasConferir": "La dirección cambió: revise que la latitud y la longitud sigan siendo de este lugar.",
         "foraDoHorarioDica": "Aparece cuando el negocio está cerrado.",
         "emergenciaDica": "Qué hacer en una emergencia fuera del horario: otra dirección, otro teléfono.",
         "semTraducao": "Estos textos aparecen tal como los escriba, en el idioma elegido en el perfil.",

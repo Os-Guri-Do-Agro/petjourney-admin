@@ -2600,6 +2600,15 @@
         "mostrarEnderecoDica": "When off, the page shows only neighbourhood, city and state, with no map.",
         "mostrarMapaDica": "Only appears with the street shown and with latitude and longitude.",
         "coordenadasDica": "Copy them from the map you use: both, with a decimal point.",
+        "buscaCep": {
+          "dica": "Enter the postcode and the street, neighbourhood and city fill in on their own.",
+          "buscando": "Looking up the address...",
+          "preenchido": "Address filled in from the postcode. Check the number.",
+          "cidadeInteira": "This postcode covers the whole city: fill in the street and neighbourhood.",
+          "naoEncontrado": "Postcode not found. Check the digits or fill in the address by hand.",
+          "falhou": "Couldn't look up the postcode right now. Fill in the address by hand."
+        },
+        "coordenadasConferir": "The address changed: check that the latitude and longitude still point to this place.",
         "foraDoHorarioDica": "Shown when you're closed.",
         "emergenciaDica": "What to do in an emergency outside opening hours: another address, another phone.",
         "semTraducao": "These texts appear as you write them, in the language chosen in the profile.",

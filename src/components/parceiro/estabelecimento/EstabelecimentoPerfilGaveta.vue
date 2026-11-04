@@ -9,6 +9,9 @@
  * começa sem a rua na página).
  *
  * As conferências são as mesmas da API, para o erro aparecer no campo antes de enviar.
+ *
+ * No endereço, o CEP novo preenche rua, bairro, cidade e UF pelo ViaCEP (o mesmo do app). As
+ * coordenadas não: o CEP só dá o centro da cidade, e o mapa precisa do ponto da casa.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -22,6 +25,7 @@ import { useI18n } from 'vue-i18n'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import { isRTLLocale, type Locale } from '@/i18n/locales'
+import { buscarCep, digitosDoCep, type EnderecoDoCep } from '@/service/brasil/cep-service'
 import type {
   DadosDoEstabelecimento,
   IdiomaDosTextos,
@@ -142,8 +146,113 @@ watch(visible, (aberta) => {
   if (aberta) {
     Object.assign(form, formularioDe(props.perfil))
     tentouSalvar.value = false
+    reiniciarBuscaDoCep()
+  } else {
+    busca?.abort()
   }
 })
+
+/* ------------------------------------------------------------------------- CEP */
+
+type BuscaDoCep = 'buscando' | 'preenchido' | 'cidadeInteira' | 'naoEncontrado' | 'falhou'
+
+const buscaDoCep = ref<BuscaDoCep | null>(null)
+/** O CEP trocou rua ou cidade: as coordenadas gravadas podem ser de outro lugar. */
+const enderecoMudou = ref(false)
+/** O último CEP buscado (ou o gravado, ao abrir): o mesmo de novo não busca. */
+let cepConsultado = ''
+let busca: AbortController | null = null
+
+function reiniciarBuscaDoCep() {
+  busca?.abort()
+  busca = null
+  cepConsultado = digitosDoCep(form.cep)
+  buscaDoCep.value = null
+  enderecoMudou.value = false
+}
+
+function mesmoNome(a: string, b: string) {
+  return a.trim().localeCompare(b.trim(), 'pt-BR', { sensitivity: 'base' }) === 0
+}
+
+function aplicarEndereco(endereco: EnderecoDoCep) {
+  const antes = [form.logradouro, form.bairro, form.cidade, form.uf].join('|')
+  const outraCidade = !mesmoNome(endereco.cidade, form.cidade) || endereco.uf !== form.uf
+
+  /*
+   * CEP de cidade inteira vem sem rua e sem bairro: o que foi digitado fica, a menos que seja de
+   * outra cidade.
+   */
+  if (endereco.logradouro || outraCidade) form.logradouro = endereco.logradouro
+  if (endereco.bairro || outraCidade) form.bairro = endereco.bairro
+  if (endereco.cidade) form.cidade = endereco.cidade
+  if (UFS.includes(endereco.uf)) form.uf = endereco.uf
+
+  if ([form.logradouro, form.bairro, form.cidade, form.uf].join('|') !== antes) {
+    enderecoMudou.value = true
+  }
+}
+
+/**
+ * Quem ainda está no CEP segue para o que falta: o número, ou a rua no CEP de cidade inteira. O
+ * campo vem selecionado: o número do endereço de antes some com a primeira tecla.
+ */
+function seguirDoCep(campo: 'est-numero' | 'est-logradouro') {
+  if (document.activeElement?.id !== 'est-cep') return
+
+  const destino = document.getElementById(campo)
+
+  if (destino instanceof HTMLInputElement) {
+    destino.focus()
+    destino.select()
+  }
+}
+
+async function preencherPeloCep(digitos: string) {
+  busca?.abort()
+  const controle = new AbortController()
+  busca = controle
+  cepConsultado = digitos
+  buscaDoCep.value = 'buscando'
+
+  try {
+    const endereco = await buscarCep(digitos, controle.signal)
+
+    if (controle.signal.aborted) return
+
+    if (!endereco) {
+      buscaDoCep.value = 'naoEncontrado'
+      return
+    }
+
+    aplicarEndereco(endereco)
+    buscaDoCep.value = endereco.logradouro ? 'preenchido' : 'cidadeInteira'
+    seguirDoCep(endereco.logradouro ? 'est-numero' : 'est-logradouro')
+  } catch {
+    if (controle.signal.aborted) return
+
+    /* Falhou a rede ou o serviço: o mesmo CEP pode ser tentado de novo. */
+    cepConsultado = ''
+    buscaDoCep.value = 'falhou'
+  }
+}
+
+watch(
+  () => digitosDoCep(form.cep),
+  (digitos) => {
+    if (props.parte !== 'endereco' || !visible.value || digitos === cepConsultado) return
+
+    if (digitos.length === 8) {
+      void preencherPeloCep(digitos)
+      return
+    }
+
+    busca?.abort()
+    buscaDoCep.value = null
+  },
+)
+
+const temCoordenadas = computed(() => texto(form.latitude) !== '' || texto(form.longitude) !== '')
 
 /* ------------------------------------------------------------------------- opções */
 
@@ -455,10 +564,34 @@ function salvar() {
               inputmode="numeric"
               maxlength="9"
               autocomplete="postal-code"
-              :invalid="!!problemaDe('cep')"
+              aria-describedby="est-cep-estado"
+              :invalid="!!problemaDe('cep') || buscaDoCep === 'naoEncontrado'"
               :disabled="salvando"
             />
-            <p v-if="problemaDe('cep')" class="eg__invalido">{{ problemaDe('cep') }}</p>
+            <!-- Uma linha só, que conta o que o CEP fez: o leitor de tela ouve a mudança. -->
+            <p
+              id="est-cep-estado"
+              :class="
+                problemaDe('cep') || buscaDoCep === 'naoEncontrado' ? 'eg__invalido' : 'eg__dica'
+              "
+              aria-live="polite"
+            >
+              <template v-if="problemaDe('cep')">{{ problemaDe('cep') }}</template>
+              <template v-else-if="buscaDoCep">
+                <i
+                  v-if="buscaDoCep === 'buscando'"
+                  class="ph ph-circle-notch ph-spin eg__cep-icone"
+                  aria-hidden="true"
+                />
+                <i
+                  v-else-if="buscaDoCep === 'preenchido'"
+                  class="ph ph-check eg__cep-icone eg__cep-icone--ok"
+                  aria-hidden="true"
+                />
+                {{ t(`parceiro.estabelecimento.gaveta.buscaCep.${buscaDoCep}`) }}
+              </template>
+              <template v-else>{{ t('parceiro.estabelecimento.gaveta.buscaCep.dica') }}</template>
+            </p>
           </section>
 
           <section class="eg__secao">
@@ -609,6 +742,11 @@ function salvar() {
           </div>
           <p v-if="problemaDe('coordenadas')" class="eg__invalido">
             {{ problemaDe('coordenadas') }}
+          </p>
+          <!-- O CEP mudou o endereço, e as coordenadas ainda são as de antes. -->
+          <p v-else-if="enderecoMudou && temCoordenadas" class="eg__aviso">
+            <i class="ph ph-warning" aria-hidden="true" />
+            {{ t('parceiro.estabelecimento.gaveta.coordenadasConferir') }}
           </p>
           <p v-else class="eg__dica">{{ t('parceiro.estabelecimento.gaveta.coordenadasDica') }}</p>
         </div>

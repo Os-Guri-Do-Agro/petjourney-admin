@@ -79,6 +79,17 @@
   color: var(--risco-tinta);
 }
 
+/* O ícone da linha do CEP: girando enquanto busca, o visto quando preencheu. */
+.eg__cep-icone {
+  margin-inline-end: 4px;
+  font-size: 14px;
+  vertical-align: -2px;
+}
+
+.eg__cep-icone--ok {
+  color: var(--ok-tinta);
+}
+
 .eg__chave {
   display: flex;
   align-items: center;

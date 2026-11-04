@@ -2600,6 +2600,15 @@
         "mostrarEnderecoDica": "Desligado, a página mostra só bairro, cidade e UF, sem mapa.",
         "mostrarMapaDica": "Só aparece com a rua à mostra e com latitude e longitude.",
         "coordenadasDica": "Copie do mapa que você usa: as duas, com ponto decimal.",
+        "buscaCep": {
+          "dica": "Com o CEP, a rua, o bairro e a cidade se preenchem sozinhos.",
+          "buscando": "Buscando o endereço do CEP...",
+          "preenchido": "Endereço preenchido pelo CEP. Confira o número.",
+          "cidadeInteira": "Este CEP vale para a cidade toda: preencha a rua e o bairro.",
+          "naoEncontrado": "CEP não encontrado. Confira os números ou preencha o endereço à mão.",
+          "falhou": "Não deu para buscar o CEP agora. Preencha o endereço à mão."
+        },
+        "coordenadasConferir": "O endereço mudou: confira se a latitude e a longitude ainda são deste lugar.",
         "foraDoHorarioDica": "Aparece quando a casa está fechada.",
         "emergenciaDica": "O que fazer numa emergência fora do horário: outro endereço, outro telefone.",
         "semTraducao": "Estes textos aparecem como você escrever, no idioma escolhido no perfil.",
