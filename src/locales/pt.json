@@ -2681,8 +2681,17 @@
           "titulo": "Folha para o balcão",
           "dica": "Uma A4 com o nome da casa, o QR e o endereço."
         },
-        "impressaoBloqueada": "O navegador bloqueou a janela de impressão",
-        "impressaoBloqueadaDetalhe": "Libere as janelas deste site e tente de novo."
+        "folha": {
+          "chamada": {
+            "clinica": "Agende seu horário pelo celular",
+            "hotel": "Reserve a hospedagem pelo celular"
+          },
+          "passo": {
+            "abrir": "Abra a câmera do celular",
+            "apontar": "Aponte para o código",
+            "tocar": "Toque no link que aparecer"
+          }
+        }
       }
     },
     "auditoria": {

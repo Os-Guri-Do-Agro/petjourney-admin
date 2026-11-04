@@ -8,7 +8,7 @@
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
@@ -16,7 +16,8 @@ import { useTelaLarga } from '@/composables/useTelaLarga'
 import { isRTLLocale, type Locale } from '@/i18n/locales'
 import type { LinkDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
-import { baixar, imagemDoQr, imprimirFolha, nomeDoArquivo, svgDoQr } from './qr-da-pagina'
+import EstabelecimentoFolhaDoBalcao from './EstabelecimentoFolhaDoBalcao.vue'
+import { baixar, imagemDoQr, nomeDoArquivo, svgDoQr } from './qr-da-pagina'
 import './gaveta.css'
 
 const props = defineProps<{
@@ -69,23 +70,52 @@ async function baixarSvg() {
   baixar(new Blob([svg], { type: 'image/svg+xml' }), nomeDoArquivo(props.slug, props.link, 'svg'))
 }
 
-function imprimir() {
-  if (!imagem.value) return
+/* ------------------------------------------------------------------- a folha do balcão */
 
-  const abriu = imprimirFolha(imagem.value, {
-    nome: props.nome,
-    instrucao: instrucao.value,
-    endereco: endereco.value,
-  })
+const imprimindo = ref(false)
 
-  if (!abriu) {
-    toast.add({
-      severity: 'warn',
-      summary: t('parceiro.estabelecimento.qr.impressaoBloqueada'),
-      detail: t('parceiro.estabelecimento.qr.impressaoBloqueadaDetalhe'),
-      life: 5000,
-    })
-  }
+/** Espera as imagens da folha (o QR, a pata, o nome PetJourney): sem isso a página sai sem elas. */
+async function imagensProntas() {
+  await nextTick()
+
+  const imagens = [...document.querySelectorAll<HTMLImageElement>('.fb img')]
+
+  await Promise.all(
+    imagens.map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => undefined))),
+  )
+}
+
+/**
+ * Imprime a própria página com só a folha à mostra. A margem zero do `@page` entra só agora (e sai
+ * depois): sem margem, o navegador não põe data, título e "about:blank" no papel, e as outras
+ * impressões do portal seguem com a margem delas. O título da aba vira o nome do PDF salvo.
+ */
+async function imprimir() {
+  if (!imagem.value || !props.link || imprimindo.value) return
+
+  imprimindo.value = true
+  await imagensProntas()
+
+  const pagina = document.createElement('style')
+  pagina.textContent = '@page { size: A4 portrait; margin: 0; }'
+  document.head.append(pagina)
+
+  const tituloAntes = document.title
+  document.title = `${props.nome} - QR`
+  document.documentElement.classList.add('imprimindo-folha')
+
+  window.addEventListener(
+    'afterprint',
+    () => {
+      document.documentElement.classList.remove('imprimindo-folha')
+      document.title = tituloAntes
+      pagina.remove()
+      imprimindo.value = false
+    },
+    { once: true },
+  )
+
+  window.print()
 }
 
 async function copiar() {
@@ -195,6 +225,15 @@ const OPCOES = [
       </div>
     </div>
   </Drawer>
+
+  <!-- Só existe durante a impressão: escondida, ela fica fora da tela e do leitor de tela. -->
+  <EstabelecimentoFolhaDoBalcao
+    v-if="imprimindo && link && imagem"
+    :nome
+    :tipo="link.tipo"
+    :endereco
+    :imagem
+  />
 </template>
 
 <style scoped>

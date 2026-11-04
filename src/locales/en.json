@@ -2681,8 +2681,17 @@
           "titulo": "Front desk sheet",
           "dica": "An A4 page with your name, the QR code and the address."
         },
-        "impressaoBloqueada": "The browser blocked the print window",
-        "impressaoBloqueadaDetalhe": "Allow pop-ups for this site and try again."
+        "folha": {
+          "chamada": {
+            "clinica": "Book your appointment from your phone",
+            "hotel": "Book your pet's stay from your phone"
+          },
+          "passo": {
+            "abrir": "Open your phone camera",
+            "apontar": "Point it at the code",
+            "tocar": "Tap the link that appears"
+          }
+        }
       }
     },
     "auditoria": {

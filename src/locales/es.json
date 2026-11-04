@@ -2681,8 +2681,17 @@
           "titulo": "Hoja para el mostrador",
           "dica": "Una A4 con el nombre del lugar, el QR y la dirección."
         },
-        "impressaoBloqueada": "El navegador bloqueó la ventana de impresión",
-        "impressaoBloqueadaDetalhe": "Permita las ventanas de este sitio e intente de nuevo."
+        "folha": {
+          "chamada": {
+            "clinica": "Agende su horario desde el celular",
+            "hotel": "Reserve el hospedaje desde el celular"
+          },
+          "passo": {
+            "abrir": "Abra la cámara del celular",
+            "apontar": "Apunte al código",
+            "tocar": "Toque el enlace que aparezca"
+          }
+        }
       }
     },
     "auditoria": {

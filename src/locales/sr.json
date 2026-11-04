@@ -2681,8 +2681,17 @@
           "titulo": "List za recepciju",
           "dica": "A4 strana sa nazivom, QR kodom i adresom."
         },
-        "impressaoBloqueada": "Pregledač je blokirao prozor za štampu",
-        "impressaoBloqueadaDetalhe": "Dozvolite prozore za ovaj sajt i pokušajte ponovo."
+        "folha": {
+          "chamada": {
+            "clinica": "Zakažite termin preko telefona",
+            "hotel": "Rezervišite smeštaj preko telefona"
+          },
+          "passo": {
+            "abrir": "Otvorite kameru telefona",
+            "apontar": "Usmerite je na kod",
+            "tocar": "Dodirnite link koji se pojavi"
+          }
+        }
       }
     },
     "auditoria": {
