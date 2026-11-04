@@ -2658,8 +2658,31 @@
         "copiar": "Copiar enlace",
         "copiado": "Enlace copiado",
         "erroCopiar": "No se pudo copiar. Copie la dirección de abajo.",
-        "baixarQr": "Descargar QR",
         "qrAlt": "QR que abre {endereco}"
+      },
+      "qr": {
+        "titulo": "QR de la página",
+        "ampliar": "Ampliar el QR",
+        "abrir": "Descargar o imprimir",
+        "instrucao": {
+          "clinica": "Apunte la cámara del celular para agendar.",
+          "hotel": "Apunte la cámara del celular para reservar."
+        },
+        "levar": "Descargar o imprimir",
+        "png": {
+          "titulo": "Imagen PNG",
+          "dica": "Para enviar por mensaje, publicar en redes o usar en el celular."
+        },
+        "svg": {
+          "titulo": "Archivo SVG",
+          "dica": "Para la imprenta: se amplía a cualquier tamaño sin perder nitidez."
+        },
+        "imprimir": {
+          "titulo": "Hoja para el mostrador",
+          "dica": "Una A4 con el nombre del lugar, el QR y la dirección."
+        },
+        "impressaoBloqueada": "El navegador bloqueó la ventana de impresión",
+        "impressaoBloqueadaDetalhe": "Permita las ventanas de este sitio e intente de nuevo."
       }
     },
     "auditoria": {

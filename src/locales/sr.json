@@ -2658,8 +2658,31 @@
         "copiar": "Kopirajte link",
         "copiado": "Link je kopiran",
         "erroCopiar": "Kopiranje nije uspelo. Kopirajte adresu ispod.",
-        "baixarQr": "Preuzmite QR",
         "qrAlt": "QR kod koji otvara {endereco}"
+      },
+      "qr": {
+        "titulo": "QR kod stranice",
+        "ampliar": "Uvećaj QR kod",
+        "abrir": "Preuzmi ili odštampaj",
+        "instrucao": {
+          "clinica": "Usmerite kameru telefona da zakažete.",
+          "hotel": "Usmerite kameru telefona da rezervišete."
+        },
+        "levar": "Preuzmi ili odštampaj",
+        "png": {
+          "titulo": "PNG slika",
+          "dica": "Za slanje porukom, objavu na mrežama ili upotrebu na telefonu."
+        },
+        "svg": {
+          "titulo": "SVG datoteka",
+          "dica": "Za štampariju: uvećava se na bilo koju veličinu bez gubitka oštrine."
+        },
+        "imprimir": {
+          "titulo": "List za recepciju",
+          "dica": "A4 strana sa nazivom, QR kodom i adresom."
+        },
+        "impressaoBloqueada": "Pregledač je blokirao prozor za štampu",
+        "impressaoBloqueadaDetalhe": "Dozvolite prozore za ovaj sajt i pokušajte ponovo."
       }
     },
     "auditoria": {

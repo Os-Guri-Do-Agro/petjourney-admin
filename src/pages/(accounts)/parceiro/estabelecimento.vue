@@ -735,6 +735,7 @@ async function salvarSlug(slug: string) {
               v-if="linksPublicos.length && estabelecimento.slug"
               :links="linksPublicos"
               :slug="estabelecimento.slug"
+              :nome="perfil?.nomePublico ?? store.parceiroNome"
             />
 
             <div class="endereco-da-pagina">

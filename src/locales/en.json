@@ -2658,8 +2658,31 @@
         "copiar": "Copy link",
         "copiado": "Link copied",
         "erroCopiar": "Could not copy. Copy the address below.",
-        "baixarQr": "Download QR",
         "qrAlt": "QR code that opens {endereco}"
+      },
+      "qr": {
+        "titulo": "Page QR code",
+        "ampliar": "Enlarge the QR code",
+        "abrir": "Download or print",
+        "instrucao": {
+          "clinica": "Point your phone camera here to book.",
+          "hotel": "Point your phone camera here to book a stay."
+        },
+        "levar": "Download or print",
+        "png": {
+          "titulo": "PNG image",
+          "dica": "To send in a message, post on social media or use on a phone."
+        },
+        "svg": {
+          "titulo": "SVG file",
+          "dica": "For the print shop: scales to any size without losing sharpness."
+        },
+        "imprimir": {
+          "titulo": "Front desk sheet",
+          "dica": "An A4 page with your name, the QR code and the address."
+        },
+        "impressaoBloqueada": "The browser blocked the print window",
+        "impressaoBloqueadaDetalhe": "Allow pop-ups for this site and try again."
       }
     },
     "auditoria": {

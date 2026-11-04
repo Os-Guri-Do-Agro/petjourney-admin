@@ -3,24 +3,24 @@
  * "Sua página pública": o link e o QR que apontam para a página no site (E1-01, PJ-KE667M).
  *
  * Aparece só com a página no ar: um link que não abre não serve para o balcão. O QR é gerado aqui
- * mesmo, no navegador (o endereço não passa por serviço de terceiro), pequeno na tela e grande no
- * arquivo que se baixa para imprimir.
+ * mesmo, no navegador (o endereço não passa por serviço de terceiro). Na tela ele é uma miniatura
+ * que amplia: o clique (ou "Baixar ou imprimir") abre a gaveta com o QR grande, o PNG, o SVG para a
+ * gráfica e a folha para imprimir.
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import QRCode from 'qrcode'
-import { reactive, watch } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { LinkDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
-const props = defineProps<{ links: LinkDaPaginaPublica[]; slug: string }>()
+import EstabelecimentoQrGaveta from './EstabelecimentoQrGaveta.vue'
+import { imagemDoQr } from './qr-da-pagina'
+
+const props = defineProps<{ links: LinkDaPaginaPublica[]; slug: string; nome: string }>()
 
 const { t } = useI18n()
 const toast = useToast()
-
-/* Tinta da casa sobre papel branco: o QR precisa de fundo claro nos dois temas para ler. */
-const CORES = { dark: '#10302A', light: '#FFFFFF' }
 
 const qrDaTela = reactive<Record<string, string>>({})
 
@@ -29,7 +29,7 @@ watch(
   async (urls) => {
     for (const url of urls) {
       if (!qrDaTela[url]) {
-        qrDaTela[url] = await QRCode.toDataURL(url, { margin: 1, width: 240, color: CORES })
+        qrDaTela[url] = await imagemDoQr(url, 280)
       }
     }
   },
@@ -59,28 +59,38 @@ async function copiar(url: string) {
   }
 }
 
-/** O arquivo para imprimir: 1024 px, para o QR do balcão não sair borrado. */
-async function baixarQr(link: LinkDaPaginaPublica) {
-  const imagem = await QRCode.toDataURL(link.url, { margin: 2, width: 1024, color: CORES })
-  const ancora = document.createElement('a')
-  ancora.href = imagem
-  ancora.download = `petjourney-${props.slug}-${link.tipo}.png`
-  ancora.click()
+const linkAberto = ref<LinkDaPaginaPublica | null>(null)
+const gavetaAberta = ref(false)
+
+function abrir(link: LinkDaPaginaPublica) {
+  linkAberto.value = link
+  gavetaAberta.value = true
 }
 </script>
 
 <template>
   <ul class="links" :aria-label="t('parceiro.estabelecimento.link.titulo')">
     <li v-for="link in links" :key="link.url" class="link">
-      <img
-        v-if="qrDaTela[link.url]"
+      <!-- A miniatura amplia: o selinho no canto e o cursor de lupa dizem que ela abre. -->
+      <Button
+        unstyled
+        type="button"
         class="link__qr"
-        :src="qrDaTela[link.url]"
-        :alt="t('parceiro.estabelecimento.link.qrAlt', { endereco: semProtocolo(link.url) })"
-        width="88"
-        height="88"
-      />
-      <span v-else class="link__qr link__qr--vazio" aria-hidden="true" />
+        :aria-label="t('parceiro.estabelecimento.qr.ampliar')"
+        :title="t('parceiro.estabelecimento.qr.ampliar')"
+        @click="abrir(link)"
+      >
+        <img
+          v-if="qrDaTela[link.url]"
+          class="link__imagem"
+          :src="qrDaTela[link.url]"
+          :alt="t('parceiro.estabelecimento.link.qrAlt', { endereco: semProtocolo(link.url) })"
+          width="112"
+          height="112"
+        />
+        <span v-else class="link__imagem link__imagem--vazia" aria-hidden="true" />
+        <span class="link__ampliar" aria-hidden="true"><i class="ph ph-arrows-out-simple" /></span>
+      </Button>
 
       <div class="link__texto">
         <span class="link__rotulo">{{ t(`parceiro.estabelecimento.link.${link.tipo}`) }}</span>
@@ -98,17 +108,19 @@ async function baixarQr(link: LinkDaPaginaPublica) {
             @click="copiar(link.url)"
           />
           <Button
-            icon="ph ph-download-simple"
-            :label="t('parceiro.estabelecimento.link.baixarQr')"
+            icon="ph ph-qr-code"
+            :label="t('parceiro.estabelecimento.qr.abrir')"
             severity="secondary"
             outlined
             size="small"
-            @click="baixarQr(link)"
+            @click="abrir(link)"
           />
         </div>
       </div>
     </li>
   </ul>
+
+  <EstabelecimentoQrGaveta v-model:visible="gavetaAberta" :link="linkAberto" :slug :nome />
 </template>
 
 <style scoped>
@@ -123,22 +135,57 @@ async function baixarQr(link: LinkDaPaginaPublica) {
 .link {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
 }
 
 /* O QR em papel branco, com a borda fina para não se perder no véu da seção. */
 .link__qr {
+  position: relative;
+  display: grid;
   flex: none;
-  width: 88px;
-  height: 88px;
-  padding: 4px;
+  place-items: center;
+  padding: 6px;
   border: 1px solid var(--linha);
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
+  cursor: zoom-in;
+  transition: border-color var(--pj-tempo-curto, 150ms) ease-out;
 }
 
-.link__qr--vazio {
+.link__qr:hover {
+  border-color: var(--app-salvia, var(--musgo));
+}
+
+.link__qr:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: 2px;
+}
+
+.link__imagem {
+  display: block;
+  width: 112px;
+  height: 112px;
+}
+
+.link__imagem--vazia {
+  border-radius: 8px;
   background: var(--superficie-2);
+}
+
+/* O selinho de ampliar, sólido: em véu translúcido ele sumia em cima do papel branco no escuro. */
+.link__ampliar {
+  position: absolute;
+  inset-block-end: -7px;
+  inset-inline-end: -7px;
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--superficie-3);
+  box-shadow: 0 0 0 3px var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .link__texto {
