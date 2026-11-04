@@ -21,6 +21,7 @@ import { useRouter } from 'vue-router'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EquipeConviteGaveta from '@/components/parceiro/EquipeConviteGaveta.vue'
 import EquipeFuncoesGaveta from '@/components/parceiro/EquipeFuncoesGaveta.vue'
+import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -79,6 +80,12 @@ async function carregar() {
   } finally {
     carregando.value = false
   }
+}
+
+/** Depois de convidar, cancelar ou mexer em alguém: a lista e o selo de convites do menu mudam juntos. */
+async function recarregarDepoisDeMudar() {
+  invalidarPendenciasDoPortal()
+  await carregar()
 }
 
 function formatarData(iso: string) {
@@ -151,7 +158,7 @@ async function enviarConvite(payload: { email: string; papel: PapelParceiro }) {
       detail: t('parceiro.equipe.toast.convidadoDetalhe', { email: payload.email }),
       life: 4000,
     })
-    await carregar()
+    await recarregarDepoisDeMudar()
   } catch (err) {
     erroDoEnvio.value = err instanceof Error ? err : new Error(String(err))
   } finally {
@@ -183,7 +190,7 @@ async function reenviarPendente(email: string) {
       detail: t('parceiro.equipe.toast.reenviadoDetalhe'),
       life: 4000,
     })
-    await carregar()
+    await recarregarDepoisDeMudar()
   } catch (err) {
     erroDoEnvio.value = err instanceof Error ? err : new Error(String(err))
   } finally {
@@ -200,7 +207,7 @@ function reenviar(convite: ConvitePendenteDto) {
       detail: t('parceiro.equipe.toast.reenviadoDetalhe'),
       life: 4000,
     })
-    await carregar()
+    await recarregarDepoisDeMudar()
   })
 }
 
@@ -266,7 +273,7 @@ function confirmar() {
     void comLinhaOcupada(pedido.convite.id, async () => {
       await cancelarConvite(pedido.convite.id, parceiroQuery())
       toast.add({ severity: 'success', summary: t('parceiro.equipe.toast.cancelado'), life: 3000 })
-      await carregar()
+      await recarregarDepoisDeMudar()
     })
     return
   }
@@ -277,7 +284,7 @@ function confirmar() {
     void comLinhaOcupada(membro.usuarioId, async () => {
       await removerDaEquipe(membro.usuarioId, parceiroQuery())
       toast.add({ severity: 'success', summary: t('parceiro.equipe.toast.removido'), life: 3000 })
-      await carregar()
+      await recarregarDepoisDeMudar()
     })
     return
   }
@@ -295,7 +302,7 @@ function confirmar() {
       }),
       life: 4000,
     })
-    await carregar()
+    await recarregarDepoisDeMudar()
   })
 }
 
@@ -335,7 +342,7 @@ async function salvarFuncoes(papeis: PapelOperacional[]) {
       detail: t('parceiro.equipe.toast.funcoesSalvasDetalhe', { nome: membro.nome }),
       life: 4000,
     })
-    await carregar()
+    await recarregarDepoisDeMudar()
 
     /* As funções de quem está logado mudam o menu dele: o /eu volta junto. */
     if (membro.usuarioId === meuId.value) {

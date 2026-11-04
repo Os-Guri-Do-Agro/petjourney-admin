@@ -18,6 +18,7 @@ import { useRoute } from 'vue-router'
 
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
 import { molduraPedida } from '@/components/layout/moldura'
+import ShellAvisos from '@/components/layout/ShellAvisos.vue'
 import ShellConta from '@/components/layout/ShellConta.vue'
 import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
@@ -63,6 +64,7 @@ const larguraParaBarraLarga = useTelaLarga(NAVIGATOR_AUTO_MIN_WIDTH)
 const compacto = ref(casaCompacto())
 const gavetaAberta = ref(false)
 const buscaAberta = ref(false)
+const avisosAbertos = ref(false)
 let consulta: MediaQueryList | undefined
 
 function casaCompacto() {
@@ -111,6 +113,11 @@ function alternarBarra() {
 function fecharGaveta() {
   gavetaAberta.value = false
 }
+
+/* Na gaveta do tablet, a lista de avisos abre no lugar da barra, e não por cima dela. */
+watch(avisosAbertos, (aberta) => {
+  if (aberta) fecharGaveta()
+})
 
 function aoMudarTela(evento: MediaQueryListEvent) {
   compacto.value = evento.matches
@@ -413,6 +420,7 @@ onUnmounted(() => {
         />
 
         <div class="barra__pe">
+          <ShellAvisos v-model:aberta="avisosAbertos" :recolhida="barraRecolhida" />
           <button
             type="button"
             class="barra__cupom"

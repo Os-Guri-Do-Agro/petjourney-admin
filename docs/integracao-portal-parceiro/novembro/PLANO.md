@@ -22,7 +22,8 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 0.8 PJ-2OPCOW parte do portal (E1-07c) | `bb4debe` | Em andamento (faltam app e CMS) |
 | 04/11 | 1.1 PJ-DXT9T5 Meu estabelecimento (E1-01) | `779153a` | Em teste |
 | 04/11 | 1.2 PJ-KE667M parte do portal (link e QR) | `779153a` | Em andamento (falta a página no site) |
-| 04/11 | 1.3 PJ-UFRXH6 auditoria da equipe (E1-05) | este commit | Em teste |
+| 04/11 | 1.3 PJ-UFRXH6 auditoria da equipe (E1-05) | `fccd243` | Em teste |
+| 04/11 | 1.4 PJ-1HX14U selos, pauta do Início e sino pela API (E1-06) | este commit | Em teste |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 

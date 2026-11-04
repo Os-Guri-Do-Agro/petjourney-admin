@@ -416,23 +416,56 @@ html:has(.shell--moldura-app) {
   border-top: 1px solid var(--app-regua);
 }
 
-.shell.shell--moldura-app .barra__cupom {
+.shell.shell--moldura-app .barra__cupom,
+.shell.shell--moldura-app .sino {
   background: transparent;
   color: var(--app-tinta);
 }
 
+.shell.shell--moldura-app .sino:hover {
+  background: var(--app-veu);
+  color: var(--app-tinta);
+}
+
+.shell.shell--moldura-app .sino:focus-visible {
+  outline-color: var(--app-tinta);
+}
+
 /* O quadradinho de 40 do menu, no mesmo eixo dos de cima (x = 40), aberta ou recolhida. */
-.shell.shell--moldura-app .barra__cupom {
+.shell.shell--moldura-app .barra__cupom,
+.shell.shell--moldura-app .sino {
   height: 48px;
 }
 
-.shell.shell--moldura-app .barra__cupom-icone {
+.shell.shell--moldura-app .barra__cupom-icone,
+.shell.shell--moldura-app .sino__icone {
   width: 40px;
   height: 40px;
   border-radius: 13px;
   background: var(--app-veu);
   color: var(--app-salvia-texto);
   font-size: 19px;
+}
+
+/* O número do sino é o selo neutro do menu: aviso é informação, não urgência. */
+.shell.shell--moldura-app .sino__selo {
+  min-width: 22px;
+  height: 22px;
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+  font-family: var(--font-texto);
+  font-weight: 700;
+}
+
+/* Recolhida: o número no canto do quadradinho, com o aro da cor do menu, como nos destinos. */
+.shell.shell--moldura-app .sino__selo.sino__selo--recolhida {
+  top: 1px;
+  inset-inline: auto 1px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-shadow: 0 0 0 2px var(--app-fundo);
+  font-size: 10.5px;
 }
 
 .shell.shell--moldura-app .barra .conta__botao {
@@ -472,11 +505,13 @@ html:has(.shell--moldura-app) {
   margin-top: 4px;
 }
 
-.shell.shell--moldura-app.shell--densa .barra__cupom {
+.shell.shell--moldura-app.shell--densa .barra__cupom,
+.shell.shell--moldura-app.shell--densa .sino {
   height: 40px;
 }
 
-.shell.shell--moldura-app.shell--densa .barra__cupom-icone {
+.shell.shell--moldura-app.shell--densa .barra__cupom-icone,
+.shell.shell--moldura-app.shell--densa .sino__icone {
   width: 30px;
   height: 30px;
   border-radius: 10px;

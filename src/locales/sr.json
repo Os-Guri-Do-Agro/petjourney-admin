@@ -435,6 +435,19 @@
     },
     "empresa": {
       "titulo": "Vaše firme"
+    },
+    "avisos": {
+      "titulo": "Obaveštenja",
+      "rotuloComNaoLidas": "Obaveštenja, {total} nepročitano | Obaveštenja, {total} nepročitana | Obaveštenja, {total} nepročitanih",
+      "de": "Obaveštenja za {parceiro}",
+      "marcarLidos": "Označi kao pročitano",
+      "carregando": "Učitavanje obaveštenja",
+      "erro": "Obaveštenja nisu mogla da se učitaju.",
+      "tentar": "Pokušaj ponovo",
+      "vazioTitulo": "Još nema obaveštenja",
+      "vazio": "Kada nešto ovde zatraži vašu pažnju, na primer modul kome uskoro ističe rok, obaveštenje se pojavljuje na ovoj listi.",
+      "naoLido": "Nepročitano",
+      "mais": "Prikaži ranija obaveštenja"
     }
   },
   "frame": {
@@ -717,7 +730,8 @@
       "emDia": "Ovde je sve ažurno.",
       "em": {
         "clinica": "{total} u Klinici",
-        "hotel": "{total} u Hotelu"
+        "hotel": "{total} u Hotelu",
+        "portal": "{total} u Portalu"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -9135,5 +9149,28 @@
       "rotinaPadrao": "Standardna rutina"
     },
     "abasAria": "Ekrani: {destino}"
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} pozivnica čeka odgovor | {total} pozivnice čekaju odgovor | {total} pozivnica čeka odgovor",
+      "acessosTemporariosAtivos": "{total} privremeni pristup je aktivan | {total} privremena pristupa su aktivna | {total} privremenih pristupa je aktivno",
+      "selosVencendo": "{total} CRMV pečat ističe ili je istekao | {total} CRMV pečata ističu ili su istekla | {total} CRMV pečata ističe ili je isteklo",
+      "importacoesPausadas": "{total} pauziran uvoz | {total} pauzirana uvoza | {total} pauziranih uvoza",
+      "agendamentosSemConfirmacao": "{total} termin nije potvrđen | {total} termina nisu potvrđena | {total} termina nije potvrđeno",
+      "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor",
+      "faltasSemJustificativa": "{total} izostanak bez opravdanja | {total} izostanka bez opravdanja | {total} izostanaka bez opravdanja",
+      "retornosPendentes": "{total} kontrola kasni ili je danas | {total} kontrole kasne ili su danas | {total} kontrola kasni ili je danas",
+      "fila": "{total} pacijent na listi čekanja | {total} pacijenta na listi čekanja | {total} pacijenata na listi čekanja",
+      "filaComOferta": "{total} ponuđen termin bez odgovora | {total} ponuđena termina bez odgovora | {total} ponuđenih termina bez odgovora",
+      "vagasParaAFila": "{total} slobodan termin za listu čekanja | {total} slobodna termina za listu čekanja | {total} slobodnih termina za listu čekanja",
+      "vacinasAtrasadas": "{total} revakcinacija kasni | {total} revakcinacije kasne | {total} revakcinacija kasni",
+      "vacinasAbaixoDoMinimo": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma",
+      "tratamentosEmQueda": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
+      "termosPendentes": "{total} dokument čeka prihvatanje | {total} dokumenta čekaju prihvatanje | {total} dokumenata čeka prihvatanje",
+      "copiasDoProntuario": "{total} otvoren zahtev za kopiju kartona | {total} otvorena zahteva za kopiju kartona | {total} otvorenih zahteva za kopiju kartona",
+      "dosesAtrasadasInternacao": "{total} zakasnela doza na hospitalizaciji | {total} zakasnele doze na hospitalizaciji | {total} zakasnelih doza na hospitalizaciji",
+      "boletinsRetidos": "{total} zadržan izveštaj | {total} zadržana izveštaja | {total} zadržanih izveštaja",
+      "outra": "{total} stavka na čekanju | {total} stavke na čekanju | {total} stavki na čekanju"
+    }
   }
 }

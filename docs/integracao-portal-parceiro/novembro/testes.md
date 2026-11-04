@@ -160,3 +160,26 @@ Equipe › aba **Auditoria**.
    embaixo da frase; evento do sistema leva o selo "Automático".
 6. **Como OPERADOR** sem a permissão `auditoria.ler` (só dono e gestão têm): a aba Auditoria não
    aparece em Equipe.
+
+## PJ-1HX14U · Selos do menu, "O que pede ação" e o sino pela API (E1-06)
+
+**Preparar:** a conta DONO de uma empresa aprovada (ex.: `dr10572931@gmail.com`, Clínica Veterinária
+Bem-Estar). Fora do modo demonstração (menu da conta, só no build de dev).
+
+1. **Selo do menu:** em Equipe, "Convidar pessoa" com um e-mail qualquer. Sem recarregar, "Equipe" no
+   menu ganha o selo "1"; passando o mouse, "1 convite esperando resposta". A aba "Pessoas" leva o
+   mesmo selo.
+2. **Início:** "1 assunto espera por você hoje" no alto e, no pé, "O que pede ação" com o grupo
+   Portal e a linha "1 convite esperando resposta", que leva à Equipe. O "Conferido às..." com o
+   botão de conferir de novo.
+3. **Cancelar o convite:** o selo some do menu e a linha some do Início. Com tudo zerado, o bloco "O
+   que pede ação" não aparece (zero não vira selo nem linha).
+4. **Sino:** "Avisos" no pé da barra, com o número de não lidos só desta empresa (a Bem-Estar tem 3;
+   a conta tem 5, contando os convites de outras empresas). Abrir mostra a lista na gaveta da
+   direita; tocar num aviso marca como lido e o número desce; "Marcar como lidos" marca os da lista.
+5. **Duas empresas:** troque de empresa no topo da barra. O sino e os selos passam a ser os da outra
+   empresa, sem sobrar número da anterior.
+6. **Barra recolhida e tablet (768):** o número do sino fica no canto do ícone; no tablet, "Avisos"
+   fecha a gaveta do menu e abre a dos avisos.
+7. **Clínica:** os contadores da Clínica (agenda, fila, vacinas, internação...) já vêm da API, mas só
+   viram selo e linha quando a tela de cada um estiver ligada à API (onda 2 em diante).

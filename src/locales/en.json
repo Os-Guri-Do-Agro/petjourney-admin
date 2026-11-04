@@ -435,6 +435,19 @@
     },
     "empresa": {
       "titulo": "Your companies"
+    },
+    "avisos": {
+      "titulo": "Notifications",
+      "rotuloComNaoLidas": "Notifications, {total} unread | Notifications, {total} unread",
+      "de": "Notifications for {parceiro}",
+      "marcarLidos": "Mark as read",
+      "carregando": "Loading notifications",
+      "erro": "Couldn't load the notifications.",
+      "tentar": "Try again",
+      "vazioTitulo": "No notifications yet",
+      "vazio": "When something here needs your attention, such as a module about to expire, it shows up in this list.",
+      "naoLido": "Unread",
+      "mais": "Show earlier notifications"
     }
   },
   "frame": {
@@ -717,7 +730,8 @@
       "emDia": "All caught up here.",
       "em": {
         "clinica": "{total} in the Clinic",
-        "hotel": "{total} in the Hotel"
+        "hotel": "{total} in the Hotel",
+        "portal": "{total} in the Portal"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -9135,5 +9149,28 @@
       "rotinaPadrao": "Standard routine"
     },
     "abasAria": "{destino} screens"
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} invitation awaiting a reply | {total} invitations awaiting a reply",
+      "acessosTemporariosAtivos": "{total} temporary access active | {total} temporary accesses active",
+      "selosVencendo": "{total} CRMV check expiring or expired | {total} CRMV checks expiring or expired",
+      "importacoesPausadas": "{total} paused import | {total} paused imports",
+      "agendamentosSemConfirmacao": "{total} appointment not confirmed | {total} appointments not confirmed",
+      "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply",
+      "faltasSemJustificativa": "{total} no-show without a reason on file | {total} no-shows without a reason on file",
+      "retornosPendentes": "{total} follow-up overdue or due today | {total} follow-ups overdue or due today",
+      "fila": "{total} patient on the waitlist | {total} patients on the waitlist",
+      "filaComOferta": "{total} offered slot without a reply | {total} offered slots without a reply",
+      "vagasParaAFila": "{total} opening for the waitlist | {total} openings for the waitlist",
+      "vacinasAtrasadas": "{total} overdue booster | {total} overdue boosters",
+      "vacinasAbaixoDoMinimo": "{total} vaccine below minimum | {total} vaccines below minimum",
+      "tratamentosEmQueda": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
+      "termosPendentes": "{total} document awaiting acceptance | {total} documents awaiting acceptance",
+      "copiasDoProntuario": "{total} open request for a record copy | {total} open requests for a record copy",
+      "dosesAtrasadasInternacao": "{total} overdue inpatient dose | {total} overdue inpatient doses",
+      "boletinsRetidos": "{total} update on hold | {total} updates on hold",
+      "outra": "{total} item to handle | {total} items to handle"
+    }
   }
 }

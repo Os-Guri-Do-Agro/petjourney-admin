@@ -435,6 +435,19 @@
     },
     "empresa": {
       "titulo": "Suas empresas"
+    },
+    "avisos": {
+      "titulo": "Avisos",
+      "rotuloComNaoLidas": "Avisos, {total} não lido | Avisos, {total} não lidos",
+      "de": "Os avisos de {parceiro}",
+      "marcarLidos": "Marcar como lidos",
+      "carregando": "Carregando os avisos",
+      "erro": "Não foi possível carregar os avisos.",
+      "tentar": "Tentar de novo",
+      "vazioTitulo": "Nenhum aviso por aqui",
+      "vazio": "Quando algo aqui pedir sua atenção, como um módulo perto de vencer, o aviso aparece nesta lista.",
+      "naoLido": "Não lido",
+      "mais": "Ver avisos anteriores"
     }
   },
   "frame": {
@@ -717,7 +730,8 @@
       "emDia": "Tudo em dia por aqui.",
       "em": {
         "clinica": "{total} na Clínica",
-        "hotel": "{total} no Hotel"
+        "hotel": "{total} no Hotel",
+        "portal": "{total} no Portal"
       },
       "comOnde": "{frase}: {onde}."
     },
@@ -9135,5 +9149,28 @@
       "rotinaPadrao": "Rotina padrão"
     },
     "abasAria": "Telas de {destino}"
+  },
+  "pendencias": {
+    "contador": {
+      "convitesPendentes": "{total} convite esperando resposta | {total} convites esperando resposta",
+      "acessosTemporariosAtivos": "{total} acesso temporário ativo | {total} acessos temporários ativos",
+      "selosVencendo": "{total} selo do CRMV vencendo ou vencido | {total} selos do CRMV vencendo ou vencidos",
+      "importacoesPausadas": "{total} importação pausada | {total} importações pausadas",
+      "agendamentosSemConfirmacao": "{total} agendamento sem confirmação | {total} agendamentos sem confirmação",
+      "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta",
+      "faltasSemJustificativa": "{total} falta sem justificativa | {total} faltas sem justificativa",
+      "retornosPendentes": "{total} retorno vencido ou para hoje | {total} retornos vencidos ou para hoje",
+      "fila": "{total} paciente na fila | {total} pacientes na fila",
+      "filaComOferta": "{total} vaga ofertada sem resposta | {total} vagas ofertadas sem resposta",
+      "vagasParaAFila": "{total} vaga aberta para a fila | {total} vagas abertas para a fila",
+      "vacinasAtrasadas": "{total} reforço vencido | {total} reforços vencidos",
+      "vacinasAbaixoDoMinimo": "{total} vacina abaixo do mínimo | {total} vacinas abaixo do mínimo",
+      "tratamentosEmQueda": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda",
+      "termosPendentes": "{total} termo esperando aceite | {total} termos esperando aceite",
+      "copiasDoProntuario": "{total} pedido de cópia do prontuário em aberto | {total} pedidos de cópia do prontuário em aberto",
+      "dosesAtrasadasInternacao": "{total} dose atrasada na internação | {total} doses atrasadas na internação",
+      "boletinsRetidos": "{total} boletim retido | {total} boletins retidos",
+      "outra": "{total} pendência | {total} pendências"
+    }
   }
 }
