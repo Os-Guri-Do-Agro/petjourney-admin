@@ -14,12 +14,13 @@
 import { useToast } from 'primevue/usetoast'
 import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog.vue'
 import { molduraPedida } from '@/components/layout/moldura'
 import ShellConta from '@/components/layout/ShellConta.vue'
 import ShellCriar from '@/components/layout/ShellCriar.vue'
+import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
 import FeedbackSaqueDialog from '@/components/parceiro/FeedbackSaqueDialog.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
@@ -47,6 +48,10 @@ const { t } = useI18n()
 const route = useRoute()
 const parceiroStore = useParceiroStore()
 const usuarioPerfilStore = useUsuarioPerfilStore()
+
+/** A lista das empresas da conta, aberta pelo bloco da empresa no topo da barra. */
+const empresas = ref<InstanceType<typeof ShellEmpresa> | null>(null)
+const empresasAbertas = ref(false)
 const { espacos, aqui, lugar, navigationSections, clinicaNaDemonstracao, hotelNaDemonstracao } =
   oferecerEspacos()
 const { open: abrirResgate, canOpen: podeResgatar } = useCupomResgateModal()
@@ -341,7 +346,19 @@ onUnmounted(() => {
           <!-- O topo sálvia do layout App é um destaque: leva os desenhos de traço, como os da
                página. Recolhida, a coluna é estreita demais para eles. -->
           <UiRabiscos v-if="moldura === 'app' && !barraRecolhida" estreito />
-          <RouterLink class="barra__marca" to="/inicio" :title="parceiroStore.parceiroNome">
+          <!--
+            A empresa em uso abre a lista das empresas da conta: é onde se procura a troca. Antes
+            era um link para o Início (que já está no menu) e a troca morava só no menu da conta.
+          -->
+          <button
+            type="button"
+            class="barra__marca"
+            aria-haspopup="menu"
+            :aria-expanded="empresasAbertas"
+            :aria-label="`${parceiroStore.parceiroNome}: ${t('shell.user.trocarEmpresa')}`"
+            :title="`${parceiroStore.parceiroNome}\n${t('shell.user.trocarEmpresa')}`"
+            @click="empresas?.alternar($event)"
+          >
             <span class="barra__pata" aria-hidden="true">
               <img src="/pata.png" alt="" />
             </span>
@@ -351,7 +368,9 @@ onUnmounted(() => {
               <strong dir="auto">{{ parceiroStore.parceiroNome }}</strong>
               <small>PetJourney</small>
             </span>
-          </RouterLink>
+            <i class="ph ph-caret-up-down barra__trocar shell-rotulo" aria-hidden="true" />
+          </button>
+          <ShellEmpresa ref="empresas" @aberto="empresasAbertas = $event" />
 
           <!-- Recolher/expandir: ao lado da empresa; recolhida, logo abaixo da pata. -->
           <button
@@ -580,9 +599,19 @@ onUnmounted(() => {
   border-radius: 14px;
   background: rgb(255 255 255 / 5%);
   color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
   text-decoration: none;
   white-space: nowrap;
   transition: background-color var(--pj-tempo-curto) ease;
+}
+
+.barra__trocar {
+  flex: none;
+  margin-inline-start: auto;
+  color: var(--sobre-rail-2);
+  font-size: 16px;
 }
 
 .barra__marca:hover {

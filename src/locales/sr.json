@@ -432,6 +432,9 @@
     },
     "demonstracao": {
       "rotulo": "Demonstracija (lokalni podaci)"
+    },
+    "empresa": {
+      "titulo": "Vaše firme"
     }
   },
   "frame": {

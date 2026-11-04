@@ -1,33 +1,23 @@
 <script setup lang="ts">
-import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { ApiError } from '@/service/api'
-import { getPerfis, trocarParaParceiro, type PerfilParceiro } from '@/service/auth/auth-service'
-import { getAuthUser } from '@/service/auth/auth-session'
-import { useParceiroStore } from '@/stores/parceiro'
-import { montarOpcoesParceiro, podeCadastrarNovaEmpresa } from '@/utils/parceiro/perfis-parceiro'
+import { useTrocaDeEmpresa } from '@/composables/useTrocaDeEmpresa'
 
 const { t } = useI18n()
-const toast = useToast()
-const router = useRouter()
-const store = useParceiroStore()
 
-const parceiros = ref<PerfilParceiro[]>([])
-const loading = ref(true)
-const errorMessage = ref('')
-const trocandoId = ref<string | null>(null)
-
-const opcoes = computed(() =>
-  montarOpcoesParceiro(parceiros.value, getAuthUser()?.parceiroAtivoId ?? store.parceiroId),
-)
-const mostrarCadastro = computed(
-  () => !loading.value && !errorMessage.value && podeCadastrarNovaEmpresa(parceiros.value),
-)
+const {
+  opcoes,
+  carregando: loading,
+  erro: errorMessage,
+  trocandoId,
+  podeCadastrar: mostrarCadastro,
+  carregar: carregarPerfis,
+  trocar,
+} = useTrocaDeEmpresa()
 
 /**
  * A frase da faixa. Com uma empresa só, "participa de mais de uma" não era verdade: o menu da conta
@@ -53,58 +43,8 @@ function iniciais(nome: string) {
     .join('')
 }
 
-async function carregarPerfis() {
-  loading.value = true
-  errorMessage.value = ''
-
-  try {
-    const perfis = await getPerfis()
-    parceiros.value = perfis.parceiros
-  } catch (err) {
-    parceiros.value = []
-    errorMessage.value =
-      err instanceof Error ? err.message : String(t('parceiro.selecionar.errorLoad'))
-  } finally {
-    loading.value = false
-  }
-}
-
-async function selecionar(parceiroId: string, jaAtivo: boolean) {
-  if (jaAtivo || trocandoId.value) {
-    return
-  }
-
-  trocandoId.value = parceiroId
-
-  try {
-    await trocarParaParceiro(parceiroId)
-    /* Contexto novo: o cache do parceiro anterior não pode vazar na tela do próximo. */
-    store.reset()
-    store.setParceiroId(parceiroId)
-    await store.bootstrap(true)
-    await router.replace('/inicio')
-  } catch (err) {
-    /* 403 = lista velha (membership removida em outro lugar): recarrega em vez de insistir. */
-    if (err instanceof ApiError && err.statusCode === 403) {
-      toast.add({
-        severity: 'warn',
-        summary: t('parceiro.selecionar.toast.stale'),
-        detail: t('parceiro.selecionar.toast.staleDetail'),
-        life: 5000,
-      })
-      await carregarPerfis()
-      return
-    }
-
-    toast.add({
-      severity: 'error',
-      summary: t('parceiro.selecionar.toast.error'),
-      detail: err instanceof Error ? err.message : t('parceiro.selecionar.toast.errorDetail'),
-      life: 5000,
-    })
-  } finally {
-    trocandoId.value = null
-  }
+function selecionar(parceiroId: string, jaAtivo: boolean) {
+  void trocar(parceiroId, jaAtivo)
 }
 
 onMounted(() => {
@@ -225,14 +165,11 @@ onMounted(() => {
   box-shadow:
     var(--pj-lugar-sombra),
     inset 0 1px 0 rgb(255 255 255 / 22%);
-  color: #fff;
+  /* A tinta do lugar sobre o tom dele: branco no pêssego pastel dava 1,4:1. */
+  color: var(--pj-lugar-tinta);
   font-family: var(--font-dados);
   font-size: 15px;
   font-weight: 650;
-}
-
-.app-dark .empresa__rosto {
-  color: var(--rail);
 }
 
 .empresa__rosto--equipe,

@@ -432,6 +432,9 @@
     },
     "demonstracao": {
       "rotulo": "عرض تجريبي (بيانات محلية)"
+    },
+    "empresa": {
+      "titulo": "شركاتك"
     }
   },
   "frame": {

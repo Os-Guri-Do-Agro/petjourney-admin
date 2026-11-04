@@ -432,6 +432,9 @@
     },
     "demonstracao": {
       "rotulo": "Demonstração (dados locais)"
+    },
+    "empresa": {
+      "titulo": "Suas empresas"
     }
   },
   "frame": {

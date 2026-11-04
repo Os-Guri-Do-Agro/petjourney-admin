@@ -138,6 +138,15 @@ html:has(.shell--moldura-app) {
   color: #fff;
 }
 
+/* A seta da troca de empresa, na tinta do nome: no sálvia, branco cheio fica acima de 3:1. */
+.shell.shell--moldura-app .barra__trocar {
+  color: #fff;
+}
+
+.shell.shell--moldura-app .barra__marca:focus-visible {
+  outline-color: #fff;
+}
+
 /*
  * O ladrilho da pata em vidro, como o botão de recolher ao lado. Em papel branco o contorno claro da
  * pata sumia no fundo, e só sobrava o miolo sálvia, que não lê como pata.

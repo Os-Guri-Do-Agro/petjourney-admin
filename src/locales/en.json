@@ -432,6 +432,9 @@
     },
     "demonstracao": {
       "rotulo": "Demo (local data)"
+    },
+    "empresa": {
+      "titulo": "Your companies"
     }
   },
   "frame": {
