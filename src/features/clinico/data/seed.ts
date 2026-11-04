@@ -467,6 +467,11 @@ const ESTADOS_GARANTIDOS = new Set([
   'apt-falta-hoje',
   /* A pré-consulta só faz sentido em atendimento que ainda vai acontecer. */
   'apt-pre-consulta',
+  /*
+   * A consulta de hoje da Pérola (10:00) é a que o lado do responsável mostra marcada e confirmada
+   * pelo app. Entre umas 9h e 11h ela era a mais próxima do agora e virava "aguardando".
+   */
+  'apt-resumo-perola',
 ])
 
 /**
