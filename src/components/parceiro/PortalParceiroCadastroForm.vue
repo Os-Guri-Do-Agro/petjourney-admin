@@ -107,7 +107,7 @@ const resumoEnvio = computed(() => [
 function applyInitial(initial: ParceiroCadastro | null) {
   form.nome = initial?.nome ?? ''
   form.categoria = initial?.categoria ?? null
-  // O backend guarda CNPJ canônico (só dígitos): mascara na entrada para exibir.
+  // O backend guarda o CNPJ canônico (letras e números, sem máscara): mascara para exibir.
   form.cnpj = formatCnpj(initial?.cnpj ?? '')
   form.telefoneComercial = formatPhone(initial?.telefoneComercial ?? '')
   form.crmv = initial?.crmv ?? null
@@ -157,9 +157,15 @@ function handleSubmit() {
 
   nomeError.value = !nome ? t('parceiroCadastro.form.nomeRequired') : ''
 
+  /*
+   * O CNPJ igual ao gravado não é conferido de novo: a API também não confere, e o cadastro antigo
+   * com o dígito errado segue editável no resto (E1-08).
+   */
+  const cnpjGravado = cnpjDigitos !== '' && cnpjDigitos === stripCnpj(props.initial?.cnpj ?? '')
+
   if (!cnpjDigitos) {
     cnpjError.value = t('parceiroCadastro.form.cnpjRequired')
-  } else if (!isValidCnpj(cnpjDigitos)) {
+  } else if (!cnpjGravado && !isValidCnpj(cnpjDigitos)) {
     cnpjError.value = t('parceiroCadastro.form.cnpjInvalid')
   } else {
     cnpjError.value = ''
@@ -270,7 +276,7 @@ function handleSubmit() {
           :placeholder="t('parceiroCadastro.form.cnpjPlaceholder')"
           :invalid="Boolean(cnpjError) || errorField === 'cnpj'"
           :aria-describedby="cnpjError ? 'cad-cnpj-error' : undefined"
-          inputmode="numeric"
+          autocapitalize="characters"
           maxlength="18"
           @input="onCnpjInput"
         />

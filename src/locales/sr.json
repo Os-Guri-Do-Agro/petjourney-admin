@@ -3060,7 +3060,77 @@
       }
     },
     "resumo": "Prijavljeni ste kao {email}.",
-    "resumoEmpresa": "Prijavljeni ste kao {email}, u firmi {empresa}."
+    "resumoEmpresa": "Prijavljeni ste kao {email}, u firmi {empresa}.",
+    "identidade": {
+      "titulo": "Provera identiteta",
+      "descricao": "Dokument sa fotografijom, selfi i CPF, koje proverava osoba iz PetJourney-ja. To omogućava potpisivanje recepata, kartona i propisane terapije.",
+      "estado": {
+        "nenhum": "Još niste poslali.",
+        "EM_ANALISE": "U proveri od {data}. Ako ga niko ne proveri do {prazo}, slanje se otkazuje.",
+        "APROVADA": "Odobreno {data}.",
+        "RECUSADA": "Odbijeno {data}.",
+        "CANCELADA": "Otkazali ste slanje od {data}.",
+        "REVOGADA": "Opozvano {data}."
+      },
+      "status": {
+        "EM_ANALISE": "U proveri",
+        "APROVADA": "Odobreno",
+        "RECUSADA": "Odbijeno",
+        "CANCELADA": "Otkazano",
+        "REVOGADA": "Opozvano"
+      },
+      "motivo": "Razlog: {motivo}",
+      "expirada": "Slanje je 14 dana čekalo proveru i fotografije su obrisane. Pošaljite ponovo.",
+      "selo": {
+        "SEM_SELO": "Vaš CRMV čeka proveru PetJourney-ja.",
+        "VENCIDO": "Provera vašeg CRMV-a je istekla: PetJourney mora ponovo da je obavi pre potpisivanja.",
+        "SEM_IDENTIDADE": "Da biste potpisivali, potvrdite identitet.",
+        "CRMV_OBRIGATORIO": "Da biste potpisivali, unesite CRMV i saveznu državu u svoj profesionalni karton."
+      },
+      "acoes": {
+        "enviar": "Proveri identitet",
+        "reenviar": "Pošalji ponovo",
+        "ver": "Pogledaj slanje",
+        "abrirFicha": "Otvori karton",
+        "fechar": "Zatvori",
+        "cancelarEnvio": "Otkaži slanje",
+        "confirmarCancelamento": "Otkazati slanje? Fotografije se odmah brišu.",
+        "voltar": "Nazad",
+        "tentarDeNovo": "Pokušaj ponovo"
+      },
+      "gaveta": {
+        "nome": "Puno ime, kao u dokumentu",
+        "cpf": "CPF",
+        "cpfDica": "Isti CPF kao u vašem profilu.",
+        "documento": "Dokument sa fotografijom",
+        "documentoDica": "Vozačka dozvola ili nova lična karta. Fotografija ili PDF.",
+        "verso": "Poleđina dokumenta",
+        "versoDica": "Izostavite ako prednja strana, ili PDF, već prikazuje obe strane.",
+        "selfie": "Selfi sa dokumentom u ruci",
+        "selfieDica": "Lice i dokument jasno vidljivi, bez odsjaja.",
+        "opcional": "(nije obavezno)",
+        "escolher": "Izaberi datoteku",
+        "remover": "Ukloni: {arquivo}",
+        "formatosFoto": "JPG, PNG ili WEBP, do 8 MB.",
+        "formatosDocumento": "JPG, PNG, WEBP ili PDF, do 8 MB.",
+        "enviadaEm": "Poslato",
+        "prazo": "Rok za proveru",
+        "decididaEm": "Odlučeno",
+        "emAnaliseDica": "Dobićete e-poruku kada bude odlučeno.",
+        "novoEnvio": "Novo slanje"
+      },
+      "erros": {
+        "nome": "Unesite puno ime, kao u dokumentu.",
+        "cpf": "Neispravan CPF.",
+        "faltando": "Izaberite datoteku.",
+        "tipoFoto": "Koristite JPG, PNG ili WEBP.",
+        "tipoDocumento": "Koristite JPG, PNG, WEBP ili PDF.",
+        "tamanho": "Datoteka je veća od 8 MB.",
+        "aviso": "Obaveštenje o privatnosti nije moglo da se učita.",
+        "carregar": "Provera nije mogla da se učita.",
+        "enviar": "Slanje nije uspelo. Pokušajte ponovo."
+      }
+    }
   },
   "clinico": {
     "navegacao": {

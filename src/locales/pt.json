@@ -3060,7 +3060,77 @@
       }
     },
     "resumo": "Você entrou como {email}.",
-    "resumoEmpresa": "Você entrou como {email}, em {empresa}."
+    "resumoEmpresa": "Você entrou como {email}, em {empresa}.",
+    "identidade": {
+      "titulo": "Verificação de identidade",
+      "descricao": "Documento com foto, selfie e CPF, conferidos por uma pessoa da PetJourney. É o que libera a assinatura de receitas, prontuários e prescrições.",
+      "estado": {
+        "nenhum": "Você ainda não enviou.",
+        "EM_ANALISE": "Em análise desde {data}. Sem conferência até {prazo}, o envio é cancelado.",
+        "APROVADA": "Aprovada em {data}.",
+        "RECUSADA": "Recusada em {data}.",
+        "CANCELADA": "Você cancelou o envio de {data}.",
+        "REVOGADA": "Revogada em {data}."
+      },
+      "status": {
+        "EM_ANALISE": "Em análise",
+        "APROVADA": "Aprovada",
+        "RECUSADA": "Recusada",
+        "CANCELADA": "Cancelada",
+        "REVOGADA": "Revogada"
+      },
+      "motivo": "Motivo: {motivo}",
+      "expirada": "O envio ficou 14 dias sem conferência e as fotos foram apagadas. Envie de novo.",
+      "selo": {
+        "SEM_SELO": "Seu CRMV espera a conferência da PetJourney.",
+        "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo para você assinar.",
+        "SEM_IDENTIDADE": "Para assinar, confirme sua identidade.",
+        "CRMV_OBRIGATORIO": "Para assinar, cadastre o CRMV e a UF na sua ficha de profissional."
+      },
+      "acoes": {
+        "enviar": "Verificar identidade",
+        "reenviar": "Enviar de novo",
+        "ver": "Ver envio",
+        "abrirFicha": "Abrir a ficha",
+        "fechar": "Fechar",
+        "cancelarEnvio": "Cancelar envio",
+        "confirmarCancelamento": "Cancelar o envio? As fotos são apagadas na hora.",
+        "voltar": "Voltar",
+        "tentarDeNovo": "Tentar de novo"
+      },
+      "gaveta": {
+        "nome": "Nome completo, como no documento",
+        "cpf": "CPF",
+        "cpfDica": "O mesmo CPF do seu perfil.",
+        "documento": "Documento com foto",
+        "documentoDica": "CNH ou a carteira de identidade nova. Foto ou PDF.",
+        "verso": "Verso do documento",
+        "versoDica": "Deixe sem se a frente, ou o PDF, já mostra os dois lados.",
+        "selfie": "Selfie segurando o documento",
+        "selfieDica": "O rosto e o documento à vista, sem reflexo.",
+        "opcional": "(opcional)",
+        "escolher": "Escolher arquivo",
+        "remover": "Remover {arquivo}",
+        "formatosFoto": "JPG, PNG ou WEBP, até 8 MB.",
+        "formatosDocumento": "JPG, PNG, WEBP ou PDF, até 8 MB.",
+        "enviadaEm": "Enviada em",
+        "prazo": "Prazo da conferência",
+        "decididaEm": "Decidida em",
+        "emAnaliseDica": "Você recebe um e-mail quando for decidida.",
+        "novoEnvio": "Novo envio"
+      },
+      "erros": {
+        "nome": "Escreva o nome completo, como no documento.",
+        "cpf": "CPF inválido.",
+        "faltando": "Escolha o arquivo.",
+        "tipoFoto": "Use JPG, PNG ou WEBP.",
+        "tipoDocumento": "Use JPG, PNG, WEBP ou PDF.",
+        "tamanho": "O arquivo passa de 8 MB.",
+        "aviso": "Não foi possível carregar o aviso de privacidade.",
+        "carregar": "Não foi possível carregar a verificação.",
+        "enviar": "Não foi possível enviar. Tente de novo."
+      }
+    }
   },
   "clinico": {
     "navegacao": {

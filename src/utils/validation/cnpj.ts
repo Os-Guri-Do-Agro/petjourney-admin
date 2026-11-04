@@ -1,5 +1,12 @@
+/**
+ * O CNPJ, numérico ou alfanumérico (o novo da Receita: letras nos 12 primeiros caracteres, os dois
+ * dígitos verificadores sempre números). A API aceita os dois e recusa o dígito errado com 400
+ * `CNPJ_INVALIDO` (E1-08); o portal confere antes de enviar, com o mesmo cálculo.
+ */
+
+/** Só letras e números, em maiúsculas: a forma canônica que a API guarda. */
 export function stripCnpj(value: string) {
-  return value.replace(/\D/g, '')
+  return value.toUpperCase().replace(/[^0-9A-Z]/g, '')
 }
 
 export function formatCnpj(value: string) {
@@ -28,13 +35,17 @@ function hasRepeatedDigits(digits: string) {
   return /^(\d)\1{13}$/.test(digits)
 }
 
-/** Módulo 11 do CNPJ: pesos de 2 a 9, cíclicos da direita para a esquerda. */
+/**
+ * Módulo 11 do CNPJ: pesos de 2 a 9, cíclicos da direita para a esquerda. Cada caractere vale o
+ * código ASCII menos 48: os números valem eles mesmos, e as letras do CNPJ alfanumérico, de 17 (A)
+ * em diante.
+ */
 function calculateCheckDigit(digits: string) {
   let factor = 2
   let total = 0
 
   for (let i = digits.length - 1; i >= 0; i -= 1) {
-    total += Number(digits[i]) * factor
+    total += (digits.charCodeAt(i) - 48) * factor
     factor = factor === 9 ? 2 : factor + 1
   }
 
@@ -46,7 +57,7 @@ function calculateCheckDigit(digits: string) {
 export function isValidCnpj(value: string) {
   const digits = stripCnpj(value)
 
-  if (digits.length !== 14 || hasRepeatedDigits(digits)) {
+  if (!/^[0-9A-Z]{12}\d{2}$/.test(digits) || hasRepeatedDigits(digits)) {
     return false
   }
 

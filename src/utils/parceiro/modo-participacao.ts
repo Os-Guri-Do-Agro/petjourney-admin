@@ -195,6 +195,11 @@ export function resolveCadastroErrorView(error: unknown): {
     }
   }
 
+  /* O dígito verificador errado (E1-08): a frase da API, no campo do CNPJ. */
+  if (error.codigo === 'CNPJ_INVALIDO') {
+    return { message: error.message, field: 'cnpj' }
+  }
+
   switch (error.reason) {
     case 'PARCEIRO_CADASTRO_JA_EXISTE':
       return { message: String(t('parceiroCadastro.errors.jaExiste')) }

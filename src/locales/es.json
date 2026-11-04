@@ -3060,7 +3060,77 @@
       }
     },
     "resumo": "Entró como {email}.",
-    "resumoEmpresa": "Entró como {email}, en {empresa}."
+    "resumoEmpresa": "Entró como {email}, en {empresa}.",
+    "identidade": {
+      "titulo": "Verificación de identidad",
+      "descricao": "Documento con foto, selfie y CPF, revisados por una persona de PetJourney. Es lo que habilita la firma de recetas, historias clínicas y prescripciones.",
+      "estado": {
+        "nenhum": "Aún no lo envió.",
+        "EM_ANALISE": "En revisión desde el {data}. Si nadie lo revisa hasta el {prazo}, se cancela.",
+        "APROVADA": "Aprobada el {data}.",
+        "RECUSADA": "Rechazada el {data}.",
+        "CANCELADA": "Usted canceló el envío del {data}.",
+        "REVOGADA": "Revocada el {data}."
+      },
+      "status": {
+        "EM_ANALISE": "En revisión",
+        "APROVADA": "Aprobada",
+        "RECUSADA": "Rechazada",
+        "CANCELADA": "Cancelada",
+        "REVOGADA": "Revocada"
+      },
+      "motivo": "Motivo: {motivo}",
+      "expirada": "El envío pasó 14 días sin revisión y las fotos se borraron. Envíelo de nuevo.",
+      "selo": {
+        "SEM_SELO": "Su CRMV espera la revisión de PetJourney.",
+        "VENCIDO": "La revisión de su CRMV venció: PetJourney debe revisarlo de nuevo para que usted firme.",
+        "SEM_IDENTIDADE": "Para firmar, confirme su identidad.",
+        "CRMV_OBRIGATORIO": "Para firmar, registre el CRMV y el estado en su ficha profesional."
+      },
+      "acoes": {
+        "enviar": "Verificar identidad",
+        "reenviar": "Enviar de nuevo",
+        "ver": "Ver envío",
+        "abrirFicha": "Abrir la ficha",
+        "fechar": "Cerrar",
+        "cancelarEnvio": "Cancelar envío",
+        "confirmarCancelamento": "¿Cancelar el envío? Las fotos se borran en el momento.",
+        "voltar": "Volver",
+        "tentarDeNovo": "Intentar de nuevo"
+      },
+      "gaveta": {
+        "nome": "Nombre completo, como en el documento",
+        "cpf": "CPF",
+        "cpfDica": "El mismo CPF de su perfil.",
+        "documento": "Documento con foto",
+        "documentoDica": "Licencia de conducir o el documento de identidad nuevo. Foto o PDF.",
+        "verso": "Reverso del documento",
+        "versoDica": "Déjelo vacío si el frente, o el PDF, ya muestra los dos lados.",
+        "selfie": "Selfie sosteniendo el documento",
+        "selfieDica": "El rostro y el documento a la vista, sin reflejos.",
+        "opcional": "(opcional)",
+        "escolher": "Elegir archivo",
+        "remover": "Quitar {arquivo}",
+        "formatosFoto": "JPG, PNG o WEBP, hasta 8 MB.",
+        "formatosDocumento": "JPG, PNG, WEBP o PDF, hasta 8 MB.",
+        "enviadaEm": "Enviada el",
+        "prazo": "Plazo de revisión",
+        "decididaEm": "Decidida el",
+        "emAnaliseDica": "Recibirá un correo cuando se decida.",
+        "novoEnvio": "Nuevo envío"
+      },
+      "erros": {
+        "nome": "Escriba el nombre completo, como en el documento.",
+        "cpf": "CPF no válido.",
+        "faltando": "Elija el archivo.",
+        "tipoFoto": "Use JPG, PNG o WEBP.",
+        "tipoDocumento": "Use JPG, PNG, WEBP o PDF.",
+        "tamanho": "El archivo supera los 8 MB.",
+        "aviso": "No se pudo cargar el aviso de privacidad.",
+        "carregar": "No se pudo cargar la verificación.",
+        "enviar": "No se pudo enviar. Intente de nuevo."
+      }
+    }
   },
   "clinico": {
     "navegacao": {

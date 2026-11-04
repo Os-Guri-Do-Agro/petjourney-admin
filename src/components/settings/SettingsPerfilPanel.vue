@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
+import SettingsIdentidadeSecao from '@/components/settings/SettingsIdentidadeSecao.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
 import { authSessionVersion, getAuthUser } from '@/service/auth/auth-session'
@@ -613,6 +614,8 @@ onMounted(() => {
         />
       </div>
     </section>
+
+    <SettingsIdentidadeSecao :nome-sugerido="nome" :cpf-sugerido="cpf" />
 
     <section class="cfg-secao" aria-labelledby="perfil-secao-vet">
       <header class="cfg-secao__cabeca">

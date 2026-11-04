@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { formatCnpj, isValidCnpj, stripCnpj } from '../cnpj'
 
 describe('stripCnpj', () => {
-  it('mantém só os dígitos', () => {
+  it('mantém só letras e números (no CNPJ numérico, os dígitos)', () => {
     expect(stripCnpj('11.222.333/0001-81')).toBe('11222333000181')
     expect(stripCnpj('  11 222 333 0001 81 ')).toBe('11222333000181')
     expect(stripCnpj('')).toBe('')
@@ -58,5 +58,22 @@ describe('isValidCnpj', () => {
 
   it('recusa texto sem dígito suficiente', () => {
     expect(isValidCnpj('abc')).toBe(false)
+  })
+
+  it('aceita o CNPJ alfanumérico, com as letras valendo o ASCII menos 48', () => {
+    expect(isValidCnpj('12.ABC.345/01DE-35')).toBe(true)
+    expect(isValidCnpj('12abc34501de35')).toBe(true)
+    expect(isValidCnpj('12.ABC.345/01DE-34')).toBe(false)
+  })
+
+  it('o dígito verificador do alfanumérico é sempre número', () => {
+    expect(isValidCnpj('12ABC34501DE3A')).toBe(false)
+  })
+})
+
+describe('CNPJ alfanumérico', () => {
+  it('guarda letras e números em maiúsculas, e a máscara é a mesma', () => {
+    expect(stripCnpj('12.abc.345/01de-35')).toBe('12ABC34501DE35')
+    expect(formatCnpj('12abc34501de35')).toBe('12.ABC.345/01DE-35')
   })
 })

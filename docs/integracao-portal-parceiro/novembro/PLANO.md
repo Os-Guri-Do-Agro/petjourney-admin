@@ -23,7 +23,8 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 1.1 PJ-DXT9T5 Meu estabelecimento (E1-01) | `779153a` | Em teste |
 | 04/11 | 1.2 PJ-KE667M parte do portal (link e QR) | `779153a` | Em andamento (falta a página no site) |
 | 04/11 | 1.3 PJ-UFRXH6 auditoria da equipe (E1-05) | `fccd243` | Em teste |
-| 04/11 | 1.4 PJ-1HX14U selos, pauta do Início e sino pela API (E1-06) | este commit | Em teste |
+| 04/11 | 1.4 PJ-1HX14U selos, pauta do Início e sino pela API (E1-06) | `420ae3e` | Em teste |
+| 04/11 | 1.5 PJ-W8TOBS identidade da pessoa, selo e CNPJ alfanumérico (E1-08) | este commit | Em andamento (o aviso nos botões de assinar entra com as telas de assinar, ondas 4 e 5) |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 

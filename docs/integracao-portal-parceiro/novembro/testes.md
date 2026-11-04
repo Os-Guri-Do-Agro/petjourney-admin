@@ -174,8 +174,8 @@ Bem-Estar). Fora do modo demonstração (menu da conta, só no build de dev).
    botão de conferir de novo.
 3. **Cancelar o convite:** o selo some do menu e a linha some do Início. Com tudo zerado, o bloco "O
    que pede ação" não aparece (zero não vira selo nem linha).
-4. **Sino:** "Avisos" no pé da barra, com o número de não lidos só desta empresa (a Bem-Estar tem 3;
-   a conta tem 5, contando os convites de outras empresas). Abrir mostra a lista na gaveta da
+4. **Sino:** "Avisos" no pé da barra, com o número de não lidos só desta empresa (a Bem-Estar tem 2
+   depois do meu teste; a PetJourney Clinic, 1). Abrir mostra a lista na gaveta da
    direita; tocar num aviso marca como lido e o número desce; "Marcar como lidos" marca os da lista.
 5. **Duas empresas:** troque de empresa no topo da barra. O sino e os selos passam a ser os da outra
    empresa, sem sobrar número da anterior.
@@ -183,3 +183,37 @@ Bem-Estar). Fora do modo demonstração (menu da conta, só no build de dev).
    fecha a gaveta do menu e abre a dos avisos.
 7. **Clínica:** os contadores da Clínica (agenda, fila, vacinas, internação...) já vêm da API, mas só
    viram selo e linha quando a tela de cada um estiver ligada à API (onda 2 em diante).
+
+## PJ-W8TOBS (portal) · Verificação de identidade e o selo (E1-08)
+
+**Preparar:** qualquer conta de empresa aprovada (ex.: `dr10572931@gmail.com`). Configurações ›
+Perfil, seção **Verificação de identidade** (ou o link direto `/settings?identidade=enviar`, que abre
+a gaveta: é para onde o aviso dos botões de assinar vai levar). Um CPF válido de teste (ex.:
+`103.371.700-29`, o que usei na conta do Daniel) e duas imagens quaisquer (JPG, PNG ou WEBP; o
+documento também em PDF).
+
+1. **Sem envio:** "Você ainda não enviou." e "Verificar identidade". A gaveta abre com o título e o
+   aviso de privacidade vindos da API (5 parágrafos, no idioma da sessão) e o botão "Li e entendi,
+   enviar", sem caixa de "aceito".
+2. **Validação:** enviar vazio marca CPF, documento e selfie. Arquivo HEIC, de outro tipo ou acima de
+   8 MB é recusado no campo. O erro de um campo some quando a pessoa mexe nele.
+3. **Enviar:** nome (vem do perfil), CPF, documento e selfie (o verso é opcional). A gaveta passa a
+   "Em análise", com o CPF mascarado, a data e o prazo da conferência (14 dias); a seção diz "Em
+   análise desde... Sem conferência até..., o envio é cancelado."
+4. **Cancelar:** "Cancelar envio" pede confirmação ("As fotos são apagadas na hora") e volta para
+   "Cancelada", com o formulário de novo envio na mesma gaveta. A seção mostra "Você cancelou o envio
+   de..." e "Enviar de novo".
+5. **Recusa:** no CMS (fila de identidade, PJ-DYEN21) ou pela API de admin, recuse com um motivo. A
+   seção mostra "Recusada em..." e o motivo; a gaveta também, com o novo envio embaixo. (O envio do
+   Daniel está **recusado** agora, com o motivo "A selfie não mostra o rosto junto do documento".)
+6. **Aprovar e o selo:** aprovada a identidade e conferido o CRMV no CMS, o `/eu` deixa de ter
+   `motivoDaConferencia`. Com a identidade aprovada e o CRMV ainda sem conferência, a seção diz "Seu
+   CRMV espera a conferência da PetJourney."
+7. **Ficha do profissional:** trocar CRMV, UF ou o login da ficha avisa antes de salvar que o selo sai
+   (veio na E1-03).
+8. **CNPJ do cadastro** (Configurações › Empresa): o campo aceita o CNPJ alfanumérico (digite
+   `12abc34501de35`: vira `12.ABC.345/01DE-35`, válido). Dígito errado é recusado no campo; o
+   `CNPJ_INVALIDO` da API cai no mesmo campo. O CNPJ gravado igual ao de antes não é conferido de novo.
+9. **Ainda não dá para testar:** o aviso nos botões de assinar (receita, prontuário, resumo,
+   prescrição). Essas telas ainda rodam só na demonstração; o aviso entra com elas (ondas 4 e 5), pelo
+   `useSeloDeAssinatura` e o link do item 1.

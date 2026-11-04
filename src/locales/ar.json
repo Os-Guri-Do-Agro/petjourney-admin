@@ -3060,7 +3060,77 @@
       }
     },
     "resumo": "سجّلت الدخول باسم {email}.",
-    "resumoEmpresa": "سجّلت الدخول باسم {email} في {empresa}."
+    "resumoEmpresa": "سجّلت الدخول باسم {email} في {empresa}.",
+    "identidade": {
+      "titulo": "التحقق من الهوية",
+      "descricao": "وثيقة بصورة وصورة سيلفي ورقم CPF، يراجعها شخص من PetJourney. هذا ما يتيح توقيع الوصفات والسجلات الطبية وأوامر العلاج.",
+      "estado": {
+        "nenhum": "لم ترسلها بعد.",
+        "EM_ANALISE": "قيد المراجعة منذ {data}. إن لم تتم المراجعة حتى {prazo} يُلغى الإرسال.",
+        "APROVADA": "تمت الموافقة في {data}.",
+        "RECUSADA": "رُفضت في {data}.",
+        "CANCELADA": "ألغيت الإرسال بتاريخ {data}.",
+        "REVOGADA": "أُلغيت الموافقة في {data}."
+      },
+      "status": {
+        "EM_ANALISE": "قيد المراجعة",
+        "APROVADA": "مقبولة",
+        "RECUSADA": "مرفوضة",
+        "CANCELADA": "ملغاة",
+        "REVOGADA": "مسحوبة"
+      },
+      "motivo": "السبب: {motivo}",
+      "expirada": "بقي الإرسال 14 يومًا دون مراجعة وحُذفت الصور. أرسله مرة أخرى.",
+      "selo": {
+        "SEM_SELO": "رقم CRMV الخاص بك بانتظار مراجعة PetJourney.",
+        "VENCIDO": "انتهت صلاحية مراجعة رقم CRMV الخاص بك: على PetJourney مراجعته مجددًا قبل أن توقّع.",
+        "SEM_IDENTIDADE": "للتوقيع، أكّد هويتك.",
+        "CRMV_OBRIGATORIO": "للتوقيع، سجّل رقم CRMV والولاية في ملفك المهني."
+      },
+      "acoes": {
+        "enviar": "تحقق من هويتي",
+        "reenviar": "أرسل مرة أخرى",
+        "ver": "عرض الإرسال",
+        "abrirFicha": "افتح الملف",
+        "fechar": "إغلاق",
+        "cancelarEnvio": "إلغاء الإرسال",
+        "confirmarCancelamento": "إلغاء الإرسال؟ تُحذف الصور فورًا.",
+        "voltar": "رجوع",
+        "tentarDeNovo": "حاول مرة أخرى"
+      },
+      "gaveta": {
+        "nome": "الاسم الكامل كما في الوثيقة",
+        "cpf": "CPF",
+        "cpfDica": "رقم CPF نفسه الموجود في ملفك الشخصي.",
+        "documento": "وثيقة بصورة",
+        "documentoDica": "رخصة القيادة أو بطاقة الهوية الجديدة. صورة أو PDF.",
+        "verso": "ظهر الوثيقة",
+        "versoDica": "اتركه فارغًا إن كان الوجه أو ملف PDF يُظهر الجانبين.",
+        "selfie": "سيلفي وأنت تمسك الوثيقة",
+        "selfieDica": "الوجه والوثيقة ظاهران، دون انعكاس.",
+        "opcional": "(اختياري)",
+        "escolher": "اختر ملفًا",
+        "remover": "إزالة {arquivo}",
+        "formatosFoto": "JPG أو PNG أو WEBP، حتى 8 ميغابايت.",
+        "formatosDocumento": "JPG أو PNG أو WEBP أو PDF، حتى 8 ميغابايت.",
+        "enviadaEm": "أُرسلت في",
+        "prazo": "موعد المراجعة",
+        "decididaEm": "تقرّرت في",
+        "emAnaliseDica": "ستصلك رسالة بريد إلكتروني عند اتخاذ القرار.",
+        "novoEnvio": "إرسال جديد"
+      },
+      "erros": {
+        "nome": "اكتب الاسم الكامل كما في الوثيقة.",
+        "cpf": "رقم CPF غير صالح.",
+        "faltando": "اختر الملف.",
+        "tipoFoto": "استخدم JPG أو PNG أو WEBP.",
+        "tipoDocumento": "استخدم JPG أو PNG أو WEBP أو PDF.",
+        "tamanho": "حجم الملف أكبر من 8 ميغابايت.",
+        "aviso": "تعذّر تحميل إشعار الخصوصية.",
+        "carregar": "تعذّر تحميل التحقق.",
+        "enviar": "تعذّر الإرسال. حاول مرة أخرى."
+      }
+    }
   },
   "clinico": {
     "navegacao": {

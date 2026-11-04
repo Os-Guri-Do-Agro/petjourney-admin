@@ -3060,7 +3060,77 @@
       }
     },
     "resumo": "You are signed in as {email}.",
-    "resumoEmpresa": "You are signed in as {email}, at {empresa}."
+    "resumoEmpresa": "You are signed in as {email}, at {empresa}.",
+    "identidade": {
+      "titulo": "Identity verification",
+      "descricao": "Photo ID, a selfie and your CPF, checked by a person at PetJourney. It is what lets you sign prescriptions, medical records and inpatient orders.",
+      "estado": {
+        "nenhum": "You have not sent it yet.",
+        "EM_ANALISE": "Under review since {data}. If nobody checks it by {prazo}, it is canceled.",
+        "APROVADA": "Approved on {data}.",
+        "RECUSADA": "Declined on {data}.",
+        "CANCELADA": "You canceled the submission of {data}.",
+        "REVOGADA": "Revoked on {data}."
+      },
+      "status": {
+        "EM_ANALISE": "Under review",
+        "APROVADA": "Approved",
+        "RECUSADA": "Declined",
+        "CANCELADA": "Canceled",
+        "REVOGADA": "Revoked"
+      },
+      "motivo": "Reason: {motivo}",
+      "expirada": "The submission went 14 days without a check and the photos were deleted. Please send it again.",
+      "selo": {
+        "SEM_SELO": "Your CRMV is waiting for the PetJourney check.",
+        "VENCIDO": "The check of your CRMV has expired: PetJourney needs to check it again before you sign.",
+        "SEM_IDENTIDADE": "To sign, confirm your identity.",
+        "CRMV_OBRIGATORIO": "To sign, add your CRMV and state to your professional record."
+      },
+      "acoes": {
+        "enviar": "Verify my identity",
+        "reenviar": "Send again",
+        "ver": "View submission",
+        "abrirFicha": "Open the record",
+        "fechar": "Close",
+        "cancelarEnvio": "Cancel submission",
+        "confirmarCancelamento": "Cancel the submission? The photos are deleted right away.",
+        "voltar": "Back",
+        "tentarDeNovo": "Try again"
+      },
+      "gaveta": {
+        "nome": "Full name, as on the ID",
+        "cpf": "CPF",
+        "cpfDica": "The same CPF as in your profile.",
+        "documento": "Photo ID",
+        "documentoDica": "Driver's license or the new ID card. A photo or a PDF.",
+        "verso": "Back of the ID",
+        "versoDica": "Leave it out if the front, or the PDF, already shows both sides.",
+        "selfie": "Selfie holding the ID",
+        "selfieDica": "Your face and the ID in view, without glare.",
+        "opcional": "(optional)",
+        "escolher": "Choose file",
+        "remover": "Remove {arquivo}",
+        "formatosFoto": "JPG, PNG or WEBP, up to 8 MB.",
+        "formatosDocumento": "JPG, PNG, WEBP or PDF, up to 8 MB.",
+        "enviadaEm": "Sent on",
+        "prazo": "Review deadline",
+        "decididaEm": "Decided on",
+        "emAnaliseDica": "You will get an email when it is decided.",
+        "novoEnvio": "New submission"
+      },
+      "erros": {
+        "nome": "Write your full name, as on the ID.",
+        "cpf": "Invalid CPF.",
+        "faltando": "Choose the file.",
+        "tipoFoto": "Use JPG, PNG or WEBP.",
+        "tipoDocumento": "Use JPG, PNG, WEBP or PDF.",
+        "tamanho": "The file is over 8 MB.",
+        "aviso": "The privacy notice could not be loaded.",
+        "carregar": "The identity check could not be loaded.",
+        "enviar": "It could not be sent. Try again."
+      }
+    }
   },
   "clinico": {
     "navegacao": {
