@@ -98,17 +98,17 @@ export function useMeuDia() {
   )
 
   function focoNaAgenda(appointmentId: string): RouteLocationRaw {
-    return { path: '/veterinario/agenda', query: { foco: appointmentId } }
+    return { path: '/clinica/agenda', query: { foco: appointmentId } }
   }
 
   function rotaDoProntuario(appointment: Appointment) {
     return appointment.encounterId
-      ? `/veterinario/atendimento/${appointment.encounterId}`
-      : `/veterinario/atendimento/novo-${appointment.id}`
+      ? `/clinica/atendimento/${appointment.encounterId}`
+      : `/clinica/atendimento/novo-${appointment.id}`
   }
 
   function rotaDoResumo(appointment: Appointment) {
-    return `/veterinario/paciente/${appointment.petId}/resumo`
+    return `/clinica/paciente/${appointment.petId}/resumo`
   }
 
   function abrirProntuario(appointment: Appointment) {
@@ -139,7 +139,7 @@ export function useMeuDia() {
     const ondeInternacao = t('inicio.pauta.onde.internacao')
 
     for (const item of internadosComPendencia.value) {
-      const to = `/veterinario/internacao/${item.internacao!.id}`
+      const to = `/clinica/internacao/${item.internacao!.id}`
       const doses = t('clinico.meuDia.pauta.doses', { total: item.atrasadas }, item.atrasadas)
 
       linhas.push(
@@ -172,7 +172,7 @@ export function useMeuDia() {
     if (retornos > 0) {
       linhas.push({
         id: 'retornos',
-        to: '/veterinario/atividades',
+        to: '/clinica/atividades',
         frase: t('clinico.meuDia.pauta.retornos', { total: retornos }, retornos),
         detalhe: nomesComResto(
           retornosPendentes.value.map((item) => clinico.pet(item.encounter.petId)?.nome ?? ''),
@@ -323,7 +323,7 @@ export function useMeuDia() {
       valor: naRecepcao.value.length,
       rotulo: t('inicio.espacos.clinica.recepcao'),
       icone: 'ph ph-door-open',
-      to: '/veterinario/agenda',
+      to: '/clinica/agenda',
       tom: naRecepcao.value.length ? 'atencao' : undefined,
     },
     {
@@ -331,14 +331,14 @@ export function useMeuDia() {
       valor: emConsulta.value.length,
       rotulo: t('inicio.espacos.clinica.consulta'),
       icone: 'ph ph-stethoscope',
-      to: '/veterinario/agenda',
+      to: '/clinica/agenda',
     },
     {
       id: 'internados',
       valor: internados.value,
       rotulo: t('clinico.meuDia.abertura.internados', internados.value),
       icone: 'ph ph-bed',
-      to: '/veterinario/internacao',
+      to: '/clinica/internacao',
       tom: internadosComPendencia.value.length ? 'risco' : undefined,
     },
     {
@@ -346,7 +346,7 @@ export function useMeuDia() {
       valor: aSeguir.value.length,
       rotulo: t('inicio.espacos.clinica.aSeguir'),
       icone: 'ph ph-clock',
-      to: '/veterinario/agenda',
+      to: '/clinica/agenda',
     },
   ])
 

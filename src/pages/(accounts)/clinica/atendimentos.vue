@@ -260,7 +260,7 @@ const nadaEncontrado = computed(
 )
 
 function rotaDe(encounter: Encounter) {
-  return `/veterinario/atendimento/${encounter.id}`
+  return `/clinica/atendimento/${encounter.id}`
 }
 
 /** O que a linha diz que foi o atendimento: o diagnóstico principal, ou a queixa no rascunho. */

@@ -180,7 +180,7 @@ describe('rotas do módulo', () => {
     /* `/hoteis` não é do módulo. Comparar por `startsWith` cru pegaria a rota errada. */
     expect(rotaPertenceAoHotel('/hoteis')).toBe(false)
     expect(rotaPertenceAoHotel('/inicio')).toBe(false)
-    expect(rotaPertenceAoHotel('/veterinario/agenda')).toBe(false)
+    expect(rotaPertenceAoHotel('/clinica/agenda')).toBe(false)
   })
 })
 

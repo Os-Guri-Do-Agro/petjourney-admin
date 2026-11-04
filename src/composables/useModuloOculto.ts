@@ -185,7 +185,7 @@ export function criarModuloOculto(definicao: DefinicaoDeModulo): ModuloOculto {
 
   function rotaPertenceAoModulo(caminho: string): boolean {
     /*
-     * Comparação por segmento e não `startsWith` cru: `/veterinarios` (plural) e
+     * Comparação por segmento e não `startsWith` cru: `/clinicas` (plural) e
      * `/design/clinicoteste` não são do módulo, e pegá-los esconderia telas do portal por engano.
      */
     return definicao.rotas.some(

@@ -503,7 +503,7 @@ async function encerrar(entrada: {
     @tentar-de-novo="carregar"
   >
     <template #voltar>
-      <RouterLink to="/veterinario/internacao" class="voltar">
+      <RouterLink to="/clinica/internacao" class="voltar">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.internacao.titulo') }}
       </RouterLink>

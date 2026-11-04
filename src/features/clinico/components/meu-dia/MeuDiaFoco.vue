@@ -291,7 +291,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
                   Botão de verdade: fundo cheio, a seta de ir na ponta e o mesmo hover dos botões do
                   app. Como placa de número solta, ninguém via que levava a algum lugar (03/11).
                 -->
-                <RouterLink class="numero" :to="numero.to ?? '/veterinario/agenda'">
+                <RouterLink class="numero" :to="numero.to ?? '/clinica/agenda'">
                   <span class="numero__icone" aria-hidden="true"><i :class="numero.icone" /></span>
                   <span
                     v-if="numero.tom"
@@ -456,7 +456,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
         <header class="secao__cabeca">
           <h2 id="foco-fila">{{ t('clinico.meuDia.fila') }}</h2>
           <span v-if="fila.length" class="contagem">{{ fila.length }}</span>
-          <RouterLink class="secao__acao" to="/veterinario/agenda">
+          <RouterLink class="secao__acao" to="/clinica/agenda">
             {{ t('clinico.fila.aceite.verNaAgenda') }}
             <i class="ph ph-caret-right" aria-hidden="true" />
           </RouterLink>

@@ -316,15 +316,15 @@ function cancelarBuscaAtrasada() {
 }
 
 function cadastrar() {
-  void router.push('/veterinario/paciente/novo')
+  void router.push('/clinica/paciente/novo')
 }
 
 function importar() {
-  void router.push('/veterinario/paciente/importar')
+  void router.push('/clinica/paciente/importar')
 }
 
 function abrir(linha: PacienteResumo) {
-  void router.push(`/veterinario/paciente/${linha.pet.id}/historico`)
+  void router.push(`/clinica/paciente/${linha.pet.id}/historico`)
 }
 
 async function buscar() {

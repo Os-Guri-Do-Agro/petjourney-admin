@@ -142,7 +142,7 @@ function selecionar(medicamento: Medication) {
 }
 
 function limparPaciente() {
-  void router.replace({ path: '/veterinario/bulario' })
+  void router.replace({ path: '/clinica/bulario' })
 }
 
 watch(petIdDaRota, carregar)

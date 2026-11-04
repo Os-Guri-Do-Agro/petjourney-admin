@@ -500,8 +500,8 @@ function abrirProntuario() {
 
   void router.push(
     appointment.encounterId
-      ? `/veterinario/atendimento/${appointment.encounterId}`
-      : `/veterinario/atendimento/novo-${appointment.id}`,
+      ? `/clinica/atendimento/${appointment.encounterId}`
+      : `/clinica/atendimento/novo-${appointment.id}`,
   )
 }
 
@@ -518,7 +518,7 @@ function verResumo() {
     return
   }
 
-  void router.push(`/veterinario/paciente/${selecionado.value.petId}/resumo`)
+  void router.push(`/clinica/paciente/${selecionado.value.petId}/resumo`)
 }
 
 function verHistorico() {
@@ -526,7 +526,7 @@ function verHistorico() {
     return
   }
 
-  void router.push(`/veterinario/paciente/${selecionado.value.petId}/historico`)
+  void router.push(`/clinica/paciente/${selecionado.value.petId}/historico`)
 }
 
 /**

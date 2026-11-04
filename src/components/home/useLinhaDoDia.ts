@@ -441,12 +441,12 @@ function rotaDoAtendimento(
   petId: string,
 ): string {
   if (encounterId) {
-    return `/veterinario/atendimento/${encounterId}`
+    return `/clinica/atendimento/${encounterId}`
   }
 
   if (estado === 'falta') {
-    return '/veterinario/faltas'
+    return '/clinica/faltas'
   }
 
-  return `/veterinario/paciente/${petId}/resumo`
+  return `/clinica/paciente/${petId}/resumo`
 }

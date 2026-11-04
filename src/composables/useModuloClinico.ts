@@ -1,7 +1,7 @@
 /**
  * Interruptor oculto do módulo clínico.
  *
- * As telas de `/veterinario/*` e a página de referência de `/design/clinico` rodam sobre uma
+ * As telas de `/clinica/*` e a página de referência de `/design/clinico` rodam sobre uma
  * camada **mocada** — pacientes, prontuários e agenda são dados de demonstração. Elas existem para
  * apresentar e testar o módulo enquanto a API clínica não existe, e não devem aparecer para quem
  * abre o portal para trabalhar: um menu "Pacientes" com bichos que não existem é indistinguível de
@@ -43,7 +43,7 @@ export const PARAMETRO_DO_MODULO = 'clinico'
  * A página de referência de design entra junto: ela existe para revisar os componentes clínicos e
  * não faz sentido fora do módulo.
  */
-export const ROTAS_DO_MODULO = ['/veterinario', '/design/clinico']
+export const ROTAS_DO_MODULO = ['/clinica', '/design/clinico']
 
 const modulo: ModuloOculto = criarModuloOculto({
   chave: 'clinic.moduleUnlocked',

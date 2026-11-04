@@ -179,18 +179,18 @@ describe('parâmetro da URL', () => {
 
 describe('rotas do módulo', () => {
   it('reconhece as telas clínicas e a de referência', () => {
-    expect(rotaPertenceAoModulo('/veterinario')).toBe(true)
-    expect(rotaPertenceAoModulo('/veterinario/agenda')).toBe(true)
-    expect(rotaPertenceAoModulo('/veterinario/paciente/pet-luna/historico')).toBe(true)
+    expect(rotaPertenceAoModulo('/clinica')).toBe(true)
+    expect(rotaPertenceAoModulo('/clinica/agenda')).toBe(true)
+    expect(rotaPertenceAoModulo('/clinica/paciente/pet-luna/historico')).toBe(true)
     expect(rotaPertenceAoModulo('/design/clinico')).toBe(true)
   })
 
   it('não confunde rota que apenas começa parecido', () => {
     /**
-     * `/veterinarios` (plural) ou `/design/clinicoteste` não são do módulo. Comparar por
+     * `/clinicas` (plural) ou `/design/clinicoteste` não são do módulo. Comparar por
      * `startsWith` cru pegaria as duas e esconderia telas do portal por engano.
      */
-    expect(rotaPertenceAoModulo('/veterinarios')).toBe(false)
+    expect(rotaPertenceAoModulo('/clinicas')).toBe(false)
     expect(rotaPertenceAoModulo('/design/clinicoteste')).toBe(false)
     expect(rotaPertenceAoModulo('/inicio')).toBe(false)
     expect(rotaPertenceAoModulo('/parceiro/acessos')).toBe(false)

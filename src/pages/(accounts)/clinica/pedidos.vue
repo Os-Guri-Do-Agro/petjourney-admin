@@ -189,7 +189,7 @@ const resultado = computed(() => {
         quando: rotulos.quando(primeiro.inicio),
         profissional: clinico.profissional(primeiro.professionalId)?.nome ?? '',
       }),
-      rota: `/veterinario/agenda?data=${clinicClock.dateOf(primeiro.inicio)}&foco=${primeiro.id}`,
+      rota: `/clinica/agenda?data=${clinicClock.dateOf(primeiro.inicio)}&foco=${primeiro.id}`,
     }
   }
 

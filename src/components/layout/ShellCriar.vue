@@ -24,7 +24,7 @@ const router = useRouter()
 const pacienteAberto = computed(() => {
   const petId = (route.params as Record<string, unknown>).petId
 
-  return route.path.startsWith('/veterinario/paciente/') && typeof petId === 'string' ? petId : null
+  return route.path.startsWith('/clinica/paciente/') && typeof petId === 'string' ? petId : null
 })
 
 const menu = ref<InstanceType<typeof Popover> | null>(null)
@@ -41,7 +41,7 @@ const opcoes = computed<Opcao[]>(() =>
           rotulo: t('shell.barra.criarItens.agendamento'),
           dica: t('shell.barra.criarItens.agendamentoDica'),
           destino: {
-            path: '/veterinario/agenda',
+            path: '/clinica/agenda',
             query: pacienteAberto.value
               ? { novo: '1', paciente: pacienteAberto.value }
               : { novo: '1' },
@@ -52,14 +52,14 @@ const opcoes = computed<Opcao[]>(() =>
           icone: 'ph ph-paw-print',
           rotulo: t('shell.barra.criarItens.paciente'),
           dica: t('shell.barra.criarItens.pacienteDica'),
-          destino: '/veterinario/paciente/novo',
+          destino: '/clinica/paciente/novo',
         },
         {
           id: 'fila',
           icone: 'ph ph-hourglass-medium',
           rotulo: t('shell.barra.criarItens.fila'),
           dica: t('shell.barra.criarItens.filaDica'),
-          destino: { path: '/veterinario/fila', query: { adicionar: '1' } },
+          destino: { path: '/clinica/fila', query: { adicionar: '1' } },
         },
       ]
     : [],

@@ -57,23 +57,23 @@ const clinicalGroup: AppNavigationGroup = {
   id: 'clinical',
   label: 'Clínica',
   items: [
-    { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
-    { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
-    { label: 'Faltas', to: '/veterinario/faltas', icon: 'ph ph-user-minus' },
+    { label: 'Meu dia', to: '/clinica/meu-dia', icon: 'ph ph-sun' },
+    { label: 'Fila de espera', to: '/clinica/fila', icon: 'ph ph-hourglass' },
+    { label: 'Faltas', to: '/clinica/faltas', icon: 'ph ph-user-minus' },
   ],
   blocos: [
     {
       id: 'agora',
       label: 'Agora',
       items: [
-        { label: 'Meu dia', to: '/veterinario/meu-dia', icon: 'ph ph-sun' },
-        { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
+        { label: 'Meu dia', to: '/clinica/meu-dia', icon: 'ph ph-sun' },
+        { label: 'Fila de espera', to: '/clinica/fila', icon: 'ph ph-hourglass' },
       ],
     },
     {
       id: 'pendencias',
       label: 'Pendências',
-      items: [{ label: 'Faltas', to: '/veterinario/faltas', icon: 'ph ph-user-minus' }],
+      items: [{ label: 'Faltas', to: '/clinica/faltas', icon: 'ph ph-user-minus' }],
     },
   ],
 }
@@ -92,7 +92,7 @@ describe('filterNavigationGroups com blocos', () => {
     expect(grupo.blocos).toHaveLength(1)
     expect(grupo.blocos?.[0]?.id).toBe('agora')
     expect(grupo.items).toEqual([
-      { label: 'Fila de espera', to: '/veterinario/fila', icon: 'ph ph-hourglass' },
+      { label: 'Fila de espera', to: '/clinica/fila', icon: 'ph ph-hourglass' },
     ])
   })
 

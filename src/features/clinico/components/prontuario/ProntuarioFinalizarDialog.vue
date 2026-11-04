@@ -223,14 +223,14 @@ function atenderProximo() {
   fechar()
   void router.push(
     item.encounterId
-      ? `/veterinario/atendimento/${item.encounterId}`
-      : `/veterinario/atendimento/novo-${item.id}`,
+      ? `/clinica/atendimento/${item.encounterId}`
+      : `/clinica/atendimento/novo-${item.id}`,
   )
 }
 
 function voltarParaAgenda() {
   fechar()
-  void router.push('/veterinario/agenda')
+  void router.push('/clinica/agenda')
 }
 
 function verResumo() {

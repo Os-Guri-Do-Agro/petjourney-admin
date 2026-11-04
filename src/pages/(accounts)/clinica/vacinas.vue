@@ -112,7 +112,7 @@ onMounted(() => {
   const daUrl = String(route.query.aba ?? '')
 
   if (daUrl === 'estoque') {
-    void router.replace('/veterinario/estoque')
+    void router.replace('/clinica/estoque')
     return
   }
 
@@ -416,7 +416,7 @@ const colunasAplicadas = computed<ColunaTabela<AplicacaoNaLista>[]>(() => [
 ])
 
 function rotaDasVacinas(petId: string) {
-  return `/veterinario/paciente/${petId}/vacinas`
+  return `/clinica/paciente/${petId}/vacinas`
 }
 
 /** A linha abre a carteira do paciente — é lá que está a sequência e a prévia do app. */
@@ -497,7 +497,7 @@ function agendar(petId: string) {
    * Atividades: antes caía na agenda vazia e a recepção procurava o paciente de novo.
    */
   void router.push({
-    path: '/veterinario/agenda',
+    path: '/clinica/agenda',
     query: { novo: '1', paciente: petId, tipo: 'vacina' },
   })
 }
@@ -610,7 +610,7 @@ watch([busca, filtros], () => {
         />
 
         <!-- O estoque saiu daqui para a própria tela; o caminho para ele fica à mão. -->
-        <RouterLink class="ui-mais" to="/veterinario/estoque">
+        <RouterLink class="ui-mais" to="/clinica/estoque">
           <i class="ph ph-package" aria-hidden="true" />
           {{ t('clinico.estoque.titulo') }}
         </RouterLink>

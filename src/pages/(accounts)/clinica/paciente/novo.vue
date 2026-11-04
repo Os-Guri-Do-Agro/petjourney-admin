@@ -59,11 +59,11 @@ onMounted(async () => {
 })
 
 function aoCriar(pet: Pet) {
-  void router.push(`/veterinario/paciente/${pet.id}/historico`)
+  void router.push(`/clinica/paciente/${pet.id}/historico`)
 }
 
 function cancelar() {
-  void router.push('/veterinario/pacientes')
+  void router.push('/clinica/pacientes')
 }
 </script>
 
@@ -76,7 +76,7 @@ function cancelar() {
     bloquear-se-suspenso
   >
     <template #voltar>
-      <RouterLink to="/veterinario/pacientes">
+      <RouterLink to="/clinica/pacientes">
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('clinico.pacientes.titulo') }}
       </RouterLink>
