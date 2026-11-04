@@ -344,7 +344,7 @@ onUnmounted(() => {
           <UiRabiscos v-if="moldura === 'app' && !barraRecolhida" estreito />
           <RouterLink class="barra__marca" to="/inicio" :title="parceiroStore.parceiroNome">
             <span class="barra__pata" aria-hidden="true">
-              <img src="/pata-escura.png" alt="" />
+              <img src="/pata.png" alt="" />
             </span>
             <span class="barra__empresa shell-rotulo">
               <!-- `dir="auto"`: no árabe, o nome em letras latinas era cortado pelo começo
@@ -604,9 +604,10 @@ onUnmounted(() => {
   box-shadow: 0 6px 14px -6px rgb(0 0 0 / 60%);
 }
 
+/* A pata é mais larga que alta: o quadro de 26 dá a ela a altura que a antiga tinha em 22. */
 .barra__pata img {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   object-fit: contain;
 }
 

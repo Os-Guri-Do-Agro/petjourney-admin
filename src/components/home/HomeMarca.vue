@@ -8,12 +8,15 @@
  * (o app proíbe pata solta como enfeite). Tem a altura da logo, não a da coluna: bloco de cor alto
  * e vazio lia como cartão esquecido.
  *
+ * A logo é a pata da marca ao lado do nome em branco, a mesma dupla da entrada. A peça antiga
+ * (pata com braço, nome em duas linhas e o lema) saiu com a pata nova, em 03/11/2026.
+ *
  * O cartão só é clicável quando alguém ouve `abrir` (a ação ainda não foi decidida). Sem ouvinte,
  * é uma figura: um botão que não faz nada ensinaria a desconfiar dos outros botões.
  */
 import { computed, getCurrentInstance } from 'vue'
 
-import logoUrl from '@/assets/Logos/logo-png.png'
+import nomeEmBranco from '@/assets/Logos/logo-for-dark-theme.png'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 
 const emit = defineEmits<{ abrir: [] }>()
@@ -32,11 +35,17 @@ const clicavel = computed(() => Boolean(instancia?.vnode.props?.onAbrir))
     @click="emit('abrir')"
   >
     <UiRabiscos />
-    <img :src="logoUrl" alt="" class="marca__logo" />
+    <span class="marca__logo">
+      <img src="/pata.png" alt="" class="marca__pata" />
+      <img :src="nomeEmBranco" alt="" class="marca__nome" />
+    </span>
   </button>
   <figure v-else class="marca" role="img" aria-label="PetJourney">
     <UiRabiscos />
-    <img :src="logoUrl" alt="" class="marca__logo" />
+    <span class="marca__logo">
+      <img src="/pata.png" alt="" class="marca__pata" />
+      <img :src="nomeEmBranco" alt="" class="marca__nome" />
+    </span>
   </figure>
 </template>
 
@@ -63,9 +72,25 @@ const clicavel = computed(() => Boolean(instancia?.vnode.props?.onAbrir))
   --rabiscos-forca: 0.14;
 }
 
+/* A pata e o nome numa linha, centrados no bloco: a pata com a altura de duas linhas do nome. */
 .marca__logo {
   position: relative;
-  width: min(56%, 14rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: min(72%, 17rem);
+}
+
+.marca__pata {
+  width: 56px;
+  height: auto;
+  flex: none;
+}
+
+.marca__nome {
+  min-width: 0;
+  flex: 1 1 auto;
   height: auto;
 }
 

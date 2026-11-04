@@ -27,7 +27,6 @@ defineProps<{
 
 const { t } = useI18n()
 
-const logoUrl = computed(() => (isDarkMode.value ? '/pata-escura.png' : '/pata-clara.png'))
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
 /**
@@ -100,7 +99,7 @@ onBeforeUnmount(() => {
           <div class="auth-brand-row">
             <div class="flex gap-3 w-full">
               <div class="bg-color-icon p-3 bg-red-500 w-[50px] h-auto rounded-2xl flex">
-                <img :src="logoUrl" alt="PetJourney" />
+                <img src="/pata.png" alt="PetJourney" />
               </div>
               <div class="w-[150px] flex items-center">
                 <img :src="logoSemPata" alt="Logo PetJourney" />

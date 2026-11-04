@@ -221,7 +221,7 @@ function estadoDoPasso(indice: number) {
         </ul>
 
         <p v-if="assinatura" class="publica__assinatura">
-          <img src="/pata-clara.png" alt="" aria-hidden="true" />
+          <img src="/pata.png" alt="" aria-hidden="true" />
           {{ assinatura }}
         </p>
       </footer>
@@ -344,9 +344,9 @@ function estadoDoPasso(indice: number) {
   position: absolute;
   bottom: -5rem;
   width: 26rem;
-  aspect-ratio: 324 / 300;
+  aspect-ratio: 525 / 431;
   inset-inline-start: -6rem;
-  background: url('/pata-clara.png') center / contain no-repeat;
+  background: url('/pata.png') center / contain no-repeat;
   content: '';
   opacity: 0.06;
   transform: rotate(10deg);

@@ -56,7 +56,7 @@ function goBack() {
     <div class="perdido__miolo">
       <RouterLink class="perdido__marca" :to="homePath">
         <span class="perdido__pata" aria-hidden="true">
-          <img src="/pata-clara.png" alt="" />
+          <img src="/pata.png" alt="" />
         </span>
         <img class="perdido__logo" :src="logo" :alt="t('errors.notFound.brandAlt')" />
       </RouterLink>
@@ -156,8 +156,8 @@ function goBack() {
 }
 
 .perdido__pata img {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 
