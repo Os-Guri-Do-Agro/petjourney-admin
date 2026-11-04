@@ -43,9 +43,7 @@ const SECOES: AppNavigationSection[] = [
       {
         id: 'em-curso',
         label: 'Em curso',
-        items: [
-          { label: 'Internação', to: '/clinica/internacao', icon: 'ph ph-building' },
-        ],
+        items: [{ label: 'Internação', to: '/clinica/internacao', icon: 'ph ph-building' }],
       },
     ],
   },

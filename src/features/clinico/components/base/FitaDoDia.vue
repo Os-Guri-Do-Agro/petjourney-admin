@@ -58,7 +58,10 @@ onMounted(() => {
 
 onUnmounted(() => clearInterval(relogio))
 
-watch(() => clinico.revisao, () => void carregar())
+watch(
+  () => clinico.revisao,
+  () => void carregar(),
+)
 
 /** O expediente arredondado para a hora cheia: a régua começa e termina em números redondos. */
 const janela = computed(() => {

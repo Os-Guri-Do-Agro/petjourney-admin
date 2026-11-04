@@ -555,11 +555,7 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
           <span class="ui-contagem">{{ pedidos.respondidas.length }}</span>
         </button>
 
-        <ul
-          v-if="historicoAberto"
-          id="pedidos-de-reserva-respondidos"
-          class="ui-folha ui-lista"
-        >
+        <ul v-if="historicoAberto" id="pedidos-de-reserva-respondidos" class="ui-folha ui-lista">
           <li v-for="linha in pedidos.respondidas" :key="linha.pedido.id" class="respondido">
             <span class="respondido__rostos">
               <PetAvatar

@@ -591,7 +591,11 @@ onMounted(carregar)
           </span>
           <span class="ui-indicador__nota">
             {{
-              t('clinico.faltas.numeros.limite', { total: LIMITE_REINCIDENCIA }, LIMITE_REINCIDENCIA)
+              t(
+                'clinico.faltas.numeros.limite',
+                { total: LIMITE_REINCIDENCIA },
+                LIMITE_REINCIDENCIA,
+              )
             }}
           </span>
         </li>
@@ -840,9 +844,7 @@ onMounted(carregar)
                         {{ formato.motivoFalta(falta.appointment.justificativaDeFalta.motivo) }}
                         <span class="falta__canal">
                           ·
-                          {{
-                            formato.canalDeContato(falta.appointment.justificativaDeFalta.canal)
-                          }}
+                          {{ formato.canalDeContato(falta.appointment.justificativaDeFalta.canal) }}
                         </span>
                       </span>
                     </button>
@@ -881,7 +883,10 @@ onMounted(carregar)
                       >
                         {{ t('clinico.faltas.historico.encerrado') }}
                       </span>
-                      <span v-else-if="falta.reagendadoPara" class="ui-selo ui-selo--ok falta__selo">
+                      <span
+                        v-else-if="falta.reagendadoPara"
+                        class="ui-selo ui-selo--ok falta__selo"
+                      >
                         <i class="ph ph-calendar-check" aria-hidden="true" />
                         {{
                           t('clinico.faltas.historico.reagendado', {

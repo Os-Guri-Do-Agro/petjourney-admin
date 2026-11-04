@@ -783,7 +783,9 @@ const fatiasDePerda = computed<Fatia[]>(() => {
                 <!-- Saldo com o mínimo ao lado: um sem o outro não diz se é muito ou pouco. -->
                 <span class="geladeira__saldo" :class="`geladeira__saldo--${linha.situacao}`">
                   <strong class="ui-num">{{ linha.saldo }}</strong>
-                  <span class="ui-num">{{ t('clinico.estoque.minimoDe', { n: linha.minimo }) }}</span>
+                  <span class="ui-num">{{
+                    t('clinico.estoque.minimoDe', { n: linha.minimo })
+                  }}</span>
                 </span>
 
                 <span class="geladeira__cobertura">
@@ -1517,7 +1519,8 @@ const fatiasDePerda = computed<Fatia[]>(() => {
  */
 .geladeira {
   /* A última trilha tem largura própria: vazia no cabeçalho, ela não pode mudar a conta das outras. */
-  --geladeira-colunas: minmax(0, 1.5fr) 8.5rem minmax(10rem, 1.3fr) 10.5rem minmax(10rem, max-content);
+  --geladeira-colunas: minmax(0, 1.5fr) 8.5rem minmax(10rem, 1.3fr) 10.5rem
+    minmax(10rem, max-content);
 }
 
 .geladeira__cabeca,

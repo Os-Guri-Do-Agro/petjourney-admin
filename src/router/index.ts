@@ -80,7 +80,6 @@ const router = createRouter({
 
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
 
-
 function getSafeRedirectPath(redirect: unknown) {
   if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
     if (
@@ -191,7 +190,9 @@ router.beforeEach((to) => {
   }
 
   if (hasActiveSession && isPublicRoute) {
-    return to.path === '/auth/login' ? getSafeRedirectPath(to.query.redirect) : getDefaultLandingPath()
+    return to.path === '/auth/login'
+      ? getSafeRedirectPath(to.query.redirect)
+      : getDefaultLandingPath()
   }
 
   return true

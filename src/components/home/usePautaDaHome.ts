@@ -115,19 +115,9 @@ export function usePautaDaHome() {
         recarregar: pendenciasClinicas.recarregar,
         linhas: porGravidade(
           [
-            linha(
-              'pedidos',
-              '/clinica/pedidos',
-              PhCalendarPlus,
-              pendenciasClinicas.pedidos.value,
-            ),
+            linha('pedidos', '/clinica/pedidos', PhCalendarPlus, pendenciasClinicas.pedidos.value),
             linha('fila', '/clinica/fila', PhHourglassMedium, pendenciasClinicas.fila.value),
-            linha(
-              'internacao',
-              '/clinica/internacao',
-              PhBed,
-              pendenciasClinicas.internacao.value,
-            ),
+            linha('internacao', '/clinica/internacao', PhBed, pendenciasClinicas.internacao.value),
             linha(
               'atividades',
               '/clinica/atividades',

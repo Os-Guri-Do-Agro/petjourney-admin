@@ -476,7 +476,9 @@ const alertasDaBarra = computed(() =>
 )
 
 function textoDoAlerta(alerta: PetAlert) {
-  return alerta.detalhe ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}` : formato.alerta(alerta.kind)
+  return alerta.detalhe
+    ? `${formato.alerta(alerta.kind)}: ${alerta.detalhe}`
+    : formato.alerta(alerta.kind)
 }
 
 /**
@@ -912,7 +914,11 @@ onBeforeUnmount(() => {
         A barra que acompanha a rolagem. Mora no fluxo com altura zero: fica presa logo abaixo da
         faixa fixa do alto e só aparece quando o cabeçalho do paciente sai de vista.
       -->
-      <div class="fixo" :class="{ 'fixo--visivel': pacienteFora }" :inert="pacienteFora ? undefined : true">
+      <div
+        class="fixo"
+        :class="{ 'fixo--visivel': pacienteFora }"
+        :inert="pacienteFora ? undefined : true"
+      >
         <div
           class="fixo__barra"
           role="region"
@@ -961,7 +967,13 @@ onBeforeUnmount(() => {
             <span class="ui-num">{{ rotulosDaEscuta.relogio(escuta.tempoMs) }}</span>
           </span>
 
-          <ProntuarioStepper class="fixo__passos" :passos="passos" :ativo="etapa" mini @ir="irParaEtapa" />
+          <ProntuarioStepper
+            class="fixo__passos"
+            :passos="passos"
+            :ativo="etapa"
+            mini
+            @ir="irParaEtapa"
+          />
 
           <Button
             v-if="podeFinalizar"

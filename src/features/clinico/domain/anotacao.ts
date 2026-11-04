@@ -67,8 +67,7 @@ import { fracionar, type Fracionamento } from './receita'
  * este arquivo não conhece nenhum deles.
  */
 export type AvisoDeConversao = {
-  kind:
-    /** Mais de dez prescrições: o contrato recusa a anotação inteira acima do teto. */
+  kind: /** Mais de dez prescrições: o contrato recusa a anotação inteira acima do teto. */
     | 'prescricoes-excedentes'
     | 'exames-excedentes'
     /** Id de exame que o catálogo não reconhece — segue como texto livre. */
@@ -140,12 +139,7 @@ export type ResultadoDaConversao = {
  * Truncar é ruim; ser recusado com 400 e perder a anotação inteira é pior. O aviso é o que
  * torna a escolha visível em vez de conveniente.
  */
-function limitar(
-  valor: string,
-  max: number,
-  campo: string,
-  avisos: AvisoDeConversao[],
-): string {
+function limitar(valor: string, max: number, campo: string, avisos: AvisoDeConversao[]): string {
   const limpo = valor.trim()
 
   if (limpo.length <= max) {
@@ -173,7 +167,10 @@ function frequenciaParaTexto(horas: number): string {
 }
 
 function juntar(partes: (string | undefined)[], separador: string): string {
-  return partes.map((parte) => parte?.trim()).filter(Boolean).join(separador)
+  return partes
+    .map((parte) => parte?.trim())
+    .filter(Boolean)
+    .join(separador)
 }
 
 // ---------------------------------------------------------------------------

@@ -168,7 +168,6 @@ const janelas = computed(
 function rotaDaFicha(petId: string) {
   return `/clinica/paciente/${petId}/tratamento`
 }
-
 </script>
 
 <template>
@@ -284,7 +283,9 @@ function rotaDaFicha(petId: string) {
                       {{ t('clinico.adesao.lista.situacaoEncerrado') }}
                     </span>
                   </span>
-                  <span class="tratamento__posologia">{{ rotulos.posologia(linha.tratamento) }}</span>
+                  <span class="tratamento__posologia">{{
+                    rotulos.posologia(linha.tratamento)
+                  }}</span>
 
                   <p v-if="linha.alerta" class="tratamento__alerta">
                     <strong>{{ rotulos.alerta(linha.alerta).titulo }}.</strong>

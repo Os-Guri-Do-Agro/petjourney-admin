@@ -688,7 +688,9 @@ useClinicShortcuts({
   >
     <template #resumo>
       <span class="agenda__data">{{ rotuloDoTopo }}</span>
-      <template v-if="agenda.dia">{{ ': ' }}<span aria-live="polite">{{ minusculaInicial(fraseDoDia) }}</span></template>
+      <template v-if="agenda.dia"
+        >{{ ': ' }}<span aria-live="polite">{{ minusculaInicial(fraseDoDia) }}</span></template
+      >
     </template>
 
     <template #acoes>
@@ -860,79 +862,79 @@ useClinicShortcuts({
     </div>
 
     <template #sempre>
-    <AgendaCriarDialog
-      v-model:visivel="criarAberto"
-      :encaixe="criarComoEncaixe"
-      :data="agenda.data"
-      :sugestao-profissional="criarProfissional"
-      :minuto-inicial="criarMinuto"
-      :sugestao-paciente="criarPaciente"
-      :sugestao-tipo="criarTipo"
-      @criado="agenda.recarregar()"
-      @entrar-na-fila="abrirEntradaNaFila"
-    />
+      <AgendaCriarDialog
+        v-model:visivel="criarAberto"
+        :encaixe="criarComoEncaixe"
+        :data="agenda.data"
+        :sugestao-profissional="criarProfissional"
+        :minuto-inicial="criarMinuto"
+        :sugestao-paciente="criarPaciente"
+        :sugestao-tipo="criarTipo"
+        @criado="agenda.recarregar()"
+        @entrar-na-fila="abrirEntradaNaFila"
+      />
 
-    <AgendaBloquearDialog
-      v-model:visivel="bloquearAberto"
-      :data="agenda.data"
-      @criado="agenda.recarregar()"
-    />
+      <AgendaBloquearDialog
+        v-model:visivel="bloquearAberto"
+        :data="agenda.data"
+        @criado="agenda.recarregar()"
+      />
 
-    <AgendaMoveDialog
-      :proposta="propostaDeMovimento"
-      @confirmar="confirmarMovimento"
-      @fechar="propostaDeMovimento = null"
-    />
+      <AgendaMoveDialog
+        :proposta="propostaDeMovimento"
+        @confirmar="confirmarMovimento"
+        @fechar="propostaDeMovimento = null"
+      />
 
-    <AgendaEditarDialog
-      :appointment="paraEditar"
-      @salvar="salvarEdicao"
-      @fechar="atendimentoParaEditar = null"
-    />
+      <AgendaEditarDialog
+        :appointment="paraEditar"
+        @salvar="salvarEdicao"
+        @fechar="atendimentoParaEditar = null"
+      />
 
-    <AgendaCancelDialog
-      :appointment="paraCancelar"
-      @confirmar="confirmarCancelamento"
-      @fechar="atendimentoParaCancelar = null"
-    />
+      <AgendaCancelDialog
+        :appointment="paraCancelar"
+        @confirmar="confirmarCancelamento"
+        @fechar="atendimentoParaCancelar = null"
+      />
 
-    <!--
+      <!--
       A justificativa vem **antes** de a falta ser gravada: é o diálogo que traz o telefone do
       responsável, e perguntar depois é não perguntar.
     -->
-    <AgendaFaltaDialog
-      :appointment="paraFaltar"
-      :tutor="tutorDaFalta"
-      :salvando="agenda.salvando"
-      @confirmar="registrarFalta"
-      @adiar="adiarJustificativa"
-      @fechar="atendimentoParaFaltar = null"
-    />
+      <AgendaFaltaDialog
+        :appointment="paraFaltar"
+        :tutor="tutorDaFalta"
+        :salvando="agenda.salvando"
+        @confirmar="registrarFalta"
+        @adiar="adiarJustificativa"
+        @fechar="atendimentoParaFaltar = null"
+      />
 
-    <!--
+      <!--
       Reagendamento abre logo depois de marcar a falta — com o telefone do responsável à mão e
       horários já buscados. Oferecer depois é não oferecer.
     -->
-    <AgendaReagendarDialog
-      :appointment="faltaParaReagendar"
-      :sugestoes="sugestoesDeReagendamento"
-      :buscando="buscandoReagendamento"
-      :salvando="agenda.salvando"
-      @confirmar="confirmarReagendamento"
-      @fechar="faltaParaReagendar = null"
-    />
+      <AgendaReagendarDialog
+        :appointment="faltaParaReagendar"
+        :sugestoes="sugestoesDeReagendamento"
+        :buscando="buscandoReagendamento"
+        :salvando="agenda.salvando"
+        @confirmar="confirmarReagendamento"
+        @fechar="faltaParaReagendar = null"
+      />
 
-    <FilaAdicionarDialog
-      v-model:visivel="filaAberta"
-      :pet-id="filaPet"
-      :type-id="filaTipo"
-      :professional-id="filaProfissional"
-      @adicionado="fila.carregar()"
-    />
+      <FilaAdicionarDialog
+        v-model:visivel="filaAberta"
+        :pet-id="filaPet"
+        :type-id="filaTipo"
+        :professional-id="filaProfissional"
+        @adicionado="fila.carregar()"
+      />
 
-    <ClinicShortcutsDialog v-model:visible="ajudaAberta" />
-    <AgendaUndoBar />
-    <ClinicDevPanel />
+      <ClinicShortcutsDialog v-model:visible="ajudaAberta" />
+      <AgendaUndoBar />
+      <ClinicDevPanel />
     </template>
   </UiPagina>
 </template>

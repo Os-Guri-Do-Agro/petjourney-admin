@@ -369,7 +369,11 @@ function trocarPeriodo(periodo: PeriodoId) {
           Cada gráfico é um cartão com cabeçalho próprio — ladrilho, título e a pergunta que ele
           responde —, como os cartões do Início.
         -->
-        <section id="resumo-por-dia" class="painel painel--salvia ui-folha" aria-labelledby="resumo-por-dia-titulo">
+        <section
+          id="resumo-por-dia"
+          class="painel painel--salvia ui-folha"
+          aria-labelledby="resumo-por-dia-titulo"
+        >
           <header class="painel__cabeca">
             <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
               <i class="ph ph-chart-bar" />
@@ -405,7 +409,11 @@ function trocarPeriodo(periodo: PeriodoId) {
         </section>
 
         <div class="relatorio__par">
-          <section id="resumo-por-tipo" class="painel painel--tipo ui-folha" aria-labelledby="resumo-por-tipo-titulo">
+          <section
+            id="resumo-por-tipo"
+            class="painel painel--tipo ui-folha"
+            aria-labelledby="resumo-por-tipo-titulo"
+          >
             <header class="painel__cabeca">
               <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-stethoscope" /></span>
               <span class="painel__titulos">
@@ -446,14 +454,20 @@ function trocarPeriodo(periodo: PeriodoId) {
         </div>
 
         <div class="relatorio__par">
-          <section id="resumo-horarios" class="painel painel--salvia ui-folha" aria-labelledby="resumo-horarios-titulo">
+          <section
+            id="resumo-horarios"
+            class="painel painel--salvia ui-folha"
+            aria-labelledby="resumo-horarios-titulo"
+          >
             <header class="painel__cabeca">
               <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
                 <i class="ph ph-clock" />
               </span>
               <span class="painel__titulos">
                 <h2 id="resumo-horarios-titulo">{{ t('clinico.resumo.grafico.horarios') }}</h2>
-                <span class="painel__descricao">{{ t('clinico.resumo.grafico.horariosAjuda') }}</span>
+                <span class="painel__descricao">{{
+                  t('clinico.resumo.grafico.horariosAjuda')
+                }}</span>
               </span>
             </header>
             <div class="relatorio__recheio">
@@ -467,7 +481,11 @@ function trocarPeriodo(periodo: PeriodoId) {
           </section>
 
           <div class="relatorio__coluna">
-            <section id="resumo-origem" class="painel painel--rosa ui-folha" aria-labelledby="resumo-origem-titulo">
+            <section
+              id="resumo-origem"
+              class="painel painel--rosa ui-folha"
+              aria-labelledby="resumo-origem-titulo"
+            >
               <header class="painel__cabeca">
                 <span class="ui-ladrilho ui-ladrilho--dado" aria-hidden="true">
                   <i class="ph ph-signpost" />

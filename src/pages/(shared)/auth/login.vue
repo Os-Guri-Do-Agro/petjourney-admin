@@ -11,10 +11,7 @@ import AuthTextField from '@/components/auth/AuthTextField.vue'
 import { ApiError } from '@/service/api'
 import { login, refreshAuthSession } from '@/service/auth/auth-service'
 import { clearAuthSession, getAuthUser, getVeterinarioId } from '@/service/auth/auth-session'
-import {
-  postUsersMeReactivate,
-  type ReactivateProfile,
-} from '@/service/user/inativacao-service'
+import { postUsersMeReactivate, type ReactivateProfile } from '@/service/user/inativacao-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { lerTokenDoConvite } from '@/service/parceiro/convite-pendente'
@@ -118,7 +115,10 @@ const parceiroStore = useParceiroStore()
 const showReactivatePanel = computed(() => pendingReactivate.value.length > 0)
 
 const reactivateCopy = computed(() => {
-  if (pendingReactivate.value.includes('veterinario') && pendingReactivate.value.includes('tutor')) {
+  if (
+    pendingReactivate.value.includes('veterinario') &&
+    pendingReactivate.value.includes('tutor')
+  ) {
     return t('auth.login.reactivate.copyBoth')
   }
 
@@ -146,10 +146,7 @@ function getSafeRedirectPath() {
   return convitePendente ? ROTA_DO_CONVITE : getDefaultLandingPath()
 }
 
-function collectInactiveProfiles(flags: {
-  tutorInactive: boolean
-  veterinarioInactive: boolean
-}) {
+function collectInactiveProfiles(flags: { tutorInactive: boolean; veterinarioInactive: boolean }) {
   const profiles: ReactivateProfile[] = []
 
   if (flags.veterinarioInactive) {
@@ -305,10 +302,7 @@ function cancelReactivate() {
 </script>
 
 <template>
-  <AuthLayout
-    :description="t('auth.login.description')"
-    :title="t('auth.login.title')"
-  >
+  <AuthLayout :description="t('auth.login.description')" :title="t('auth.login.title')">
     <div v-if="showReactivatePanel" class="login-reactivate" role="status">
       <div class="login-reactivate__icon" aria-hidden="true">
         <i class="ph ph-user-minus" />
@@ -324,11 +318,7 @@ function cancelReactivate() {
           type="button"
           @click="handleReactivate('veterinario')"
         >
-          {{
-            reactivating
-              ? t('auth.login.reactivate.loading')
-              : t('auth.login.reactivate.vet')
-          }}
+          {{ reactivating ? t('auth.login.reactivate.loading') : t('auth.login.reactivate.vet') }}
         </AuthButton>
 
         <AuthButton
@@ -338,11 +328,7 @@ function cancelReactivate() {
           type="button"
           @click="handleReactivate('tutor')"
         >
-          {{
-            reactivating
-              ? t('auth.login.reactivate.loading')
-              : t('auth.login.reactivate.tutor')
-          }}
+          {{ reactivating ? t('auth.login.reactivate.loading') : t('auth.login.reactivate.tutor') }}
         </AuthButton>
 
         <AuthButton

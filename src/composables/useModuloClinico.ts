@@ -28,11 +28,7 @@
  * não volte.
  */
 
-import {
-  criarModuloOculto,
-  instalarSequenciasSecretas,
-  type ModuloOculto,
-} from './useModuloOculto'
+import { criarModuloOculto, instalarSequenciasSecretas, type ModuloOculto } from './useModuloOculto'
 
 /** Nome do parâmetro e da sequência. Curto o bastante para digitar sem errar. */
 export const PARAMETRO_DO_MODULO = 'clinico'

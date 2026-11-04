@@ -661,7 +661,6 @@ function abrirLeito(leitoId: string) {
   flex: none;
 }
 
-
 .setor__leitos {
   display: grid;
   gap: var(--vao);

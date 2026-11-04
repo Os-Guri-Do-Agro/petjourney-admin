@@ -453,7 +453,9 @@ function numeroDaDose(aplicacao: AplicacaoVacina): string {
               v-if="pedeAcao.length > 0 && proximaDoCalendario"
               class="agora__item agora__item--depois"
             >
-              <span class="agora__icone" aria-hidden="true"><i class="ph ph-calendar-blank" /></span>
+              <span class="agora__icone" aria-hidden="true"
+                ><i class="ph ph-calendar-blank"
+              /></span>
               <div class="agora__texto">
                 <p class="agora__depois">{{ proximaDoCalendario.titulo }}</p>
                 <p class="agora__meta ui-num">{{ proximaDoCalendario.meta }}</p>

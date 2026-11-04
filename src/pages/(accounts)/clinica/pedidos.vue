@@ -662,7 +662,9 @@ async function celularMudou() {
 
         <div class="pedidos-gaveta__corpo clinic-scope">
           <div class="ensaio">
-            <span id="ensaio-pessoa" class="ensaio__rotulo">{{ t('clinico.pedidos.ensaio.quem') }}</span>
+            <span id="ensaio-pessoa" class="ensaio__rotulo">{{
+              t('clinico.pedidos.ensaio.quem')
+            }}</span>
             <SelectButton
               v-model="pessoa"
               :options="pessoas"

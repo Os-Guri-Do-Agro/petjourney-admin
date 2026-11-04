@@ -162,8 +162,7 @@ const mostrarFita = computed(
 
 /** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
 const mostrarFitaDaCasa = computed(
-  () =>
-    hasHotelProfile.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
+  () => hasHotelProfile.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
 )
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
@@ -425,7 +424,9 @@ onUnmounted(() => {
         >
           <i class="ph ph-list" aria-hidden="true" />
         </button>
-        <span class="topo__lugar" aria-hidden="true"><i :class="aqui.espaco?.icone ?? 'ph ph-house-simple'" /></span>
+        <span class="topo__lugar" aria-hidden="true"
+          ><i :class="aqui.espaco?.icone ?? 'ph ph-house-simple'"
+        /></span>
         <strong class="topo__titulo">{{ tituloNoTopo }}</strong>
         <button
           v-if="hasClinicalProfile"

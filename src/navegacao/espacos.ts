@@ -207,7 +207,13 @@ function abaDoItem(item: AppNavigationItem, rotulo: string): Aba {
   }
 }
 
-function destinoDe(id: string, rotulo: string, icone: string, abas: Aba[], prefixos: string[] = []) {
+function destinoDe(
+  id: string,
+  rotulo: string,
+  icone: string,
+  abas: Aba[],
+  prefixos: string[] = [],
+) {
   const selo = somaDosSelos(abas)
 
   return {
@@ -244,7 +250,9 @@ function montarPelaReceita(
       return item ? [abaDoItem(item, t(chave))] : []
     })
 
-    return abas.length > 0 ? [destinoDe(passo.id, t(passo.chave), passo.icone, abas, passo.prefixos)] : []
+    return abas.length > 0
+      ? [destinoDe(passo.id, t(passo.chave), passo.icone, abas, passo.prefixos)]
+      : []
   })
 }
 
@@ -265,7 +273,9 @@ function espacoDe(
     to: destinos[0]?.to ?? '/inicio',
     destinos,
     selo,
-    tom: selo ? tomMaisGrave(destinos.map((destino) => (destino.selo ? destino.tom : undefined))) : undefined,
+    tom: selo
+      ? tomMaisGrave(destinos.map((destino) => (destino.selo ? destino.tom : undefined)))
+      : undefined,
   }
 }
 
@@ -318,9 +328,13 @@ export function montarEspacos(
         portal.items.map((item) => {
           const aba = abaDoItem(item, item.label)
 
-          return destinoDe(item.to, item.label, ICONE_DO_PORTAL[item.to] ?? item.icon, [aba], [
-            `${item.to}/`,
-          ])
+          return destinoDe(
+            item.to,
+            item.label,
+            ICONE_DO_PORTAL[item.to] ?? item.icon,
+            [aba],
+            [`${item.to}/`],
+          )
         }),
       ),
     )

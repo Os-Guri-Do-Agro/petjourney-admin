@@ -154,10 +154,15 @@ function minutosDesde(iso: string) {
 }
 
 /** "qual tipo · com quem": o que a entrada espera, na linha de baixo do nome. */
-function oQueEspera(entrada: WaitlistEntry, professionalId: string | null = entrada.professionalId) {
+function oQueEspera(
+  entrada: WaitlistEntry,
+  professionalId: string | null = entrada.professionalId,
+) {
   return [
     clinico.tipo(entrada.typeId)?.nome,
-    professionalId ? clinico.profissional(professionalId)?.nome : t('clinico.fila.qualquerProfissional'),
+    professionalId
+      ? clinico.profissional(professionalId)?.nome
+      : t('clinico.fila.qualquerProfissional'),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -330,14 +335,20 @@ onMounted(carregar)
             </p>
           </div>
           <span class="vaga__quando">
-            <small>{{ formato.diaDaSemanaCurto(clinicClock.dateOf(fila.vagaAberta.inicio)) }},
-              {{ formato.dataCurta(clinicClock.dateOf(fila.vagaAberta.inicio)) }}</small>
+            <small
+              >{{ formato.diaDaSemanaCurto(clinicClock.dateOf(fila.vagaAberta.inicio)) }},
+              {{ formato.dataCurta(clinicClock.dateOf(fila.vagaAberta.inicio)) }}</small
+            >
             <strong class="ui-hora">{{ formato.hora(fila.vagaAberta.inicio) }}</strong>
           </span>
         </div>
 
         <ul class="vaga__candidatos">
-          <li v-for="candidato in fila.vagaAberta.candidatos" :key="candidato.id" class="vaga__candidato">
+          <li
+            v-for="candidato in fila.vagaAberta.candidatos"
+            :key="candidato.id"
+            class="vaga__candidato"
+          >
             <PetAvatar
               :nome="clinico.pet(candidato.petId)?.nome ?? ''"
               :iniciais="clinico.pet(candidato.petId)?.iniciais ?? ''"
@@ -437,7 +448,9 @@ onMounted(carregar)
             v-for="entrada in ofertas"
             :key="entrada.id"
             class="oferta"
-            :class="tomDaOferta(entrada) !== 'neutro' ? `ui-marca ui-marca--${tomDaOferta(entrada)}` : ''"
+            :class="
+              tomDaOferta(entrada) !== 'neutro' ? `ui-marca ui-marca--${tomDaOferta(entrada)}` : ''
+            "
           >
             <span class="quando">
               <template v-if="entrada.ofertaSlotInicio">
@@ -495,7 +508,9 @@ onMounted(carregar)
               </strong>
               <small v-if="entrada.ofertaExpiraEm">
                 {{
-                  t('clinico.fila.tela.paraResponder', { hora: formato.hora(entrada.ofertaExpiraEm) })
+                  t('clinico.fila.tela.paraResponder', {
+                    hora: formato.hora(entrada.ofertaExpiraEm),
+                  })
                 }}
               </small>
             </p>
@@ -552,7 +567,9 @@ onMounted(carregar)
             <span
               class="posicao ui-num"
               :class="{ 'posicao--primeira': fila.posicaoDe(entrada.id) === 1 }"
-              :title="t('clinico.fila.posicaoNaFila', { posicao: fila.posicaoDe(entrada.id) ?? '' })"
+              :title="
+                t('clinico.fila.posicaoNaFila', { posicao: fila.posicaoDe(entrada.id) ?? '' })
+              "
             >
               <span aria-hidden="true">{{ fila.posicaoDe(entrada.id) }}</span>
               <span class="sr-only">
@@ -594,14 +611,20 @@ onMounted(carregar)
 
             <!-- Quebra só entre janelas: "qua." numa linha e "14:00–18:00" na outra não se lê. -->
             <span class="janelas" :aria-label="t('clinico.fila.janelas')">
-              <span v-for="(faixa, indice) in janelasLegiveis(entrada)" :key="indice" class="janela">
+              <span
+                v-for="(faixa, indice) in janelasLegiveis(entrada)"
+                :key="indice"
+                class="janela"
+              >
                 <span class="janela__dias">{{ faixa.dias }}</span>
                 <span class="janela__horas ui-num">{{ faixa.horas }}</span>
               </span>
             </span>
 
             <span class="tempo">
-              <strong class="ui-num">{{ formato.distancia(minutosDesde(entrada.criadoEm)) }}</strong>
+              <strong class="ui-num">{{
+                formato.distancia(minutosDesde(entrada.criadoEm))
+              }}</strong>
               <small>{{ t('clinico.fila.tela.naFila') }}</small>
             </span>
 
@@ -691,10 +714,7 @@ onMounted(carregar)
               </span>
             </span>
             <span class="resolvida__como">
-              <span
-                class="ui-selo"
-                :class="entrada.status === 'aceito' ? 'ui-selo--ok' : ''"
-              >
+              <span class="ui-selo" :class="entrada.status === 'aceito' ? 'ui-selo--ok' : ''">
                 <i
                   class="ph"
                   :class="entrada.status === 'aceito' ? 'ph-check-circle' : 'ph-clock-countdown'"
