@@ -87,4 +87,33 @@ describe('estabelecimento-service', () => {
       method: 'DELETE',
     })
   })
+
+  it('remove em lote com um DELETE por dia: 404 conta como removido, o resto como falha', async () => {
+    const { removerDiasEspeciais } = await loadService()
+    const erro = (status: number, codigo: string) =>
+      new Response(JSON.stringify({ statusCode: status, message: codigo, codigo }), {
+        status,
+        headers: JSON_HEADERS,
+      })
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (url) => {
+      const id = String(url).split('/dias-especiais/')[1]?.split('?')[0]
+
+      if (id === 'sumiu') return erro(404, 'ESTABELECIMENTO_DIA_ESPECIAL_NAO_ENCONTRADO')
+      if (id === 'recusado') return erro(403, 'ESTABELECIMENTO_APENAS_DONO')
+
+      return new Response(null, { status: 204 })
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const resultado = await removerDiasEspeciais(['d1', 'sumiu', 'd2', 'recusado', 'd1', 'd3'], {
+      parceiroId: 'p1',
+    })
+
+    /* O id repetido vai uma vez só. */
+    expect(fetchMock).toHaveBeenCalledTimes(5)
+    expect(fetchMock.mock.calls.every(([, init]) => init?.method === 'DELETE')).toBe(true)
+    expect([...resultado.removidos].sort()).toEqual(['d1', 'd2', 'd3', 'sumiu'])
+    expect(resultado.falharam).toEqual(['recusado'])
+    expect(resultado.erro).toMatchObject({ codigo: 'ESTABELECIMENTO_APENAS_DONO' })
+  })
 })

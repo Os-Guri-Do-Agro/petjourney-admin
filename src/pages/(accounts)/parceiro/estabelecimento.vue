@@ -25,16 +25,15 @@
  * vem da API com o offset do fuso e é mostrado como veio, sem converter para o fuso do navegador.
  */
 import Button from 'primevue/button'
-import Menu from 'primevue/menu'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import type { MenuItem } from 'primevue/menuitem'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EstabelecimentoDiaGaveta from '@/components/parceiro/estabelecimento/EstabelecimentoDiaGaveta.vue'
+import EstabelecimentoDiasEspeciais from '@/components/parceiro/estabelecimento/EstabelecimentoDiasEspeciais.vue'
 import EstabelecimentoHorariosGaveta from '@/components/parceiro/estabelecimento/EstabelecimentoHorariosGaveta.vue'
 import EstabelecimentoLinkPublico from '@/components/parceiro/estabelecimento/EstabelecimentoLinkPublico.vue'
 import EstabelecimentoPerfilGaveta, {
@@ -45,7 +44,6 @@ import EstabelecimentoSlugGaveta from '@/components/parceiro/estabelecimento/Est
 import {
   dataCivil,
   dataDoInstante,
-  faixasDoDia,
   hojeNoFuso,
   horaDoInstante,
   nomeDoFuso,
@@ -65,6 +63,7 @@ import {
   obterEstabelecimento,
   publicarEstabelecimento,
   removerDiaEspecial,
+  removerDiasEspeciais,
   salvarHorarios,
   salvarPerfil,
   trocarSlug,
@@ -484,54 +483,11 @@ async function adicionarDia(dia: NovoDiaEspecial) {
   }
 }
 
-const diasEspeciais = computed(() =>
-  [...(estabelecimento.value?.diasEspeciais ?? [])].sort((um, outro) =>
-    um.data.localeCompare(outro.data),
-  ),
-)
+const diasEspeciais = computed(() => estabelecimento.value?.diasEspeciais ?? [])
 
-/** Os que já passaram ficam recolhidos: a lista é para o que vem. */
-const proximosDias = computed(() => diasEspeciais.value.filter((dia) => dia.data >= hoje.value))
-const diasQuePassaram = computed(() =>
-  diasEspeciais.value.filter((dia) => dia.data < hoje.value).reverse(),
-)
-const mostrarPassados = ref(false)
-
-function folhinha(dia: DiaEspecial) {
-  const data = dataCivil(dia.data)
-  const mesmoAno = dia.data.slice(0, 4) === hoje.value.slice(0, 4)
-
-  return {
-    numero: data.getUTCDate(),
-    mes: data
-      .toLocaleDateString(intl.value, { month: 'short', timeZone: 'UTC' })
-      .replace(/\.$/, ''),
-    semana: data.toLocaleDateString(intl.value, {
-      weekday: 'long',
-      year: mesmoAno ? undefined : 'numeric',
-      timeZone: 'UTC',
-    }),
-  }
-}
-
-function horarioDoDiaEspecial(dia: DiaEspecial) {
-  return dia.fechado ? t('parceiro.estabelecimento.horario.fechado') : faixasDoDia(dia).join(' · ')
-}
-
-const diaParaRemover = ref<DiaEspecial | null>(null)
-const confirmarRemocao = ref(false)
 const removendo = ref<string | null>(null)
 
-function pedirRemocao(dia: DiaEspecial) {
-  diaParaRemover.value = dia
-  confirmarRemocao.value = true
-}
-
-async function remover() {
-  const dia = diaParaRemover.value
-
-  if (!dia) return
-
+async function remover(dia: DiaEspecial) {
   removendo.value = dia.id
 
   try {
@@ -546,32 +502,49 @@ async function remover() {
   }
 }
 
-const menuDeAdicionar = ref<InstanceType<typeof Menu> | null>(null)
-
-/** O catálogo da API tem o ano corrente e o próximo; outro ano ela recusa. */
-const anosDeFeriado = computed(() => {
-  const ano = Number(hoje.value.slice(0, 4))
-
-  return [ano, ano + 1]
-})
+const removendoVarios = ref(false)
 
 /**
- * Um botão "Adicionar" só, com o dia avulso e os feriados nacionais dentro: os dois botões lado a
- * lado não cabiam ao lado do título na coluna estreita.
+ * Vários de uma vez. O que já tinha saído (404) conta como removido; o que falhou fica na lista, e o
+ * aviso diz quantos. Papel trocado ou cadastro suspenso no meio: a tela se recarrega como sempre.
  */
-const itensDeAdicionar = computed<MenuItem[]>(() => [
-  {
-    label: t('parceiro.estabelecimento.dia.umDia'),
-    icon: 'ph ph-calendar-plus',
-    command: abrirDia,
-  },
-  { separator: true },
-  ...anosDeFeriado.value.map((ano) => ({
-    label: t('parceiro.estabelecimento.dia.feriadosDe', { ano }),
-    icon: 'ph ph-flag',
-    command: () => void copiarFeriados(ano),
-  })),
-])
+async function removerVarios(ids: string[]) {
+  removendoVarios.value = true
+
+  try {
+    const { removidos, falharam, erro } = await removerDiasEspeciais(ids, parceiroQuery())
+
+    if (falharam.length === 0) {
+      avisarSucesso(
+        'diasRemovidos',
+        t(
+          'parceiro.estabelecimento.toast.diasRemovidosDetalhe',
+          { total: removidos.length },
+          removidos.length,
+        ),
+      )
+    } else {
+      toast.add({
+        severity: 'warn',
+        summary: t(
+          'parceiro.estabelecimento.toast.diasRemovidosEmParte',
+          { total: removidos.length },
+          removidos.length,
+        ),
+        detail: t(
+          'parceiro.estabelecimento.toast.diasNaoRemovidos',
+          { total: falharam.length },
+          falharam.length,
+        ),
+        life: 6000,
+      })
+      seATelaFicouVelha(erro)
+    }
+  } finally {
+    await carregar()
+    removendoVarios.value = false
+  }
+}
 
 async function copiarFeriados(ano: number) {
   acao.value = 'feriados'
@@ -957,115 +930,18 @@ async function salvarSlug(slug: string) {
           </div>
         </UiSecao>
 
-        <UiSecao
-          :titulo="t('parceiro.estabelecimento.dia.titulo')"
-          :contagem="proximosDias.length || null"
-          icone="ph ph-calendar-star"
-          folha
-        >
-          <template v-if="podeEditar" #acoes>
-            <Button
-              icon="ph ph-plus"
-              :label="t('parceiro.estabelecimento.dia.adicionar')"
-              severity="secondary"
-              outlined
-              size="small"
-              aria-haspopup="true"
-              aria-controls="menu-adicionar-dia"
-              :loading="acao === 'feriados'"
-              @click="menuDeAdicionar?.toggle($event)"
-            />
-            <Menu id="menu-adicionar-dia" ref="menuDeAdicionar" :model="itensDeAdicionar" popup />
-          </template>
-
-          <div class="especiais">
-            <p v-if="proximosDias.length === 0" class="dado__vazio">
-              {{
-                diasQuePassaram.length
-                  ? t('parceiro.estabelecimento.dia.nenhumProximo')
-                  : t('parceiro.estabelecimento.dia.vazio')
-              }}
-            </p>
-
-            <ul v-else class="especiais__lista">
-              <li v-for="dia in proximosDias" :key="dia.id" class="especial">
-                <span class="folhinha" aria-hidden="true">
-                  <strong class="ui-num">{{ folhinha(dia).numero }}</strong>
-                  <small>{{ folhinha(dia).mes }}</small>
-                </span>
-                <span class="especial__texto">
-                  <span class="especial__nome" :title="dia.nome">{{ dia.nome }}</span>
-                  <span class="especial__meta">
-                    <span class="sr-only">{{ folhinha(dia).numero }} {{ folhinha(dia).mes }},</span>
-                    {{ folhinha(dia).semana }} ·
-                    <bdi class="ui-num" dir="ltr">{{ horarioDoDiaEspecial(dia) }}</bdi>
-                  </span>
-                </span>
-                <Button
-                  v-if="podeEditar"
-                  icon="ph ph-trash"
-                  severity="secondary"
-                  outlined
-                  size="small"
-                  :aria-label="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-                  :title="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-                  :loading="removendo === dia.id"
-                  @click="pedirRemocao(dia)"
-                />
-              </li>
-            </ul>
-
-            <template v-if="diasQuePassaram.length">
-              <Button
-                class="especiais__passados"
-                :icon="mostrarPassados ? 'ph ph-caret-up' : 'ph ph-caret-down'"
-                :label="
-                  mostrarPassados
-                    ? t('parceiro.estabelecimento.dia.esconderPassados')
-                    : t(
-                        'parceiro.estabelecimento.dia.mostrarPassados',
-                        { total: diasQuePassaram.length },
-                        diasQuePassaram.length,
-                      )
-                "
-                :aria-expanded="mostrarPassados"
-                severity="secondary"
-                text
-                size="small"
-                @click="mostrarPassados = !mostrarPassados"
-              />
-              <ul v-if="mostrarPassados" class="especiais__lista especiais__lista--passados">
-                <li v-for="dia in diasQuePassaram" :key="dia.id" class="especial">
-                  <span class="folhinha" aria-hidden="true">
-                    <strong class="ui-num">{{ folhinha(dia).numero }}</strong>
-                    <small>{{ folhinha(dia).mes }}</small>
-                  </span>
-                  <span class="especial__texto">
-                    <span class="especial__nome" :title="dia.nome">{{ dia.nome }}</span>
-                    <span class="especial__meta">
-                      <span class="sr-only"
-                        >{{ folhinha(dia).numero }} {{ folhinha(dia).mes }},</span
-                      >
-                      {{ folhinha(dia).semana }} ·
-                      <bdi class="ui-num" dir="ltr">{{ horarioDoDiaEspecial(dia) }}</bdi>
-                    </span>
-                  </span>
-                  <Button
-                    v-if="podeEditar"
-                    icon="ph ph-trash"
-                    severity="secondary"
-                    outlined
-                    size="small"
-                    :aria-label="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-                    :title="t('parceiro.estabelecimento.dia.remover', { nome: dia.nome })"
-                    :loading="removendo === dia.id"
-                    @click="pedirRemocao(dia)"
-                  />
-                </li>
-              </ul>
-            </template>
-          </div>
-        </UiSecao>
+        <EstabelecimentoDiasEspeciais
+          :dias="diasEspeciais"
+          :hoje="hoje"
+          :pode-editar="podeEditar"
+          :copiando-feriados="acao === 'feriados'"
+          :removendo="removendo"
+          :removendo-varios="removendoVarios"
+          @adicionar="abrirDia"
+          @feriados="copiarFeriados"
+          @remover="remover"
+          @remover-varios="removerVarios"
+        />
       </div>
     </div>
 
@@ -1117,19 +993,6 @@ async function salvarSlug(slug: string) {
         :cancel-label="t('parceiro.estabelecimento.confirmar.voltar')"
         severity="warn"
         @confirm="despublicar"
-      />
-      <ConfirmActionDialog
-        v-model:visible="confirmarRemocao"
-        :title="t('parceiro.estabelecimento.confirmar.remover.titulo')"
-        :message="
-          t('parceiro.estabelecimento.confirmar.remover.mensagem', {
-            nome: diaParaRemover?.nome ?? '',
-          })
-        "
-        :confirm-label="t('parceiro.estabelecimento.confirmar.remover.botao')"
-        :cancel-label="t('parceiro.estabelecimento.confirmar.voltar')"
-        severity="danger"
-        @confirm="remover"
       />
     </template>
   </UiPagina>
@@ -1440,91 +1303,5 @@ async function salvarSlug(slug: string) {
 
 .agora--aberto .agora__ponto {
   background: var(--ok-tinta, var(--musgo));
-}
-
-/* ------------------------------------------------------------------------ dias especiais */
-
-.especiais {
-  display: grid;
-  gap: 4px;
-  padding: 10px 20px 12px;
-}
-
-.especiais > .dado__vazio {
-  padding: 8px 0;
-}
-
-.especiais__lista {
-  display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.especiais__lista--passados {
-  opacity: 0.7;
-}
-
-.especial {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-top: 1px solid var(--linha);
-}
-
-.especial:first-child {
-  border-top: 0;
-}
-
-/* A data como folhinha de calendário: o dia grande o bastante para achar, o mês embaixo. */
-.folhinha {
-  display: grid;
-  width: 44px;
-  flex: none;
-  justify-items: center;
-  padding: 4px 0 5px;
-  border-radius: 10px;
-  background: var(--app-veu, var(--superficie-2));
-  line-height: 1.1;
-}
-
-.folhinha strong {
-  color: var(--tinta);
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.folhinha small {
-  color: var(--app-salvia-texto, var(--musgo));
-  font-size: 11px;
-  font-weight: 650;
-  text-transform: uppercase;
-}
-
-.especial__texto {
-  display: grid;
-  flex: 1;
-  gap: 2px;
-  min-width: 0;
-}
-
-.especial__nome {
-  overflow: hidden;
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.especial__meta {
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.especiais__passados {
-  justify-self: start;
-  margin-top: 4px;
 }
 </style>

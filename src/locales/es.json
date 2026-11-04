@@ -2539,7 +2539,11 @@
         "abertoDica": "Ese día vale este horario y no el de la semana.",
         "nenhumProximo": "Ningún día especial por delante.",
         "mostrarPassados": "Mostrar {total} día que ya pasó | Mostrar {total} días que ya pasaron",
-        "esconderPassados": "Ocultar los que ya pasaron"
+        "esconderPassados": "Ocultar los que ya pasaron",
+        "apagarVarios": "Eliminar varios",
+        "marcados": "Ninguno marcado | {total} marcado | {total} marcados",
+        "marcarPassados": "Marcar los que ya pasaron",
+        "apagarMarcados": "Eliminar | Eliminar {total} | Eliminar {total}"
       },
       "mensagens": {
         "titulo": "Mensajes al tutor"
@@ -2555,6 +2559,11 @@
           "titulo": "¿Quitar el día especial?",
           "mensagem": "{nome} sale de la lista y el horario de la semana vuelve a valer en esa fecha.",
           "botao": "Quitar"
+        },
+        "removerVarios": {
+          "titulo": "¿Eliminar {total} día especial? | ¿Eliminar {total} días especiales?",
+          "mensagem": "Salen de la lista y el horario de la semana vuelve a valer en esas fechas.",
+          "botao": "Eliminar"
         }
       },
       "toast": {
@@ -2572,7 +2581,11 @@
         "feriadosCopiados": "Feriados copiados",
         "slugTrocado": "Dirección cambiada",
         "feriadosNovos": "Ningún feriado nuevo. | {total} feriado nuevo. | {total} feriados nuevos.",
-        "feriadosJaExistiam": "{total} ya estaba en la lista. | {total} ya estaban en la lista."
+        "feriadosJaExistiam": "{total} ya estaba en la lista. | {total} ya estaban en la lista.",
+        "diasRemovidos": "Días especiales eliminados",
+        "diasRemovidosDetalhe": "{total} día salió de la lista. | {total} días salieron de la lista.",
+        "diasRemovidosEmParte": "{total} día eliminado | {total} días eliminados",
+        "diasNaoRemovidos": "{total} no se pudo eliminar; intente de nuevo. | {total} no se pudieron eliminar; intente de nuevo."
       },
       "campo": {
         "nomePublico": "Nombre público",

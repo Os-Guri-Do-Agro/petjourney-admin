@@ -2539,7 +2539,11 @@
         "abertoDica": "Nesse dia vale este horário, e não o da semana.",
         "nenhumProximo": "Nenhum dia especial pela frente.",
         "mostrarPassados": "Mostrar {total} dia que já passou | Mostrar {total} dias que já passaram",
-        "esconderPassados": "Esconder os que já passaram"
+        "esconderPassados": "Esconder os que já passaram",
+        "apagarVarios": "Apagar vários",
+        "marcados": "Nenhum marcado | {total} marcado | {total} marcados",
+        "marcarPassados": "Marcar os que já passaram",
+        "apagarMarcados": "Apagar | Apagar {total} | Apagar {total}"
       },
       "mensagens": {
         "titulo": "Mensagens ao responsável"
@@ -2555,6 +2559,11 @@
           "titulo": "Remover o dia especial?",
           "mensagem": "{nome} sai da lista e o horário da semana volta a valer nessa data.",
           "botao": "Remover"
+        },
+        "removerVarios": {
+          "titulo": "Apagar {total} dia especial? | Apagar {total} dias especiais?",
+          "mensagem": "Eles saem da lista e o horário da semana volta a valer nessas datas.",
+          "botao": "Apagar"
         }
       },
       "toast": {
@@ -2572,7 +2581,11 @@
         "feriadosCopiados": "Feriados copiados",
         "slugTrocado": "Endereço trocado",
         "feriadosNovos": "Nenhum feriado novo. | {total} feriado novo. | {total} feriados novos.",
-        "feriadosJaExistiam": "{total} já estava na lista. | {total} já estavam na lista."
+        "feriadosJaExistiam": "{total} já estava na lista. | {total} já estavam na lista.",
+        "diasRemovidos": "Dias especiais removidos",
+        "diasRemovidosDetalhe": "{total} dia saiu da lista. | {total} dias saíram da lista.",
+        "diasRemovidosEmParte": "{total} dia removido | {total} dias removidos",
+        "diasNaoRemovidos": "{total} não saiu; tente de novo. | {total} não saíram; tente de novo."
       },
       "campo": {
         "nomePublico": "Nome público",

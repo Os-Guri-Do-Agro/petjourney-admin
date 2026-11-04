@@ -2539,7 +2539,11 @@
         "abertoDica": "Tog dana važi ovo radno vreme, a ne nedeljno.",
         "nenhumProximo": "Nema predstojećih posebnih dana.",
         "mostrarPassados": "Prikaži {total} prošli dan | Prikaži {total} prošla dana | Prikaži {total} prošlih dana",
-        "esconderPassados": "Sakrij prošle dane"
+        "esconderPassados": "Sakrij prošle dane",
+        "apagarVarios": "Obriši više",
+        "marcados": "Ništa nije označeno | Označen {total} | Označena {total} | Označeno {total}",
+        "marcarPassados": "Označi prošle dane",
+        "apagarMarcados": "Obriši | Obriši {total} | Obriši {total} | Obriši {total}"
       },
       "mensagens": {
         "titulo": "Poruke staratelju"
@@ -2555,6 +2559,11 @@
           "titulo": "Ukloniti poseban dan?",
           "mensagem": "{nome} izlazi sa liste i za taj datum ponovo važi nedeljno radno vreme.",
           "botao": "Ukloni"
+        },
+        "removerVarios": {
+          "titulo": "Obrisati {total} poseban dan? | Obrisati {total} posebna dana? | Obrisati {total} posebnih dana?",
+          "mensagem": "Uklanjaju se sa liste i na te datume ponovo važi nedeljno radno vreme.",
+          "botao": "Obriši"
         }
       },
       "toast": {
@@ -2572,7 +2581,11 @@
         "feriadosCopiados": "Praznici su kopirani",
         "slugTrocado": "Adresa je promenjena",
         "feriadosNovos": "Nema novih praznika. | {total} novi praznik. | {total} nova praznika. | {total} novih praznika.",
-        "feriadosJaExistiam": "{total} je već bio na listi. | {total} su već bila na listi. | {total} je već bilo na listi."
+        "feriadosJaExistiam": "{total} je već bio na listi. | {total} su već bila na listi. | {total} je već bilo na listi.",
+        "diasRemovidos": "Posebni dani su obrisani",
+        "diasRemovidosDetalhe": "{total} dan je uklonjen sa liste. | {total} dana su uklonjena sa liste. | {total} dana je uklonjeno sa liste.",
+        "diasRemovidosEmParte": "{total} dan obrisan | {total} dana obrisana | {total} dana obrisano",
+        "diasNaoRemovidos": "{total} nije obrisan; pokušajte ponovo. | {total} nisu obrisana; pokušajte ponovo. | {total} nije obrisano; pokušajte ponovo."
       },
       "campo": {
         "nomePublico": "Javni naziv",

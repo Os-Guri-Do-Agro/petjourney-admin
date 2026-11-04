@@ -2539,7 +2539,11 @@
         "abertoDica": "On that day these hours apply instead of the weekly ones.",
         "nenhumProximo": "No special days coming up.",
         "mostrarPassados": "Show {total} past day | Show {total} past days",
-        "esconderPassados": "Hide past days"
+        "esconderPassados": "Hide past days",
+        "apagarVarios": "Delete several",
+        "marcados": "None selected | {total} selected | {total} selected",
+        "marcarPassados": "Select past days",
+        "apagarMarcados": "Delete | Delete {total} | Delete {total}"
       },
       "mensagens": {
         "titulo": "Messages to pet parents"
@@ -2555,6 +2559,11 @@
           "titulo": "Remove the special day?",
           "mensagem": "{nome} leaves the list and the weekly hours apply again on that date.",
           "botao": "Remove"
+        },
+        "removerVarios": {
+          "titulo": "Delete {total} special day? | Delete {total} special days?",
+          "mensagem": "They leave the list and the weekly hours apply again on those dates.",
+          "botao": "Delete"
         }
       },
       "toast": {
@@ -2572,7 +2581,11 @@
         "feriadosCopiados": "Holidays copied",
         "slugTrocado": "Address changed",
         "feriadosNovos": "No new holidays. | {total} new holiday. | {total} new holidays.",
-        "feriadosJaExistiam": "{total} was already on the list. | {total} were already on the list."
+        "feriadosJaExistiam": "{total} was already on the list. | {total} were already on the list.",
+        "diasRemovidos": "Special days deleted",
+        "diasRemovidosDetalhe": "{total} day left the list. | {total} days left the list.",
+        "diasRemovidosEmParte": "{total} day deleted | {total} days deleted",
+        "diasNaoRemovidos": "{total} could not be deleted; try again. | {total} could not be deleted; try again."
       },
       "campo": {
         "nomePublico": "Public name",
