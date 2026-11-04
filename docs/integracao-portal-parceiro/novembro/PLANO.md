@@ -15,6 +15,9 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 0.1 PJ-VK5P13 convite com a conta errada | `f867aa4` | Em teste (fluxo de equipe e envio já testado pelo Luís; roteiro em `testes.md`) |
 | 04/11 | 0.2 PJ-XOI9HR merge da `redesign/portal` | já estava no `main` | Em teste |
 | 04/11 | 0.3 PJ-RWQBMT `/veterinario` vira `/clinica` | `14da2a4`, `b3c297b` (só formatação) | Em teste |
+| 04/11 | 0.4 PJ-TYT5JY docs do lado do responsável | `c2f0d35` | Em teste |
+| 04/11 | 0.5 PJ-49U4QS Idempotency-Key e código do erro (E1-04) | `e291e95` | Em teste |
+| 04/11 | 0.6 PJ-IWQ1F4 módulos pelo servidor (E1-02) | `7e8646a` | Em teste |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 

@@ -48,3 +48,38 @@ conta, com um e-mail que você lê.
    `/clinica/agenda`.
 5. **Caminhos dentro das telas.** Do Hoje, "Continuar atendimento" e "Resumo em 30 s"; da lista de
    pacientes, abrir um histórico; da internação, abrir um leito: todos em `/clinica/...`.
+
+---
+
+## PJ-TYT5JY · Docs do lado do responsável
+
+Só leitura: `docs/clinico/09`, `12`, `14` e `16` começam com a nota de que o contrato é o OpenAPI
+da API e não citam mais caminhos `D:\PROJETOS\...` nem "copie o `responsavel.ts`".
+
+---
+
+## PJ-49U4QS · Idempotency-Key e o código do erro (E1-04)
+
+Nada novo na tela: é a base que as telas de Clínica e Hotel usam a partir da E2-01. Os testes
+automáticos cobrem a chave repetida nos retries e trocada quando o corpo muda. O captcha ficou com o
+site (lacuna N5).
+
+---
+
+## PJ-IWQ1F4 · Clínica e Hotel ligados pelo servidor (E1-02)
+
+**Preparar:** uma conta DONO na API de dev. Ver os módulos dela no CMS (Parceiro › Módulos).
+
+1. **Sem demonstração.** Entre e abra o Início.
+   - O menu **não** tem Clínica nem Hotel: nenhuma tela deles fala com a API ainda (entram card a
+     card, da E2 em diante).
+   - No Início, o bloco "Módulos da Clínica e do Hotel" mostra o estado de cada um: "Pedir o
+     módulo", pedido em análise, "Em teste até {data}", ativo ou só consulta.
+2. **Pedir o módulo.** Com um módulo nunca pedido, clique em "Pedir o módulo": vira "pedido em
+   análise". Como OPERADOR, o botão não aparece.
+3. **Endereço direto.** Cole `/clinica/agenda` ou `/hotel/painel` na barra: volta ao Início. O
+   `?clinico=on` não liga mais nada.
+4. **Demonstração (só no `npm run dev`).** Menu da conta › "Demonstração (dados locais)": Clínica e
+   Hotel voltam ao menu e ao Início com os dados de exemplo, como antes. Desligue e eles somem.
+5. **Build de produção.** `npm run build` + `npm run preview`: o menu da conta não tem a chave da
+   demonstração.
