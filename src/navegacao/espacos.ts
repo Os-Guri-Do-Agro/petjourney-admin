@@ -126,6 +126,12 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     icone: 'ph ph-chart-line-up',
     abas: [{ rota: '/clinica/resumo', chave: 'espacos.clinica.relatorios' }],
   },
+  {
+    id: 'configuracao',
+    chave: 'espacos.clinica.configuracao',
+    icone: 'ph ph-sliders-horizontal',
+    abas: [{ rota: '/clinica/configuracao', chave: 'espacos.clinica.configuracao' }],
+  },
 ]
 
 const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [

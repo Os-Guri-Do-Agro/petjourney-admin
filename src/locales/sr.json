@@ -2445,7 +2445,8 @@
         "perdeSeloLogin": "Povezivanje ove kartice sa nalogom uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
         "perdeSeloSemLogin": "Odvajanje naloga od ove kartice uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
         "salvar": "Sačuvajte karticu"
-      }
+      },
+      "expediente": "Radno vreme"
     },
     "indicados": {
       "titulo": "Preporučeni",
@@ -9365,7 +9366,8 @@
       "pacientes": "Pacijenti",
       "internacao": "Hospitalizacija",
       "pendencias": "Zaostali poslovi",
-      "relatorios": "Izveštaji"
+      "relatorios": "Izveštaji",
+      "configuracao": "Podešavanja"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9807,6 +9809,206 @@
       "novoDica": "Klinika pravi klijenta i pacijenta iz podataka pristupa, sa privremenim imenom \"Vlasnik ljubimca {pet}\".",
       "escolha": "Izaberite pacijenta ili napravite upis.",
       "feito": "Zahtev je poslat. Vlasnik dobija zahtev u aplikaciji da ga prihvati."
+    }
+  },
+  "agenda": {
+    "config": {
+      "titulo": "Podešavanja rasporeda",
+      "resumo": "Sale, vrste pregleda, blokade i rokovi dogovoreni sa onima koji zakazuju preko aplikacije.",
+      "abas": {
+        "salas": "Sale",
+        "tipos": "Vrste pregleda",
+        "bloqueios": "Blokade",
+        "politica": "Pravila"
+      },
+      "erroAoCarregar": "Učitavanje nije uspelo.",
+      "desativar": "Deaktiviraj",
+      "reativar": "Ponovo aktiviraj",
+      "inativas": "Deaktivirane",
+      "inativos": "Deaktivirani",
+      "subir": "Pomeri gore: {nome}",
+      "descer": "Pomeri dole: {nome}",
+      "editarDe": "Izmeni: {nome}",
+      "sala": {
+        "titulo": "Sale",
+        "descricao": "Gde se obavljaju pregledi. Redosled je redosled kolona u rasporedu. Sala se ne briše: deaktivira se.",
+        "nova": "Nova sala",
+        "editar": "Izmeni salu",
+        "nome": "Naziv",
+        "nomeExemplo": "Npr.: Ordinacija 1",
+        "nomeTamanho": "Naziv mora imati od {min} do {max} znakova.",
+        "nomeEmUso": "Druga aktivna sala već ima ovaj naziv.",
+        "tipoRotulo": "Vrsta",
+        "vazio": "Još nema sala.",
+        "tipo": {
+          "CONSULTORIO": "Ordinacija",
+          "CIRURGIA": "Operaciona sala",
+          "BANHO": "Kupanje i šišanje",
+          "INTERNACAO": "Stacionar",
+          "EXAME": "Dijagnostika"
+        }
+      },
+      "tipo": {
+        "titulo": "Vrste pregleda",
+        "descricao": "Šta klinika radi, sa trajanjem i salama. Redosled je redosled legende rasporeda.",
+        "novo": "Nova vrsta",
+        "editar": "Izmeni vrstu pregleda",
+        "nome": "Naziv",
+        "nomeExemplo": "Npr.: Pregled mačke",
+        "faltaNome": "Unesite naziv.",
+        "nomeEmUso": "Druga aktivna vrsta već ima ovaj naziv.",
+        "kindRotulo": "Kategorija",
+        "duracao": "Trajanje",
+        "min": "min",
+        "minutos": "{n} min",
+        "duracaoInvalida": "Od {min} do {max} minuta, u koracima od {passo}.",
+        "salas": "Odgovarajuće sale",
+        "salasDica": "Bez označenih, važi bilo koja sala.",
+        "qualquerSala": "bilo koja sala",
+        "encaixe": "Dozvoljava ubacivanje",
+        "encaixeDica": "Prijem može da ubaci ovaj pregled u zauzet termin.",
+        "ofertadoOnline": "Prikazuje se u online zahtevu",
+        "ofertadoOnlineDica": "Ko nema nalog može da zatraži ovaj pregled na stranici klinike.",
+        "naoOnline": "Operacija i hitan slučaj se ne prikazuju u online zahtevu.",
+        "online": "Online",
+        "semEncaixe": "Bez ubacivanja",
+        "vazio": "Još nema vrsta pregleda.",
+        "kind": {
+          "CONSULTA": "Pregled",
+          "RETORNO": "Kontrola",
+          "VACINA": "Vakcina",
+          "EXAME": "Analiza",
+          "CIRURGIA": "Operacija",
+          "BANHO": "Kupanje i šišanje",
+          "EMERGENCIA": "Hitan slučaj"
+        }
+      },
+      "politica": {
+        "titulo": "Pravila klinike",
+        "descricao": "Rokovi koje klinika dogovara sa onima koji zakazuju preko aplikacije. Aplikacija dobija ove brojeve gotove.",
+        "padrao": "Klinika još ništa nije promenila: važe podrazumevani rokovi.",
+        "salva": "Pravila su sačuvana",
+        "faixa": "Od {min} do {max}.",
+        "naoReescreve": "Važi za ono što se zakaže posle. Već zakazano se ne menja.",
+        "ofertaAutomatica": "Sam ponudi termin prvom na listi čekanja",
+        "ofertaAutomaticaDica": "Kada se termin oslobodi, prvi na listi dobija ponudu i ima {min} min da prihvati.",
+        "campos": {
+          "granularidadeMinutos": "Mreža rasporeda",
+          "cancelarAteHorasAntes": "Otkazivanje preko aplikacije do",
+          "confirmacaoAbreHorasAntes": "Traženje potvrde",
+          "preConsultaAbreHorasAntes": "Otvaranje upitnika pre pregleda",
+          "reservaMinutos": "Čuvanje termina dok se traži",
+          "ofertaDeVagaMinutos": "Rok za prihvatanje termina"
+        },
+        "dicas": {
+          "granularidadeMinutos": "Korak slobodnih termina.",
+          "cancelarAteHorasAntes": "Sati pre termina.",
+          "confirmacaoAbreHorasAntes": "Sati pre termina.",
+          "preConsultaAbreHorasAntes": "Sati pre termina.",
+          "reservaMinutos": "Minuti dok osoba popunjava zahtev.",
+          "ofertaDeVagaMinutos": "Minuti da prvi na listi odgovori."
+        }
+      },
+      "bloqueio": {
+        "titulo": "Blokade",
+        "descricao": "Vreme kada se ne zakazuje: ručak, sastanak, odmor, održavanje sale. Nedeljno radno vreme i praznici su u Ustanovi.",
+        "novo": "Nova blokada",
+        "editarSerie": "Izmeni blokadu",
+        "editarDia": "Izmeni samo ovaj dan",
+        "editar": "Izmeni",
+        "apagar": "Obriši",
+        "apagado": "Blokada je obrisana",
+        "filtro": "Za koga",
+        "todos": "Sve blokade",
+        "periodo": "Narednih {n} dana",
+        "vazio": "Nema blokada narednih dana.",
+        "todaSemana": "Svake nedelje",
+        "horas": "{inicio} do {fim}",
+        "ateOutroDia": "{inicio} do {fim} dana {dia}",
+        "quem": "Važi za",
+        "alcance": {
+          "clinica": "Cela klinika",
+          "profissional": "Profesionalac",
+          "sala": "Sala"
+        },
+        "escolhaProfissional": "Izaberite profesionalca",
+        "escolhaSala": "Izaberite salu",
+        "motivoRotulo": "Razlog",
+        "motivo": {
+          "ALMOCO": "Ručak",
+          "REUNIAO": "Sastanak",
+          "FERIAS": "Odmor",
+          "MANUTENCAO": "Održavanje",
+          "BLOQUEIO_PESSOAL": "Lična blokada",
+          "OUTRO": "Drugo"
+        },
+        "detalhe": "Detalj",
+        "dia": "Dan",
+        "aPartirDe": "Od",
+        "inicio": "Početak",
+        "fim": "Kraj",
+        "diaFinal": "Završava se drugog dana",
+        "diaFinalDica": "Za odmor ili blokade duže od jednog dana.",
+        "semanal": "Ponavljaj svake nedelje",
+        "semanalDica": "U izabrane dane, u isto vreme.",
+        "dias": "Dani u nedelji",
+        "diaCurto": {
+          "0": "Ned",
+          "1": "Pon",
+          "2": "Uto",
+          "3": "Sre",
+          "4": "Čet",
+          "5": "Pet",
+          "6": "Sub"
+        },
+        "ate": "Do",
+        "ateDica": "Bez datuma, ponavlja se bez kraja.",
+        "soNesteDiaDica": "Ovaj dan izlazi iz serije i postaje zasebna blokada. Ostali dani ostaju kakvi jesu.",
+        "horaInvalida": "Proverite vreme (00:00 do 23:59).",
+        "faltaProfissional": "Izaberite profesionalca.",
+        "faltaSala": "Izaberite salu.",
+        "faltaDias": "Izaberite bar jedan dan u nedelji.",
+        "fimAntes": "Kraj mora biti posle početka.",
+        "apagarTitulo": "Obriši blokadu",
+        "editarTitulo": "Izmeni blokadu",
+        "qualParte": "Ova blokada se ponavlja svake nedelje. Samo za dan {dia} ili za celu seriju?",
+        "apagarUnico": "Obrisati ovu blokadu?",
+        "soNesteDia": "Samo ovaj dan",
+        "aSerie": "Cela serija",
+        "erros": {
+          "salaInativa": "Ova sala je deaktivirana. Ponovo je aktivirajte ili izaberite drugu.",
+          "series": "Klinika je dostigla ograničenje blokada koje se ponavljaju. Završite ili obrišite stare serije."
+        }
+      },
+      "expediente": {
+        "titulo": "Radno vreme: {nome}",
+        "modo": {
+          "clinica": "Kao klinika",
+          "proprio": "Sopstveno",
+          "folga": "Slobodan dan"
+        },
+        "segueAClinica": "Prati radno vreme klinike.",
+        "clinicaFecha": "Klinika ne radi ovog dana.",
+        "horario": "{inicio} do {fim}, kao klinika.",
+        "horarioComIntervalo": "{inicio} do {fim}, pauza od {intervaloInicio} do {intervaloFim}, kao klinika.",
+        "naoAtende": "Ne radi ovog dana.",
+        "das": "Od",
+        "as": "do",
+        "comecaEm": "{dia}: počinje u",
+        "terminaEm": "{dia}: završava u",
+        "sala": "Podrazumevana sala",
+        "salaDica": "Raspored predlaže ovu salu kada se zakazuje kod ove osobe.",
+        "semSala": "Bez podrazumevane sale",
+        "semSalas": "Još nema aktivnih sala. Sale su u Podešavanjima rasporeda.",
+        "salaInativa": "Ova sala je deaktivirana. Izaberite drugu ili ostavite bez podrazumevane sale.",
+        "semana": "Nedelja",
+        "descricao": "Menjajte samo dane koji se razlikuju od klinike. Ostali prate njeno radno vreme.",
+        "semHorario": "Klinika još nije unela nedeljno radno vreme: \"kao klinika\" nema sate do tada.",
+        "irAoEstabelecimento": "Unesite radno vreme",
+        "notas": "Praznici i posebni dani klinike imaju prednost nad radnim vremenom. Sopstvena pauza za ručak je nedeljna blokada, u Podešavanjima rasporeda.",
+        "salvo": "Radno vreme je sačuvano",
+        "fechar": "Zatvori"
+      }
     }
   }
 }

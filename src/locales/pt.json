@@ -2367,7 +2367,7 @@
       },
       "funcaoDica": {
         "RECEPCAO": "Agenda, pedidos de horário, fila e cadastro de pacientes; no hotel, reservas e check-in.",
-        "VETERINARIO": "Agenda, prontuário, vacinas e internação. Assinar receita e finalizar prontuário pedem CRMV.",
+        "VETERINARIO": "Agenda, prontuário, vacinas e internação. Emitir receita e finalizar prontuário pedem CRMV.",
         "ENFERMAGEM": "Vacinas, internação e consulta ao prontuário e à agenda.",
         "CUIDADOR": "A rotina e os hóspedes do hotel.",
         "BANHISTA": "Os serviços e a rotina do hotel, como o cuidador.",
@@ -2409,8 +2409,8 @@
       "vazioDica": "A ficha é o que a agenda e o prontuário citam: cadastre quem atende, mesmo sem login.",
       "crmv": {
         "titulo": "Falta a sua ficha com CRMV",
-        "corpo": "Escrever prontuário, liberar o resumo ao responsável e assinar receita pedem uma ficha ativa com CRMV, número e UF.",
-        "peca": "Escrever prontuário, liberar o resumo e assinar receita pedem uma ficha com CRMV. Peça ao dono da conta para cadastrar a sua.",
+        "corpo": "Escrever prontuário, liberar o resumo ao responsável e emitir receita pedem uma ficha ativa com CRMV, número e UF.",
+        "peca": "Escrever prontuário, liberar o resumo e emitir receita pedem uma ficha com CRMV. Peça ao dono da conta para cadastrar a sua.",
         "cadastrar": "Cadastrar minha ficha",
         "completar": "Completar meu CRMV"
       },
@@ -2445,7 +2445,8 @@
         "perdeSeloLogin": "Ligar esta ficha a um login tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
         "perdeSeloSemLogin": "Desligar o login desta ficha tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
         "salvar": "Salvar ficha"
-      }
+      },
+      "expediente": "Expediente"
     },
     "indicados": {
       "titulo": "Indicados",
@@ -3238,7 +3239,7 @@
     "resumoEmpresa": "Você entrou como {email}, em {empresa}.",
     "identidade": {
       "titulo": "Verificação de identidade",
-      "descricao": "Documento com foto, selfie e CPF, conferidos por uma pessoa da PetJourney. É o que libera a assinatura de receitas, prontuários e prescrições.",
+      "descricao": "Documento com foto, selfie e CPF, conferidos por uma pessoa da PetJourney. É o que libera emitir receitas e prescrições e finalizar prontuários.",
       "estado": {
         "nenhum": "Você ainda não enviou.",
         "EM_ANALISE": "Em análise desde {data}. Sem conferência até {prazo}, o envio é cancelado.",
@@ -3258,9 +3259,9 @@
       "expirada": "O envio ficou 14 dias sem conferência e as fotos foram apagadas. Envie de novo.",
       "selo": {
         "SEM_SELO": "Seu CRMV espera a conferência da PetJourney.",
-        "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo para você assinar.",
-        "SEM_IDENTIDADE": "Para assinar, confirme sua identidade.",
-        "CRMV_OBRIGATORIO": "Para assinar, cadastre o CRMV e a UF na sua ficha de profissional."
+        "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo para você emitir receitas.",
+        "SEM_IDENTIDADE": "Para emitir receitas, confirme sua identidade.",
+        "CRMV_OBRIGATORIO": "Para emitir receitas, cadastre o CRMV e a UF na sua ficha de profissional."
       },
       "acoes": {
         "enviar": "Verificar identidade",
@@ -9365,7 +9366,8 @@
       "pacientes": "Pacientes",
       "internacao": "Internação",
       "pendencias": "Pendências",
-      "relatorios": "Relatórios"
+      "relatorios": "Relatórios",
+      "configuracao": "Configuração"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9807,6 +9809,206 @@
       "novoDica": "A clínica cria o cliente e o paciente com os dados do acesso, com o nome provisório \"Responsável de {pet}\".",
       "escolha": "Escolha o paciente ou crie o cadastro.",
       "feito": "Pedido enviado. O responsável recebe o pedido no app para aceitar."
+    }
+  },
+  "agenda": {
+    "config": {
+      "titulo": "Configuração da agenda",
+      "resumo": "Salas, tipos de atendimento, bloqueios e os prazos combinados com quem marca pelo app.",
+      "abas": {
+        "salas": "Salas",
+        "tipos": "Tipos de atendimento",
+        "bloqueios": "Bloqueios",
+        "politica": "Política"
+      },
+      "erroAoCarregar": "Não foi possível carregar.",
+      "desativar": "Desativar",
+      "reativar": "Reativar",
+      "inativas": "Desativadas",
+      "inativos": "Desativados",
+      "subir": "Subir {nome}",
+      "descer": "Descer {nome}",
+      "editarDe": "Editar {nome}",
+      "sala": {
+        "titulo": "Salas",
+        "descricao": "Onde os atendimentos acontecem. A ordem é a das colunas da agenda. Sala não se apaga: desativa.",
+        "nova": "Nova sala",
+        "editar": "Editar sala",
+        "nome": "Nome",
+        "nomeExemplo": "Ex.: Consultório 1",
+        "nomeTamanho": "O nome precisa ter de {min} a {max} caracteres.",
+        "nomeEmUso": "Já existe outra sala ativa com esse nome.",
+        "tipoRotulo": "Tipo",
+        "vazio": "Nenhuma sala cadastrada ainda.",
+        "tipo": {
+          "CONSULTORIO": "Consultório",
+          "CIRURGIA": "Centro cirúrgico",
+          "BANHO": "Banho e tosa",
+          "INTERNACAO": "Internação",
+          "EXAME": "Exames"
+        }
+      },
+      "tipo": {
+        "titulo": "Tipos de atendimento",
+        "descricao": "O que a clínica atende, com a duração e as salas. A ordem é a da legenda da agenda.",
+        "novo": "Novo tipo",
+        "editar": "Editar tipo de atendimento",
+        "nome": "Nome",
+        "nomeExemplo": "Ex.: Check-up felino",
+        "faltaNome": "Informe o nome.",
+        "nomeEmUso": "Já existe outro tipo ativo com esse nome.",
+        "kindRotulo": "Categoria",
+        "duracao": "Duração",
+        "min": "min",
+        "minutos": "{n} min",
+        "duracaoInvalida": "De {min} a {max} minutos, de {passo} em {passo}.",
+        "salas": "Salas compatíveis",
+        "salasDica": "Sem nenhuma marcada, vale qualquer sala.",
+        "qualquerSala": "qualquer sala",
+        "encaixe": "Permite encaixe",
+        "encaixeDica": "A recepção pode encaixar este atendimento num horário já ocupado.",
+        "ofertadoOnline": "Aparece no pedido online",
+        "ofertadoOnlineDica": "Quem não tem conta pode pedir este atendimento pela página da clínica.",
+        "naoOnline": "Cirurgia e emergência não aparecem no pedido online.",
+        "online": "Online",
+        "semEncaixe": "Sem encaixe",
+        "vazio": "Nenhum tipo de atendimento cadastrado ainda.",
+        "kind": {
+          "CONSULTA": "Consulta",
+          "RETORNO": "Retorno",
+          "VACINA": "Vacina",
+          "EXAME": "Exame",
+          "CIRURGIA": "Cirurgia",
+          "BANHO": "Banho e tosa",
+          "EMERGENCIA": "Emergência"
+        }
+      },
+      "politica": {
+        "titulo": "Política da clínica",
+        "descricao": "Os prazos que a clínica combina com quem marca pelo app. O app recebe estes números prontos.",
+        "padrao": "A clínica ainda não mudou nada: valem os prazos padrão.",
+        "salva": "Política salva",
+        "faixa": "De {min} a {max}.",
+        "naoReescreve": "Vale para o que for marcado depois. O que já está marcado não muda.",
+        "ofertaAutomatica": "Ofertar vagas sozinho ao primeiro da fila",
+        "ofertaAutomaticaDica": "Quando um horário vaga, o primeiro da fila de espera recebe a oferta e tem {min} min para aceitar.",
+        "campos": {
+          "granularidadeMinutos": "Grade da agenda",
+          "cancelarAteHorasAntes": "Cancelar pelo app até",
+          "confirmacaoAbreHorasAntes": "Pedir a confirmação",
+          "preConsultaAbreHorasAntes": "Abrir a pré-consulta",
+          "reservaMinutos": "Segurar o horário enquanto pede",
+          "ofertaDeVagaMinutos": "Prazo para aceitar a vaga"
+        },
+        "dicas": {
+          "granularidadeMinutos": "O passo dos horários livres.",
+          "cancelarAteHorasAntes": "Horas antes do horário.",
+          "confirmacaoAbreHorasAntes": "Horas antes do horário.",
+          "preConsultaAbreHorasAntes": "Horas antes do horário.",
+          "reservaMinutos": "Minutos enquanto a pessoa preenche o pedido.",
+          "ofertaDeVagaMinutos": "Minutos para o primeiro da fila responder."
+        }
+      },
+      "bloqueio": {
+        "titulo": "Bloqueios",
+        "descricao": "Horários em que não se marca: almoço, reunião, férias, manutenção de sala. O horário da semana e os feriados ficam em Estabelecimento.",
+        "novo": "Novo bloqueio",
+        "editarSerie": "Editar o bloqueio",
+        "editarDia": "Editar só este dia",
+        "editar": "Editar",
+        "apagar": "Apagar",
+        "apagado": "Bloqueio apagado",
+        "filtro": "De quem",
+        "todos": "Todos os bloqueios",
+        "periodo": "Próximos {n} dias",
+        "vazio": "Nenhum bloqueio nos próximos dias.",
+        "todaSemana": "Toda semana",
+        "horas": "{inicio} às {fim}",
+        "ateOutroDia": "{inicio} até {fim} de {dia}",
+        "quem": "Vale para",
+        "alcance": {
+          "clinica": "Clínica toda",
+          "profissional": "Profissional",
+          "sala": "Sala"
+        },
+        "escolhaProfissional": "Escolha o profissional",
+        "escolhaSala": "Escolha a sala",
+        "motivoRotulo": "Motivo",
+        "motivo": {
+          "ALMOCO": "Almoço",
+          "REUNIAO": "Reunião",
+          "FERIAS": "Férias",
+          "MANUTENCAO": "Manutenção",
+          "BLOQUEIO_PESSOAL": "Bloqueio pessoal",
+          "OUTRO": "Outro"
+        },
+        "detalhe": "Detalhe",
+        "dia": "Dia",
+        "aPartirDe": "A partir de",
+        "inicio": "Início",
+        "fim": "Fim",
+        "diaFinal": "Termina em outro dia",
+        "diaFinalDica": "Para férias ou bloqueios de mais de um dia.",
+        "semanal": "Repetir toda semana",
+        "semanalDica": "Nos dias escolhidos, no mesmo horário.",
+        "dias": "Dias da semana",
+        "diaCurto": {
+          "0": "Dom",
+          "1": "Seg",
+          "2": "Ter",
+          "3": "Qua",
+          "4": "Qui",
+          "5": "Sex",
+          "6": "Sáb"
+        },
+        "ate": "Até",
+        "ateDica": "Sem data, repete sem fim.",
+        "soNesteDiaDica": "Este dia sai da série e vira um bloqueio à parte. Os outros dias continuam como estão.",
+        "horaInvalida": "Confira as horas (00:00 a 23:59).",
+        "faltaProfissional": "Escolha o profissional.",
+        "faltaSala": "Escolha a sala.",
+        "faltaDias": "Escolha pelo menos um dia da semana.",
+        "fimAntes": "O fim precisa ser depois do início.",
+        "apagarTitulo": "Apagar bloqueio",
+        "editarTitulo": "Editar bloqueio",
+        "qualParte": "Este bloqueio se repete toda semana. Vale só para o dia {dia} ou para a série inteira?",
+        "apagarUnico": "Apagar este bloqueio?",
+        "soNesteDia": "Só neste dia",
+        "aSerie": "A série inteira",
+        "erros": {
+          "salaInativa": "Esta sala está desativada. Reative a sala ou escolha outra.",
+          "series": "A clínica chegou ao limite de bloqueios que se repetem. Encerre ou apague séries antigas."
+        }
+      },
+      "expediente": {
+        "titulo": "Expediente de {nome}",
+        "modo": {
+          "clinica": "Como a clínica",
+          "proprio": "Próprio",
+          "folga": "Folga"
+        },
+        "segueAClinica": "Segue o horário da clínica.",
+        "clinicaFecha": "A clínica fecha neste dia.",
+        "horario": "{inicio} às {fim}, como a clínica.",
+        "horarioComIntervalo": "{inicio} às {fim}, intervalo das {intervaloInicio} às {intervaloFim}, como a clínica.",
+        "naoAtende": "Não atende neste dia.",
+        "das": "Das",
+        "as": "às",
+        "comecaEm": "{dia}: começa às",
+        "terminaEm": "{dia}: termina às",
+        "sala": "Sala padrão",
+        "salaDica": "A agenda propõe esta sala ao marcar com esta pessoa.",
+        "semSala": "Sem sala padrão",
+        "semSalas": "Nenhuma sala ativa ainda. As salas ficam na Configuração da agenda.",
+        "salaInativa": "Essa sala foi desativada. Escolha outra ou fique sem sala padrão.",
+        "semana": "Semana",
+        "descricao": "Mude só os dias diferentes da clínica. O resto segue o horário dela.",
+        "semHorario": "A clínica ainda não cadastrou o horário da semana: \"como a clínica\" fica sem hora até lá.",
+        "irAoEstabelecimento": "Cadastrar o horário",
+        "notas": "Feriado e dia especial da clínica valem por cima do expediente. Almoço próprio é um bloqueio semanal, na Configuração da agenda.",
+        "salvo": "Expediente salvo",
+        "fechar": "Fechar"
+      }
     }
   }
 }

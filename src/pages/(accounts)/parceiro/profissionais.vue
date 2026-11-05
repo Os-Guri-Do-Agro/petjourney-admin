@@ -16,6 +16,7 @@ import type { MenuItem } from 'primevue/menuitem'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import ExpedienteGaveta from '@/components/agenda/ExpedienteGaveta.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import ProfissionalGaveta from '@/components/parceiro/ProfissionalGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -227,6 +228,39 @@ async function reativar(profissional: Profissional) {
   }
 }
 
+/* ------------------------------------------------------------------------- o expediente */
+
+/**
+ * O expediente e a sala padrão (E3-01, seção 1.4) só existem com a Clínica: ler é `agenda.ler`,
+ * mudar é `estabelecimento.editar` com a Clínica ligada para escrita.
+ */
+const veExpediente = computed(
+  () => Boolean(store.modulo('CLINICA')) && store.temPermissao('agenda.ler'),
+)
+const mudaExpediente = computed(
+  () =>
+    Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('estabelecimento.editar'),
+)
+const expedienteAberto = ref(false)
+const doExpediente = ref<Profissional | null>(null)
+
+function abrirExpediente(profissional: Profissional) {
+  doExpediente.value = profissional
+  expedienteAberto.value = true
+}
+
+function itemDoExpediente(profissional: Profissional): MenuItem[] {
+  return veExpediente.value
+    ? [
+        {
+          label: t('parceiro.profissionais.expediente'),
+          icon: 'ph ph-clock',
+          command: () => abrirExpediente(profissional),
+        },
+      ]
+    : []
+}
+
 /* ------------------------------------------------------------------------- menu da linha */
 
 const menu = ref<InstanceType<typeof Menu> | null>(null)
@@ -243,6 +277,7 @@ function acoesDe(profissional: Profissional): MenuItem[] {
             icon: 'ph ph-pencil-simple',
             command: () => abrirEdicao(profissional),
           },
+          ...itemDoExpediente(profissional),
         ]
       : []
   }
@@ -253,6 +288,7 @@ function acoesDe(profissional: Profissional): MenuItem[] {
       icon: 'ph ph-pencil-simple',
       command: () => abrirEdicao(profissional),
     },
+    ...itemDoExpediente(profissional),
     { separator: true },
     {
       label: t('parceiro.profissionais.desativar'),
@@ -474,6 +510,12 @@ onMounted(async () => {
         :salvando="salvando"
         :erro="erroDaGaveta"
         @salvar="salvar"
+      />
+
+      <ExpedienteGaveta
+        v-model:visible="expedienteAberto"
+        :profissional="doExpediente"
+        :pode-editar="mudaExpediente"
       />
 
       <ConfirmActionDialog

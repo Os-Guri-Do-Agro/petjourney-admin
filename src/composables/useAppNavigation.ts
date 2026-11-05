@@ -220,6 +220,18 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     key: 'clinico.navegacao.analise',
     rotas: [{ key: 'clinico.resumo.titulo', to: '/clinica/resumo', icon: 'ph ph-chart-bar' }],
   },
+  /* Salas, tipos de atendimento, bloqueios e política da agenda (E3-01). */
+  {
+    id: 'configuracao',
+    key: 'agenda.config.titulo',
+    rotas: [
+      {
+        key: 'agenda.config.titulo',
+        to: '/clinica/configuracao',
+        icon: 'ph ph-sliders-horizontal',
+      },
+    ],
+  },
 ]
 
 const PATIENT_ROUTES = [

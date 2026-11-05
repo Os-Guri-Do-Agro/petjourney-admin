@@ -2445,7 +2445,8 @@
         "perdeSeloLogin": "Linking this record to a login removes the verified seal: the CRMV goes back to PetJourney for verification.",
         "perdeSeloSemLogin": "Unlinking the login from this record removes the verified seal: the CRMV goes back to PetJourney for verification.",
         "salvar": "Save record"
-      }
+      },
+      "expediente": "Working hours"
     },
     "indicados": {
       "titulo": "Referrals",
@@ -9365,7 +9366,8 @@
       "pacientes": "Patients",
       "internacao": "Inpatients",
       "pendencias": "Follow-ups",
-      "relatorios": "Reports"
+      "relatorios": "Reports",
+      "configuracao": "Settings"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9807,6 +9809,206 @@
       "novoDica": "The clinic creates the client and the patient from the access data, with the temporary name \"Guardian of {pet}\".",
       "escolha": "Choose the patient or create the record.",
       "feito": "Request sent. The guardian gets the request in the app to accept."
+    }
+  },
+  "agenda": {
+    "config": {
+      "titulo": "Schedule settings",
+      "resumo": "Rooms, appointment types, blocks and the deadlines agreed with people who book through the app.",
+      "abas": {
+        "salas": "Rooms",
+        "tipos": "Appointment types",
+        "bloqueios": "Blocks",
+        "politica": "Policy"
+      },
+      "erroAoCarregar": "Could not load.",
+      "desativar": "Deactivate",
+      "reativar": "Reactivate",
+      "inativas": "Deactivated",
+      "inativos": "Deactivated",
+      "subir": "Move {nome} up",
+      "descer": "Move {nome} down",
+      "editarDe": "Edit {nome}",
+      "sala": {
+        "titulo": "Rooms",
+        "descricao": "Where appointments happen. The order is the order of the schedule columns. Rooms are never deleted: they are deactivated.",
+        "nova": "New room",
+        "editar": "Edit room",
+        "nome": "Name",
+        "nomeExemplo": "E.g.: Exam room 1",
+        "nomeTamanho": "The name must have {min} to {max} characters.",
+        "nomeEmUso": "Another active room already has this name.",
+        "tipoRotulo": "Type",
+        "vazio": "No rooms yet.",
+        "tipo": {
+          "CONSULTORIO": "Exam room",
+          "CIRURGIA": "Operating room",
+          "BANHO": "Grooming",
+          "INTERNACAO": "Inpatient",
+          "EXAME": "Diagnostics"
+        }
+      },
+      "tipo": {
+        "titulo": "Appointment types",
+        "descricao": "What the clinic offers, with duration and rooms. The order is the order of the schedule legend.",
+        "novo": "New type",
+        "editar": "Edit appointment type",
+        "nome": "Name",
+        "nomeExemplo": "E.g.: Feline check-up",
+        "faltaNome": "Enter the name.",
+        "nomeEmUso": "Another active type already has this name.",
+        "kindRotulo": "Category",
+        "duracao": "Duration",
+        "min": "min",
+        "minutos": "{n} min",
+        "duracaoInvalida": "{min} to {max} minutes, in steps of {passo}.",
+        "salas": "Compatible rooms",
+        "salasDica": "With none selected, any room works.",
+        "qualquerSala": "any room",
+        "encaixe": "Allows squeeze-in",
+        "encaixeDica": "The front desk can squeeze this appointment into a taken slot.",
+        "ofertadoOnline": "Shown in online requests",
+        "ofertadoOnlineDica": "People without an account can request this appointment on the clinic's page.",
+        "naoOnline": "Surgery and emergency are never shown in online requests.",
+        "online": "Online",
+        "semEncaixe": "No squeeze-in",
+        "vazio": "No appointment types yet.",
+        "kind": {
+          "CONSULTA": "Consultation",
+          "RETORNO": "Follow-up",
+          "VACINA": "Vaccine",
+          "EXAME": "Test",
+          "CIRURGIA": "Surgery",
+          "BANHO": "Grooming",
+          "EMERGENCIA": "Emergency"
+        }
+      },
+      "politica": {
+        "titulo": "Clinic policy",
+        "descricao": "The deadlines the clinic agrees with people who book through the app. The app gets these numbers ready.",
+        "padrao": "The clinic has not changed anything yet: the default deadlines apply.",
+        "salva": "Policy saved",
+        "faixa": "From {min} to {max}.",
+        "naoReescreve": "Applies to what is booked from now on. Existing appointments do not change.",
+        "ofertaAutomatica": "Offer slots automatically to the first in the waitlist",
+        "ofertaAutomaticaDica": "When a slot frees up, the first person on the waitlist gets the offer and has {min} min to accept.",
+        "campos": {
+          "granularidadeMinutos": "Schedule grid",
+          "cancelarAteHorasAntes": "Cancel through the app up to",
+          "confirmacaoAbreHorasAntes": "Ask for confirmation",
+          "preConsultaAbreHorasAntes": "Open the pre-visit form",
+          "reservaMinutos": "Hold the slot while requesting",
+          "ofertaDeVagaMinutos": "Time to accept the slot"
+        },
+        "dicas": {
+          "granularidadeMinutos": "The step between free slots.",
+          "cancelarAteHorasAntes": "Hours before the appointment.",
+          "confirmacaoAbreHorasAntes": "Hours before the appointment.",
+          "preConsultaAbreHorasAntes": "Hours before the appointment.",
+          "reservaMinutos": "Minutes while the person fills in the request.",
+          "ofertaDeVagaMinutos": "Minutes for the first in line to answer."
+        }
+      },
+      "bloqueio": {
+        "titulo": "Blocks",
+        "descricao": "Times when nothing can be booked: lunch, meetings, vacation, room maintenance. Weekly hours and holidays live in Establishment.",
+        "novo": "New block",
+        "editarSerie": "Edit block",
+        "editarDia": "Edit this day only",
+        "editar": "Edit",
+        "apagar": "Delete",
+        "apagado": "Block deleted",
+        "filtro": "For whom",
+        "todos": "All blocks",
+        "periodo": "Next {n} days",
+        "vazio": "No blocks in the coming days.",
+        "todaSemana": "Every week",
+        "horas": "{inicio} to {fim}",
+        "ateOutroDia": "{inicio} until {fim} on {dia}",
+        "quem": "Applies to",
+        "alcance": {
+          "clinica": "Whole clinic",
+          "profissional": "Professional",
+          "sala": "Room"
+        },
+        "escolhaProfissional": "Choose the professional",
+        "escolhaSala": "Choose the room",
+        "motivoRotulo": "Reason",
+        "motivo": {
+          "ALMOCO": "Lunch",
+          "REUNIAO": "Meeting",
+          "FERIAS": "Vacation",
+          "MANUTENCAO": "Maintenance",
+          "BLOQUEIO_PESSOAL": "Personal block",
+          "OUTRO": "Other"
+        },
+        "detalhe": "Detail",
+        "dia": "Day",
+        "aPartirDe": "Starting on",
+        "inicio": "Start",
+        "fim": "End",
+        "diaFinal": "Ends on another day",
+        "diaFinalDica": "For vacations or blocks longer than a day.",
+        "semanal": "Repeat every week",
+        "semanalDica": "On the chosen days, at the same time.",
+        "dias": "Days of the week",
+        "diaCurto": {
+          "0": "Sun",
+          "1": "Mon",
+          "2": "Tue",
+          "3": "Wed",
+          "4": "Thu",
+          "5": "Fri",
+          "6": "Sat"
+        },
+        "ate": "Until",
+        "ateDica": "Without a date, it repeats forever.",
+        "soNesteDiaDica": "This day leaves the series and becomes a separate block. The other days stay as they are.",
+        "horaInvalida": "Check the times (00:00 to 23:59).",
+        "faltaProfissional": "Choose the professional.",
+        "faltaSala": "Choose the room.",
+        "faltaDias": "Choose at least one day of the week.",
+        "fimAntes": "The end must be after the start.",
+        "apagarTitulo": "Delete block",
+        "editarTitulo": "Edit block",
+        "qualParte": "This block repeats every week. Apply to {dia} only or to the whole series?",
+        "apagarUnico": "Delete this block?",
+        "soNesteDia": "This day only",
+        "aSerie": "The whole series",
+        "erros": {
+          "salaInativa": "This room is deactivated. Reactivate it or choose another.",
+          "series": "The clinic reached the limit of repeating blocks. End or delete old series."
+        }
+      },
+      "expediente": {
+        "titulo": "Working hours: {nome}",
+        "modo": {
+          "clinica": "Same as clinic",
+          "proprio": "Own hours",
+          "folga": "Day off"
+        },
+        "segueAClinica": "Follows the clinic's hours.",
+        "clinicaFecha": "The clinic is closed on this day.",
+        "horario": "{inicio} to {fim}, same as the clinic.",
+        "horarioComIntervalo": "{inicio} to {fim}, break from {intervaloInicio} to {intervaloFim}, same as the clinic.",
+        "naoAtende": "Not working on this day.",
+        "das": "From",
+        "as": "to",
+        "comecaEm": "{dia}: starts at",
+        "terminaEm": "{dia}: ends at",
+        "sala": "Default room",
+        "salaDica": "The schedule suggests this room when booking with this person.",
+        "semSala": "No default room",
+        "semSalas": "No active rooms yet. Rooms live in Schedule settings.",
+        "salaInativa": "This room was deactivated. Pick another one or leave no default room.",
+        "semana": "Week",
+        "descricao": "Change only the days that differ from the clinic. The rest follow its hours.",
+        "semHorario": "The clinic has not set its weekly hours yet: \"same as clinic\" has no times until then.",
+        "irAoEstabelecimento": "Set the hours",
+        "notas": "The clinic's holidays and special days override working hours. A personal lunch break is a weekly block, in Schedule settings.",
+        "salvo": "Working hours saved",
+        "fechar": "Close"
+      }
     }
   }
 }

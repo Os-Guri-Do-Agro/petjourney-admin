@@ -49,6 +49,14 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   },
   { prefixo: '/clinica/resumo', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
 
+  /* Clínica: a configuração da agenda (E3-01, PJ-GL3IVL), já pela API. */
+  {
+    prefixo: '/clinica/configuracao',
+    modulo: 'CLINICA',
+    permissao: 'agenda.ler',
+    integrada: true,
+  },
+
   /* Clínica: prontuário, receita, vacinas e adesão (E4). */
   {
     prefixo: '/clinica/atendimentos',
