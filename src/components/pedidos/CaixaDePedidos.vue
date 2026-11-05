@@ -263,7 +263,7 @@ function aoResponder() {
     </template>
 
     <div class="pc">
-      <p v-if="configuracao && !configuracao.ativo" class="pc__desligado ui-folha" role="status">
+      <p v-if="configuracao && !configuracao.ativo" class="pc__desligado" role="status">
         <i class="ph ph-pause-circle" aria-hidden="true" />
         <span>{{ t('pedidos.caixa.desligado') }}</span>
         <Button
@@ -310,7 +310,8 @@ function aoResponder() {
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="pc__vazio ui-folha">
+      <div v-else-if="!itens.length" class="ui-vazio pc__vazio">
+        <i class="ph ph-calendar-plus" aria-hidden="true" />
         <strong>{{ t(`pedidos.caixa.vazio.${aba}`) }}</strong>
         <span v-if="aba === 'PENDENTES'">{{ t('clinico.pedidos.vazio.descricao') }}</span>
       </div>
@@ -421,6 +422,7 @@ function aoResponder() {
   overflow-x: auto;
 }
 
+/* Uma linha, sem painel: o estado mora no ícone, e o "Configurar" fica junto do texto. */
 .pc__desligado {
   display: flex;
   flex-wrap: wrap;
@@ -431,19 +433,21 @@ function aoResponder() {
   font-size: 14px;
 }
 
-.pc__desligado > span {
-  flex: 1 1 18rem;
+.pc__desligado > i {
+  color: var(--atencao-tinta);
+  font-size: 18px;
 }
 
+/* O vazio da casa (o mesmo da lista de Pacientes), centrado. */
 .pc__vazio {
-  display: grid;
-  gap: 4px;
-  color: var(--tinta-2);
-  font-size: 14px;
+  justify-items: center;
+  padding: 40px 16px;
+  text-align: center;
 }
 
-.pc__vazio strong {
-  color: var(--tinta);
+.pc__vazio > i {
+  color: var(--tinta-3);
+  font-size: 26px;
 }
 
 .pc__linha {

@@ -343,11 +343,21 @@ const vagasAbertas = ref(false)
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="fl__vazio ui-folha">
+      <div v-else-if="!itens.length" class="ui-vazio fl__vazio">
+        <i class="ph ph-hourglass-medium" aria-hidden="true" />
         <strong>{{
           situacao === 'ATIVAS' ? t('clinico.fila.vazioTitulo') : t('fila.semNaoResponderam')
         }}</strong>
         <span v-if="situacao === 'ATIVAS'">{{ t('clinico.fila.vazioDescricao') }}</span>
+        <Button
+          v-if="situacao === 'ATIVAS' && podeGerir"
+          type="button"
+          icon="ph ph-plus"
+          severity="secondary"
+          outlined
+          :label="t('clinico.fila.adicionar')"
+          @click="entrarAberta = true"
+        />
       </div>
 
       <ul v-else class="ui-lista ui-folha">
@@ -493,15 +503,16 @@ const vagasAbertas = ref(false)
   justify-self: start;
 }
 
+/* O vazio da casa (o mesmo da lista de Pacientes), centrado. */
 .fl__vazio {
-  display: grid;
-  gap: 4px;
-  color: var(--tinta-2);
-  font-size: 14px;
+  justify-items: center;
+  padding: 40px 16px;
+  text-align: center;
 }
 
-.fl__vazio strong {
-  color: var(--tinta);
+.fl__vazio > i {
+  color: var(--tinta-3);
+  font-size: 26px;
 }
 
 .fl__linha {
