@@ -7,6 +7,8 @@
  * O texto antes do botão é o aviso de privacidade da API, na versão que o envio manda
  * (`consentimentoVersaoAtual`), no idioma da sessão: nada dele mora no front. Também é da API o
  * texto do botão ("Li e entendi, enviar"). É um aviso, não um consentimento: sem caixa de "aceito".
+ * Desde 05/11/2026 ele aparece em camadas (`IdentidadeAviso`): a abertura à vista e os tópicos
+ * recolhidos. O título da gaveta é o da tela; o título do aviso fica no bloco do aviso.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -16,6 +18,7 @@ import Skeleton from 'primevue/skeleton'
 import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import IdentidadeAviso from '@/components/settings/IdentidadeAviso.vue'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import { INTL_LOCALE, isRTLLocale, type Locale } from '@/i18n/locales'
@@ -356,7 +359,7 @@ const campos = computed(() => [
         <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
           <i class="ph ph-identification-card" />
         </span>
-        {{ (podeEnviar && aviso?.titulo) || t('settings.identidade.titulo') }}
+        {{ t('settings.identidade.titulo') }}
       </h2>
     </template>
 
@@ -526,7 +529,7 @@ const campos = computed(() => [
               @click="carregarAviso"
             />
           </p>
-          <p v-else-if="aviso" class="ig__aviso-texto">{{ aviso.texto }}</p>
+          <IdentidadeAviso v-else-if="aviso" :titulo="aviso.titulo" :texto="aviso.texto" />
         </section>
       </form>
 
@@ -717,14 +720,5 @@ const campos = computed(() => [
   gap: 10px;
   padding-top: 16px;
   border-top: 1px solid var(--linha-suave);
-}
-
-/* Os parágrafos do aviso vêm separados por linha em branco: a quebra é do texto da API. */
-.ig__aviso-texto {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 13.5px;
-  line-height: 1.55;
-  white-space: pre-line;
 }
 </style>

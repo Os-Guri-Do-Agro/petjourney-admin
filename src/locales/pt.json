@@ -3219,7 +3219,12 @@
         "prazo": "Prazo da conferência",
         "decididaEm": "Decidida em",
         "emAnaliseDica": "Você recebe um e-mail quando for decidida.",
-        "novoEnvio": "Novo envio"
+        "novoEnvio": "Novo envio",
+        "aviso": {
+          "titulo": "Aviso de privacidade",
+          "politica": "Política de Privacidade da PetJourney",
+          "novaAba": "(abre em outra aba)"
+        }
       },
       "erros": {
         "nome": "Escreva o nome completo, como no documento.",

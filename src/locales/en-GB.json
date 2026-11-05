@@ -3219,7 +3219,12 @@
         "prazo": "Review deadline",
         "decididaEm": "Decided on",
         "emAnaliseDica": "You will get an email when it is decided.",
-        "novoEnvio": "New submission"
+        "novoEnvio": "New submission",
+        "aviso": {
+          "titulo": "Privacy notice",
+          "politica": "PetJourney Privacy Policy",
+          "novaAba": "(opens in a new tab)"
+        }
       },
       "erros": {
         "nome": "Write your full name, as on the ID.",

@@ -3219,7 +3219,12 @@
         "prazo": "Rok za proveru",
         "decididaEm": "Odlučeno",
         "emAnaliseDica": "Dobićete e-poruku kada bude odlučeno.",
-        "novoEnvio": "Novo slanje"
+        "novoEnvio": "Novo slanje",
+        "aviso": {
+          "titulo": "Obaveštenje o privatnosti",
+          "politica": "Politika privatnosti PetJourney-a",
+          "novaAba": "(otvara se u novoj kartici)"
+        }
       },
       "erros": {
         "nome": "Unesite puno ime, kao u dokumentu.",

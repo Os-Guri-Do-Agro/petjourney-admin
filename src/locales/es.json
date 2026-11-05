@@ -3219,7 +3219,12 @@
         "prazo": "Plazo de revisión",
         "decididaEm": "Decidida el",
         "emAnaliseDica": "Recibirá un correo cuando se decida.",
-        "novoEnvio": "Nuevo envío"
+        "novoEnvio": "Nuevo envío",
+        "aviso": {
+          "titulo": "Aviso de privacidad",
+          "politica": "Política de Privacidad de PetJourney",
+          "novaAba": "(se abre en otra pestaña)"
+        }
       },
       "erros": {
         "nome": "Escriba el nombre completo, como en el documento.",
