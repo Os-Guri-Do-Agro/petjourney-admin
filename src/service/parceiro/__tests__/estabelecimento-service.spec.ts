@@ -88,32 +88,73 @@ describe('estabelecimento-service', () => {
     })
   })
 
-  it('remove em lote com um DELETE por dia: 404 conta como removido, o resto como falha', async () => {
+  it('remove em lote num pedido só; os não encontrados contam como removidos (PJ-HZC7C6)', async () => {
     const { removerDiasEspeciais } = await loadService()
-    const erro = (status: number, codigo: string) =>
-      new Response(JSON.stringify({ statusCode: status, message: codigo, codigo }), {
-        status,
-        headers: JSON_HEADERS,
-      })
-    const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (url) => {
-      const id = String(url).split('/dias-especiais/')[1]?.split('?')[0]
+    const fetchMock = mockFetch({ removidos: ['d1', 'd2'], naoEncontrados: ['sumiu'] })
 
-      if (id === 'sumiu') return erro(404, 'ESTABELECIMENTO_DIA_ESPECIAL_NAO_ENCONTRADO')
-      if (id === 'recusado') return erro(403, 'ESTABELECIMENTO_APENAS_DONO')
+    const resultado = await removerDiasEspeciais(['d1', 'sumiu', 'd2', 'd1'], { parceiroId: 'p1' })
 
-      return new Response(null, { status: 204 })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(chamada(fetchMock)).toMatchObject({
+      url: 'https://api.exemplo.test/parceiro/portal/estabelecimento/dias-especiais/remover?parceiroId=p1',
+      method: 'POST',
+    })
+    /* O id repetido vai uma vez só. */
+    expect(JSON.parse(String(chamada(fetchMock).body))).toEqual({ ids: ['d1', 'sumiu', 'd2'] })
+    expect([...resultado.removidos].sort()).toEqual(['d1', 'd2', 'sumiu'])
+    expect(resultado.falharam).toEqual([])
+    expect(resultado.erro).toBeNull()
+  })
+
+  it('mais de 500 dias vão em pedidos de 500', async () => {
+    const { removerDiasEspeciais } = await loadService()
+    const ids = Array.from({ length: 1201 }, (_, i) => `d${i}`)
+    const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (_url, init) => {
+      const { ids: lote } = JSON.parse(String(init?.body)) as { ids: string[] }
+
+      return new Response(
+        JSON.stringify({
+          statusCode: 200,
+          message: 'ok',
+          data: { removidos: lote, naoEncontrados: [] },
+        }),
+        { status: 200, headers: JSON_HEADERS },
+      )
     })
     vi.stubGlobal('fetch', fetchMock)
 
-    const resultado = await removerDiasEspeciais(['d1', 'sumiu', 'd2', 'recusado', 'd1', 'd3'], {
-      parceiroId: 'p1',
-    })
+    const resultado = await removerDiasEspeciais(ids)
 
-    /* O id repetido vai uma vez só. */
-    expect(fetchMock).toHaveBeenCalledTimes(5)
-    expect(fetchMock.mock.calls.every(([, init]) => init?.method === 'DELETE')).toBe(true)
-    expect([...resultado.removidos].sort()).toEqual(['d1', 'd2', 'd3', 'sumiu'])
-    expect(resultado.falharam).toEqual(['recusado'])
+    const tamanhos = fetchMock.mock.calls.map(
+      ([, init]) => (JSON.parse(String(init?.body)) as { ids: string[] }).ids.length,
+    )
+    expect(tamanhos).toEqual([500, 500, 201])
+    expect(resultado.removidos).toHaveLength(1201)
+  })
+
+  it('OPERADOR (403): nada sai, todos ficam em falharam e o erro vai para a tela', async () => {
+    const { removerDiasEspeciais } = await loadService()
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          statusCode: 403,
+          message: 'Só o dono edita o estabelecimento.',
+          codigo: 'ESTABELECIMENTO_APENAS_DONO',
+        }),
+        { status: 403, headers: JSON_HEADERS },
+      ),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const resultado = await removerDiasEspeciais(
+      Array.from({ length: 700 }, (_, i) => `d${i}`),
+      { parceiroId: 'p1' },
+    )
+
+    /* O segundo pedido nem sai: falharia do mesmo jeito. */
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(resultado.removidos).toEqual([])
+    expect(resultado.falharam).toHaveLength(700)
     expect(resultado.erro).toMatchObject({ codigo: 'ESTABELECIMENTO_APENAS_DONO' })
   })
 })

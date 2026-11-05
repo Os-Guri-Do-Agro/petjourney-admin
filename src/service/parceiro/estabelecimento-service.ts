@@ -7,13 +7,15 @@
  * (`docs/integracao-portal-parceiro/lacunas-da-api.md`, L2). O formato é o de
  * `EstabelecimentoInternoDto`.
  */
-import { ApiError, apiFetch } from '../api'
+import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
 import type {
   DiaEspecialRespostaDto,
   FeriadosCopiadosDto,
   FuncionamentoDto,
   HorarioDiaRespostaDto,
+  RemocaoDeDiasEspeciaisDto,
+  RemoverDiasEspeciaisDto,
 } from '../contrato/openapi'
 
 type ParceiroQuery = {
@@ -148,49 +150,49 @@ export async function removerDiaEspecial(id: string, params?: ParceiroQuery) {
 }
 
 export type RemocaoEmLote = {
-  /** Os que saíram, contando os que já não existiam (404): o resultado é o mesmo. */
+  /** Os que saíram, contando os que já não existiam (`naoEncontrados`): o resultado é o mesmo. */
   removidos: string[]
   falharam: string[]
-  /** O primeiro erro que não foi 404, para a tela decidir (papel trocado, cadastro suspenso). */
+  /** O erro do pedido que falhou, para a tela decidir (papel trocado, cadastro suspenso). */
   erro: unknown
 }
 
-/** Quantos DELETE ao mesmo tempo: o bastante para não demorar, pouco para não bater no limite. */
-const REMOCOES_SIMULTANEAS = 4
+/** O teto da rota: lista maior vai em pedidos de 500 (PJ-HZC7C6). */
+export const DIAS_POR_PEDIDO = 500
 
 /**
- * Remove vários dias especiais. A API ainda não tem rota de lote, então vai um DELETE por dia, quatro
- * de cada vez, e o resultado conta o que saiu e o que não saiu. Quando a rota existir (spec em
- * `docs/integracao-portal-parceiro/novembro/spec-dias-especiais-em-lote.md`), só esta função muda.
+ * Remove vários dias especiais num pedido só (`POST .../dias-especiais/remover`, PJ-HZC7C6): antes era
+ * um DELETE por dia. Os repetidos vão uma vez, e os `naoEncontrados` (já apagado em outra aba,
+ * inexistente ou de outro parceiro) contam como removidos, como o 404 contava.
+ *
+ * Mais de 500: pedidos de 500, um depois do outro. Se um falhar (OPERADOR, cadastro suspenso), os
+ * seguintes nem saem, porque falhariam do mesmo jeito, e tudo o que não foi vira `falharam`.
  */
 export async function removerDiasEspeciais(
   ids: readonly string[],
   params?: ParceiroQuery,
 ): Promise<RemocaoEmLote> {
   const resultado: RemocaoEmLote = { removidos: [], falharam: [], erro: null }
-  const fila = [...new Set(ids)]
+  const unicos = [...new Set(ids)]
 
-  async function proximo(): Promise<void> {
-    const id = fila.shift()
-
-    if (id === undefined) return
+  for (let inicio = 0; inicio < unicos.length; inicio += DIAS_POR_PEDIDO) {
+    const lote = unicos.slice(inicio, inicio + DIAS_POR_PEDIDO)
 
     try {
-      await removerDiaEspecial(id, params)
-      resultado.removidos.push(id)
+      const resposta = await dados(
+        apiFetch<ApiEnvelope<RemocaoDeDiasEspeciaisDto>>(
+          comParceiro('/dias-especiais/remover', params),
+          { method: 'POST', body: JSON.stringify({ ids: lote } satisfies RemoverDiasEspeciaisDto) },
+        ),
+      )
+
+      resultado.removidos.push(...resposta.removidos, ...resposta.naoEncontrados)
     } catch (err) {
-      if (err instanceof ApiError && err.codigo === 'ESTABELECIMENTO_DIA_ESPECIAL_NAO_ENCONTRADO') {
-        resultado.removidos.push(id)
-      } else {
-        resultado.falharam.push(id)
-        resultado.erro ??= err
-      }
+      resultado.falharam.push(...unicos.slice(inicio))
+      resultado.erro = err
+      break
     }
-
-    return proximo()
   }
-
-  await Promise.all(Array.from({ length: Math.min(REMOCOES_SIMULTANEAS, fila.length) }, proximo))
 
   return resultado
 }

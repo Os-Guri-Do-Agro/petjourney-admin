@@ -505,8 +505,9 @@ async function remover(dia: DiaEspecial) {
 const removendoVarios = ref(false)
 
 /**
- * Vários de uma vez. O que já tinha saído (404) conta como removido; o que falhou fica na lista, e o
- * aviso diz quantos. Papel trocado ou cadastro suspenso no meio: a tela se recarrega como sempre.
+ * Vários de uma vez, num pedido só (PJ-HZC7C6). O que já tinha saído conta como removido; o que
+ * falhou fica na lista, e o aviso diz quantos. Nada saiu (OPERADOR, cadastro suspenso): o mesmo erro
+ * do apagar um dia, e a tela se recarrega como sempre.
  */
 async function removerVarios(ids: string[]) {
   removendoVarios.value = true
@@ -514,7 +515,9 @@ async function removerVarios(ids: string[]) {
   try {
     const { removidos, falharam, erro } = await removerDiasEspeciais(ids, parceiroQuery())
 
-    if (falharam.length === 0) {
+    if (removidos.length === 0 && erro) {
+      avisarErro(erro)
+    } else if (falharam.length === 0) {
       avisarSucesso(
         'diasRemovidos',
         t(
