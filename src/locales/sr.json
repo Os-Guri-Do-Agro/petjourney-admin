@@ -448,6 +448,27 @@
       "vazio": "Kada nešto ovde zatraži vašu pažnju, na primer modul kome uskoro ističe rok, obaveštenje se pojavljuje na ovoj listi.",
       "naoLido": "Nepročitano",
       "mais": "Prikaži ranija obaveštenja"
+    },
+    "pendencia": {
+      "fechar": "Zatvori obaveštenje",
+      "fecharDica": "Zatvori do sledeće sesije",
+      "verificar": "Proveri identitet",
+      "enviarDeNovo": "Pošalji ponovo",
+      "ambos": {
+        "titulo": "Još malo do potpisivanja",
+        "frase": "Potvrdi identitet i upiši CRMV u svoj profil u timu.",
+        "reenviar": "Pošalji identitet ponovo i upiši CRMV u svoj profil u timu."
+      },
+      "identidade": {
+        "titulo": "Potvrdi identitet",
+        "frase": "Dokument sa fotografijom i selfi. To omogućava potpisivanje recepata i kartona.",
+        "reenviar": "Poslednje slanje nije odobreno. Pošalji ponovo da bi potpisivao recepte i kartone."
+      },
+      "crmv": {
+        "titulo": "Upiši svoj CRMV",
+        "frase": "Broj i savezna država idu u tvoj profil u timu. Bez njih se recepti i kartoni ne mogu potpisati.",
+        "acao": "Otvori profile"
+      }
     }
   },
   "frame": {

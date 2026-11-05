@@ -448,6 +448,27 @@
       "vazio": "Cuando algo aquí requiera su atención, como un módulo por vencer, el aviso aparece en esta lista.",
       "naoLido": "Sin leer",
       "mais": "Ver avisos anteriores"
+    },
+    "pendencia": {
+      "fechar": "Cerrar el aviso",
+      "fecharDica": "Cerrar hasta la próxima sesión",
+      "verificar": "Verificar identidad",
+      "enviarDeNovo": "Enviar de nuevo",
+      "ambos": {
+        "titulo": "Falta poco para que firmes",
+        "frase": "Confirma tu identidad y registra el CRMV en tu ficha del equipo.",
+        "reenviar": "Envía tu identidad de nuevo y registra el CRMV en tu ficha del equipo."
+      },
+      "identidade": {
+        "titulo": "Confirma tu identidad",
+        "frase": "Documento con foto y selfie. Es lo que permite firmar recetas e historias clínicas.",
+        "reenviar": "El último envío no fue aprobado. Envíalo de nuevo para firmar recetas e historias clínicas."
+      },
+      "crmv": {
+        "titulo": "Registra tu CRMV",
+        "frase": "El número y el estado van en tu ficha del equipo. Sin ellos, no se pueden firmar recetas ni historias clínicas.",
+        "acao": "Abrir las fichas"
+      }
     }
   },
   "frame": {

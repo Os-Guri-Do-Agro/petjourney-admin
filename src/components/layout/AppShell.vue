@@ -23,6 +23,7 @@ import ShellConta from '@/components/layout/ShellConta.vue'
 import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
+import ShellPendencia from '@/components/layout/ShellPendencia.vue'
 import FeedbackSaqueDialog from '@/components/parceiro/FeedbackSaqueDialog.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
@@ -420,8 +421,12 @@ onUnmounted(() => {
         />
 
         <div class="barra__pe">
+          <ShellPendencia :recolhida="barraRecolhida" @navegou="fecharGaveta" />
           <ShellAvisos v-model:aberta="avisosAbertos" :recolhida="barraRecolhida" />
+          <!-- "Validar cupom" sai do menu enquanto a funcionalidade de cupom estiver desligada
+               (04/11/2026): o "Em breve" ocupava o pé com uma promessa. Volta com a flag. -->
           <button
+            v-if="cupomLigado"
             type="button"
             class="barra__cupom"
             :disabled="cupomLigado && !podeResgatar"

@@ -448,6 +448,27 @@
       "vazio": "When something here needs your attention, such as a module about to expire, it shows up in this list.",
       "naoLido": "Unread",
       "mais": "Show earlier notifications"
+    },
+    "pendencia": {
+      "fechar": "Close the notice",
+      "fecharDica": "Close until your next session",
+      "verificar": "Verify my identity",
+      "enviarDeNovo": "Send again",
+      "ambos": {
+        "titulo": "Almost ready to sign",
+        "frase": "Confirm your identity and add your CRMV to your team profile.",
+        "reenviar": "Send your identity again and add your CRMV to your team profile."
+      },
+      "identidade": {
+        "titulo": "Confirm your identity",
+        "frase": "A photo ID and a selfie. This is what lets you sign prescriptions and records.",
+        "reenviar": "Your last submission was not approved. Send it again to sign prescriptions and records."
+      },
+      "crmv": {
+        "titulo": "Add your CRMV",
+        "frase": "The number and state go on your team profile. Without them, prescriptions and records cannot be signed.",
+        "acao": "Open team profiles"
+      }
     }
   },
   "frame": {

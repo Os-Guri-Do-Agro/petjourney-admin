@@ -9,7 +9,7 @@
  */
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -139,17 +139,32 @@ function aoAtualizar(nova: IdentidadeDaPessoa | null) {
   void store.bootstrap(true)
 }
 
+/** `?identidade=enviar` abre a gaveta e sai da URL (voltar não reabre). */
+function abrirSePedido() {
+  if (route.query.identidade !== 'enviar') return
+
+  aberta.value = true
+
+  const query = { ...route.query }
+  delete query.identidade
+  void router.replace({ query })
+}
+
 onMounted(async () => {
   await carregar()
-
-  if (route.query.identidade === 'enviar') {
-    aberta.value = true
-
-    const query = { ...route.query }
-    delete query.identidade
-    void router.replace({ query })
-  }
+  abrirSePedido()
 })
+
+/*
+ * Também com a tela já aberta: o pedido do pé da barra leva para cá de qualquer tela, inclusive
+ * desta, e aí a seção não é montada de novo.
+ */
+watch(
+  () => route.query.identidade,
+  () => {
+    if (!carregando.value) abrirSePedido()
+  },
+)
 </script>
 
 <template>
