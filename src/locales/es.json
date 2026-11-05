@@ -455,18 +455,18 @@
       "verificar": "Verificar identidad",
       "enviarDeNovo": "Enviar de nuevo",
       "ambos": {
-        "titulo": "Falta poco para que firmes",
+        "titulo": "Falta poco para emitir recetas",
         "frase": "Confirma tu identidad y registra el CRMV en tu ficha del equipo.",
         "reenviar": "Envía tu identidad de nuevo y registra el CRMV en tu ficha del equipo."
       },
       "identidade": {
         "titulo": "Confirma tu identidad",
-        "frase": "Documento con foto y selfie. Es lo que permite firmar recetas e historias clínicas.",
-        "reenviar": "El último envío no fue aprobado. Envíalo de nuevo para firmar recetas e historias clínicas."
+        "frase": "Documento con foto y selfie, para que emitas recetas y finalices historias clínicas.",
+        "reenviar": "El último envío no fue aprobado. Envíalo de nuevo para emitir recetas y finalizar historias clínicas."
       },
       "crmv": {
         "titulo": "Registra tu CRMV",
-        "frase": "El número y el estado van en tu ficha del equipo. Sin ellos, no se pueden firmar recetas ni historias clínicas.",
+        "frase": "El número y el estado van en tu ficha del equipo. Sin ellos, no puedes emitir recetas ni finalizar historias clínicas.",
         "acao": "Abrir las fichas"
       }
     }

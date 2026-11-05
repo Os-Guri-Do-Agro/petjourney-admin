@@ -455,18 +455,18 @@
       "verificar": "Verificar identidade",
       "enviarDeNovo": "Enviar de novo",
       "ambos": {
-        "titulo": "Falta pouco para você assinar",
+        "titulo": "Falta pouco para emitir receitas",
         "frase": "Confirme sua identidade e cadastre o CRMV na sua ficha da equipe.",
         "reenviar": "Envie sua identidade de novo e cadastre o CRMV na sua ficha da equipe."
       },
       "identidade": {
         "titulo": "Confirme sua identidade",
-        "frase": "Documento com foto e selfie. É o que libera assinar receitas e prontuários.",
-        "reenviar": "O último envio não foi aprovado. Envie de novo para assinar receitas e prontuários."
+        "frase": "Documento com foto e selfie, para você emitir receitas e finalizar prontuários.",
+        "reenviar": "O último envio não foi aprovado. Envie de novo para emitir receitas e finalizar prontuários."
       },
       "crmv": {
         "titulo": "Cadastre seu CRMV",
-        "frase": "O número e a UF vão na sua ficha da equipe. Sem eles, receitas e prontuários não são assinados.",
+        "frase": "O número e a UF vão na sua ficha da equipe. Sem eles, não dá para emitir receitas nem finalizar prontuários.",
         "acao": "Abrir as fichas"
       }
     }

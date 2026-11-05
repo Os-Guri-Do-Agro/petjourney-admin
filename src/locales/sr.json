@@ -455,18 +455,18 @@
       "verificar": "Proveri identitet",
       "enviarDeNovo": "Pošalji ponovo",
       "ambos": {
-        "titulo": "Još malo do potpisivanja",
+        "titulo": "Još malo do izdavanja recepata",
         "frase": "Potvrdi identitet i upiši CRMV u svoj profil u timu.",
         "reenviar": "Pošalji identitet ponovo i upiši CRMV u svoj profil u timu."
       },
       "identidade": {
         "titulo": "Potvrdi identitet",
-        "frase": "Dokument sa fotografijom i selfi. To omogućava potpisivanje recepata i kartona.",
-        "reenviar": "Poslednje slanje nije odobreno. Pošalji ponovo da bi potpisivao recepte i kartone."
+        "frase": "Dokument sa fotografijom i selfi, da bi izdavao recepte i zaključivao kartone.",
+        "reenviar": "Poslednje slanje nije odobreno. Pošalji ponovo da bi izdavao recepte i zaključivao kartone."
       },
       "crmv": {
         "titulo": "Upiši svoj CRMV",
-        "frase": "Broj i savezna država idu u tvoj profil u timu. Bez njih se recepti i kartoni ne mogu potpisati.",
+        "frase": "Broj i savezna država idu u tvoj profil u timu. Bez njih ne možeš da izdaješ recepte ni da zaključuješ kartone.",
         "acao": "Otvori profile"
       }
     }

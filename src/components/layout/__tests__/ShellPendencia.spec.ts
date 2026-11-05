@@ -97,7 +97,7 @@ describe('ShellPendencia', () => {
     comEu({ aguardandoCrmv: ['receita.assinar'], identidade: null })
     const wrapper = montar()
 
-    expect(wrapper.find('.pendencia__titulo').text()).toBe('Falta pouco para você assinar')
+    expect(wrapper.find('.pendencia__titulo').text()).toBe('Falta pouco para emitir receitas')
     expect(wrapper.find('.pendencia__acao').attributes('href')).toBe('/settings?identidade=enviar')
   })
 

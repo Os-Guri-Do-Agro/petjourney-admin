@@ -455,18 +455,18 @@
       "verificar": "Verify my identity",
       "enviarDeNovo": "Send again",
       "ambos": {
-        "titulo": "Almost ready to sign",
+        "titulo": "Almost ready to issue prescriptions",
         "frase": "Confirm your identity and add your CRMV to your team profile.",
         "reenviar": "Send your identity again and add your CRMV to your team profile."
       },
       "identidade": {
         "titulo": "Confirm your identity",
-        "frase": "A photo ID and a selfie. This is what lets you sign prescriptions and records.",
-        "reenviar": "Your last submission was not approved. Send it again to sign prescriptions and records."
+        "frase": "A photo ID and a selfie, so you can issue prescriptions and finalize records.",
+        "reenviar": "Your last submission was not approved. Send it again to issue prescriptions and finalize records."
       },
       "crmv": {
         "titulo": "Add your CRMV",
-        "frase": "The number and state go on your team profile. Without them, prescriptions and records cannot be signed.",
+        "frase": "The number and state go on your team profile. Without them, you cannot issue prescriptions or finalize records.",
         "acao": "Open team profiles"
       }
     }
