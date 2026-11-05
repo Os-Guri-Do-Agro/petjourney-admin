@@ -90,12 +90,28 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     integrada: false,
   },
 
-  /* O cadastro de clientes e pacientes é dos dois módulos (E2-01). */
+  /*
+   * O cadastro de clientes e pacientes é dos dois módulos (E2-01, PJ-ECWI3Z): a lista, a ficha do
+   * cadastro (`/clinica/ficha/:id`) e o cadastro novo falam com a API. A ficha da demonstração
+   * (`/clinica/paciente/:id/historico`, vacinas, tratamento) espera o prontuário (E4).
+   */
   {
     prefixo: '/clinica/pacientes',
     modulo: 'QUALQUER',
     permissao: 'paciente.ler',
-    integrada: false,
+    integrada: true,
+  },
+  {
+    prefixo: '/clinica/ficha',
+    modulo: 'QUALQUER',
+    permissao: 'paciente.ler',
+    integrada: true,
+  },
+  {
+    prefixo: '/clinica/paciente/novo',
+    modulo: 'QUALQUER',
+    permissao: 'paciente.escrever',
+    integrada: true,
   },
   {
     prefixo: '/clinica/paciente',

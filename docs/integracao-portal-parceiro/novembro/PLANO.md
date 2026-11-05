@@ -30,6 +30,7 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | E1 no app (`petjourney-app`): PJ-80M7IL avisos de módulo, PJ-K49ST6 tipos e erro pelo código, PJ-A5TIS6 "Quem viu", PJ-2OPCOW parte do app | `10cc287`, `3b76917`, `521d6a9`, `79e3918` (no develop do app; não gerar build de loja antes da API de develop ir para produção) | Em teste |
 | 05/11 | PJ-HZC7C6 "Apagar vários" num pedido só (`POST .../dias-especiais/remover`, até 500 por pedido); contrato de 04/11 (`7e194ba`, 763 rotas) | (este commit) | Em teste (3 dias num POST só e o dia já apagado em outra aba vistos no dev; OPERADOR e mais de 500 só em teste de unidade) |
 | 05/11 | 1.7 PJ-4NARE1 ficha de emergência pelo QR: "Emergência pelo QR" em Acessos, gaveta com o endereço do QR e o motivo, ficha curta e erros pelo código | (este commit) | Em teste (403 real visto na conta do Daniel, sem o selo; ficha aberta, 404 e 429 vistos com a resposta simulada, para não avisar o responsável de um pet real; câmera fora, lacuna N19) |
+| 05/11 | 2.1 PJ-ECWI3Z pacientes e clientes pela API: lista com busca, espécie e inativos; ficha do cadastro (`/clinica/ficha/:id`) com dados, foto, alertas (teto de 50), responsável, autorizados, óbito, inativar, reativar, mesclar e exclusão a pedido do titular; cadastro novo com cliente da casa ou novo | (este commit) | Em teste (tudo visto no dev na Bem-Estar, com cadastros de teste já excluídos; o mesclar de paciente dá 500 na API, lacuna N20; mesclar responsável e o 409 de CPF repetido não vistos) |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 

@@ -99,7 +99,7 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
       { rota: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
       { rota: '/clinica/bulario', chave: 'espacos.abas.bulario' },
     ],
-    prefixos: ['/clinica/paciente/', '/clinica/atendimento/'],
+    prefixos: ['/clinica/paciente/', '/clinica/ficha/', '/clinica/atendimento/'],
   },
   {
     id: 'internacao',
