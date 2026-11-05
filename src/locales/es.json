@@ -1697,6 +1697,79 @@
         "minutos": "{m} min"
       },
       "oProximo": "el próximo en vencer"
+    },
+    "emergencia": {
+      "cta": "Emergencia por QR",
+      "titulo": "Emergencia por QR",
+      "lede": "Para la mascota que llegó sin su responsable. Solo quien tiene el CRMV verificado abre la ficha, y el responsable recibe el aviso al instante.",
+      "qrRotulo": "Dirección del QR del collar",
+      "qrExemplo": "petjourney.health/carteirinha/...",
+      "qrDica": "Lea el QR con el celular y pegue aquí la dirección de la página que se abra, o solo el código del final.",
+      "qrProblema": {
+        "vazio": "Pegue la dirección de la credencial de la mascota.",
+        "qrDoResponsavel": "Este es el QR del responsable, con la lista de mascotas. Abra la credencial de la mascota y pegue su dirección.",
+        "linkSemCarteirinha": "Esta dirección no es la de la credencial. Abra el QR en el celular y pegue la dirección de la página que aparezca."
+      },
+      "motivoRotulo": "Motivo",
+      "motivoExemplo": "Ej.: atropellamiento, llegó inconsciente",
+      "motivoDica": "El responsable lee este motivo en la app.",
+      "motivoTamanho": "Escriba de {min} a {max} caracteres.",
+      "abrir": "Abrir ficha",
+      "cancelar": "Cancelar",
+      "fechar": "Cerrar",
+      "outra": "Abrir otra ficha",
+      "avisado": "El responsable acaba de recibir el aviso.",
+      "semContato": "La ficha no trae el contacto del responsable. Él recibió el aviso con el teléfono de la clínica y los llamará.",
+      "tratamentos": "Medicamentos continuos",
+      "condicoes": "Condiciones",
+      "nenhumaAlergia": "Ninguna alergia registrada.",
+      "nenhumTratamento": "Ningún medicamento continuo registrado.",
+      "nenhumaCondicao": "Ninguna condición registrada.",
+      "pesoEm": "{kg} kg el {data}",
+      "idadeAnos": "{n} año | {n} años",
+      "idadeMeses": "{n} mes | {n} meses",
+      "especieOutra": "Otro",
+      "sexo": {
+        "MACHO": "Macho",
+        "FEMEA": "Hembra"
+      },
+      "categoriaAlergia": {
+        "ALIMENTAR": "Alimentaria",
+        "AMBIENTAL": "Ambiental",
+        "MEDICAMENTOSA": "Medicamentosa",
+        "INSETO": "Insecto",
+        "CONTATO": "Contacto",
+        "OUTRA": "Otra"
+      },
+      "severidade": {
+        "LEVE": "Leve",
+        "MODERADA": "Moderada",
+        "GRAVE": "Grave",
+        "ANAFILATICA": "Anafiláctica"
+      },
+      "categoriaCondicao": {
+        "FELV": "FeLV",
+        "FIV": "FIV",
+        "CANCER": "Cáncer",
+        "DIABETES": "Diabetes",
+        "CARDIO": "Cardíaca",
+        "RENAL": "Renal",
+        "HEPATICA": "Hepática",
+        "ENDOCRINA": "Endocrina",
+        "ORTOPEDICA": "Ortopédica",
+        "NEUROLOGICA": "Neurológica",
+        "DERMATOLOGICA": "Dermatológica",
+        "AUTOIMUNE": "Autoinmune",
+        "OUTRA": "Otra"
+      },
+      "abrirProfissionais": "Abrir Profesionales",
+      "erros": {
+        "semSelo": "Solo abre la ficha de emergencia quien tiene una ficha de profesional con el CRMV verificado por PetJourney y la identidad confirmada.",
+        "indisponivel": "Ficha no disponible para este QR.",
+        "limite": "Límite del día alcanzado: 10 fichas por persona y 30 por clínica en 24 horas.",
+        "motivo": "El motivo debe tener de {min} a {max} caracteres.",
+        "generico": "No se pudo abrir la ficha. Intente de nuevo."
+      }
     }
   },
   "divulgacao": {

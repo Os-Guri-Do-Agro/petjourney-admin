@@ -1697,6 +1697,79 @@
         "minutos": "{m}min"
       },
       "oProximo": "the next to expire"
+    },
+    "emergencia": {
+      "cta": "Emergency by QR",
+      "titulo": "Emergency by QR",
+      "lede": "For a pet that arrived without its guardian. Only someone with a verified CRMV can open the record, and the guardian is notified right away.",
+      "qrRotulo": "Collar QR address",
+      "qrExemplo": "petjourney.health/carteirinha/...",
+      "qrDica": "Scan the QR with a phone and paste the address of the page it opens, or just the code at the end of it.",
+      "qrProblema": {
+        "vazio": "Paste the address of the pet's card.",
+        "qrDoResponsavel": "This is the guardian's QR, with the list of pets. Open the pet's card and paste its address.",
+        "linkSemCarteirinha": "This is not the card's address. Open the QR on a phone and paste the address of the page that appears."
+      },
+      "motivoRotulo": "Reason",
+      "motivoExemplo": "E.g.: hit by a car, arrived unconscious",
+      "motivoDica": "The guardian reads this reason in the app.",
+      "motivoTamanho": "Write {min} to {max} characters.",
+      "abrir": "Open record",
+      "cancelar": "Cancel",
+      "fechar": "Close",
+      "outra": "Open another record",
+      "avisado": "The guardian has just been notified.",
+      "semContato": "The record does not include the guardian's contact. They got the notice with the clinic's phone number and will call you.",
+      "tratamentos": "Ongoing medications",
+      "condicoes": "Conditions",
+      "nenhumaAlergia": "No allergies recorded.",
+      "nenhumTratamento": "No ongoing medication recorded.",
+      "nenhumaCondicao": "No conditions recorded.",
+      "pesoEm": "{kg} kg on {data}",
+      "idadeAnos": "{n} year | {n} years",
+      "idadeMeses": "{n} month | {n} months",
+      "especieOutra": "Other",
+      "sexo": {
+        "MACHO": "Male",
+        "FEMEA": "Female"
+      },
+      "categoriaAlergia": {
+        "ALIMENTAR": "Food",
+        "AMBIENTAL": "Environmental",
+        "MEDICAMENTOSA": "Drug",
+        "INSETO": "Insect",
+        "CONTATO": "Contact",
+        "OUTRA": "Other"
+      },
+      "severidade": {
+        "LEVE": "Mild",
+        "MODERADA": "Moderate",
+        "GRAVE": "Severe",
+        "ANAFILATICA": "Anaphylactic"
+      },
+      "categoriaCondicao": {
+        "FELV": "FeLV",
+        "FIV": "FIV",
+        "CANCER": "Cancer",
+        "DIABETES": "Diabetes",
+        "CARDIO": "Cardiac",
+        "RENAL": "Renal",
+        "HEPATICA": "Hepatic",
+        "ENDOCRINA": "Endocrine",
+        "ORTOPEDICA": "Orthopedic",
+        "NEUROLOGICA": "Neurological",
+        "DERMATOLOGICA": "Dermatological",
+        "AUTOIMUNE": "Autoimmune",
+        "OUTRA": "Other"
+      },
+      "abrirProfissionais": "Open Professionals",
+      "erros": {
+        "semSelo": "Only someone with a professional profile whose CRMV was verified by PetJourney, and with a confirmed identity, can open the emergency record.",
+        "indisponivel": "Record unavailable for this QR.",
+        "limite": "Daily limit reached: 10 records per person and 30 per clinic in 24 hours.",
+        "motivo": "The reason must have {min} to {max} characters.",
+        "generico": "Could not open the record. Please try again."
+      }
     }
   },
   "divulgacao": {

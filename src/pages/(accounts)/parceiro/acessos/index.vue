@@ -34,6 +34,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AcessosPassos from '@/components/parceiro/AcessosPassos.vue'
+import EmergenciaQrGaveta from '@/components/parceiro/EmergenciaQrGaveta.vue'
 import ReivindicacoesAvisos from '@/components/parceiro/ReivindicacoesAvisos.vue'
 import VincularCodigoDialog from '@/components/parceiro/VincularCodigoDialog.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -108,6 +109,8 @@ const loadingMore = ref(false)
 const error = ref('')
 
 const vincularVisible = ref(false)
+/** A ficha de emergência pelo QR da coleira (PJ-4NARE1). */
+const emergenciaVisible = ref(false)
 /** O código que veio pelo link; vale só para a abertura que ele mesmo provocou. */
 const codigoDoLink = ref('')
 
@@ -957,6 +960,16 @@ useRevalidarAoVoltar(() => {
     </template>
 
     <template #acoes>
+      <!-- A emergência não depende de módulo nem de cadastro aprovado na tela: quem decide é a
+           API, pelo selo do CRMV do próprio login (PJ-4NARE1). -->
+      <Button
+        type="button"
+        icon="ph ph-first-aid-kit"
+        :label="t('acessos.emergencia.cta')"
+        severity="secondary"
+        outlined
+        @click="emergenciaVisible = true"
+      />
       <Button
         type="button"
         icon="ph ph-link"
@@ -1117,7 +1130,9 @@ useRevalidarAoVoltar(() => {
           </div>
 
           <div class="campo campo--periodo">
-            <label class="campo__rotulo" for="atend-periodo">{{ t('acessos.filtros.periodo') }}</label>
+            <label class="campo__rotulo" for="atend-periodo">{{
+              t('acessos.filtros.periodo')
+            }}</label>
             <DatePicker
               v-model="periodo"
               input-id="atend-periodo"
@@ -1371,9 +1386,7 @@ useRevalidarAoVoltar(() => {
                     {{ prazoCurto(grupo.acessos[0]!) }}
                   </strong>
                   <span class="prazo__barra" aria-hidden="true">
-                    <span
-                      :style="{ inlineSize: `${fracaoRestante(grupo.acessos[0]!) * 100}%` }"
-                    />
+                    <span :style="{ inlineSize: `${fracaoRestante(grupo.acessos[0]!) * 100}%` }" />
                   </span>
                   <small class="ui-num">{{ dataEHora(grupo.acessos[0]!.expiraEm) }}</small>
                   <span v-if="prazoUrgente(grupo.acessos[0]!)" class="sr-only">
@@ -1384,7 +1397,9 @@ useRevalidarAoVoltar(() => {
                   <span class="ui-selo">
                     <i
                       :class="
-                        grupo.acessos[0]!.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass'
+                        grupo.acessos[0]!.status === 'REVOGADO'
+                          ? 'ph ph-prohibit'
+                          : 'ph ph-hourglass'
                       "
                       aria-hidden="true"
                     />
@@ -1446,10 +1461,7 @@ useRevalidarAoVoltar(() => {
 
                   <span class="linha__prontuario">
                     <template v-if="prontuarioDoAcesso(somaDoGrupo(grupo)).length">
-                      <span
-                        v-for="parte in prontuarioDoAcesso(somaDoGrupo(grupo))"
-                        :key="parte.id"
-                      >
+                      <span v-for="parte in prontuarioDoAcesso(somaDoGrupo(grupo))" :key="parte.id">
                         <i :class="parte.icone" aria-hidden="true" />
                         {{ parte.texto }}
                       </span>
@@ -1524,7 +1536,9 @@ useRevalidarAoVoltar(() => {
                               class="ui-selo ui-selo--atencao linha__atualizado"
                             >
                               <i class="ph ph-arrow-clockwise" aria-hidden="true" />
-                              {{ t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) }) }}
+                              {{
+                                t('acessos.list.resumoAtualizado', { data: resumoAtualizado(item) })
+                              }}
                             </span>
                             <span class="linha__estreito">
                               {{ haQuantoTempo(item.vinculadoEm) }} ·
@@ -1578,7 +1592,9 @@ useRevalidarAoVoltar(() => {
                         <span v-else class="prazo prazo--fim">
                           <span class="ui-selo">
                             <i
-                              :class="item.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass'"
+                              :class="
+                                item.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass'
+                              "
                               aria-hidden="true"
                             />
                             {{ statusLabel(item) }}
@@ -1633,6 +1649,7 @@ useRevalidarAoVoltar(() => {
     </div>
 
     <template #sempre>
+      <EmergenciaQrGaveta v-model:visible="emergenciaVisible" />
       <VincularCodigoDialog
         v-model:visible="vincularVisible"
         :codigo-inicial="codigoDoLink"

@@ -1697,6 +1697,79 @@
         "minutos": "{m} د"
       },
       "oProximo": "الأقرب انتهاءً"
+    },
+    "emergencia": {
+      "cta": "الطوارئ عبر رمز QR",
+      "titulo": "الطوارئ عبر رمز QR",
+      "lede": "للحيوان الذي وصل دون مسؤوله. لا يفتح البطاقة إلا من لديه CRMV موثَّق، ويُبلَّغ المسؤول فورًا.",
+      "qrRotulo": "عنوان رمز QR في الطوق",
+      "qrExemplo": "petjourney.health/carteirinha/...",
+      "qrDica": "امسح الرمز بالهاتف والصق هنا عنوان الصفحة التي تُفتح، أو الرمز الموجود في آخره فقط.",
+      "qrProblema": {
+        "vazio": "الصق عنوان بطاقة الحيوان.",
+        "qrDoResponsavel": "هذا رمز المسؤول، وفيه قائمة الحيوانات. افتح بطاقة الحيوان والصق عنوانها.",
+        "linkSemCarteirinha": "هذا ليس عنوان البطاقة. افتح الرمز على الهاتف والصق عنوان الصفحة التي تظهر."
+      },
+      "motivoRotulo": "السبب",
+      "motivoExemplo": "مثال: صدمته سيارة، ووصل فاقد الوعي",
+      "motivoDica": "يقرأ المسؤول هذا السبب في التطبيق.",
+      "motivoTamanho": "اكتب من {min} إلى {max} حرفًا.",
+      "abrir": "فتح البطاقة",
+      "cancelar": "إلغاء",
+      "fechar": "إغلاق",
+      "outra": "فتح بطاقة أخرى",
+      "avisado": "تم إبلاغ المسؤول الآن.",
+      "semContato": "لا تتضمن البطاقة بيانات التواصل مع المسؤول. لقد تلقّى الإشعار مع رقم هاتف العيادة وسيتصل بكم.",
+      "tratamentos": "الأدوية المستمرة",
+      "condicoes": "الحالات",
+      "nenhumaAlergia": "لا توجد حساسية مسجلة.",
+      "nenhumTratamento": "لا توجد أدوية مستمرة مسجلة.",
+      "nenhumaCondicao": "لا توجد حالات مسجلة.",
+      "pesoEm": "{kg} كغ في {data}",
+      "idadeAnos": "أقل من سنة | سنة واحدة | سنتان | {n} سنوات | {n} سنة | {n} سنة",
+      "idadeMeses": "أقل من شهر | شهر واحد | شهران | {n} أشهر | {n} شهرًا | {n} شهر",
+      "especieOutra": "أخرى",
+      "sexo": {
+        "MACHO": "ذكر",
+        "FEMEA": "أنثى"
+      },
+      "categoriaAlergia": {
+        "ALIMENTAR": "غذائية",
+        "AMBIENTAL": "بيئية",
+        "MEDICAMENTOSA": "دوائية",
+        "INSETO": "حشرات",
+        "CONTATO": "تلامسية",
+        "OUTRA": "أخرى"
+      },
+      "severidade": {
+        "LEVE": "خفيفة",
+        "MODERADA": "متوسطة",
+        "GRAVE": "شديدة",
+        "ANAFILATICA": "تأقية"
+      },
+      "categoriaCondicao": {
+        "FELV": "FeLV",
+        "FIV": "FIV",
+        "CANCER": "سرطان",
+        "DIABETES": "سكري",
+        "CARDIO": "قلبية",
+        "RENAL": "كلوية",
+        "HEPATICA": "كبدية",
+        "ENDOCRINA": "غدد صماء",
+        "ORTOPEDICA": "عظمية",
+        "NEUROLOGICA": "عصبية",
+        "DERMATOLOGICA": "جلدية",
+        "AUTOIMUNE": "مناعة ذاتية",
+        "OUTRA": "أخرى"
+      },
+      "abrirProfissionais": "فتح المهنيين",
+      "erros": {
+        "semSelo": "لا يفتح بطاقة الطوارئ إلا من لديه ملف مهني برقم CRMV وثّقته PetJourney وهوية مؤكدة.",
+        "indisponivel": "البطاقة غير متاحة لهذا الرمز.",
+        "limite": "تم بلوغ الحد اليومي: 10 بطاقات لكل شخص و30 لكل عيادة خلال 24 ساعة.",
+        "motivo": "يجب أن يكون السبب من {min} إلى {max} حرفًا.",
+        "generico": "تعذر فتح البطاقة. حاول مرة أخرى."
+      }
     }
   },
   "divulgacao": {

@@ -1697,6 +1697,79 @@
         "minutos": "{m} min"
       },
       "oProximo": "sledeći koji ističe"
+    },
+    "emergencia": {
+      "cta": "Hitno preko QR koda",
+      "titulo": "Hitno preko QR koda",
+      "lede": "Za ljubimca koji je stigao bez vlasnika. Karton otvara samo onaj ko ima provereni CRMV, a vlasnik odmah dobija obaveštenje.",
+      "qrRotulo": "Adresa QR koda sa ogrlice",
+      "qrExemplo": "petjourney.health/carteirinha/...",
+      "qrDica": "Skenirajte QR kod telefonom i nalepite ovde adresu stranice koja se otvori, ili samo kod sa njenog kraja.",
+      "qrProblema": {
+        "vazio": "Nalepite adresu kartice ljubimca.",
+        "qrDoResponsavel": "Ovo je QR kod vlasnika, sa spiskom ljubimaca. Otvorite karticu ljubimca i nalepite njenu adresu.",
+        "linkSemCarteirinha": "Ovo nije adresa kartice. Otvorite QR kod na telefonu i nalepite adresu stranice koja se pojavi."
+      },
+      "motivoRotulo": "Razlog",
+      "motivoExemplo": "Npr.: udaren automobilom, stigao bez svesti",
+      "motivoDica": "Vlasnik čita ovaj razlog u aplikaciji.",
+      "motivoTamanho": "Napišite od {min} do {max} znakova.",
+      "abrir": "Otvori karton",
+      "cancelar": "Otkaži",
+      "fechar": "Zatvori",
+      "outra": "Otvori drugi karton",
+      "avisado": "Vlasnik je upravo obavešten.",
+      "semContato": "Karton ne sadrži kontakt vlasnika. On je dobio obaveštenje sa telefonom klinike i zvaće vas.",
+      "tratamentos": "Stalni lekovi",
+      "condicoes": "Stanja",
+      "nenhumaAlergia": "Nema zabeleženih alergija.",
+      "nenhumTratamento": "Nema zabeleženih stalnih lekova.",
+      "nenhumaCondicao": "Nema zabeleženih stanja.",
+      "pesoEm": "{kg} kg dana {data}",
+      "idadeAnos": "{n} godina | {n} godine | {n} godina",
+      "idadeMeses": "{n} mesec | {n} meseca | {n} meseci",
+      "especieOutra": "Drugo",
+      "sexo": {
+        "MACHO": "Mužjak",
+        "FEMEA": "Ženka"
+      },
+      "categoriaAlergia": {
+        "ALIMENTAR": "Na hranu",
+        "AMBIENTAL": "Iz okoline",
+        "MEDICAMENTOSA": "Na lekove",
+        "INSETO": "Na insekte",
+        "CONTATO": "Kontaktna",
+        "OUTRA": "Druga"
+      },
+      "severidade": {
+        "LEVE": "Blaga",
+        "MODERADA": "Umerena",
+        "GRAVE": "Teška",
+        "ANAFILATICA": "Anafilaktička"
+      },
+      "categoriaCondicao": {
+        "FELV": "FeLV",
+        "FIV": "FIV",
+        "CANCER": "Rak",
+        "DIABETES": "Dijabetes",
+        "CARDIO": "Srčana",
+        "RENAL": "Bubrežna",
+        "HEPATICA": "Jetrena",
+        "ENDOCRINA": "Endokrina",
+        "ORTOPEDICA": "Ortopedska",
+        "NEUROLOGICA": "Neurološka",
+        "DERMATOLOGICA": "Dermatološka",
+        "AUTOIMUNE": "Autoimuna",
+        "OUTRA": "Druga"
+      },
+      "abrirProfissionais": "Otvori Profesionalce",
+      "erros": {
+        "semSelo": "Hitni karton otvara samo onaj ko ima profil profesionalca sa CRMV-om koji je PetJourney proverio i potvrđen identitet.",
+        "indisponivel": "Karton nije dostupan za ovaj QR kod.",
+        "limite": "Dnevno ograničenje je dostignuto: 10 kartona po osobi i 30 po klinici u 24 sata.",
+        "motivo": "Razlog mora imati od {min} do {max} znakova.",
+        "generico": "Karton nije mogao da se otvori. Pokušajte ponovo."
+      }
     }
   },
   "divulgacao": {
