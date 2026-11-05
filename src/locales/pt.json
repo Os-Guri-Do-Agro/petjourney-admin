@@ -10185,5 +10185,86 @@
       "indisponivel": "Foto indisponível.",
       "erro": "Não foi possível abrir a foto agora. Tente de novo em alguns minutos."
     }
+  },
+  "fila": {
+    "a": "a",
+    "das": "Das",
+    "ate": "Até",
+    "dia": "Dia da semana",
+    "diasDe": "{de} a {ate}",
+    "faixa": "{dias} {inicio} a {fim}",
+    "aceiteRegistrado": "Aceite registrado",
+    "automatica": "oferta automática",
+    "automaticas": "oferta automática: {n} de 5",
+    "buscarPaciente": "Nome do pet, do responsável ou telefone",
+    "comQuem": "Com quem",
+    "entrou": "Paciente na fila",
+    "erro": {
+      "FILA_ENCERRADA": "Esta entrada já foi aceita ou removida.",
+      "FILA_HORARIO_NAO_E_MAIS_CEDO": "Este horário não é antes do que o paciente já tem: a fila só oferta horário mais cedo.",
+      "OFERTA_JA_ABERTA": "Já há uma oferta aberta para este paciente. Espere a resposta ou o prazo.",
+      "VAGA_JA_PREENCHIDA": "Este horário já foi preenchido. A lista de vagas foi atualizada.",
+      "CONFLITO_BLOQUEANTE": "A clínica está fechada neste dia. Marque direto na agenda."
+    },
+    "erroAoCarregar": "Não deu para carregar a fila.",
+    "horario": "Horário",
+    "jaNaFila": "Este paciente já espera este serviço na fila.",
+    "jaOfertado": "já recebeu oferta deste horário",
+    "janelasDica": "Os dias e horários em que a pessoa pode vir.",
+    "limiteClinica": "A fila da clínica chegou ao limite de 500 entradas.",
+    "limitePaciente": "Este paciente já está em 5 filas.",
+    "maisCandidatos": "e mais {n} na fila",
+    "mensagem": "Mensagem para o responsável",
+    "mensagemDica": "Aparece no app e no comprovante, nunca na notificação. Revise antes de ofertar.",
+    "observacao": "Observação interna",
+    "observacaoDica": "Só a equipe vê: nunca vai ao app.",
+    "ofertada": "Vaga ofertada",
+    "ofertar": "Ofertar",
+    "ofertaAte": "Vaga oferecida: {horario}, responde até {prazo}",
+    "ofertaVenceu": "A oferta de {horario} venceu às {prazo}",
+    "ofertasAbertas": "1 oferta aberta | {n} ofertas abertas",
+    "origem": {
+      "CANCELAMENTO": "cancelamento",
+      "REMARCACAO": "remarcação",
+      "FALTA": "falta"
+    },
+    "outraJanela": "Outro dia ou horário",
+    "paciente": "Paciente",
+    "pacienteObrigatorio": "Escolha o paciente.",
+    "problema": {
+      "VAZIA": "Diga pelo menos um dia e horário.",
+      "HORA_INVALIDA": "Hora inválida. Use de 00:00 a 23:59; 24:00 só para o fim.",
+      "JANELA_INVERTIDA": "O fim precisa vir depois do início.",
+      "JANELA_REPETIDA": "Há um dia e horário repetido."
+    },
+    "recusaRegistrada": "Recusa registrada: o paciente volta à fila, no mesmo lugar.",
+    "recusouPeloApp": "recusou pelo app em {quando}",
+    "recusouPorTelefone": "recusou por telefone em {quando}",
+    "removerDe": "Tirar {nome} da fila",
+    "removerTexto": "A oferta aberta, se houver, é retirada. Dá para pôr de volta depois, no fim da fila.",
+    "removerTitulo": "Tirar {nome} da fila?",
+    "removido": "Paciente fora da fila",
+    "saiEmUmMinuto": "O aviso sai no próximo minuto. A oferta vale até {hora}.",
+    "semCanal": "Sem o app ligado à clínica: a oferta só chega por telefone.",
+    "semCanalCurto": "sem canal no app: ligue",
+    "semCanalLigue": "Sem canal no app: ligue para o responsável e registre o sim ou o não na fila.",
+    "semNaoResponderam": "Ninguém deixou de responder nos últimos 7 dias",
+    "semVagas": "Nenhuma vaga liberada com alguém da fila que caiba, nos próximos 14 dias.",
+    "servico": "Serviço",
+    "situacaoRotulo": "Quais entradas mostrar",
+    "situacoes": {
+      "ATIVAS": "Na fila",
+      "NAO_RESPONDERAM": "Não responderam"
+    },
+    "soTelefone": "só por telefone",
+    "temHorario": "tem horário em {quando}, quer antes",
+    "tirarJanela": "Tirar este dia",
+    "vagas": "Vagas para a fila",
+    "vagasComTotal": "Vagas para a fila ({n})",
+    "voltarAsVagas": "Voltar às vagas",
+    "mensagemPadrao": {
+      "comPrazo": "Olá! Abriu um horário para {paciente} em {data} às {hora}. Se puder vir, responda em até {minutos} minutos. Se não puder, você continua na fila, no mesmo lugar.",
+      "semPrazo": "Olá! Abriu um horário para {paciente} em {data} às {hora}. Se puder vir, responda o quanto antes. Se não puder, você continua na fila, no mesmo lugar."
+    }
   }
 }

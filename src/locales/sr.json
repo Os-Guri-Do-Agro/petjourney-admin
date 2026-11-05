@@ -10185,5 +10185,86 @@
       "indisponivel": "Fotografija nije dostupna.",
       "erro": "Trenutno nije moguće otvoriti fotografiju. Pokušajte ponovo za nekoliko minuta."
     }
+  },
+  "fila": {
+    "a": "do",
+    "das": "Od",
+    "ate": "Do",
+    "dia": "Dan u nedelji",
+    "diasDe": "{de} do {ate}",
+    "faixa": "{dias} {inicio} do {fim}",
+    "aceiteRegistrado": "Prihvatanje je zabeleženo",
+    "automatica": "automatska ponuda",
+    "automaticas": "automatska ponuda: {n} od 5",
+    "buscarPaciente": "Ime ljubimca, vlasnika ili telefon",
+    "comQuem": "Kod koga",
+    "entrou": "Pacijent je na listi čekanja",
+    "erro": {
+      "FILA_ENCERRADA": "Ovaj unos je već prihvaćen ili uklonjen.",
+      "FILA_HORARIO_NAO_E_MAIS_CEDO": "Ovaj termin nije raniji od onog koji pacijent već ima: lista nudi samo ranije termine.",
+      "OFERTA_JA_ABERTA": "Već postoji otvorena ponuda za ovog pacijenta. Sačekajte odgovor ili rok.",
+      "VAGA_JA_PREENCHIDA": "Ovaj termin je već popunjen. Lista slobodnih termina je osvežena.",
+      "CONFLITO_BLOQUEANTE": "Klinika ne radi ovog dana. Zakažite direktno u rasporedu."
+    },
+    "erroAoCarregar": "Nije moguće učitati listu čekanja.",
+    "horario": "Termin",
+    "jaNaFila": "Ovaj pacijent već čeka ovu uslugu na listi.",
+    "jaOfertado": "već je dobio ponudu za ovaj termin",
+    "janelasDica": "Dani i sati kada osoba može da dođe.",
+    "limiteClinica": "Lista čekanja klinike dostigla je ograničenje od 500 unosa.",
+    "limitePaciente": "Ovaj pacijent je već na 5 lista.",
+    "maisCandidatos": "i još {n} na listi",
+    "mensagem": "Poruka za vlasnika",
+    "mensagemDica": "Prikazuje se u aplikaciji i na potvrdi, nikad u obaveštenju. Proverite pre slanja ponude.",
+    "observacao": "Interna napomena",
+    "observacaoDica": "Vidi je samo tim: nikad ne ide u aplikaciju.",
+    "ofertada": "Termin je ponuđen",
+    "ofertar": "Ponudi",
+    "ofertaAte": "Ponuđen termin: {horario}, odgovor do {prazo}",
+    "ofertaVenceu": "Ponuda za {horario} je istekla u {prazo}",
+    "ofertasAbertas": "{n} otvorena ponuda | {n} otvorene ponude | {n} otvorenih ponuda",
+    "origem": {
+      "CANCELAMENTO": "otkazivanje",
+      "REMARCACAO": "promena termina",
+      "FALTA": "nedolazak"
+    },
+    "outraJanela": "Drugi dan ili vreme",
+    "paciente": "Pacijent",
+    "pacienteObrigatorio": "Izaberite pacijenta.",
+    "problema": {
+      "VAZIA": "Navedite bar jedan dan i vreme.",
+      "HORA_INVALIDA": "Neispravno vreme. Koristite 00:00 do 23:59; 24:00 samo kao kraj.",
+      "JANELA_INVERTIDA": "Kraj mora biti posle početka.",
+      "JANELA_REPETIDA": "Dan i vreme se ponavljaju."
+    },
+    "recusaRegistrada": "Odbijanje je zabeleženo: pacijent je ponovo na listi, na istom mestu.",
+    "recusouPeloApp": "odbio u aplikaciji {quando}",
+    "recusouPorTelefone": "odbio telefonom {quando}",
+    "removerDe": "Ukloni {nome} sa liste",
+    "removerTexto": "Otvorena ponuda, ako postoji, povlači se. Može se kasnije ponovo dodati, na kraj liste.",
+    "removerTitulo": "Ukloniti {nome} sa liste?",
+    "removido": "Pacijent je uklonjen sa liste",
+    "saiEmUmMinuto": "Obaveštenje odlazi u narednom minutu. Ponuda važi do {hora}.",
+    "semCanal": "Bez aplikacije povezane sa klinikom: ponuda stiže samo telefonom.",
+    "semCanalCurto": "bez kanala u aplikaciji: pozovite",
+    "semCanalLigue": "Bez kanala u aplikaciji: pozovite vlasnika i zabeležite da ili ne na listi.",
+    "semNaoResponderam": "Niko nije propustio da odgovori u poslednjih 7 dana",
+    "semVagas": "Nema oslobođenih termina koji odgovaraju nekome sa liste u narednih 14 dana.",
+    "servico": "Usluga",
+    "situacaoRotulo": "Koje unose prikazati",
+    "situacoes": {
+      "ATIVAS": "Na listi",
+      "NAO_RESPONDERAM": "Bez odgovora"
+    },
+    "soTelefone": "samo telefonom",
+    "temHorario": "ima termin {quando}, želi ranije",
+    "tirarJanela": "Ukloni ovaj dan",
+    "vagas": "Termini za listu",
+    "vagasComTotal": "Termini za listu ({n})",
+    "voltarAsVagas": "Nazad na termine",
+    "mensagemPadrao": {
+      "comPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite u roku od {minutos} minuta. Ako ne možete, ostajete na listi, na istom mestu.",
+      "semPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite što pre. Ako ne možete, ostajete na listi, na istom mestu."
+    }
   }
 }

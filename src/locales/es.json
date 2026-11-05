@@ -10185,5 +10185,86 @@
       "indisponivel": "Foto no disponible.",
       "erro": "No se pudo abrir la foto ahora. Intenta de nuevo en unos minutos."
     }
+  },
+  "fila": {
+    "a": "a",
+    "das": "De",
+    "ate": "Hasta",
+    "dia": "Día de la semana",
+    "diasDe": "{de} a {ate}",
+    "faixa": "{dias} {inicio} a {fim}",
+    "aceiteRegistrado": "Aceptación registrada",
+    "automatica": "oferta automática",
+    "automaticas": "oferta automática: {n} de 5",
+    "buscarPaciente": "Nombre de la mascota, del responsable o teléfono",
+    "comQuem": "Con quién",
+    "entrou": "Paciente en la lista",
+    "erro": {
+      "FILA_ENCERRADA": "Esta entrada ya fue aceptada o quitada.",
+      "FILA_HORARIO_NAO_E_MAIS_CEDO": "Este horario no es antes del que el paciente ya tiene: la lista solo ofrece horarios más temprano.",
+      "OFERTA_JA_ABERTA": "Ya hay una oferta abierta para este paciente. Espera la respuesta o el plazo.",
+      "VAGA_JA_PREENCHIDA": "Este horario ya fue ocupado. La lista de huecos se actualizó.",
+      "CONFLITO_BLOQUEANTE": "La clínica está cerrada este día. Agenda directo en la agenda."
+    },
+    "erroAoCarregar": "No se pudo cargar la lista de espera.",
+    "horario": "Horario",
+    "jaNaFila": "Este paciente ya espera este servicio en la lista.",
+    "jaOfertado": "ya recibió oferta de este horario",
+    "janelasDica": "Los días y horarios en que la persona puede venir.",
+    "limiteClinica": "La lista de la clínica llegó al límite de 500 entradas.",
+    "limitePaciente": "Este paciente ya está en 5 listas.",
+    "maisCandidatos": "y {n} más en la lista",
+    "mensagem": "Mensaje para el responsable",
+    "mensagemDica": "Aparece en la app y en el comprobante, nunca en la notificación. Revisa antes de ofrecer.",
+    "observacao": "Observación interna",
+    "observacaoDica": "Solo el equipo la ve: nunca va a la app.",
+    "ofertada": "Hueco ofrecido",
+    "ofertar": "Ofrecer",
+    "ofertaAte": "Hueco ofrecido: {horario}, responde hasta {prazo}",
+    "ofertaVenceu": "La oferta de {horario} venció a las {prazo}",
+    "ofertasAbertas": "1 oferta abierta | {n} ofertas abiertas",
+    "origem": {
+      "CANCELAMENTO": "cancelación",
+      "REMARCACAO": "cambio de horario",
+      "FALTA": "inasistencia"
+    },
+    "outraJanela": "Otro día u horario",
+    "paciente": "Paciente",
+    "pacienteObrigatorio": "Elige el paciente.",
+    "problema": {
+      "VAZIA": "Indica al menos un día y horario.",
+      "HORA_INVALIDA": "Hora inválida. Usa de 00:00 a 23:59; 24:00 solo como fin.",
+      "JANELA_INVERTIDA": "El fin debe venir después del inicio.",
+      "JANELA_REPETIDA": "Hay un día y horario repetido."
+    },
+    "recusaRegistrada": "Rechazo registrado: el paciente vuelve a la lista, en el mismo lugar.",
+    "recusouPeloApp": "rechazó por la app el {quando}",
+    "recusouPorTelefone": "rechazó por teléfono el {quando}",
+    "removerDe": "Quitar a {nome} de la lista",
+    "removerTexto": "La oferta abierta, si la hay, se retira. Se puede volver a agregar después, al final de la lista.",
+    "removerTitulo": "¿Quitar a {nome} de la lista?",
+    "removido": "Paciente fuera de la lista",
+    "saiEmUmMinuto": "El aviso sale en el próximo minuto. La oferta vale hasta las {hora}.",
+    "semCanal": "Sin la app vinculada a la clínica: la oferta solo llega por teléfono.",
+    "semCanalCurto": "sin canal en la app: llama",
+    "semCanalLigue": "Sin canal en la app: llama al responsable y registra el sí o el no en la lista.",
+    "semNaoResponderam": "Nadie dejó de responder en los últimos 7 días",
+    "semVagas": "Ningún hueco liberado que le sirva a alguien de la lista en los próximos 14 días.",
+    "servico": "Servicio",
+    "situacaoRotulo": "Qué entradas mostrar",
+    "situacoes": {
+      "ATIVAS": "En la lista",
+      "NAO_RESPONDERAM": "Sin respuesta"
+    },
+    "soTelefone": "solo por teléfono",
+    "temHorario": "tiene horario el {quando}, quiere antes",
+    "tirarJanela": "Quitar este día",
+    "vagas": "Huecos para la lista",
+    "vagasComTotal": "Huecos para la lista ({n})",
+    "voltarAsVagas": "Volver a los huecos",
+    "mensagemPadrao": {
+      "comPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde en hasta {minutos} minutos. Si no puedes, sigues en la lista, en el mismo lugar.",
+      "semPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde lo antes posible. Si no puedes, sigues en la lista, en el mismo lugar."
+    }
   }
 }

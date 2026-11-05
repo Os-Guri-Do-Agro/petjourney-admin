@@ -10185,5 +10185,86 @@
       "indisponivel": "Photo unavailable.",
       "erro": "Could not open the photo right now. Try again in a few minutes."
     }
+  },
+  "fila": {
+    "a": "to",
+    "das": "From",
+    "ate": "To",
+    "dia": "Day of the week",
+    "diasDe": "{de} to {ate}",
+    "faixa": "{dias} {inicio} to {fim}",
+    "aceiteRegistrado": "Acceptance recorded",
+    "automatica": "automatic offer",
+    "automaticas": "automatic offer: {n} of 5",
+    "buscarPaciente": "Pet's name, owner's name or phone",
+    "comQuem": "With",
+    "entrou": "Patient added to the waiting list",
+    "erro": {
+      "FILA_ENCERRADA": "This entry was already accepted or removed.",
+      "FILA_HORARIO_NAO_E_MAIS_CEDO": "This time is not earlier than the one the patient already has: the list only offers earlier times.",
+      "OFERTA_JA_ABERTA": "There is already an open offer for this patient. Wait for the reply or the deadline.",
+      "VAGA_JA_PREENCHIDA": "This time has already been taken. The slot list was refreshed.",
+      "CONFLITO_BLOQUEANTE": "The clinic is closed on this day. Book it directly in the schedule."
+    },
+    "erroAoCarregar": "Could not load the waiting list.",
+    "horario": "Time",
+    "jaNaFila": "This patient is already waiting for this service.",
+    "jaOfertado": "already offered this time",
+    "janelasDica": "The days and times the person can come.",
+    "limiteClinica": "The clinic's waiting list reached its limit of 500 entries.",
+    "limitePaciente": "This patient is already on 5 waiting lists.",
+    "maisCandidatos": "and {n} more on the list",
+    "mensagem": "Message to the owner",
+    "mensagemDica": "Shown in the app and on the receipt, never in the notification. Review before offering.",
+    "observacao": "Internal note",
+    "observacaoDica": "Only the team sees it: it never goes to the app.",
+    "ofertada": "Slot offered",
+    "ofertar": "Offer",
+    "ofertaAte": "Slot offered: {horario}, reply by {prazo}",
+    "ofertaVenceu": "The offer for {horario} expired at {prazo}",
+    "ofertasAbertas": "1 open offer | {n} open offers",
+    "origem": {
+      "CANCELAMENTO": "cancellation",
+      "REMARCACAO": "reschedule",
+      "FALTA": "no-show"
+    },
+    "outraJanela": "Another day or time",
+    "paciente": "Patient",
+    "pacienteObrigatorio": "Choose the patient.",
+    "problema": {
+      "VAZIA": "Add at least one day and time.",
+      "HORA_INVALIDA": "Invalid time. Use 00:00 to 23:59; 24:00 only as the end.",
+      "JANELA_INVERTIDA": "The end must come after the start.",
+      "JANELA_REPETIDA": "A day and time is repeated."
+    },
+    "recusaRegistrada": "Decline recorded: the patient is back on the list, in the same place.",
+    "recusouPeloApp": "declined in the app on {quando}",
+    "recusouPorTelefone": "declined by phone on {quando}",
+    "removerDe": "Remove {nome} from the list",
+    "removerTexto": "Any open offer is withdrawn. You can add them back later, at the end of the list.",
+    "removerTitulo": "Remove {nome} from the list?",
+    "removido": "Patient removed from the list",
+    "saiEmUmMinuto": "The notice goes out within a minute. The offer is valid until {hora}.",
+    "semCanal": "Not linked to the clinic in the app: the offer only reaches them by phone.",
+    "semCanalCurto": "no app channel: call",
+    "semCanalLigue": "No app channel: call the owner and record the yes or no on the list.",
+    "semNaoResponderam": "No unanswered offers in the last 7 days",
+    "semVagas": "No freed slots that fit someone on the list in the next 14 days.",
+    "servico": "Service",
+    "situacaoRotulo": "Which entries to show",
+    "situacoes": {
+      "ATIVAS": "On the list",
+      "NAO_RESPONDERAM": "No reply"
+    },
+    "soTelefone": "phone only",
+    "temHorario": "has a time on {quando}, wants earlier",
+    "tirarJanela": "Remove this day",
+    "vagas": "Slots for the list",
+    "vagasComTotal": "Slots for the list ({n})",
+    "voltarAsVagas": "Back to slots",
+    "mensagemPadrao": {
+      "comPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply within {minutos} minutes. If not, you stay on the list, in the same place.",
+      "semPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply as soon as you can. If not, you stay on the list, in the same place."
+    }
   }
 }
