@@ -36,6 +36,7 @@ import {
   TOM_DA_SEVERIDADE,
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
+import ResumoDoApp from '@/components/cadastro/ResumoDoApp.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -109,6 +110,11 @@ const donoOuGestor = computed(
 )
 
 const clienteAnonimizado = computed(() => Boolean(paciente.value?.cliente.anonimizadoEm))
+
+/** "Este pet em 30 segundos" e o diário do app (E2-03): veterinário, enfermagem e o dono. */
+const leOApp = computed(
+  () => Boolean(store.modulo('CLINICA')) && store.temPermissao('prontuario.ler'),
+)
 
 const editavel = computed(
   () => podeEscrever.value && Boolean(paciente.value?.ativo) && !clienteAnonimizado.value,
@@ -784,6 +790,13 @@ watch(excluindo, (aberta) => {
               </div>
             </dl>
           </section>
+
+          <!-- O que o app conta, com o consentimento do responsável (E2-03). -->
+          <ResumoDoApp
+            v-if="!clienteAnonimizado && leOApp"
+            :paciente-id="paciente.id"
+            :nome="paciente.nome"
+          />
 
           <!-- O app: o vínculo, as propostas e os pedidos de correção (E2-02). -->
           <VinculoCartao

@@ -10132,5 +10132,58 @@
       "salva": "Settings saved",
       "erroAoCarregar": "Could not load the settings."
     }
+  },
+  "leituraApp": {
+    "erro": "Could not read the app right now.",
+    "ultimaConsulta": "Last visit on {data}",
+    "registradoEm": "logged at home on {data}",
+    "vezes": "{nome} ({vezes}×)",
+    "verDiario": "View the diary",
+    "semVinculo": "No active link with the app: the summary, diary and health card show up once the owner accepts the link.",
+    "taxa": "Too many app reads right now. Try again in {segundos} s.",
+    "naoLiberado": "The owner has not shared this yet: {chave}.",
+    "semDiario": "The owner's current plan does not include the diary.",
+    "carteirinha": "Medication and app health card",
+    "alergias": "Allergies",
+    "vacinas": "Latest vaccines",
+    "nestaClinica": "at this clinic",
+    "resumida": "Short list: the rest was left out.",
+    "diarioDe": "{nome}'s diary",
+    "desde": "Since",
+    "desdeUltimaConsulta": "Since the last visit",
+    "periodo": "From {de} to {ate}",
+    "truncado": "There were more entries: the most recent are shown.",
+    "campo": {
+      "cicloCio": "Heat",
+      "temperamento": "Temperament",
+      "remedios": "Medicines",
+      "observacoes": "Notes",
+      "nota": "Note"
+    },
+    "cicloCio": {
+      "INICIO": "Start",
+      "MEIO": "Middle",
+      "FINAL": "End",
+      "POS_CIO": "After heat"
+    },
+    "temperamento": {
+      "BRINCANDO": "Playful",
+      "AGITADO": "Restless",
+      "CALMO": "Calm",
+      "CARINHOSO": "Affectionate",
+      "BAGUNCEIRO": "Mischievous",
+      "ESTRESSADO": "Stressed",
+      "ANSIOSO": "Anxious",
+      "AGRESSIVO": "Aggressive",
+      "AMEDRONTADO": "Fearful",
+      "RETRAIDO": "Withdrawn",
+      "VOCALIZANDO_MUITO": "Very vocal"
+    },
+    "foto": {
+      "abrir": "Photo {n}",
+      "formato": "This photo is in a format the portal cannot open.",
+      "indisponivel": "Photo unavailable.",
+      "erro": "Could not open the photo right now. Try again in a few minutes."
+    }
   }
 }

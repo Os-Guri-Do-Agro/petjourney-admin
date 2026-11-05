@@ -10132,5 +10132,58 @@
       "salva": "Podešavanja su sačuvana",
       "erroAoCarregar": "Nije moguće učitati podešavanja."
     }
+  },
+  "leituraApp": {
+    "erro": "Trenutno nije moguće pročitati aplikaciju.",
+    "ultimaConsulta": "Poslednji pregled {data}",
+    "registradoEm": "zabeleženo kod kuće {data}",
+    "vezes": "{nome} ({vezes}×)",
+    "verDiario": "Pogledaj dnevnik",
+    "semVinculo": "Nema aktivne veze sa aplikacijom: rezime, dnevnik i knjižica se pojavljuju kada vlasnik prihvati vezu.",
+    "taxa": "Previše čitanja aplikacije trenutno. Pokušajte ponovo za {segundos} s.",
+    "naoLiberado": "Vlasnik još nije podelio: {chave}.",
+    "semDiario": "Trenutni plan vlasnika ne uključuje dnevnik.",
+    "carteirinha": "Terapija i knjižica iz aplikacije",
+    "alergias": "Alergije",
+    "vacinas": "Najnovije vakcine",
+    "nestaClinica": "u ovoj klinici",
+    "resumida": "Skraćena lista: ostatak je izostavljen.",
+    "diarioDe": "Dnevnik: {nome}",
+    "desde": "Od",
+    "desdeUltimaConsulta": "Od poslednjeg pregleda",
+    "periodo": "Od {de} do {ate}",
+    "truncado": "Bilo je još unosa: prikazani su najnoviji.",
+    "campo": {
+      "cicloCio": "Tera",
+      "temperamento": "Temperament",
+      "remedios": "Lekovi",
+      "observacoes": "Napomene",
+      "nota": "Beleška"
+    },
+    "cicloCio": {
+      "INICIO": "Početak",
+      "MEIO": "Sredina",
+      "FINAL": "Kraj",
+      "POS_CIO": "Posle tere"
+    },
+    "temperamento": {
+      "BRINCANDO": "Razigran",
+      "AGITADO": "Nemiran",
+      "CALMO": "Miran",
+      "CARINHOSO": "Umiljat",
+      "BAGUNCEIRO": "Nestašan",
+      "ESTRESSADO": "Pod stresom",
+      "ANSIOSO": "Uznemiren",
+      "AGRESSIVO": "Agresivan",
+      "AMEDRONTADO": "Uplašen",
+      "RETRAIDO": "Povučen",
+      "VOCALIZANDO_MUITO": "Mnogo se oglašava"
+    },
+    "foto": {
+      "abrir": "Fotografija {n}",
+      "formato": "Ova fotografija je u formatu koji portal ne otvara.",
+      "indisponivel": "Fotografija nije dostupna.",
+      "erro": "Trenutno nije moguće otvoriti fotografiju. Pokušajte ponovo za nekoliko minuta."
+    }
   }
 }

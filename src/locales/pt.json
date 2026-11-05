@@ -10132,5 +10132,58 @@
       "salva": "Configuração salva",
       "erroAoCarregar": "Não deu para carregar a configuração."
     }
+  },
+  "leituraApp": {
+    "erro": "Não deu para ler o app agora.",
+    "ultimaConsulta": "Última consulta em {data}",
+    "registradoEm": "registrado em casa em {data}",
+    "vezes": "{nome} ({vezes}×)",
+    "verDiario": "Ver o diário",
+    "semVinculo": "Sem ligação ativa com o app: o resumo, o diário e a carteirinha aparecem quando o responsável aceitar o vínculo.",
+    "taxa": "Muitas leituras do app agora. Tente de novo em {segundos} s.",
+    "naoLiberado": "O responsável ainda não liberou: {chave}.",
+    "semDiario": "O responsável não usa o diário no plano atual.",
+    "carteirinha": "Medicação e carteirinha do app",
+    "alergias": "Alergias",
+    "vacinas": "Vacinas mais recentes",
+    "nestaClinica": "nesta clínica",
+    "resumida": "Lista resumida: o resto ficou de fora.",
+    "diarioDe": "Diário de {nome}",
+    "desde": "Desde",
+    "desdeUltimaConsulta": "Desde a última consulta",
+    "periodo": "De {de} a {ate}",
+    "truncado": "Havia mais registros: aparecem os mais recentes.",
+    "campo": {
+      "cicloCio": "Cio",
+      "temperamento": "Temperamento",
+      "remedios": "Remédios",
+      "observacoes": "Observações",
+      "nota": "Nota"
+    },
+    "cicloCio": {
+      "INICIO": "Início",
+      "MEIO": "Meio",
+      "FINAL": "Final",
+      "POS_CIO": "Pós-cio"
+    },
+    "temperamento": {
+      "BRINCANDO": "Brincalhão",
+      "AGITADO": "Agitado",
+      "CALMO": "Calmo",
+      "CARINHOSO": "Carinhoso",
+      "BAGUNCEIRO": "Bagunceiro",
+      "ESTRESSADO": "Estressado",
+      "ANSIOSO": "Ansioso",
+      "AGRESSIVO": "Agressivo",
+      "AMEDRONTADO": "Amedrontado",
+      "RETRAIDO": "Retraído",
+      "VOCALIZANDO_MUITO": "Vocalizando muito"
+    },
+    "foto": {
+      "abrir": "Foto {n}",
+      "formato": "Esta foto está num formato que o portal não abre.",
+      "indisponivel": "Foto indisponível.",
+      "erro": "Não foi possível abrir a foto agora. Tente de novo em alguns minutos."
+    }
   }
 }

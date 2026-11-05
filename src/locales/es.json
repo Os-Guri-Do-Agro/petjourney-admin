@@ -10132,5 +10132,58 @@
       "salva": "Configuración guardada",
       "erroAoCarregar": "No se pudo cargar la configuración."
     }
+  },
+  "leituraApp": {
+    "erro": "No se pudo leer la app ahora.",
+    "ultimaConsulta": "Última consulta el {data}",
+    "registradoEm": "registrado en casa el {data}",
+    "vezes": "{nome} ({vezes}×)",
+    "verDiario": "Ver el diario",
+    "semVinculo": "Sin vínculo activo con la app: el resumen, el diario y la cartilla aparecen cuando el responsable acepte el vínculo.",
+    "taxa": "Demasiadas lecturas de la app ahora. Intenta de nuevo en {segundos} s.",
+    "naoLiberado": "El responsable aún no lo compartió: {chave}.",
+    "semDiario": "El plan actual del responsable no incluye el diario.",
+    "carteirinha": "Medicación y cartilla de la app",
+    "alergias": "Alergias",
+    "vacinas": "Vacunas más recientes",
+    "nestaClinica": "en esta clínica",
+    "resumida": "Lista resumida: el resto quedó fuera.",
+    "diarioDe": "Diario de {nome}",
+    "desde": "Desde",
+    "desdeUltimaConsulta": "Desde la última consulta",
+    "periodo": "Del {de} al {ate}",
+    "truncado": "Había más registros: se muestran los más recientes.",
+    "campo": {
+      "cicloCio": "Celo",
+      "temperamento": "Temperamento",
+      "remedios": "Remedios",
+      "observacoes": "Observaciones",
+      "nota": "Nota"
+    },
+    "cicloCio": {
+      "INICIO": "Inicio",
+      "MEIO": "Mitad",
+      "FINAL": "Final",
+      "POS_CIO": "Después del celo"
+    },
+    "temperamento": {
+      "BRINCANDO": "Juguetón",
+      "AGITADO": "Agitado",
+      "CALMO": "Tranquilo",
+      "CARINHOSO": "Cariñoso",
+      "BAGUNCEIRO": "Travieso",
+      "ESTRESSADO": "Estresado",
+      "ANSIOSO": "Ansioso",
+      "AGRESSIVO": "Agresivo",
+      "AMEDRONTADO": "Asustado",
+      "RETRAIDO": "Retraído",
+      "VOCALIZANDO_MUITO": "Vocalizando mucho"
+    },
+    "foto": {
+      "abrir": "Foto {n}",
+      "formato": "Esta foto está en un formato que el portal no abre.",
+      "indisponivel": "Foto no disponible.",
+      "erro": "No se pudo abrir la foto ahora. Intenta de nuevo en unos minutos."
+    }
   }
 }

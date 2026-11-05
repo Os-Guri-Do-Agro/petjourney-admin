@@ -10132,5 +10132,58 @@
       "salva": "تم حفظ الإعدادات",
       "erroAoCarregar": "تعذر تحميل الإعدادات."
     }
+  },
+  "leituraApp": {
+    "erro": "تعذرت قراءة التطبيق الآن.",
+    "ultimaConsulta": "آخر زيارة في {data}",
+    "registradoEm": "سُجّل في المنزل في {data}",
+    "vezes": "{nome} ({vezes}×)",
+    "verDiario": "عرض اليوميات",
+    "semVinculo": "لا يوجد ربط نشط بالتطبيق: يظهر الملخص واليوميات والبطاقة الصحية عندما يقبل المسؤول الربط.",
+    "taxa": "قراءات كثيرة من التطبيق الآن. حاول مرة أخرى بعد {segundos} ثانية.",
+    "naoLiberado": "لم يشارك المسؤول هذا بعد: {chave}.",
+    "semDiario": "خطة المسؤول الحالية لا تشمل اليوميات.",
+    "carteirinha": "الأدوية والبطاقة الصحية من التطبيق",
+    "alergias": "الحساسية",
+    "vacinas": "أحدث اللقاحات",
+    "nestaClinica": "في هذه العيادة",
+    "resumida": "قائمة مختصرة: تم حذف الباقي.",
+    "diarioDe": "يوميات {nome}",
+    "desde": "منذ",
+    "desdeUltimaConsulta": "منذ آخر زيارة",
+    "periodo": "من {de} إلى {ate}",
+    "truncado": "كانت هناك سجلات أكثر: تظهر الأحدث.",
+    "campo": {
+      "cicloCio": "الشبق",
+      "temperamento": "المزاج",
+      "remedios": "الأدوية",
+      "observacoes": "ملاحظات",
+      "nota": "ملاحظة"
+    },
+    "cicloCio": {
+      "INICIO": "البداية",
+      "MEIO": "المنتصف",
+      "FINAL": "النهاية",
+      "POS_CIO": "بعد الشبق"
+    },
+    "temperamento": {
+      "BRINCANDO": "مرح",
+      "AGITADO": "مضطرب",
+      "CALMO": "هادئ",
+      "CARINHOSO": "حنون",
+      "BAGUNCEIRO": "مشاغب",
+      "ESTRESSADO": "متوتر",
+      "ANSIOSO": "قلق",
+      "AGRESSIVO": "عدواني",
+      "AMEDRONTADO": "خائف",
+      "RETRAIDO": "منطوٍ",
+      "VOCALIZANDO_MUITO": "كثير الأصوات"
+    },
+    "foto": {
+      "abrir": "صورة {n}",
+      "formato": "هذه الصورة بصيغة لا يفتحها البوابة.",
+      "indisponivel": "الصورة غير متاحة.",
+      "erro": "تعذر فتح الصورة الآن. حاول مرة أخرى بعد بضع دقائق."
+    }
   }
 }
