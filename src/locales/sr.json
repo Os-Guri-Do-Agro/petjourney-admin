@@ -10265,6 +10265,7 @@
     "mensagemPadrao": {
       "comPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite u roku od {minutos} minuta. Ako ne možete, ostajete na listi, na istom mestu.",
       "semPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite što pre. Ako ne možete, ostajete na listi, na istom mestu."
-    }
+    },
+    "trocado": "Termin za {paciente} je pomeren sa {de} na {para}."
   }
 }

@@ -12,7 +12,7 @@
  */
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import DiarioDoAppGaveta from '@/components/cadastro/DiarioDoAppGaveta.vue'
@@ -26,6 +26,7 @@ import {
   type ResumoDoPaciente,
   type SinalDoResumo,
 } from '@/service/parceiro/leitura-do-app-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{ pacienteId: string; nome: string }>()
 
@@ -37,22 +38,35 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 const resumo = ref<ResumoDoPaciente | null>(null)
 const recusa = ref<RecusaDaLeitura | null>(null)
 const carregando = ref(true)
+const leitura = criarUltimaLeitura()
 
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   recusa.value = null
 
   try {
-    resumo.value = await obterResumo(props.pacienteId, parceiroQuery())
+    const lido = await obterResumo(props.pacienteId, parceiroQuery())
+    if (!leitura.valendo(vez)) return
+    resumo.value = lido
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     resumo.value = null
     recusa.value = lerRecusa(err, t('leituraApp.erro'))
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
-onMounted(() => void carregar())
+/* A ficha troca de paciente sem remontar (o "abrir o que ficou" de um mesclado): lê de novo. */
+watch(
+  () => props.pacienteId,
+  () => {
+    resumo.value = null
+    void carregar()
+  },
+  { immediate: true },
+)
 
 /* --------------------------------------------------------------------------- formatação */
 

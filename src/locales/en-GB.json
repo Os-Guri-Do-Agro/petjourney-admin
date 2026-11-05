@@ -10265,6 +10265,7 @@
     "mensagemPadrao": {
       "comPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply within {minutos} minutes. If not, you stay on the list, in the same place.",
       "semPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply as soon as you can. If not, you stay on the list, in the same place."
-    }
+    },
+    "trocado": "{paciente}'s appointment moved from {de} to {para}."
   }
 }

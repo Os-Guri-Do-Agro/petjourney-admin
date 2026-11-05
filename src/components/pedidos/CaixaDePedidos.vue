@@ -39,6 +39,7 @@ import {
   type ConfiguracaoOnline,
   type PedidoNaCaixa,
 } from '@/service/parceiro/pedidos-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const { t, locale } = useI18n()
 const route = useRoute()
@@ -87,25 +88,32 @@ const carregandoMais = ref(false)
 const jaCarregou = ref(false)
 const erro = ref('')
 
+/* Trocar de aba antes de a resposta chegar: a página da aba anterior não vale mais. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   erro.value = ''
 
   try {
     const pagina = await listarPedidos({ status: aba.value }, parceiroQuery())
+    if (!leitura.valendo(vez)) return
     itens.value = pagina.itens
     proximoCursor.value = pagina.proximoCursor
     jaCarregou.value = true
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('pedidos.caixa.erroAoCarregar')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
 async function carregarMais() {
   if (!proximoCursor.value) return
 
+  const vez = leitura.atual()
   carregandoMais.value = true
 
   try {
@@ -113,9 +121,11 @@ async function carregarMais() {
       { status: aba.value, cursor: proximoCursor.value },
       parceiroQuery(),
     )
+    if (!leitura.valendo(vez)) return
     itens.value = [...itens.value, ...pagina.itens]
     proximoCursor.value = pagina.proximoCursor
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     const lido = lerErroDoCadastro(err, t('pedidos.caixa.erroAoCarregar'))
     /* Cursor de outra consulta: a lista recomeça. */
     if (lido.codigo === 'CURSOR_INVALIDO') await carregar()

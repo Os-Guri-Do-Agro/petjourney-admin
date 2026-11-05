@@ -38,6 +38,7 @@ import {
   type Expediente,
   type Sala,
 } from '@/service/parceiro/agenda-config-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{
   profissional: { id: string; nome: string } | null
@@ -74,9 +75,13 @@ function aplicar(atual: Expediente) {
   sala.value = atual.salaPadraoId ?? SEM_SALA
 }
 
+/* Abrir a gaveta de outro profissional antes de a leitura chegar: a do anterior não vale. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
   if (!props.profissional) return
 
+  const vez = leitura.nova()
   carregando.value = true
   erro.value = ''
 
@@ -85,12 +90,14 @@ async function carregar() {
       obterExpediente(props.profissional.id, parceiroQuery()),
       listarSalas({ ...parceiroQuery(), ativas: true }),
     ])
+    if (!leitura.valendo(vez)) return
     salas.value = ativas
     aplicar(atual)
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('agenda.config.erroAoCarregar')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
@@ -180,14 +187,16 @@ async function salvar() {
   tentou.value = true
   erroDaSala.value = ''
   recusado.value = null
-  if (!props.profissional || temProblema.value) return
+  /* Salva no profissional cujo expediente está na tela (o lido), nunca no que a gaveta pediu depois. */
+  const profissionalId = expediente.value?.profissionalId
+  if (!profissionalId || temProblema.value) return
 
   salvando.value = true
 
   try {
     aplicar(
       await salvarExpediente(
-        props.profissional.id,
+        profissionalId,
         {
           dias: diasParaSalvar(linhas.value),
           salaPadraoId: sala.value === SEM_SALA ? null : sala.value,

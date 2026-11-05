@@ -55,6 +55,7 @@ import {
   type SugestaoDoPedido,
 } from '@/service/parceiro/pedidos-service'
 import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{
   pedidoId: string | null
@@ -90,22 +91,30 @@ const aConfirmar = ref<{
 /** Depois do aceite: o que ficou marcado e os avisos que sobraram. */
 const resultado = ref<{ quando: string; conflitos: Conflito[] } | null>(null)
 
+/* Trocar de pedido com a gaveta aberta: a resposta do anterior que chegar depois não vale. */
+const leituraDoPedido = criarUltimaLeitura()
+const leituraDasSugestoes = criarUltimaLeitura()
+
 async function carregar() {
   if (!props.pedidoId) return
 
+  const vez = leituraDoPedido.nova()
   carregando.value = true
   erro.value = ''
 
   try {
-    pedido.value = await obterPedido(props.pedidoId, parceiroQuery())
+    const lido = await obterPedido(props.pedidoId, parceiroQuery())
+    if (!leituraDoPedido.valendo(vez)) return
+    pedido.value = lido
     /* Com o horário pedido ocupado depois, a gaveta abre nas sugestões. */
     const inicial = sumiu.value ? opcoesDeAcao.value.find((opcao) => opcao.valor === 'outro') : null
     acao.value = inicial?.valor ?? opcoesDeAcao.value[0]?.valor ?? 'recusar'
     if (acao.value === 'outro' && pedido.value.status === 'PENDENTE') void buscarSugestoes()
   } catch (err) {
+    if (!leituraDoPedido.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('pedidos.caixa.erroAoCarregar')).mensagem
   } finally {
-    carregando.value = false
+    if (leituraDoPedido.valendo(vez)) carregando.value = false
   }
 }
 
@@ -118,6 +127,8 @@ onMounted(() => {
 })
 
 function reiniciar() {
+  leituraDasSugestoes.nova()
+  buscando.value = false
   pedido.value = null
   mensagem.value = ''
   aConfirmar.value = null
@@ -206,16 +217,21 @@ const buscando = ref(false)
 const escolhida = ref<number | null>(null)
 
 async function buscarSugestoes() {
-  if (!props.pedidoId) return
+  /* As sugestões são do pedido que está na tela, nunca de um que a gaveta já deixou. */
+  const id = pedido.value?.id ?? props.pedidoId
+  if (!id) return
 
+  const vez = leituraDasSugestoes.nova()
   buscando.value = true
   escolhida.value = null
 
   try {
-    const resposta = await sugestoesDoPedido(props.pedidoId, LIMITE_DE_SUGESTOES, parceiroQuery())
+    const resposta = await sugestoesDoPedido(id, LIMITE_DE_SUGESTOES, parceiroQuery())
+    if (!leituraDasSugestoes.valendo(vez)) return
     sugestoes.value = resposta.sugestoes
     buscaInterrompida.value = resposta.buscaInterrompida
   } catch (err) {
+    if (!leituraDasSugestoes.valendo(vez)) return
     sugestoes.value = []
     toast.add({
       severity: 'error',
@@ -223,7 +239,7 @@ async function buscarSugestoes() {
       life: 6000,
     })
   } finally {
-    buscando.value = false
+    if (leituraDasSugestoes.valendo(vez)) buscando.value = false
   }
 }
 
@@ -250,12 +266,14 @@ function corpoDoAceite(): Aceite | null {
 }
 
 async function aceitar(aceite: Aceite) {
-  if (!props.pedidoId) return
+  /* Responde o pedido que está na tela (o carregado), não o id que a caixa acabou de pedir. */
+  const id = pedido.value?.id
+  if (!id) return
 
   enviando.value = true
 
   try {
-    const resposta = await aceitarPedido(props.pedidoId, aceite, parceiroQuery())
+    const resposta = await aceitarPedido(id, aceite, parceiroQuery())
     const inicio = aceite.inicio ?? resposta.pedido.pets.find((pet) => pet.inicio)?.inicio ?? null
     pedido.value = resposta.pedido
     aConfirmar.value = null
@@ -323,13 +341,14 @@ const opcoesDaRecusa = computed(() =>
 
 async function recusar() {
   tentouRecusar.value = true
-  if (!props.pedidoId || !motivoDaRecusa.value) return
+  const id = pedido.value?.id
+  if (!id || !motivoDaRecusa.value) return
 
   enviando.value = true
 
   try {
     pedido.value = await recusarPedido(
-      props.pedidoId,
+      id,
       { motivo: motivoDaRecusa.value, mensagem: mensagemDaRecusa.value.trim() || null },
       parceiroQuery(),
     )

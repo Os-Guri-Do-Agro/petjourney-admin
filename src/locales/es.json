@@ -10265,6 +10265,7 @@
     "mensagemPadrao": {
       "comPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde en hasta {minutos} minutos. Si no puedes, sigues en la lista, en el mismo lugar.",
       "semPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde lo antes posible. Si no puedes, sigues en la lista, en el mismo lugar."
-    }
+    },
+    "trocado": "Horario de {paciente} cambiado de {de} a {para}."
   }
 }

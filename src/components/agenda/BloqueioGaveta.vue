@@ -144,12 +144,27 @@ const problema = computed(() => {
   if (semanal.value && !diasDaSemana.value.length) return t('agenda.config.bloqueio.faltaDias')
 
   const primeiro = diaLocal(dia.value)
-  const ultimo = diaFinal.value ? diaLocal(diaFinal.value) : primeiro
-  if (`${ultimo}T${fim.value}` <= `${primeiro}T${inicio.value}`)
+  if (`${diaDoFim()}T${fim.value}` <= `${primeiro}T${inicio.value}`)
     return t('agenda.config.bloqueio.fimAntes')
 
   return ''
 })
+
+/**
+ * O dia em que a primeira ocorrência termina. Na série semanal, o fim antes do início vira o dia
+ * seguinte (a ocorrência atravessa a meia-noite, até 24 h); no bloqueio único, o dia final escolhido.
+ */
+function diaDoFim() {
+  const primeiro = diaLocal(dia.value)
+  if (semanal.value) {
+    if (fim.value > inicio.value) return primeiro
+    const seguinte = new Date(dia.value)
+    seguinte.setDate(seguinte.getDate() + 1)
+    return diaLocal(seguinte)
+  }
+
+  return diaFinal.value ? diaLocal(diaFinal.value) : primeiro
+}
 
 const modoDia = computed(() => props.modo.tipo === 'dia')
 
@@ -159,7 +174,7 @@ async function salvar() {
   if (problema.value) return
 
   const primeiro = diaLocal(dia.value)
-  const ultimo = diaFinal.value && !semanal.value ? diaLocal(diaFinal.value) : primeiro
+  const ultimo = diaDoFim()
   const comum = {
     profissionalId: alcance.value === 'profissional' ? profissionalId.value : null,
     salaId: alcance.value === 'sala' ? salaId.value : null,

@@ -113,7 +113,7 @@ const clienteAnonimizado = computed(() => Boolean(paciente.value?.cliente.anonim
 
 /** "Este pet em 30 segundos" e o diário do app (E2-03): veterinário, enfermagem e o dono. */
 const leOApp = computed(
-  () => Boolean(store.modulo('CLINICA')) && store.temPermissao('prontuario.ler'),
+  () => Boolean(store.modulo('CLINICA')?.podeLer) && store.temPermissao('prontuario.ler'),
 )
 
 const editavel = computed(

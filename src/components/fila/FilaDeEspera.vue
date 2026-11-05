@@ -41,6 +41,7 @@ import {
   type SituacaoDaFila,
 } from '@/service/parceiro/fila-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -69,34 +70,44 @@ const profissionais = ref<Profissional[]>([])
 const prazoMinutos = ref<number | null>(null)
 const totalDeVagas = ref<number | null>(null)
 
+/* Trocar de aba antes de a resposta chegar: a página da aba anterior não vale mais. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   erro.value = ''
 
   try {
     const pagina = await listarFila({ situacao: situacao.value }, parceiroQuery())
+    if (!leitura.valendo(vez)) return
     itens.value = pagina.itens
     aguardando.value = pagina.aguardando
     proximoCursor.value = pagina.proximoCursor
     jaCarregou.value = true
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('fila.erroAoCarregar')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
 async function carregarMais() {
   if (!proximoCursor.value) return
 
+  const vez = leitura.atual()
+
   try {
     const pagina = await listarFila(
       { situacao: situacao.value, cursor: proximoCursor.value },
       parceiroQuery(),
     )
+    if (!leitura.valendo(vez)) return
     itens.value = [...itens.value, ...pagina.itens]
     proximoCursor.value = pagina.proximoCursor
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('fila.erroAoCarregar')).mensagem
   }
 }
@@ -190,21 +201,25 @@ async function aceitar(entrada: EntradaNaFila) {
   try {
     const resposta = await registrarAceite(entrada.id, parceiroQuery())
     const oferta = entrada.oferta
-    toast.add({
-      severity: 'success',
-      summary: oferta
-        ? t('clinico.fila.aceite.marcado', {
+    /* G2: quem já tinha horário no serviço tem o agendamento trocado, não um novo. */
+    const resumoDoAceite =
+      resposta.remarcadoDe && oferta
+        ? t('fila.trocado', {
             paciente: entrada.paciente.nome,
-            data: (
-              quandoCurto(oferta.inicio, intl.value).split(' · ')[0] ?? ''
-            ).toLocaleLowerCase(),
-            hora: horaDoInstante(oferta.inicio),
-            profissional: nomeDoProfissional(oferta.profissionalId),
+            de: quandoCurto(resposta.remarcadoDe, intl.value),
+            para: quandoCurto(oferta.inicio, intl.value),
           })
-        : t('fila.aceiteRegistrado'),
-      life: 5000,
-    })
-    void resposta
+        : oferta
+          ? t('clinico.fila.aceite.marcado', {
+              paciente: entrada.paciente.nome,
+              data: (
+                quandoCurto(oferta.inicio, intl.value).split(' · ')[0] ?? ''
+              ).toLocaleLowerCase(),
+              hora: horaDoInstante(oferta.inicio),
+              profissional: nomeDoProfissional(oferta.profissionalId),
+            })
+          : t('fila.aceiteRegistrado')
+    toast.add({ severity: 'success', summary: resumoDoAceite, life: 5000 })
     recarregarTudo()
   } catch (err) {
     avisarErroDaOferta(err, entrada)

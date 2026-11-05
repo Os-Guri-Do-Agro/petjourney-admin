@@ -29,6 +29,7 @@ import {
   type Sala,
 } from '@/service/parceiro/agenda-config-service'
 import { listarProfissionais } from '@/service/parceiro/profissionais-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{ podeEditar: boolean }>()
 
@@ -73,7 +74,11 @@ async function carregarApoio() {
   profissionais.value = listaDeProfissionais.map((item) => ({ id: item.id, nome: item.nome }))
 }
 
+/* Trocar o filtro antes de a resposta chegar: a lista do filtro anterior não vale mais. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   erro.value = ''
 
@@ -92,12 +97,14 @@ async function carregar() {
       },
       parceiroQuery(),
     )
+    if (!leitura.valendo(vez)) return
     fuso.value = periodo.fuso
     ocorrencias.value = periodo.ocorrencias
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('agenda.config.erroAoCarregar')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 

@@ -235,7 +235,7 @@ async function reativar(profissional: Profissional) {
  * mudar é `estabelecimento.editar` com a Clínica ligada para escrita.
  */
 const veExpediente = computed(
-  () => Boolean(store.modulo('CLINICA')) && store.temPermissao('agenda.ler'),
+  () => Boolean(store.modulo('CLINICA')?.podeLer) && store.temPermissao('agenda.ler'),
 )
 const mudaExpediente = computed(
   () =>
