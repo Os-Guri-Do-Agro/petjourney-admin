@@ -36,6 +36,7 @@ import {
   TOM_DA_SEVERIDADE,
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
+import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -783,6 +784,13 @@ watch(excluindo, (aberta) => {
               </div>
             </dl>
           </section>
+
+          <!-- O app: o vínculo, as propostas e os pedidos de correção (E2-02). -->
+          <VinculoCartao
+            v-if="!clienteAnonimizado"
+            :paciente="paciente"
+            :pode-escrever="podeEscrever"
+          />
 
           <!-- Quem pode buscar. -->
           <section

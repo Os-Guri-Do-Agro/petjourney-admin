@@ -9396,7 +9396,8 @@
       "reservas": "Bookings",
       "pedidosDeReserva": "Requests",
       "acomodacoes": "Rooms",
-      "rotinaPadrao": "Standard routine"
+      "rotinaPadrao": "Standard routine",
+      "correcoes": "Corrections"
     },
     "abasAria": "{destino} screens"
   },
@@ -9700,6 +9701,112 @@
       "usarEsteCliente": "Use this client",
       "cadastrar": "Register patient",
       "criado": "{nome} registered"
+    },
+    "vinculo": {
+      "titulo": "In the guardian's app",
+      "noApp": "In the app",
+      "naoLigado": "This patient is not linked to the app yet. Once linked, the guardian follows what the clinic records.",
+      "desde": "Linked since {data}, via {origem}.",
+      "ligar": "Link to the app",
+      "lede": "Ask {nome}'s guardian to link this record to their pet in the app. They need to accept.",
+      "caminho": {
+        "codigo": "Code",
+        "email": "Email",
+        "qr": "Card QR"
+      },
+      "codigoDica": "Creates an 8-character code for the guardian to type in the app. Valid for 72 hours.",
+      "codigoPronto": "Code for the guardian",
+      "codigoComo": "In the app, on the \"I have a code from the clinic\" screen.",
+      "validoAte": "Valid until {data}.",
+      "imprimir": "Print",
+      "gerarCodigo": "Create code",
+      "emailDica": "The link to accept goes to the record's email:",
+      "enviarEmail": "Send link",
+      "emailEnviado": "Request sent. The link went to {email}.",
+      "qrRotulo": "Address of the pet's card QR",
+      "qrDica": "Scan the collar QR with a phone and paste the address of the page that opens.",
+      "enviarPedido": "Send request",
+      "qrEnviado": "Request sent. If the card belongs to a pet in the app, the guardian gets the request to accept.",
+      "folha": {
+        "titulo": "Code to link to the app",
+        "para": "To link {nome} to the PetJourney app",
+        "como": "In the PetJourney app, open \"I have a code from the clinic\" and type the code above."
+      },
+      "erros": {
+        "semEmail": "The record has no email. Use the code.",
+        "jaLigado": "This patient is already linked to a pet in the app.",
+        "inativo": "Inactive or deceased patients cannot get a request.",
+        "teto": "Limit of 50 requests per day reached. Try tomorrow."
+      },
+      "propostas": "Requests",
+      "status": {
+        "PENDENTE": "Not answered",
+        "RESPONDIDA": "Accepted",
+        "RECUSADA": "Declined",
+        "EXPIRADA": "Expired",
+        "CANCELADA": "Cancelled"
+      },
+      "canal": {
+        "PEDIDO_APP": "request from the app",
+        "PROPOSTA_EMAIL": "email",
+        "PROPOSTA_CODIGO": "code",
+        "ACESSO_TEMPORARIO": "temporary access",
+        "QR_CARTEIRINHA": "card QR",
+        "RESERVA_HOTEL": "hotel booking"
+      },
+      "recusa": {
+        "NAO_SOU_EU": "the guardian said it is not them",
+        "NAO_QUERO_VINCULO": "the guardian chose not to link"
+      },
+      "proposta": {
+        "ate": "valid until {data}",
+        "respondidaEm": "answered on {data}",
+        "criadaEm": "made on {data}"
+      },
+      "cancelarProposta": "Cancel",
+      "verTodas": "See all ({n})",
+      "verMenos": "See less",
+      "liberou": "What the guardian shared",
+      "consentimento": {
+        "diarioCompleto": "Full diary",
+        "peso": "Home weight",
+        "notas": "Notes"
+      },
+      "liberado": "shared",
+      "naoLiberado": "not shared",
+      "encerrar": "End link",
+      "encerrarTitulo": "End {nome}'s link",
+      "encerrarLede": "The patient is no longer linked to the app. The guardian is notified and can link again later.",
+      "motivo": "Reason",
+      "motivoTamanho": "Write {min} to {max} characters.",
+      "encerrado": "Link ended"
+    },
+    "correcoes": {
+      "titulo": "Correction requests",
+      "lede": "What guardians asked, through the app, to correct in their record.",
+      "abertos": "Open",
+      "resolvidos": "Resolved",
+      "contagem": "No open requests | {n} open request | {n} open requests",
+      "vazio": "No open requests",
+      "vazioResolvidos": "No resolved requests yet",
+      "pedidoEm": "Requested on {data}",
+      "resolvidoEm": "Resolved on {data}",
+      "abrir": "Open record",
+      "resolver": "Mark as resolved",
+      "resolvido": "Request resolved",
+      "semPaciente": "We couldn't find a patient for this guardian. Search in Patients."
+    },
+    "porAcesso": {
+      "botao": "Link to the record",
+      "titulo": "Link to the clinic's record",
+      "lede": "Ask the guardian to link {pet} to the clinic's record. They get the request in the app.",
+      "existente": "Patient already registered",
+      "novo": "Create the record",
+      "procurar": "Search for the patient",
+      "nenhum": "No patient matches this search. You can create the record from the access.",
+      "novoDica": "The clinic creates the client and the patient from the access data, with the temporary name \"Guardian of {pet}\".",
+      "escolha": "Choose the patient or create the record.",
+      "feito": "Request sent. The guardian gets the request in the app to accept."
     }
   }
 }

@@ -96,6 +96,7 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     icone: 'ph ph-paw-print',
     abas: [
       { rota: '/clinica/pacientes', chave: 'espacos.abas.pacientes' },
+      { rota: '/clinica/correcoes', chave: 'espacos.abas.correcoes' },
       { rota: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
       { rota: '/clinica/bulario', chave: 'espacos.abas.bulario' },
     ],

@@ -9396,7 +9396,8 @@
       "reservas": "Reservas",
       "pedidosDeReserva": "Solicitudes",
       "acomodacoes": "Alojamientos",
-      "rotinaPadrao": "Rutina estándar"
+      "rotinaPadrao": "Rutina estándar",
+      "correcoes": "Correcciones"
     },
     "abasAria": "Pantallas de {destino}"
   },
@@ -9700,6 +9701,112 @@
       "usarEsteCliente": "Usar este cliente",
       "cadastrar": "Registrar paciente",
       "criado": "{nome} registrado"
+    },
+    "vinculo": {
+      "titulo": "En la app del responsable",
+      "noApp": "En la app",
+      "naoLigado": "Este paciente todavía no está vinculado a la app. Vinculado, el responsable sigue lo que la clínica registra.",
+      "desde": "Vinculado desde el {data}, por {origem}.",
+      "ligar": "Vincular a la app",
+      "lede": "Proponga al responsable de {nome} vincular el registro a su mascota en la app. Debe aceptar.",
+      "caminho": {
+        "codigo": "Código",
+        "email": "Correo",
+        "qr": "QR de la credencial"
+      },
+      "codigoDica": "Genera un código de 8 caracteres para que el responsable lo escriba en la app. Vale 72 horas.",
+      "codigoPronto": "Código para el responsable",
+      "codigoComo": "En la app, en la pantalla \"Tengo un código de la clínica\".",
+      "validoAte": "Vale hasta el {data}.",
+      "imprimir": "Imprimir",
+      "gerarCodigo": "Generar código",
+      "emailDica": "El enlace para aceptar va al correo del registro:",
+      "enviarEmail": "Enviar enlace",
+      "emailEnviado": "Pedido enviado. El enlace fue a {email}.",
+      "qrRotulo": "Dirección del QR de la credencial de la mascota",
+      "qrDica": "Lea el QR del collar con el celular y pegue la dirección de la página que se abra.",
+      "enviarPedido": "Enviar pedido",
+      "qrEnviado": "Pedido enviado. Si la credencial es de una mascota en la app, el responsable recibe el pedido para aceptar.",
+      "folha": {
+        "titulo": "Código para vincular a la app",
+        "para": "Para vincular a {nome} a la app PetJourney",
+        "como": "En la app PetJourney, abra \"Tengo un código de la clínica\" y escriba el código de arriba."
+      },
+      "erros": {
+        "semEmail": "El registro no tiene correo. Use el código.",
+        "jaLigado": "Este paciente ya está vinculado a una mascota de la app.",
+        "inativo": "Paciente inactivo o fallecido no recibe propuesta.",
+        "teto": "Límite de 50 propuestas por día alcanzado. Intente mañana."
+      },
+      "propostas": "Propuestas",
+      "status": {
+        "PENDENTE": "Sin respuesta",
+        "RESPONDIDA": "Aceptada",
+        "RECUSADA": "Rechazada",
+        "EXPIRADA": "Vencida",
+        "CANCELADA": "Cancelada"
+      },
+      "canal": {
+        "PEDIDO_APP": "pedido desde la app",
+        "PROPOSTA_EMAIL": "correo",
+        "PROPOSTA_CODIGO": "código",
+        "ACESSO_TEMPORARIO": "acceso temporal",
+        "QR_CARTEIRINHA": "QR de la credencial",
+        "RESERVA_HOTEL": "reserva del hotel"
+      },
+      "recusa": {
+        "NAO_SOU_EU": "el responsable dijo que no es él",
+        "NAO_QUERO_VINCULO": "el responsable prefirió no vincular"
+      },
+      "proposta": {
+        "ate": "vale hasta el {data}",
+        "respondidaEm": "respondida el {data}",
+        "criadaEm": "hecha el {data}"
+      },
+      "cancelarProposta": "Cancelar",
+      "verTodas": "Ver todas ({n})",
+      "verMenos": "Ver menos",
+      "liberou": "Lo que el responsable compartió",
+      "consentimento": {
+        "diarioCompleto": "Diario completo",
+        "peso": "Peso en casa",
+        "notas": "Notas"
+      },
+      "liberado": "compartido",
+      "naoLiberado": "no compartido",
+      "encerrar": "Terminar vínculo",
+      "encerrarTitulo": "Terminar el vínculo de {nome}",
+      "encerrarLede": "El paciente deja de estar vinculado a la app. El responsable recibe el aviso y puede vincular de nuevo después.",
+      "motivo": "Motivo",
+      "motivoTamanho": "Escriba de {min} a {max} caracteres.",
+      "encerrado": "Vínculo terminado"
+    },
+    "correcoes": {
+      "titulo": "Pedidos de corrección",
+      "lede": "Lo que los responsables pidieron, por la app, corregir en su registro.",
+      "abertos": "Abiertos",
+      "resolvidos": "Resueltos",
+      "contagem": "Ningún pedido abierto | {n} pedido abierto | {n} pedidos abiertos",
+      "vazio": "Ningún pedido abierto",
+      "vazioResolvidos": "Todavía no hay pedidos resueltos",
+      "pedidoEm": "Pedido el {data}",
+      "resolvidoEm": "Resuelto el {data}",
+      "abrir": "Abrir registro",
+      "resolver": "Marcar como resuelto",
+      "resolvido": "Pedido resuelto",
+      "semPaciente": "No encontramos un paciente de este responsable. Busque en Pacientes."
+    },
+    "porAcesso": {
+      "botao": "Vincular al registro",
+      "titulo": "Vincular al registro de la clínica",
+      "lede": "Proponga al responsable vincular a {pet} al registro de la clínica. Recibe el pedido en la app.",
+      "existente": "Paciente ya registrado",
+      "novo": "Crear el registro",
+      "procurar": "Buscar el paciente",
+      "nenhum": "Ningún paciente con esta búsqueda. Puede crear el registro desde el acceso.",
+      "novoDica": "La clínica crea el cliente y el paciente con los datos del acceso, con el nombre provisional \"Responsable de {pet}\".",
+      "escolha": "Elija el paciente o cree el registro.",
+      "feito": "Pedido enviado. El responsable recibe el pedido en la app para aceptar."
     }
   }
 }

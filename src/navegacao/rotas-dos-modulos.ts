@@ -101,6 +101,13 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     permissao: 'paciente.ler',
     integrada: true,
   },
+  /* Os pedidos de correção que os responsáveis mandam pelo app (E2-02, PJ-HD8PAB). */
+  {
+    prefixo: '/clinica/correcoes',
+    modulo: 'QUALQUER',
+    permissao: 'paciente.ler',
+    integrada: true,
+  },
   {
     prefixo: '/clinica/ficha',
     modulo: 'QUALQUER',

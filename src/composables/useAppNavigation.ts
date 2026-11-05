@@ -224,6 +224,8 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
 
 const PATIENT_ROUTES = [
   { key: 'clinico.pacientes.titulo', to: '/clinica/pacientes', icon: 'ph ph-users' },
+  /* Os pedidos de correção do cadastro que os responsáveis mandam pelo app (E2-02). */
+  { key: 'cadastro.correcoes.titulo', to: '/clinica/correcoes', icon: 'ph ph-pencil-line' },
   { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
 ] as const
 

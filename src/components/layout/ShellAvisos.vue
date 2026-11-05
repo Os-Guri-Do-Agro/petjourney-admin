@@ -33,10 +33,29 @@ const ROTA_DO_AVISO: Record<string, string> = {
   PARCEIRO_MODULO_SUSPENSO: '/inicio',
 }
 
+/**
+ * O vínculo com o app respondido ou encerrado pelo responsável (E2-02): o aviso traz
+ * `dados.pacienteIds`, e abre a ficha do primeiro; sem ele, a lista de pacientes.
+ */
+const AVISOS_DO_VINCULO = new Set(['VINCULO_RESPONDIDO', 'VINCULO_ENCERRADO_PELO_RESPONSAVEL'])
+
+function rotaDoAviso(aviso: Aviso): string | null {
+  if (AVISOS_DO_VINCULO.has(aviso.tipo)) {
+    const ids = aviso.dados.pacienteIds
+    const primeiro = Array.isArray(ids) && typeof ids[0] === 'string' ? ids[0] : null
+
+    return primeiro ? `/clinica/ficha/${primeiro}` : '/clinica/pacientes'
+  }
+
+  return ROTA_DO_AVISO[aviso.tipo] ?? null
+}
+
 const ICONE_DO_AVISO: Record<string, string> = {
   PARCEIRO_MODULO_VENCENDO: 'ph ph-hourglass-medium',
   PARCEIRO_MODULO_SUSPENSO: 'ph ph-pause-circle',
   PARCEIRO_CONVITE_EQUIPE: 'ph ph-envelope-simple',
+  VINCULO_RESPONDIDO: 'ph ph-device-mobile',
+  VINCULO_ENCERRADO_PELO_RESPONSAVEL: 'ph ph-link-break',
 }
 
 const { t, locale } = useI18n()
@@ -196,15 +215,13 @@ function irPara(aviso: Aviso) {
       <ul v-else class="avisos__lista">
         <li v-for="aviso in avisos" :key="aviso.id">
           <component
-            :is="ROTA_DO_AVISO[aviso.tipo] ? RouterLink : Button"
+            :is="rotaDoAviso(aviso) ? RouterLink : Button"
             v-bind="
-              ROTA_DO_AVISO[aviso.tipo]
-                ? { to: ROTA_DO_AVISO[aviso.tipo] }
-                : { unstyled: true, type: 'button' }
+              rotaDoAviso(aviso) ? { to: rotaDoAviso(aviso) } : { unstyled: true, type: 'button' }
             "
             class="aviso"
             :class="{ 'aviso--nova': !aviso.lidaEm }"
-            @click="ROTA_DO_AVISO[aviso.tipo] ? irPara(aviso) : abrir(aviso)"
+            @click="rotaDoAviso(aviso) ? irPara(aviso) : abrir(aviso)"
           >
             <span class="aviso__icone" aria-hidden="true">
               <i :class="ICONE_DO_AVISO[aviso.tipo] ?? 'ph ph-bell'" />

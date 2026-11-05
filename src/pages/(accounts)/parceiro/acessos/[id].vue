@@ -36,6 +36,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
 import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
+import PorAcessoGaveta from '@/components/cadastro/PorAcessoGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
@@ -214,6 +215,19 @@ const isAtivo = computed(() => detalhe.value?.status === 'ATIVO')
  * cadastro do parceiro ter caído em análise não desfaz esse consentimento.
  */
 const podeAnotar = computed(() => isAtivo.value && store.podeOperar)
+
+/*
+ * Ligar ao cadastro da clínica (E2-02): o acesso ainda vale, o cadastro está liberado e a conta
+ * escreve no cadastro de pacientes (a permissão e um módulo que não esteja só para consulta).
+ */
+const ligandoAoCadastro = ref(false)
+const podeLigarAoCadastro = computed(
+  () =>
+    isAtivo.value &&
+    store.podeOperar &&
+    store.temPermissao('paciente.escrever') &&
+    Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
+)
 
 /** Acesso vivo, mas o cadastro perdeu a operabilidade: só leitura. */
 const somenteLeitura = computed(() => isAtivo.value && !store.podeOperar)
@@ -747,10 +761,7 @@ function haQuantoTempo(value: string) {
   /* Dias de calendário, não blocos de 24 h: 47 horas atrás é anteontem, não ontem. */
   return horas < 24
     ? relativo.format(-horas, 'hour')
-    : relativo.format(
-        -Math.max(1, diasDeCalendarioEntre(parseInstante(value), agora.value)),
-        'day',
-      )
+    : relativo.format(-Math.max(1, diasDeCalendarioEntre(parseInstante(value), agora.value)), 'day')
 }
 
 /** Quando o acesso acabou: a revogação tem data própria; o expirado acaba no prazo. */
@@ -1232,7 +1243,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </span>
                 <span v-else class="ui-selo">
                   <i
-                    :class="detalhe.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass-low'"
+                    :class="
+                      detalhe.status === 'REVOGADO' ? 'ph ph-prohibit' : 'ph ph-hourglass-low'
+                    "
                     aria-hidden="true"
                   />
                   {{ t(`acessos.list.status.${detalhe.status}`) }}
@@ -1290,7 +1303,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 {{ t('acessos.detalhe.prazo.encerrado') }}
               </dt>
               <dd>
-                <strong class="capa__desfecho">{{ t(`acessos.list.status.${detalhe.status}`) }}</strong>
+                <strong class="capa__desfecho">{{
+                  t(`acessos.list.status.${detalhe.status}`)
+                }}</strong>
                 <small class="ui-num">{{ dataEHora(encerradoEm) }}</small>
               </dd>
             </div>
@@ -1301,7 +1316,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           <ul class="capa__fatos">
             <li>
               <i class="ph ph-link-simple" aria-hidden="true" />
-              {{ t('acessos.detalhe.prazo.vinculado', { quando: haQuantoTempo(detalhe.vinculadoEm) }) }}
+              {{
+                t('acessos.detalhe.prazo.vinculado', { quando: haQuantoTempo(detalhe.vinculadoEm) })
+              }}
             </li>
             <!-- O responsável mexeu no resumo depois de entregar: a leitura de ontem pode não
                  valer mais. -->
@@ -1322,6 +1339,18 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
               }}
             </li>
           </ul>
+          <!-- Propor o vínculo pelo acesso, enquanto ele vale (E2-02, PJ-HD8PAB). -->
+          <Button
+            v-if="podeLigarAoCadastro"
+            type="button"
+            class="capa__ligar"
+            icon="ph ph-device-mobile"
+            :label="t('cadastro.porAcesso.botao')"
+            severity="secondary"
+            outlined
+            size="small"
+            @click="ligandoAoCadastro = true"
+          />
           <Button
             type="button"
             class="capa__guia"
@@ -1398,7 +1427,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
         <div class="mesa__grade">
           <!-- ------------------------------------------------ o que o responsável compartilhou -->
           <aside v-if="isAtivo" class="ficha" aria-labelledby="atd-ficha-titulo">
-            <h2 id="atd-ficha-titulo" class="sr-only">{{ t('acessos.detalhe.tabs.resumo.label') }}</h2>
+            <h2 id="atd-ficha-titulo" class="sr-only">
+              {{ t('acessos.detalhe.tabs.resumo.label') }}
+            </h2>
 
             <!-- O recado do responsável: a primeira coisa a ler, com as observações dele embaixo. -->
             <section
@@ -1508,7 +1539,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   <p v-if="item.observacoes" class="trat__obs">
                     <i class="ph ph-note" aria-hidden="true" />
                     <span>
-                      <span class="sr-only">{{ t('acessos.tratamentos.campos.observacoes') }}:</span>
+                      <span class="sr-only"
+                        >{{ t('acessos.tratamentos.campos.observacoes') }}:</span
+                      >
                       {{ item.observacoes }}
                     </span>
                   </p>
@@ -1625,7 +1658,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                     {{ t('acessos.documentos.lede') }}
                   </p>
                 </div>
-                <span v-if="documentos.length" class="ui-cartao__total">{{ documentos.length }}</span>
+                <span v-if="documentos.length" class="ui-cartao__total">{{
+                  documentos.length
+                }}</span>
               </header>
 
               <p v-if="documentosVazioTexto" class="ui-vazio">{{ documentosVazioTexto }}</p>
@@ -1716,7 +1751,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   <div class="dia__corpo">
                     <strong class="dia__data ui-num">{{ entrada.data }}</strong>
 
-                    <div v-if="entrada.sintomas.length || entrada.doencas.length" class="dia__selos">
+                    <div
+                      v-if="entrada.sintomas.length || entrada.doencas.length"
+                      class="dia__selos"
+                    >
                       <span
                         v-for="(sintoma, index) in entrada.sintomas"
                         :key="`s-${index}`"
@@ -2071,7 +2109,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                                 {{ formatBytes(anexo.tamanhoBytes) }}
                               </small>
                             </span>
-                            <i class="ph ph-arrow-square-out nota__anexo-abrir" aria-hidden="true" />
+                            <i
+                              class="ph ph-arrow-square-out nota__anexo-abrir"
+                              aria-hidden="true"
+                            />
                           </button>
                         </li>
                       </ul>
@@ -2084,6 +2125,14 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
         </div>
       </div>
     </div>
+    <template #sempre>
+      <PorAcessoGaveta
+        v-if="detalhe"
+        v-model:visible="ligandoAoCadastro"
+        :acesso-id="detalhe.id"
+        :pet-nome="detalhe.petNome"
+      />
+    </template>
   </UiPagina>
 </template>
 

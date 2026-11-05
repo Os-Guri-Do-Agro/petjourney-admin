@@ -9396,7 +9396,8 @@
       "reservas": "Rezervacije",
       "pedidosDeReserva": "Zahtevi",
       "acomodacoes": "Smeštaj",
-      "rotinaPadrao": "Standardna rutina"
+      "rotinaPadrao": "Standardna rutina",
+      "correcoes": "Ispravke"
     },
     "abasAria": "Ekrani: {destino}"
   },
@@ -9700,6 +9701,112 @@
       "usarEsteCliente": "Koristi ovog klijenta",
       "cadastrar": "Upiši pacijenta",
       "criado": "{nome} je upisan"
+    },
+    "vinculo": {
+      "titulo": "U aplikaciji vlasnika",
+      "noApp": "U aplikaciji",
+      "naoLigado": "Ovaj pacijent još nije povezan sa aplikacijom. Kada se poveže, vlasnik prati šta klinika beleži.",
+      "desde": "Povezan od {data}, preko: {origem}.",
+      "ligar": "Poveži sa aplikacijom",
+      "lede": "Predložite vlasniku ljubimca {nome} da poveže ovaj upis sa ljubimcem u aplikaciji. On mora da prihvati.",
+      "caminho": {
+        "codigo": "Kod",
+        "email": "E-pošta",
+        "qr": "QR kartice"
+      },
+      "codigoDica": "Pravi kod od 8 znakova koji vlasnik unosi u aplikaciji. Važi 72 sata.",
+      "codigoPronto": "Kod za vlasnika",
+      "codigoComo": "U aplikaciji, na ekranu \"Imam kod od klinike\".",
+      "validoAte": "Važi do {data}.",
+      "imprimir": "Štampaj",
+      "gerarCodigo": "Napravi kod",
+      "emailDica": "Link za prihvatanje ide na e-poštu iz upisa:",
+      "enviarEmail": "Pošalji link",
+      "emailEnviado": "Zahtev je poslat. Link je otišao na {email}.",
+      "qrRotulo": "Adresa QR koda kartice ljubimca",
+      "qrDica": "Skenirajte QR kod sa ogrlice telefonom i nalepite adresu stranice koja se otvori.",
+      "enviarPedido": "Pošalji zahtev",
+      "qrEnviado": "Zahtev je poslat. Ako je kartica ljubimca iz aplikacije, vlasnik dobija zahtev da ga prihvati.",
+      "folha": {
+        "titulo": "Kod za povezivanje sa aplikacijom",
+        "para": "Za povezivanje ljubimca {nome} sa aplikacijom PetJourney",
+        "como": "U aplikaciji PetJourney otvorite \"Imam kod od klinike\" i unesite kod iznad."
+      },
+      "erros": {
+        "semEmail": "Upis nema e-poštu. Koristite kod.",
+        "jaLigado": "Ovaj pacijent je već povezan sa ljubimcem iz aplikacije.",
+        "inativo": "Neaktivan ili uginuo pacijent ne dobija predlog.",
+        "teto": "Dostignuto je ograničenje od 50 predloga dnevno. Pokušajte sutra."
+      },
+      "propostas": "Predlozi",
+      "status": {
+        "PENDENTE": "Bez odgovora",
+        "RESPONDIDA": "Prihvaćen",
+        "RECUSADA": "Odbijen",
+        "EXPIRADA": "Istekao",
+        "CANCELADA": "Otkazan"
+      },
+      "canal": {
+        "PEDIDO_APP": "zahtev iz aplikacije",
+        "PROPOSTA_EMAIL": "e-pošta",
+        "PROPOSTA_CODIGO": "kod",
+        "ACESSO_TEMPORARIO": "privremeni pristup",
+        "QR_CARTEIRINHA": "QR kartice",
+        "RESERVA_HOTEL": "rezervacija hotela"
+      },
+      "recusa": {
+        "NAO_SOU_EU": "vlasnik je rekao da to nije on",
+        "NAO_QUERO_VINCULO": "vlasnik nije želeo povezivanje"
+      },
+      "proposta": {
+        "ate": "važi do {data}",
+        "respondidaEm": "odgovoreno {data}",
+        "criadaEm": "napravljeno {data}"
+      },
+      "cancelarProposta": "Otkaži",
+      "verTodas": "Vidi sve ({n})",
+      "verMenos": "Vidi manje",
+      "liberou": "Šta je vlasnik podelio",
+      "consentimento": {
+        "diarioCompleto": "Ceo dnevnik",
+        "peso": "Težina kod kuće",
+        "notas": "Beleške"
+      },
+      "liberado": "podeljeno",
+      "naoLiberado": "nije podeljeno",
+      "encerrar": "Prekini povezivanje",
+      "encerrarTitulo": "Prekini povezivanje: {nome}",
+      "encerrarLede": "Pacijent više nije povezan sa aplikacijom. Vlasnik dobija obaveštenje i može kasnije ponovo da poveže.",
+      "motivo": "Razlog",
+      "motivoTamanho": "Napišite od {min} do {max} znakova.",
+      "encerrado": "Povezivanje je prekinuto"
+    },
+    "correcoes": {
+      "titulo": "Zahtevi za ispravku",
+      "lede": "Šta su vlasnici, preko aplikacije, tražili da se ispravi u njihovom upisu.",
+      "abertos": "Otvoreni",
+      "resolvidos": "Rešeni",
+      "contagem": "Nema otvorenih zahteva | {n} otvoren zahtev | {n} otvorena zahteva | {n} otvorenih zahteva",
+      "vazio": "Nema otvorenih zahteva",
+      "vazioResolvidos": "Još nema rešenih zahteva",
+      "pedidoEm": "Zatraženo {data}",
+      "resolvidoEm": "Rešeno {data}",
+      "abrir": "Otvori upis",
+      "resolver": "Označi kao rešeno",
+      "resolvido": "Zahtev je rešen",
+      "semPaciente": "Nismo našli pacijenta ovog vlasnika. Potražite u Pacijentima."
+    },
+    "porAcesso": {
+      "botao": "Poveži sa upisom",
+      "titulo": "Poveži sa upisom klinike",
+      "lede": "Predložite vlasniku da poveže ljubimca {pet} sa upisom klinike. Zahtev dobija u aplikaciji.",
+      "existente": "Pacijent je već upisan",
+      "novo": "Napravi upis",
+      "procurar": "Potražite pacijenta",
+      "nenhum": "Nijedan pacijent za ovu pretragu. Možete da napravite upis iz pristupa.",
+      "novoDica": "Klinika pravi klijenta i pacijenta iz podataka pristupa, sa privremenim imenom \"Vlasnik ljubimca {pet}\".",
+      "escolha": "Izaberite pacijenta ili napravite upis.",
+      "feito": "Zahtev je poslat. Vlasnik dobija zahtev u aplikaciji da ga prihvati."
     }
   }
 }
