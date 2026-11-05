@@ -9970,15 +9970,25 @@
         "faltaDias": "Izaberite bar jedan dan u nedelji.",
         "fimAntes": "Kraj mora biti posle početka.",
         "apagarTitulo": "Obriši blokadu",
-        "editarTitulo": "Izmeni blokadu",
-        "qualParte": "Ova blokada se ponavlja svake nedelje. Samo za dan {dia} ili za celu seriju?",
         "apagarUnico": "Obrisati ovu blokadu?",
-        "soNesteDia": "Samo ovaj dan",
-        "aSerie": "Cela serija",
         "erros": {
           "salaInativa": "Ova sala je deaktivirana. Ponovo je aktivirajte ili izaberite drugu.",
           "series": "Klinika je dostigla ograničenje blokada koje se ponavljaju. Završite ili obrišite stare serije."
-        }
+        },
+        "semana": {
+          "todos": "Svaki dan",
+          "faixa": "od {de} do {ate}"
+        },
+        "diasAte": "{dias}, do {dia}",
+        "ateDiaSeguinte": "{inicio} do {fim} sledećeg dana",
+        "verDias": "Prikaži dane",
+        "diasDica": "Izaberite dan da promenite ili uklonite samo njega. Ostali ostaju.",
+        "tirarDia": "Ukloni samo ovaj dan",
+        "tirarDiaTitulo": "Ukloni jedan dan",
+        "tirarDiaTexto": "Ukloniti blokadu za {dia}? Ostali dani ostaju.",
+        "tirarEsteDia": "Ukloni ovaj dan",
+        "diaTirado": "Ovaj dan je uklonjen iz blokade",
+        "apagarSerieTexto": "Obrisati ovu nedeljnu blokadu? Nestaje iz svih dana."
       },
       "expediente": {
         "titulo": "Radno vreme: {nome}",

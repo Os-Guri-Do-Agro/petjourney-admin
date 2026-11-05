@@ -9970,15 +9970,25 @@
         "faltaDias": "Escolha pelo menos um dia da semana.",
         "fimAntes": "O fim precisa ser depois do início.",
         "apagarTitulo": "Apagar bloqueio",
-        "editarTitulo": "Editar bloqueio",
-        "qualParte": "Este bloqueio se repete toda semana. Vale só para o dia {dia} ou para a série inteira?",
         "apagarUnico": "Apagar este bloqueio?",
-        "soNesteDia": "Só neste dia",
-        "aSerie": "A série inteira",
         "erros": {
           "salaInativa": "Esta sala está desativada. Reative a sala ou escolha outra.",
           "series": "A clínica chegou ao limite de bloqueios que se repetem. Encerre ou apague séries antigas."
-        }
+        },
+        "semana": {
+          "todos": "Todos os dias",
+          "faixa": "{de} a {ate}"
+        },
+        "diasAte": "{dias}, até {dia}",
+        "ateDiaSeguinte": "{inicio} às {fim} do dia seguinte",
+        "verDias": "Ver os dias",
+        "diasDica": "Escolha um dia para mudar ou tirar só ele. Os outros continuam.",
+        "tirarDia": "Tirar só este dia",
+        "tirarDiaTitulo": "Tirar um dia",
+        "tirarDiaTexto": "Tirar o bloqueio de {dia}? Os outros dias continuam.",
+        "tirarEsteDia": "Tirar este dia",
+        "diaTirado": "Este dia saiu do bloqueio",
+        "apagarSerieTexto": "Apagar este bloqueio de toda semana? Ele sai de todos os dias."
       },
       "expediente": {
         "titulo": "Expediente de {nome}",

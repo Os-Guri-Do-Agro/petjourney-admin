@@ -9970,15 +9970,25 @@
         "faltaDias": "Choose at least one day of the week.",
         "fimAntes": "The end must be after the start.",
         "apagarTitulo": "Delete block",
-        "editarTitulo": "Edit block",
-        "qualParte": "This block repeats every week. Apply to {dia} only or to the whole series?",
         "apagarUnico": "Delete this block?",
-        "soNesteDia": "This day only",
-        "aSerie": "The whole series",
         "erros": {
           "salaInativa": "This room is deactivated. Reactivate it or choose another.",
           "series": "The clinic reached the limit of repeating blocks. End or delete old series."
-        }
+        },
+        "semana": {
+          "todos": "Every day",
+          "faixa": "{de} to {ate}"
+        },
+        "diasAte": "{dias}, until {dia}",
+        "ateDiaSeguinte": "{inicio} to {fim} the next day",
+        "verDias": "See the days",
+        "diasDica": "Pick a day to change or remove only that one. The others stay.",
+        "tirarDia": "Remove this day only",
+        "tirarDiaTitulo": "Remove one day",
+        "tirarDiaTexto": "Remove the block on {dia}? The other days stay.",
+        "tirarEsteDia": "Remove this day",
+        "diaTirado": "This day was removed from the block",
+        "apagarSerieTexto": "Delete this weekly block? It leaves every day."
       },
       "expediente": {
         "titulo": "Working hours: {nome}",
