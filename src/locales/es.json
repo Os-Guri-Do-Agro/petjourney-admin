@@ -10010,5 +10010,127 @@
         "fechar": "Cerrar"
       }
     }
+  },
+  "pedidos": {
+    "caixa": {
+      "aba": {
+        "PENDENTES": "Esperando respuesta",
+        "ACEITOS": "Aceptados",
+        "RECUSADOS": "Rechazados",
+        "ENCERRADOS": "Cerrados"
+      },
+      "situacoes": "Estado de las solicitudes",
+      "vazio": {
+        "PENDENTES": "Ninguna solicitud esperando respuesta",
+        "ACEITOS": "Aún no hay solicitudes aceptadas",
+        "RECUSADOS": "Ninguna solicitud rechazada",
+        "ENCERRADOS": "Ninguna solicitud cerrada"
+      },
+      "desligado": "La agenda en línea está apagada: la app y la página del sitio no ofrecen horarios.",
+      "ligar": "Configurar",
+      "erroAoCarregar": "No se pudieron cargar las solicitudes.",
+      "maisDe": "Más de {n} solicitudes esperando respuesta",
+      "melhorHorario": "Mejor horario",
+      "peloSite": "Por la página del sitio",
+      "remarcacao": "Cambio de horario",
+      "prazo": {
+        "ate": "Responder hasta {quando}",
+        "atrasado": "El plazo venció {quando}"
+      },
+      "desfechoCurto": {
+        "aceito": "Reservado",
+        "automatico": "Aceptado automáticamente",
+        "desistiu": "Desistió",
+        "expirado": "Perdió el plazo"
+      },
+      "responder": "Responder",
+      "ver": "Ver",
+      "verMais": "Ver más",
+      "pedido": "La solicitud",
+      "quando": "{dia}, a las {hora}",
+      "janela": "Del {de} al {ate}, {periodos}",
+      "motivo": "Motivo",
+      "queixa": "Lo que contó",
+      "quemPede": "Quién pide",
+      "telefone": "Teléfono",
+      "email": "Correo",
+      "ativaVinculo": "Solicitud por la app: al aceptar, la clínica empieza a acompañar a la mascota en la app.",
+      "resposta": "Respuesta",
+      "acao": {
+        "escolhido": "Horario pedido",
+        "outro": "Otro horario",
+        "marcar": "Reservar"
+      },
+      "marcaOEscolhido": "Reserva {quando}, como se pidió.",
+      "sugestao": "{dia}, {inicio} a {fim} · {profissional}",
+      "buscaInterrompida": "La búsqueda se detuvo antes: puede haber más horarios más adelante.",
+      "escolhaOMotivo": "Elige el motivo",
+      "motivoObrigatorio": "Elige el motivo del rechazo.",
+      "mensagemDaRecusaDica": "Va citada en la app, en la página de la solicitud y en el correo. Nunca en el aviso del celular.",
+      "mensagem": "Mensaje para {nome}",
+      "mensagemDica": "Va con la confirmación, en la app, en la página de la solicitud y en el correo.",
+      "confirmar": {
+        "professional-overlap": "El profesional ya tiene una cita en este horario. Mira otros horarios, rechaza o reserva igual como sobreturno.",
+        "holiday-closed": "La clínica está cerrada este día. ¿Reservar igual?"
+      },
+      "verOutros": "Ver otros horarios",
+      "marcarMesmoAssim": "Reservar igual",
+      "aceito": "Solicitud aceptada",
+      "marcado": "Reservado: {quando}. Quien pidió ya fue avisado.",
+      "desfecho": "Respuesta",
+      "aviso": {
+        "PENDENTE": "Aviso {canal} saliendo",
+        "ENVIADO": "Aviso enviado {canal}",
+        "NAO_ENVIADO": "Aviso no enviado",
+        "canal": {
+          "PUSH_INBOX": "por la app",
+          "EMAIL": "por correo",
+          "PAGINA_TOKEN": "en la página de la solicitud",
+          "NENHUM": "sin canal"
+        }
+      },
+      "conflito": {
+        "professional-overlap": "El profesional ya tiene una cita en este horario.",
+        "room-overlap": "La sala ya está ocupada en este horario.",
+        "pet-double-book": "La mascota ya tiene otra cita cerca de este horario.",
+        "block-invasion": "Entra en un horario bloqueado.",
+        "outside-hours": "Queda fuera del horario de trabajo.",
+        "lunch-overlap": "Cruza el almuerzo.",
+        "holiday-closed": "La clínica está cerrada este día.",
+        "over-capacity": "El día supera la carga habitual.",
+        "type-room-mismatch": "La sala no es la indicada para esta atención.",
+        "pedido-pendente": "Hay otra solicitud para este horario.",
+        "outro": "Hay un aviso en este horario."
+      },
+      "marcaComoEncaixe": "Reserva {quando}, pero el horario se ocupó después de la solicitud: queda como sobreturno, con confirmación."
+    },
+    "config": {
+      "ativo": "Recibir solicitudes por la app y el sitio",
+      "ativoDica": "Apagado, la app y la página del sitio muestran solo el teléfono.",
+      "semPagina": "La página de la clínica en el sitio aún no está publicada. Sin ella, la agenda en línea no se enciende.",
+      "irAPagina": "Publicar la página",
+      "escolherHorarioDica": "Ve los horarios libres y elige. La recepción acepta ese o reserva otro.",
+      "peloSite": "Recibir por la página del sitio, sin cuenta",
+      "peloSiteDica": "Apagado, solo pide quien tiene la app; la página del sitio desaparece.",
+      "mostrarProfissionais": "Mostrar quién atiende",
+      "mostrarProfissionaisDica": "Apagado, los horarios aparecen por hora y se asigna el primer profesional libre.",
+      "aceitarSozinho": "Aceptar automáticamente las solicitudes de quien ya es cliente",
+      "aceitarSozinhoDica": "El horario elegido y aún libre se vuelve cita sin pasar por la recepción, hasta 2 horarios reservados por cliente. Cuenta nueva y solicitud por el sitio siempre llegan a la bandeja.",
+      "servicosDica": "Solo aparecen los tipos de atención con \"aparece en la solicitud en línea\" encendido, en Configuración de la agenda.",
+      "semServicos": "Ningún tipo de atención aparece en la solicitud en línea aún.",
+      "irAosTipos": "Abrir los tipos de atención",
+      "semProfissionais": "Ningún profesional activo atiende en la agenda aún.",
+      "irAosProfissionais": "Abrir los profesionales",
+      "prazoDica": "El plazo cuenta solo el horario de trabajo.",
+      "linkDesligado": "La página no recibe solicitudes: enciende \"Recibir por la página del sitio\".",
+      "falta": {
+        "PERFIL_NAO_PUBLICADO": "Publica la página de la clínica antes de encender.",
+        "SEM_SERVICO": "Elige al menos un servicio.",
+        "SEM_PROFISSIONAL": "Elige al menos un profesional.",
+        "SEM_MODO": "Elige al menos una forma de pedir."
+      },
+      "salva": "Configuración guardada",
+      "erroAoCarregar": "No se pudo cargar la configuración."
+    }
   }
 }

@@ -10010,5 +10010,127 @@
         "fechar": "Fechar"
       }
     }
+  },
+  "pedidos": {
+    "caixa": {
+      "aba": {
+        "PENDENTES": "Esperando resposta",
+        "ACEITOS": "Aceitos",
+        "RECUSADOS": "Recusados",
+        "ENCERRADOS": "Encerrados"
+      },
+      "situacoes": "Situação dos pedidos",
+      "vazio": {
+        "PENDENTES": "Nenhum pedido esperando resposta",
+        "ACEITOS": "Nenhum pedido aceito ainda",
+        "RECUSADOS": "Nenhum pedido recusado",
+        "ENCERRADOS": "Nenhum pedido encerrado"
+      },
+      "desligado": "O agendamento online está desligado: o app e a página no site não oferecem horário.",
+      "ligar": "Configurar",
+      "erroAoCarregar": "Não deu para carregar os pedidos.",
+      "maisDe": "Mais de {n} pedidos esperando resposta",
+      "melhorHorario": "Melhor horário",
+      "peloSite": "Pela página no site",
+      "remarcacao": "Remarcação",
+      "prazo": {
+        "ate": "Responder até {quando}",
+        "atrasado": "Prazo venceu {quando}"
+      },
+      "desfechoCurto": {
+        "aceito": "Marcado",
+        "automatico": "Aceito sozinho",
+        "desistiu": "Desistiu",
+        "expirado": "Perdeu o prazo"
+      },
+      "responder": "Responder",
+      "ver": "Ver",
+      "verMais": "Ver mais",
+      "pedido": "O pedido",
+      "quando": "{dia}, às {hora}",
+      "janela": "De {de} a {ate}, {periodos}",
+      "motivo": "Motivo",
+      "queixa": "O que contou",
+      "quemPede": "Quem pede",
+      "telefone": "Telefone",
+      "email": "E-mail",
+      "ativaVinculo": "Pedido pelo app: ao aceitar, a clínica passa a acompanhar o pet no app.",
+      "resposta": "Resposta",
+      "acao": {
+        "escolhido": "Horário pedido",
+        "outro": "Outro horário",
+        "marcar": "Marcar"
+      },
+      "marcaOEscolhido": "Marca {quando}, como foi pedido.",
+      "sugestao": "{dia}, {inicio} a {fim} · {profissional}",
+      "buscaInterrompida": "A busca parou antes do fim: pode haver outros horários mais adiante.",
+      "escolhaOMotivo": "Escolha o motivo",
+      "motivoObrigatorio": "Escolha o motivo da recusa.",
+      "mensagemDaRecusaDica": "Vai citada no app, na página do pedido e no e-mail. Nunca no aviso do celular.",
+      "mensagem": "Mensagem para {nome}",
+      "mensagemDica": "Vai junto da confirmação, no app, na página do pedido e no e-mail.",
+      "confirmar": {
+        "professional-overlap": "O profissional já tem atendimento neste horário. Veja outros horários, recuse, ou marque mesmo assim como encaixe.",
+        "holiday-closed": "A clínica está fechada neste dia. Marcar mesmo assim?"
+      },
+      "verOutros": "Ver outros horários",
+      "marcarMesmoAssim": "Marcar mesmo assim",
+      "aceito": "Pedido aceito",
+      "marcado": "Marcado: {quando}. Quem pediu já foi avisado.",
+      "desfecho": "Resposta",
+      "aviso": {
+        "PENDENTE": "Aviso {canal} saindo",
+        "ENVIADO": "Aviso enviado {canal}",
+        "NAO_ENVIADO": "Aviso não enviado",
+        "canal": {
+          "PUSH_INBOX": "pelo app",
+          "EMAIL": "por e-mail",
+          "PAGINA_TOKEN": "na página do pedido",
+          "NENHUM": "sem canal"
+        }
+      },
+      "conflito": {
+        "professional-overlap": "O profissional já tem atendimento neste horário.",
+        "room-overlap": "A sala já está ocupada neste horário.",
+        "pet-double-book": "O pet já tem outro atendimento perto deste horário.",
+        "block-invasion": "Entra num horário bloqueado.",
+        "outside-hours": "Fica fora do expediente.",
+        "lunch-overlap": "Atravessa o almoço.",
+        "holiday-closed": "A clínica está fechada neste dia.",
+        "over-capacity": "O dia passa da carga usual.",
+        "type-room-mismatch": "A sala não é a indicada para este atendimento.",
+        "pedido-pendente": "Há outro pedido para este horário.",
+        "outro": "Há um aviso neste horário."
+      },
+      "marcaComoEncaixe": "Marca {quando}, mas o horário foi ocupado depois do pedido: vira encaixe, com confirmação."
+    },
+    "config": {
+      "ativo": "Receber pedidos pelo app e pelo site",
+      "ativoDica": "Desligado, o app e a página no site mostram só o telefone.",
+      "semPagina": "A página da clínica no site ainda não está publicada. Sem ela, o online não liga.",
+      "irAPagina": "Publicar a página",
+      "escolherHorarioDica": "Vê os horários livres e escolhe. A recepção aceita aquele ou marca outro.",
+      "peloSite": "Receber pela página no site, sem conta",
+      "peloSiteDica": "Desligado, só quem tem o app pede; a página no site some.",
+      "mostrarProfissionais": "Mostrar quem atende",
+      "mostrarProfissionaisDica": "Desligado, os horários aparecem por hora e o profissional sai do primeiro livre.",
+      "aceitarSozinho": "Aceitar sozinho os pedidos de quem já é cliente",
+      "aceitarSozinhoDica": "Horário escolhido e ainda livre vira atendimento sem passar pela recepção, até 2 horários marcados por cliente. Conta nova e pedido pelo site sempre vêm para a caixa.",
+      "servicosDica": "Só aparecem os tipos de atendimento com \"aparece no pedido online\" ligado, na Configuração da agenda.",
+      "semServicos": "Nenhum tipo de atendimento aparece no pedido online ainda.",
+      "irAosTipos": "Abrir os tipos de atendimento",
+      "semProfissionais": "Nenhum profissional ativo atende na agenda ainda.",
+      "irAosProfissionais": "Abrir os profissionais",
+      "prazoDica": "O prazo conta só o horário de expediente.",
+      "linkDesligado": "A página não recebe pedidos: ligue \"Receber pela página no site\".",
+      "falta": {
+        "PERFIL_NAO_PUBLICADO": "Publique a página da clínica antes de ligar.",
+        "SEM_SERVICO": "Escolha pelo menos um serviço.",
+        "SEM_PROFISSIONAL": "Escolha pelo menos um profissional.",
+        "SEM_MODO": "Escolha pelo menos um caminho do pedido."
+      },
+      "salva": "Configuração salva",
+      "erroAoCarregar": "Não deu para carregar a configuração."
+    }
   }
 }

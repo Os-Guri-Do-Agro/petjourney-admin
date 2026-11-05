@@ -37,7 +37,8 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     prefixo: '/clinica/pedidos',
     modulo: 'CLINICA',
     permissao: 'pedido.responder',
-    integrada: false,
+    /* A caixa pela API (E3-05, PJ-SVL85R); a demonstração segue com a de sempre. */
+    integrada: true,
   },
   { prefixo: '/clinica/fila', modulo: 'CLINICA', permissao: 'fila.gerir', integrada: false },
   { prefixo: '/clinica/faltas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },

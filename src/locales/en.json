@@ -10010,5 +10010,127 @@
         "fechar": "Close"
       }
     }
+  },
+  "pedidos": {
+    "caixa": {
+      "aba": {
+        "PENDENTES": "Awaiting reply",
+        "ACEITOS": "Accepted",
+        "RECUSADOS": "Declined",
+        "ENCERRADOS": "Closed"
+      },
+      "situacoes": "Request status",
+      "vazio": {
+        "PENDENTES": "No requests awaiting reply",
+        "ACEITOS": "No accepted requests yet",
+        "RECUSADOS": "No declined requests",
+        "ENCERRADOS": "No closed requests"
+      },
+      "desligado": "Online booking is off: the app and the website page do not offer times.",
+      "ligar": "Set up",
+      "erroAoCarregar": "Could not load the requests.",
+      "maisDe": "More than {n} requests awaiting reply",
+      "melhorHorario": "Best time",
+      "peloSite": "Through the website page",
+      "remarcacao": "Reschedule",
+      "prazo": {
+        "ate": "Reply by {quando}",
+        "atrasado": "Deadline passed {quando}"
+      },
+      "desfechoCurto": {
+        "aceito": "Booked",
+        "automatico": "Accepted automatically",
+        "desistiu": "Withdrawn",
+        "expirado": "Missed the deadline"
+      },
+      "responder": "Reply",
+      "ver": "View",
+      "verMais": "Show more",
+      "pedido": "The request",
+      "quando": "{dia}, at {hora}",
+      "janela": "From {de} to {ate}, {periodos}",
+      "motivo": "Reason",
+      "queixa": "What they said",
+      "quemPede": "Requested by",
+      "telefone": "Phone",
+      "email": "Email",
+      "ativaVinculo": "Requested in the app: once accepted, the clinic starts following the pet in the app.",
+      "resposta": "Reply",
+      "acao": {
+        "escolhido": "Requested time",
+        "outro": "Another time",
+        "marcar": "Book"
+      },
+      "marcaOEscolhido": "Books {quando}, as requested.",
+      "sugestao": "{dia}, {inicio} to {fim} · {profissional}",
+      "buscaInterrompida": "The search stopped early: there may be more times later on.",
+      "escolhaOMotivo": "Choose the reason",
+      "motivoObrigatorio": "Choose the reason for declining.",
+      "mensagemDaRecusaDica": "Quoted in the app, on the request page and in the email. Never in the phone notification.",
+      "mensagem": "Message to {nome}",
+      "mensagemDica": "Sent with the confirmation, in the app, on the request page and in the email.",
+      "confirmar": {
+        "professional-overlap": "The professional already has an appointment at this time. See other times, decline, or book it anyway as a fit-in.",
+        "holiday-closed": "The clinic is closed on this day. Book it anyway?"
+      },
+      "verOutros": "See other times",
+      "marcarMesmoAssim": "Book anyway",
+      "aceito": "Request accepted",
+      "marcado": "Booked: {quando}. The requester has been notified.",
+      "desfecho": "Reply",
+      "aviso": {
+        "PENDENTE": "Notice {canal} on its way",
+        "ENVIADO": "Notice sent {canal}",
+        "NAO_ENVIADO": "Notice not sent",
+        "canal": {
+          "PUSH_INBOX": "in the app",
+          "EMAIL": "by email",
+          "PAGINA_TOKEN": "on the request page",
+          "NENHUM": "with no channel"
+        }
+      },
+      "conflito": {
+        "professional-overlap": "The professional already has an appointment at this time.",
+        "room-overlap": "The room is already in use at this time.",
+        "pet-double-book": "The pet already has another appointment close to this time.",
+        "block-invasion": "It runs into a blocked time.",
+        "outside-hours": "It is outside working hours.",
+        "lunch-overlap": "It runs over lunch.",
+        "holiday-closed": "The clinic is closed on this day.",
+        "over-capacity": "The day goes over the usual load.",
+        "type-room-mismatch": "The room is not the right one for this appointment.",
+        "pedido-pendente": "There is another request for this time.",
+        "outro": "There is a notice for this time."
+      },
+      "marcaComoEncaixe": "Books {quando}, but the time was taken after the request: it becomes a fit-in, with confirmation."
+    },
+    "config": {
+      "ativo": "Receive requests through the app and the website",
+      "ativoDica": "When off, the app and the website page show only the phone number.",
+      "semPagina": "The clinic's website page is not published yet. Without it, online booking cannot be turned on.",
+      "irAPagina": "Publish the page",
+      "escolherHorarioDica": "They see the free times and pick one. Reception accepts it or books another.",
+      "peloSite": "Receive through the website page, without an account",
+      "peloSiteDica": "When off, only app users can request; the website page goes away.",
+      "mostrarProfissionais": "Show who sees patients",
+      "mostrarProfissionaisDica": "When off, times are shown by the hour and the first free professional is picked.",
+      "aceitarSozinho": "Accept requests from existing clients automatically",
+      "aceitarSozinhoDica": "A chosen time that is still free becomes an appointment without going through reception, up to 2 booked times per client. New accounts and website requests always come to the inbox.",
+      "servicosDica": "Only appointment types with \"shown in online requests\" turned on, in Schedule settings, appear here.",
+      "semServicos": "No appointment type is shown in online requests yet.",
+      "irAosTipos": "Open appointment types",
+      "semProfissionais": "No active professional is on the schedule yet.",
+      "irAosProfissionais": "Open professionals",
+      "prazoDica": "The deadline only counts working hours.",
+      "linkDesligado": "The page does not take requests: turn on \"Receive through the website page\".",
+      "falta": {
+        "PERFIL_NAO_PUBLICADO": "Publish the clinic's page before turning this on.",
+        "SEM_SERVICO": "Choose at least one service.",
+        "SEM_PROFISSIONAL": "Choose at least one professional.",
+        "SEM_MODO": "Choose at least one way to request."
+      },
+      "salva": "Settings saved",
+      "erroAoCarregar": "Could not load the settings."
+    }
   }
 }

@@ -10010,5 +10010,127 @@
         "fechar": "Zatvori"
       }
     }
+  },
+  "pedidos": {
+    "caixa": {
+      "aba": {
+        "PENDENTES": "Čekaju odgovor",
+        "ACEITOS": "Prihvaćeni",
+        "RECUSADOS": "Odbijeni",
+        "ENCERRADOS": "Zatvoreni"
+      },
+      "situacoes": "Status zahteva",
+      "vazio": {
+        "PENDENTES": "Nijedan zahtev ne čeka odgovor",
+        "ACEITOS": "Još nema prihvaćenih zahteva",
+        "RECUSADOS": "Nema odbijenih zahteva",
+        "ENCERRADOS": "Nema zatvorenih zahteva"
+      },
+      "desligado": "Onlajn zakazivanje je isključeno: aplikacija i stranica na sajtu ne nude termine.",
+      "ligar": "Podesi",
+      "erroAoCarregar": "Nije moguće učitati zahteve.",
+      "maisDe": "Više od {n} zahteva čeka odgovor",
+      "melhorHorario": "Najbolji termin",
+      "peloSite": "Preko stranice na sajtu",
+      "remarcacao": "Promena termina",
+      "prazo": {
+        "ate": "Odgovoriti do {quando}",
+        "atrasado": "Rok je istekao {quando}"
+      },
+      "desfechoCurto": {
+        "aceito": "Zakazano",
+        "automatico": "Automatski prihvaćeno",
+        "desistiu": "Odustao",
+        "expirado": "Propušten rok"
+      },
+      "responder": "Odgovori",
+      "ver": "Pogledaj",
+      "verMais": "Prikaži još",
+      "pedido": "Zahtev",
+      "quando": "{dia}, u {hora}",
+      "janela": "Od {de} do {ate}, {periodos}",
+      "motivo": "Razlog",
+      "queixa": "Šta je rekao",
+      "quemPede": "Ko traži",
+      "telefone": "Telefon",
+      "email": "Imejl",
+      "ativaVinculo": "Zahtev iz aplikacije: kada prihvatite, klinika počinje da prati ljubimca u aplikaciji.",
+      "resposta": "Odgovor",
+      "acao": {
+        "escolhido": "Traženi termin",
+        "outro": "Drugi termin",
+        "marcar": "Zakaži"
+      },
+      "marcaOEscolhido": "Zakazuje {quando}, kako je traženo.",
+      "sugestao": "{dia}, {inicio} do {fim} · {profissional}",
+      "buscaInterrompida": "Pretraga je stala ranije: kasnije može biti još termina.",
+      "escolhaOMotivo": "Izaberite razlog",
+      "motivoObrigatorio": "Izaberite razlog odbijanja.",
+      "mensagemDaRecusaDica": "Citira se u aplikaciji, na stranici zahteva i u imejlu. Nikad u obaveštenju na telefonu.",
+      "mensagem": "Poruka za {nome}",
+      "mensagemDica": "Ide uz potvrdu, u aplikaciji, na stranici zahteva i u imejlu.",
+      "confirmar": {
+        "professional-overlap": "Stručnjak već ima pregled u ovom terminu. Pogledajte druge termine, odbijte ili ipak zakažite kao ubacivanje.",
+        "holiday-closed": "Klinika ne radi ovog dana. Ipak zakazati?"
+      },
+      "verOutros": "Pogledaj druge termine",
+      "marcarMesmoAssim": "Ipak zakaži",
+      "aceito": "Zahtev prihvaćen",
+      "marcado": "Zakazano: {quando}. Podnosilac je obavešten.",
+      "desfecho": "Odgovor",
+      "aviso": {
+        "PENDENTE": "Obaveštenje {canal} se šalje",
+        "ENVIADO": "Obaveštenje poslato {canal}",
+        "NAO_ENVIADO": "Obaveštenje nije poslato",
+        "canal": {
+          "PUSH_INBOX": "u aplikaciji",
+          "EMAIL": "imejlom",
+          "PAGINA_TOKEN": "na stranici zahteva",
+          "NENHUM": "bez kanala"
+        }
+      },
+      "conflito": {
+        "professional-overlap": "Stručnjak već ima pregled u ovom terminu.",
+        "room-overlap": "Sala je već zauzeta u ovom terminu.",
+        "pet-double-book": "Ljubimac već ima drugi pregled blizu ovog termina.",
+        "block-invasion": "Ulazi u blokirano vreme.",
+        "outside-hours": "Van je radnog vremena.",
+        "lunch-overlap": "Prelazi preko pauze za ručak.",
+        "holiday-closed": "Klinika ne radi ovog dana.",
+        "over-capacity": "Dan prelazi uobičajeno opterećenje.",
+        "type-room-mismatch": "Sala nije odgovarajuća za ovaj pregled.",
+        "pedido-pendente": "Postoji drugi zahtev za ovaj termin.",
+        "outro": "Postoji upozorenje za ovaj termin."
+      },
+      "marcaComoEncaixe": "Zakazuje {quando}, ali je termin zauzet posle zahteva: postaje ubacivanje, uz potvrdu."
+    },
+    "config": {
+      "ativo": "Primaj zahteve preko aplikacije i sajta",
+      "ativoDica": "Kada je isključeno, aplikacija i stranica na sajtu prikazuju samo telefon.",
+      "semPagina": "Stranica klinike na sajtu još nije objavljena. Bez nje se onlajn zakazivanje ne uključuje.",
+      "irAPagina": "Objavi stranicu",
+      "escolherHorarioDica": "Vidi slobodne termine i bira. Recepcija prihvata taj ili zakazuje drugi.",
+      "peloSite": "Primaj preko stranice na sajtu, bez naloga",
+      "peloSiteDica": "Kada je isključeno, traže samo korisnici aplikacije; stranica na sajtu nestaje.",
+      "mostrarProfissionais": "Prikaži ko prima",
+      "mostrarProfissionaisDica": "Kada je isključeno, termini se prikazuju po satu i dodeljuje se prvi slobodan stručnjak.",
+      "aceitarSozinho": "Automatski prihvataj zahteve postojećih klijenata",
+      "aceitarSozinhoDica": "Izabran termin koji je još slobodan postaje pregled bez recepcije, do 2 zakazana termina po klijentu. Novi nalozi i zahtevi sa sajta uvek stižu u sanduče.",
+      "servicosDica": "Prikazuju se samo vrste pregleda sa uključenim \"prikazuje se u onlajn zahtevu\", u Podešavanjima rasporeda.",
+      "semServicos": "Još nijedna vrsta pregleda nije u onlajn zahtevu.",
+      "irAosTipos": "Otvori vrste pregleda",
+      "semProfissionais": "Još nijedan aktivan stručnjak nije u rasporedu.",
+      "irAosProfissionais": "Otvori stručnjake",
+      "prazoDica": "Rok računa samo radno vreme.",
+      "linkDesligado": "Stranica ne prima zahteve: uključite \"Primaj preko stranice na sajtu\".",
+      "falta": {
+        "PERFIL_NAO_PUBLICADO": "Objavite stranicu klinike pre uključivanja.",
+        "SEM_SERVICO": "Izaberite bar jednu uslugu.",
+        "SEM_PROFISSIONAL": "Izaberite bar jednog stručnjaka.",
+        "SEM_MODO": "Izaberite bar jedan način zahteva."
+      },
+      "salva": "Podešavanja su sačuvana",
+      "erroAoCarregar": "Nije moguće učitati podešavanja."
+    }
   }
 }
