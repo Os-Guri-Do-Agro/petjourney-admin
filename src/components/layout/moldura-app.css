@@ -781,19 +781,55 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
 /* ======================================================================================
  * O layout do app nas peças do Trilha.
  *
- * O padrão do app (`docs/design/padrao-tutor.md`, no petjourney-app): listas de ponta a ponta,
- * agrupadas por título de seção e não por caixa; painel em véu, sem borda e sem sombra, só para
- * resumo, aviso e formulário curto; métrica como número grande e rótulo curto num painel, não em
- * cartões soltos que ficam com metade vazia.
+ * O padrão do app (`docs/design/padrao-tutor.md`, no petjourney-app), com a regra do portal de
+ * 05/11: cada assunto com título (`ui-cartao` ou folha com cabeçalho) mora numa caixa em véu, sem
+ * borda e sem sombra, com um fio entre o título e o conteúdo; dentro dela, linhas e dados de ponta
+ * a ponta, sem caixa própria. Lista que é a tela inteira fica aberta, organizada pelos fios. Métrica
+ * como número grande e rótulo curto num painel, não em cartões soltos que ficam com metade vazia.
  * ==================================================================================== */
 
-/* O cartão com assunto vira seção: título 17/700 no branco, o conteúdo de ponta a ponta. */
+/*
+ * O cartão com assunto é uma caixa de verdade: o painel em véu do Início, os cantos do app e
+ * respiro por dentro. Sem a caixa (como era até 05/11), a tela não mostrava onde um assunto acabava
+ * e o outro começava: cada seção com título fica na sua caixa, e o que está dentro dela (linha,
+ * dado, campo) não ganha caixa própria.
+ */
 :root.trilha.moldura-app .ui-folha.ui-cartao {
   overflow: visible;
+  padding: 20px 22px 22px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--app-painel, var(--app-veu));
+  box-shadow: none;
+}
+
+/* O fio separa o título do conteúdo: quem bate o olho sabe de que a caixa trata antes de ler. */
+:root.trilha.moldura-app .ui-folha.ui-cartao > header:first-child:not(:last-child) {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--app-regua);
+}
+
+/* Caixa recolhida (`v-show`): o título fica sozinho, sem fio embaixo. */
+:root.trilha.moldura-app .ui-folha.ui-cartao > header:first-child:has(+ [style*='display: none']) {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+/* Dentro de outra caixa, de uma gaveta ou de um diálogo, a seção fica aberta: cartão dentro de
+ * cartão não organiza nada. */
+:root.trilha.moldura-app :is(.ui-folha, .p-drawer, .p-dialog) .ui-folha.ui-cartao {
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
+}
+
+:root.trilha.moldura-app
+  :is(.ui-folha, .p-drawer, .p-dialog)
+  .ui-folha.ui-cartao
+  > header:first-child:not(:last-child) {
+  padding-bottom: 12px;
+  border-bottom: 0;
 }
 
 :root.trilha.moldura-app .ui-cartao__cabeca,
@@ -841,6 +877,11 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
 
 :root.trilha.moldura-app .ui-lista > li + li {
   border-top-color: var(--app-regua);
+}
+
+/* Quando o item da lista é a própria linha, o canto macio entortava o fio de cima nas pontas. */
+:root.trilha.moldura-app .ui-folha.ui-cartao .ui-lista > li.ui-linha {
+  border-radius: 0;
 }
 
 :root.trilha.moldura-app a.ui-linha:hover,
@@ -909,12 +950,7 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   box-shadow: none;
 }
 
-/*
- * Folha com cabeçalho próprio (a ficha, os postos do Painel do hotel, os assuntos) é cartão com
- * assunto, mesmo sem a classe `ui-cartao`: vira seção aberta. E lista ou tabela numa folha vai de
- * ponta a ponta, sem a caixa em volta.
- */
-:root.trilha.moldura-app .ui-folha:has(> header),
+/* Lista ou tabela solta numa folha vai de ponta a ponta, sem a caixa em volta. */
 :root.trilha.moldura-app .ui-lista.ui-folha,
 :root.trilha.moldura-app .ui-folha.tabela,
 :root.trilha.moldura-app .ui-folha:has(> .tabela),
@@ -923,6 +959,31 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/*
+ * Folha com cabeçalho próprio (o kit da Divulgação, a ficha da demonstração, os postos do Painel
+ * do hotel) é cartão com assunto, mesmo sem a classe `ui-cartao`: a mesma caixa em véu, com o
+ * respiro de dentro que ela já tem. Aninhada, fica aberta como o cartão.
+ */
+:root.trilha.moldura-app .ui-folha:has(> header) {
+  border: 0;
+  border-radius: 22px;
+  background: var(--app-painel, var(--app-veu));
+  box-shadow: none;
+}
+
+:root.trilha.moldura-app :is(.ui-folha, .p-drawer, .p-dialog) .ui-folha:has(> header) {
+  border-radius: 0;
+  background: transparent;
+}
+
+/*
+ * Dentro da caixa em véu, o cinza claro (campo de leitura, poço, ladrilho neutro) sumia no fundo:
+ * vira o papel do app, branco sobre o véu, como o escolhido da pílula.
+ */
+:root.trilha.moldura-app :is(.ui-folha.ui-cartao, .ui-folha:has(> header)) {
+  --superficie-2: var(--app-cartao);
 }
 
 /* Sem faixa colorida na borda (regra do app): o estado já está no selo e no ícone da linha. */

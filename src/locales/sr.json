@@ -9885,8 +9885,7 @@
       },
       "politica": {
         "titulo": "Pravila klinike",
-        "descricao": "Rokovi koje klinika dogovara sa onima koji zakazuju preko aplikacije. Aplikacija dobija ove brojeve gotove.",
-        "padrao": "Klinika još ništa nije promenila: važe podrazumevani rokovi.",
+        "descricao": "Rokovi koje aplikacija i sajt poštuju kada neko zakazuje, otkazuje ili čeka termin u klinici.",
         "salva": "Pravila su sačuvana",
         "faixa": "Od {min} do {max}.",
         "naoReescreve": "Važi za ono što se zakaže posle. Već zakazano se ne menja.",
@@ -9907,6 +9906,25 @@
           "preConsultaAbreHorasAntes": "Sati pre termina.",
           "reservaMinutos": "Minuti dok osoba popunjava zahtev.",
           "ofertaDeVagaMinutos": "Minuti da prvi na listi odgovori."
+        },
+        "padraoSelo": "Podrazumevano",
+        "grupos": {
+          "agenda": {
+            "titulo": "Slobodni termini",
+            "descricao": "Na koliko minuta raspored nudi termin."
+          },
+          "app": {
+            "titulo": "Zakazivanje preko aplikacije",
+            "descricao": "Do kada može da se otkaže i kada aplikacija traži potvrdu i otvara upitnik pre pregleda."
+          },
+          "pedido": {
+            "titulo": "Zahtev za termin",
+            "descricao": "Dok osoba popunjava zahtev u aplikaciji ili na sajtu, termin se čuva za nju."
+          },
+          "fila": {
+            "titulo": "Lista čekanja",
+            "descricao": "Kada se termin oslobodi, onaj ko čeka na listi dobija ponudu."
+          }
         }
       },
       "bloqueio": {

@@ -9885,8 +9885,7 @@
       },
       "politica": {
         "titulo": "Política de la clínica",
-        "descricao": "Los plazos que la clínica acuerda con quien reserva por la app. La app recibe estos números listos.",
-        "padrao": "La clínica todavía no cambió nada: valen los plazos estándar.",
+        "descricao": "Los plazos que siguen la app y el sitio cuando alguien reserva, cancela o espera un turno en la clínica.",
         "salva": "Política guardada",
         "faixa": "De {min} a {max}.",
         "naoReescreve": "Vale para lo que se reserve después. Lo ya reservado no cambia.",
@@ -9907,6 +9906,25 @@
           "preConsultaAbreHorasAntes": "Horas antes del horario.",
           "reservaMinutos": "Minutos mientras la persona completa el pedido.",
           "ofertaDeVagaMinutos": "Minutos para que el primero de la lista responda."
+        },
+        "padraoSelo": "Estándar",
+        "grupos": {
+          "agenda": {
+            "titulo": "Horarios libres",
+            "descricao": "Cada cuántos minutos la agenda ofrece horario."
+          },
+          "app": {
+            "titulo": "Quien reserva por la app",
+            "descricao": "Hasta cuándo se puede cancelar y cuándo la app pide la confirmación y abre la preconsulta."
+          },
+          "pedido": {
+            "titulo": "Solicitud de horario",
+            "descricao": "Mientras la persona completa la solicitud en la app o en el sitio, el horario queda retenido para ella."
+          },
+          "fila": {
+            "titulo": "Lista de espera",
+            "descricao": "Cuando se libera un horario, quien espera en la lista recibe la oferta."
+          }
         }
       },
       "bloqueio": {

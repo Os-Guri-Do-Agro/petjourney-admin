@@ -47,6 +47,25 @@ const CAMPOS: { campo: CampoNumerico; unidade: 'h' | 'min' }[] = [
   { campo: 'ofertaDeVagaMinutos', unidade: 'min' },
 ]
 
+/**
+ * Os números por assunto, cada um com o que ele muda: a grade da agenda, o que o app deixa fazer,
+ * o pedido de horário e a fila de espera. Seis campos soltos lado a lado não diziam de que a tela
+ * tratava.
+ */
+const GRUPOS: { chave: 'agenda' | 'app' | 'pedido' | 'fila'; campos: CampoNumerico[] }[] = [
+  { chave: 'agenda', campos: [] },
+  {
+    chave: 'app',
+    campos: ['cancelarAteHorasAntes', 'confirmacaoAbreHorasAntes', 'preConsultaAbreHorasAntes'],
+  },
+  { chave: 'pedido', campos: ['reservaMinutos'] },
+  { chave: 'fila', campos: ['ofertaDeVagaMinutos'] },
+]
+
+function unidadeDe(campo: CampoNumerico) {
+  return CAMPOS.find((item) => item.campo === campo)?.unidade ?? 'min'
+}
+
 const politica = ref<Politica | null>(null)
 const carregando = ref(true)
 const erro = ref('')
@@ -151,14 +170,11 @@ async function salvar() {
       <span class="ui-cartao__titulos">
         <h2 id="politica-titulo" class="ui-cartao__titulo">
           {{ t('agenda.config.politica.titulo') }}
+          <span v-if="politica && !politica.personalizada" class="ui-selo">
+            {{ t('agenda.config.politica.padraoSelo') }}
+          </span>
         </h2>
-        <p class="ui-cartao__descricao">
-          {{
-            politica && !politica.personalizada
-              ? t('agenda.config.politica.padrao')
-              : t('agenda.config.politica.descricao')
-          }}
-        </p>
+        <p class="ui-cartao__descricao">{{ t('agenda.config.politica.descricao') }}</p>
       </span>
     </header>
 
@@ -175,70 +191,88 @@ async function salvar() {
       />
     </p>
 
-    <div v-if="carregando && !politica" class="pol__grade" aria-busy="true">
-      <Skeleton v-for="n in 6" :key="n" height="4rem" />
+    <div v-if="carregando && !politica" class="pol__esqueleto" aria-busy="true">
+      <Skeleton v-for="n in 4" :key="n" height="4rem" />
     </div>
 
     <form v-else-if="politica" class="pol__form" novalidate @submit.prevent="salvar">
-      <div class="pol__grade">
-        <section class="eg__secao">
-          <label class="eg__rotulo" for="politica-grade">{{
-            t('agenda.config.politica.campos.granularidadeMinutos')
-          }}</label>
-          <Select
-            v-model="valores.granularidadeMinutos"
-            input-id="politica-grade"
-            :options="opcoesDaGrade"
-            option-label="rotulo"
-            option-value="valor"
-            :disabled="!props.podeEditar || salvando"
-          />
-          <small class="eg__dica">{{
-            t('agenda.config.politica.dicas.granularidadeMinutos')
-          }}</small>
-        </section>
+      <section
+        v-for="grupo in GRUPOS"
+        :key="grupo.chave"
+        class="pol__grupo"
+        :aria-labelledby="`politica-${grupo.chave}`"
+      >
+        <div class="pol__sobre">
+          <h3 :id="`politica-${grupo.chave}`" class="pol__titulo">
+            {{ t(`agenda.config.politica.grupos.${grupo.chave}.titulo`) }}
+          </h3>
+          <p class="pol__descricao">
+            {{ t(`agenda.config.politica.grupos.${grupo.chave}.descricao`) }}
+          </p>
+        </div>
 
-        <section v-for="item in CAMPOS" :key="item.campo" class="eg__secao">
-          <label class="eg__rotulo" :for="`politica-${item.campo}`">
-            {{ t(`agenda.config.politica.campos.${item.campo}`) }}
+        <div class="pol__campos">
+          <div v-if="grupo.chave === 'agenda'" class="eg__secao">
+            <label class="eg__rotulo" for="politica-grade">{{
+              t('agenda.config.politica.campos.granularidadeMinutos')
+            }}</label>
+            <Select
+              v-model="valores.granularidadeMinutos"
+              input-id="politica-grade"
+              :options="opcoesDaGrade"
+              option-label="rotulo"
+              option-value="valor"
+              :disabled="!props.podeEditar || salvando"
+            />
+            <small class="eg__dica">{{
+              t('agenda.config.politica.dicas.granularidadeMinutos')
+            }}</small>
+          </div>
+
+          <label v-if="grupo.chave === 'fila'" class="pol__chave">
+            <ToggleSwitch
+              v-model="valores.ofertaAutomaticaFila"
+              :disabled="!props.podeEditar || salvando"
+            />
+            <span>
+              <strong>{{ t('agenda.config.politica.ofertaAutomatica') }}</strong>
+              <small>{{
+                t('agenda.config.politica.ofertaAutomaticaDica', {
+                  min: valores.ofertaDeVagaMinutos,
+                })
+              }}</small>
+            </span>
           </label>
-          <InputNumber
-            v-model="valores[item.campo]"
-            :input-id="`politica-${item.campo}`"
-            :min="faixa(item.campo).min"
-            :max="faixa(item.campo).max"
-            show-buttons
-            :suffix="item.unidade === 'h' ? ' h' : ` ${t('agenda.config.tipo.min')}`"
-            :invalid="foraDaFaixa.includes(item.campo) || erroDoCampo?.campo === item.campo"
-            :disabled="!props.podeEditar || salvando"
-          />
-          <small v-if="erroDoCampo?.campo === item.campo" class="eg__invalido">{{
-            erroDoCampo.texto
-          }}</small>
-          <small v-else class="eg__dica">
-            {{ t(`agenda.config.politica.dicas.${item.campo}`) }}
-            {{
-              t('agenda.config.politica.faixa', {
-                min: faixa(item.campo).min,
-                max: faixa(item.campo).max,
-              })
-            }}
-          </small>
-        </section>
-      </div>
 
-      <label class="pol__chave">
-        <span>
-          <strong>{{ t('agenda.config.politica.ofertaAutomatica') }}</strong>
-          <small>{{
-            t('agenda.config.politica.ofertaAutomaticaDica', { min: valores.ofertaDeVagaMinutos })
-          }}</small>
-        </span>
-        <ToggleSwitch
-          v-model="valores.ofertaAutomaticaFila"
-          :disabled="!props.podeEditar || salvando"
-        />
-      </label>
+          <div v-for="campo in grupo.campos" :key="campo" class="eg__secao">
+            <label class="eg__rotulo" :for="`politica-${campo}`">
+              {{ t(`agenda.config.politica.campos.${campo}`) }}
+            </label>
+            <InputNumber
+              v-model="valores[campo]"
+              :input-id="`politica-${campo}`"
+              :min="faixa(campo).min"
+              :max="faixa(campo).max"
+              show-buttons
+              :suffix="unidadeDe(campo) === 'h' ? ' h' : ` ${t('agenda.config.tipo.min')}`"
+              :invalid="foraDaFaixa.includes(campo) || erroDoCampo?.campo === campo"
+              :disabled="!props.podeEditar || salvando"
+            />
+            <small v-if="erroDoCampo?.campo === campo" class="eg__invalido">{{
+              erroDoCampo.texto
+            }}</small>
+            <small v-else class="eg__dica">
+              {{ t(`agenda.config.politica.dicas.${campo}`) }}
+              {{
+                t('agenda.config.politica.faixa', {
+                  min: faixa(campo).min,
+                  max: faixa(campo).max,
+                })
+              }}
+            </small>
+          </div>
+        </div>
+      </section>
 
       <footer v-if="props.podeEditar" class="pol__pe">
         <p class="pol__nota">
@@ -261,33 +295,86 @@ async function salvar() {
 .pol {
   display: grid;
   gap: 16px;
+  container: politica / inline-size;
+}
+
+.pol__esqueleto {
+  display: grid;
+  gap: 16px;
 }
 
 .pol__form {
   display: grid;
-  gap: 20px;
 }
 
-.pol__grade {
+/*
+ * Um assunto por faixa: à esquerda o que ele muda, à direita os números. O fio entre as faixas é
+ * o mesmo do título do cartão.
+ */
+.pol__grupo {
+  display: grid;
+  gap: 14px 40px;
+  padding: 20px 0;
+}
+
+.pol__grupo + .pol__grupo {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.pol__grupo:first-child {
+  padding-top: 4px;
+}
+
+@container politica (min-width: 760px) {
+  .pol__grupo {
+    grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+  }
+}
+
+.pol__sobre {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.pol__titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.pol__descricao {
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.pol__campos {
   display: grid;
   gap: 18px 20px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
   align-items: start;
 }
 
-.pol__grade :deep(.p-inputnumber),
-.pol__grade :deep(.p-select) {
+.pol__campos :deep(.p-inputnumber),
+.pol__campos :deep(.p-select) {
   width: 100%;
 }
 
+/* O interruptor da fila ocupa a faixa toda: liga ou desliga o que o prazo ao lado mede. */
 .pol__chave {
   display: flex;
+  grid-column: 1 / -1;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 0 0;
-  border-top: 1px solid var(--linha-suave);
+  gap: 12px;
   cursor: pointer;
+}
+
+.pol__chave :deep(.p-toggleswitch) {
+  flex: 0 0 auto;
 }
 
 .pol__chave span {
@@ -312,6 +399,8 @@ async function salvar() {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
 }
 
 .pol__nota {

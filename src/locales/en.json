@@ -9885,8 +9885,7 @@
       },
       "politica": {
         "titulo": "Clinic policy",
-        "descricao": "The deadlines the clinic agrees with people who book through the app. The app gets these numbers ready.",
-        "padrao": "The clinic has not changed anything yet: the default deadlines apply.",
+        "descricao": "The deadlines the app and the website follow when someone books, cancels or waits for a slot at the clinic.",
         "salva": "Policy saved",
         "faixa": "From {min} to {max}.",
         "naoReescreve": "Applies to what is booked from now on. Existing appointments do not change.",
@@ -9907,6 +9906,25 @@
           "preConsultaAbreHorasAntes": "Hours before the appointment.",
           "reservaMinutos": "Minutes while the person fills in the request.",
           "ofertaDeVagaMinutos": "Minutes for the first in line to answer."
+        },
+        "padraoSelo": "Default",
+        "grupos": {
+          "agenda": {
+            "titulo": "Free slots",
+            "descricao": "How many minutes apart the schedule offers times."
+          },
+          "app": {
+            "titulo": "Booking through the app",
+            "descricao": "Until when people can cancel, and when the app asks for confirmation and opens the pre-visit form."
+          },
+          "pedido": {
+            "titulo": "Time requests",
+            "descricao": "While the person fills in the request in the app or on the website, the slot is held for them."
+          },
+          "fila": {
+            "titulo": "Waiting list",
+            "descricao": "When a slot frees up, the people on the waiting list get the offer."
+          }
         }
       },
       "bloqueio": {
