@@ -25,6 +25,9 @@ um card, reconfira se o guia dele foi reanexado.
 | 04/11 | 1.3 PJ-UFRXH6 auditoria da equipe (E1-05) | `fccd243` | Em teste |
 | 04/11 | 1.4 PJ-1HX14U selos, pauta do Início e sino pela API (E1-06) | `420ae3e` | Em teste |
 | 04/11 | 1.5 PJ-W8TOBS identidade da pessoa, selo e CNPJ alfanumérico (E1-08) | `e4ce0fc` | Em teste desde 04/11 (o aviso nos botões de assinar entra com as telas de assinar, ondas 4 e 5; lacuna N11) |
+| 04/11 | E1 no site (`petjourney-web`): PJ-KE667M página pública `/agendar` e `/reservar`, PJ-BY8ULR CNPJ no cadastro | `d78562d`, `bd2e2ce` (no develop do site) | Em teste (KE667M completo: portal e site) |
+| 04/11 | E1 no CMS (`petjourney-cms`): PJ-IPL2CL módulos, PJ-9OAGFK conferir CRMV, PJ-DYEN21 fila de identidade, PJ-2OPCOW parte do CMS | `a208af2`, `f4d7134`, `903b841`, `c43fdd3` (no develop do CMS) | Em teste (2OPCOW completo: portal, app e CMS) |
+| 04/11 | E1 no app (`petjourney-app`): PJ-80M7IL avisos de módulo, PJ-K49ST6 tipos e erro pelo código, PJ-A5TIS6 "Quem viu", PJ-2OPCOW parte do app | `10cc287`, `3b76917`, `521d6a9`, `79e3918` (no develop do app; não gerar build de loja antes da API de develop ir para produção) | Em teste |
 
 Lacunas e decisões provisórias: `lacunas.md`.
 
