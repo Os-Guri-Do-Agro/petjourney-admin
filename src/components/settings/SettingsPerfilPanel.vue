@@ -411,18 +411,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="pageState === 'loading'" class="ui-folha cfg-folha" aria-hidden="true">
+  <!--
+    O esqueleto tem a anatomia da tela carregada: a mesma folha aberta (`perfil`, sem o véu de
+    cartão), a capa com a foto redonda e quem é, e as seções com o ladrilho e o texto à esquerda e os
+    campos à direita. Antes era um cartão em véu com um bloco só, e a tela "pulava" ao carregar.
+  -->
+  <div v-if="pageState === 'loading'" class="ui-folha cfg-folha perfil" aria-hidden="true">
     <div class="perfil__capa">
       <Skeleton shape="circle" size="7rem" />
       <div class="perfil__esqueleto">
-        <Skeleton width="14rem" height="1.4rem" border-radius="6px" />
-        <Skeleton width="11rem" height="1rem" border-radius="6px" />
-        <Skeleton width="8rem" height="2.5rem" border-radius="10px" />
+        <Skeleton width="14rem" height="1.6rem" border-radius="6px" />
+        <Skeleton width="12rem" height="1rem" border-radius="6px" />
+        <Skeleton width="18rem" height="1.1rem" border-radius="6px" />
+        <Skeleton width="10rem" height="2.75rem" border-radius="12px" />
       </div>
     </div>
-    <div class="cfg-secao">
-      <Skeleton width="8rem" height="1rem" border-radius="6px" />
-      <Skeleton height="6rem" border-radius="12px" />
+    <div v-for="secao in 2" :key="secao" class="cfg-secao">
+      <div class="perfil__esqueleto">
+        <Skeleton width="2.25rem" height="2.25rem" border-radius="10px" />
+        <Skeleton width="7rem" height="1.1rem" border-radius="6px" />
+        <Skeleton width="13rem" height="0.9rem" border-radius="6px" />
+        <Skeleton width="10rem" height="0.9rem" border-radius="6px" />
+      </div>
+      <div class="perfil__esqueleto">
+        <Skeleton width="8rem" height="1rem" border-radius="6px" />
+        <Skeleton height="3rem" border-radius="12px" />
+        <Skeleton width="6rem" height="1rem" border-radius="6px" />
+        <Skeleton height="3rem" border-radius="12px" />
+      </div>
     </div>
   </div>
 

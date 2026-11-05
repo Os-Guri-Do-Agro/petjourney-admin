@@ -131,10 +131,18 @@ html.trilha.app-dark
 /* A secundária: papel branco, fio leve e uma sombra rente, como um cartão pequeno. */
 html:root.trilha {
   --p-button-secondary-border-color: var(--linha-media);
-  --p-button-secondary-hover-border-color: color-mix(in oklab, var(--linha-media) 60%, var(--tinta-3));
+  --p-button-secondary-hover-border-color: color-mix(
+    in oklab,
+    var(--linha-media) 60%,
+    var(--tinta-3)
+  );
   --p-button-secondary-active-border-color: var(--tinta-3);
   --p-button-outlined-secondary-border-color: var(--linha-media);
-  --p-button-outlined-primary-border-color: color-mix(in oklab, var(--musgo) 35%, var(--linha-media));
+  --p-button-outlined-primary-border-color: color-mix(
+    in oklab,
+    var(--musgo) 35%,
+    var(--linha-media)
+  );
 }
 
 html.trilha .p-button.p-button-secondary:not(.p-button-text):not(.p-button-link),
@@ -356,6 +364,14 @@ html.trilha .p-progressbar-value {
 html.trilha .p-skeleton {
   border-radius: 10px;
   background: var(--superficie-3);
+}
+
+/*
+ * O círculo continua círculo: o raio de 10 px acima pegava também o `shape="circle"` e o avatar do
+ * esqueleto saía quadrado (Configurações, Início, Equipe, Indicados, avisos, Meu dia...).
+ */
+html.trilha .p-skeleton.p-skeleton-circle {
+  border-radius: 50%;
 }
 
 /* ------------------------------------------------------------------------- barras de rolagem */

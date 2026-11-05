@@ -12,7 +12,9 @@
  * antes), então voltar, favoritar e abrir em outra guia funcionam, e os redirecionamentos antigos
  * para `?aba=empresa` continuam caindo no lugar certo.
  *
- * A tela é de leitura: título, abas e folhas numa coluna centralizada (`largura="leitura"`).
+ * A tela ocupa a largura toda, como as outras do portal: título, abas e folhas vão até a margem.
+ * Em 04/11/2026 saiu a coluna centralizada de 1200 px (`largura="leitura"`), que no monitor largo
+ * deixava as duas bordas vazias.
  *
  * Cada aba é uma folha com seções: o nome e uma frase da seção à esquerda, os campos à direita,
  * e o "Salvar" no rodapé da folha.
@@ -144,7 +146,6 @@ watch(
     class="tela-conta"
     :titulo="t('settings.title')"
     :resumo="resumo"
-    largura="leitura"
     icone="ph ph-gear-six"
     :abas-da-tela="abas"
     :aba-atual="abaAtual"
