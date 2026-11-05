@@ -784,7 +784,8 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
  * O padrão do app (`docs/design/padrao-tutor.md`, no petjourney-app), com a regra do portal de
  * 05/11: cada assunto com título (`ui-cartao` ou folha com cabeçalho) mora numa caixa em véu, sem
  * borda e sem sombra, com um fio entre o título e o conteúdo; dentro dela, linhas e dados de ponta
- * a ponta, sem caixa própria. Lista que é a tela inteira fica aberta, organizada pelos fios. Métrica
+ * a ponta, sem caixa própria. Lista ou tabela que é a tela inteira e o estado da página (vazio, erro)
+ * também vão na caixa em véu. Métrica
  * como número grande e rótulo curto num painel, não em cartões soltos que ficam com metade vazia.
  * ==================================================================================== */
 
@@ -950,15 +951,26 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
   box-shadow: none;
 }
 
-/* Lista ou tabela solta numa folha vai de ponta a ponta, sem a caixa em volta. */
+/*
+ * Lista ou tabela que é a tela inteira (os pedidos, a fila, a equipe) também mora na caixa em véu:
+ * a mesma do assunto com título, com as linhas no respiro delas. Aninhada, fica aberta.
+ */
 :root.trilha.moldura-app .ui-lista.ui-folha,
 :root.trilha.moldura-app .ui-folha.tabela,
 :root.trilha.moldura-app .ui-folha:has(> .tabela),
 :root.trilha.moldura-app .ui-folha:has(> table) {
+  --ui-raio-folha: 22px;
   border: 0;
+  border-radius: 22px;
+  background: var(--app-painel, var(--app-veu));
+  box-shadow: none;
+}
+
+:root.trilha.moldura-app
+  :is(.ui-folha, .p-drawer, .p-dialog)
+  :is(.ui-lista.ui-folha, .ui-folha.tabela, .ui-folha:has(> .tabela), .ui-folha:has(> table)) {
   border-radius: 0;
   background: transparent;
-  box-shadow: none;
 }
 
 /*
@@ -976,6 +988,19 @@ html.trilha.moldura-app .p-button:not(.p-button-sm):not(.p-button-icon-only):not
 :root.trilha.moldura-app :is(.ui-folha, .p-drawer, .p-dialog) .ui-folha:has(> header) {
   border-radius: 0;
   background: transparent;
+}
+
+/*
+ * O estado que toma a tela (vazio, erro, sem acesso, carregando) é a mesma caixa em véu, na largura
+ * do conteúdo: não um cartão branco de borda estreito no meio do branco.
+ */
+:root.trilha.moldura-app .pagina__estado {
+  max-width: none;
+  margin: 0;
+  border: 0;
+  border-radius: 22px;
+  background: var(--app-painel, var(--app-veu));
+  box-shadow: none;
 }
 
 /*

@@ -343,7 +343,7 @@ const vagasAbertas = ref(false)
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-vazio fl__vazio">
+      <div v-else-if="!itens.length" class="ui-folha ui-vazio fl__vazio">
         <i class="ph ph-hourglass-medium" aria-hidden="true" />
         <strong>{{
           situacao === 'ATIVAS' ? t('clinico.fila.vazioTitulo') : t('fila.semNaoResponderam')

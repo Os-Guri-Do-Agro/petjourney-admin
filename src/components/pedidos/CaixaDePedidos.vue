@@ -310,7 +310,7 @@ function aoResponder() {
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-vazio pc__vazio">
+      <div v-else-if="!itens.length" class="ui-folha ui-vazio pc__vazio">
         <i class="ph ph-calendar-plus" aria-hidden="true" />
         <strong>{{ t(`pedidos.caixa.vazio.${aba}`) }}</strong>
         <span v-if="aba === 'PENDENTES'">{{ t('clinico.pedidos.vazio.descricao') }}</span>
