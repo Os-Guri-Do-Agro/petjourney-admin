@@ -36,6 +36,7 @@ import {
 
 import InternarGaveta from './InternarGaveta.vue'
 import LeitoDoMapa from './LeitoDoMapa.vue'
+import PlantaoDaInternacao from './PlantaoDaInternacao.vue'
 import { ICONE_DO_KIND, TOM_DA_URGENCIA } from './rotulos-da-internacao'
 
 const { t } = useI18n()
@@ -46,6 +47,8 @@ const clinicaEscreve = computed(() => Boolean(store.modulo('CLINICA')?.podeEscre
 const podeInternar = computed(
   () => clinicaEscreve.value && store.temPermissao('internacao.prescrever'),
 )
+/* O plantão (E5-02c): quem executa a internação (DONO, veterinário, enfermagem). */
+const executa = computed(() => clinicaEscreve.value && store.temPermissao('internacao.executar'))
 const veLeitos = computed(
   () => store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar'),
 )
@@ -241,6 +244,11 @@ function abrir(id: string) {
 
     <div v-if="mapa && !vazio" class="ic">
       <p v-if="erro" class="ic__erro" role="alert">{{ erro }}</p>
+
+      <PlantaoDaInternacao
+        v-if="store.temPermissao('internacao.executar')"
+        :pode-executar="executa"
+      />
 
       <UiSecao
         id="internacao-pauta"

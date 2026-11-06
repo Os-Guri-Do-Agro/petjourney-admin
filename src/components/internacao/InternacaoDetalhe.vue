@@ -11,7 +11,8 @@
  * - Sem registro há 72 h: o aviso de que as doses e o boletim automático pararam.
  * - O animal também hospedado: a medicação do hotel, só leitura.
  *
- * Prescrições, checklist, evolução e boletins entram com a E5-02 e a E5-03.
+ * O cuidado (E5-02): as prescrições, o checklist e a evolução, logo depois do estado. Os
+ * boletins entram com a E5-03.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -34,10 +35,13 @@ import {
 } from '@/service/parceiro/internacao-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
 
+import ChecklistDaInternacao from './ChecklistDaInternacao.vue'
 import EditarCasoGaveta from './EditarCasoGaveta.vue'
 import EncerrarAdministrativoGaveta from './EncerrarAdministrativoGaveta.vue'
 import EncerrarInternacaoGaveta from './EncerrarInternacaoGaveta.vue'
+import EvolucoesDaInternacao from './EvolucoesDaInternacao.vue'
 import MudarLeitoGaveta from './MudarLeitoGaveta.vue'
+import PrescricoesDaInternacao from './PrescricoesDaInternacao.vue'
 import PrevisaoDeAltaGaveta from './PrevisaoDeAltaGaveta.vue'
 import { TOM_DA_GRAVIDADE, TOM_DO_STATUS } from './rotulos-da-internacao'
 
@@ -83,6 +87,18 @@ const podeExecutar = computed(
 const podePrescrever = computed(
   () => aberta.value && clinicaEscreve.value && store.temPermissao('internacao.prescrever'),
 )
+/* O checklist e a evolução: quem executa (a enfermagem também), mesmo depois de encerrada (só lê). */
+const executa = computed(() => clinicaEscreve.value && store.temPermissao('internacao.executar'))
+
+const checklist = ref<InstanceType<typeof ChecklistDaInternacao> | null>(null)
+const prescricoes = ref<InstanceType<typeof PrescricoesDaInternacao> | null>(null)
+
+/** Prescrever muda as doses; a evolução pode mudar a gravidade: relê o que depende. */
+function cuidadoMudou() {
+  void checklist.value?.carregar()
+  void carregar()
+}
+
 const podeAdministrativo = computed(
   () =>
     aberta.value &&
@@ -356,6 +372,30 @@ function encerrou(encerrada: Internacao) {
           </div>
         </dl>
       </section>
+
+      <!-- O cuidado (E5-02): o checklist da hora, as prescrições e a evolução do plantão. -->
+      <template v-if="store.temPermissao('internacao.executar')">
+        <ChecklistDaInternacao
+          ref="checklist"
+          :internacao-id="internacao.id"
+          :pode-registrar="executa"
+          @mudou="carregar"
+        />
+        <PrescricoesDaInternacao
+          ref="prescricoes"
+          :internacao-id="internacao.id"
+          :especie="internacao.paciente.especie"
+          :pode-prescrever="podePrescrever"
+          @mudou="cuidadoMudou"
+        />
+        <EvolucoesDaInternacao
+          :internacao-id="internacao.id"
+          :gravidade-atual="internacao.gravidade"
+          :pode-evoluir="aberta && executa"
+          @mudou="carregar"
+          @desatualizada="carregar"
+        />
+      </template>
 
       <!-- O caso: o que a equipe precisa saber, nunca no mapa. -->
       <section class="ui-folha ui-cartao" aria-labelledby="id-caso">
