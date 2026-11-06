@@ -3899,7 +3899,35 @@
         "continuar": "Continuar atendimento"
       },
       "ninguemAgora": "Ninguém na sala nem na recepção, e nada mais marcado para hoje.",
-      "fila": "Quem vem depois"
+      "fila": "Quem vem depois",
+      "escopo": {
+        "rotulo": "De quem é o dia",
+        "minha": "Minha agenda",
+        "clinica": "Clínica"
+      },
+      "erro": "Não deu para abrir o dia agora.",
+      "falhou": "Não carregou desta vez: {blocos}.",
+      "tentarDeNovo": "Tentar de novo",
+      "bloco": {
+        "atendimentos": "atendimentos de hoje",
+        "salaDeEspera": "sala de espera",
+        "faltasSemJustificativa": "faltas",
+        "retornosPendentes": "retornos",
+        "preConsultasNovas": "pré-consultas",
+        "rascunhos": "rascunhos",
+        "internados": "internados"
+      },
+      "pautaApi": {
+        "internado": "{pet} internado pede atenção",
+        "faltas": "{total} falta sem justificativa | {total} faltas sem justificativa",
+        "faltasMais": "Mais de {total} faltas sem justificativa",
+        "preConsultas": "{total} pré-consulta respondida para hoje | {total} pré-consultas respondidas para hoje",
+        "rascunhos": "{total} prontuário em rascunho | {total} prontuários em rascunho"
+      },
+      "onde": {
+        "faltas": "Faltas",
+        "agenda": "Agenda"
+      }
     },
     "resumo": {
       "titulo": "Resumo da clínica",
@@ -3971,6 +3999,23 @@
       "numero": {
         "horas": "Tempo de atendimento",
         "horasNota": "somando os atendimentos concluídos"
+      },
+      "api": {
+        "semDados": "Sem dados",
+        "horasAgendadas": "Horas agendadas",
+        "horasAgendadasNota": "a duração marcada dos atendimentos concluídos",
+        "acimaDaCapacidade": "Passou da capacidade: houve encaixes",
+        "atualizadoAs": "atualizado às {hora}",
+        "saudacaoLivre": "Nenhum atendimento concluído em {dias} dias | 1 atendimento concluído em {dias} dias | {n} atendimentos concluídos em {dias} dias",
+        "excedida": "Esta clínica tem atendimentos demais para ler este período de uma vez. Cabem {dias} dias.",
+        "verDias": "Ver os últimos {dias} dias",
+        "outros": "Outros",
+        "soASuaLinha": "Só a sua linha: a de cada colega fica com a gestão.",
+        "semCodigo": "Sem código do catálogo",
+        "semDiagnostico": "Nenhum atendimento sem diagnóstico | 1 atendimento marcado sem diagnóstico | {n} atendimentos marcados sem diagnóstico",
+        "avulsos": "Nenhum atendimento avulso | 1 deles sem horário na agenda (avulso) | {n} deles sem horário na agenda (avulsos)",
+        "diagnosticosSemPermissao": "Os diagnósticos aparecem para quem lê o prontuário.",
+        "semDesfecho": "Nenhum horário sem desfecho | 1 horário ficou sem desfecho (nem chegada, nem falta) e fica fora do comparecimento. | {n} horários ficaram sem desfecho (nem chegada, nem falta) e ficam fora do comparecimento."
       }
     },
     "bulario": {
@@ -5075,6 +5120,75 @@
       "acao": {
         "continuar": "Continuar prontuário",
         "verNaFila": "Ver na fila"
+      },
+      "api": {
+        "erro": "Não deu para abrir as atividades agora.",
+        "emDia": "Nada ficou para trás na clínica.",
+        "vazioDescricao": "Pedidos com prazo vencido, faltas sem contato, retornos, vacinas atrasadas e prontuários abertos aparecem aqui.",
+        "falhou": "Esta lista não carregou desta vez.",
+        "mostrando": "Mostrando {n} de {total}.",
+        "verTudo": "Ver tudo",
+        "semPaciente": "Pedido pelo site",
+        "dias": "{total} dia | {total} dias",
+        "prazoEra": "O prazo era {quando}",
+        "atrasado": "Atrasado {tempo}",
+        "faltouEm": "Faltou em {quando}",
+        "venceu": "venceu em {dia}",
+        "doseDe": "dose de {dia}",
+        "nuncaAberto": "o veterinário ainda não abriu",
+        "iniciadoHa": "Iniciado há {tempo}",
+        "abertoHa": "Aberto há {tempo}",
+        "finalizadoEm": "Finalizado em {quando}",
+        "acao": {
+          "responder": "Responder",
+          "contato": "Registrar contato",
+          "verPaciente": "Ver o paciente"
+        },
+        "motivo": {
+          "REMOVIDO_PELO_RESPONSAVEL": "O responsável removeu do app",
+          "OBITO": "Óbito registrado",
+          "SEM_VINCULO": "Paciente sem ligação com o app",
+          "NAO_LIBERADO": "Resumo ainda não liberado ao responsável"
+        },
+        "pilha": {
+          "pedidosAtrasados": {
+            "titulo": "Pedidos com o prazo vencido",
+            "porque": "Alguém pediu horário e a clínica passou do prazo de resposta prometido.",
+            "resumo": "{total} pedido com o prazo vencido | {total} pedidos com o prazo vencido"
+          },
+          "faltasSemJustificativa": {
+            "titulo": "Faltas sem contato",
+            "porque": "Faltas dos últimos 30 dias em que ninguém falou com o responsável.",
+            "resumo": "{total} falta sem contato | {total} faltas sem contato"
+          },
+          "retornosVencidos": {
+            "titulo": "Retornos sem horário",
+            "porque": "O veterinário indicou retorno, e o prazo chegou sem horário na agenda.",
+            "resumo": "{total} retorno sem horário | {total} retornos sem horário"
+          },
+          "vacinasAtrasadas": {
+            "titulo": "Vacinas atrasadas",
+            "porque": "Doses que já passaram da data. O telefone de cada um está na lista de chamada.",
+            "resumo": "{total} vacina atrasada | {total} vacinas atrasadas"
+          },
+          "iniciadosNuncaAbertos": {
+            "titulo": "Atendimentos iniciados e não abertos",
+            "porque": "A recepção iniciou o atendimento e o veterinário ainda não abriu o prontuário.",
+            "resumo": "{total} atendimento iniciado e não aberto | {total} atendimentos iniciados e não abertos"
+          },
+          "rascunhosSemFecho": {
+            "titulo": "Prontuários em rascunho",
+            "porque": "Consulta começada e não finalizada. Enquanto não fecha, o resumo não vai ao responsável.",
+            "resumo": "{total} prontuário em rascunho | {total} prontuários em rascunho"
+          },
+          "resumosNaoPublicados": {
+            "titulo": "Resumos que não chegaram ao app",
+            "porque": "Atendimentos finalizados nos últimos 30 dias cujo resumo o responsável não recebeu.",
+            "resumo": "{total} resumo que não chegou ao app | {total} resumos que não chegaram ao app"
+          }
+        },
+        "haDias": "Há {total} dia | Há {total} dias",
+        "hoje": "Hoje"
       }
     },
     "atalhos": {

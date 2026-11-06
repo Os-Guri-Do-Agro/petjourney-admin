@@ -67,12 +67,13 @@ import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
-const { espacos, clinicaNaDemonstracao, hotelNaDemonstracao } = useEspacos()
+const { espacos, clinicaNoInicio, clinicaPelaApi, hotelNaDemonstracao } = useEspacos()
 const perfil = useUsuarioPerfilStore()
 const { resumo, modulos } = usePautaDaHome()
 
 const dia = useLinhaDoDia({
-  clinica: () => clinicaNaDemonstracao.value,
+  clinica: () => clinicaNoInicio.value,
+  clinicaPelaApi: () => clinicaPelaApi.value,
   hotel: () => hotelNaDemonstracao.value,
 })
 
@@ -87,7 +88,7 @@ let clockId: ReturnType<typeof setInterval> | undefined
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
 /** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
-const temModulos = computed(() => clinicaNaDemonstracao.value || hotelNaDemonstracao.value)
+const temModulos = computed(() => clinicaNoInicio.value || hotelNaDemonstracao.value)
 
 const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'portal') ?? null)
 
@@ -98,8 +99,8 @@ const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'port
 const blocos = computed(() =>
   espacos.value.filter(
     (espaco) =>
-      /* O "Hoje" de Clínica e Hotel ainda conta sobre os dados locais: só na demonstração. */
-      (espaco.id === 'clinica' && clinicaNaDemonstracao.value) ||
+      /* A Clínica pela API (meu-dia) ou na demonstração; o Hotel, por enquanto, só na demonstração. */
+      (espaco.id === 'clinica' && clinicaNoInicio.value) ||
       (espaco.id === 'hotel' && hotelNaDemonstracao.value),
   ),
 )
@@ -264,7 +265,8 @@ onUnmounted(() => {
         <HomeAgenda
           v-if="temModulos"
           class="calma__agenda"
-          :clinica="clinicaNaDemonstracao"
+          :clinica="clinicaNoInicio"
+          :clinica-pela-api="clinicaPelaApi"
           :hotel="hotelNaDemonstracao"
         />
         <HomeEspacoPortal v-if="temModulos && portal" :espaco="portal" />

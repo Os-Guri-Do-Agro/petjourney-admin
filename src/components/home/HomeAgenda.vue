@@ -34,7 +34,12 @@ import {
 } from './linha-do-dia'
 import { carregarAgendaDoDia, carregarChegadasDoDia, useDiaDaCasa } from './useLinhaDoDia'
 
-const props = defineProps<{ clinica: boolean; hotel: boolean }>()
+const props = defineProps<{
+  clinica: boolean
+  hotel: boolean
+  /** A clínica de verdade: os outros dias vêm de `agenda/dia`, não dos dados locais. */
+  clinicaPelaApi?: boolean
+}>()
 
 const { t, locale } = useI18n()
 const dia = useDiaDaCasa()
@@ -136,7 +141,7 @@ async function carregarOutroDia(data: string) {
 
   try {
     const [agenda, chegadas] = await Promise.all([
-      props.clinica ? carregarAgendaDoDia(data) : null,
+      props.clinica ? carregarAgendaDoDia(data, props.clinicaPelaApi) : null,
       props.hotel ? carregarChegadasDoDia(data) : [],
     ])
 

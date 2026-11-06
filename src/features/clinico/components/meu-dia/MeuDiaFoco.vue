@@ -16,6 +16,7 @@
  */
 import { PhInfo, PhWarning, PhWarningOctagon } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
+import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -23,11 +24,10 @@ import { RouterLink } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
-import type { MeuDia } from '@/features/clinico/composables/useMeuDia'
-import type { Appointment } from '@/features/clinico/data/types'
+import type { HorarioDoDia, ModeloDoMeuDia } from '@/features/clinico/composables/modelo-do-meu-dia'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 
-const props = defineProps<{ dia: MeuDia }>()
+const props = defineProps<{ dia: ModeloDoMeuDia }>()
 
 const { t } = useI18n()
 const formato = useClinicFormat()
@@ -43,7 +43,7 @@ const pendenciasAbertas = ref(false)
  * Os pacientes do cartão do destaque, um por vez num carrossel: todos os que estão em sala. Sem
  * ninguém em sala, o da vez (o primeiro da recepção, ou o próximo horário), como antes.
  */
-const noCartao = computed<Appointment[]>(() => {
+const noCartao = computed<HorarioDoDia[]>(() => {
   if (props.dia.emConsulta.length) {
     return props.dia.emConsulta
   }
@@ -119,7 +119,7 @@ function terminarArraste(evento: PointerEvent) {
   }
 }
 
-type Entrada = { item: Appointment; estado: 'espera' | 'marcado' }
+type Entrada = { item: HorarioDoDia; estado: 'espera' | 'marcado' }
 
 /** A recepção e depois os horários, sem repetir quem já está no cartão. */
 const fila = computed<Entrada[]>(() => {
@@ -158,7 +158,7 @@ const numeros = computed(() =>
  * "Esperando há 4 min", e no primeiro minuto "Chegou agora": "há 0 min" lia como conta errada, e
  * a lista "O que pede ação" ao lado já dizia "esperando agora".
  */
-function tempoDesde(desde: string | null, chave: 'sala' | 'espera') {
+function tempoDesde(desde: string | null | undefined, chave: 'sala' | 'espera') {
   const minutos = props.dia.minutosDesde(desde) ?? 0
 
   return minutos < 1
@@ -167,7 +167,7 @@ function tempoDesde(desde: string | null, chave: 'sala' | 'espera') {
 }
 
 /** O estado do paciente do cartão, na pílula em véu ao lado do nome. */
-function estadoDe(item: Appointment) {
+function estadoDe(item: HorarioDoDia) {
   if (item.status === 'em-atendimento') {
     return tempoDesde(item.iniciadoEm ?? item.inicio, 'sala')
   }
@@ -187,7 +187,7 @@ const ALERTAS_NA_LINHA = 2
  * texto inteiro, com o detalhe, fica no título do selo e no leitor de tela: a terceira linha em
  * negrito com tudo escrito era o que mais pesava na lista (03/11).
  */
-function alertasDaLinha(item: Appointment) {
+function alertasDaLinha(item: HorarioDoDia) {
   const alertas = props.dia.alertasRelevantes(props.dia.pet(item.petId))
 
   return {
@@ -207,19 +207,19 @@ const alertasPorLinha = computed(
   () => new Map(filaVisivel.value.map(({ item }) => [item.id, alertasDaLinha(item)])),
 )
 
-function alertasDe(item: Appointment) {
+function alertasDe(item: HorarioDoDia) {
   return alertasPorLinha.value.get(item.id) ?? alertasDaLinha(item)
 }
 
 /** O rótulo do botão, sem o nome: o nome já é o título do cartão, e nome longo estourava o botão. */
-function acaoCurtaDe(item: Appointment) {
+function acaoCurtaDe(item: HorarioDoDia) {
   return item.status === 'em-atendimento'
     ? t('clinico.meuDia.carrossel.continuar')
     : t('clinico.hoje.chamar')
 }
 
 /** Quem está na sala se continua; quem espera ou vem, se atende. Para o leitor de tela, com o nome. */
-function acaoDe(item: Appointment) {
+function acaoDe(item: HorarioDoDia) {
   const pet = props.dia.pet(item.petId)?.nome ?? ''
 
   return item.status === 'em-atendimento'
@@ -228,6 +228,12 @@ function acaoDe(item: Appointment) {
 }
 
 const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhInfo }
+
+/** "Minha agenda" ou "Clínica" (só na clínica de verdade, e só para quem tem ficha). */
+const opcoesDeEscopo = computed(() => [
+  { valor: 'PROFISSIONAL', rotulo: t('clinico.meuDia.escopo.minha') },
+  { valor: 'CLINICA', rotulo: t('clinico.meuDia.escopo.clinica') },
+])
 </script>
 
 <template>
@@ -273,6 +279,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
               <h1 id="foco-resumo">{{ dia.fraseDoResumo }}</h1>
               <p>{{ dia.dataDeHoje }}</p>
             </div>
+
+            <SelectButton
+              v-if="dia.escopo"
+              class="resumo__escopo"
+              size="small"
+              :model-value="dia.escopo.atual"
+              :options="opcoesDeEscopo"
+              option-label="rotulo"
+              option-value="valor"
+              :allow-empty="false"
+              :aria-label="t('clinico.meuDia.escopo.rotulo')"
+              @update:model-value="(valor: 'PROFISSIONAL' | 'CLINICA') => dia.escopo?.trocar(valor)"
+            />
 
             <div v-if="dia.progressoDoDia.total" class="resumo__andamento">
               <span class="resumo__barra" aria-hidden="true">
@@ -336,7 +355,7 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
                   </span>
                   <div class="cartao__nome">
                     <h2 :id="`foco-agora-${atual.id}`">{{ dia.pet(atual.petId)?.nome }}</h2>
-                    <p v-if="dia.pet(atual.petId)">
+                    <p v-if="dia.pet(atual.petId) && dia.linhaDoPaciente(dia.pet(atual.petId)!)">
                       {{ dia.linhaDoPaciente(dia.pet(atual.petId)!) }}
                     </p>
                   </div>
@@ -563,6 +582,19 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
         </header>
 
         <div class="painel">
+          <!-- Bloco que passou do tempo de leitura: só ele falta, o resto da tela vale. -->
+          <p v-if="dia.falhas?.length" class="falhou" role="status">
+            <i class="ph ph-cloud-slash" aria-hidden="true" />
+            <span>{{ t('clinico.meuDia.falhou', { blocos: dia.falhas.join(', ') }) }}</span>
+            <Button
+              type="button"
+              size="small"
+              severity="secondary"
+              outlined
+              :label="t('clinico.meuDia.tentarDeNovo')"
+              @click="dia.carregar"
+            />
+          </p>
           <ul v-if="dia.linhasDaPauta.length" class="lista">
             <li v-for="linha in pendenciasVisiveis" :key="linha.id" class="linha">
               <RouterLink class="linha__toque" :to="linha.to">
@@ -707,6 +739,27 @@ const ICONE_DO_TOM = { risco: PhWarningOctagon, atencao: PhWarning, neutro: PhIn
   color: var(--app-texto-2);
   font-size: 14.5px;
   line-height: 1.4;
+}
+
+.resumo__escopo {
+  align-self: flex-start;
+  justify-self: start;
+  width: auto;
+}
+
+/* Um bloco do painel não veio (a leitura passou do tempo): a frase e o tentar de novo, no topo. */
+.falhou {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 0 12px;
+  color: var(--app-texto-2);
+  font-size: 14px;
+}
+
+.falhou i {
+  font-size: 18px;
 }
 
 /* O andamento do dia: a barra fina na sálvia e a frase ao lado, numa linha. */

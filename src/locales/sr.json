@@ -3899,7 +3899,35 @@
         "continuar": "Nastavi pregled"
       },
       "ninguemAgora": "Nikoga u sali ni na recepciji, i ništa više nije zakazano za danas.",
-      "fila": "Ko dolazi sledeći"
+      "fila": "Ko dolazi sledeći",
+      "escopo": {
+        "rotulo": "Čiji je dan",
+        "minha": "Moj raspored",
+        "clinica": "Klinika"
+      },
+      "erro": "Dan trenutno ne može da se otvori.",
+      "falhou": "Ovaj put nije učitano: {blocos}.",
+      "tentarDeNovo": "Pokušaj ponovo",
+      "bloco": {
+        "atendimentos": "današnji pregledi",
+        "salaDeEspera": "čekaonica",
+        "faltasSemJustificativa": "izostanci",
+        "retornosPendentes": "kontrole",
+        "preConsultasNovas": "upitnici pre pregleda",
+        "rascunhos": "nacrti",
+        "internados": "hospitalizovani"
+      },
+      "pautaApi": {
+        "internado": "{pet} je hospitalizovan i traži pažnju",
+        "faltas": "{total} izostanak bez opravdanja | {total} izostanka bez opravdanja | {total} izostanaka bez opravdanja",
+        "faltasMais": "Više od {total} izostanaka bez opravdanja",
+        "preConsultas": "{total} popunjen upitnik za danas | {total} popunjena upitnika za danas | {total} popunjenih upitnika za danas",
+        "rascunhos": "{total} karton u nacrtu | {total} kartona u nacrtu | {total} kartona u nacrtu"
+      },
+      "onde": {
+        "faltas": "Izostanci",
+        "agenda": "Raspored"
+      }
     },
     "resumo": {
       "titulo": "Rezime klinike",
@@ -3971,6 +3999,23 @@
       "numero": {
         "horas": "Vreme pregleda",
         "horasNota": "zbir završenih pregleda"
+      },
+      "api": {
+        "semDados": "Nema podataka",
+        "horasAgendadas": "Zakazani sati",
+        "horasAgendadasNota": "zakazano trajanje obavljenih pregleda",
+        "acimaDaCapacidade": "Preko kapaciteta: bilo je ubacivanja",
+        "atualizadoAs": "ažurirano u {hora}",
+        "saudacaoLivre": "Nema obavljenih pregleda za {dias} dana | {n} obavljen pregled za {dias} dana | {n} obavljena pregleda za {dias} dana | {n} obavljenih pregleda za {dias} dana",
+        "excedida": "Ova klinika ima previše pregleda da bi se ovaj period pročitao odjednom. Staje {dias} dana.",
+        "verDias": "Prikaži poslednjih {dias} dana",
+        "outros": "Ostalo",
+        "soASuaLinha": "Samo vaš red: red svakog kolege vidi uprava.",
+        "semCodigo": "Bez šifre iz kataloga",
+        "semDiagnostico": "Nema pregleda bez dijagnoze | {n} pregled označen bez dijagnoze | {n} pregleda označena bez dijagnoze | {n} pregleda označenih bez dijagnoze",
+        "avulsos": "Nema pregleda bez termina | {n} od njih bez termina u rasporedu | {n} od njih bez termina u rasporedu | {n} od njih bez termina u rasporedu",
+        "diagnosticosSemPermissao": "Dijagnoze vidi onaj ko čita karton.",
+        "semDesfecho": "Nema termina bez ishoda | {n} termin je ostao bez ishoda (ni dolazak ni izostanak) i ne ulazi u odziv. | {n} termina su ostala bez ishoda (ni dolazak ni izostanak) i ne ulaze u odziv. | {n} termina je ostalo bez ishoda (ni dolazak ni izostanak) i ne ulazi u odziv."
       }
     },
     "bulario": {
@@ -5075,6 +5120,75 @@
       "acao": {
         "continuar": "Nastavi karton",
         "verNaFila": "Pogledaj na listi"
+      },
+      "api": {
+        "erro": "Aktivnosti trenutno ne mogu da se otvore.",
+        "emDia": "Ništa nije zaostalo u klinici.",
+        "vazioDescricao": "Ovde se pojavljuju zakasneli zahtevi, izostanci bez kontakta, kontrole, zakasnele vakcine i otvoreni kartoni.",
+        "falhou": "Ova lista se ovaj put nije učitala.",
+        "mostrando": "Prikazano {n} od {total}.",
+        "verTudo": "Prikaži sve",
+        "semPaciente": "Zahtev sa sajta",
+        "dias": "{total} dan | {total} dana | {total} dana",
+        "prazoEra": "Rok je bio {quando}",
+        "atrasado": "Kasni {tempo}",
+        "faltouEm": "Izostao {quando}",
+        "venceu": "rok {dia}",
+        "doseDe": "doza od {dia}",
+        "nuncaAberto": "veterinar ga još nije otvorio",
+        "iniciadoHa": "Započeto pre {tempo}",
+        "abertoHa": "Otvoreno {tempo}",
+        "finalizadoEm": "Završeno {quando}",
+        "acao": {
+          "responder": "Odgovori",
+          "contato": "Zabeleži kontakt",
+          "verPaciente": "Prikaži pacijenta"
+        },
+        "motivo": {
+          "REMOVIDO_PELO_RESPONSAVEL": "Odgovorna osoba je uklonila iz aplikacije",
+          "OBITO": "Upisana smrt",
+          "SEM_VINCULO": "Pacijent nije povezan sa aplikacijom",
+          "NAO_LIBERADO": "Sažetak još nije pušten odgovornoj osobi"
+        },
+        "pilha": {
+          "pedidosAtrasados": {
+            "titulo": "Zahtevi sa isteklim rokom",
+            "porque": "Neko je tražio termin, a klinika je prekoračila obećani rok za odgovor.",
+            "resumo": "{total} zahtev sa isteklim rokom | {total} zahteva sa isteklim rokom | {total} zahteva sa isteklim rokom"
+          },
+          "faltasSemJustificativa": {
+            "titulo": "Izostanci bez kontakta",
+            "porque": "Izostanci u poslednjih 30 dana kada niko nije razgovarao sa odgovornom osobom.",
+            "resumo": "{total} izostanak bez kontakta | {total} izostanka bez kontakta | {total} izostanaka bez kontakta"
+          },
+          "retornosVencidos": {
+            "titulo": "Kontrole bez termina",
+            "porque": "Veterinar je preporučio kontrolu, a datum je stigao bez termina u rasporedu.",
+            "resumo": "{total} kontrola bez termina | {total} kontrole bez termina | {total} kontrola bez termina"
+          },
+          "vacinasAtrasadas": {
+            "titulo": "Zakasnele vakcine",
+            "porque": "Doze kojima je prošao datum. Telefon svakog je na listi za pozivanje.",
+            "resumo": "{total} zakasnela vakcina | {total} zakasnele vakcine | {total} zakasnelih vakcina"
+          },
+          "iniciadosNuncaAbertos": {
+            "titulo": "Započeti, a neotvoreni pregledi",
+            "porque": "Prijem je započeo pregled, a veterinar još nije otvorio karton.",
+            "resumo": "{total} započet, a neotvoren pregled | {total} započeta, a neotvorena pregleda | {total} započetih, a neotvorenih pregleda"
+          },
+          "rascunhosSemFecho": {
+            "titulo": "Kartoni u nacrtu",
+            "porque": "Pregled je započet i nije završen. Dok se ne zatvori, sažetak ne stiže odgovornoj osobi.",
+            "resumo": "{total} karton u nacrtu | {total} kartona u nacrtu | {total} kartona u nacrtu"
+          },
+          "resumosNaoPublicados": {
+            "titulo": "Sažeci koji nisu stigli u aplikaciju",
+            "porque": "Pregledi završeni u poslednjih 30 dana čiji sažetak odgovorna osoba nije dobila.",
+            "resumo": "{total} sažetak nije stigao u aplikaciju | {total} sažetka nisu stigla u aplikaciju | {total} sažetaka nije stiglo u aplikaciju"
+          }
+        },
+        "haDias": "Pre {total} dan | Pre {total} dana | Pre {total} dana",
+        "hoje": "Danas"
       }
     },
     "atalhos": {

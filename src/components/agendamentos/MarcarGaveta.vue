@@ -151,7 +151,7 @@ async function buscarPaciente(evento: { query: string }) {
 }
 
 function rotuloDoPaciente(item: PacienteEscolhido) {
-  return `${item.nome} · ${item.responsavel}`
+  return item.responsavel ? `${item.nome} · ${item.responsavel}` : item.nome
 }
 
 const tiposAtivos = computed(() => props.tipos.filter((tipo) => tipo.ativo))

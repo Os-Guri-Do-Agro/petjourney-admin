@@ -32,7 +32,7 @@ defineProps<{ espaco: Espaco }>()
 
 const { t } = useI18n()
 const dia = useDiaDaCasa()
-const { pendenciasClinicas } = useEspacos()
+const { pedidosDaClinica, pedidosDaClinicaCarregados } = useEspacos()
 
 const agenda = computed(() => dia.clinica.value)
 const pronta = computed(() => agenda.value.carga === 'pronta')
@@ -61,8 +61,8 @@ const aSeguir = computed(() => {
     .sort((uma, outra) => uma.inicio.localeCompare(outra.inicio))
 })
 
-const pedidos = computed(() => pendenciasClinicas.pedidos.value)
-const pedidosCarregados = computed(() => pendenciasClinicas.carregado.value)
+const pedidos = computed(() => pedidosDaClinica.value)
+const pedidosCarregados = computed(() => pedidosDaClinicaCarregados.value)
 
 function parte(chave: string) {
   return pedidos.value.partes?.find((item) => item.chave === chave)?.total ?? 0

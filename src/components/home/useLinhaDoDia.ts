@@ -95,7 +95,8 @@ function montarContas(
  * A agenda da clínica de um dia qualquer — a Agenda da home navega pela semana. Carrega sob demanda,
  * pelo mesmo motivo do resto do arquivo.
  */
-export async function carregarAgendaDoDia(data: string) {
+export async function carregarAgendaDoDia(data: string, pelaApi = false) {
+  if (pelaApi) return carregarAgendaDoDiaPelaApi(data)
   const [{ agendaRepository }, { useClinicoStore }] = await Promise.all([
     import('@/features/clinico/data/repositories'),
     import('@/features/clinico/stores/clinico'),
@@ -113,6 +114,46 @@ export async function carregarAgendaDoDia(data: string) {
     feriado: dia.feriado?.nome ?? null,
     contas: montarContas(dia.atendimentos, catalogo, data),
   }
+}
+
+/** O mesmo dia pela agenda da API (`agenda/dia`), fora da demonstração. Cancelado não entra. */
+async function carregarAgendaDoDiaPelaApi(data: string) {
+  const [{ obterDia }, { listarTipos }] = await Promise.all([
+    import('@/service/parceiro/agenda-service'),
+    import('@/service/parceiro/agenda-config-service'),
+  ])
+  const [dia, tipos] = await Promise.all([
+    obterDia(data, 'PROFISSIONAL'),
+    listarTipos().catch(() => []),
+  ])
+  const nomeDoTipo = new Map(tipos.map((tipo) => [tipo.id, tipo.nome]))
+  const nomeDoProfissional = new Map(dia.profissionais.map((p) => [p.id, p.nome]))
+
+  const contas: ContaDoDia[] = dia.agendamentos.flatMap((item) => {
+    const estado = ESTADO_DO_PAINEL[item.status]
+    if (!estado) return []
+    const partes = item.paciente.nome.trim().split(/s+/).filter(Boolean)
+    return [
+      {
+        id: item.id,
+        inicio: item.inicio,
+        fim: item.fim,
+        estado,
+        petNome: item.paciente.nome,
+        petIniciais: [partes[0]?.[0], partes.length > 1 ? partes[partes.length - 1]![0] : '']
+          .join('')
+          .toLocaleUpperCase(),
+        petEspecie: null,
+        petFotoUrl: '',
+        tipo: nomeDoTipo.get(item.tipoId) ?? '',
+        profissional: nomeDoProfissional.get(item.profissionalId) ?? '',
+        chegadaEm: item.chegadaEm,
+        rota: `/clinica/agenda?data=${data}&horario=${encodeURIComponent(item.id)}`,
+      },
+    ]
+  })
+
+  return { fechada: dia.clinicaFechada, feriado: dia.feriado?.nome ?? null, contas }
 }
 
 /** As chegadas do hotel de um dia qualquer, para a Agenda da home. */
@@ -165,7 +206,45 @@ export type FaixaDoHotel = {
 /** De quanto em quanto o fio do agora anda. Meio minuto: o rótulo mostra minutos. */
 const TIQUE_MS = 30_000
 
-export function useLinhaDoDia(opcoes: { clinica: () => boolean; hotel: () => boolean }) {
+/** A hora de agora na parede de um fuso, no mesmo formato das horas da API (com o offset). */
+export function agoraNaParede(
+  fuso: string,
+  offsetDe: (fuso: string, dia: string, hora: string) => string,
+) {
+  const partes = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: fuso,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
+    })
+      .formatToParts(new Date())
+      .map((parte) => [parte.type, parte.value]),
+  )
+  const dia = `${partes.year}-${partes.month}-${partes.day}`
+  const hora = `${partes.hour}:${partes.minute}`
+  return `${dia}T${hora}:${partes.second}${offsetDe(fuso, dia, hora)}`
+}
+
+const ESTADO_DO_PAINEL: Record<string, ContaDoDia['estado']> = {
+  AGENDADO: 'marcado',
+  CONFIRMADO: 'marcado',
+  AGUARDANDO: 'esperando',
+  EM_ATENDIMENTO: 'agora',
+  FINALIZADO: 'feito',
+  FALTA: 'falta',
+}
+
+export function useLinhaDoDia(opcoes: {
+  clinica: () => boolean
+  /** A Clínica de verdade: o dia vem da rota `meu-dia` (escopo da clínica), não dos dados locais. */
+  clinicaPelaApi?: () => boolean
+  hotel: () => boolean
+}) {
   const clinica = ref<FaixaDaClinica>({
     carga: 'carregando',
     fechada: false,
@@ -203,7 +282,70 @@ export function useLinhaDoDia(opcoes: { clinica: () => boolean; hotel: () => boo
     }
   }
 
+  /**
+   * O dia da clínica pela rota `meu-dia` (E3-08), no escopo da clínica inteira. Os nomes do serviço
+   * e de quem atende vêm das listas da agenda; cada conta leva ao horário na agenda.
+   */
+  async function carregarClinicaPelaApi() {
+    try {
+      const [{ lerMeuDia }, { listarTipos, offsetDoFuso }, { listarProfissionais }] =
+        await Promise.all([
+          import('@/service/parceiro/painel-service'),
+          import('@/service/parceiro/agenda-config-service'),
+          import('@/service/parceiro/profissionais-service'),
+        ])
+      const [lido, tipos, profissionais] = await Promise.all([
+        lerMeuDia({ escopo: 'CLINICA' }),
+        listarTipos().catch(() => []),
+        listarProfissionais().catch(() => []),
+      ])
+
+      relogio = () => agoraNaParede(lido.fuso, offsetDoFuso)
+
+      const nomeDoTipo = new Map(tipos.map((tipo) => [tipo.id, tipo.nome]))
+      const nomeDoProfissional = new Map(profissionais.map((p) => [p.id, p.nome]))
+      const sala = lido.blocos.salaDeEspera
+      const chegadas = new Map(
+        (sala && !sala.falhou ? sala.itens : []).map((item) => [item.id, item.quando ?? null]),
+      )
+      const atendimentos = lido.blocos.atendimentos
+      if (!atendimentos || atendimentos.falhou) throw new Error('atendimentos')
+
+      const contas: ContaDoDia[] = atendimentos.itens.flatMap((item) => {
+        const estado = ESTADO_DO_PAINEL[item.status ?? '']
+        if (!estado || !item.quando) return []
+        const nome = item.pacienteNome ?? ''
+        const partes = nome.trim().split(/s+/).filter(Boolean)
+        return [
+          {
+            id: item.id,
+            inicio: item.quando,
+            fim: item.fim ?? item.quando,
+            estado,
+            petNome: nome,
+            petIniciais: [partes[0]?.[0], partes.length > 1 ? partes[partes.length - 1]![0] : '']
+              .join('')
+              .toLocaleUpperCase(),
+            petEspecie: null,
+            petFotoUrl: '',
+            tipo: nomeDoTipo.get(item.tipoId ?? '') ?? '',
+            profissional: nomeDoProfissional.get(item.profissionalId ?? '') ?? '',
+            chegadaEm: chegadas.get(item.id) ?? null,
+            rota: `/clinica/agenda?horario=${encodeURIComponent(item.id)}`,
+          },
+        ]
+      })
+
+      clinica.value = { carga: 'pronta', fechada: false, feriado: null, contas }
+    } catch {
+      if (clinica.value.carga !== 'pronta') {
+        clinica.value = { ...clinica.value, carga: 'falhou' }
+      }
+    }
+  }
+
   async function carregarClinica() {
+    if (opcoes.clinicaPelaApi?.()) return carregarClinicaPelaApi()
     try {
       const [{ agendaRepository }, { clinicClock, useClinicoStore }] = await Promise.all([
         import('@/features/clinico/data/repositories'),

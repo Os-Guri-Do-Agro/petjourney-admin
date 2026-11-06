@@ -34,9 +34,10 @@ function pontoDo(total: number, tom: TomDePendencia): IndicadorDaAbertura['tom']
 export function useAberturaDoInicio(dia: DiaDaCasa) {
   const { t } = useI18n()
   const {
-    clinicaNaDemonstracao: hasClinicalProfile,
+    clinicaNoInicio: hasClinicalProfile,
     hotelNaDemonstracao: hasHotelProfile,
-    pendenciasClinicas,
+    pedidosDaClinica,
+    pedidosDaClinicaCarregados,
     pendenciasDoHotel,
   } = useEspacos()
 
@@ -48,7 +49,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
     const porVir = agenda.contas.filter(
       (conta) => conta.estado === 'marcado' && (agora === null || conta.inicio > agora),
     ).length
-    const pedidos = pendenciasClinicas.pedidos.value
+    const pedidos = pedidosDaClinica.value
 
     return [
       {
@@ -68,7 +69,7 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
       },
       {
         id: 'pedidos',
-        valor: pendenciasClinicas.carregado.value ? pedidos.total : null,
+        valor: pedidosDaClinicaCarregados.value ? pedidos.total : null,
         rotulo: t('inicio.espacos.clinica.pedidos', { total: pedidos.total }, pedidos.total),
         icone: 'ph ph-calendar-plus',
         to: '/clinica/pedidos',

@@ -3899,7 +3899,35 @@
         "continuar": "Continuar la consulta"
       },
       "ninguemAgora": "Nadie en la sala ni en la recepción, y nada más agendado para hoy.",
-      "fila": "Quién viene después"
+      "fila": "Quién viene después",
+      "escopo": {
+        "rotulo": "De quién es el día",
+        "minha": "Mi agenda",
+        "clinica": "Clínica"
+      },
+      "erro": "No se pudo abrir el día ahora.",
+      "falhou": "No se cargó esta vez: {blocos}.",
+      "tentarDeNovo": "Intentar de nuevo",
+      "bloco": {
+        "atendimentos": "atenciones de hoy",
+        "salaDeEspera": "sala de espera",
+        "faltasSemJustificativa": "ausencias",
+        "retornosPendentes": "controles",
+        "preConsultasNovas": "preconsultas",
+        "rascunhos": "borradores",
+        "internados": "internados"
+      },
+      "pautaApi": {
+        "internado": "{pet}, internado, requiere atención",
+        "faltas": "{total} ausencia sin justificar | {total} ausencias sin justificar",
+        "faltasMais": "Más de {total} ausencias sin justificar",
+        "preConsultas": "{total} preconsulta respondida para hoy | {total} preconsultas respondidas para hoy",
+        "rascunhos": "{total} historia clínica en borrador | {total} historias clínicas en borrador"
+      },
+      "onde": {
+        "faltas": "Ausencias",
+        "agenda": "Agenda"
+      }
     },
     "resumo": {
       "titulo": "Resumen de la clínica",
@@ -3971,6 +3999,23 @@
       "numero": {
         "horas": "Tiempo de atención",
         "horasNota": "sumando las consultas concluidas"
+      },
+      "api": {
+        "semDados": "Sin datos",
+        "horasAgendadas": "Horas agendadas",
+        "horasAgendadasNota": "la duración agendada de las atenciones concluidas",
+        "acimaDaCapacidade": "Superó la capacidad: hubo sobreturnos",
+        "atualizadoAs": "actualizado a las {hora}",
+        "saudacaoLivre": "Ninguna atención concluida en {dias} días | 1 atención concluida en {dias} días | {n} atenciones concluidas en {dias} días",
+        "excedida": "Esta clínica tiene demasiadas atenciones para leer este período de una vez. Caben {dias} días.",
+        "verDias": "Ver los últimos {dias} días",
+        "outros": "Otros",
+        "soASuaLinha": "Solo su fila: la de cada colega queda para la gestión.",
+        "semCodigo": "Sin código del catálogo",
+        "semDiagnostico": "Ninguna atención sin diagnóstico | 1 atención marcada sin diagnóstico | {n} atenciones marcadas sin diagnóstico",
+        "avulsos": "Ninguna atención suelta | 1 de ellas sin horario en la agenda (suelta) | {n} de ellas sin horario en la agenda (sueltas)",
+        "diagnosticosSemPermissao": "Los diagnósticos aparecen para quien lee la historia clínica.",
+        "semDesfecho": "Ningún horario sin desenlace | 1 horario quedó sin desenlace (ni llegada ni ausencia) y queda fuera de la asistencia. | {n} horarios quedaron sin desenlace (ni llegada ni ausencia) y quedan fuera de la asistencia."
       }
     },
     "bulario": {
@@ -5075,6 +5120,75 @@
       "acao": {
         "continuar": "Continuar historia",
         "verNaFila": "Ver en la lista"
+      },
+      "api": {
+        "erro": "No se pudieron abrir las actividades ahora.",
+        "emDia": "Nada quedó pendiente en la clínica.",
+        "vazioDescricao": "Aquí aparecen solicitudes vencidas, ausencias sin contacto, controles, vacunas atrasadas e historias abiertas.",
+        "falhou": "Esta lista no se cargó esta vez.",
+        "mostrando": "Mostrando {n} de {total}.",
+        "verTudo": "Ver todo",
+        "semPaciente": "Solicitud desde el sitio",
+        "dias": "{total} día | {total} días",
+        "prazoEra": "El plazo era {quando}",
+        "atrasado": "Con {tempo} de retraso",
+        "faltouEm": "Faltó el {quando}",
+        "venceu": "venció el {dia}",
+        "doseDe": "dosis del {dia}",
+        "nuncaAberto": "el veterinario aún no la abrió",
+        "iniciadoHa": "Iniciada hace {tempo}",
+        "abertoHa": "Abierta hace {tempo}",
+        "finalizadoEm": "Finalizada el {quando}",
+        "acao": {
+          "responder": "Responder",
+          "contato": "Registrar contacto",
+          "verPaciente": "Ver el paciente"
+        },
+        "motivo": {
+          "REMOVIDO_PELO_RESPONSAVEL": "El responsable lo quitó de la app",
+          "OBITO": "Fallecimiento registrado",
+          "SEM_VINCULO": "Paciente sin vínculo con la app",
+          "NAO_LIBERADO": "Resumen aún no liberado al responsable"
+        },
+        "pilha": {
+          "pedidosAtrasados": {
+            "titulo": "Solicitudes con el plazo vencido",
+            "porque": "Alguien pidió un horario y la clínica superó el plazo de respuesta prometido.",
+            "resumo": "{total} solicitud con el plazo vencido | {total} solicitudes con el plazo vencido"
+          },
+          "faltasSemJustificativa": {
+            "titulo": "Ausencias sin contacto",
+            "porque": "Ausencias de los últimos 30 días en las que nadie habló con el responsable.",
+            "resumo": "{total} ausencia sin contacto | {total} ausencias sin contacto"
+          },
+          "retornosVencidos": {
+            "titulo": "Controles sin horario",
+            "porque": "El veterinario indicó un control y la fecha llegó sin horario en la agenda.",
+            "resumo": "{total} control sin horario | {total} controles sin horario"
+          },
+          "vacinasAtrasadas": {
+            "titulo": "Vacunas atrasadas",
+            "porque": "Dosis que ya pasaron de la fecha. El teléfono de cada uno está en la lista de llamadas.",
+            "resumo": "{total} vacuna atrasada | {total} vacunas atrasadas"
+          },
+          "iniciadosNuncaAbertos": {
+            "titulo": "Atenciones iniciadas y no abiertas",
+            "porque": "La recepción inició la atención y el veterinario aún no abrió la historia clínica.",
+            "resumo": "{total} atención iniciada y no abierta | {total} atenciones iniciadas y no abiertas"
+          },
+          "rascunhosSemFecho": {
+            "titulo": "Historias clínicas en borrador",
+            "porque": "Consulta iniciada y no finalizada. Mientras no se cierre, el resumen no llega al responsable.",
+            "resumo": "{total} historia en borrador | {total} historias en borrador"
+          },
+          "resumosNaoPublicados": {
+            "titulo": "Resúmenes que no llegaron a la app",
+            "porque": "Atenciones finalizadas en los últimos 30 días cuyo resumen el responsable no recibió.",
+            "resumo": "{total} resumen que no llegó a la app | {total} resúmenes que no llegaron a la app"
+          }
+        },
+        "haDias": "Hace {total} día | Hace {total} días",
+        "hoje": "Hoy"
       }
     },
     "atalhos": {

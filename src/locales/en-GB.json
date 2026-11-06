@@ -3899,7 +3899,35 @@
         "continuar": "Continue appointment"
       },
       "ninguemAgora": "No one in the room or at reception, and nothing else booked for today.",
-      "fila": "Up next"
+      "fila": "Up next",
+      "escopo": {
+        "rotulo": "Whose day",
+        "minha": "My schedule",
+        "clinica": "Clinic"
+      },
+      "erro": "Could not open the day right now.",
+      "falhou": "Did not load this time: {blocos}.",
+      "tentarDeNovo": "Try again",
+      "bloco": {
+        "atendimentos": "today's appointments",
+        "salaDeEspera": "waiting room",
+        "faltasSemJustificativa": "no-shows",
+        "retornosPendentes": "follow-ups",
+        "preConsultasNovas": "pre-visit forms",
+        "rascunhos": "drafts",
+        "internados": "inpatients"
+      },
+      "pautaApi": {
+        "internado": "{pet}, an inpatient, needs attention",
+        "faltas": "{total} no-show without a reason | {total} no-shows without a reason",
+        "faltasMais": "Over {total} no-shows without a reason",
+        "preConsultas": "{total} pre-visit form answered for today | {total} pre-visit forms answered for today",
+        "rascunhos": "{total} medical record in draft | {total} medical records in draft"
+      },
+      "onde": {
+        "faltas": "No-shows",
+        "agenda": "Schedule"
+      }
     },
     "resumo": {
       "titulo": "Clinic summary",
@@ -3971,6 +3999,23 @@
       "numero": {
         "horas": "Time with patients",
         "horasNota": "across completed visits"
+      },
+      "api": {
+        "semDados": "No data",
+        "horasAgendadas": "Booked hours",
+        "horasAgendadasNota": "the booked length of completed visits",
+        "acimaDaCapacidade": "Above capacity: there were squeeze-ins",
+        "atualizadoAs": "updated at {hora}",
+        "saudacaoLivre": "No visits completed in {dias} days | 1 visit completed in {dias} days | {n} visits completed in {dias} days",
+        "excedida": "This clinic has too many visits to read this period at once. {dias} days fit.",
+        "verDias": "See the last {dias} days",
+        "outros": "Others",
+        "soASuaLinha": "Only your row: each colleague is for management to see.",
+        "semCodigo": "No catalogue code",
+        "semDiagnostico": "No visits without a diagnosis | 1 visit marked without a diagnosis | {n} visits marked without a diagnosis",
+        "avulsos": "No walk-in visits | 1 of them without a time on the schedule (walk-in) | {n} of them without a time on the schedule (walk-ins)",
+        "diagnosticosSemPermissao": "Diagnoses show for whoever reads medical records.",
+        "semDesfecho": "No appointments without an outcome | 1 appointment was left without an outcome (no arrival, no no-show) and stays out of attendance. | {n} appointments were left without an outcome (no arrival, no no-show) and stay out of attendance."
       }
     },
     "bulario": {
@@ -5075,6 +5120,75 @@
       "acao": {
         "continuar": "Continue record",
         "verNaFila": "View in waitlist"
+      },
+      "api": {
+        "erro": "Could not open the activities right now.",
+        "emDia": "Nothing has fallen behind at the clinic.",
+        "vazioDescricao": "Overdue requests, no-shows without contact, follow-ups, overdue vaccines and open records show up here.",
+        "falhou": "This list did not load this time.",
+        "mostrando": "Showing {n} of {total}.",
+        "verTudo": "See all",
+        "semPaciente": "Request from the website",
+        "dias": "{total} day | {total} days",
+        "prazoEra": "The deadline was {quando}",
+        "atrasado": "Late by {tempo}",
+        "faltouEm": "Missed on {quando}",
+        "venceu": "due on {dia}",
+        "doseDe": "dose of {dia}",
+        "nuncaAberto": "the vet has not opened it yet",
+        "iniciadoHa": "Started {tempo} ago",
+        "abertoHa": "Open for {tempo}",
+        "finalizadoEm": "Finished on {quando}",
+        "acao": {
+          "responder": "Reply",
+          "contato": "Log contact",
+          "verPaciente": "See the patient"
+        },
+        "motivo": {
+          "REMOVIDO_PELO_RESPONSAVEL": "The owner removed it from the app",
+          "OBITO": "Death recorded",
+          "SEM_VINCULO": "Patient not linked to the app",
+          "NAO_LIBERADO": "Summary not yet released to the owner"
+        },
+        "pilha": {
+          "pedidosAtrasados": {
+            "titulo": "Overdue requests",
+            "porque": "Someone asked for an appointment and the clinic missed the promised reply time.",
+            "resumo": "{total} overdue request | {total} overdue requests"
+          },
+          "faltasSemJustificativa": {
+            "titulo": "No-shows without contact",
+            "porque": "No-shows in the last 30 days where nobody talked to the owner.",
+            "resumo": "{total} no-show without contact | {total} no-shows without contact"
+          },
+          "retornosVencidos": {
+            "titulo": "Follow-ups without a time",
+            "porque": "The vet asked for a follow-up, and the date came without a time on the schedule.",
+            "resumo": "{total} follow-up without a time | {total} follow-ups without a time"
+          },
+          "vacinasAtrasadas": {
+            "titulo": "Overdue vaccines",
+            "porque": "Doses past their date. Each owner's phone is on the call list.",
+            "resumo": "{total} overdue vaccine | {total} overdue vaccines"
+          },
+          "iniciadosNuncaAbertos": {
+            "titulo": "Visits started and not opened",
+            "porque": "The front desk started the visit and the vet has not opened the record yet.",
+            "resumo": "{total} visit started and not opened | {total} visits started and not opened"
+          },
+          "rascunhosSemFecho": {
+            "titulo": "Records in draft",
+            "porque": "Visit started and not finished. Until it closes, the summary does not reach the owner.",
+            "resumo": "{total} record in draft | {total} records in draft"
+          },
+          "resumosNaoPublicados": {
+            "titulo": "Summaries that did not reach the app",
+            "porque": "Visits finished in the last 30 days whose summary the owner did not get.",
+            "resumo": "{total} summary that did not reach the app | {total} summaries that did not reach the app"
+          }
+        },
+        "haDias": "{total} day ago | {total} days ago",
+        "hoje": "Today"
       }
     },
     "atalhos": {

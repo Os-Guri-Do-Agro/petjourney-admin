@@ -527,6 +527,23 @@ function abrir(agendamento: Agendamento) {
   detalheAberto.value = true
 }
 
+/**
+ * Veio de outra tela (Meu dia, Atividades) com `?horario=<id>`: abre a gaveta dele quando o dia
+ * chegar, uma vez, e tira o parâmetro (voltar não reabre).
+ */
+watch(
+  () => [dia.value, route.query.horario] as const,
+  ([lido, pedido]) => {
+    if (!lido || typeof pedido !== 'string' || !pedido) return
+    const alvo = lido.agendamentos.find((item) => item.id === pedido)
+    if (alvo) abrir(alvo)
+    const query = { ...route.query }
+    delete query.horario
+    void router.replace({ query })
+  },
+  { immediate: true },
+)
+
 function mudouNaGaveta(mutacao: Mutacao, texto: string) {
   depoisDeMudar(mutacao, texto, true)
 }
@@ -577,6 +594,37 @@ function marcarRetorno(agendamento: Agendamento) {
     retorno: true,
   })
 }
+
+/**
+ * Veio das Atividades com `?retorno=<paciente>&nome=&profissional=`: abre a marcação de retorno
+ * com o paciente e quem atendeu, quando os tipos chegarem, e tira os parâmetros.
+ */
+watch(
+  () => [tipos.value.length, route.query.retorno] as const,
+  ([quantosTipos, pacienteId]) => {
+    if (!quantosTipos || typeof pacienteId !== 'string' || !pacienteId) return
+    const nome = typeof route.query.nome === 'string' ? route.query.nome : ''
+    const profissional =
+      typeof route.query.profissional === 'string' && route.query.profissional
+        ? route.query.profissional
+        : null
+    const retorno = tipos.value.find((tipo) => tipo.ativo && tipo.kind === 'RETORNO')
+    abrirMarcacao({
+      data: somarDias(hoje.value, 1),
+      hora: '09:00',
+      profissionalId: profissional,
+      paciente: { id: pacienteId, nome, responsavel: '' },
+      tipoId: retorno?.id ?? null,
+      retorno: true,
+    })
+    const query = { ...route.query }
+    delete query.retorno
+    delete query.nome
+    delete query.profissional
+    void router.replace({ query })
+  },
+  { immediate: true },
+)
 
 function marcado(mutacao: Mutacao) {
   depoisDeMudar(mutacao, t('agendamentos.feito.criar'), true)

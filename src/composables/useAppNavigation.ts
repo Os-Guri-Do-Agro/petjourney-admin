@@ -310,6 +310,14 @@ export function useAppNavigation() {
   const hotelNaDemonstracao = computed(() => demonstracao.value && hasHotelProfile.value)
 
   /**
+   * A Clínica no Início (a fita do dia, o bloco e os números da abertura): fora da demonstração,
+   * pela rota `meu-dia` (E3-08), quando a conta pode abrir o Meu dia; na demonstração, sobre os
+   * dados locais, como sempre.
+   */
+  const clinicaPelaApi = computed(() => !demonstracao.value && podeAbrir('/clinica/meu-dia'))
+  const clinicaNoInicio = computed(() => clinicaNaDemonstracao.value || clinicaPelaApi.value)
+
+  /**
    * Os contadores do servidor (`GET /parceiro/portal/pendencias`, E1-06), fora da demonstração. A
    * API já filtra pelo que a conta pode ver; o portal só omite o zero.
    */
@@ -319,6 +327,20 @@ export function useAppNavigation() {
       parceiroStore.loadState === 'ready' &&
       !parceiroStore.semAcessoParceiro &&
       !parceiroStore.cadastroSuspenso,
+  )
+
+  /**
+   * Os pedidos de horário esperando a recepção, para o Início: na demonstração, a conta local; fora
+   * dela, o contador `pedidos` do servidor (o mesmo selo da barra), com o tom de atenção.
+   */
+  const pedidosDaClinica = computed<ContagemDePendencia>(() => {
+    if (demonstracao.value) return pendencias.pedidos.value
+    const total =
+      pendenciasDoPortal.lista.value.find((item) => item.chave === 'pedidos')?.valor ?? 0
+    return { total, tom: 'atencao' }
+  })
+  const pedidosDaClinicaCarregados = computed(() =>
+    demonstracao.value ? pendencias.carregado.value : pendenciasDoPortal.carregado.value,
   )
 
   /**
@@ -611,6 +633,10 @@ export function useAppNavigation() {
     hasHotelProfile,
     modoDemonstracao: demonstracao,
     clinicaNaDemonstracao,
+    clinicaPelaApi,
+    clinicaNoInicio,
+    pedidosDaClinica,
+    pedidosDaClinicaCarregados,
     hotelNaDemonstracao,
     pendenciasClinicas: pendencias,
     pendenciasDoHotel,

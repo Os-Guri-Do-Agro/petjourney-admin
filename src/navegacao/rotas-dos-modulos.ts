@@ -31,7 +31,8 @@ export type RotaDeModulo = {
 
 export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   /* Clínica: a recepção e o dia (E3). */
-  { prefixo: '/clinica/meu-dia', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  /* O Meu dia pela rota `meu-dia` (E3-08, PJ-W2RB1D). */
+  { prefixo: '/clinica/meu-dia', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
   /* A agenda pela API (E3-02, PJ-4BS8TK); a demonstração segue com a de sempre. */
   { prefixo: '/clinica/agenda', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
   {
@@ -49,9 +50,10 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     prefixo: '/clinica/atividades',
     modulo: 'CLINICA',
     permissao: 'agenda.ler',
-    integrada: false,
+    integrada: true,
   },
-  { prefixo: '/clinica/resumo', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  /* Atividades e resumo pelas rotas de painel (E3-08, PJ-W2RB1D). */
+  { prefixo: '/clinica/resumo', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
 
   /* Clínica: a configuração da agenda (E3-01, PJ-GL3IVL), já pela API. */
   {

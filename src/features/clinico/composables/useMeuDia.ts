@@ -15,6 +15,7 @@ import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela
 import type { IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
+import type { PacienteDoDia } from '@/features/clinico/composables/modelo-do-meu-dia'
 import type { Appointment, Pet } from '@/features/clinico/data/types'
 import { retornosVencidos, type RetornoPendente } from '@/features/clinico/domain/follow-up'
 import { umPorGrupo } from '@/features/clinico/domain/load'
@@ -275,9 +276,13 @@ export function useMeuDia() {
   }
 
   /** "Cão · Shih-tzu · 6 anos": quem é o paciente, numa linha. */
-  function linhaDoPaciente(pet: Pet | null) {
+  function linhaDoPaciente(pet: PacienteDoDia | null) {
     return pet
-      ? [formato.especie(pet.especie), pet.raca, formato.idade(pet.nascimento)]
+      ? [
+          pet.especie ? formato.especie(pet.especie) : '',
+          pet.raca,
+          pet.nascimento !== undefined ? formato.idade(pet.nascimento) : '',
+        ]
           .filter(Boolean)
           .join(' · ')
       : ''

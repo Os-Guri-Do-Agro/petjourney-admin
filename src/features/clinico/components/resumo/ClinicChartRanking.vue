@@ -34,8 +34,13 @@ const props = withDefaults(
     vazio?: string
     /** A cor de cada linha, quando a entidade tem uma (o tipo de atendimento). */
     corDaFatia?: (fatia: Fatia) => string | undefined
+    /**
+     * `false` para pessoas: a lista vira `ul` (não é pódio) e segue a ordem recebida. O resumo
+     * por profissional não ranqueia ninguém (E3-08, guia 8.3).
+     */
+    ordenada?: boolean
   }>(),
-  { unidade: '', tom: 'acento', vazio: '', corDaFatia: undefined },
+  { unidade: '', tom: 'acento', vazio: '', corDaFatia: undefined, ordenada: true },
 )
 
 const formato = useClinicFormat()
@@ -50,7 +55,7 @@ function largura(fatia: Fatia) {
 <template>
   <p v-if="fatias.length === 0" class="ranking__vazio">{{ vazio }}</p>
 
-  <ol v-else class="ranking" :class="`ranking--${tom}`">
+  <component :is="ordenada ? 'ol' : 'ul'" v-else class="ranking" :class="`ranking--${tom}`">
     <li v-for="fatia in fatias" :key="fatia.id" class="ranking__linha">
       <span class="ranking__nome">{{ fatia.rotulo }}</span>
       <span class="ranking__trilho" aria-hidden="true">
@@ -64,7 +69,7 @@ function largura(fatia: Fatia) {
         ({{ formato.percentual(fatia.parte) }})
       </span>
     </li>
-  </ol>
+  </component>
 </template>
 
 <style scoped>
