@@ -82,17 +82,17 @@ const _ = ''
 /* prettier-ignore */
 const LINHAS_DA_CLINICA: LinhaDaClinica[] = [
   // 4 · Já cadastrada, achada pelo telefone sem máscara. Luna também já existe; o peso discorda.
-  ['MARINA ALVES', _, '11984221030', _, 'MARINA.ALVES@EXEMPLO.COM', 'Rua Harmonia, 120', 'Vila Madalena', 'São Paulo', 'LUNA', 'Cão', 'SRD', 'F', '12/03/2017', '12,8', 'Sim', 'amoxicilina', _, _, 'Ativo', _],
+  ['MARINA ALVES', _, '11984221030', _, 'MARINA.ALVES@PETJOURNEY.TEST', 'Rua Harmonia, 120', 'Vila Madalena', 'São Paulo', 'LUNA', 'Cão', 'SRD', 'F', '12/03/2017', '12,8', 'Sim', 'amoxicilina', _, _, 'Ativo', _],
   // 5 · Sem responsável: a célula mesclada de cima virou vazio no csv. Peso em gramas.
   [_, _, _, _, _, _, _, _, 'Frida', 'Calopsita', _, 'F', '2020-05-02', '95g', _, _, _, _, _, _],
   // 6 · Novo. Ano com dois dígitos, peso com vírgula e unidade colada.
-  ['Paulo Henrique Souza', '034.981.207-19', '(11) 99876-5544', _, 'paulo.souza@gmail.com', 'Av. Rebouças, 1500 ap 32', 'Pinheiros', 'São Paulo', 'Bob', 'cachorro', 'Labrador', 'Macho', '05/11/17', '32,4kg', 'N', 'Não', '982000123456789', 'Bravo com estranhos', 'Ativo', _],
+  ['Paulo Henrique Souza', '034.981.207-19', '(11) 99876-5544', _, 'paulo.souza@petjourney.test', 'Av. Rebouças, 1500 ap 32', 'Pinheiros', 'São Paulo', 'Bob', 'cachorro', 'Labrador', 'Macho', '05/11/17', '32,4kg', 'N', 'Não', '982000123456789', 'Bravo com estranhos', 'Ativo', _],
   // 7 · Data guardada como número serial do Excel. "Fêmea castrada" responde pelas duas colunas.
   ['Maria Souza', _, '(11) 3456-7788', _, _, 'Rua Augusta, 55', 'Consolação', 'São Paulo', 'Mimi', 'Gato', 'Siamês', 'Fêmea castrada', '43891', '4,2', _, 'nega', _, _, _, _],
   // 8 · Responsável sem animal: entra como contato.
-  ['ROBERTO DIAS', '275.104.863-35', '(11) 99111-2233', _, 'roberto.dias@hotmail.com', _, _, 'Osasco', _, _, _, _, _, _, _, _, _, 'Cliente antigo, animal faleceu em 2021', _, _],
+  ['ROBERTO DIAS', '275.104.863-35', '(11) 99111-2233', _, 'roberto.dias@petjourney.test', _, _, 'Osasco', _, _, _, _, _, _, _, _, _, 'Cliente antigo, animal faleceu em 2021', _, _],
   // 9 · Dois telefones na mesma célula.
-  ['Carla Menezes', '406.218.935-60', '11 98765-4321 / 3322-1100', _, 'carla.menezes@exemplo.com', 'Rua Girassol, 88', 'Vila Madalena', 'São Paulo', 'Pingo', 'Cão', 'Poodle', 'M', '22/07/2018', '6.3', 'x', _, _, _, 'Ativo', _],
+  ['Carla Menezes', '406.218.935-60', '11 98765-4321 / 3322-1100', _, 'carla.menezes@petjourney.test', 'Rua Girassol, 88', 'Vila Madalena', 'São Paulo', 'Pingo', 'Cão', 'Poodle', 'M', '22/07/2018', '6.3', 'x', _, _, _, 'Ativo', _],
   // 10 · Continuação da Carla. Espécie em branco, a raça resolve. Data sem dia.
   [_, _, _, _, _, _, _, _, 'Pipoca', _, 'Shih Tzu', 'F', 'mar/2021', '5,1', _, _, _, _, _, _],
   // 11 · Segunda continuação seguida.
@@ -106,15 +106,15 @@ const LINHAS_DA_CLINICA: LinhaDaClinica[] = [
   // 15 · Mesmo nome de quem está cadastrada, telefone diferente: só a pessoa sabe.
   ['Luciana Prado', _, '(11) 97000-1234', _, _, _, _, _, 'Mel', 'Cão', 'Golden Retriever', 'F', _, '30', 'S', _, _, _, _, _],
   // 16 · Mesmo nome da linha 7, telefone diferente. Data que não existe.
-  ['Maria Souza', _, '(11) 97654-0000', _, 'maria.souza@yahoo.com', _, _, _, 'Tobias', 'Cão', 'Beagle', 'M', '2019-02-30', '14', _, _, _, _, _, _],
+  ['Maria Souza', _, '(11) 97654-0000', _, 'maria.souza@petjourney.test', _, _, _, 'Tobias', 'Cão', 'Beagle', 'M', '2019-02-30', '14', _, _, _, _, _, _],
   // 17 · Celular antigo, nascimento no futuro, CPF só com dígitos.
-  ["Joana D'Arc Lima", '12846397546', '(11) 7654-3210', '(11) 3333-4444', 'joana.lima@exemplo.com', _, _, _, 'Belinha', 'Cão', 'Yorkshire', 'F', '15/08/2027', '2,7', 'Sim', _, _, _, 'Ativo', _],
+  ["Joana D'Arc Lima", '12846397546', '(11) 7654-3210', '(11) 3333-4444', 'joana.lima@petjourney.test', _, _, _, 'Belinha', 'Cão', 'Yorkshire', 'F', '15/08/2027', '2,7', 'Sim', _, _, _, 'Ativo', _],
   // 18 · O Paulo da linha 6 de novo (mesmo telefone), com o Bob de novo e outro peso.
   ['Paulo Henrique Souza', _, '11998765544', _, _, _, _, _, 'BOB', 'Cão', 'Labrador', 'M', '05/11/2017', '33', _, _, _, _, _, _],
   // 19 · CPF que perdeu o zero da frente no Excel. Sem telefone e sem e-mail. Idade em vez de data.
   ['Ana Beatriz Rocha', '1234567890', _, _, _, _, _, _, 'Luna', 'felino', 'Persa', 'F', '3 anos', _, _, _, _, _, _, _],
   // 20 · Falecido: não entra como paciente.
-  ['Fábio Nunes', _, '8888-1234', _, 'fabio@exemplo.com', _, _, _, 'Rex', 'Cão', 'Pastor Alemão', 'M', '01.02.2015', '38,5', 'Sim', _, _, _, 'Falecido', _],
+  ['Fábio Nunes', _, '8888-1234', _, 'fabio@petjourney.test', _, _, _, 'Rex', 'Cão', 'Pastor Alemão', 'M', '01.02.2015', '38,5', 'Sim', _, _, _, 'Falecido', _],
   // 21 · O mesmo Fábio, com outro animal. Telefone sem DDD e sem o nono dígito. Só o ano.
   ['Fábio Nunes', _, '8888-1234', _, _, _, _, _, 'Luna', 'Cachorro', 'SRD', 'F', '2022', '9', 'Não', _, _, _, 'Ativo', _],
   // 22 · Registro pela metade: tem bicho, não tem nome.
@@ -126,7 +126,7 @@ const LINHAS_DA_CLINICA: LinhaDaClinica[] = [
   // 25 · Coelho vira roedor — o mais perto que o cadastro tem, e a tela diz que é palpite.
   ['Juliana Prates', _, '(21) 99888-7766', _, _, _, _, _, 'Zeca', 'Coelho', _, 'M', _, '1,8', _, _, _, _, _, _],
   // 26 · Peixe: o cadastro não tem essa espécie.
-  ['Leonardo Quintana', _, '+55 11 97777-6666', _, 'LEO.Q@GMAIL.COM', _, _, _, 'Nemo', 'Peixe', 'Betta', 'M', _, _, _, _, _, _, _, _],
+  ['Leonardo Quintana', _, '+55 11 97777-6666', _, 'LEO.Q@PETJOURNEY.TEST', _, _, _, 'Nemo', 'Peixe', 'Betta', 'M', _, _, _, _, _, _, _, _],
   // 27 · Espécie "?", mas Pinscher só pode ser cão. Telefone com 0xx.
   ['Márcia Oliveira', _, '0xx11 5555-1234', _, _, _, _, _, 'Amendoim', '?', 'Pinscher', 'M', '12/12/2012', '3,1', _, _, _, _, _, _],
   // 28 · Telefone que não é telefone, e nenhum outro contato.
@@ -142,7 +142,7 @@ const LINHAS_DA_CLINICA: LinhaDaClinica[] = [
   // 33
   ['Sandra Vieira', _, '(11) 97878-7878', _, _, _, _, _, 'Mel', 'Gato', 'SRD', 'F', _, _, _, _, _, _, _, _],
   // 34 · Telefone só na coluna do celular.
-  ['Tatiane Freitas', _, _, '(11) 96767-6767', 'tati@exemplo.com', _, _, _, 'Paçoca', 'Cão', 'Dachshund', 'F', '2021-07-14', '7,4', _, _, _, _, _, _],
+  ['Tatiane Freitas', _, _, '(11) 96767-6767', 'tati@petjourney.test', _, _, _, 'Paçoca', 'Cão', 'Dachshund', 'F', '2021-07-14', '7,4', _, _, _, _, _, _],
   // 35 · Égua de 430 kg: peso alto, mas de equino.
   ['Ulisses Barros', _, '(11) 95151-5151', _, _, _, _, 'Cotia', 'Faísca', 'Égua', 'Mangalarga', 'F', '2014', '430', _, _, _, _, _, _],
   // 36 · Linha em branco.
@@ -337,7 +337,7 @@ function gerarClientes(semente: number, quantos: number): ClienteGerado[] {
         sorteio() < 0.3
           ? `(11) ${intBetween(sorteio, 2000, 5999)}-${intBetween(sorteio, 1000, 9999)}`
           : '',
-      email: sorteio() < 0.75 ? `${email}@exemplo.com` : '',
+      email: sorteio() < 0.75 ? `${email}@petjourney.test` : '',
       animais,
     })
   }
@@ -361,7 +361,7 @@ function exportDoSimplesVet(): string[][] {
     cpf: '507.913.622-72',
     celular: '(11) 99504-3312',
     fixo: '',
-    email: 'daniel.okamoto@exemplo.com',
+    email: 'daniel.okamoto@petjourney.test',
     animais: [
       {
         nome: 'Sushi',

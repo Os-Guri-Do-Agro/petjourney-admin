@@ -9486,7 +9486,10 @@
       "vazioDica": "Register the first one at the front desk, with the guardian present.",
       "vazioBusca": "No patients match this search",
       "vazioInativos": "No inactive patients",
-      "erro": "Could not load the patients."
+      "erro": "Could not load the patients.",
+      "importar": "Import spreadsheet",
+      "importacaoParada": "An import is paused or stopped halfway. | {n} imports are paused or stopped halfway.",
+      "verImportacao": "See the import"
     },
     "campos": {
       "nome": "Pet's name",
@@ -10295,5 +10298,210 @@
       "semPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply as soon as you can. If not, you stay on the list, in the same place."
     },
     "trocado": "{paciente}'s appointment moved from {de} to {para}."
+  },
+  "importacao": {
+    "erroAoCarregar": "The import could not be loaded.",
+    "linhasDoArquivo": "{n} row | {n} rows",
+    "eMais": "and {n} more",
+    "descartar": "Discard",
+    "descartada": "Import discarded. Nothing was saved.",
+    "descartarTitulo": "Discard the import",
+    "descartarTexto": "Discard this import? Nothing was saved, and the answers to the questions are lost. The file stays open so you can send it again.",
+    "especieOutra": "Which species?",
+    "especieOutraExemplo": "E.g.: Horse",
+    "exemplos": {
+      "titulo": "Sample spreadsheets",
+      "texto": "Development environment only. The import writes to the real clinic: undo it when the test is over."
+    },
+    "interrompido": {
+      "titulo": "The spreadsheet upload did not finish",
+      "texto": "The page was closed in the middle of the upload, and the file was not kept here. Discard it and send the file again."
+    },
+    "envio": {
+      "titulo": "Ready to send",
+      "texto": "The rows go to the server, which looks for existing clients and repeated records. Nothing is saved yet.",
+      "enviar": "Send the spreadsheet",
+      "andando": "Sending: {feitas} of {total} rows",
+      "erro": "The upload stopped. Try again: it picks up where it stopped.",
+      "grandeDemais": "The spreadsheet has {n} rows, and each import takes up to {max}. Split the file and import one part at a time.",
+      "rever": "Review the questions",
+      "ver": "Continue"
+    },
+    "duvida": {
+      "naPlanilha": "In the spreadsheet · row {n}",
+      "telefone": "This row's phone number belongs to a client with another name. It may be the same person, or someone from the same household.",
+      "cpf": "This row's CPF is already on {nome}'s record. Is it the same person? If not, the new person comes in without the CPF.",
+      "mesmoCpf": "Both rows have the same CPF with different names. If they are not the same person, the second one comes in without the CPF.",
+      "ehCandidato": "It is {nome}",
+      "deixarDeFora": "Leave this row out",
+      "linhasEMais": "Rows {lista} and {n} more | Rows {lista} and {n} more",
+      "segura": "If you are not sure, choose “{resposta}”: it is the answer that merges no one by mistake."
+    },
+    "resumo": {
+      "paraCompletar": "{n} row comes in missing something | {n} rows come in missing something",
+      "emBranco": "{n} blank row doesn't count | {n} blank rows don't count",
+      "rever": "Review the answers"
+    },
+    "andamento": {
+      "desfazendo": "Undoing the import…",
+      "parou": "The import stopped",
+      "parouTexto": "Try to continue: it resumes from the same batch, and no row is saved twice.",
+      "desfazerParou": "The undo stopped",
+      "desfazerParouTexto": "Try to continue: it resumes where it stopped.",
+      "desfazerContagem": "So far: {pacientes} patients and {clientes} clients removed, {ficaram} kept.",
+      "codigo": "Error code: {codigo}"
+    },
+    "fim": {
+      "titulo": {
+        "CONCLUIDA": "Import complete",
+        "DESFEITA": "Import undone",
+        "CANCELADA": "Import cancelled"
+      },
+      "desfeitaTexto": "The records the import created and no one used were removed. What was kept is in the list, with the reason.",
+      "canceladaTexto": "It stayed paused for 30 days and was cancelled. What had already been saved was kept, and it can still be undone.",
+      "criados": "new record | new records",
+      "juntados": "merged into an existing client | merged into existing clients",
+      "fora": "row did not come in | rows did not come in",
+      "pacientesRemovidos": "patient removed | patients removed",
+      "clientesRemovidos": "client removed | clients removed",
+      "preenchimentos": "record restored | records restored",
+      "ficaram": "record kept | records kept",
+      "propostasCanceladas": "{n} pending link proposal was cancelled: its link no longer works. | {n} pending link proposals were cancelled: their links no longer work.",
+      "desfazer": "Undo",
+      "desfazerDeNovo": "Undo again",
+      "desfazerTitulo": "Undo the import",
+      "desfazerTexto": "Undo this import? The records it created that no one has used yet are removed. Anything that already has an appointment, a vaccine, a link to the app or was edited is kept, and the list shows why.",
+      "desfazerPropostas": "Link proposals that have not been answered yet are cancelled: the link sent by email stops working."
+    },
+    "propostas": {
+      "botao": "Propose linking to the app",
+      "enviadas": "{n} link proposal sent by email | {n} link proposals sent by email",
+      "jaPropostos": "{n} client already had a proposal from this clinic and does not get another | {n} clients already had a proposal from this clinic and do not get another",
+      "semEmail": "{n} client without an email on record | {n} clients without an email on record",
+      "emailRepetido": "{n} client with a repeated email: each email gets it only once | {n} clients with a repeated email: each email gets it only once",
+      "semPaciente": "{n} client without an active patient | {n} clients without an active patient",
+      "paraDepois": "Today's limit is used up. Tomorrow you can send it to the other one. | Today's limit is used up. Tomorrow you can send it to the other {n}.",
+      "pelaFicha": "{n} client was left out because the animal was already a patient or the email came from the spreadsheet. Check the record before inviting. | {n} clients were left out because the animal was already a patient or the email came from the spreadsheet. Check the record before inviting.",
+      "semNome": "Client with no name in the report",
+      "motivo": {
+        "EMAIL_PREENCHIDO_NA_IMPORTACAO": "the email came from the spreadsheet",
+        "PACIENTE_JA_EXISTIA": "the animal was already a patient"
+      }
+    },
+    "historico": {
+      "titulo": "Previous imports",
+      "texto": "Those from the last year, newest first.",
+      "abrir": "Open",
+      "entraram": "{n} came in",
+      "descartada": "Discarded",
+      "semNome": "File with no name"
+    },
+    "jaImportado": {
+      "titulo": "This file was already imported",
+      "texto": "This file was already imported on {data}. Do you want to import it again?",
+      "nao": "No, discard",
+      "sim": "Import again"
+    },
+    "relatorio": {
+      "texto": "What happened to each row of the file.",
+      "apagados": "The details of each row were deleted 30 days after the import. The outcome and the reason remain.",
+      "todas": "All rows",
+      "mais": "Show more",
+      "preencheu": "{campo} was blank on the record and came from the spreadsheet."
+    },
+    "destino": {
+      "ENTRA": "Came in",
+      "JUNTA_EXISTENTE": "Merged into a record",
+      "JUNTA_LINHA": "Added to another row",
+      "CONTATO": "Client only",
+      "FORA": "Did not come in",
+      "DUVIDA": "In question"
+    },
+    "desfecho": {
+      "DESFEITA": "Removed",
+      "NADA_A_DESFAZER": "Nothing to undo",
+      "FICOU_REGISTRO_POSTERIOR": "Kept: has an appointment or record",
+      "FICOU_EDITADO": "Kept: edited afterwards",
+      "FICOU_VINCULO": "Kept: linked to the app",
+      "FICOU_CLIENTE_EM_USO": "Kept: the client is in use"
+    },
+    "status": {
+      "RECEBENDO_LINHAS": "Receiving rows",
+      "COM_DUVIDAS": "With questions",
+      "PRONTA": "Ready",
+      "PROCESSANDO": "Importing",
+      "PAUSADA": "Paused",
+      "CONCLUIDA": "Complete",
+      "FALHOU": "Stopped",
+      "DESFAZENDO": "Undoing",
+      "DESFEITA": "Undone",
+      "CANCELADA": "Cancelled"
+    },
+    "campo": {
+      "complemento": "Address line 2",
+      "codigoCliente": "Client code in the previous system",
+      "codigoAnimal": "Animal code in the previous system"
+    },
+    "ajuste": {
+      "NOME_CORTADO": "Name “{de}” was longer than the record allows: it became {para}.",
+      "TEXTO_LONGO": "{campo} was longer than the record keeps: it was left blank.",
+      "TELEFONE_DE_ENCHIMENTO": "{de} looks like a filler phone number: left without a phone.",
+      "TELEFONES_A_MAIS": "The cell had more than 3 numbers: the others did not come in.",
+      "CPF_DE_OUTRO_CADASTRO": "CPF “{de}” belongs to someone else: the new record came in without it.",
+      "ALERTAS_NO_LIMITE": "The patient already has the maximum number of alerts: “{de}” did not come in as an alert."
+    },
+    "codigo": {
+      "DATA_ANO_CURTO": "Date with a two-digit year",
+      "DATA_DA_PLANILHA": "Date as an Excel number",
+      "DATA_AMERICANA": "Date with the month before the day",
+      "DATA_SEM_DIA": "Date without the day",
+      "NASCIMENTO_PELA_IDADE": "Birth date estimated from the age",
+      "PESO_EM_GRAMAS": "Weight in grams",
+      "TELEFONE_NONO_DIGITO": "Mobile number missing the 9",
+      "TELEFONE_SEM_DDD_CORRIGIDO": "Phone without area code: got the clinic's",
+      "TELEFONE_DIVIDIDO": "Two phone numbers in the same cell",
+      "CPF_ZEROS": "CPF missing the leading zeros",
+      "CEP_ZERO": "Postcode missing the leading zero",
+      "ESPECIE_PELA_RACA": "Species worked out from the breed",
+      "ESPECIE_ESCOLHIDA": "Species chosen by you",
+      "CELULA_MESCLADA": "Client from a merged cell",
+      "RESPONSAVEL_DA_LINHA_ANTERIOR": "Client from the row above",
+      "NOME_CORTADO": "Name too long: it was shortened",
+      "DATA_INVALIDA": "Date that does not exist: left blank",
+      "DATA_FUTURA": "Date in the future: left blank",
+      "IDADE_INVALIDA": "Age that could not be read: left blank",
+      "PESO_INVALIDO": "Impossible weight: left blank",
+      "TELEFONE_INVALIDO": "Invalid phone: did not come in",
+      "CPF_INVALIDO": "Invalid CPF: left blank",
+      "EMAIL_INVALIDO": "Incomplete email: left blank",
+      "CEP_INVALIDO": "Incomplete postcode: left blank",
+      "UF_INVALIDA": "State that does not exist: left blank",
+      "MICROCHIP_INVALIDO": "Incomplete microchip: left blank",
+      "MICROCHIP_CIENTIFICO": "Microchip in scientific notation: digits were lost",
+      "SEXO_NAO_RECONHECIDO": "Sex not recognised: left blank",
+      "CASTRADO_NAO_RECONHECIDO": "Neutering not recognised: left blank",
+      "TEXTO_LONGO": "Text too long: left blank",
+      "TELEFONE_DE_ENCHIMENTO": "Filler phone number: left without a phone",
+      "TELEFONES_A_MAIS": "More than 3 phone numbers in the cell",
+      "CPF_DE_OUTRO_CADASTRO": "Someone else's CPF: came in without it",
+      "ALERTAS_NO_LIMITE": "Alerts at the limit: the allergy did not come in",
+      "DEIXADA_DE_FORA": "Left out by you",
+      "ALVO_INDISPONIVEL": "The record to merge into was deleted at the holder's request",
+      "LINHA_EM_BRANCO": "Blank row",
+      "SEM_CONTATO": "No phone or email: complete the record",
+      "JUNTOU_POR_CPF": "Merged into a client by CPF",
+      "JUNTOU_POR_TELEFONE": "Merged into a client by phone",
+      "JUNTOU_POR_NOME": "Merged into a client by name",
+      "JUNTOU_AO_PACIENTE": "Merged into an existing patient",
+      "DIVERGE_RACA": "The spreadsheet's breed differs: the record's was kept",
+      "DIVERGE_SEXO": "The spreadsheet's sex differs: the record's was kept",
+      "DIVERGE_NASCIMENTO": "The spreadsheet's birth date differs: the record's was kept",
+      "DIVERGE_PESO": "The spreadsheet's weight differs: the record's was kept",
+      "DIVERGE_MICROCHIP": "The spreadsheet's microchip differs: the record's was kept",
+      "DIVERGE_PELAGEM": "The spreadsheet's coat differs: the record's was kept",
+      "DIVERGE_TELEFONE": "The spreadsheet's phone differs: the record's was kept",
+      "DIVERGE_EMAIL": "The spreadsheet's email differs: the record's was kept",
+      "DIVERGE_CPF": "The spreadsheet's CPF differs: the record's was kept"
+    }
   }
 }

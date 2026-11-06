@@ -9486,7 +9486,10 @@
       "vazioDica": "Upišite prvog na šalteru, uz vlasnika.",
       "vazioBusca": "Nijedan pacijent za ovu pretragu",
       "vazioInativos": "Nema neaktivnih pacijenata",
-      "erro": "Pacijenti nisu mogli da se učitaju."
+      "erro": "Pacijenti nisu mogli da se učitaju.",
+      "importar": "Uvezi tabelu",
+      "importacaoParada": "{n} uvoz je pauziran ili je stao na pola. | {n} uvoza su pauzirana ili su stala na pola. | {n} uvoza je pauzirano ili je stalo na pola.",
+      "verImportacao": "Pogledaj uvoz"
     },
     "campos": {
       "nome": "Ime ljubimca",
@@ -10295,5 +10298,210 @@
       "semPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite što pre. Ako ne možete, ostajete na listi, na istom mestu."
     },
     "trocado": "Termin za {paciente} je pomeren sa {de} na {para}."
+  },
+  "importacao": {
+    "erroAoCarregar": "Uvoz nije mogao da se učita.",
+    "linhasDoArquivo": "{n} red | {n} reda | {n} redova",
+    "eMais": "i još {n}",
+    "descartar": "Odbaci",
+    "descartada": "Uvoz je odbačen. Ništa nije sačuvano.",
+    "descartarTitulo": "Odbaci uvoz",
+    "descartarTexto": "Odbaciti ovaj uvoz? Ništa nije sačuvano, a odgovori na pitanja se gube. Datoteka ostaje otvorena da je pošaljete ponovo.",
+    "especieOutra": "Koja vrsta?",
+    "especieOutraExemplo": "Npr.: Konj",
+    "exemplos": {
+      "titulo": "Primeri tabela",
+      "texto": "Samo u razvojnom okruženju. Uvoz upisuje u pravu kliniku: poništite ga na kraju testa."
+    },
+    "interrompido": {
+      "titulo": "Slanje tabele nije završeno",
+      "texto": "Ekran je zatvoren usred slanja, a datoteka nije sačuvana ovde. Odbacite uvoz i pošaljite datoteku ponovo."
+    },
+    "envio": {
+      "titulo": "Spremno za slanje",
+      "texto": "Redovi idu na server, koji traži ko je već klijent i šta se ponavlja. Još ništa nije sačuvano.",
+      "enviar": "Pošalji tabelu",
+      "andando": "Slanje: {feitas} od {total} redova",
+      "erro": "Slanje je stalo. Pokušajte ponovo: nastavlja odakle je stalo.",
+      "grandeDemais": "Tabela ima {n} redova, a svaki uvoz prima do {max}. Podelite datoteku i uvozite deo po deo.",
+      "rever": "Pregledaj pitanja",
+      "ver": "Nastavi"
+    },
+    "duvida": {
+      "naPlanilha": "U tabeli · red {n}",
+      "telefone": "Telefon iz ovog reda je u evidenciji klijenta sa drugim imenom. Može biti ista osoba, ili neko iz istog domaćinstva.",
+      "cpf": "CPF iz ovog reda je već u evidenciji osobe {nome}. Da li je to ista osoba? Ako nije, nova osoba ulazi bez CPF-a.",
+      "mesmoCpf": "Oba reda imaju isti CPF sa različitim imenima. Ako nisu ista osoba, drugi ulazi bez CPF-a.",
+      "ehCandidato": "To je {nome}",
+      "deixarDeFora": "Izostavi ovaj red",
+      "linhasEMais": "Redovi {lista} i još {n} | Redovi {lista} i još {n} | Redovi {lista} i još {n}",
+      "segura": "Ako niste sigurni, izaberite „{resposta}”: to je odgovor koji nikoga ne spaja greškom."
+    },
+    "resumo": {
+      "paraCompletar": "{n} red ulazi sa nečim što nedostaje | {n} reda ulaze sa nečim što nedostaje | {n} redova ulazi sa nečim što nedostaje",
+      "emBranco": "{n} prazan red se ne računa | {n} prazna reda se ne računaju | {n} praznih redova se ne računa",
+      "rever": "Pregledaj odgovore"
+    },
+    "andamento": {
+      "desfazendo": "Poništavanje uvoza…",
+      "parou": "Uvoz je stao",
+      "parouTexto": "Pokušajte da nastavite: nastavlja od iste serije, i nijedan red se ne upisuje dvaput.",
+      "desfazerParou": "Poništavanje je stalo",
+      "desfazerParouTexto": "Pokušajte da nastavite: nastavlja odakle je stalo.",
+      "desfazerContagem": "Do sada: uklonjeno {pacientes} pacijenata i {clientes} vlasnika, ostalo {ficaram}.",
+      "codigo": "Kôd greške: {codigo}"
+    },
+    "fim": {
+      "titulo": {
+        "CONCLUIDA": "Uvoz je završen",
+        "DESFEITA": "Uvoz je poništen",
+        "CANCELADA": "Uvoz je otkazan"
+      },
+      "desfeitaTexto": "Uklonjeni su zapisi koje je uvoz napravio i koje niko nije koristio. Ono što je ostalo je na listi, sa razlogom.",
+      "canceladaTexto": "Bio je pauziran 30 dana i otkazan je. Ono što je već upisano je ostalo, i može se poništiti.",
+      "criados": "novi zapis | nova zapisa | novih zapisa",
+      "juntados": "spojen sa postojećim klijentom | spojena sa postojećim klijentima | spojenih sa postojećim klijentima",
+      "fora": "red nije ušao | reda nisu ušla | redova nije ušlo",
+      "pacientesRemovidos": "pacijent uklonjen | pacijenta uklonjena | pacijenata uklonjeno",
+      "clientesRemovidos": "vlasnik uklonjen | vlasnika uklonjena | vlasnika uklonjeno",
+      "preenchimentos": "zapis vraćen | zapisa vraćena | zapisa vraćeno",
+      "ficaram": "zapis ostao | zapisa ostala | zapisa ostalo",
+      "propostasCanceladas": "{n} predlog povezivanja na čekanju je otkazan: njegov link više ne važi. | {n} predloga povezivanja na čekanju su otkazana: njihovi linkovi više ne važe. | {n} predloga povezivanja na čekanju je otkazano: njihovi linkovi više ne važe.",
+      "desfazer": "Poništi",
+      "desfazerDeNovo": "Poništi ponovo",
+      "desfazerTitulo": "Poništi uvoz",
+      "desfazerTexto": "Poništiti ovaj uvoz? Uklanjaju se zapisi koje je napravio i koje još niko nije koristio. Ono što već ima termin, vakcinu, vezu sa aplikacijom ili je izmenjeno ostaje, a lista pokazuje zašto.",
+      "desfazerPropostas": "Predlozi povezivanja na koje još nije odgovoreno se otkazuju: link poslat imejlom prestaje da važi."
+    },
+    "propostas": {
+      "botao": "Predloži povezivanje sa aplikacijom",
+      "enviadas": "{n} predlog povezivanja poslat imejlom | {n} predloga povezivanja poslata imejlom | {n} predloga povezivanja poslato imejlom",
+      "jaPropostos": "{n} klijent je već imao predlog ove klinike i ne dobija ga ponovo | {n} klijenta su već imala predlog ove klinike i ne dobijaju ga ponovo | {n} klijenata je već imalo predlog ove klinike i ne dobija ga ponovo",
+      "semEmail": "{n} klijent bez imejla u evidenciji | {n} klijenta bez imejla u evidenciji | {n} klijenata bez imejla u evidenciji",
+      "emailRepetido": "{n} klijent sa ponovljenim imejlom: svaki imejl ga dobija samo jednom | {n} klijenta sa ponovljenim imejlom: svaki imejl ga dobija samo jednom | {n} klijenata sa ponovljenim imejlom: svaki imejl ga dobija samo jednom",
+      "semPaciente": "{n} klijent bez aktivnog pacijenta | {n} klijenta bez aktivnog pacijenta | {n} klijenata bez aktivnog pacijenta",
+      "paraDepois": "Današnja granica je potrošena. Sutra možete poslati ostalom {n}. | Današnja granica je potrošena. Sutra možete poslati ostalima {n}. | Današnja granica je potrošena. Sutra možete poslati ostalima {n}.",
+      "pelaFicha": "{n} klijent je izostavljen jer je životinja već bila pacijent ili je imejl došao iz tabele. Proverite karton pre pozivanja. | {n} klijenta su izostavljena jer je životinja već bila pacijent ili je imejl došao iz tabele. Proverite karton pre pozivanja. | {n} klijenata je izostavljeno jer je životinja već bila pacijent ili je imejl došao iz tabele. Proverite karton pre pozivanja.",
+      "semNome": "Klijent bez imena u izveštaju",
+      "motivo": {
+        "EMAIL_PREENCHIDO_NA_IMPORTACAO": "imejl je došao iz tabele",
+        "PACIENTE_JA_EXISTIA": "životinja je već bila pacijent"
+      }
+    },
+    "historico": {
+      "titulo": "Prethodni uvozi",
+      "texto": "Oni iz poslednje godine, najnoviji prvi.",
+      "abrir": "Otvori",
+      "entraram": "ušlo {n}",
+      "descartada": "Odbačen",
+      "semNome": "Datoteka bez imena"
+    },
+    "jaImportado": {
+      "titulo": "Ova datoteka je već uvezena",
+      "texto": "Ova datoteka je već uvezena {data}. Želite li da je uvezete ponovo?",
+      "nao": "Ne, odbaci",
+      "sim": "Uvezi ponovo"
+    },
+    "relatorio": {
+      "texto": "Šta se desilo sa svakim redom datoteke.",
+      "apagados": "Detalji svakog reda su obrisani 30 dana posle uvoza. Ostaju ishod i razlog.",
+      "todas": "Svi redovi",
+      "mais": "Prikaži još",
+      "preencheu": "{campo} je bilo prazno u evidenciji i došlo je iz tabele."
+    },
+    "destino": {
+      "ENTRA": "Ušao",
+      "JUNTA_EXISTENTE": "Spojen sa zapisom",
+      "JUNTA_LINHA": "Dodat drugom redu",
+      "CONTATO": "Samo vlasnik",
+      "FORA": "Nije ušao",
+      "DUVIDA": "Pod pitanjem"
+    },
+    "desfecho": {
+      "DESFEITA": "Uklonjen",
+      "NADA_A_DESFAZER": "Nema šta da se poništi",
+      "FICOU_REGISTRO_POSTERIOR": "Ostao: ima termin ili zapis",
+      "FICOU_EDITADO": "Ostao: izmenjen posle",
+      "FICOU_VINCULO": "Ostao: povezan sa aplikacijom",
+      "FICOU_CLIENTE_EM_USO": "Ostao: klijent je u upotrebi"
+    },
+    "status": {
+      "RECEBENDO_LINHAS": "Prima redove",
+      "COM_DUVIDAS": "Sa pitanjima",
+      "PRONTA": "Spreman",
+      "PROCESSANDO": "Uvozi se",
+      "PAUSADA": "Pauziran",
+      "CONCLUIDA": "Završen",
+      "FALHOU": "Stao",
+      "DESFAZENDO": "Poništava se",
+      "DESFEITA": "Poništen",
+      "CANCELADA": "Otkazan"
+    },
+    "campo": {
+      "complemento": "Dodatak adrese",
+      "codigoCliente": "Šifra klijenta u prethodnom sistemu",
+      "codigoAnimal": "Šifra životinje u prethodnom sistemu"
+    },
+    "ajuste": {
+      "NOME_CORTADO": "Ime „{de}” je bilo duže nego što evidencija dozvoljava: postalo je {para}.",
+      "TEXTO_LONGO": "{campo} je bilo duže nego što evidencija čuva: ostalo je prazno.",
+      "TELEFONE_DE_ENCHIMENTO": "{de} liči na izmišljen broj: ostalo bez telefona.",
+      "TELEFONES_A_MAIS": "Ćelija je imala više od 3 broja: ostali nisu ušli.",
+      "CPF_DE_OUTRO_CADASTRO": "CPF „{de}” pripada drugoj osobi: novi zapis je ušao bez njega.",
+      "ALERTAS_NO_LIMITE": "Pacijent već ima najviše upozorenja: „{de}” nije ušlo kao upozorenje."
+    },
+    "codigo": {
+      "DATA_ANO_CURTO": "Datum sa dvocifrenom godinom",
+      "DATA_DA_PLANILHA": "Datum kao Excel broj",
+      "DATA_AMERICANA": "Datum sa mesecom pre dana",
+      "DATA_SEM_DIA": "Datum bez dana",
+      "NASCIMENTO_PELA_IDADE": "Rođenje procenjeno po starosti",
+      "PESO_EM_GRAMAS": "Težina u gramima",
+      "TELEFONE_NONO_DIGITO": "Mobilni bez cifre 9",
+      "TELEFONE_SEM_DDD_CORRIGIDO": "Telefon bez pozivnog broja: dobio pozivni klinike",
+      "TELEFONE_DIVIDIDO": "Dva telefona u istoj ćeliji",
+      "CPF_ZEROS": "CPF bez početnih nula",
+      "CEP_ZERO": "Poštanski broj bez početne nule",
+      "ESPECIE_PELA_RACA": "Vrsta otkrivena po rasi",
+      "ESPECIE_ESCOLHIDA": "Vrsta koju ste izabrali",
+      "CELULA_MESCLADA": "Vlasnik iz spojene ćelije",
+      "RESPONSAVEL_DA_LINHA_ANTERIOR": "Vlasnik iz reda iznad",
+      "NOME_CORTADO": "Predugo ime: skraćeno",
+      "DATA_INVALIDA": "Datum koji ne postoji: ostao prazan",
+      "DATA_FUTURA": "Datum u budućnosti: ostao prazan",
+      "IDADE_INVALIDA": "Starost koja nije mogla da se pročita: ostala prazna",
+      "PESO_INVALIDO": "Nemoguća težina: ostala prazna",
+      "TELEFONE_INVALIDO": "Neispravan telefon: nije ušao",
+      "CPF_INVALIDO": "Neispravan CPF: ostao prazan",
+      "EMAIL_INVALIDO": "Nepotpun imejl: ostao prazan",
+      "CEP_INVALIDO": "Nepotpun poštanski broj: ostao prazan",
+      "UF_INVALIDA": "Država koja ne postoji: ostala prazna",
+      "MICROCHIP_INVALIDO": "Nepotpun mikročip: ostao prazan",
+      "MICROCHIP_CIENTIFICO": "Mikročip u naučnoj notaciji: izgubljene cifre",
+      "SEXO_NAO_RECONHECIDO": "Pol nije prepoznat: ostao prazan",
+      "CASTRADO_NAO_RECONHECIDO": "Kastracija nije prepoznata: ostala prazna",
+      "TEXTO_LONGO": "Predug tekst: ostao prazan",
+      "TELEFONE_DE_ENCHIMENTO": "Izmišljen broj: ostalo bez telefona",
+      "TELEFONES_A_MAIS": "Više od 3 telefona u ćeliji",
+      "CPF_DE_OUTRO_CADASTRO": "CPF druge osobe: ušao bez njega",
+      "ALERTAS_NO_LIMITE": "Upozorenja na granici: alergija nije ušla",
+      "DEIXADA_DE_FORA": "Izostavili ste ga",
+      "ALVO_INDISPONIVEL": "Zapis za spajanje je obrisan na zahtev vlasnika podataka",
+      "LINHA_EM_BRANCO": "Prazan red",
+      "SEM_CONTATO": "Bez telefona i imejla: dopunite zapis",
+      "JUNTOU_POR_CPF": "Spojen sa klijentom po CPF-u",
+      "JUNTOU_POR_TELEFONE": "Spojen sa klijentom po telefonu",
+      "JUNTOU_POR_NOME": "Spojen sa klijentom po imenu",
+      "JUNTOU_AO_PACIENTE": "Spojen sa postojećim pacijentom",
+      "DIVERGE_RACA": "Rasa iz tabele je drugačija: ostala je ona iz evidencije",
+      "DIVERGE_SEXO": "Pol iz tabele je drugačiji: ostao je onaj iz evidencije",
+      "DIVERGE_NASCIMENTO": "Rođenje iz tabele je drugačije: ostalo je ono iz evidencije",
+      "DIVERGE_PESO": "Težina iz tabele je drugačija: ostala je ona iz evidencije",
+      "DIVERGE_MICROCHIP": "Mikročip iz tabele je drugačiji: ostao je onaj iz evidencije",
+      "DIVERGE_PELAGEM": "Krzno iz tabele je drugačije: ostalo je ono iz evidencije",
+      "DIVERGE_TELEFONE": "Telefon iz tabele je drugačiji: ostao je onaj iz evidencije",
+      "DIVERGE_EMAIL": "Imejl iz tabele je drugačiji: ostao je onaj iz evidencije",
+      "DIVERGE_CPF": "CPF iz tabele je drugačiji: ostao je onaj iz evidencije"
+    }
   }
 }

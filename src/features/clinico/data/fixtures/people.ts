@@ -22,7 +22,7 @@ export const tutorsFixture: Tutor[] = [
     nome: 'Marina Alves',
     telefone: '(11) 98422-1030',
     telefoneSecundario: '(11) 3044-1180',
-    email: 'marina.alves@exemplo.com',
+    email: 'marina.alves@petjourney.test',
     documento: '318.442.910-57',
     preferenciaContato: 'whatsapp',
     endereco: {
@@ -140,7 +140,7 @@ export const tutorsFixture: Tutor[] = [
     nome: 'Daniel Okamoto',
     telefone: '(11) 99504-3312',
     telefoneSecundario: '',
-    email: 'daniel.okamoto@exemplo.com',
+    email: 'daniel.okamoto@petjourney.test',
     documento: '507.913.622-72',
     preferenciaContato: 'whatsapp',
     endereco: null,
@@ -288,7 +288,9 @@ export const petsFixture: Pet[] = [
     tutorId: 'tutor-joao',
     iniciais: 'AN',
     fotoUrl: '',
-    alertas: [{ id: 'alerta-acai-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Dermatite atópica' }],
+    alertas: [
+      { id: 'alerta-acai-1', kind: 'cronico', severidade: 'atencao', detalhe: 'Dermatite atópica' },
+    ],
   },
   {
     id: 'pet-tofu',
@@ -306,7 +308,12 @@ export const petsFixture: Pet[] = [
     iniciais: 'TO',
     fotoUrl: '',
     alertas: [
-      { id: 'alerta-tofu-1', kind: 'cronico', severidade: 'risco', detalhe: 'Doença renal crônica' },
+      {
+        id: 'alerta-tofu-1',
+        kind: 'cronico',
+        severidade: 'risco',
+        detalhe: 'Doença renal crônica',
+      },
     ],
   },
   {
@@ -341,7 +348,9 @@ export const petsFixture: Pet[] = [
     tutorId: 'tutor-luciana',
     iniciais: 'ME',
     fotoUrl: '/demo/pacientes/mel.jpg',
-    alertas: [{ id: 'alerta-mel-1', kind: 'gestante', severidade: 'atencao', detalhe: '5 semanas' }],
+    alertas: [
+      { id: 'alerta-mel-1', kind: 'gestante', severidade: 'atencao', detalhe: '5 semanas' },
+    ],
   },
   {
     id: 'pet-sushi',
@@ -393,7 +402,12 @@ export const petsFixture: Pet[] = [
     iniciais: 'TH',
     fotoUrl: '',
     alertas: [
-      { id: 'alerta-thor-1', kind: 'agressivo', severidade: 'risco', detalhe: 'Focinheira obrigatória' },
+      {
+        id: 'alerta-thor-1',
+        kind: 'agressivo',
+        severidade: 'risco',
+        detalhe: 'Focinheira obrigatória',
+      },
     ],
   },
   {

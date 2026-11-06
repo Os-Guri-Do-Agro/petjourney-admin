@@ -133,5 +133,10 @@ export function useRotulosDoCadastro() {
     return t(`cadastro.inativo.motivo.${paciente.inativoMotivo ?? 'OUTRO'}`)
   }
 
-  return { especie, idade, dia, data, peso, alerta, severidade, situacao, intl }
+  /** Contagem com o separador de milhar do idioma: 2.400, 2,400. */
+  function numero(valor: number) {
+    return new Intl.NumberFormat(intl()).format(valor)
+  }
+
+  return { especie, idade, dia, data, peso, alerta, severidade, situacao, intl, numero }
 }

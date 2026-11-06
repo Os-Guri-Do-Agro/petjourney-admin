@@ -140,7 +140,7 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     prefixo: '/clinica/paciente/importar',
     modulo: 'QUALQUER',
     permissao: 'importacao.executar',
-    integrada: false,
+    integrada: true,
   },
 
   /* Vitrine de design do módulo: não é tela de trabalho. */

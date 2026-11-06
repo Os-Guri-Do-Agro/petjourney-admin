@@ -9486,7 +9486,10 @@
       "vazioDica": "Registre el primero en el mostrador, con el responsable presente.",
       "vazioBusca": "Ningún paciente con esta búsqueda",
       "vazioInativos": "Ningún paciente inactivo",
-      "erro": "No se pudieron cargar los pacientes."
+      "erro": "No se pudieron cargar los pacientes.",
+      "importar": "Importar planilla",
+      "importacaoParada": "Una importación está pausada o se detuvo a la mitad. | {n} importaciones están pausadas o se detuvieron a la mitad.",
+      "verImportacao": "Ver la importación"
     },
     "campos": {
       "nome": "Nombre de la mascota",
@@ -10295,5 +10298,210 @@
       "semPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde lo antes posible. Si no puedes, sigues en la lista, en el mismo lugar."
     },
     "trocado": "Horario de {paciente} cambiado de {de} a {para}."
+  },
+  "importacao": {
+    "erroAoCarregar": "No se pudo cargar la importación.",
+    "linhasDoArquivo": "{n} fila | {n} filas",
+    "eMais": "y {n} más",
+    "descartar": "Descartar",
+    "descartada": "Importación descartada. No se guardó nada.",
+    "descartarTitulo": "Descartar la importación",
+    "descartarTexto": "¿Descartar esta importación? No se guardó nada, y se pierden las respuestas a las dudas. El archivo sigue abierto para enviarlo de nuevo.",
+    "especieOutra": "¿Qué especie?",
+    "especieOutraExemplo": "Ej.: Equino",
+    "exemplos": {
+      "titulo": "Planillas de ejemplo",
+      "texto": "Solo en el entorno de desarrollo. La importación graba en la clínica de verdad: deshágala al terminar la prueba."
+    },
+    "interrompido": {
+      "titulo": "El envío de la planilla no terminó",
+      "texto": "La pantalla se cerró en medio del envío, y el archivo no quedó guardado aquí. Descártela y envíe el archivo de nuevo."
+    },
+    "envio": {
+      "titulo": "Listo para enviar",
+      "texto": "Las filas van al servidor, que busca quién ya es cliente y qué se repite. Todavía no se guarda nada.",
+      "enviar": "Enviar la planilla",
+      "andando": "Enviando: {feitas} de {total} filas",
+      "erro": "El envío se detuvo. Inténtelo de nuevo: sigue desde donde se detuvo.",
+      "grandeDemais": "La planilla tiene {n} filas, y cada importación acepta hasta {max}. Divida el archivo e importe una parte por vez.",
+      "rever": "Revisar las preguntas",
+      "ver": "Continuar"
+    },
+    "duvida": {
+      "naPlanilha": "En la planilla · fila {n}",
+      "telefone": "El teléfono de esta fila está en el registro de un cliente con otro nombre. Puede ser la misma persona, o alguien de la misma casa.",
+      "cpf": "El CPF de esta fila ya está en el registro de {nome}. ¿Es la misma persona? Si no lo es, la persona nueva entra sin el CPF.",
+      "mesmoCpf": "Las dos filas tienen el mismo CPF con nombres distintos. Si no son la misma persona, la segunda entra sin el CPF.",
+      "ehCandidato": "Es {nome}",
+      "deixarDeFora": "Dejar esta fila fuera",
+      "linhasEMais": "Filas {lista} y {n} más | Filas {lista} y {n} más",
+      "segura": "Si no lo sabe, quédese con “{resposta}”: es la respuesta que no junta a nadie por error."
+    },
+    "resumo": {
+      "paraCompletar": "{n} fila entra con algo faltante | {n} filas entran con algo faltante",
+      "emBranco": "{n} fila en blanco no cuenta | {n} filas en blanco no cuentan",
+      "rever": "Revisar las respuestas"
+    },
+    "andamento": {
+      "desfazendo": "Deshaciendo la importación…",
+      "parou": "La importación se detuvo",
+      "parouTexto": "Intente continuar: sigue desde el mismo lote, y ninguna fila se graba dos veces.",
+      "desfazerParou": "El deshacer se detuvo",
+      "desfazerParouTexto": "Intente continuar: sigue desde donde se detuvo.",
+      "desfazerContagem": "Hasta ahora: salieron {pacientes} pacientes y {clientes} responsables, quedaron {ficaram}.",
+      "codigo": "Código del error: {codigo}"
+    },
+    "fim": {
+      "titulo": {
+        "CONCLUIDA": "Importación concluida",
+        "DESFEITA": "Importación deshecha",
+        "CANCELADA": "Importación cancelada"
+      },
+      "desfeitaTexto": "Salieron los registros que creó la importación y que nadie usó. Lo que quedó está en la lista, con el porqué.",
+      "canceladaTexto": "Quedó pausada 30 días y se canceló. Lo que ya se había grabado quedó, y se puede deshacer.",
+      "criados": "registro nuevo | registros nuevos",
+      "juntados": "unido a quien ya era cliente | unidos a quien ya era cliente",
+      "fora": "fila no entró | filas no entraron",
+      "pacientesRemovidos": "paciente salió | pacientes salieron",
+      "clientesRemovidos": "responsable salió | responsables salieron",
+      "preenchimentos": "registro volvió a como estaba | registros volvieron a como estaban",
+      "ficaram": "registro quedó | registros quedaron",
+      "propostasCanceladas": "{n} propuesta de vínculo pendiente fue cancelada: su enlace ya no vale. | {n} propuestas de vínculo pendientes fueron canceladas: sus enlaces ya no valen.",
+      "desfazer": "Deshacer",
+      "desfazerDeNovo": "Deshacer de nuevo",
+      "desfazerTitulo": "Deshacer la importación",
+      "desfazerTexto": "¿Deshacer esta importación? Salen los registros que creó y que nadie usó todavía. Lo que ya tiene turno, vacuna, vínculo con la app o fue editado queda, y la lista muestra por qué.",
+      "desfazerPropostas": "Las propuestas de vínculo que todavía no fueron respondidas se cancelan: el enlace enviado por correo deja de valer."
+    },
+    "propostas": {
+      "botao": "Proponer vínculo con la app",
+      "enviadas": "{n} propuesta de vínculo enviada por correo | {n} propuestas de vínculo enviadas por correo",
+      "jaPropostos": "{n} cliente ya tenía propuesta de esta clínica y no la recibe de nuevo | {n} clientes ya tenían propuesta de esta clínica y no la reciben de nuevo",
+      "semEmail": "{n} cliente sin correo en el registro | {n} clientes sin correo en el registro",
+      "emailRepetido": "{n} cliente con correo repetido: cada correo la recibe una sola vez | {n} clientes con correo repetido: cada correo la recibe una sola vez",
+      "semPaciente": "{n} cliente sin paciente activo | {n} clientes sin paciente activo",
+      "paraDepois": "El límite de hoy se acabó. Mañana puede enviarla al otro. | El límite de hoy se acabó. Mañana puede enviarla a los otros {n}.",
+      "pelaFicha": "{n} cliente quedó fuera porque el animal ya era paciente o el correo vino de la planilla. Revise la ficha antes de invitar. | {n} clientes quedaron fuera porque el animal ya era paciente o el correo vino de la planilla. Revise la ficha antes de invitar.",
+      "semNome": "Cliente sin nombre en el informe",
+      "motivo": {
+        "EMAIL_PREENCHIDO_NA_IMPORTACAO": "el correo vino de la planilla",
+        "PACIENTE_JA_EXISTIA": "el animal ya era paciente"
+      }
+    },
+    "historico": {
+      "titulo": "Importaciones anteriores",
+      "texto": "Las del último año, la más nueva primero.",
+      "abrir": "Abrir",
+      "entraram": "entraron {n}",
+      "descartada": "Descartada",
+      "semNome": "Archivo sin nombre"
+    },
+    "jaImportado": {
+      "titulo": "Este archivo ya fue importado",
+      "texto": "Este archivo ya fue importado el {data}. ¿Quiere importarlo de nuevo?",
+      "nao": "No, descartar",
+      "sim": "Importar de nuevo"
+    },
+    "relatorio": {
+      "texto": "Lo que pasó con cada fila del archivo.",
+      "apagados": "Los detalles de cada fila se borraron 30 días después de la importación. Quedan el destino y el motivo.",
+      "todas": "Todas las filas",
+      "mais": "Mostrar más",
+      "preencheu": "{campo} estaba en blanco en el registro y vino de la planilla."
+    },
+    "destino": {
+      "ENTRA": "Entró",
+      "JUNTA_EXISTENTE": "Se unió a un registro",
+      "JUNTA_LINHA": "Se sumó a otra fila",
+      "CONTATO": "Solo el responsable",
+      "FORA": "No entró",
+      "DUVIDA": "En duda"
+    },
+    "desfecho": {
+      "DESFEITA": "Salió",
+      "NADA_A_DESFAZER": "Nada que deshacer",
+      "FICOU_REGISTRO_POSTERIOR": "Quedó: tiene turno o registro",
+      "FICOU_EDITADO": "Quedó: fue editado después",
+      "FICOU_VINCULO": "Quedó: tiene vínculo con la app",
+      "FICOU_CLIENTE_EM_USO": "Quedó: el cliente está en uso"
+    },
+    "status": {
+      "RECEBENDO_LINHAS": "Recibiendo filas",
+      "COM_DUVIDAS": "Con dudas",
+      "PRONTA": "Lista",
+      "PROCESSANDO": "Importando",
+      "PAUSADA": "Pausada",
+      "CONCLUIDA": "Concluida",
+      "FALHOU": "Detenida",
+      "DESFAZENDO": "Deshaciendo",
+      "DESFEITA": "Deshecha",
+      "CANCELADA": "Cancelada"
+    },
+    "campo": {
+      "complemento": "Complemento",
+      "codigoCliente": "Código del cliente en el sistema anterior",
+      "codigoAnimal": "Código del animal en el sistema anterior"
+    },
+    "ajuste": {
+      "NOME_CORTADO": "El nombre “{de}” superaba el tamaño del registro: quedó {para}.",
+      "TEXTO_LONGO": "{campo} superaba el tamaño que guarda el registro: quedó en blanco.",
+      "TELEFONE_DE_ENCHIMENTO": "{de} parece un teléfono de relleno: quedó sin teléfono.",
+      "TELEFONES_A_MAIS": "La celda tenía más de 3 números: los otros no entraron.",
+      "CPF_DE_OUTRO_CADASTRO": "El CPF “{de}” es de otra persona: el registro nuevo entró sin él.",
+      "ALERTAS_NO_LIMITE": "El paciente ya tiene el máximo de alertas: “{de}” no entró como alerta."
+    },
+    "codigo": {
+      "DATA_ANO_CURTO": "Fecha con el año en dos dígitos",
+      "DATA_DA_PLANILHA": "Fecha como número de Excel",
+      "DATA_AMERICANA": "Fecha con el mes antes del día",
+      "DATA_SEM_DIA": "Fecha sin el día",
+      "NASCIMENTO_PELA_IDADE": "Nacimiento estimado por la edad",
+      "PESO_EM_GRAMAS": "Peso en gramos",
+      "TELEFONE_NONO_DIGITO": "Celular sin el 9",
+      "TELEFONE_SEM_DDD_CORRIGIDO": "Teléfono sin código de área: recibió el de la clínica",
+      "TELEFONE_DIVIDIDO": "Dos teléfonos en la misma celda",
+      "CPF_ZEROS": "CPF sin los ceros iniciales",
+      "CEP_ZERO": "Código postal sin el cero inicial",
+      "ESPECIE_PELA_RACA": "Especie deducida por la raza",
+      "ESPECIE_ESCOLHIDA": "Especie elegida por usted",
+      "CELULA_MESCLADA": "Responsable de una celda combinada",
+      "RESPONSAVEL_DA_LINHA_ANTERIOR": "Responsable de la fila de arriba",
+      "NOME_CORTADO": "Nombre demasiado largo: se acortó",
+      "DATA_INVALIDA": "Fecha que no existe: quedó en blanco",
+      "DATA_FUTURA": "Fecha en el futuro: quedó en blanco",
+      "IDADE_INVALIDA": "Edad que no se pudo leer: quedó en blanco",
+      "PESO_INVALIDO": "Peso imposible: quedó en blanco",
+      "TELEFONE_INVALIDO": "Teléfono inválido: no entró",
+      "CPF_INVALIDO": "CPF inválido: quedó en blanco",
+      "EMAIL_INVALIDO": "Correo incompleto: quedó en blanco",
+      "CEP_INVALIDO": "Código postal incompleto: quedó en blanco",
+      "UF_INVALIDA": "Estado que no existe: quedó en blanco",
+      "MICROCHIP_INVALIDO": "Microchip incompleto: quedó en blanco",
+      "MICROCHIP_CIENTIFICO": "Microchip en notación científica: perdió números",
+      "SEXO_NAO_RECONHECIDO": "Sexo no reconocido: quedó en blanco",
+      "CASTRADO_NAO_RECONHECIDO": "Castración no reconocida: quedó en blanco",
+      "TEXTO_LONGO": "Texto demasiado largo: quedó en blanco",
+      "TELEFONE_DE_ENCHIMENTO": "Teléfono de relleno: quedó sin teléfono",
+      "TELEFONES_A_MAIS": "Más de 3 teléfonos en la celda",
+      "CPF_DE_OUTRO_CADASTRO": "CPF de otra persona: entró sin él",
+      "ALERTAS_NO_LIMITE": "Alertas en el límite: la alergia no entró",
+      "DEIXADA_DE_FORA": "Dejada fuera por usted",
+      "ALVO_INDISPONIVEL": "El registro a unir se borró a pedido del titular",
+      "LINHA_EM_BRANCO": "Fila en blanco",
+      "SEM_CONTATO": "Sin teléfono ni correo: complete el registro",
+      "JUNTOU_POR_CPF": "Se unió a un cliente por el CPF",
+      "JUNTOU_POR_TELEFONE": "Se unió a un cliente por el teléfono",
+      "JUNTOU_POR_NOME": "Se unió a un cliente por el nombre",
+      "JUNTOU_AO_PACIENTE": "Se unió a un paciente que ya existía",
+      "DIVERGE_RACA": "La raza de la planilla es otra: quedó la del registro",
+      "DIVERGE_SEXO": "El sexo de la planilla es otro: quedó el del registro",
+      "DIVERGE_NASCIMENTO": "El nacimiento de la planilla es otro: quedó el del registro",
+      "DIVERGE_PESO": "El peso de la planilla es otro: quedó el del registro",
+      "DIVERGE_MICROCHIP": "El microchip de la planilla es otro: quedó el del registro",
+      "DIVERGE_PELAGEM": "El pelaje de la planilla es otro: quedó el del registro",
+      "DIVERGE_TELEFONE": "El teléfono de la planilla es otro: quedó el del registro",
+      "DIVERGE_EMAIL": "El correo de la planilla es otro: quedó el del registro",
+      "DIVERGE_CPF": "El CPF de la planilla es otro: quedó el del registro"
+    }
   }
 }

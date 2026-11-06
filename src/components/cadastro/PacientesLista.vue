@@ -42,6 +42,7 @@ import {
   type Especie,
   type PacienteNaLista,
 } from '@/service/parceiro/pacientes-service'
+import { listarPendencias } from '@/service/parceiro/pendencias-service'
 import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const { t } = useI18n()
@@ -155,7 +156,30 @@ watch(termo, () => {
 
 watch([especie, situacao], () => void buscar())
 
-onMounted(() => void buscar())
+onMounted(() => {
+  void buscar()
+  void lerImportacaoParada()
+})
+
+/** Quem importa (DONO e GESTOR): o migrador da base (E2-05). */
+const podeImportar = computed(() => store.temPermissao('importacao.executar'))
+
+/*
+ * A importação pausada ou parada (o contador `importacoesPausadas` da E1-06, tom de atenção, só
+ * para quem importa): a lista avisa, para ela não ficar esquecida no meio.
+ */
+const importacoesParadas = ref(0)
+
+async function lerImportacaoParada() {
+  if (!podeImportar.value) return
+  try {
+    const pendencias = await listarPendencias(parceiroQuery())
+    importacoesParadas.value =
+      pendencias.find((item) => item.chave === 'importacoesPausadas')?.valor ?? 0
+  } catch {
+    importacoesParadas.value = 0
+  }
+}
 onUnmounted(() => clearTimeout(espera))
 
 function meta(paciente: PacienteNaLista) {
@@ -199,14 +223,39 @@ function cadastrar() {
       <span aria-live="polite">{{ fraseDoResumo }}</span>
     </template>
 
-    <template v-if="podeCadastrar" #acoes>
+    <template v-if="podeCadastrar || podeImportar" #acoes>
       <Button
+        v-if="podeImportar"
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-file-arrow-up"
+        :label="t('cadastro.lista.importar')"
+        @click="router.push('/clinica/paciente/importar')"
+      />
+      <Button
+        v-if="podeCadastrar"
         type="button"
         icon="ph ph-plus"
         :label="t('cadastro.lista.cadastrar')"
         @click="cadastrar"
       />
     </template>
+
+    <p v-if="importacoesParadas > 0" class="cl__importacao" role="status">
+      <i class="ph ph-pause-circle" aria-hidden="true" />
+      <span>{{
+        t('cadastro.lista.importacaoParada', { n: importacoesParadas }, importacoesParadas)
+      }}</span>
+      <Button
+        type="button"
+        size="small"
+        severity="secondary"
+        outlined
+        :label="t('cadastro.lista.verImportacao')"
+        @click="router.push('/clinica/paciente/importar')"
+      />
+    </p>
 
     <section class="cl ui-folha" :aria-label="t('cadastro.lista.titulo')">
       <div class="cl__procura" role="search">
@@ -368,6 +417,22 @@ function cadastrar() {
   display: grid;
   gap: 4px;
   padding: 12px;
+}
+
+/* Um aviso de uma linha, sem painel: o ícone de atenção diz que algo ficou no meio. */
+.cl__importacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 0 12px;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.cl__importacao > i {
+  color: var(--atencao-tinta);
+  font-size: 18px;
 }
 
 .cl__procura {
