@@ -188,14 +188,8 @@ function linhaDe(chave: ChaveDaPilha, item: ItemDoPainel): Linha {
     case 'retornosVencidos':
       return {
         ...base,
-        to: {
-          path: '/clinica/agenda',
-          query: {
-            retorno: item.pacienteId ?? '',
-            nome: item.pacienteNome ?? '',
-            profissional: item.profissionalId ?? '',
-          },
-        },
+        /* Os retornos pendentes marcam pelo atendimento (E4-01): o retorno sai ligado à consulta. */
+        to: '/clinica/retornos-pendentes',
         meta: juntar([
           item.tipoNome,
           profissionalDe(item),

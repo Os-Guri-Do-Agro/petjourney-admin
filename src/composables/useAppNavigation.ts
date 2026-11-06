@@ -154,7 +154,13 @@ export const OVERVIEW_SECTION_ID = 'overview'
  * Nada saiu da lista. O que mudou é que ela deixou de exigir que se leia inteira.
  */
 /** Um destino de menu de um módulo. Compartilhado entre a clínica e o hotel. */
-type RotaDeModulo = { key: string; to: string; icon: string }
+type RotaDeModulo = {
+  key: string
+  to: string
+  icon: string
+  /** Tela que só existe pela API: a demonstração não tem os dados dela e esconde o item. */
+  soComApi?: boolean
+}
 
 type BlocoDeModulo = { id: string; key: string; rotas: readonly RotaDeModulo[] }
 
@@ -200,6 +206,13 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     rotas: [
       { key: 'clinico.atividades.titulo', to: '/clinica/atividades', icon: 'ph ph-list-bullets' },
       { key: 'clinico.faltas.titulo', to: '/clinica/faltas', icon: 'ph ph-user-minus' },
+      /* O retorno que o veterinário indicou e ninguém marcou (E4-01): a recepção liga e marca. */
+      {
+        key: 'atendimento.retornos.titulo',
+        to: '/clinica/retornos-pendentes',
+        icon: 'ph ph-clock-counter-clockwise',
+        soComApi: true,
+      },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
       { key: 'clinico.vacinas.titulo', to: '/clinica/vacinas', icon: 'ph ph-shield' },
       /*
@@ -258,7 +271,9 @@ export function useAppNavigation() {
       .map((bloco) => ({
         id: bloco.id,
         label: t(bloco.key),
-        items: bloco.rotas.filter((rota) => podeAbrir(rota.to)).map(decorarRota),
+        items: bloco.rotas
+          .filter((rota) => podeAbrir(rota.to) && !(rota.soComApi && demonstracao.value))
+          .map(decorarRota),
       }))
       .filter((bloco) => bloco.items.length > 0)
   }

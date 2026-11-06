@@ -21,7 +21,7 @@ import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import { horaNoFuso, ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
@@ -88,7 +88,19 @@ const visible = defineModel<boolean>('visible', { default: false })
 const { t } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAgenda()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
+const router = useRouter()
+
+/**
+ * O atendimento do horário (E4-01): quem lê prontuário abre daqui; quem escreve nele cai direto no
+ * atendimento depois do "Iniciar". A recepção inicia e fica na agenda.
+ */
+const leProntuario = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeLer) && store.temPermissao('prontuario.ler'),
+)
+const escreveProntuario = computed(
+  () => leProntuario.value && store.temPermissao('prontuario.escrever'),
+)
 
 type Modo = 'ver' | 'editar' | 'mudar' | 'cancelar' | 'falta'
 
@@ -248,6 +260,10 @@ async function agir(acao: 'confirmar-presenca' | 'chegada' | 'iniciar') {
   try {
     const mutacao = await agirNoAgendamento(atual.id, acao, atual.versao, parceiroQuery())
     emit('mudou', mutacao, t(`agendamentos.feito.${acao}`))
+    const atendimentoId = mutacao.agendamentos.find((item) => item.id === atual.id)?.atendimentoId
+    if (acao === 'iniciar' && atendimentoId && escreveProntuario.value) {
+      void router.push(`/clinica/atendimento/${atendimentoId}`)
+    }
   } catch (err) {
     falhou(err)
   } finally {
@@ -669,6 +685,16 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             </li>
           </ul>
         </section>
+
+        <!-- O atendimento que o "Iniciar" abriu (E4-01). -->
+        <RouterLink
+          v-if="ag.atendimentoId && leProntuario"
+          class="p-button p-component p-button-secondary p-button-outlined agv__atendimento"
+          :to="`/clinica/atendimento/${ag.atendimentoId}`"
+        >
+          <i class="ph ph-note-pencil p-button-icon p-button-icon-left" aria-hidden="true" />
+          <span class="p-button-label">{{ t('atendimento.abrirDoHorario') }}</span>
+        </RouterLink>
 
         <!-- A pré-consulta do app (E3-07): recolhida até alguém pedir para ler. -->
         <PreConsultaDoHorario
@@ -1210,5 +1236,9 @@ const itensDoMenu = computed<MenuItem[]>(() => {
   justify-content: flex-end;
   gap: 8px;
   margin-inline-start: auto;
+}
+
+.agv__atendimento {
+  justify-self: start;
 }
 </style>

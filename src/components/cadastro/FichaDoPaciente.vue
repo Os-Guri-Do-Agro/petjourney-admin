@@ -37,6 +37,7 @@ import {
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
 import ResumoDoApp from '@/components/cadastro/ResumoDoApp.vue'
+import LinhaDoTempoDaFicha from '@/components/atendimento/LinhaDoTempoDaFicha.vue'
 import VacinasDaFicha from '@/components/vacinas/VacinasDaFicha.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -733,6 +734,14 @@ watch(excluindo, (aberta) => {
             :especie="paciente.especie"
             :ativo="paciente.ativo"
             :responsavel="paciente.cliente.nome"
+          />
+
+          <!-- O histórico clínico pela API (E4-01): atendimentos, atos, vacinas e faltas. -->
+          <LinhaDoTempoDaFicha
+            v-if="leOApp"
+            :paciente-id="paciente.id"
+            :ativo="paciente.ativo"
+            :obito="Boolean(paciente.obitoEm)"
           />
         </div>
 

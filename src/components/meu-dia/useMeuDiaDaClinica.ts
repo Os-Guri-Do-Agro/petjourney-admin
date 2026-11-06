@@ -212,11 +212,11 @@ export function useMeuDiaDaClinica() {
     if (retornos) {
       linhas.push({
         id: 'retornos',
-        to: seIntegrada('/clinica/atividades', '/clinica/agenda'),
+        to: seIntegrada('/clinica/retornos-pendentes', '/clinica/atividades'),
         frase: t('clinico.meuDia.pauta.retornos', { total: retornos.total }, retornos.total),
         detalhe: nomesComResto(itensDe('retornosPendentes').map((item) => item.pacienteNome ?? '')),
         tom: 'neutro',
-        onde: t('inicio.pauta.onde.atividades'),
+        onde: t('atendimento.retornos.titulo'),
       })
     }
 

@@ -148,8 +148,11 @@ export interface ApiFetchOpcoes {
    * 401 que quer dizer "a senha digitada não confere", e não "a sessão caiu". A troca de senha da
    * API anterior ao PJ-4BI7TE responde 401 para a senha atual errada: limpar a sessão ali derrubava
    * a pessoa no meio da tela, sem o menu e sem aviso.
+   *
+   * Com uma função, decide pelo `codigo` do erro: o finalizar e o anular do prontuário mantêm a
+   * sessão só nos 401 da senha da assinatura (`ASSINATURA_SENHA_*`); o resto ainda é queda.
    */
-  manterSessaoEm401?: boolean
+  manterSessaoEm401?: boolean | ((codigo: string | undefined) => boolean)
 }
 
 /** Avisa a raiz (App.vue) que a sessão caiu no meio do uso, para levar de volta à entrada. */
@@ -186,7 +189,14 @@ export async function apiFetch<T>(
   if (!response.ok) {
     const errorBody = isJsonResponse(response) ? await response.json().catch(() => null) : null
 
-    if (response.status === 401 && !opcoes?.manterSessaoEm401) {
+    const manterSessao =
+      typeof opcoes?.manterSessaoEm401 === 'function'
+        ? opcoes.manterSessaoEm401(
+            typeof errorBody?.codigo === 'string' ? errorBody.codigo : undefined,
+          )
+        : opcoes?.manterSessaoEm401
+
+    if (response.status === 401 && !manterSessao) {
       clearAuthSession()
 
       /* Só quem tinha sessão perde a sessão: o 401 do login (senha errada) não é queda. */

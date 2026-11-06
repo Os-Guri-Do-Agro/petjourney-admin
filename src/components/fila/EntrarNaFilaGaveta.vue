@@ -36,7 +36,20 @@ import {
 import { listarPacientes, type PacienteNaLista } from '@/service/parceiro/pacientes-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
 
-const props = defineProps<{ tipos: TipoDeAtendimento[]; profissionais: Profissional[] }>()
+const props = defineProps<{
+  tipos: TipoDeAtendimento[]
+  profissionais: Profissional[]
+  /**
+   * O paciente já escolhido (o retorno sem horário, E4-01): a gaveta não pede a busca e já vem com
+   * o serviço e com quem.
+   */
+  paraQuem?: {
+    pacienteId: string
+    nome: string
+    tipoId?: string | null
+    profissionalId?: string | null
+  } | null
+}>()
 const emit = defineEmits<{ entrou: [] }>()
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -74,8 +87,10 @@ watch(visible, (aberta) => {
   if (!aberta) return
 
   paciente.value = null
-  tipoId.value = props.tipos[0]?.id ?? null
-  profissionalId.value = QUALQUER
+  const tipoDoRetorno = props.tipos.find((tipo) => tipo.id === props.paraQuem?.tipoId)
+  const quemAtendeu = props.profissionais.find((p) => p.id === props.paraQuem?.profissionalId)
+  tipoId.value = tipoDoRetorno?.id ?? props.tipos[0]?.id ?? null
+  profissionalId.value = quemAtendeu?.id ?? QUALQUER
   prioridade.value = 'NORMAL'
   janelas.value = [novaJanela(1)]
   observacao.value = ''
@@ -135,11 +150,12 @@ function removerJanela(id: number) {
 async function salvar() {
   tentou.value = true
   erroDoPaciente.value = ''
-  if (!paciente.value || !tipoId.value || problema.value) return
+  const pacienteId = props.paraQuem?.pacienteId ?? paciente.value?.id
+  if (!pacienteId || !tipoId.value || problema.value) return
 
   salvando.value = true
   const corpo = {
-    pacienteId: paciente.value.id,
+    pacienteId,
     tipoId: tipoId.value,
     profissionalId: profissionalId.value === QUALQUER ? undefined : profissionalId.value,
     prioridade: prioridade.value,
@@ -186,8 +202,11 @@ function rotuloDoPaciente(item: PacienteNaLista) {
   >
     <form id="fila-form" class="eg" novalidate @submit.prevent="salvar">
       <section class="eg__secao">
-        <label class="eg__rotulo" for="fila-paciente">{{ t('fila.paciente') }}</label>
+        <span v-if="paraQuem" class="eg__rotulo">{{ t('fila.paciente') }}</span>
+        <label v-else class="eg__rotulo" for="fila-paciente">{{ t('fila.paciente') }}</label>
+        <strong v-if="paraQuem" class="fe__fixo">{{ paraQuem.nome }}</strong>
         <AutoComplete
+          v-else
           v-model="paciente"
           input-id="fila-paciente"
           :suggestions="sugestoes"
@@ -199,7 +218,7 @@ function rotuloDoPaciente(item: PacienteNaLista) {
           @complete="buscar"
         />
         <small v-if="erroDoPaciente" class="eg__invalido">{{ erroDoPaciente }}</small>
-        <small v-else-if="tentou && !paciente" class="eg__invalido">{{
+        <small v-else-if="tentou && !paciente && !paraQuem" class="eg__invalido">{{
           t('fila.pacienteObrigatorio')
         }}</small>
       </section>
@@ -342,6 +361,10 @@ function rotuloDoPaciente(item: PacienteNaLista) {
 </template>
 
 <style scoped>
+.fe__fixo {
+  font-size: 15px;
+}
+
 .fe__janelas {
   display: grid;
   gap: 8px;

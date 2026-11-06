@@ -115,6 +115,7 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     abas: [
       { rota: '/clinica/atividades', chave: 'espacos.abas.atividades' },
       { rota: '/clinica/faltas', chave: 'espacos.abas.faltas' },
+      { rota: '/clinica/retornos-pendentes', chave: 'espacos.abas.retornos' },
       { rota: '/clinica/vacinas', chave: 'espacos.abas.vacinas' },
       { rota: '/clinica/tratamentos', chave: 'espacos.abas.tratamentos' },
       { rota: '/clinica/estoque', chave: 'espacos.abas.estoque' },

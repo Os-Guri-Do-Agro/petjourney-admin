@@ -64,17 +64,25 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   },
 
   /* Clínica: prontuário, receita, vacinas e adesão (E4). */
+  /* O prontuário pela API (E4-01, PJ-QQT1WN): a lista, o atendimento e os retornos pendentes. */
   {
     prefixo: '/clinica/atendimentos',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
-    integrada: false,
+    integrada: true,
   },
   {
     prefixo: '/clinica/atendimento',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
-    integrada: false,
+    integrada: true,
+  },
+  /* A recepção marca o retorno sem ler o prontuário: a lista é da agenda. */
+  {
+    prefixo: '/clinica/retornos-pendentes',
+    modulo: 'CLINICA',
+    permissao: 'agenda.ler',
+    integrada: true,
   },
   {
     prefixo: '/clinica/bulario',
