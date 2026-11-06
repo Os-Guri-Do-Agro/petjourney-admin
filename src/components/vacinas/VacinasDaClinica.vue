@@ -50,7 +50,9 @@ const opcoesDeAba = computed(() => [
 
 /* ------------------------------------------------------------------- lista de chamada */
 
-const situacao = ref<SituacaoDaChamada | null>(null)
+/* O SelectButton não marca a opção de valor `null`: "Todas" tem um valor próprio. */
+const TODAS = 'TODAS'
+const situacao = ref<SituacaoDaChamada | typeof TODAS>(TODAS)
 const chamada = ref<Chamada[]>([])
 const cursorDaChamada = ref<string | null>(null)
 const carregando = ref(false)
@@ -58,7 +60,7 @@ const erro = ref('')
 const lido = ref(false)
 
 const opcoesDeSituacao = computed(() => [
-  { valor: null, rotulo: t('vacinas.chamada.todas') },
+  { valor: TODAS, rotulo: t('vacinas.chamada.todas') },
   { valor: 'VENCIDO', rotulo: t('vacinas.chamada.situacao.VENCIDO') },
   { valor: 'SERIE_INCOMPLETA', rotulo: t('vacinas.chamada.situacao.SERIE_INCOMPLETA') },
   { valor: 'PROXIMO', rotulo: t('vacinas.chamada.situacao.PROXIMO') },
@@ -69,7 +71,10 @@ async function carregarChamada(mais = false) {
   erro.value = ''
   try {
     const pagina = await lerChamada(
-      { situacao: situacao.value, cursor: mais ? cursorDaChamada.value : null },
+      {
+        situacao: situacao.value === TODAS ? null : situacao.value,
+        cursor: mais ? cursorDaChamada.value : null,
+      },
       parceiroQuery(),
     )
     chamada.value = mais ? [...chamada.value, ...pagina.itens] : pagina.itens
