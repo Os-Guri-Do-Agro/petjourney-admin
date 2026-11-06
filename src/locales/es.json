@@ -11933,5 +11933,53 @@
         "omitidos": "No volvieron: {nomes}. Prescríbalas de nuevo."
       }
     }
+  },
+  "adesao": {
+    "erro": "No se pudieron cargar los tratamientos.",
+    "erroCritico": "No se pudo cambiar el crítico.",
+    "pedeAtencao": "Pide atención",
+    "naoCompartilhado": "El responsable no comparte las dosis de este tratamiento.",
+    "desde": "Desde el {data}: {contagens}",
+    "inicio": "inicio el {data}",
+    "encerradoEm": "terminado el {data}",
+    "encerrados": "Terminados ({n})",
+    "truncado": "Hay más tratamientos; ábralos desde la lista de la clínica.",
+    "verMaisDias": "Ver los últimos 42 días",
+    "horarioQueDestoa": "Las dosis de las {horario} casi nunca se registran ({dadas} de {fechadas}).",
+    "quem": {
+      "O": "por el dueño",
+      "F": "por la familia",
+      "N": "quien registró no lo dijo",
+      "-": ""
+    },
+    "alerta": {
+      "PULADAS": "Se saltó {n} dosis en los últimos 3 días | Se saltaron {n} dosis en los últimos 3 días",
+      "PULADAS_SEM_CONTA": "Se saltaron dosis en los últimos 3 días",
+      "QUEDA": "Puede que hayan dejado de registrar."
+    },
+    "contato": {
+      "dica": "Lo que la clínica acordó con la familia sobre {remedio}. La alerta sale hasta la próxima dosis que falte.",
+      "soNaClinica": "Nota interna: nunca va a la app.",
+      "ultimo": "Contacto el {data}: {nota}",
+      "erro": "No se pudo registrar el contacto.",
+      "feito": "Contacto registrado."
+    },
+    "ficha": {
+      "comAlerta": "{n} tratamiento pide atención. | {n} tratamientos piden atención."
+    },
+    "lista": {
+      "todos": "Todos",
+      "filtro": "Qué tratamientos",
+      "naoCompartilhado": "no compartido",
+      "contatoEm": "contacto el {data}",
+      "desde": "desde el {data}",
+      "resumo": "{n} tratamiento pide atención | {n} tratamientos piden atención",
+      "resumoEmDia": "Ningún tratamiento pide atención ahora.",
+      "vazioAtencao": "Ningún tratamiento crítico pide atención ahora.",
+      "verMais": "Ver más"
+    },
+    "resumo": {
+      "indisponivel": "No disponible ahora."
+    }
   }
 }

@@ -11933,5 +11933,53 @@
         "omitidos": "Not carried over: {nomes}. Prescribe them again."
       }
     }
+  },
+  "adesao": {
+    "erro": "Could not load the treatments.",
+    "erroCritico": "Could not change the critical setting.",
+    "pedeAtencao": "Needs attention",
+    "naoCompartilhado": "The owner does not share the doses of this treatment.",
+    "desde": "Since {data}: {contagens}",
+    "inicio": "started on {data}",
+    "encerradoEm": "ended on {data}",
+    "encerrados": "Ended ({n})",
+    "truncado": "There are more treatments; open them from the clinic's list.",
+    "verMaisDias": "See the last 42 days",
+    "horarioQueDestoa": "The {horario} doses are hardly ever recorded ({dadas} of {fechadas}).",
+    "quem": {
+      "O": "by the owner",
+      "F": "by the family",
+      "N": "who recorded did not say",
+      "-": ""
+    },
+    "alerta": {
+      "PULADAS": "{n} dose skipped in the last 3 days | {n} doses skipped in the last 3 days",
+      "PULADAS_SEM_CONTA": "Doses skipped in the last 3 days",
+      "QUEDA": "They may have stopped recording."
+    },
+    "contato": {
+      "dica": "What the clinic agreed with the family about {remedio}. The alert clears until the next missing dose.",
+      "soNaClinica": "Internal note: never goes to the app.",
+      "ultimo": "Contact on {data}: {nota}",
+      "erro": "Could not record the contact.",
+      "feito": "Contact recorded."
+    },
+    "ficha": {
+      "comAlerta": "{n} treatment needs attention. | {n} treatments need attention."
+    },
+    "lista": {
+      "todos": "All",
+      "filtro": "Which treatments",
+      "naoCompartilhado": "not shared",
+      "contatoEm": "contact on {data}",
+      "desde": "since {data}",
+      "resumo": "{n} treatment needs attention | {n} treatments need attention",
+      "resumoEmDia": "No treatment needs attention now.",
+      "vazioAtencao": "No critical treatment needs attention now.",
+      "verMais": "Show more"
+    },
+    "resumo": {
+      "indisponivel": "Unavailable right now."
+    }
   }
 }

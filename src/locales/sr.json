@@ -11933,5 +11933,53 @@
         "omitidos": "Nisu preneti: {nomes}. Propišite ih ponovo."
       }
     }
+  },
+  "adesao": {
+    "erro": "Terapije nisu mogle da se učitaju.",
+    "erroCritico": "Oznaka kritično nije mogla da se promeni.",
+    "pedeAtencao": "Traži pažnju",
+    "naoCompartilhado": "Vlasnik ne deli doze ove terapije.",
+    "desde": "Od {data}: {contagens}",
+    "inicio": "početak {data}",
+    "encerradoEm": "završeno {data}",
+    "encerrados": "Završene ({n})",
+    "truncado": "Ima još terapija; otvorite ih sa liste klinike.",
+    "verMaisDias": "Prikaži poslednja 42 dana",
+    "horarioQueDestoa": "Doze u {horario} se skoro nikad ne beleže ({dadas} od {fechadas}).",
+    "quem": {
+      "O": "vlasnik",
+      "F": "porodica",
+      "N": "ko je beležio nije rekao",
+      "-": ""
+    },
+    "alerta": {
+      "PULADAS": "Preskočena {n} doza u poslednja 3 dana | Preskočene {n} doze u poslednja 3 dana | Preskočeno {n} doza u poslednja 3 dana",
+      "PULADAS_SEM_CONTA": "Preskočene doze u poslednja 3 dana",
+      "QUEDA": "Moguće je da su prestali da beleže."
+    },
+    "contato": {
+      "dica": "Šta se klinika dogovorila sa porodicom o leku {remedio}. Upozorenje nestaje do sledeće propuštene doze.",
+      "soNaClinica": "Interna napomena: nikada ne ide u aplikaciju.",
+      "ultimo": "Kontakt {data}: {nota}",
+      "erro": "Kontakt nije mogao da se zabeleži.",
+      "feito": "Kontakt zabeležen."
+    },
+    "ficha": {
+      "comAlerta": "{n} terapija traži pažnju. | {n} terapije traže pažnju. | {n} terapija traži pažnju."
+    },
+    "lista": {
+      "todos": "Sve",
+      "filtro": "Koje terapije",
+      "naoCompartilhado": "nije podeljeno",
+      "contatoEm": "kontakt {data}",
+      "desde": "od {data}",
+      "resumo": "{n} terapija traži pažnju | {n} terapije traže pažnju | {n} terapija traži pažnju",
+      "resumoEmDia": "Nijedna terapija sada ne traži pažnju.",
+      "vazioAtencao": "Nijedna kritična terapija sada ne traži pažnju.",
+      "verMais": "Prikaži još"
+    },
+    "resumo": {
+      "indisponivel": "Trenutno nedostupno."
+    }
   }
 }

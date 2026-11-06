@@ -11933,5 +11933,53 @@
         "omitidos": "Não voltaram: {nomes}. Prescreva de novo."
       }
     }
+  },
+  "adesao": {
+    "erro": "Não deu para ler os tratamentos.",
+    "erroCritico": "Não deu para mudar o crítico.",
+    "pedeAtencao": "Pede atenção",
+    "naoCompartilhado": "O responsável não compartilha as doses deste tratamento.",
+    "desde": "Desde {data}: {contagens}",
+    "inicio": "início em {data}",
+    "encerradoEm": "encerrado em {data}",
+    "encerrados": "Encerrados ({n})",
+    "truncado": "Há mais tratamentos; abra pela lista da clínica.",
+    "verMaisDias": "Ver os últimos 42 dias",
+    "horarioQueDestoa": "As doses das {horario} quase nunca são registradas ({dadas} de {fechadas}).",
+    "quem": {
+      "O": "pelo dono",
+      "F": "pela família",
+      "N": "quem registrou não disse",
+      "-": ""
+    },
+    "alerta": {
+      "PULADAS": "Pularam {n} dose nos últimos 3 dias | Pularam {n} doses nos últimos 3 dias",
+      "PULADAS_SEM_CONTA": "Pularam doses nos últimos 3 dias",
+      "QUEDA": "Pode ser que tenham parado de registrar."
+    },
+    "contato": {
+      "dica": "O que a clínica combinou com a família sobre {remedio}. O alerta sai até a próxima dose que faltar.",
+      "soNaClinica": "Nota interna: nunca vai ao app.",
+      "ultimo": "Contato em {data}: {nota}",
+      "erro": "Não deu para registrar o contato.",
+      "feito": "Contato registrado."
+    },
+    "ficha": {
+      "comAlerta": "{n} tratamento pede atenção. | {n} tratamentos pedem atenção."
+    },
+    "lista": {
+      "todos": "Todos",
+      "filtro": "Quais tratamentos",
+      "naoCompartilhado": "não compartilhado",
+      "contatoEm": "contato em {data}",
+      "desde": "desde {data}",
+      "resumo": "{n} tratamento pede atenção | {n} tratamentos pedem atenção",
+      "resumoEmDia": "Nenhum tratamento pede atenção agora.",
+      "vazioAtencao": "Nenhum tratamento crítico pede atenção agora.",
+      "verMais": "Ver mais"
+    },
+    "resumo": {
+      "indisponivel": "Indisponível agora."
+    }
   }
 }

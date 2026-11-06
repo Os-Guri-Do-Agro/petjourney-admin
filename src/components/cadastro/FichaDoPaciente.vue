@@ -38,6 +38,7 @@ import {
 } from '@/components/cadastro/useRotulosDoCadastro'
 import ResumoDoApp from '@/components/cadastro/ResumoDoApp.vue'
 import LinhaDoTempoDaFicha from '@/components/atendimento/LinhaDoTempoDaFicha.vue'
+import TratamentosDaFicha from '@/components/tratamentos/TratamentosDaFicha.vue'
 import VacinasDaFicha from '@/components/vacinas/VacinasDaFicha.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -743,6 +744,9 @@ watch(excluindo, (aberta) => {
             :ativo="paciente.ativo"
             :obito="Boolean(paciente.obitoEm)"
           />
+
+          <!-- Os tratamentos em casa pela API (E4-05b): a faixa de doses, o alerta e o contato. -->
+          <TratamentosDaFicha v-if="leOApp" :paciente-id="paciente.id" />
         </div>
 
         <div class="fp__coluna">

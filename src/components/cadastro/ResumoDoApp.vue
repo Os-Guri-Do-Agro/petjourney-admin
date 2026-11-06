@@ -16,6 +16,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import DiarioDoAppGaveta from '@/components/cadastro/DiarioDoAppGaveta.vue'
+import { useFrasesDaAdesao } from '@/components/tratamentos/useFrasesDaAdesao'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -203,6 +204,16 @@ const carteirinha = computed(() => resumo.value?.carteirinha ?? null)
 const vacinas = computed(() => (carteirinha.value?.vacinas ?? []).slice(0, 3))
 
 const diarioAberto = ref(false)
+
+/* -------------------------------------------------------------------------- adesão (E4-05b) */
+
+/**
+ * Os remédios compartilhados e em curso, numa janela de até 10 dias; o alerta é o que o cron
+ * gravou. Falhou o cálculo: "indisponível agora", nunca "sem tratamento".
+ */
+const frasesDaAdesao = useFrasesDaAdesao()
+const adesao = computed(() => resumo.value?.adesao ?? null)
+const adesaoIndisponivel = computed(() => resumo.value?.naoDisponivel.includes('adesao') ?? false)
 </script>
 
 <template>
@@ -370,6 +381,20 @@ const diarioAberto = ref(false)
         <p v-if="pesoNaoLiberado" class="ra__nada">
           {{ t('leituraApp.naoLiberado', { chave: t('cadastro.vinculo.consentimento.peso') }) }}
         </p>
+      </section>
+
+      <!-- Tratamentos em casa (E4-05b): só os compartilhados e em curso. -->
+      <section v-if="adesao || adesaoIndisponivel" class="ra__bloco" aria-labelledby="ra-adesao">
+        <h3 id="ra-adesao" class="ra__subtitulo">{{ t('clinico.adesao.titulo') }}</h3>
+        <p v-if="adesaoIndisponivel" class="ra__nada">{{ t('adesao.resumo.indisponivel') }}</p>
+        <ul v-else-if="adesao" class="ra__fatos">
+          <li v-for="item in adesao.tratamentos" :key="item.tratamentoId">
+            <strong>{{ item.medicamento }}:</strong>
+            <template v-if="item.alerta">{{ frasesDaAdesao.alerta(item.alerta) }} · </template>
+            {{ frasesDaAdesao.contagens(item.resumo) }}
+          </li>
+        </ul>
+        <p v-if="adesao?.truncado" class="ra__nada">{{ t('adesao.truncado') }}</p>
       </section>
 
       <!-- Medicação e carteirinha do app. -->

@@ -92,11 +92,12 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   },
   /* A lista de chamada e as aplicadas pela API (E4-04, PJ-VQVQ0C). */
   { prefixo: '/clinica/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
+  /* Os tratamentos em casa pela API (E4-05b, PJ-LU09N7). */
   {
     prefixo: '/clinica/tratamentos',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
-    integrada: false,
+    integrada: true,
   },
 
   /* Clínica: internação e estoque (E5, E6). */
