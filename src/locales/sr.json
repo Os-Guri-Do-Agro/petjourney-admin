@@ -11218,5 +11218,142 @@
         "LINFONODOS": "Limfni čvorovi"
       }
     }
+  },
+  "vacinas": {
+    "titulo": "Vakcine",
+    "verChamada": "Prikaži listu za pozivanje klinike",
+    "verMais": "Prikaži još",
+    "erro": {
+      "carregar": "Vakcine trenutno ne mogu da se otvore.",
+      "loteVencido": "Serija je istekla pre dana primene. Proverite rok ili koristite drugu seriju.",
+      "via": "Ovaj put primene nije jedan od puteva vakcine.",
+      "repetida": "Ova vakcina je danas već data ovom pacijentu.",
+      "foraDeOrdem": "Poslednja doza ove vakcine je bila {data}: upišite redom ili poništite pogrešnu.",
+      "foraDaJanela": "Sledeća doza ili termin je dalje od 60 dana: revakcinacija ide na listu za pozivanje.",
+      "semTipo": "Klinika nema aktivan tip pregleda za vakcinu da zakaže sledeću dozu.",
+      "especie": "Ova vakcina nije za vrstu pacijenta."
+    },
+    "situacao": {
+      "ATRASADA": "Zakasnela",
+      "DEVIDA": "Na redu",
+      "A_VENCER": "Uskoro",
+      "NAO_INICIADA": "Nije započeta",
+      "AGUARDA_IDADE": "Čeka uzrast",
+      "EM_DIA": "Ažurno"
+    },
+    "plano": {
+      "resumo": "Zakasnelo: {atrasadas}, na redu: {devidas}",
+      "emDia": "Ništa nije zakasnelo ni na redu.",
+      "serieCompleta": "Serija završena",
+      "reforco": "revakcinacija",
+      "dose": "doza {n} od {total}",
+      "aPartirDe": "Sledeća: {qual}, od {dia}",
+      "marcada": "Sledeća: {qual}, zakazano za {dia}",
+      "proxima": "Sledeća: {qual}, {dia}",
+      "serie": "Date doze: {n} od {total}",
+      "aplicar": "Daj",
+      "vazio": "Nema vakcina u planu ovog pacijenta.",
+      "eMais": "i još {n} ažurnih vakcina",
+      "opcionais": "Opcione, nezapočete ({n})"
+    },
+    "historico": {
+      "titulo": "Istorija ({n})",
+      "lote": "serija {codigo}",
+      "externa": "drugde: {local}",
+      "anulada": "Poništeno: {motivo}",
+      "truncado": "Istorija je duga: prikazuje se 300 najnovijih."
+    },
+    "recado": {
+      "dose": "{vacina}: upisana doza {dose} od {total}.",
+      "noApp": "Već je u kartonu u aplikaciji osobe {responsavel}.",
+      "marcada": "Sledeća doza je zakazana u rasporedu.",
+      "naoMarcada": "Doza je upisana, ali termin sledeće nije zakazan: zakažite u rasporedu.",
+      "aviso": {
+        "LOTE_VENCE_HOJE": "Ova serija ističe danas.",
+        "LOTE_VENCENDO": "Ova serija prva ističe: koristite je pre ostalih.",
+        "IDADE_MINIMA_CONFIRMADA": "Data pre minimalnog uzrasta, uz potvrdu veterinara."
+      }
+    },
+    "lote": {
+      "VENCIDO": "istekla",
+      "SEM_VALIDADE": "bez roka",
+      "VENCE_HOJE": "ističe danas",
+      "VENCENDO": "prva ističe"
+    },
+    "aplicar": {
+      "titulo": "Daj vakcinu",
+      "vacina": "Vakcina",
+      "escolher": "Izaberite vakcinu",
+      "lote": "Serija",
+      "lotesUsados": "Serije već korišćene u ovoj klinici",
+      "codigo": "Šifra serije",
+      "validade": "Rok trajanja",
+      "via": "Put primene",
+      "quem": "Ko je dao",
+      "semCrmvNoApp": "U aplikaciji doza ide bez CRMV ovog stručnjaka: potvrđuje samo on, vlasnik ili uprava.",
+      "outroDia": "Data je drugog dana",
+      "dia": "Dan primene",
+      "observacao": "Napomena",
+      "marcar": "Zakaži sledeću dozu u rasporedu",
+      "marcarDica": "Do 60 dana. Godišnja revakcinacija ide na listu za pozivanje.",
+      "proximoDia": "Dan sledeće doze",
+      "hora": "Vreme",
+      "idadeMinima": "Pacijent ima uzrast za ovu vakcinu tek od {data}.",
+      "mesmoAssim": "Ipak daj",
+      "confirmar": "Daj i upiši"
+    },
+    "externa": {
+      "titulo": "Upiši iz drugog mesta",
+      "dica": "Doza koju je pacijent primio negde drugde, po datumu na papiru. Bez serije: klinika je nije dala. Računa se u plan, ali ne ide u aplikaciju kao vakcina klinike.",
+      "dia": "Datum na papiru",
+      "local": "Gde je data",
+      "aplicador": "Ko je dao",
+      "procedenciaRotulo": "Kako klinika zna",
+      "procedencia": {
+        "COMPROVANTE": "Potvrda",
+        "RELATO": "Izjava odgovorne osobe"
+      },
+      "semVia": "Put nije naveden",
+      "quemTranscreve": "Ko upisuje",
+      "confirmar": "Upiši"
+    },
+    "anular": {
+      "titulo": "Poništi",
+      "dica": "Ništa se ne briše: doza ostaje precrtana u istoriji, a prethodna ponovo važi. U aplikaciji vakcina nestaje i odgovorna osoba dobija obaveštenje.",
+      "motivo": "Razlog",
+      "motivoDica": "Najmanje {min} znakova.",
+      "confirmar": "Poništi primenu",
+      "feita": "Primena je poništena.",
+      "horarioFicou": "Termin sledeće doze ostaje u rasporedu. Ako više ne važi, otkažite ga tamo.",
+      "abrirHorario": "Otvori termin u rasporedu",
+      "fechar": "Zatvori",
+      "alterada": "Ova primena je prešla u drugi karton (pacijent je spojen). Otvorite karton koji je ostao i ponovo poništite.",
+      "jaAnulada": "Ova primena je već poništena."
+    },
+    "chamada": {
+      "titulo": "Lista za pozivanje",
+      "todas": "Sve",
+      "filtro": "Stanje",
+      "situacao": {
+        "VENCIDO": "Istekle",
+        "SERIE_INCOMPLETA": "Otvorena serija",
+        "PROXIMO": "Uskoro"
+      },
+      "venceuHa": "Istekla pre {n} dan | Istekla pre {n} dana | Istekla pre {n} dana",
+      "venceHoje": "Ističe danas",
+      "venceEm": "Ističe za {n} dan | Ističe za {n} dana | Ističe za {n} dana",
+      "marcado": "zakazano za {dia}",
+      "vazio": "Trenutno nema koga zvati.",
+      "resumo": "Koga zvati: od najviše zakasnelih."
+    },
+    "aplicadas": {
+      "titulo": "Date",
+      "dias": "{n} dana",
+      "periodo": "Period",
+      "externa": "drugde",
+      "anulada": "poništena",
+      "vazio": "Nema primena u ovom periodu.",
+      "resumo": "Šta je klinika dala, sa serijom i ko je dao."
+    }
   }
 }

@@ -82,7 +82,8 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     permissao: 'prontuario.ler',
     integrada: true,
   },
-  { prefixo: '/clinica/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  /* A lista de chamada e as aplicadas pela API (E4-04, PJ-VQVQ0C). */
+  { prefixo: '/clinica/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
   {
     prefixo: '/clinica/tratamentos',
     modulo: 'CLINICA',

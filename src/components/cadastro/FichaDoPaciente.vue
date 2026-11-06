@@ -37,6 +37,7 @@ import {
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
 import ResumoDoApp from '@/components/cadastro/ResumoDoApp.vue'
+import VacinasDaFicha from '@/components/vacinas/VacinasDaFicha.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -112,6 +113,11 @@ const donoOuGestor = computed(
 const clienteAnonimizado = computed(() => Boolean(paciente.value?.cliente.anonimizadoEm))
 
 /** "Este pet em 30 segundos" e o diário do app (E2-03): veterinário, enfermagem e o dono. */
+/** As vacinas da ficha: o módulo Clínica e `paciente.ler` (E4-04). */
+const leVacinas = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeLer) && store.temPermissao('paciente.ler'),
+)
+
 const leOApp = computed(
   () => Boolean(store.modulo('CLINICA')?.podeLer) && store.temPermissao('prontuario.ler'),
 )
@@ -719,6 +725,15 @@ watch(excluindo, (aberta) => {
               </ul>
             </template>
           </section>
+
+          <!-- As vacinas pela API (E4-04): o plano, o histórico, aplicar e anular. -->
+          <VacinasDaFicha
+            v-if="leVacinas"
+            :paciente-id="paciente.id"
+            :especie="paciente.especie"
+            :ativo="paciente.ativo"
+            :responsavel="paciente.cliente.nome"
+          />
         </div>
 
         <div class="fp__coluna">

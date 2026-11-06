@@ -11218,5 +11218,142 @@
         "LINFONODOS": "Ganglios linfáticos"
       }
     }
+  },
+  "vacinas": {
+    "titulo": "Vacunas",
+    "verChamada": "Ver la lista de llamadas de la clínica",
+    "verMais": "Ver más",
+    "erro": {
+      "carregar": "No se pudieron abrir las vacunas ahora.",
+      "loteVencido": "El lote venció antes del día de la aplicación. Revise la fecha o use otro lote.",
+      "via": "Esta vía no es una de las vías de la vacuna.",
+      "repetida": "Esta vacuna ya se aplicó hoy a este paciente.",
+      "foraDeOrdem": "La última dosis de esta vacuna fue el {data}: registre en orden o anule la incorrecta.",
+      "foraDaJanela": "La próxima dosis o el horario pasan de 60 días: el refuerzo va a la lista de llamadas.",
+      "semTipo": "La clínica no tiene un tipo de atención de vacuna activo para agendar la próxima dosis.",
+      "especie": "Esta vacuna no es para la especie del paciente."
+    },
+    "situacao": {
+      "ATRASADA": "Atrasada",
+      "DEVIDA": "Pendiente",
+      "A_VENCER": "Por vencer",
+      "NAO_INICIADA": "No iniciada",
+      "AGUARDA_IDADE": "Espera la edad",
+      "EM_DIA": "Al día"
+    },
+    "plano": {
+      "resumo": "{atrasadas} atrasada(s) y {devidas} pendiente(s)",
+      "emDia": "Nada atrasado ni pendiente.",
+      "serieCompleta": "Serie completa",
+      "reforco": "refuerzo",
+      "dose": "dosis {n} de {total}",
+      "aPartirDe": "Próxima: {qual}, a partir del {dia}",
+      "marcada": "Próxima: {qual}, agendada para el {dia}",
+      "proxima": "Próxima: {qual} el {dia}",
+      "serie": "{n} de {total} dosis aplicadas",
+      "aplicar": "Aplicar",
+      "vazio": "Ninguna vacuna en el plan de este paciente.",
+      "eMais": "y {n} vacunas más al día",
+      "opcionais": "Opcionales no iniciadas ({n})"
+    },
+    "historico": {
+      "titulo": "Historial ({n})",
+      "lote": "lote {codigo}",
+      "externa": "de otro lugar: {local}",
+      "anulada": "Anulada: {motivo}",
+      "truncado": "El historial es largo: aparecen las 300 más recientes."
+    },
+    "recado": {
+      "dose": "{vacina}: dosis {dose} de {total} registrada.",
+      "noApp": "Ya está en la cartilla de la app de {responsavel}.",
+      "marcada": "La próxima dosis quedó agendada.",
+      "naoMarcada": "La dosis quedó registrada, pero el horario de la próxima no se agendó: agéndelo en la agenda.",
+      "aviso": {
+        "LOTE_VENCE_HOJE": "Este lote vence hoy.",
+        "LOTE_VENCENDO": "Este lote es el primero en vencer: úselo antes que los otros.",
+        "IDADE_MINIMA_CONFIRMADA": "Aplicada antes de la edad mínima, con la confirmación del veterinario."
+      }
+    },
+    "lote": {
+      "VENCIDO": "vencido",
+      "SEM_VALIDADE": "sin fecha",
+      "VENCE_HOJE": "vence hoy",
+      "VENCENDO": "el primero en vencer"
+    },
+    "aplicar": {
+      "titulo": "Aplicar vacuna",
+      "vacina": "Vacuna",
+      "escolher": "Elija la vacuna",
+      "lote": "Lote",
+      "lotesUsados": "Lotes ya usados en esta clínica",
+      "codigo": "Código del lote",
+      "validade": "Vencimiento",
+      "via": "Vía",
+      "quem": "Quién aplicó",
+      "semCrmvNoApp": "En la app, la dosis va sin el CRMV de este profesional: solo él, el dueño o la gestión lo confirman.",
+      "outroDia": "Se aplicó otro día",
+      "dia": "Día de la aplicación",
+      "observacao": "Observación",
+      "marcar": "Agendar la próxima dosis",
+      "marcarDica": "Hasta 60 días. El refuerzo anual va a la lista de llamadas.",
+      "proximoDia": "Día de la próxima dosis",
+      "hora": "Hora",
+      "idadeMinima": "El paciente solo tiene edad para esta vacuna a partir del {data}.",
+      "mesmoAssim": "Aplicar de todos modos",
+      "confirmar": "Aplicar y registrar"
+    },
+    "externa": {
+      "titulo": "Registrar de otro lugar",
+      "dica": "La dosis que el paciente recibió fuera, con la fecha del papel. Sin lote: la clínica no la aplicó. Cuenta para el plan, pero no va a la app como vacuna de la clínica.",
+      "dia": "Fecha del papel",
+      "local": "Dónde se aplicó",
+      "aplicador": "Quién la aplicó",
+      "procedenciaRotulo": "Cómo lo sabe la clínica",
+      "procedencia": {
+        "COMPROVANTE": "Comprobante",
+        "RELATO": "Relato del responsable"
+      },
+      "semVia": "Vía no indicada",
+      "quemTranscreve": "Quién registra",
+      "confirmar": "Registrar"
+    },
+    "anular": {
+      "titulo": "Anular",
+      "dica": "Nada se borra: la dosis queda tachada en el historial y la anterior vuelve a valer. En la app, la vacuna sale y se avisa al responsable.",
+      "motivo": "Motivo",
+      "motivoDica": "Al menos {min} caracteres.",
+      "confirmar": "Anular la aplicación",
+      "feita": "Aplicación anulada.",
+      "horarioFicou": "El horario de la próxima dosis sigue en la agenda. Si ya no vale, cancélelo allí.",
+      "abrirHorario": "Abrir el horario en la agenda",
+      "fechar": "Cerrar",
+      "alterada": "Esta aplicación cambió de ficha (el paciente fue fusionado). Abra la ficha que quedó y anule de nuevo.",
+      "jaAnulada": "Esta aplicación ya fue anulada."
+    },
+    "chamada": {
+      "titulo": "Lista de llamadas",
+      "todas": "Todas",
+      "filtro": "Situación",
+      "situacao": {
+        "VENCIDO": "Vencidas",
+        "SERIE_INCOMPLETA": "Serie abierta",
+        "PROXIMO": "Por vencer"
+      },
+      "venceuHa": "Venció hace {n} día | Venció hace {n} días",
+      "venceHoje": "Vence hoy",
+      "venceEm": "Vence en {n} día | Vence en {n} días",
+      "marcado": "agendado para el {dia}",
+      "vazio": "Nadie para llamar ahora.",
+      "resumo": "A quién llamar: del más atrasado al menos."
+    },
+    "aplicadas": {
+      "titulo": "Aplicadas",
+      "dias": "{n} días",
+      "periodo": "Período",
+      "externa": "de otro lugar",
+      "anulada": "anulada",
+      "vazio": "Ninguna aplicación en este período.",
+      "resumo": "Lo que aplicó la clínica, con el lote y quién aplicó."
+    }
   }
 }

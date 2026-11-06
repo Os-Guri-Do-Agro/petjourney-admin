@@ -11218,5 +11218,142 @@
         "LINFONODOS": "Lymph nodes"
       }
     }
+  },
+  "vacinas": {
+    "titulo": "Vaccines",
+    "verChamada": "See the clinic's call list",
+    "verMais": "See more",
+    "erro": {
+      "carregar": "Could not open the vaccines right now.",
+      "loteVencido": "The batch expired before the application date. Check the expiry or use another batch.",
+      "via": "This route is not one of the vaccine routes.",
+      "repetida": "This vaccine was already given to this patient today.",
+      "foraDeOrdem": "The last dose of this vaccine was on {data}: record in order or void the wrong one.",
+      "foraDaJanela": "The next dose or the time is over 60 days away: the booster goes to the call list.",
+      "semTipo": "The clinic has no active vaccine appointment type to book the next dose.",
+      "especie": "This vaccine is not for the patient's species."
+    },
+    "situacao": {
+      "ATRASADA": "Overdue",
+      "DEVIDA": "Due",
+      "A_VENCER": "Due soon",
+      "NAO_INICIADA": "Not started",
+      "AGUARDA_IDADE": "Waiting for age",
+      "EM_DIA": "Up to date"
+    },
+    "plano": {
+      "resumo": "{atrasadas} overdue and {devidas} due",
+      "emDia": "Nothing overdue or due.",
+      "serieCompleta": "Series complete",
+      "reforco": "booster",
+      "dose": "dose {n} of {total}",
+      "aPartirDe": "Next: {qual}, from {dia}",
+      "marcada": "Next: {qual}, booked for {dia}",
+      "proxima": "Next: {qual} on {dia}",
+      "serie": "{n} of {total} doses given",
+      "aplicar": "Give",
+      "vazio": "No vaccines in this patient's plan.",
+      "eMais": "and {n} more vaccines up to date",
+      "opcionais": "Optional, not started ({n})"
+    },
+    "historico": {
+      "titulo": "History ({n})",
+      "lote": "batch {codigo}",
+      "externa": "elsewhere: {local}",
+      "anulada": "Voided: {motivo}",
+      "truncado": "The history is long: the 300 most recent show."
+    },
+    "recado": {
+      "dose": "{vacina}: dose {dose} of {total} recorded.",
+      "noApp": "It is already on {responsavel}'s app vaccination card.",
+      "marcada": "The next dose was booked on the schedule.",
+      "naoMarcada": "The dose was recorded, but the next appointment was not booked: book it on the schedule.",
+      "aviso": {
+        "LOTE_VENCE_HOJE": "This batch expires today.",
+        "LOTE_VENCENDO": "This batch expires first: use it before the others.",
+        "IDADE_MINIMA_CONFIRMADA": "Given before the minimum age, with the vet's confirmation."
+      }
+    },
+    "lote": {
+      "VENCIDO": "expired",
+      "SEM_VALIDADE": "no expiry",
+      "VENCE_HOJE": "expires today",
+      "VENCENDO": "expires first"
+    },
+    "aplicar": {
+      "titulo": "Give vaccine",
+      "vacina": "Vaccine",
+      "escolher": "Choose the vaccine",
+      "lote": "Batch",
+      "lotesUsados": "Batches already used at this clinic",
+      "codigo": "Batch code",
+      "validade": "Expiry",
+      "via": "Route",
+      "quem": "Given by",
+      "semCrmvNoApp": "In the app, the dose goes without this professional's CRMV: only they, the owner or management confirm it.",
+      "outroDia": "It was given on another day",
+      "dia": "Application date",
+      "observacao": "Note",
+      "marcar": "Book the next dose on the schedule",
+      "marcarDica": "Up to 60 days. The yearly booster goes to the call list.",
+      "proximoDia": "Next dose date",
+      "hora": "Time",
+      "idadeMinima": "The patient is only old enough for this vaccine from {data}.",
+      "mesmoAssim": "Give it anyway",
+      "confirmar": "Give and record"
+    },
+    "externa": {
+      "titulo": "Record from elsewhere",
+      "dica": "A dose the patient got elsewhere, by the date on the paper. No batch: the clinic did not give it. It counts for the plan but does not go to the app as a clinic vaccine.",
+      "dia": "Date on the paper",
+      "local": "Where it was given",
+      "aplicador": "Given by",
+      "procedenciaRotulo": "How the clinic knows",
+      "procedencia": {
+        "COMPROVANTE": "Certificate",
+        "RELATO": "Owner's account"
+      },
+      "semVia": "Route not given",
+      "quemTranscreve": "Recorded by",
+      "confirmar": "Record"
+    },
+    "anular": {
+      "titulo": "Void",
+      "dica": "Nothing is deleted: the dose stays crossed out in the history, and the previous one counts again. In the app, the vaccine is removed and the owner is told.",
+      "motivo": "Reason",
+      "motivoDica": "At least {min} characters.",
+      "confirmar": "Void the application",
+      "feita": "Application voided.",
+      "horarioFicou": "The next dose appointment is still on the schedule. If it no longer applies, cancel it there.",
+      "abrirHorario": "Open the appointment on the schedule",
+      "fechar": "Close",
+      "alterada": "This application moved to another record (the patient was merged). Open the remaining record and void it again.",
+      "jaAnulada": "This application was already voided."
+    },
+    "chamada": {
+      "titulo": "Call list",
+      "todas": "All",
+      "filtro": "Status",
+      "situacao": {
+        "VENCIDO": "Overdue",
+        "SERIE_INCOMPLETA": "Open series",
+        "PROXIMO": "Due soon"
+      },
+      "venceuHa": "Overdue by {n} day | Overdue by {n} days",
+      "venceHoje": "Due today",
+      "venceEm": "Due in {n} day | Due in {n} days",
+      "marcado": "booked for {dia}",
+      "vazio": "No one to call right now.",
+      "resumo": "Who to call: most overdue first."
+    },
+    "aplicadas": {
+      "titulo": "Given",
+      "dias": "{n} days",
+      "periodo": "Period",
+      "externa": "elsewhere",
+      "anulada": "voided",
+      "vazio": "No applications in this period.",
+      "resumo": "What the clinic gave, with the batch and who gave it."
+    }
   }
 }
