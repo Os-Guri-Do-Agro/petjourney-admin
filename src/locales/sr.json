@@ -10503,5 +10503,229 @@
       "DIVERGE_EMAIL": "Imejl iz tabele je drugačiji: ostao je onaj iz evidencije",
       "DIVERGE_CPF": "CPF iz tabele je drugačiji: ostao je onaj iz evidencije"
     }
+  },
+  "agendamentos": {
+    "navegar": "Izaberi period",
+    "diaAnterior": "Prethodni dan",
+    "semanaAnterior": "Prethodna nedelja",
+    "proximoDia": "Sledeći dan",
+    "proximaSemana": "Sledeća nedelja",
+    "escolherDia": "Izaberi dan",
+    "hoje": "Danas",
+    "visao": {
+      "dia": "Dan",
+      "semana": "Nedelja",
+      "rotulo": "Prikaz"
+    },
+    "agrupar": {
+      "rotulo": "Kolone",
+      "PROFISSIONAL": "Po stručnjaku",
+      "SALA": "Po prostoriji"
+    },
+    "exibicao": "Prikaz",
+    "ocultarRiscados": "Sakrij otkazane i nedolaske",
+    "erroAoCarregar": "Nije moguće otvoriti raspored.",
+    "resumo": {
+      "marcados": "{n} zakazan termin | {n} zakazana termina | {n} zakazanih termina",
+      "nenhum": "Nema zakazanih termina"
+    },
+    "gravadoComAviso": "Sačuvano, uz upozorenje",
+    "fechado": "Klinika ne radi ovog dana.",
+    "fechadoNoFeriado": "{nome}: klinika ne radi ovog dana.",
+    "feriadoComHorario": "{nome}: klinika radi od {abre} do {fecha}.",
+    "fechadoTitulo": "Klinika je zatvorena",
+    "vazio": {
+      "titulo": "Niko ne radi ovog dana",
+      "descricao": "Nijedan stručnjak nema radno vreme ni zakazan termin ovog dana.",
+      "semana": "Pogledaj nedelju"
+    },
+    "voltar": "Nazad",
+    "horario": "{inicio} do {fim} · {duracao}",
+    "encaixe": "Ubačen termin",
+    "status": {
+      "AGENDADO": "Zakazano",
+      "CONFIRMADO": "Potvrđeno",
+      "AGUARDANDO": "Čeka",
+      "EM_ATENDIMENTO": "Na pregledu",
+      "FINALIZADO": "Završeno",
+      "FALTA": "Nedolazak",
+      "CANCELADO": "Otkazano"
+    },
+    "origem": {
+      "RECEPCAO": "Recepcija",
+      "APP": "Preko aplikacije",
+      "LINK": "Preko linka",
+      "TELEFONE": "Telefon",
+      "ENCAIXE": "Ubačen termin",
+      "RETORNO": "Kontrola",
+      "FILA": "Lista čekanja"
+    },
+    "porQuem": {
+      "APP": "vlasnik u aplikaciji",
+      "RECEPCAO": "recepcija"
+    },
+    "grade": {
+      "folga": "Slobodan dan",
+      "salaDesativada": "Prostorija deaktivirana",
+      "segurado": "Zadržano"
+    },
+    "semana": {
+      "fechado": "Zatvoreno",
+      "agendados": "{n} termin | {n} termina | {n} termina",
+      "faltas": "{n} nedolazak | {n} nedolaska | {n} nedolazaka",
+      "encaixes": "{n} ubačen termin | {n} ubačena termina | {n} ubačenih termina",
+      "eMais": "i još {n}",
+      "faixa": {
+        "vazio": "Nema zakazanih termina",
+        "tranquilo": "Miran dan",
+        "cheio": "Pun dan",
+        "excedido": "Preko radnog vremena"
+      }
+    },
+    "duracao": {
+      "minutos": "{m} min",
+      "horas": "{h} h",
+      "horasMinutos": "{h} h {m} min",
+      "sufixo": "min"
+    },
+    "conflito": {
+      "professional-overlap": "Preklapa se sa pacijentom {paciente} od {hora}: {minutos} min preklapanja.",
+      "room-overlap": "Prostorija {sala} je u to vreme već zauzeta za pacijenta {paciente}.",
+      "pet-double-book": "{paciente} već ima termin u {hora}.",
+      "block-invasion": "Zalazi {minutos} min u blokirano vreme ({motivo}).",
+      "lunch-overlap": "Zalazi {minutos} min u pauzu za ručak.",
+      "outside-hours": {
+        "padrao": "Van radnog vremena.",
+        "FECHADO": "Klinika ne radi ovog dana.",
+        "FOLGA": "Stručnjak ne radi ovog dana.",
+        "FORA_DO_EXPEDIENTE": "Van radnog vremena stručnjaka, od {abre} do {fecha}.",
+        "FORA_DO_ESTABELECIMENTO": "Van radnog vremena klinike, od {abre} do {fecha}.",
+        "ESTABELECIMENTO_FECHADO": "Klinika je zatvorena u to vreme."
+      },
+      "holiday-closed": "Klinika je zatvorena: {feriado}.",
+      "over-capacity": "Dan stručnjaka dostiže {minutos} zakazanog vremena, iznad {capacidade} radnog vremena.",
+      "type-room-mismatch": {
+        "padrao": "Prostorija nije odgovarajuća za ovaj pregled.",
+        "SALA_INCOMPATIVEL": "Prostorija {sala} nije odgovarajuća za ovaj pregled.",
+        "SALA_INATIVA": "Prostorija {sala} je deaktivirana."
+      },
+      "pedido-pendente": "Termin zadržava {origem} do {hora}.",
+      "origemDoPedido": {
+        "PEDIDO_APP": "zahtev preko aplikacije",
+        "PEDIDO_LINK": "zahtev preko linka",
+        "FILA": "ponuda sa liste čekanja"
+      },
+      "eMais": "I još {n}.",
+      "outro": "Postoji upozorenje za ovaj termin."
+    },
+    "detalhe": {
+      "titulo": "Termin",
+      "responsavel": "Vlasnik: {nome}",
+      "abrirFicha": "Otvori karton",
+      "quando": "Kada",
+      "tipo": "Vrsta pregleda",
+      "profissional": "Stručnjak",
+      "salas": "Prostorija | Prostorije | Prostorije",
+      "situacao": "Status",
+      "avisos": "Upozorenja",
+      "observacao": "Interna napomena",
+      "rastro": "Istorija"
+    },
+    "rastro": {
+      "criado": "Zakazano {quando} ({origem})",
+      "confirmado": "Dolazak potvrđen {quando}, potvrdio: {quem}",
+      "chegada": "Stigao {quando}",
+      "iniciado": "Pregled počeo {quando}",
+      "finalizado": "Pregled završen {quando}",
+      "falta": "Nedolazak zabeležen {quando}",
+      "cancelado": "Otkazano {quando}, otkazao: {quem}: {motivo}"
+    },
+    "acao": {
+      "confirmar": "Potvrdi dolazak",
+      "chegada": "Označi dolazak",
+      "iniciar": "Započni pregled",
+      "editar": "Izmeni",
+      "mudar": "Promeni vreme",
+      "cancelar": "Otkaži",
+      "retorno": "Zakaži kontrolu",
+      "mais": "Još radnji"
+    },
+    "feito": {
+      "confirmar-presenca": "Dolazak potvrđen",
+      "chegada": "Dolazak označen",
+      "iniciar": "Pregled započet",
+      "editar": "Termin ažuriran",
+      "mover": "Vreme promenjeno",
+      "cancelar": "Termin otkazan",
+      "criar": "Termin zakazan"
+    },
+    "desfazer": {
+      "botao": "Poništi",
+      "feito": "Poništeno",
+      "expirado": "Više nije moguće poništiti."
+    },
+    "erros": {
+      "salvar": "Čuvanje nije uspelo. Pokušaj ponovo.",
+      "alterado": "Ovaj termin je promenjen dok si ga menjao. Raspored je ažuriran."
+    },
+    "editar": {
+      "titulo": "Izmeni termin",
+      "semSala": "Izaberi bar jednu prostoriju.",
+      "salasDemais": "Najviše 4 prostorije.",
+      "duracaoInvalida": "Trajanje je od 5 do 480 minuta."
+    },
+    "mudar": {
+      "titulo": "Promeni vreme",
+      "dica": "Izaberi novi dan i vreme. Upozorenja za novo vreme pojavljuju se posle čuvanja.",
+      "salvar": "Promeni vreme",
+      "mesmoAssim": "Promeni ipak"
+    },
+    "cancelar": {
+      "titulo": "Otkaži termin",
+      "dica": "{paciente}, {quando}. Termin ostaje u danu, precrtan.",
+      "motivo": "Razlog",
+      "escolha": "Izaberi razlog",
+      "semMotivo": "Izaberi razlog otkazivanja.",
+      "confirmar": "Otkaži termin",
+      "motivos": {
+        "RESPONSAVEL_DESMARCOU": "Vlasnik je otkazao",
+        "CLINICA_REMARCOU": "Klinika je pomerila termin",
+        "PACIENTE_INDISPONIVEL": "Pacijent ne može da dođe",
+        "DUPLICADO": "Zakazano dvaput",
+        "OUTRO": "Drugi razlog"
+      }
+    },
+    "marcar": {
+      "titulo": "Zakaži termin",
+      "tituloRetorno": "Zakaži kontrolu",
+      "salvar": "Zakaži",
+      "paciente": "Pacijent",
+      "buscarPaciente": "Ime ljubimca, ime vlasnika ili telefon",
+      "escolha": "Izaberi",
+      "dia": "Dan",
+      "hora": "Vreme",
+      "duracao": "Trajanje",
+      "salas": "Prostorije",
+      "origem": "Kako je zatraženo",
+      "observacaoDica": "Vidi je samo tim: nikad ne ide u aplikaciju.",
+      "encaixeDica": "Ubacuje se usred rasporeda, van uobičajenog ritma.",
+      "semEncaixe": "Ova vrsta pregleda ne dozvoljava ubačene termine.",
+      "nesteHorario": "U ovo vreme",
+      "semAviso": "Nema upozorenja u ovo vreme.",
+      "alternativas": "Druga vremena kod stručnjaka {nome} ovog dana",
+      "alternativaComAviso": "{hora}, uz upozorenje",
+      "mesmoAssim": "Zakaži ipak",
+      "sugerir": "Predloži vremena",
+      "sugerirDica": "Izaberi pacijenta i vrstu pregleda da vidiš predloge.",
+      "semSugestao": "Nema slobodnih termina u narednim nedeljama. Probaj drugog stručnjaka.",
+      "buscaInterrompida": "Pretraga je stala pre kraja. Probaj od drugog dana ili sa jednim stručnjakom.",
+      "profissionaisLimitados": "Pretraga je pregledala prvih 30 stručnjaka. Izaberi jednog da vidiš njegova vremena.",
+      "erroDasSugestoes": "Nije moguće potražiti predloge.",
+      "semPaciente": "Izaberi pacijenta.",
+      "semTipo": "Izaberi vrstu pregleda.",
+      "semProfissional": "Izaberi stručnjaka.",
+      "horaInvalida": "Neispravno vreme. Koristi format 09:30.",
+      "abrirOQueFicou": "Otvori karton koji je ostao"
+    }
   }
 }

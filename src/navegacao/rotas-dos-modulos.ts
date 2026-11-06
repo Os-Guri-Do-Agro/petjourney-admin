@@ -32,7 +32,8 @@ export type RotaDeModulo = {
 export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   /* Clínica: a recepção e o dia (E3). */
   { prefixo: '/clinica/meu-dia', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
-  { prefixo: '/clinica/agenda', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  /* A agenda pela API (E3-02, PJ-4BS8TK); a demonstração segue com a de sempre. */
+  { prefixo: '/clinica/agenda', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
   {
     prefixo: '/clinica/pedidos',
     modulo: 'CLINICA',

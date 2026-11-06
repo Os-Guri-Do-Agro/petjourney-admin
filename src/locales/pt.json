@@ -10503,5 +10503,229 @@
       "DIVERGE_EMAIL": "O e-mail da planilha é outro: ficou o do cadastro",
       "DIVERGE_CPF": "O CPF da planilha é outro: ficou o do cadastro"
     }
+  },
+  "agendamentos": {
+    "navegar": "Escolher o período",
+    "diaAnterior": "Dia anterior",
+    "semanaAnterior": "Semana anterior",
+    "proximoDia": "Próximo dia",
+    "proximaSemana": "Próxima semana",
+    "escolherDia": "Escolher o dia",
+    "hoje": "Hoje",
+    "visao": {
+      "dia": "Dia",
+      "semana": "Semana",
+      "rotulo": "Visão"
+    },
+    "agrupar": {
+      "rotulo": "Colunas",
+      "PROFISSIONAL": "Por profissional",
+      "SALA": "Por sala"
+    },
+    "exibicao": "Exibição",
+    "ocultarRiscados": "Esconder cancelados e faltas",
+    "erroAoCarregar": "Não deu para abrir a agenda.",
+    "resumo": {
+      "marcados": "{n} horário marcado | {n} horários marcados",
+      "nenhum": "Nenhum horário marcado"
+    },
+    "gravadoComAviso": "Salvo, com aviso",
+    "fechado": "A clínica não abre neste dia.",
+    "fechadoNoFeriado": "{nome}: a clínica não abre neste dia.",
+    "feriadoComHorario": "{nome}: a clínica abre das {abre} às {fecha}.",
+    "fechadoTitulo": "A clínica está fechada",
+    "vazio": {
+      "titulo": "Ninguém atende neste dia",
+      "descricao": "Nenhum profissional tem expediente nem horário marcado neste dia.",
+      "semana": "Ver a semana"
+    },
+    "voltar": "Voltar",
+    "horario": "{inicio} às {fim} · {duracao}",
+    "encaixe": "Encaixe",
+    "status": {
+      "AGENDADO": "Agendado",
+      "CONFIRMADO": "Confirmado",
+      "AGUARDANDO": "Aguardando",
+      "EM_ATENDIMENTO": "Em atendimento",
+      "FINALIZADO": "Finalizado",
+      "FALTA": "Falta",
+      "CANCELADO": "Cancelado"
+    },
+    "origem": {
+      "RECEPCAO": "Recepção",
+      "APP": "Pelo app",
+      "LINK": "Pelo link",
+      "TELEFONE": "Telefone",
+      "ENCAIXE": "Encaixe",
+      "RETORNO": "Retorno",
+      "FILA": "Fila de espera"
+    },
+    "porQuem": {
+      "APP": "pelo responsável no app",
+      "RECEPCAO": "pela recepção"
+    },
+    "grade": {
+      "folga": "Folga",
+      "salaDesativada": "Sala desativada",
+      "segurado": "Segurado"
+    },
+    "semana": {
+      "fechado": "Fechado",
+      "agendados": "{n} horário | {n} horários",
+      "faltas": "{n} falta | {n} faltas",
+      "encaixes": "{n} encaixe | {n} encaixes",
+      "eMais": "e mais {n}",
+      "faixa": {
+        "vazio": "Sem horário marcado",
+        "tranquilo": "Dia tranquilo",
+        "cheio": "Dia cheio",
+        "excedido": "Acima do expediente"
+      }
+    },
+    "duracao": {
+      "minutos": "{m} min",
+      "horas": "{h} h",
+      "horasMinutos": "{h} h {m} min",
+      "sufixo": "min"
+    },
+    "conflito": {
+      "professional-overlap": "Sobrepõe {paciente}, das {hora}: {minutos} min em comum.",
+      "room-overlap": "A sala {sala} já está com {paciente} neste horário.",
+      "pet-double-book": "{paciente} já tem horário às {hora}.",
+      "block-invasion": "Entra {minutos} min num horário bloqueado ({motivo}).",
+      "lunch-overlap": "Atravessa o almoço por {minutos} min.",
+      "outside-hours": {
+        "padrao": "Fora do expediente.",
+        "FECHADO": "A clínica não abre neste dia.",
+        "FOLGA": "O profissional não trabalha neste dia.",
+        "FORA_DO_EXPEDIENTE": "Fora do expediente do profissional, das {abre} às {fecha}.",
+        "FORA_DO_ESTABELECIMENTO": "Fora do horário da clínica, das {abre} às {fecha}.",
+        "ESTABELECIMENTO_FECHADO": "A clínica está fechada neste horário."
+      },
+      "holiday-closed": "A clínica está fechada: {feriado}.",
+      "over-capacity": "O dia do profissional fica com {minutos} marcados, acima de {capacidade} de expediente.",
+      "type-room-mismatch": {
+        "padrao": "A sala não é a indicada para este atendimento.",
+        "SALA_INCOMPATIVEL": "A sala {sala} não é a indicada para este atendimento.",
+        "SALA_INATIVA": "A sala {sala} foi desativada."
+      },
+      "pedido-pendente": "Horário segurado por {origem} até as {hora}.",
+      "origemDoPedido": {
+        "PEDIDO_APP": "um pedido pelo app",
+        "PEDIDO_LINK": "um pedido pelo link",
+        "FILA": "uma oferta da fila"
+      },
+      "eMais": "E mais {n}.",
+      "outro": "Há um aviso neste horário."
+    },
+    "detalhe": {
+      "titulo": "Horário",
+      "responsavel": "Responsável: {nome}",
+      "abrirFicha": "Abrir a ficha",
+      "quando": "Quando",
+      "tipo": "Atendimento",
+      "profissional": "Profissional",
+      "salas": "Sala | Salas",
+      "situacao": "Situação",
+      "avisos": "Avisos",
+      "observacao": "Observação interna",
+      "rastro": "Histórico"
+    },
+    "rastro": {
+      "criado": "Marcado em {quando} ({origem})",
+      "confirmado": "Presença confirmada em {quando}, {quem}",
+      "chegada": "Chegou em {quando}",
+      "iniciado": "Atendimento começou em {quando}",
+      "finalizado": "Atendimento terminou em {quando}",
+      "falta": "Falta marcada em {quando}",
+      "cancelado": "Cancelado em {quando}, {quem}: {motivo}"
+    },
+    "acao": {
+      "confirmar": "Confirmar presença",
+      "chegada": "Marcar chegada",
+      "iniciar": "Iniciar atendimento",
+      "editar": "Editar",
+      "mudar": "Mudar horário",
+      "cancelar": "Cancelar",
+      "retorno": "Marcar retorno",
+      "mais": "Mais ações"
+    },
+    "feito": {
+      "confirmar-presenca": "Presença confirmada",
+      "chegada": "Chegada marcada",
+      "iniciar": "Atendimento iniciado",
+      "editar": "Horário atualizado",
+      "mover": "Horário mudado",
+      "cancelar": "Horário cancelado",
+      "criar": "Horário marcado"
+    },
+    "desfazer": {
+      "botao": "Desfazer",
+      "feito": "Desfeito",
+      "expirado": "Não dá mais para desfazer."
+    },
+    "erros": {
+      "salvar": "Não deu para salvar. Tente de novo.",
+      "alterado": "Este horário mudou enquanto você mexia. A agenda foi atualizada."
+    },
+    "editar": {
+      "titulo": "Editar horário",
+      "semSala": "Escolha ao menos uma sala.",
+      "salasDemais": "No máximo 4 salas.",
+      "duracaoInvalida": "A duração vai de 5 a 480 minutos."
+    },
+    "mudar": {
+      "titulo": "Mudar horário",
+      "dica": "Escolha o novo dia e a hora. Os avisos do horário novo aparecem depois de salvar.",
+      "salvar": "Mudar horário",
+      "mesmoAssim": "Mudar mesmo assim"
+    },
+    "cancelar": {
+      "titulo": "Cancelar horário",
+      "dica": "{paciente}, {quando}. O horário fica no dia, riscado.",
+      "motivo": "Motivo",
+      "escolha": "Escolha o motivo",
+      "semMotivo": "Escolha o motivo do cancelamento.",
+      "confirmar": "Cancelar o horário",
+      "motivos": {
+        "RESPONSAVEL_DESMARCOU": "O responsável desmarcou",
+        "CLINICA_REMARCOU": "A clínica remarcou",
+        "PACIENTE_INDISPONIVEL": "O paciente não pode vir",
+        "DUPLICADO": "Marcado em dobro",
+        "OUTRO": "Outro motivo"
+      }
+    },
+    "marcar": {
+      "titulo": "Marcar horário",
+      "tituloRetorno": "Marcar retorno",
+      "salvar": "Marcar",
+      "paciente": "Paciente",
+      "buscarPaciente": "Nome do pet, do responsável ou telefone",
+      "escolha": "Escolha",
+      "dia": "Dia",
+      "hora": "Hora",
+      "duracao": "Duração",
+      "salas": "Salas",
+      "origem": "Como pediu",
+      "observacaoDica": "Só a equipe vê: nunca vai ao app.",
+      "encaixeDica": "Entra no meio da agenda, fora do ritmo normal.",
+      "semEncaixe": "Este atendimento não aceita encaixe.",
+      "nesteHorario": "Neste horário",
+      "semAviso": "Sem aviso neste horário.",
+      "alternativas": "Outros horários com {nome} neste dia",
+      "alternativaComAviso": "{hora}, com aviso",
+      "mesmoAssim": "Marcar mesmo assim",
+      "sugerir": "Sugerir horários",
+      "sugerirDica": "Escolha o paciente e o atendimento para ver sugestões.",
+      "semSugestao": "Nenhum horário livre nas próximas semanas. Tente outro profissional.",
+      "buscaInterrompida": "A busca parou antes do fim. Tente a partir de outro dia ou com um profissional.",
+      "profissionaisLimitados": "A busca olhou os 30 primeiros profissionais. Escolha um para ver os horários dele.",
+      "erroDasSugestoes": "Não deu para buscar sugestões.",
+      "semPaciente": "Escolha o paciente.",
+      "semTipo": "Escolha o atendimento.",
+      "semProfissional": "Escolha o profissional.",
+      "horaInvalida": "Hora inválida. Use o formato 09:30.",
+      "abrirOQueFicou": "Abrir o cadastro que ficou"
+    }
   }
 }

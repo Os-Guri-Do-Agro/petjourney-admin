@@ -10503,5 +10503,229 @@
       "DIVERGE_EMAIL": "البريد في الجدول مختلف: بقي بريد السجل",
       "DIVERGE_CPF": "CPF في الجدول مختلف: بقي CPF السجل"
     }
+  },
+  "agendamentos": {
+    "navegar": "اختيار الفترة",
+    "diaAnterior": "اليوم السابق",
+    "semanaAnterior": "الأسبوع السابق",
+    "proximoDia": "اليوم التالي",
+    "proximaSemana": "الأسبوع التالي",
+    "escolherDia": "اختيار اليوم",
+    "hoje": "اليوم",
+    "visao": {
+      "dia": "يوم",
+      "semana": "أسبوع",
+      "rotulo": "العرض"
+    },
+    "agrupar": {
+      "rotulo": "الأعمدة",
+      "PROFISSIONAL": "حسب المختص",
+      "SALA": "حسب الغرفة"
+    },
+    "exibicao": "العرض",
+    "ocultarRiscados": "إخفاء الملغاة وحالات عدم الحضور",
+    "erroAoCarregar": "تعذّر فتح جدول المواعيد.",
+    "resumo": {
+      "marcados": "لا مواعيد محجوزة | موعد واحد محجوز | موعدان محجوزان | {n} مواعيد محجوزة | {n} موعدًا محجوزًا | {n} موعد محجوز",
+      "nenhum": "لا مواعيد محجوزة"
+    },
+    "gravadoComAviso": "تم الحفظ، مع تنبيه",
+    "fechado": "العيادة لا تفتح في هذا اليوم.",
+    "fechadoNoFeriado": "{nome}: العيادة لا تفتح في هذا اليوم.",
+    "feriadoComHorario": "{nome}: تفتح العيادة من {abre} إلى {fecha}.",
+    "fechadoTitulo": "العيادة مغلقة",
+    "vazio": {
+      "titulo": "لا أحد يعمل في هذا اليوم",
+      "descricao": "لا يوجد مختص لديه ساعات عمل أو موعد محجوز في هذا اليوم.",
+      "semana": "عرض الأسبوع"
+    },
+    "voltar": "رجوع",
+    "horario": "{inicio} إلى {fim} · {duracao}",
+    "encaixe": "موعد إضافي",
+    "status": {
+      "AGENDADO": "مجدول",
+      "CONFIRMADO": "مؤكد",
+      "AGUARDANDO": "في الانتظار",
+      "EM_ATENDIMENTO": "الزيارة جارية",
+      "FINALIZADO": "مكتمل",
+      "FALTA": "عدم الحضور",
+      "CANCELADO": "ملغى"
+    },
+    "origem": {
+      "RECEPCAO": "الاستقبال",
+      "APP": "عبر التطبيق",
+      "LINK": "عبر الرابط",
+      "TELEFONE": "الهاتف",
+      "ENCAIXE": "موعد إضافي",
+      "RETORNO": "متابعة",
+      "FILA": "قائمة الانتظار"
+    },
+    "porQuem": {
+      "APP": "من المسؤول عبر التطبيق",
+      "RECEPCAO": "من الاستقبال"
+    },
+    "grade": {
+      "folga": "يوم راحة",
+      "salaDesativada": "غرفة معطّلة",
+      "segurado": "محجوز مؤقتًا"
+    },
+    "semana": {
+      "fechado": "مغلق",
+      "agendados": "لا مواعيد | موعد واحد | موعدان | {n} مواعيد | {n} موعدًا | {n} موعد",
+      "faltas": "لا حالات عدم حضور | حالة عدم حضور واحدة | حالتا عدم حضور | {n} حالات عدم حضور | {n} حالة عدم حضور | {n} حالة عدم حضور",
+      "encaixes": "لا مواعيد إضافية | موعد إضافي واحد | موعدان إضافيان | {n} مواعيد إضافية | {n} موعدًا إضافيًا | {n} موعد إضافي",
+      "eMais": "و{n} غيرها",
+      "faixa": {
+        "vazio": "لا مواعيد محجوزة",
+        "tranquilo": "يوم هادئ",
+        "cheio": "يوم ممتلئ",
+        "excedido": "يتجاوز ساعات العمل"
+      }
+    },
+    "duracao": {
+      "minutos": "{m} دقيقة",
+      "horas": "{h} ساعة",
+      "horasMinutos": "{h} ساعة و{m} دقيقة",
+      "sufixo": "دقيقة"
+    },
+    "conflito": {
+      "professional-overlap": "يتداخل مع موعد {paciente} في {hora}، ومدة التداخل {minutos} دقيقة.",
+      "room-overlap": "الغرفة {sala} يشغلها {paciente} بالفعل في هذا الوقت.",
+      "pet-double-book": "لدى {paciente} موعد بالفعل في {hora}.",
+      "block-invasion": "يتداخل مع وقت محجوب ({motivo}) لمدة {minutos} دقيقة.",
+      "lunch-overlap": "يمتد إلى استراحة الغداء بمقدار {minutos} دقيقة.",
+      "outside-hours": {
+        "padrao": "خارج ساعات العمل.",
+        "FECHADO": "العيادة لا تفتح في هذا اليوم.",
+        "FOLGA": "المختص لا يعمل في هذا اليوم.",
+        "FORA_DO_EXPEDIENTE": "خارج ساعات عمل المختص، من {abre} إلى {fecha}.",
+        "FORA_DO_ESTABELECIMENTO": "خارج ساعات عمل العيادة، من {abre} إلى {fecha}.",
+        "ESTABELECIMENTO_FECHADO": "العيادة مغلقة في هذا الوقت."
+      },
+      "holiday-closed": "العيادة مغلقة: {feriado}.",
+      "over-capacity": "يصل يوم المختص إلى {minutos} من المواعيد، متجاوزًا {capacidade} من ساعات العمل.",
+      "type-room-mismatch": {
+        "padrao": "الغرفة ليست المناسبة لهذه الزيارة.",
+        "SALA_INCOMPATIVEL": "الغرفة {sala} ليست المناسبة لهذه الزيارة.",
+        "SALA_INATIVA": "تم تعطيل الغرفة {sala}."
+      },
+      "pedido-pendente": "الوقت محجوز مؤقتًا بسبب {origem} حتى {hora}.",
+      "origemDoPedido": {
+        "PEDIDO_APP": "طلب عبر التطبيق",
+        "PEDIDO_LINK": "طلب عبر الرابط",
+        "FILA": "عرض من قائمة الانتظار"
+      },
+      "eMais": "و{n} غيرها.",
+      "outro": "يوجد تنبيه في هذا الوقت."
+    },
+    "detalhe": {
+      "titulo": "الموعد",
+      "responsavel": "المسؤول: {nome}",
+      "abrirFicha": "فتح الملف",
+      "quando": "الموعد",
+      "tipo": "نوع الزيارة",
+      "profissional": "المختص",
+      "salas": "لا غرف | الغرفة | الغرفتان | الغرف | الغرف | الغرف",
+      "situacao": "الحالة",
+      "avisos": "التنبيهات",
+      "observacao": "ملاحظة داخلية",
+      "rastro": "السجل"
+    },
+    "rastro": {
+      "criado": "حُجز في {quando} ({origem})",
+      "confirmado": "تأكد الحضور في {quando}، {quem}",
+      "chegada": "وصل في {quando}",
+      "iniciado": "بدأت الزيارة في {quando}",
+      "finalizado": "انتهت الزيارة في {quando}",
+      "falta": "سُجّل عدم الحضور في {quando}",
+      "cancelado": "أُلغي في {quando}، {quem}: {motivo}"
+    },
+    "acao": {
+      "confirmar": "تأكيد الحضور",
+      "chegada": "تسجيل الوصول",
+      "iniciar": "بدء الزيارة",
+      "editar": "تعديل",
+      "mudar": "تغيير الوقت",
+      "cancelar": "إلغاء",
+      "retorno": "حجز متابعة",
+      "mais": "إجراءات أخرى"
+    },
+    "feito": {
+      "confirmar-presenca": "تم تأكيد الحضور",
+      "chegada": "تم تسجيل الوصول",
+      "iniciar": "بدأت الزيارة",
+      "editar": "تم تحديث الموعد",
+      "mover": "تم تغيير الوقت",
+      "cancelar": "تم إلغاء الموعد",
+      "criar": "تم حجز الموعد"
+    },
+    "desfazer": {
+      "botao": "تراجع",
+      "feito": "تم التراجع",
+      "expirado": "لم يعد التراجع ممكنًا."
+    },
+    "erros": {
+      "salvar": "تعذّر الحفظ. حاول مرة أخرى.",
+      "alterado": "تغيّر هذا الموعد أثناء تعديلك له. تم تحديث جدول المواعيد."
+    },
+    "editar": {
+      "titulo": "تعديل الموعد",
+      "semSala": "اختر غرفة واحدة على الأقل.",
+      "salasDemais": "4 غرف كحد أقصى.",
+      "duracaoInvalida": "المدة من 5 إلى 480 دقيقة."
+    },
+    "mudar": {
+      "titulo": "تغيير الوقت",
+      "dica": "اختر اليوم والوقت الجديدين. تظهر تنبيهات الوقت الجديد بعد الحفظ.",
+      "salvar": "تغيير الوقت",
+      "mesmoAssim": "تغيير على أي حال"
+    },
+    "cancelar": {
+      "titulo": "إلغاء الموعد",
+      "dica": "{paciente}، {quando}. يبقى الموعد في اليوم مشطوبًا.",
+      "motivo": "السبب",
+      "escolha": "اختر السبب",
+      "semMotivo": "اختر سبب الإلغاء.",
+      "confirmar": "إلغاء الموعد",
+      "motivos": {
+        "RESPONSAVEL_DESMARCOU": "ألغاه المسؤول",
+        "CLINICA_REMARCOU": "أعادت العيادة جدولته",
+        "PACIENTE_INDISPONIVEL": "المريض لا يستطيع الحضور",
+        "DUPLICADO": "حُجز مرتين",
+        "OUTRO": "سبب آخر"
+      }
+    },
+    "marcar": {
+      "titulo": "حجز موعد",
+      "tituloRetorno": "حجز متابعة",
+      "salvar": "حجز",
+      "paciente": "المريض",
+      "buscarPaciente": "اسم الحيوان أو المسؤول أو الهاتف",
+      "escolha": "اختر",
+      "dia": "اليوم",
+      "hora": "الوقت",
+      "duracao": "المدة",
+      "salas": "الغرف",
+      "origem": "طريقة الطلب",
+      "observacaoDica": "يراها الفريق فقط: لا تصل إلى التطبيق أبدًا.",
+      "encaixeDica": "يدخل في وسط الجدول، خارج الإيقاع المعتاد.",
+      "semEncaixe": "نوع الزيارة هذا لا يقبل المواعيد الإضافية.",
+      "nesteHorario": "في هذا الوقت",
+      "semAviso": "لا تنبيهات في هذا الوقت.",
+      "alternativas": "أوقات أخرى مع {nome} في هذا اليوم",
+      "alternativaComAviso": "{hora}، مع تنبيه",
+      "mesmoAssim": "حجز على أي حال",
+      "sugerir": "اقتراح أوقات",
+      "sugerirDica": "اختر المريض ونوع الزيارة لرؤية الاقتراحات.",
+      "semSugestao": "لا أوقات متاحة في الأسابيع القادمة. جرّب مختصًا آخر.",
+      "buscaInterrompida": "توقف البحث قبل النهاية. جرّب من يوم آخر أو مع مختص واحد.",
+      "profissionaisLimitados": "راجع البحث أول 30 مختصًا. اختر مختصًا لرؤية أوقاته.",
+      "erroDasSugestoes": "تعذّر البحث عن اقتراحات.",
+      "semPaciente": "اختر المريض.",
+      "semTipo": "اختر نوع الزيارة.",
+      "semProfissional": "اختر المختص.",
+      "horaInvalida": "وقت غير صالح. استخدم الصيغة 09:30.",
+      "abrirOQueFicou": "فتح الملف المتبقي"
+    }
   }
 }

@@ -10503,5 +10503,229 @@
       "DIVERGE_EMAIL": "The spreadsheet's email differs: the record's was kept",
       "DIVERGE_CPF": "The spreadsheet's CPF differs: the record's was kept"
     }
+  },
+  "agendamentos": {
+    "navegar": "Choose the period",
+    "diaAnterior": "Previous day",
+    "semanaAnterior": "Previous week",
+    "proximoDia": "Next day",
+    "proximaSemana": "Next week",
+    "escolherDia": "Choose the day",
+    "hoje": "Today",
+    "visao": {
+      "dia": "Day",
+      "semana": "Week",
+      "rotulo": "View"
+    },
+    "agrupar": {
+      "rotulo": "Columns",
+      "PROFISSIONAL": "By professional",
+      "SALA": "By room"
+    },
+    "exibicao": "Display",
+    "ocultarRiscados": "Hide canceled and no-shows",
+    "erroAoCarregar": "Couldn't open the schedule.",
+    "resumo": {
+      "marcados": "{n} appointment booked | {n} appointments booked",
+      "nenhum": "No appointments booked"
+    },
+    "gravadoComAviso": "Saved, with a warning",
+    "fechado": "The clinic doesn't open on this day.",
+    "fechadoNoFeriado": "{nome}: the clinic doesn't open on this day.",
+    "feriadoComHorario": "{nome}: the clinic opens from {abre} to {fecha}.",
+    "fechadoTitulo": "The clinic is closed",
+    "vazio": {
+      "titulo": "No one is working this day",
+      "descricao": "No professional has working hours or a booked appointment on this day.",
+      "semana": "See the week"
+    },
+    "voltar": "Back",
+    "horario": "{inicio} to {fim} · {duracao}",
+    "encaixe": "Squeeze-in",
+    "status": {
+      "AGENDADO": "Scheduled",
+      "CONFIRMADO": "Confirmed",
+      "AGUARDANDO": "Waiting",
+      "EM_ATENDIMENTO": "In consult",
+      "FINALIZADO": "Completed",
+      "FALTA": "No-show",
+      "CANCELADO": "Canceled"
+    },
+    "origem": {
+      "RECEPCAO": "Front desk",
+      "APP": "Through the app",
+      "LINK": "Through the link",
+      "TELEFONE": "Phone",
+      "ENCAIXE": "Squeeze-in",
+      "RETORNO": "Follow-up",
+      "FILA": "Waiting list"
+    },
+    "porQuem": {
+      "APP": "by the owner in the app",
+      "RECEPCAO": "by the front desk"
+    },
+    "grade": {
+      "folga": "Day off",
+      "salaDesativada": "Room deactivated",
+      "segurado": "On hold"
+    },
+    "semana": {
+      "fechado": "Closed",
+      "agendados": "{n} appointment | {n} appointments",
+      "faltas": "{n} no-show | {n} no-shows",
+      "encaixes": "{n} squeeze-in | {n} squeeze-ins",
+      "eMais": "and {n} more",
+      "faixa": {
+        "vazio": "No appointments booked",
+        "tranquilo": "Quiet day",
+        "cheio": "Full day",
+        "excedido": "Over working hours"
+      }
+    },
+    "duracao": {
+      "minutos": "{m} min",
+      "horas": "{h} h",
+      "horasMinutos": "{h} h {m} min",
+      "sufixo": "min"
+    },
+    "conflito": {
+      "professional-overlap": "Overlaps {paciente}, from {hora}: {minutos} min in common.",
+      "room-overlap": "Room {sala} already has {paciente} at this time.",
+      "pet-double-book": "{paciente} already has an appointment at {hora}.",
+      "block-invasion": "Runs {minutos} min into blocked time ({motivo}).",
+      "lunch-overlap": "Crosses the lunch break by {minutos} min.",
+      "outside-hours": {
+        "padrao": "Outside working hours.",
+        "FECHADO": "The clinic doesn't open on this day.",
+        "FOLGA": "The professional doesn't work on this day.",
+        "FORA_DO_EXPEDIENTE": "Outside the professional's hours, {abre} to {fecha}.",
+        "FORA_DO_ESTABELECIMENTO": "Outside the clinic's hours, {abre} to {fecha}.",
+        "ESTABELECIMENTO_FECHADO": "The clinic is closed at this time."
+      },
+      "holiday-closed": "The clinic is closed: {feriado}.",
+      "over-capacity": "The professional's day reaches {minutos} booked, above {capacidade} of working hours.",
+      "type-room-mismatch": {
+        "padrao": "The room isn't the right one for this appointment.",
+        "SALA_INCOMPATIVEL": "Room {sala} isn't the right one for this appointment.",
+        "SALA_INATIVA": "Room {sala} was deactivated."
+      },
+      "pedido-pendente": "Time held by {origem} until {hora}.",
+      "origemDoPedido": {
+        "PEDIDO_APP": "a request through the app",
+        "PEDIDO_LINK": "a request through the link",
+        "FILA": "a waiting list offer"
+      },
+      "eMais": "And {n} more.",
+      "outro": "There is a warning at this time."
+    },
+    "detalhe": {
+      "titulo": "Appointment",
+      "responsavel": "Owner: {nome}",
+      "abrirFicha": "Open the record",
+      "quando": "When",
+      "tipo": "Appointment type",
+      "profissional": "Professional",
+      "salas": "Room | Rooms",
+      "situacao": "Status",
+      "avisos": "Warnings",
+      "observacao": "Internal note",
+      "rastro": "History"
+    },
+    "rastro": {
+      "criado": "Booked on {quando} ({origem})",
+      "confirmado": "Attendance confirmed on {quando}, {quem}",
+      "chegada": "Arrived on {quando}",
+      "iniciado": "Consult started on {quando}",
+      "finalizado": "Consult ended on {quando}",
+      "falta": "No-show recorded on {quando}",
+      "cancelado": "Canceled on {quando}, {quem}: {motivo}"
+    },
+    "acao": {
+      "confirmar": "Confirm attendance",
+      "chegada": "Mark arrival",
+      "iniciar": "Start consult",
+      "editar": "Edit",
+      "mudar": "Change time",
+      "cancelar": "Cancel",
+      "retorno": "Book follow-up",
+      "mais": "More actions"
+    },
+    "feito": {
+      "confirmar-presenca": "Attendance confirmed",
+      "chegada": "Arrival marked",
+      "iniciar": "Consult started",
+      "editar": "Appointment updated",
+      "mover": "Time changed",
+      "cancelar": "Appointment canceled",
+      "criar": "Appointment booked"
+    },
+    "desfazer": {
+      "botao": "Undo",
+      "feito": "Undone",
+      "expirado": "It's too late to undo."
+    },
+    "erros": {
+      "salvar": "Couldn't save. Try again.",
+      "alterado": "This appointment changed while you were editing it. The schedule was updated."
+    },
+    "editar": {
+      "titulo": "Edit appointment",
+      "semSala": "Choose at least one room.",
+      "salasDemais": "At most 4 rooms.",
+      "duracaoInvalida": "The duration goes from 5 to 480 minutes."
+    },
+    "mudar": {
+      "titulo": "Change time",
+      "dica": "Choose the new day and time. Warnings for the new time show up after saving.",
+      "salvar": "Change time",
+      "mesmoAssim": "Change anyway"
+    },
+    "cancelar": {
+      "titulo": "Cancel appointment",
+      "dica": "{paciente}, {quando}. The appointment stays on the day, struck through.",
+      "motivo": "Reason",
+      "escolha": "Choose the reason",
+      "semMotivo": "Choose the reason for canceling.",
+      "confirmar": "Cancel the appointment",
+      "motivos": {
+        "RESPONSAVEL_DESMARCOU": "The owner canceled",
+        "CLINICA_REMARCOU": "The clinic rescheduled",
+        "PACIENTE_INDISPONIVEL": "The patient can't come",
+        "DUPLICADO": "Booked twice",
+        "OUTRO": "Other reason"
+      }
+    },
+    "marcar": {
+      "titulo": "Book appointment",
+      "tituloRetorno": "Book follow-up",
+      "salvar": "Book",
+      "paciente": "Patient",
+      "buscarPaciente": "Pet's name, owner's name or phone",
+      "escolha": "Choose",
+      "dia": "Day",
+      "hora": "Time",
+      "duracao": "Duration",
+      "salas": "Rooms",
+      "origem": "How it was requested",
+      "observacaoDica": "Only the team sees it: it never goes to the app.",
+      "encaixeDica": "Fits in the middle of the schedule, outside the usual pace.",
+      "semEncaixe": "This appointment type doesn't allow squeeze-ins.",
+      "nesteHorario": "At this time",
+      "semAviso": "No warnings at this time.",
+      "alternativas": "Other times with {nome} on this day",
+      "alternativaComAviso": "{hora}, with a warning",
+      "mesmoAssim": "Book anyway",
+      "sugerir": "Suggest times",
+      "sugerirDica": "Choose the patient and the appointment type to see suggestions.",
+      "semSugestao": "No free time in the coming weeks. Try another professional.",
+      "buscaInterrompida": "The search stopped before the end. Try from another day or with one professional.",
+      "profissionaisLimitados": "The search looked at the first 30 professionals. Choose one to see their times.",
+      "erroDasSugestoes": "Couldn't look for suggestions.",
+      "semPaciente": "Choose the patient.",
+      "semTipo": "Choose the appointment type.",
+      "semProfissional": "Choose the professional.",
+      "horaInvalida": "Invalid time. Use the format 09:30.",
+      "abrirOQueFicou": "Open the remaining record"
+    }
   }
 }
