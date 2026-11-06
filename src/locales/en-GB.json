@@ -10728,6 +10728,32 @@
       "semProfissional": "Choose the professional.",
       "horaInvalida": "Invalid time. Use the format 09:30.",
       "abrirOQueFicou": "Open the remaining record"
+    },
+    "preConsulta": {
+      "titulo": "Pre-visit form",
+      "dica": "What the owner told you in the app before the visit. Reading it is logged for them.",
+      "ver": "View the pre-visit form",
+      "erro": "Could not read the pre-visit form right now.",
+      "respondidaEm": "Answered on {quando}",
+      "abreEm": "The app opens the pre-visit form on {quando}.",
+      "naoAbriu": "The app has not opened the pre-visit form yet.",
+      "naoRespondeu": "The owner did not answer before the visit.",
+      "aindaNao": "The owner has not answered yet.",
+      "editada": "edited on {quando}",
+      "evolucao": {
+        "PIORANDO": "Getting worse",
+        "ESTAVEL": "The same",
+        "MELHORANDO": "Getting better",
+        "VAI_E_VOLTA": "Comes and goes"
+      },
+      "pesoDeCasa": "Weight at home",
+      "peso": "{peso} kg",
+      "pesoEm": "{peso} kg, weighed on {dia}",
+      "pesoNaoVaiAosVitais": "Home scale weight: confirm it at the clinic before recording vitals.",
+      "abrirFoto": "Open photo {n}",
+      "fotoIndisponivel": "Photo unavailable right now",
+      "recorte": "The rest is for whoever reads the medical record.",
+      "observacao": "Anything else, in the owner's words"
     }
   },
   "faltas": {

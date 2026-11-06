@@ -27,6 +27,7 @@ import { horaNoFuso, ordenarConflitos } from '@/components/agendamentos/leitura-
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import PreConsultaDoHorario from '@/components/agendamentos/PreConsultaDoHorario.vue'
 import FaltaDoHorario from '@/components/faltas/FaltaDoHorario.vue'
 import JustificativaCampos from '@/components/faltas/JustificativaCampos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -668,6 +669,13 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             </li>
           </ul>
         </section>
+
+        <!-- A pré-consulta do app (E3-07): recolhida até alguém pedir para ler. -->
+        <PreConsultaDoHorario
+          v-if="ag.status !== 'CANCELADO'"
+          :agendamento-id="ag.id"
+          :fuso="fuso"
+        />
 
         <!-- A falta: em que pé está, os registros, o contato e o reagendar. -->
         <FaltaDoHorario

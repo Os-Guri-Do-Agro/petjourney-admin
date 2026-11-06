@@ -10728,6 +10728,32 @@
       "semProfissional": "Izaberi stručnjaka.",
       "horaInvalida": "Neispravno vreme. Koristi format 09:30.",
       "abrirOQueFicou": "Otvori karton koji je ostao"
+    },
+    "preConsulta": {
+      "titulo": "Upitnik pre pregleda",
+      "dica": "Ono što je odgovorna osoba napisala u aplikaciji pre pregleda. Čitanje se beleži i ona ga vidi.",
+      "ver": "Prikaži upitnik",
+      "erro": "Upitnik trenutno ne može da se učita.",
+      "respondidaEm": "Odgovoreno {quando}",
+      "abreEm": "Aplikacija otvara upitnik {quando}.",
+      "naoAbriu": "Aplikacija još nije otvorila upitnik.",
+      "naoRespondeu": "Odgovorna osoba nije odgovorila pre pregleda.",
+      "aindaNao": "Odgovorna osoba još nije odgovorila.",
+      "editada": "izmenjeno {quando}",
+      "evolucao": {
+        "PIORANDO": "Pogoršava se",
+        "ESTAVEL": "Isto je",
+        "MELHORANDO": "Poboljšava se",
+        "VAI_E_VOLTA": "Dolazi i prolazi"
+      },
+      "pesoDeCasa": "Težina kod kuće",
+      "peso": "{peso} kg",
+      "pesoEm": "{peso} kg, mereno {dia}",
+      "pesoNaoVaiAosVitais": "Težina sa kućne vage: proverite je u klinici pre upisa u vitalne znake.",
+      "abrirFoto": "Otvori fotografiju {n}",
+      "fotoIndisponivel": "Fotografija trenutno nije dostupna",
+      "recorte": "Ostalo vidi samo onaj ko čita karton.",
+      "observacao": "Još nešto, rečima odgovorne osobe"
     }
   },
   "faltas": {

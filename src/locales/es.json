@@ -10728,6 +10728,32 @@
       "semProfissional": "Elige el profesional.",
       "horaInvalida": "Hora inválida. Usa el formato 09:30.",
       "abrirOQueFicou": "Abrir el registro que quedó"
+    },
+    "preConsulta": {
+      "titulo": "Preconsulta",
+      "dica": "Lo que el responsable contó en la app antes de la consulta. La lectura queda registrada para él.",
+      "ver": "Ver la preconsulta",
+      "erro": "No se pudo leer la preconsulta ahora.",
+      "respondidaEm": "Respondida el {quando}",
+      "abreEm": "La app abre la preconsulta el {quando}.",
+      "naoAbriu": "La app aún no abrió la preconsulta.",
+      "naoRespondeu": "El responsable no respondió antes de la consulta.",
+      "aindaNao": "El responsable aún no respondió.",
+      "editada": "editada el {quando}",
+      "evolucao": {
+        "PIORANDO": "Empeorando",
+        "ESTAVEL": "Igual",
+        "MELHORANDO": "Mejorando",
+        "VAI_E_VOLTA": "Va y viene"
+      },
+      "pesoDeCasa": "Peso en casa",
+      "peso": "{peso} kg",
+      "pesoEm": "{peso} kg, pesado el {dia}",
+      "pesoNaoVaiAosVitais": "Peso de la balanza de casa: confírmelo en la clínica antes de anotarlo en los signos vitales.",
+      "abrirFoto": "Abrir la foto {n}",
+      "fotoIndisponivel": "Foto no disponible ahora",
+      "recorte": "El resto queda para quien lee la historia clínica.",
+      "observacao": "Algo más, en palabras del responsable"
     }
   },
   "faltas": {

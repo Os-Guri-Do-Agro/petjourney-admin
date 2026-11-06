@@ -10728,6 +10728,32 @@
       "semProfissional": "Escolha o profissional.",
       "horaInvalida": "Hora inválida. Use o formato 09:30.",
       "abrirOQueFicou": "Abrir o cadastro que ficou"
+    },
+    "preConsulta": {
+      "titulo": "Pré-consulta",
+      "dica": "O que o responsável contou pelo app antes da consulta. A leitura fica registrada para ele.",
+      "ver": "Ver a pré-consulta",
+      "erro": "Não deu para ler a pré-consulta agora.",
+      "respondidaEm": "Respondida em {quando}",
+      "abreEm": "O app abre a pré-consulta em {quando}.",
+      "naoAbriu": "O app ainda não abriu a pré-consulta.",
+      "naoRespondeu": "O responsável não respondeu antes da consulta.",
+      "aindaNao": "O responsável ainda não respondeu.",
+      "editada": "editada em {quando}",
+      "evolucao": {
+        "PIORANDO": "Piorando",
+        "ESTAVEL": "Igual",
+        "MELHORANDO": "Melhorando",
+        "VAI_E_VOLTA": "Vai e volta"
+      },
+      "pesoDeCasa": "Peso de casa",
+      "peso": "{peso} kg",
+      "pesoEm": "{peso} kg, pesado em {dia}",
+      "pesoNaoVaiAosVitais": "Peso da balança de casa: confirme na clínica antes de anotar nos vitais.",
+      "abrirFoto": "Abrir a foto {n}",
+      "fotoIndisponivel": "Foto indisponível agora",
+      "recorte": "O restante fica com quem lê o prontuário.",
+      "observacao": "Mais alguma coisa, nas palavras do responsável"
     }
   },
   "faltas": {
