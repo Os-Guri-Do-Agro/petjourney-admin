@@ -75,7 +75,7 @@ describe('podeAbrirRotaDeModulo', () => {
   })
 
   it('tela ainda não integrada não abre fora da demonstração, mesmo com módulo e permissão', () => {
-    expect(podeAbrirCaminho('/clinica/faltas', acesso(['CLINICA'], ['agenda.ler']))).toBe(false)
+    expect(podeAbrirCaminho('/clinica/meu-dia', acesso(['CLINICA'], ['agenda.ler']))).toBe(false)
   })
 
   it('integrada: precisa do módulo e da permissão', () => {

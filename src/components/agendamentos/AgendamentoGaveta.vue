@@ -27,6 +27,8 @@ import { horaNoFuso, ordenarConflitos } from '@/components/agendamentos/leitura-
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import FaltaDoHorario from '@/components/faltas/FaltaDoHorario.vue'
+import JustificativaCampos from '@/components/faltas/JustificativaCampos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   diaLocal,
@@ -49,6 +51,13 @@ import {
   type MotivoDoCancelamento,
   type Mutacao,
 } from '@/service/parceiro/agenda-service'
+import {
+  justificativaParaEnviar,
+  marcarFalta,
+  problemaDaJustificativa,
+  type NovaJustificativa,
+  type Obito,
+} from '@/service/parceiro/faltas-service'
 
 const OBSERVACAO_MAX = 500
 
@@ -59,11 +68,19 @@ const props = defineProps<{
   salas: Sala[]
   tipos: TipoDeAtendimento[]
   podeEscrever: boolean
+  /** O óbito encerra o caso e pede `paciente.escrever` (guia 3.1). */
+  podeObito: boolean
+  /** `AAAA-MM-DD` de hoje na clínica e o relógio da página (a falta só depois do início). */
+  hoje: string
+  relogio: Date
 }>()
 const emit = defineEmits<{
   mudou: [mutacao: Mutacao, texto: string]
   alterado: [mensagem: string]
   retorno: [agendamento: Agendamento]
+  /** Contato registrado numa falta: a página relê. */
+  justificado: [obito: Obito | null]
+  obito: [obito: Obito]
 }>()
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -72,7 +89,7 @@ const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAgenda()
 const { parceiroQuery } = useParceiroPortal()
 
-type Modo = 'ver' | 'editar' | 'mudar' | 'cancelar'
+type Modo = 'ver' | 'editar' | 'mudar' | 'cancelar' | 'falta'
 
 const modo = ref<Modo>('ver')
 const enviando = ref<string | null>(null)
@@ -88,6 +105,7 @@ watch(
     erro.value = ''
     tentou.value = false
     bloqueante.value = null
+    semContato.value = false
   },
 )
 
@@ -428,12 +446,88 @@ async function cancelar() {
   }
 }
 
+/* ------------------------------------------------------------------------------ falta */
+
+/** A falta só depois do início (guia 3.2) e só de quem ainda não chegou. */
+const podeMarcarFalta = computed(() => {
+  const atual = ag.value
+  if (!atual || !props.podeEscrever) return false
+  if (atual.status !== 'AGENDADO' && atual.status !== 'CONFIRMADO') return false
+  return props.relogio.getTime() >= Date.parse(atual.inicio)
+})
+
+const comContato = ref(false)
+const justificativa = ref<NovaJustificativa>({ canal: 'TELEFONE', motivo: null })
+/** Cliente anonimizado: a falta se marca, o contato não (guia 3.3). */
+const semContato = ref(false)
+
+function abrirFalta() {
+  comContato.value = false
+  justificativa.value = { canal: 'TELEFONE', motivo: null }
+  erro.value = ''
+  tentou.value = false
+  modo.value = 'falta'
+}
+
+async function salvarFalta() {
+  const atual = ag.value
+  if (!atual) return
+  tentou.value = true
+  erro.value = ''
+  if (comContato.value && problemaDaJustificativa(justificativa.value, props.hoje)) return
+
+  enviando.value = 'falta'
+  try {
+    const marcada = await marcarFalta(
+      atual.id,
+      {
+        versao: atual.versao,
+        ...(comContato.value
+          ? { justificativa: justificativaParaEnviar(justificativa.value) }
+          : {}),
+      },
+      parceiroQuery(),
+    )
+    modo.value = 'ver'
+    emit('mudou', marcada, t('faltas.feito.marcada'))
+    if (marcada.obito) emit('obito', marcada.obito)
+  } catch (err) {
+    const lido = lerErroDaAgenda(err, t('agendamentos.erros.salvar'))
+    if (lido.codigo === 'CLIENTE_ANONIMIZADO') {
+      semContato.value = true
+      comContato.value = false
+    }
+    if (lido.codigo === 'AGENDAMENTO_ALTERADO' || lido.codigo === 'AGENDAMENTO_STATUS_INVALIDO') {
+      falhou(err)
+      return
+    }
+    erro.value = lido.mensagem
+  } finally {
+    enviando.value = null
+  }
+}
+
+/** O horário em falta, para o bloco da falta (registros, contato e reagendar). */
+const horarioQueFaltou = computed(() => {
+  const atual = ag.value
+  if (!atual || atual.status !== 'FALTA') return null
+  return {
+    agendamentoId: atual.id,
+    pacienteId: atual.paciente.id,
+    pacienteNome: atual.paciente.nome,
+    inicio: atual.inicio,
+    profissionalId: atual.profissionalId,
+    tipoId: atual.tipoId,
+  }
+})
+
 /* ------------------------------------------------------------------------------- topo */
 
 const titulo = computed(() => {
   if (modo.value === 'editar') return t('agendamentos.editar.titulo')
   if (modo.value === 'mudar') return t('agendamentos.mudar.titulo')
   if (modo.value === 'cancelar') return t('agendamentos.cancelar.titulo')
+  if (modo.value === 'falta') return t('faltas.marcar.titulo')
   return ag.value?.paciente.nome ?? t('agendamentos.detalhe.titulo')
 })
 
@@ -441,6 +535,7 @@ const icone = computed(() => {
   if (modo.value === 'editar') return 'ph ph-pencil-simple'
   if (modo.value === 'mudar') return 'ph ph-calendar-dots'
   if (modo.value === 'cancelar') return 'ph ph-calendar-x'
+  if (modo.value === 'falta') return 'ph ph-user-minus'
   return 'ph ph-calendar-check'
 })
 
@@ -514,7 +609,7 @@ const itensDoMenu = computed<MenuItem[]>(() => {
 </script>
 
 <template>
-  <CadastroGaveta v-model:visible="visible" :titulo="titulo" :icone="icone" largura="32rem">
+  <CadastroGaveta v-model:visible="visible" :titulo="titulo" :icone="icone" largura="34rem">
     <template v-if="ag">
       <!-- Ver -->
       <template v-if="modo === 'ver'">
@@ -573,6 +668,19 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             </li>
           </ul>
         </section>
+
+        <!-- A falta: em que pé está, os registros, o contato e o reagendar. -->
+        <FaltaDoHorario
+          v-if="horarioQueFaltou"
+          :falta="horarioQueFaltou"
+          :fuso="fuso"
+          :profissionais="profissionais"
+          :pode-escrever="podeEscrever"
+          :pode-obito="podeObito"
+          :hoje="hoje"
+          @justificado="(obito) => emit('justificado', obito)"
+          @reagendado="(mutacao) => emit('mudou', mutacao, t('faltas.feito.reagendada'))"
+        />
 
         <section v-if="ag.observacao" class="eg__secao">
           <span class="eg__rotulo">{{ t('agendamentos.detalhe.observacao') }}</span>
@@ -737,6 +845,40 @@ const itensDoMenu = computed<MenuItem[]>(() => {
         </div>
       </form>
 
+      <!-- Marcar a falta, com o contato junto se já houve -->
+      <form
+        v-else-if="modo === 'falta'"
+        id="agendamento-falta"
+        class="eg"
+        novalidate
+        @submit.prevent="salvarFalta"
+      >
+        <p class="eg__dica">
+          {{
+            t('faltas.marcar.dica', {
+              paciente: ag.paciente.nome,
+              hora: ag.inicio.slice(11, 16),
+            })
+          }}
+        </p>
+        <label v-if="!semContato" class="agv__chave">
+          <span>
+            <strong>{{ t('faltas.marcar.comContato') }}</strong>
+            <small>{{ t('faltas.marcar.comContatoDica') }}</small>
+          </span>
+          <ToggleSwitch v-model="comContato" :disabled="Boolean(enviando)" />
+        </label>
+        <JustificativaCampos
+          v-if="comContato && !semContato"
+          v-model="justificativa"
+          :prefixo="`falta-${ag.id}`"
+          :pode-obito="podeObito"
+          :tentou="tentou"
+          :desabilitado="Boolean(enviando)"
+          :hoje="hoje"
+        />
+      </form>
+
       <!-- Cancelar -->
       <form v-else id="agendamento-cancelar" class="eg" novalidate @submit.prevent="cancelar">
         <p class="eg__dica">
@@ -794,31 +936,42 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             />
             <Menu ref="menu" :model="itensDoMenu" popup />
           </template>
-          <span class="agv__vao" />
-          <Button
-            v-if="principal"
-            type="button"
-            :icon="ICONE_DA_ACAO[principal]"
-            :label="t(ROTULO_DA_ACAO[principal])"
-            :loading="enviando === principal"
-            :disabled="Boolean(enviando) && enviando !== principal"
-            @click="agir(principal)"
-          />
-          <Button
-            v-else-if="ag.status === 'FINALIZADO' && podeEscrever"
-            type="button"
-            icon="ph ph-arrow-clockwise"
-            :label="t('agendamentos.acao.retorno')"
-            @click="emit('retorno', ag)"
-          />
-          <Button
-            v-else
-            type="button"
-            severity="secondary"
-            outlined
-            :label="t('agenda.config.expediente.fechar')"
-            @click="visible = false"
-          />
+          <div class="agv__passos">
+            <Button
+              v-if="podeMarcarFalta"
+              type="button"
+              severity="secondary"
+              outlined
+              icon="ph ph-user-minus"
+              :label="t('faltas.marcar.titulo')"
+              :disabled="Boolean(enviando)"
+              @click="abrirFalta"
+            />
+            <Button
+              v-if="principal"
+              type="button"
+              :icon="ICONE_DA_ACAO[principal]"
+              :label="t(ROTULO_DA_ACAO[principal])"
+              :loading="enviando === principal"
+              :disabled="Boolean(enviando) && enviando !== principal"
+              @click="agir(principal)"
+            />
+            <Button
+              v-else-if="ag.status === 'FINALIZADO' && podeEscrever"
+              type="button"
+              icon="ph ph-arrow-clockwise"
+              :label="t('agendamentos.acao.retorno')"
+              @click="emit('retorno', ag)"
+            />
+            <Button
+              v-else
+              type="button"
+              severity="secondary"
+              outlined
+              :label="t('agenda.config.expediente.fechar')"
+              @click="visible = false"
+            />
+          </div>
         </div>
       </template>
 
@@ -847,6 +1000,14 @@ const itensDoMenu = computed<MenuItem[]>(() => {
           :label="t('agendamentos.mudar.salvar')"
           :loading="enviando === 'mudar' && !bloqueante"
           :disabled="Boolean(bloqueante)"
+        />
+        <Button
+          v-else-if="modo === 'falta'"
+          type="submit"
+          form="agendamento-falta"
+          icon="ph ph-user-minus"
+          :label="t('faltas.marcar.titulo')"
+          :loading="enviando === 'falta'"
         />
         <Button
           v-else
@@ -1035,7 +1196,11 @@ const itensDoMenu = computed<MenuItem[]>(() => {
   gap: 8px;
 }
 
-.agv__vao {
-  flex: 1;
+.agv__passos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
 }
 </style>

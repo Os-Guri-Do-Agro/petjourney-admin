@@ -10692,7 +10692,9 @@
         "CLINICA_REMARCOU": "Klinika je pomerila termin",
         "PACIENTE_INDISPONIVEL": "Pacijent ne može da dođe",
         "DUPLICADO": "Zakazano dvaput",
-        "OUTRO": "Drugi razlog"
+        "OUTRO": "Drugi razlog",
+        "OBITO": "Slučaj zatvoren (uginuće)",
+        "EXCLUSAO_DO_TITULAR": "Podaci obrisani na zahtev vlasnika"
       }
     },
     "marcar": {
@@ -10726,6 +10728,128 @@
       "semProfissional": "Izaberi stručnjaka.",
       "horaInvalida": "Neispravno vreme. Koristi format 09:30.",
       "abrirOQueFicou": "Otvori karton koji je ostao"
+    }
+  },
+  "faltas": {
+    "titulo": "Nedolazak",
+    "erroAoCarregar": "Nije moguće otvoriti nedolaske.",
+    "canal": {
+      "TELEFONE": "Telefon",
+      "WHATSAPP": "WhatsApp",
+      "PRESENCIAL": "Lično",
+      "SEM_RESPOSTA": "Bez odgovora",
+      "APP": "Preko aplikacije"
+    },
+    "motivo": {
+      "ESQUECEU": "Zaboravio",
+      "IMPREVISTO": "Nepredviđeno",
+      "TRANSPORTE": "Prevoz",
+      "PACIENTE_MELHOROU": "Ljubimcu je bolje",
+      "EMERGENCIA": "Hitan slučaj",
+      "CUSTO": "Trošak",
+      "INSATISFACAO": "Nezadovoljstvo",
+      "OBITO": "Uginuće",
+      "OUTRO": "Drugi razlog"
+    },
+    "justificar": {
+      "canal": "Kako je bio kontakt",
+      "semRespostaDica": "Pokušaj ostaje zabeležen; nedolazak ostaje na listi za kontakt.",
+      "motivo": "Šta se desilo",
+      "escolha": "Izaberi razlog",
+      "semMotivo": "Izaberi šta se desilo.",
+      "obitoAviso": "Uginuće zatvara slučaj: pacijent postaje neaktivan, njegovi sledeći termini se otkazuju i veza sa aplikacijom se prekida. Ne može da se poništi.",
+      "obitoEm": "Dan uginuća",
+      "observacao": "Interna napomena",
+      "observacaoDica": "Vidi je samo tim: nikad ne ide u aplikaciju."
+    },
+    "situacao": {
+      "PENDENTE": "Još niko nije kontaktiran",
+      "SEM_RESPOSTA": "Pokušali smo, bez odgovora",
+      "JUSTIFICADA": "Opravdano",
+      "ENCERRADA": "Slučaj zatvoren (uginuće)"
+    },
+    "jaReagendada": "Već zakazano ponovo.",
+    "anonimizado": "Podaci ovog vlasnika su obrisani na njegov zahtev: nema kontakta za beleženje.",
+    "registro": {
+      "titulo": "Zapisi",
+      "nenhum": "Još nema zapisa.",
+      "vale": "Ovaj važi",
+      "peloApp": "Vlasnik u aplikaciji, {quando}",
+      "por": "{nome}, {quando}"
+    },
+    "acao": {
+      "contato": "Zabeleži kontakt",
+      "reagendar": "Zakaži ponovo",
+      "registrar": "Zabeleži"
+    },
+    "reagendar": {
+      "dica": "Slobodni termini od dana posle nedolaska, kod istog stručnjaka.",
+      "horarios": "Slobodni termini"
+    },
+    "marcar": {
+      "titulo": "Označi nedolazak",
+      "dica": "{paciente} nije došao na termin u {hora}.",
+      "comContato": "Već sam razgovarao sa vlasnikom",
+      "comContatoDica": "Beleži kontakt zajedno sa nedolaskom."
+    },
+    "feito": {
+      "marcada": "Nedolazak označen",
+      "contato": "Kontakt zabeležen",
+      "reagendada": "Nedolazak ponovo zakazan"
+    },
+    "obito": {
+      "titulo": "Slučaj zatvoren",
+      "cancelados": "Nema budućih termina za otkazivanje. | {n} termin otkazan. | {n} termina otkazana. | {n} termina otkazano."
+    },
+    "lote": {
+      "botao": "Zatvori smenu ({n})",
+      "titulo": "Zatvori smenu",
+      "pergunta": "Označiti nedolazak za {n} termin koji je prošao bez dolaska? | Označiti nedolazak za {n} termina koja su prošla bez dolaska? | Označiti nedolazak za {n} termina koji su prošli bez dolaska?",
+      "confirmar": "Označi nedolaske",
+      "marcadas": "{n} nedolazak označen | {n} nedolaska označena | {n} nedolazaka označeno",
+      "deFora": "{n} je izostavljen | {n} su izostavljena | {n} je izostavljeno",
+      "porque": {
+        "FORA_DO_TURNO": "{n} iz drugog dana ili kod drugog stručnjaka | {n} iz drugog dana ili kod drugog stručnjaka | {n} iz drugog dana ili kod drugog stručnjaka",
+        "STATUS": "{n} se već promenio | {n} su se već promenila | {n} se već promenilo",
+        "CHEGOU": "{n} je stigao | {n} su stigla | {n} je stiglo",
+        "NAO_ENCERROU": "{n} se još nije završio | {n} se još nisu završila | {n} se još nije završilo"
+      }
+    },
+    "recorte": {
+      "rotulo": "Šta prikazati",
+      "reincidentes": "Ponovljeni",
+      "pendentes": "Za kontakt",
+      "todas": "Svi"
+    },
+    "resumo": {
+      "reincidentes": "Oni koji nisu došli {n} puta ili više u poslednjih 12 meseci",
+      "pendentes": "Nedolasci bez zabeleženog kontakta",
+      "todas": "Nedolasci u poslednjih 12 meseci"
+    },
+    "vazio": {
+      "reincidentes": "Nema ponovljenih nedolazaka",
+      "pendentes": "Nema nedolazaka za kontakt",
+      "todas": "Nema nedolazaka u periodu",
+      "descricao": "Ovde se pojavljuju nedolasci označeni u rasporedu."
+    },
+    "selo": {
+      "obito": "Uginuo",
+      "inativo": "Neaktivan",
+      "aJustificar": "{n} za kontakt | {n} za kontakt | {n} za kontakt",
+      "aConvidar": "Za poziv",
+      "reincidente": "Ponovljeno"
+    },
+    "ultima": "poslednji {dia}",
+    "contagem": "{n} nedolazak | {n} nedolaska | {n} nedolazaka",
+    "verMais": "Prikaži još",
+    "historico": {
+      "titulo": "Nedolasci: {nome}",
+      "falta": "Nedolazak: {paciente}, {dia}",
+      "vazio": "Ovaj vlasnik nema nedolazaka.",
+      "verTudo": "prikaži sve",
+      "voltou": "Vratio se {dia}",
+      "registros": "{n} zapis | {n} zapisa | {n} zapisa",
+      "voltar": "Nazad na nedolaske"
     }
   }
 }

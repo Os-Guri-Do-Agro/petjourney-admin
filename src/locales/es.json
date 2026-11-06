@@ -10692,7 +10692,9 @@
         "CLINICA_REMARCOU": "La clínica lo reprogramó",
         "PACIENTE_INDISPONIVEL": "El paciente no puede venir",
         "DUPLICADO": "Agendado dos veces",
-        "OUTRO": "Otro motivo"
+        "OUTRO": "Otro motivo",
+        "OBITO": "Caso cerrado (fallecimiento)",
+        "EXCLUSAO_DO_TITULAR": "Datos borrados a pedido del titular"
       }
     },
     "marcar": {
@@ -10726,6 +10728,128 @@
       "semProfissional": "Elige el profesional.",
       "horaInvalida": "Hora inválida. Usa el formato 09:30.",
       "abrirOQueFicou": "Abrir el registro que quedó"
+    }
+  },
+  "faltas": {
+    "titulo": "Ausencia",
+    "erroAoCarregar": "No se pudieron abrir las ausencias.",
+    "canal": {
+      "TELEFONE": "Teléfono",
+      "WHATSAPP": "WhatsApp",
+      "PRESENCIAL": "En persona",
+      "SEM_RESPOSTA": "Sin respuesta",
+      "APP": "Por la app"
+    },
+    "motivo": {
+      "ESQUECEU": "Se olvidó",
+      "IMPREVISTO": "Imprevisto",
+      "TRANSPORTE": "Transporte",
+      "PACIENTE_MELHOROU": "La mascota mejoró",
+      "EMERGENCIA": "Emergencia",
+      "CUSTO": "Costo",
+      "INSATISFACAO": "Insatisfacción",
+      "OBITO": "Fallecimiento",
+      "OUTRO": "Otro motivo"
+    },
+    "justificar": {
+      "canal": "Cómo fue el contacto",
+      "semRespostaDica": "Queda registrado el intento; la ausencia sigue en la lista para contactar.",
+      "motivo": "Qué pasó",
+      "escolha": "Elige el motivo",
+      "semMotivo": "Elige qué pasó.",
+      "obitoAviso": "El fallecimiento cierra el caso: el paciente queda inactivo, sus próximos turnos se cancelan y se termina el vínculo con la app. No se puede deshacer.",
+      "obitoEm": "Día del fallecimiento",
+      "observacao": "Nota interna",
+      "observacaoDica": "Solo el equipo la ve: nunca va a la app."
+    },
+    "situacao": {
+      "PENDENTE": "Nadie contactó todavía",
+      "SEM_RESPOSTA": "Intentamos, sin respuesta",
+      "JUSTIFICADA": "Justificada",
+      "ENCERRADA": "Caso cerrado (fallecimiento)"
+    },
+    "jaReagendada": "Ya reprogramada.",
+    "anonimizado": "Los datos de este responsable se borraron a su pedido: no hay contacto para registrar.",
+    "registro": {
+      "titulo": "Registros",
+      "nenhum": "Ningún registro todavía.",
+      "vale": "Es el que vale",
+      "peloApp": "Por el responsable en la app, el {quando}",
+      "por": "{nome}, el {quando}"
+    },
+    "acao": {
+      "contato": "Registrar contacto",
+      "reagendar": "Reprogramar",
+      "registrar": "Registrar"
+    },
+    "reagendar": {
+      "dica": "Los horarios libres desde el día siguiente a la ausencia, con quien atendió.",
+      "horarios": "Horarios libres"
+    },
+    "marcar": {
+      "titulo": "Marcar ausencia",
+      "dica": "{paciente} no vino al turno de las {hora}.",
+      "comContato": "Ya hablé con el responsable",
+      "comContatoDica": "Registra el contacto junto con la ausencia."
+    },
+    "feito": {
+      "marcada": "Ausencia marcada",
+      "contato": "Contacto registrado",
+      "reagendada": "Ausencia reprogramada"
+    },
+    "obito": {
+      "titulo": "Caso cerrado",
+      "cancelados": "Ningún turno futuro para cancelar. | {n} turno cancelado. | {n} turnos cancelados."
+    },
+    "lote": {
+      "botao": "Cerrar el turno ({n})",
+      "titulo": "Cerrar el turno",
+      "pergunta": "¿Marcar ausencia en el turno que ya pasó y nadie llegó? | ¿Marcar ausencia en los {n} turnos que ya pasaron y nadie llegó?",
+      "confirmar": "Marcar las ausencias",
+      "marcadas": "{n} ausencia marcada | {n} ausencias marcadas",
+      "deFora": "{n} quedó afuera | {n} quedaron afuera",
+      "porque": {
+        "FORA_DO_TURNO": "{n} de otro día o profesional | {n} de otro día o profesional",
+        "STATUS": "{n} ya había cambiado | {n} ya habían cambiado",
+        "CHEGOU": "{n} llegó | {n} llegaron",
+        "NAO_ENCERROU": "{n} todavía no terminó | {n} todavía no terminaron"
+      }
+    },
+    "recorte": {
+      "rotulo": "Cuáles mostrar",
+      "reincidentes": "Reincidentes",
+      "pendentes": "Por justificar",
+      "todas": "Todas"
+    },
+    "resumo": {
+      "reincidentes": "Quienes faltaron {n} veces o más en los últimos 12 meses",
+      "pendentes": "Ausencias sin contacto registrado",
+      "todas": "Las ausencias de los últimos 12 meses"
+    },
+    "vazio": {
+      "reincidentes": "Ningún reincidente",
+      "pendentes": "Ninguna ausencia por justificar",
+      "todas": "Ninguna ausencia en el período",
+      "descricao": "Las ausencias marcadas en la agenda aparecen aquí."
+    },
+    "selo": {
+      "obito": "Fallecido",
+      "inativo": "Inactivo",
+      "aJustificar": "{n} por justificar | {n} por justificar",
+      "aConvidar": "Por invitar",
+      "reincidente": "Reincidente"
+    },
+    "ultima": "última el {dia}",
+    "contagem": "{n} ausencia | {n} ausencias",
+    "verMais": "Ver más",
+    "historico": {
+      "titulo": "Ausencias de {nome}",
+      "falta": "Ausencia de {paciente}, {dia}",
+      "vazio": "Ninguna ausencia de este responsable.",
+      "verTudo": "ver todo",
+      "voltou": "Volvió el {dia}",
+      "registros": "{n} registro | {n} registros",
+      "voltar": "Volver a las ausencias"
     }
   }
 }

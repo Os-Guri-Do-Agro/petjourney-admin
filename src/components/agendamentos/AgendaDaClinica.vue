@@ -66,6 +66,12 @@ import {
   type ColunaDaAgenda,
   type Mutacao,
 } from '@/service/parceiro/agenda-service'
+import {
+  FALTAS_POR_LOTE,
+  marcarFaltasEmLote,
+  type IgnoradoNoLote,
+  type Obito,
+} from '@/service/parceiro/faltas-service'
 import { listarProfissionais } from '@/service/parceiro/profissionais-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
@@ -80,6 +86,9 @@ const { store, parceiroQuery } = useParceiroPortal()
 const podeEscrever = computed(
   () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('agenda.escrever'),
 )
+
+/** O óbito (na falta) encerra o caso: pede também `paciente.escrever` (guia e3 3.1). */
+const podeObito = computed(() => podeEscrever.value && store.temPermissao('paciente.escrever'))
 
 /* ------------------------------------------------------------------------- onde estou */
 
@@ -392,6 +401,106 @@ function alterado(mensagem: string) {
   void carregar(true)
 }
 
+/** Contato registrado numa falta: relê o dia (a situação muda) e avisa o óbito, se houve. */
+function justificado(obito: Obito | null) {
+  toast.add({ severity: 'success', summary: t('faltas.feito.contato'), life: 3000 })
+  if (obito) avisarObito(obito)
+  invalidarPendenciasDoPortal()
+  void carregar(true)
+}
+
+/** O óbito encerra o caso: diz quantos horários dele foram cancelados (guia e3 3.6). */
+function avisarObito(obito: Obito) {
+  toast.add({
+    severity: 'info',
+    summary: t('faltas.obito.titulo'),
+    detail: t(
+      'faltas.obito.cancelados',
+      { n: obito.agendamentosCancelados },
+      obito.agendamentosCancelados,
+    ),
+    life: 8000,
+  })
+}
+
+/* ----------------------------------------------------------------------- fechar o turno */
+
+/**
+ * Os horários do dia que já acabaram e ninguém chegou: o "fechar o turno" (guia e3 3.2) marca
+ * todos de uma vez. O servidor confere de novo e devolve os que ficaram de fora e por quê.
+ */
+const semChegada = computed(() => {
+  const lido = diaNaTela.value
+  if (!lido || !podeEscrever.value) return []
+  const agora = relogio.value.getTime()
+  return lido.agendamentos
+    .filter(
+      (item) =>
+        (!item.grupoId || item.grupoId === item.id) &&
+        (item.status === 'AGENDADO' || item.status === 'CONFIRMADO') &&
+        item.inicio.slice(0, 10) === lido.data &&
+        Date.parse(item.fim) <= agora,
+    )
+    .sort((a, b) => a.inicio.localeCompare(b.inicio))
+})
+
+const fecharTurnoAberto = ref(false)
+const fechandoTurno = ref(false)
+
+async function fecharTurno() {
+  const lido = diaNaTela.value
+  if (!lido) return
+  fechandoTurno.value = true
+  try {
+    const resposta = await marcarFaltasEmLote(
+      {
+        data: lido.data,
+        agendamentoIds: semChegada.value.slice(0, FALTAS_POR_LOTE).map((item) => item.id),
+      },
+      parceiroQuery(),
+    )
+    fecharTurnoAberto.value = false
+    aplicarNaTela({ agendamentos: resposta.marcados, removidos: [] })
+    const n = resposta.marcados.length
+    feito.value = resposta.desfazerToken
+      ? {
+          texto: t('faltas.lote.marcadas', { n }, n),
+          token: resposta.desfazerToken,
+          ate: Date.now() + DESFAZER_NA_TELA_MS,
+        }
+      : null
+    if (resposta.ignorados.length) {
+      toast.add({
+        severity: 'info',
+        summary: t(
+          'faltas.lote.deFora',
+          { n: resposta.ignorados.length },
+          resposta.ignorados.length,
+        ),
+        detail: porquesDoLote(resposta.ignorados),
+        life: 8000,
+      })
+    }
+    invalidarPendenciasDoPortal()
+    void carregar(true)
+  } catch (err) {
+    const lido = lerErroDaAgenda(err, t('agendamentos.erros.salvar'))
+    toast.add({ severity: 'error', summary: lido.mensagem, life: 6000 })
+    if (lido.codigo === 'AGENDAMENTO_ALTERADO') void carregar(true)
+  } finally {
+    fechandoTurno.value = false
+  }
+}
+
+/** "2 ainda não acabaram, 1 chegou": cada motivo com quantos. */
+function porquesDoLote(ignorados: IgnoradoNoLote[]) {
+  const contagem = new Map<IgnoradoNoLote['reason'], number>()
+  for (const item of ignorados) contagem.set(item.reason, (contagem.get(item.reason) ?? 0) + 1)
+  return [...contagem.entries()]
+    .map(([motivo, n]) => t(`faltas.lote.porque.${motivo}`, { n }, n))
+    .join(' · ')
+}
+
 /* ------------------------------------------------------------------------------- abrir */
 
 const abertoId = ref<string | null>(null)
@@ -544,6 +653,14 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
     </template>
 
     <template v-if="podeEscrever" #acoes>
+      <Button
+        v-if="visao === 'dia' && semChegada.length"
+        type="button"
+        severity="secondary"
+        icon="ph ph-user-minus"
+        :label="t('faltas.lote.botao', { n: semChegada.length })"
+        @click="fecharTurnoAberto = true"
+      />
       <Button
         type="button"
         icon="ph ph-calendar-plus"
@@ -768,10 +885,52 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
         :salas="salas"
         :tipos="tipos"
         :pode-escrever="podeEscrever"
+        :pode-obito="podeObito"
+        :hoje="hoje"
+        :relogio="relogio"
         @mudou="mudouNaGaveta"
         @alterado="alterado"
         @retorno="marcarRetorno"
+        @justificado="justificado"
+        @obito="avisarObito"
       />
+
+      <Dialog
+        v-model:visible="fecharTurnoAberto"
+        modal
+        :header="t('faltas.lote.titulo')"
+        :style="{ width: 'min(30rem, calc(100vw - 32px))' }"
+      >
+        <p class="ag__confirmar">
+          {{ t('faltas.lote.pergunta', { n: semChegada.length }, semChegada.length) }}
+        </p>
+        <ul class="ag__turno">
+          <li v-for="item in semChegada" :key="item.id">
+            <span class="ui-num">{{ item.inicio.slice(11, 16) }}</span>
+            <bdi>{{ item.paciente.nome }}</bdi>
+            <span class="ag__turno-com">{{
+              profissionais.find((pessoa) => pessoa.id === item.profissionalId)?.nome ?? ''
+            }}</span>
+          </li>
+        </ul>
+        <template #footer>
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            :label="t('agendamentos.voltar')"
+            :disabled="fechandoTurno"
+            @click="fecharTurnoAberto = false"
+          />
+          <Button
+            type="button"
+            icon="ph ph-user-minus"
+            :label="t('faltas.lote.confirmar')"
+            :loading="fechandoTurno"
+            @click="fecharTurno"
+          />
+        </template>
+      </Dialog>
 
       <MarcarGaveta
         v-if="podeEscrever"
@@ -901,6 +1060,35 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
 
 .ag__vazio .p-button {
   justify-self: center;
+}
+
+.ag__turno {
+  display: grid;
+  max-height: 16rem;
+  margin: 12px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.ag__turno li {
+  display: grid;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 0;
+  color: var(--tinta);
+  font-size: 14px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.ag__turno li + li {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.ag__turno .ui-num,
+.ag__turno-com {
+  color: var(--tinta-2);
+  font-size: 13px;
 }
 
 .ag__confirmar {

@@ -43,7 +43,8 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   },
   /* A fila pela API (E3-04, PJ-07YV9I): ler é agenda.ler; gerir, fila.gerir (a tela esconde os botões). */
   { prefixo: '/clinica/fila', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
-  { prefixo: '/clinica/faltas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
+  /* As faltas pela API (E3-03, PJ-MVMNOZ); a demonstração segue com o painel de sempre. */
+  { prefixo: '/clinica/faltas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: true },
   {
     prefixo: '/clinica/atividades',
     modulo: 'CLINICA',

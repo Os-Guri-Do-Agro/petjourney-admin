@@ -10692,7 +10692,9 @@
         "CLINICA_REMARCOU": "The clinic rescheduled",
         "PACIENTE_INDISPONIVEL": "The patient can't come",
         "DUPLICADO": "Booked twice",
-        "OUTRO": "Other reason"
+        "OUTRO": "Other reason",
+        "OBITO": "Case closed (death)",
+        "EXCLUSAO_DO_TITULAR": "Data erased at the holder's request"
       }
     },
     "marcar": {
@@ -10726,6 +10728,128 @@
       "semProfissional": "Choose the professional.",
       "horaInvalida": "Invalid time. Use the format 09:30.",
       "abrirOQueFicou": "Open the remaining record"
+    }
+  },
+  "faltas": {
+    "titulo": "No-show",
+    "erroAoCarregar": "Couldn't open the no-shows.",
+    "canal": {
+      "TELEFONE": "Phone",
+      "WHATSAPP": "WhatsApp",
+      "PRESENCIAL": "In person",
+      "SEM_RESPOSTA": "No answer",
+      "APP": "Through the app"
+    },
+    "motivo": {
+      "ESQUECEU": "Forgot",
+      "IMPREVISTO": "Something came up",
+      "TRANSPORTE": "Transport",
+      "PACIENTE_MELHOROU": "The pet got better",
+      "EMERGENCIA": "Emergency",
+      "CUSTO": "Cost",
+      "INSATISFACAO": "Dissatisfaction",
+      "OBITO": "Death",
+      "OUTRO": "Other reason"
+    },
+    "justificar": {
+      "canal": "How you got in touch",
+      "semRespostaDica": "The attempt is recorded; the no-show stays in the follow-up queue.",
+      "motivo": "What happened",
+      "escolha": "Choose the reason",
+      "semMotivo": "Choose what happened.",
+      "obitoAviso": "Death closes the case: the patient becomes inactive, their upcoming appointments are canceled and the link with the app ends. It can't be undone.",
+      "obitoEm": "Date of death",
+      "observacao": "Internal note",
+      "observacaoDica": "Only the team sees it: it never goes to the app."
+    },
+    "situacao": {
+      "PENDENTE": "No one has reached out yet",
+      "SEM_RESPOSTA": "We tried, no answer",
+      "JUSTIFICADA": "Explained",
+      "ENCERRADA": "Case closed (death)"
+    },
+    "jaReagendada": "Already rescheduled.",
+    "anonimizado": "This owner's data was erased at their request: there is no contact to record.",
+    "registro": {
+      "titulo": "Records",
+      "nenhum": "No records yet.",
+      "vale": "This one counts",
+      "peloApp": "By the owner in the app, on {quando}",
+      "por": "{nome}, on {quando}"
+    },
+    "acao": {
+      "contato": "Record contact",
+      "reagendar": "Reschedule",
+      "registrar": "Record"
+    },
+    "reagendar": {
+      "dica": "Free times from the day after the no-show, with the same professional.",
+      "horarios": "Free times"
+    },
+    "marcar": {
+      "titulo": "Mark no-show",
+      "dica": "{paciente} didn't come to the {hora} appointment.",
+      "comContato": "I've already spoken to the owner",
+      "comContatoDica": "Records the contact together with the no-show."
+    },
+    "feito": {
+      "marcada": "No-show marked",
+      "contato": "Contact recorded",
+      "reagendada": "No-show rescheduled"
+    },
+    "obito": {
+      "titulo": "Case closed",
+      "cancelados": "No upcoming appointment to cancel. | {n} appointment canceled. | {n} appointments canceled."
+    },
+    "lote": {
+      "botao": "Close the shift ({n})",
+      "titulo": "Close the shift",
+      "pergunta": "Mark a no-show for the appointment that has passed with no one arriving? | Mark no-shows for the {n} appointments that have passed with no one arriving?",
+      "confirmar": "Mark the no-shows",
+      "marcadas": "{n} no-show marked | {n} no-shows marked",
+      "deFora": "{n} was left out | {n} were left out",
+      "porque": {
+        "FORA_DO_TURNO": "{n} from another day or professional | {n} from another day or professional",
+        "STATUS": "{n} had already changed | {n} had already changed",
+        "CHEGOU": "{n} arrived | {n} arrived",
+        "NAO_ENCERROU": "{n} hasn't ended yet | {n} haven't ended yet"
+      }
+    },
+    "recorte": {
+      "rotulo": "Which to show",
+      "reincidentes": "Repeat no-shows",
+      "pendentes": "To follow up",
+      "todas": "All"
+    },
+    "resumo": {
+      "reincidentes": "Those who missed {n} times or more in the last 12 months",
+      "pendentes": "No-shows with no contact recorded",
+      "todas": "No-shows in the last 12 months"
+    },
+    "vazio": {
+      "reincidentes": "No repeat no-shows",
+      "pendentes": "No no-shows to follow up",
+      "todas": "No no-shows in the period",
+      "descricao": "No-shows marked in the schedule show up here."
+    },
+    "selo": {
+      "obito": "Deceased",
+      "inativo": "Inactive",
+      "aJustificar": "{n} to follow up | {n} to follow up",
+      "aConvidar": "To invite back",
+      "reincidente": "Repeat"
+    },
+    "ultima": "last on {dia}",
+    "contagem": "{n} no-show | {n} no-shows",
+    "verMais": "See more",
+    "historico": {
+      "titulo": "{nome}'s no-shows",
+      "falta": "{paciente} no-show, {dia}",
+      "vazio": "No no-shows for this owner.",
+      "verTudo": "see all",
+      "voltou": "Came back on {dia}",
+      "registros": "{n} record | {n} records",
+      "voltar": "Back to the no-shows"
     }
   }
 }
