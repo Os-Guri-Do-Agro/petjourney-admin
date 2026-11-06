@@ -4097,7 +4097,93 @@
         "dias": "dan | dana | dana",
         "conta": "Uobičajeni raspon za vrstu ({faixa} mg/kg) × {peso}, upisana težina. Proverite današnju težinu pre propisivanja."
       },
-      "escolherPara": "Za pacijenta {pet}"
+      "escolherPara": "Za pacijenta {pet}",
+      "api": {
+        "classeOutra": "Druga klasa",
+        "todasEspecies": "Sve vrste",
+        "todasClasses": "Sve klase",
+        "semPermissao": "Registar lekova je za one koji čitaju karton.",
+        "erro": "Pretraga registra lekova trenutno nije uspela.",
+        "resumo": "Tražite po nazivu, aktivnoj supstanci ili indikaciji.",
+        "resumoPaciente": "Pregled za {pet}: lista prati njegovu vrstu, sa računom doze.",
+        "daClinica": "Iz klinike",
+        "emRevisao": "Registar lekova PetJourney još uvek pregleda stručni rukovodilac. Za sada se prikazuju samo lekovi koje je klinika dodala.",
+        "acrescentar": "Dodaj lek klinike",
+        "naoRevisado": "Referenca nije pregledana",
+        "manipulado": "Magistralni",
+        "doseUsual": "Uobičajena doza",
+        "controle": {
+          "NENHUM": "Bez kontrole",
+          "MAPA_VETERINARIO": "Kontrolisan (MAPA)",
+          "ANVISA_HUMANO": "Kontrolisan (Anvisa)",
+          "ANVISA_RETENCAO": "Recept se zadržava (Anvisa)"
+        },
+        "via": {
+          "ORAL": "Oralno",
+          "SUBCUTANEA": "Potkožno",
+          "INTRAMUSCULAR": "Intramuskularno",
+          "INTRAVENOSA": "Intravenski",
+          "TOPICA": "Lokalno",
+          "OTOLOGICA": "U uho",
+          "OFTALMICA": "U oko",
+          "INTRANASAL": "U nos"
+        },
+        "unidade": {
+          "ML": "mL | mL | mL",
+          "COMPRIMIDO": "tableta | tablete | tableta",
+          "GOTA": "kap | kapi | kapi",
+          "APLICACAO": "primena | primene | primena"
+        },
+        "dose": {
+          "titulo": "Doza za {pet}",
+          "mgPorKg": "Izabrana doza",
+          "intervalo": "Interval",
+          "duracao": "Trajanje",
+          "dias": "dana",
+          "continuo": "Stalna upotreba",
+          "peso": "Današnja težina",
+          "pesoDoCadastro": "Iz kartona",
+          "semCrmv": "Za račun doze profil stručnjaka mora imati provereni CRMV.",
+          "erro": "Račun trenutno nije uspeo.",
+          "passoPeso": "{peso} kg × {dose} mg/kg = {mg} mg",
+          "passoConcentracao": "{mg} mg ÷ {concentracao} mg/{unidade} = {quantidade} {unidades}",
+          "passoTotal": "{porDia} dnevno × {dias} dana = {total} primena",
+          "aproximado": "Račun je dao {conta}; zaokruženo na {fracao}. Proverite pre propisivanja.",
+          "fracao": "Tableta: {fracao}",
+          "faixaEspecie": "Uobičajeni opseg za vrstu: {min} do {max} mg/kg",
+          "faixaGeral": "Opšti uobičajeni opseg (registar nema ovu vrstu): {min} do {max} mg/kg",
+          "semPeso": "Bez težine nema računa: unesite današnju težinu.",
+          "porAdministracao": "po primeni, na svakih {horas} h"
+        },
+        "fracao": {
+          "INTEIRO": "{n} cela",
+          "MEIO": "pola",
+          "UM_E_MEIO": "jedna i po",
+          "QUARTO": "četvrtina",
+          "TRES_QUARTOS": "tri četvrtine",
+          "MULTIPLO": "{n}",
+          "APROXIMADO": "{n}"
+        },
+        "aviso": {
+          "ESPECIE_PROIBIDA": "Kontraindikovan za ovu vrstu",
+          "ALERGIA": "Pacijent je alergičan na ovu supstancu",
+          "PESO_AUSENTE": "Nema težine u kartonu niti unete",
+          "ACIMA_DA_USUAL": "Doza iznad uobičajene",
+          "ABAIXO_DA_USUAL": "Doza ispod uobičajene",
+          "SEM_DOSE_DA_ESPECIE": "Registar nema ovu vrstu: opseg je opšti",
+          "CUIDADO": "Oprez: {cuidado}"
+        },
+        "cuidado": {
+          "GESTANTE": "gravidnost",
+          "LACTANTE": "dojenje",
+          "FILHOTE": "mladunče",
+          "IDOSO": "starost",
+          "RENAL": "bubrezi",
+          "HEPATICO": "jetra",
+          "CARDIACO": "srce",
+          "GASTRICO": "želudac"
+        }
+      }
     },
     "documentos": {
       "titulo": "Dokumenti pregleda",
@@ -9930,13 +10016,14 @@
   },
   "agenda": {
     "config": {
-      "titulo": "Podešavanja rasporeda",
+      "titulo": "Podešavanja klinike",
       "resumo": "Sale, vrste pregleda, blokade i rokovi dogovoreni sa onima koji zakazuju preko aplikacije.",
       "abas": {
         "salas": "Sale",
         "tipos": "Vrste pregleda",
         "bloqueios": "Blokade",
-        "politica": "Pravila"
+        "politica": "Pravila",
+        "catalogo": "Katalog klinike"
       },
       "erroAoCarregar": "Učitavanje nije uspelo.",
       "desativar": "Deaktiviraj",
@@ -10990,6 +11077,146 @@
       "voltou": "Vratio se {dia}",
       "registros": "{n} zapis | {n} zapisa | {n} zapisa",
       "voltar": "Nazad na nedolaske"
+    }
+  },
+  "catalogo": {
+    "dica": "Katalog PetJourney je samo za čitanje. Ovde ide ono što klinika dodaje: magistralni lek, uvezena vakcina, analiza partnerske laboratorije, sopstvena šifra.",
+    "desativados": "Deaktivirano ({n})",
+    "editarDe": "Izmeni: {nome}",
+    "secao": {
+      "medicamentos": {
+        "titulo": "Lekovi klinike",
+        "descricao": "Pojavljuju se u registru i na receptu označeni kao lekovi klinike.",
+        "novo": "Novi lek",
+        "vazio": "Klinika još nije dodala lekove."
+      },
+      "vacinas": {
+        "titulo": "Vakcine klinike",
+        "descricao": "Sa protokolom serije: API računa plan vakcinacije.",
+        "novo": "Nova vakcina",
+        "vazio": "Klinika još nije dodala vakcine."
+      },
+      "exames": {
+        "titulo": "Analize klinike",
+        "descricao": "Analize partnerske laboratorije i sopstvene.",
+        "novo": "Nova analiza",
+        "vazio": "Klinika još nije dodala analize."
+      },
+      "diagnosticos": {
+        "titulo": "Dijagnoze klinike",
+        "descricao": "Sopstvene šifre, pored šifara PetJourney.",
+        "novo": "Nova dijagnoza",
+        "vazio": "Klinika još nije dodala dijagnoze."
+      }
+    },
+    "erro": {
+      "carregar": "Katalog klinike trenutno ne može da se otvori.",
+      "nomeEmUso": "Klinika već ima aktivnu stavku sa ovim nazivom.",
+      "codigoEmUso": "Ovu šifru već koristi dijagnoza klinike ili PetJourney.",
+      "noLimite": "Klinika je dostigla ograničenje od 2.000 sopstvenih lekova: iskoristite neki koji više ne propisuje.",
+      "faltaCampo": "Nedostaje obavezno polje."
+    },
+    "medicamento": {
+      "novo": "Novi lek",
+      "editar": "Izmeni lek",
+      "oQueE": "Šta je",
+      "nome": "Zaštićeni naziv",
+      "principio": "Aktivna supstanca",
+      "apresentacao": "Oblik",
+      "apresentacaoExemplo": "Tableta od 250 mg",
+      "concentracao": "Jačina",
+      "porUnidade": "Po",
+      "classeRotulo": "Klasa",
+      "dose": "Doza",
+      "doseMin": "Minimalna doza",
+      "doseMax": "Maksimalna doza",
+      "especie": "Vrsta",
+      "intervalo": "Interval",
+      "nota": "Napomena o dozi (opciono)",
+      "proibido": "Kontraindikovan za ovu vrstu",
+      "tirarEspecie": "Ukloni",
+      "doseDaEspecie": "Doza za vrstu",
+      "usoEControle": "Upotreba i kontrola",
+      "controle": "Kontrola",
+      "lista": "Lista",
+      "manipulado": "Magistralni (izostavlja se iz PDF-a recepta ako je kontrolisan)",
+      "cuidados": "Oprez kod",
+      "texto": "Prateći tekst",
+      "umaPorLinha": "Jedna stavka po redu.",
+      "observacao": "Napomena",
+      "classe": {
+        "ANTIBIOTICO": "Antibiotik",
+        "ANTI_INFLAMATORIO": "Antiinflamatorni",
+        "ANALGESICO": "Analgetik",
+        "CORTICOIDE": "Kortikosteroid",
+        "ANTIEMETICO": "Antiemetik",
+        "GASTROPROTETOR": "Gastroprotektiv",
+        "ANTIPARASITARIO": "Antiparazitik",
+        "SEDATIVO": "Sedativ",
+        "CARDIOLOGICO": "Kardiološki",
+        "DERMATOLOGICO": "Dermatološki",
+        "OUTRA": "Drugo"
+      }
+    },
+    "vacina": {
+      "nova": "Nova vakcina",
+      "editar": "Izmeni vakcinu",
+      "oQueE": "Šta je",
+      "nome": "Naziv",
+      "fabricante": "Proizvođač",
+      "especies": "Vrste",
+      "serie": "Serija i revakcinacija",
+      "dosesFilhote": "Doze za mladunče",
+      "dosesAdulto": "Doze za odraslog bez istorije",
+      "idadeMinima": "Minimalni uzrast",
+      "dias": "dana",
+      "entreDoses": "Između doza",
+      "modoRotulo": "Serija za mladunče",
+      "modo": {
+        "FIXA": "Fiksan broj doza",
+        "ATE_IDADE_MINIMA": "Do minimalnog uzrasta"
+      },
+      "modoDica": {
+        "FIXA": "Doze serije, jedna po intervalu.",
+        "ATE_IDADE_MINIMA": "Najmanje doze serije, uz ponavljanje dok se jedna ne da u minimalnom uzrastu."
+      },
+      "idadeUltimaDose": "Minimalni uzrast za poslednju dozu",
+      "reforco": "Revakcinacija na svakih",
+      "naClinica": "U klinici",
+      "essencial": "Osnovna",
+      "obrigatoria": "Obavezna",
+      "estoqueMinimo": "Minimalna zaliha"
+    },
+    "exame": {
+      "novo": "Nova analiza",
+      "editar": "Izmeni analizu",
+      "nome": "Naziv",
+      "grupoRotulo": "Grupa",
+      "grupo": {
+        "LABORATORIO": "Laboratorija",
+        "IMAGEM": "Snimanje",
+        "OUTROS": "Ostalo"
+      }
+    },
+    "diagnostico": {
+      "novo": "Nova dijagnoza",
+      "editar": "Izmeni dijagnozu",
+      "codigo": "Šifra",
+      "codigoExemplo": "CL-01",
+      "codigoDica": "Slova, brojevi, tačka i crtica, do 20.",
+      "descricao": "Opis",
+      "sistemaRotulo": "Sistem",
+      "semSistema": "Bez sistema",
+      "sistema": {
+        "CARDIOVASCULAR": "Kardiovaskularni",
+        "RESPIRATORIO": "Respiratorni",
+        "DIGESTORIO": "Digestivni",
+        "URINARIO": "Urinarni",
+        "TEGUMENTAR": "Koža",
+        "LOCOMOTOR": "Lokomotorni",
+        "NEUROLOGICO": "Neurološki",
+        "LINFONODOS": "Limfni čvorovi"
+      }
     }
   }
 }

@@ -4097,7 +4097,93 @@
         "dias": "día | días",
         "conta": "Rango usual de la especie ({faixa} mg/kg) × {peso}, el peso del registro. Confirme el peso del día antes de prescribir."
       },
-      "escolherPara": "Para {pet}"
+      "escolherPara": "Para {pet}",
+      "api": {
+        "classeOutra": "Otra clase",
+        "todasEspecies": "Todas las especies",
+        "todasClasses": "Todas las clases",
+        "semPermissao": "El vademécum es para quien lee la historia clínica.",
+        "erro": "No se pudo buscar en el vademécum ahora.",
+        "resumo": "Busque por nombre, principio activo o indicación.",
+        "resumoPaciente": "Consulta para {pet}: la lista sigue su especie, con el cálculo de la dosis.",
+        "daClinica": "De la clínica",
+        "emRevisao": "El vademécum de PetJourney todavía está en revisión por el responsable técnico. Por ahora aparecen solo los medicamentos que agregó la clínica.",
+        "acrescentar": "Agregar un medicamento de la clínica",
+        "naoRevisado": "Referencia no revisada",
+        "manipulado": "Magistral",
+        "doseUsual": "Dosis usual",
+        "controle": {
+          "NENHUM": "Sin control",
+          "MAPA_VETERINARIO": "Controlado (MAPA)",
+          "ANVISA_HUMANO": "Controlado (Anvisa)",
+          "ANVISA_RETENCAO": "Receta retenida (Anvisa)"
+        },
+        "via": {
+          "ORAL": "Oral",
+          "SUBCUTANEA": "Subcutánea",
+          "INTRAMUSCULAR": "Intramuscular",
+          "INTRAVENOSA": "Intravenosa",
+          "TOPICA": "Tópica",
+          "OTOLOGICA": "Ótica",
+          "OFTALMICA": "Oftálmica",
+          "INTRANASAL": "Intranasal"
+        },
+        "unidade": {
+          "ML": "mL | mL",
+          "COMPRIMIDO": "comprimido | comprimidos",
+          "GOTA": "gota | gotas",
+          "APLICACAO": "aplicación | aplicaciones"
+        },
+        "dose": {
+          "titulo": "Dosis para {pet}",
+          "mgPorKg": "Dosis elegida",
+          "intervalo": "Intervalo",
+          "duracao": "Duración",
+          "dias": "días",
+          "continuo": "Uso continuo",
+          "peso": "Peso de hoy",
+          "pesoDoCadastro": "El del registro",
+          "semCrmv": "Para calcular la dosis, la ficha del profesional necesita el CRMV verificado.",
+          "erro": "No se pudo hacer el cálculo ahora.",
+          "passoPeso": "{peso} kg × {dose} mg/kg = {mg} mg",
+          "passoConcentracao": "{mg} mg ÷ {concentracao} mg/{unidade} = {quantidade} {unidades}",
+          "passoTotal": "{porDia} por día × {dias} días = {total} administraciones",
+          "aproximado": "El cálculo dio {conta}; redondeado a {fracao}. Revíselo antes de prescribir.",
+          "fracao": "Comprimido: {fracao}",
+          "faixaEspecie": "Rango usual de la especie: {min} a {max} mg/kg",
+          "faixaGeral": "Rango usual general (el vademécum no trae esta especie): {min} a {max} mg/kg",
+          "semPeso": "Sin peso no hay cálculo: indique el peso de hoy.",
+          "porAdministracao": "por administración, cada {horas} h"
+        },
+        "fracao": {
+          "INTEIRO": "{n} entero(s)",
+          "MEIO": "medio",
+          "UM_E_MEIO": "uno y medio",
+          "QUARTO": "un cuarto",
+          "TRES_QUARTOS": "tres cuartos",
+          "MULTIPLO": "{n}",
+          "APROXIMADO": "{n}"
+        },
+        "aviso": {
+          "ESPECIE_PROIBIDA": "Contraindicado en esta especie",
+          "ALERGIA": "Alergia del paciente a este principio",
+          "PESO_AUSENTE": "Sin peso en el registro ni indicado",
+          "ACIMA_DA_USUAL": "Dosis por encima de la usual",
+          "ABAIXO_DA_USUAL": "Dosis por debajo de la usual",
+          "SEM_DOSE_DA_ESPECIE": "El vademécum no trae esta especie: el rango es el general",
+          "CUIDADO": "Cuidado: {cuidado}"
+        },
+        "cuidado": {
+          "GESTANTE": "gestante",
+          "LACTANTE": "lactante",
+          "FILHOTE": "cachorro",
+          "IDOSO": "mayor",
+          "RENAL": "renal",
+          "HEPATICO": "hepático",
+          "CARDIACO": "cardíaco",
+          "GASTRICO": "gástrico"
+        }
+      }
     },
     "documentos": {
       "titulo": "Documentos de la atención",
@@ -9930,13 +10016,14 @@
   },
   "agenda": {
     "config": {
-      "titulo": "Configuración de la agenda",
+      "titulo": "Configuración de la clínica",
       "resumo": "Salas, tipos de atención, bloqueos y los plazos acordados con quien reserva por la app.",
       "abas": {
         "salas": "Salas",
         "tipos": "Tipos de atención",
         "bloqueios": "Bloqueos",
-        "politica": "Política"
+        "politica": "Política",
+        "catalogo": "Catálogo de la clínica"
       },
       "erroAoCarregar": "No se pudo cargar.",
       "desativar": "Desactivar",
@@ -10990,6 +11077,146 @@
       "voltou": "Volvió el {dia}",
       "registros": "{n} registro | {n} registros",
       "voltar": "Volver a las ausencias"
+    }
+  },
+  "catalogo": {
+    "dica": "El catálogo de PetJourney es solo de lectura. Aquí va lo que agrega la clínica: el magistral, la vacuna importada, el examen del laboratorio asociado, el código propio.",
+    "desativados": "Desactivados ({n})",
+    "editarDe": "Editar {nome}",
+    "secao": {
+      "medicamentos": {
+        "titulo": "Medicamentos de la clínica",
+        "descricao": "Aparecen en el vademécum y en la receta marcados como de la clínica.",
+        "novo": "Nuevo medicamento",
+        "vazio": "La clínica todavía no agregó medicamentos."
+      },
+      "vacinas": {
+        "titulo": "Vacunas de la clínica",
+        "descricao": "Con el protocolo de la serie: la API calcula el plan vacunal.",
+        "novo": "Nueva vacuna",
+        "vazio": "La clínica todavía no agregó vacunas."
+      },
+      "exames": {
+        "titulo": "Exámenes de la clínica",
+        "descricao": "Los exámenes del laboratorio asociado y los propios.",
+        "novo": "Nuevo examen",
+        "vazio": "La clínica todavía no agregó exámenes."
+      },
+      "diagnosticos": {
+        "titulo": "Diagnósticos de la clínica",
+        "descricao": "Códigos propios, junto a los de PetJourney.",
+        "novo": "Nuevo diagnóstico",
+        "vazio": "La clínica todavía no agregó diagnósticos."
+      }
+    },
+    "erro": {
+      "carregar": "No se pudo abrir el catálogo de la clínica ahora.",
+      "nomeEmUso": "La clínica ya tiene un ítem activo con este nombre.",
+      "codigoEmUso": "Este código ya lo usa un diagnóstico de la clínica o de PetJourney.",
+      "noLimite": "La clínica llegó al límite de 2.000 medicamentos propios: reutilice uno que ya no prescribe.",
+      "faltaCampo": "Falta completar un campo obligatorio."
+    },
+    "medicamento": {
+      "novo": "Nuevo medicamento",
+      "editar": "Editar medicamento",
+      "oQueE": "Qué es",
+      "nome": "Nombre comercial",
+      "principio": "Principio activo",
+      "apresentacao": "Presentación",
+      "apresentacaoExemplo": "Comprimido de 250 mg",
+      "concentracao": "Concentración",
+      "porUnidade": "Por",
+      "classeRotulo": "Clase",
+      "dose": "Dosis",
+      "doseMin": "Dosis mínima",
+      "doseMax": "Dosis máxima",
+      "especie": "Especie",
+      "intervalo": "Intervalo",
+      "nota": "Nota de la dosis (opcional)",
+      "proibido": "Contraindicado en esta especie",
+      "tirarEspecie": "Quitar",
+      "doseDaEspecie": "Dosis de una especie",
+      "usoEControle": "Uso y control",
+      "controle": "Control",
+      "lista": "Lista",
+      "manipulado": "Magistral (queda fuera del PDF de la receta si es controlado)",
+      "cuidados": "Requiere cuidado en",
+      "texto": "Texto de apoyo",
+      "umaPorLinha": "Un ítem por línea.",
+      "observacao": "Observación",
+      "classe": {
+        "ANTIBIOTICO": "Antibiótico",
+        "ANTI_INFLAMATORIO": "Antiinflamatorio",
+        "ANALGESICO": "Analgésico",
+        "CORTICOIDE": "Corticoide",
+        "ANTIEMETICO": "Antiemético",
+        "GASTROPROTETOR": "Gastroprotector",
+        "ANTIPARASITARIO": "Antiparasitario",
+        "SEDATIVO": "Sedante",
+        "CARDIOLOGICO": "Cardiológico",
+        "DERMATOLOGICO": "Dermatológico",
+        "OUTRA": "Otra"
+      }
+    },
+    "vacina": {
+      "nova": "Nueva vacuna",
+      "editar": "Editar vacuna",
+      "oQueE": "Qué es",
+      "nome": "Nombre",
+      "fabricante": "Fabricante",
+      "especies": "Especies",
+      "serie": "Serie y refuerzo",
+      "dosesFilhote": "Dosis en el cachorro",
+      "dosesAdulto": "Dosis en el adulto sin historial",
+      "idadeMinima": "Edad mínima",
+      "dias": "días",
+      "entreDoses": "Entre dosis",
+      "modoRotulo": "Serie del cachorro",
+      "modo": {
+        "FIXA": "Número fijo de dosis",
+        "ATE_IDADE_MINIMA": "Hasta la edad mínima"
+      },
+      "modoDica": {
+        "FIXA": "Las dosis de la serie, una por intervalo.",
+        "ATE_IDADE_MINIMA": "Al menos las dosis de la serie, repitiendo hasta que una se dé con la edad mínima."
+      },
+      "idadeUltimaDose": "Edad mínima de la última dosis",
+      "reforco": "Refuerzo cada",
+      "naClinica": "En la clínica",
+      "essencial": "Esencial",
+      "obrigatoria": "Obligatoria",
+      "estoqueMinimo": "Stock mínimo"
+    },
+    "exame": {
+      "novo": "Nuevo examen",
+      "editar": "Editar examen",
+      "nome": "Nombre",
+      "grupoRotulo": "Grupo",
+      "grupo": {
+        "LABORATORIO": "Laboratorio",
+        "IMAGEM": "Imagen",
+        "OUTROS": "Otros"
+      }
+    },
+    "diagnostico": {
+      "novo": "Nuevo diagnóstico",
+      "editar": "Editar diagnóstico",
+      "codigo": "Código",
+      "codigoExemplo": "CL-01",
+      "codigoDica": "Letras, números, punto y guion, hasta 20.",
+      "descricao": "Descripción",
+      "sistemaRotulo": "Sistema",
+      "semSistema": "Sin sistema",
+      "sistema": {
+        "CARDIOVASCULAR": "Cardiovascular",
+        "RESPIRATORIO": "Respiratorio",
+        "DIGESTORIO": "Digestivo",
+        "URINARIO": "Urinario",
+        "TEGUMENTAR": "Tegumentario",
+        "LOCOMOTOR": "Locomotor",
+        "NEUROLOGICO": "Neurológico",
+        "LINFONODOS": "Ganglios linfáticos"
+      }
     }
   }
 }

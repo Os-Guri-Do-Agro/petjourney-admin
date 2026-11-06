@@ -80,7 +80,7 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     prefixo: '/clinica/bulario',
     modulo: 'CLINICA',
     permissao: 'prontuario.ler',
-    integrada: false,
+    integrada: true,
   },
   { prefixo: '/clinica/vacinas', modulo: 'CLINICA', permissao: 'agenda.ler', integrada: false },
   {

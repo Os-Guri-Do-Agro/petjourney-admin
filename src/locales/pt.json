@@ -4097,7 +4097,93 @@
         "dias": "dia | dias",
         "conta": "Faixa usual da espécie ({faixa} mg/kg) × {peso}, o peso do cadastro. Confira o peso do dia antes de prescrever."
       },
-      "escolherPara": "Para {pet}"
+      "escolherPara": "Para {pet}",
+      "api": {
+        "classeOutra": "Outra classe",
+        "todasEspecies": "Todas as espécies",
+        "todasClasses": "Todas as classes",
+        "semPermissao": "O bulário é de quem lê o prontuário.",
+        "erro": "Não deu para buscar no bulário agora.",
+        "resumo": "Busque pelo nome, pelo princípio ativo ou pela indicação.",
+        "resumoPaciente": "Consulta para {pet}: a lista vem pela espécie dele, com a conta da dose.",
+        "daClinica": "Da clínica",
+        "emRevisao": "O bulário da PetJourney ainda está em revisão pelo responsável técnico. Por enquanto aparecem só os medicamentos que a clínica acrescentou.",
+        "acrescentar": "Acrescentar um medicamento da clínica",
+        "naoRevisado": "Referência não revisada",
+        "manipulado": "Manipulado",
+        "doseUsual": "Dose usual",
+        "controle": {
+          "NENHUM": "Sem controle",
+          "MAPA_VETERINARIO": "Controlado (MAPA)",
+          "ANVISA_HUMANO": "Controlado (Anvisa)",
+          "ANVISA_RETENCAO": "Retenção de receita (Anvisa)"
+        },
+        "via": {
+          "ORAL": "Oral",
+          "SUBCUTANEA": "Subcutânea",
+          "INTRAMUSCULAR": "Intramuscular",
+          "INTRAVENOSA": "Intravenosa",
+          "TOPICA": "Tópica",
+          "OTOLOGICA": "Otológica",
+          "OFTALMICA": "Oftálmica",
+          "INTRANASAL": "Intranasal"
+        },
+        "unidade": {
+          "ML": "mL | mL",
+          "COMPRIMIDO": "comprimido | comprimidos",
+          "GOTA": "gota | gotas",
+          "APLICACAO": "aplicação | aplicações"
+        },
+        "dose": {
+          "titulo": "Dose para {pet}",
+          "mgPorKg": "Dose escolhida",
+          "intervalo": "Intervalo",
+          "duracao": "Duração",
+          "dias": "dias",
+          "continuo": "Uso contínuo",
+          "peso": "Peso de hoje",
+          "pesoDoCadastro": "O do cadastro",
+          "semCrmv": "Para calcular a dose, a ficha do profissional precisa do CRMV conferido.",
+          "erro": "Não deu para fazer a conta agora.",
+          "passoPeso": "{peso} kg × {dose} mg/kg = {mg} mg",
+          "passoConcentracao": "{mg} mg ÷ {concentracao} mg/{unidade} = {quantidade} {unidades}",
+          "passoTotal": "{porDia} por dia × {dias} dias = {total} administrações",
+          "aproximado": "A conta deu {conta}; arredondado para {fracao}. Confira antes de prescrever.",
+          "fracao": "Comprimido: {fracao}",
+          "faixaEspecie": "Faixa usual da espécie: {min} a {max} mg/kg",
+          "faixaGeral": "Faixa usual geral (o bulário não traz esta espécie): {min} a {max} mg/kg",
+          "semPeso": "Sem peso, nenhuma conta: informe o peso de hoje.",
+          "porAdministracao": "por administração, a cada {horas} h"
+        },
+        "fracao": {
+          "INTEIRO": "{n} inteiro(s)",
+          "MEIO": "meio",
+          "UM_E_MEIO": "um e meio",
+          "QUARTO": "um quarto",
+          "TRES_QUARTOS": "três quartos",
+          "MULTIPLO": "{n}",
+          "APROXIMADO": "{n}"
+        },
+        "aviso": {
+          "ESPECIE_PROIBIDA": "Contraindicado nesta espécie",
+          "ALERGIA": "Alergia do paciente a este princípio",
+          "PESO_AUSENTE": "Sem peso no cadastro nem informado",
+          "ACIMA_DA_USUAL": "Dose acima da usual",
+          "ABAIXO_DA_USUAL": "Dose abaixo da usual",
+          "SEM_DOSE_DA_ESPECIE": "O bulário não traz esta espécie: a faixa é a geral",
+          "CUIDADO": "Cuidado: {cuidado}"
+        },
+        "cuidado": {
+          "GESTANTE": "gestante",
+          "LACTANTE": "lactante",
+          "FILHOTE": "filhote",
+          "IDOSO": "idoso",
+          "RENAL": "renal",
+          "HEPATICO": "hepático",
+          "CARDIACO": "cardíaco",
+          "GASTRICO": "gástrico"
+        }
+      }
     },
     "documentos": {
       "titulo": "Documentos do atendimento",
@@ -9930,13 +10016,14 @@
   },
   "agenda": {
     "config": {
-      "titulo": "Configuração da agenda",
+      "titulo": "Configuração da clínica",
       "resumo": "Salas, tipos de atendimento, bloqueios e os prazos combinados com quem marca pelo app.",
       "abas": {
         "salas": "Salas",
         "tipos": "Tipos de atendimento",
         "bloqueios": "Bloqueios",
-        "politica": "Política"
+        "politica": "Política",
+        "catalogo": "Catálogo da clínica"
       },
       "erroAoCarregar": "Não foi possível carregar.",
       "desativar": "Desativar",
@@ -10990,6 +11077,146 @@
       "voltou": "Voltou em {dia}",
       "registros": "{n} registro | {n} registros",
       "voltar": "Voltar às faltas"
+    }
+  },
+  "catalogo": {
+    "dica": "O catálogo da PetJourney é só leitura. Aqui fica o que a clínica acrescenta: o manipulado, a vacina importada, o exame do laboratório parceiro, o código próprio.",
+    "desativados": "Desativados ({n})",
+    "editarDe": "Editar {nome}",
+    "secao": {
+      "medicamentos": {
+        "titulo": "Medicamentos da clínica",
+        "descricao": "Aparecem no bulário e na receita marcados como da clínica.",
+        "novo": "Novo medicamento",
+        "vazio": "A clínica ainda não acrescentou medicamentos."
+      },
+      "vacinas": {
+        "titulo": "Vacinas da clínica",
+        "descricao": "Com o protocolo da série: a API calcula o plano vacinal.",
+        "novo": "Nova vacina",
+        "vazio": "A clínica ainda não acrescentou vacinas."
+      },
+      "exames": {
+        "titulo": "Exames da clínica",
+        "descricao": "Os exames do laboratório parceiro e os próprios.",
+        "novo": "Novo exame",
+        "vazio": "A clínica ainda não acrescentou exames."
+      },
+      "diagnosticos": {
+        "titulo": "Diagnósticos da clínica",
+        "descricao": "Códigos próprios, ao lado dos da PetJourney.",
+        "novo": "Novo diagnóstico",
+        "vazio": "A clínica ainda não acrescentou diagnósticos."
+      }
+    },
+    "erro": {
+      "carregar": "Não deu para abrir o catálogo da clínica agora.",
+      "nomeEmUso": "A clínica já tem um item ativo com este nome.",
+      "codigoEmUso": "Este código já é usado por um diagnóstico da clínica ou da PetJourney.",
+      "noLimite": "A clínica chegou ao limite de 2.000 medicamentos próprios: reaproveite um que não prescreve mais.",
+      "faltaCampo": "Falta preencher um campo obrigatório."
+    },
+    "medicamento": {
+      "novo": "Novo medicamento",
+      "editar": "Editar medicamento",
+      "oQueE": "O que é",
+      "nome": "Nome comercial",
+      "principio": "Princípio ativo",
+      "apresentacao": "Apresentação",
+      "apresentacaoExemplo": "Comprimido de 250 mg",
+      "concentracao": "Concentração",
+      "porUnidade": "Por",
+      "classeRotulo": "Classe",
+      "dose": "Dose",
+      "doseMin": "Dose mínima",
+      "doseMax": "Dose máxima",
+      "especie": "Espécie",
+      "intervalo": "Intervalo",
+      "nota": "Nota da dose (opcional)",
+      "proibido": "Contraindicado nesta espécie",
+      "tirarEspecie": "Tirar",
+      "doseDaEspecie": "Dose de uma espécie",
+      "usoEControle": "Uso e controle",
+      "controle": "Controle",
+      "lista": "Lista",
+      "manipulado": "Manipulado (fica fora do PDF da receita se for controlado)",
+      "cuidados": "Pede cuidado em",
+      "texto": "Texto de apoio",
+      "umaPorLinha": "Um item por linha.",
+      "observacao": "Observação",
+      "classe": {
+        "ANTIBIOTICO": "Antibiótico",
+        "ANTI_INFLAMATORIO": "Anti-inflamatório",
+        "ANALGESICO": "Analgésico",
+        "CORTICOIDE": "Corticoide",
+        "ANTIEMETICO": "Antiemético",
+        "GASTROPROTETOR": "Gastroprotetor",
+        "ANTIPARASITARIO": "Antiparasitário",
+        "SEDATIVO": "Sedativo",
+        "CARDIOLOGICO": "Cardiológico",
+        "DERMATOLOGICO": "Dermatológico",
+        "OUTRA": "Outra"
+      }
+    },
+    "vacina": {
+      "nova": "Nova vacina",
+      "editar": "Editar vacina",
+      "oQueE": "O que é",
+      "nome": "Nome",
+      "fabricante": "Fabricante",
+      "especies": "Espécies",
+      "serie": "Série e reforço",
+      "dosesFilhote": "Doses no filhote",
+      "dosesAdulto": "Doses no adulto sem histórico",
+      "idadeMinima": "Idade mínima",
+      "dias": "dias",
+      "entreDoses": "Entre as doses",
+      "modoRotulo": "Série do filhote",
+      "modo": {
+        "FIXA": "Número fixo de doses",
+        "ATE_IDADE_MINIMA": "Até a idade mínima"
+      },
+      "modoDica": {
+        "FIXA": "As doses da série, uma a cada intervalo.",
+        "ATE_IDADE_MINIMA": "No mínimo as doses da série, repetindo até uma ser dada com a idade mínima."
+      },
+      "idadeUltimaDose": "Idade mínima da última dose",
+      "reforco": "Reforço a cada",
+      "naClinica": "Na clínica",
+      "essencial": "Essencial",
+      "obrigatoria": "Obrigatória",
+      "estoqueMinimo": "Estoque mínimo"
+    },
+    "exame": {
+      "novo": "Novo exame",
+      "editar": "Editar exame",
+      "nome": "Nome",
+      "grupoRotulo": "Grupo",
+      "grupo": {
+        "LABORATORIO": "Laboratório",
+        "IMAGEM": "Imagem",
+        "OUTROS": "Outros"
+      }
+    },
+    "diagnostico": {
+      "novo": "Novo diagnóstico",
+      "editar": "Editar diagnóstico",
+      "codigo": "Código",
+      "codigoExemplo": "CL-01",
+      "codigoDica": "Letras, números, ponto e hífen, até 20.",
+      "descricao": "Descrição",
+      "sistemaRotulo": "Sistema",
+      "semSistema": "Sem sistema",
+      "sistema": {
+        "CARDIOVASCULAR": "Cardiovascular",
+        "RESPIRATORIO": "Respiratório",
+        "DIGESTORIO": "Digestório",
+        "URINARIO": "Urinário",
+        "TEGUMENTAR": "Tegumentar",
+        "LOCOMOTOR": "Locomotor",
+        "NEUROLOGICO": "Neurológico",
+        "LINFONODOS": "Linfonodos"
+      }
     }
   }
 }

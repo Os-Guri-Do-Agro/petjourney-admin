@@ -18,11 +18,12 @@ import BloqueiosAba from '@/components/agenda/BloqueiosAba.vue'
 import PoliticaAba from '@/components/agenda/PoliticaAba.vue'
 import SalasAba from '@/components/agenda/SalasAba.vue'
 import TiposAba from '@/components/agenda/TiposAba.vue'
+import CatalogoAba from '@/components/catalogo/CatalogoAba.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { Aba } from '@/navegacao/espacos'
 
-const ABAS = ['salas', 'tipos', 'bloqueios', 'politica'] as const
+const ABAS = ['salas', 'tipos', 'bloqueios', 'politica', 'catalogo'] as const
 type AbaDaTela = (typeof ABAS)[number]
 
 const ICONE: Record<AbaDaTela, string> = {
@@ -30,6 +31,7 @@ const ICONE: Record<AbaDaTela, string> = {
   tipos: 'ph ph-stethoscope',
   bloqueios: 'ph ph-calendar-x',
   politica: 'ph ph-scales',
+  catalogo: 'ph ph-books',
 }
 
 const { t } = useI18n()
@@ -37,9 +39,14 @@ const route = useRoute()
 const router = useRouter()
 const { store } = useParceiroPortal()
 
+/** O catálogo da clínica (E4-02) só para quem gere o catálogo: DONO e GESTOR. */
+const geraCatalogo = computed(() => store.temPermissao('catalogo.gerir'))
+
+const abasVisiveis = computed(() => ABAS.filter((aba) => aba !== 'catalogo' || geraCatalogo.value))
+
 const abaAtual = computed<AbaDaTela>(() => {
   const pedida = route.query.aba
-  return typeof pedida === 'string' && (ABAS as readonly string[]).includes(pedida)
+  return typeof pedida === 'string' && (abasVisiveis.value as readonly string[]).includes(pedida)
     ? (pedida as AbaDaTela)
     : 'salas'
 })
@@ -52,7 +59,7 @@ function destino(aba: AbaDaTela) {
 }
 
 const abas = computed<Aba[]>(() =>
-  ABAS.map((id) => ({
+  abasVisiveis.value.map((id) => ({
     rotulo: t(`agenda.config.abas.${id}`),
     icone: ICONE[id],
     to: destino(id),
@@ -82,6 +89,7 @@ const podeBloquear = computed(() => clinicaEscreve.value && store.temPermissao('
     <SalasAba v-if="abaAtual === 'salas'" :pode-editar="podeConfigurar" />
     <TiposAba v-else-if="abaAtual === 'tipos'" :pode-editar="podeConfigurar" />
     <BloqueiosAba v-else-if="abaAtual === 'bloqueios'" :pode-editar="podeBloquear" />
-    <PoliticaAba v-else :pode-editar="podeConfigurar" />
+    <PoliticaAba v-else-if="abaAtual === 'politica'" :pode-editar="podeConfigurar" />
+    <CatalogoAba v-else :pode-editar="clinicaEscreve && geraCatalogo" />
   </UiPagina>
 </template>

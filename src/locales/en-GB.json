@@ -4097,7 +4097,93 @@
         "dias": "day | days",
         "conta": "Usual range for the species ({faixa} mg/kg) × {peso}, the weight on file. Check today's weight before prescribing."
       },
-      "escolherPara": "For {pet}"
+      "escolherPara": "For {pet}",
+      "api": {
+        "classeOutra": "Other class",
+        "todasEspecies": "All species",
+        "todasClasses": "All classes",
+        "semPermissao": "The formulary is for those who read medical records.",
+        "erro": "Could not search the formulary right now.",
+        "resumo": "Search by name, active ingredient or indication.",
+        "resumoPaciente": "Lookup for {pet}: the list follows its species, with the dose calculation.",
+        "daClinica": "From the clinic",
+        "emRevisao": "PetJourney's formulary is still being reviewed by the technical lead. For now, only the medicines the clinic added show up.",
+        "acrescentar": "Add a clinic medicine",
+        "naoRevisado": "Reference not reviewed",
+        "manipulado": "Compounded",
+        "doseUsual": "Usual dose",
+        "controle": {
+          "NENHUM": "Not controlled",
+          "MAPA_VETERINARIO": "Controlled (MAPA)",
+          "ANVISA_HUMANO": "Controlled (Anvisa)",
+          "ANVISA_RETENCAO": "Prescription retained (Anvisa)"
+        },
+        "via": {
+          "ORAL": "Oral",
+          "SUBCUTANEA": "Subcutaneous",
+          "INTRAMUSCULAR": "Intramuscular",
+          "INTRAVENOSA": "Intravenous",
+          "TOPICA": "Topical",
+          "OTOLOGICA": "Otic",
+          "OFTALMICA": "Ophthalmic",
+          "INTRANASAL": "Intranasal"
+        },
+        "unidade": {
+          "ML": "mL | mL",
+          "COMPRIMIDO": "tablet | tablets",
+          "GOTA": "drop | drops",
+          "APLICACAO": "application | applications"
+        },
+        "dose": {
+          "titulo": "Dose for {pet}",
+          "mgPorKg": "Chosen dose",
+          "intervalo": "Interval",
+          "duracao": "Duration",
+          "dias": "days",
+          "continuo": "Ongoing use",
+          "peso": "Today's weight",
+          "pesoDoCadastro": "From the record",
+          "semCrmv": "To calculate the dose, the professional's profile needs a verified CRMV.",
+          "erro": "Could not run the calculation right now.",
+          "passoPeso": "{peso} kg × {dose} mg/kg = {mg} mg",
+          "passoConcentracao": "{mg} mg ÷ {concentracao} mg/{unidade} = {quantidade} {unidades}",
+          "passoTotal": "{porDia} a day × {dias} days = {total} administrations",
+          "aproximado": "The math gave {conta}; rounded to {fracao}. Check before prescribing.",
+          "fracao": "Tablet: {fracao}",
+          "faixaEspecie": "Usual range for the species: {min} to {max} mg/kg",
+          "faixaGeral": "General usual range (the formulary has no data for this species): {min} to {max} mg/kg",
+          "semPeso": "No weight, no calculation: enter today's weight.",
+          "porAdministracao": "per administration, every {horas} h"
+        },
+        "fracao": {
+          "INTEIRO": "{n} whole",
+          "MEIO": "half",
+          "UM_E_MEIO": "one and a half",
+          "QUARTO": "a quarter",
+          "TRES_QUARTOS": "three quarters",
+          "MULTIPLO": "{n}",
+          "APROXIMADO": "{n}"
+        },
+        "aviso": {
+          "ESPECIE_PROIBIDA": "Contraindicated in this species",
+          "ALERGIA": "Patient allergic to this ingredient",
+          "PESO_AUSENTE": "No weight on record or entered",
+          "ACIMA_DA_USUAL": "Dose above the usual",
+          "ABAIXO_DA_USUAL": "Dose below the usual",
+          "SEM_DOSE_DA_ESPECIE": "The formulary has no data for this species: the range is the general one",
+          "CUIDADO": "Caution: {cuidado}"
+        },
+        "cuidado": {
+          "GESTANTE": "pregnant",
+          "LACTANTE": "nursing",
+          "FILHOTE": "young",
+          "IDOSO": "senior",
+          "RENAL": "kidney",
+          "HEPATICO": "liver",
+          "CARDIACO": "heart",
+          "GASTRICO": "stomach"
+        }
+      }
     },
     "documentos": {
       "titulo": "Visit documents",
@@ -9930,13 +10016,14 @@
   },
   "agenda": {
     "config": {
-      "titulo": "Schedule settings",
+      "titulo": "Clinic settings",
       "resumo": "Rooms, appointment types, blocks and the deadlines agreed with people who book through the app.",
       "abas": {
         "salas": "Rooms",
         "tipos": "Appointment types",
         "bloqueios": "Blocks",
-        "politica": "Policy"
+        "politica": "Policy",
+        "catalogo": "Clinic catalogue"
       },
       "erroAoCarregar": "Could not load.",
       "desativar": "Deactivate",
@@ -10990,6 +11077,146 @@
       "voltou": "Came back on {dia}",
       "registros": "{n} record | {n} records",
       "voltar": "Back to the no-shows"
+    }
+  },
+  "catalogo": {
+    "dica": "PetJourney's catalogue is read-only. This is where the clinic adds its own: the compounded medicine, the imported vaccine, the partner lab's test, its own code.",
+    "desativados": "Deactivated ({n})",
+    "editarDe": "Edit {nome}",
+    "secao": {
+      "medicamentos": {
+        "titulo": "Clinic medicines",
+        "descricao": "They show in the formulary and the prescription marked as from the clinic.",
+        "novo": "New medicine",
+        "vazio": "The clinic has not added medicines yet."
+      },
+      "vacinas": {
+        "titulo": "Clinic vaccines",
+        "descricao": "With the series protocol: the API works out the vaccination plan.",
+        "novo": "New vaccine",
+        "vazio": "The clinic has not added vaccines yet."
+      },
+      "exames": {
+        "titulo": "Clinic tests",
+        "descricao": "The partner lab's tests and the clinic's own.",
+        "novo": "New test",
+        "vazio": "The clinic has not added tests yet."
+      },
+      "diagnosticos": {
+        "titulo": "Clinic diagnoses",
+        "descricao": "Own codes, next to PetJourney's.",
+        "novo": "New diagnosis",
+        "vazio": "The clinic has not added diagnoses yet."
+      }
+    },
+    "erro": {
+      "carregar": "Could not open the clinic catalogue right now.",
+      "nomeEmUso": "The clinic already has an active item with this name.",
+      "codigoEmUso": "This code is already used by a clinic or PetJourney diagnosis.",
+      "noLimite": "The clinic reached the limit of 2,000 own medicines: reuse one it no longer prescribes.",
+      "faltaCampo": "A required field is missing."
+    },
+    "medicamento": {
+      "novo": "New medicine",
+      "editar": "Edit medicine",
+      "oQueE": "What it is",
+      "nome": "Brand name",
+      "principio": "Active ingredient",
+      "apresentacao": "Presentation",
+      "apresentacaoExemplo": "250 mg tablet",
+      "concentracao": "Strength",
+      "porUnidade": "Per",
+      "classeRotulo": "Class",
+      "dose": "Dose",
+      "doseMin": "Minimum dose",
+      "doseMax": "Maximum dose",
+      "especie": "Species",
+      "intervalo": "Interval",
+      "nota": "Dose note (optional)",
+      "proibido": "Contraindicated in this species",
+      "tirarEspecie": "Remove",
+      "doseDaEspecie": "Dose for a species",
+      "usoEControle": "Use and control",
+      "controle": "Control",
+      "lista": "List",
+      "manipulado": "Compounded (left out of the prescription PDF when controlled)",
+      "cuidados": "Needs caution in",
+      "texto": "Supporting text",
+      "umaPorLinha": "One item per line.",
+      "observacao": "Note",
+      "classe": {
+        "ANTIBIOTICO": "Antibiotic",
+        "ANTI_INFLAMATORIO": "Anti-inflammatory",
+        "ANALGESICO": "Analgesic",
+        "CORTICOIDE": "Corticosteroid",
+        "ANTIEMETICO": "Antiemetic",
+        "GASTROPROTETOR": "Gastroprotective",
+        "ANTIPARASITARIO": "Antiparasitic",
+        "SEDATIVO": "Sedative",
+        "CARDIOLOGICO": "Cardiology",
+        "DERMATOLOGICO": "Dermatology",
+        "OUTRA": "Other"
+      }
+    },
+    "vacina": {
+      "nova": "New vaccine",
+      "editar": "Edit vaccine",
+      "oQueE": "What it is",
+      "nome": "Name",
+      "fabricante": "Manufacturer",
+      "especies": "Species",
+      "serie": "Series and booster",
+      "dosesFilhote": "Doses for young animals",
+      "dosesAdulto": "Doses for adults with no history",
+      "idadeMinima": "Minimum age",
+      "dias": "days",
+      "entreDoses": "Between doses",
+      "modoRotulo": "Young animal series",
+      "modo": {
+        "FIXA": "Fixed number of doses",
+        "ATE_IDADE_MINIMA": "Up to the minimum age"
+      },
+      "modoDica": {
+        "FIXA": "The series doses, one per interval.",
+        "ATE_IDADE_MINIMA": "At least the series doses, repeating until one is given at the minimum age."
+      },
+      "idadeUltimaDose": "Minimum age for the last dose",
+      "reforco": "Booster every",
+      "naClinica": "At the clinic",
+      "essencial": "Core",
+      "obrigatoria": "Mandatory",
+      "estoqueMinimo": "Minimum stock"
+    },
+    "exame": {
+      "novo": "New test",
+      "editar": "Edit test",
+      "nome": "Name",
+      "grupoRotulo": "Group",
+      "grupo": {
+        "LABORATORIO": "Laboratory",
+        "IMAGEM": "Imaging",
+        "OUTROS": "Other"
+      }
+    },
+    "diagnostico": {
+      "novo": "New diagnosis",
+      "editar": "Edit diagnosis",
+      "codigo": "Code",
+      "codigoExemplo": "CL-01",
+      "codigoDica": "Letters, numbers, dot and hyphen, up to 20.",
+      "descricao": "Description",
+      "sistemaRotulo": "System",
+      "semSistema": "No system",
+      "sistema": {
+        "CARDIOVASCULAR": "Cardiovascular",
+        "RESPIRATORIO": "Respiratory",
+        "DIGESTORIO": "Digestive",
+        "URINARIO": "Urinary",
+        "TEGUMENTAR": "Integumentary",
+        "LOCOMOTOR": "Musculoskeletal",
+        "NEUROLOGICO": "Neurological",
+        "LINFONODOS": "Lymph nodes"
+      }
     }
   }
 }

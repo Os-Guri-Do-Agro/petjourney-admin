@@ -4097,7 +4097,93 @@
         "dias": "يوم | يوم | يومان | أيام | يومًا | يوم",
         "conta": "النطاق المعتاد للنوع ({faixa} mg/kg) × {peso}، وهو الوزن المسجل. تحقق من وزن اليوم قبل الوصف."
       },
-      "escolherPara": "من أجل {pet}"
+      "escolherPara": "من أجل {pet}",
+      "api": {
+        "classeOutra": "فئة أخرى",
+        "todasEspecies": "كل الأنواع",
+        "todasClasses": "كل الفئات",
+        "semPermissao": "دليل الأدوية لمن يقرأ السجل الطبي.",
+        "erro": "تعذر البحث في دليل الأدوية الآن.",
+        "resumo": "ابحث بالاسم أو المادة الفعالة أو الاستطباب.",
+        "resumoPaciente": "استشارة لـ {pet}: القائمة حسب نوعه، مع حساب الجرعة.",
+        "daClinica": "من العيادة",
+        "emRevisao": "دليل أدوية PetJourney ما زال قيد المراجعة من المسؤول الفني. حاليًا تظهر فقط الأدوية التي أضافتها العيادة.",
+        "acrescentar": "إضافة دواء للعيادة",
+        "naoRevisado": "مرجع غير مراجَع",
+        "manipulado": "مُحضَّر",
+        "doseUsual": "الجرعة المعتادة",
+        "controle": {
+          "NENHUM": "غير خاضع للرقابة",
+          "MAPA_VETERINARIO": "خاضع للرقابة (MAPA)",
+          "ANVISA_HUMANO": "خاضع للرقابة (Anvisa)",
+          "ANVISA_RETENCAO": "احتجاز الوصفة (Anvisa)"
+        },
+        "via": {
+          "ORAL": "فموي",
+          "SUBCUTANEA": "تحت الجلد",
+          "INTRAMUSCULAR": "عضلي",
+          "INTRAVENOSA": "وريدي",
+          "TOPICA": "موضعي",
+          "OTOLOGICA": "أذني",
+          "OFTALMICA": "عيني",
+          "INTRANASAL": "أنفي"
+        },
+        "unidade": {
+          "ML": "مل | مل | مل | مل | مل | مل",
+          "COMPRIMIDO": "قرص | قرص | قرصان | أقراص | قرصًا | قرص",
+          "GOTA": "قطرة | قطرة | قطرتان | قطرات | قطرة | قطرة",
+          "APLICACAO": "تطبيق | تطبيق | تطبيقان | تطبيقات | تطبيقًا | تطبيق"
+        },
+        "dose": {
+          "titulo": "جرعة {pet}",
+          "mgPorKg": "الجرعة المختارة",
+          "intervalo": "الفاصل",
+          "duracao": "المدة",
+          "dias": "يوم",
+          "continuo": "استخدام مستمر",
+          "peso": "وزن اليوم",
+          "pesoDoCadastro": "من السجل",
+          "semCrmv": "لحساب الجرعة، يحتاج ملف المهني إلى CRMV مُتحقَّق منه.",
+          "erro": "تعذر إجراء الحساب الآن.",
+          "passoPeso": "{peso} كغ × {dose} ملغ/كغ = {mg} ملغ",
+          "passoConcentracao": "{mg} ملغ ÷ {concentracao} ملغ/{unidade} = {quantidade} {unidades}",
+          "passoTotal": "{porDia} يوميًا × {dias} يوم = {total} إعطاء",
+          "aproximado": "أعطى الحساب {conta}؛ مُقرَّب إلى {fracao}. راجعه قبل الوصف.",
+          "fracao": "القرص: {fracao}",
+          "faixaEspecie": "النطاق المعتاد للنوع: {min} إلى {max} ملغ/كغ",
+          "faixaGeral": "النطاق المعتاد العام (الدليل لا يذكر هذا النوع): {min} إلى {max} ملغ/كغ",
+          "semPeso": "بلا وزن لا يوجد حساب: أدخل وزن اليوم.",
+          "porAdministracao": "لكل إعطاء، كل {horas} ساعة"
+        },
+        "fracao": {
+          "INTEIRO": "{n} كامل",
+          "MEIO": "نصف",
+          "UM_E_MEIO": "واحد ونصف",
+          "QUARTO": "ربع",
+          "TRES_QUARTOS": "ثلاثة أرباع",
+          "MULTIPLO": "{n}",
+          "APROXIMADO": "{n}"
+        },
+        "aviso": {
+          "ESPECIE_PROIBIDA": "مضاد استطباب في هذا النوع",
+          "ALERGIA": "المريض لديه حساسية من هذه المادة",
+          "PESO_AUSENTE": "لا يوجد وزن في السجل ولا مُدخل",
+          "ACIMA_DA_USUAL": "جرعة أعلى من المعتاد",
+          "ABAIXO_DA_USUAL": "جرعة أقل من المعتاد",
+          "SEM_DOSE_DA_ESPECIE": "الدليل لا يذكر هذا النوع: النطاق هو العام",
+          "CUIDADO": "تنبيه: {cuidado}"
+        },
+        "cuidado": {
+          "GESTANTE": "حامل",
+          "LACTANTE": "مرضعة",
+          "FILHOTE": "صغير السن",
+          "IDOSO": "مسن",
+          "RENAL": "الكلى",
+          "HEPATICO": "الكبد",
+          "CARDIACO": "القلب",
+          "GASTRICO": "المعدة"
+        }
+      }
     },
     "documentos": {
       "titulo": "مستندات الزيارة",
@@ -9930,13 +10016,14 @@
   },
   "agenda": {
     "config": {
-      "titulo": "إعدادات الجدول",
+      "titulo": "إعدادات العيادة",
       "resumo": "الغرف وأنواع المواعيد والحجب والمهل المتفق عليها مع من يحجز عبر التطبيق.",
       "abas": {
         "salas": "الغرف",
         "tipos": "أنواع المواعيد",
         "bloqueios": "الحجب",
-        "politica": "السياسة"
+        "politica": "السياسة",
+        "catalogo": "كتالوج العيادة"
       },
       "erroAoCarregar": "تعذر التحميل.",
       "desativar": "إيقاف",
@@ -10990,6 +11077,146 @@
       "voltou": "عاد في {dia}",
       "registros": "لا سجلات | سجل واحد | سجلان | {n} سجلات | {n} سجلًا | {n} سجل",
       "voltar": "العودة إلى الحالات"
+    }
+  },
+  "catalogo": {
+    "dica": "كتالوج PetJourney للقراءة فقط. هنا ما تضيفه العيادة: الدواء المُحضَّر، اللقاح المستورد، تحليل المختبر الشريك، الرمز الخاص.",
+    "desativados": "معطَّلة ({n})",
+    "editarDe": "تعديل {nome}",
+    "secao": {
+      "medicamentos": {
+        "titulo": "أدوية العيادة",
+        "descricao": "تظهر في دليل الأدوية وفي الوصفة على أنها من العيادة.",
+        "novo": "دواء جديد",
+        "vazio": "لم تضف العيادة أدوية بعد."
+      },
+      "vacinas": {
+        "titulo": "لقاحات العيادة",
+        "descricao": "مع بروتوكول السلسلة: تحسب الواجهة خطة التطعيم.",
+        "novo": "لقاح جديد",
+        "vazio": "لم تضف العيادة لقاحات بعد."
+      },
+      "exames": {
+        "titulo": "تحاليل العيادة",
+        "descricao": "تحاليل المختبر الشريك والتحاليل الخاصة.",
+        "novo": "تحليل جديد",
+        "vazio": "لم تضف العيادة تحاليل بعد."
+      },
+      "diagnosticos": {
+        "titulo": "تشخيصات العيادة",
+        "descricao": "رموز خاصة، بجانب رموز PetJourney.",
+        "novo": "تشخيص جديد",
+        "vazio": "لم تضف العيادة تشخيصات بعد."
+      }
+    },
+    "erro": {
+      "carregar": "تعذر فتح كتالوج العيادة الآن.",
+      "nomeEmUso": "لدى العيادة عنصر نشط بهذا الاسم.",
+      "codigoEmUso": "هذا الرمز مستخدم لتشخيص من العيادة أو من PetJourney.",
+      "noLimite": "وصلت العيادة إلى حد 2000 دواء خاص: أعد استخدام دواء لم تعد تصفه.",
+      "faltaCampo": "ينقص حقل إلزامي."
+    },
+    "medicamento": {
+      "novo": "دواء جديد",
+      "editar": "تعديل الدواء",
+      "oQueE": "ما هو",
+      "nome": "الاسم التجاري",
+      "principio": "المادة الفعالة",
+      "apresentacao": "الشكل الصيدلاني",
+      "apresentacaoExemplo": "قرص 250 ملغ",
+      "concentracao": "التركيز",
+      "porUnidade": "لكل",
+      "classeRotulo": "الفئة",
+      "dose": "الجرعة",
+      "doseMin": "الجرعة الدنيا",
+      "doseMax": "الجرعة القصوى",
+      "especie": "النوع",
+      "intervalo": "الفاصل",
+      "nota": "ملاحظة الجرعة (اختياري)",
+      "proibido": "مضاد استطباب في هذا النوع",
+      "tirarEspecie": "إزالة",
+      "doseDaEspecie": "جرعة لنوع",
+      "usoEControle": "الاستخدام والرقابة",
+      "controle": "الرقابة",
+      "lista": "القائمة",
+      "manipulado": "مُحضَّر (يُستبعد من PDF الوصفة إن كان خاضعًا للرقابة)",
+      "cuidados": "يحتاج حذرًا في",
+      "texto": "نص مساعد",
+      "umaPorLinha": "عنصر واحد في كل سطر.",
+      "observacao": "ملاحظة",
+      "classe": {
+        "ANTIBIOTICO": "مضاد حيوي",
+        "ANTI_INFLAMATORIO": "مضاد التهاب",
+        "ANALGESICO": "مسكن",
+        "CORTICOIDE": "كورتيكوستيرويد",
+        "ANTIEMETICO": "مضاد للقيء",
+        "GASTROPROTETOR": "واقٍ للمعدة",
+        "ANTIPARASITARIO": "مضاد طفيليات",
+        "SEDATIVO": "مهدئ",
+        "CARDIOLOGICO": "قلبي",
+        "DERMATOLOGICO": "جلدي",
+        "OUTRA": "أخرى"
+      }
+    },
+    "vacina": {
+      "nova": "لقاح جديد",
+      "editar": "تعديل اللقاح",
+      "oQueE": "ما هو",
+      "nome": "الاسم",
+      "fabricante": "الشركة المصنعة",
+      "especies": "الأنواع",
+      "serie": "السلسلة والجرعة المعززة",
+      "dosesFilhote": "جرعات الصغير",
+      "dosesAdulto": "جرعات البالغ بلا سجل",
+      "idadeMinima": "العمر الأدنى",
+      "dias": "يوم",
+      "entreDoses": "بين الجرعات",
+      "modoRotulo": "سلسلة الصغير",
+      "modo": {
+        "FIXA": "عدد ثابت من الجرعات",
+        "ATE_IDADE_MINIMA": "حتى العمر الأدنى"
+      },
+      "modoDica": {
+        "FIXA": "جرعات السلسلة، واحدة في كل فاصل.",
+        "ATE_IDADE_MINIMA": "جرعات السلسلة على الأقل، مع التكرار حتى تُعطى جرعة في العمر الأدنى."
+      },
+      "idadeUltimaDose": "العمر الأدنى للجرعة الأخيرة",
+      "reforco": "جرعة معززة كل",
+      "naClinica": "في العيادة",
+      "essencial": "أساسي",
+      "obrigatoria": "إلزامي",
+      "estoqueMinimo": "الحد الأدنى للمخزون"
+    },
+    "exame": {
+      "novo": "تحليل جديد",
+      "editar": "تعديل التحليل",
+      "nome": "الاسم",
+      "grupoRotulo": "المجموعة",
+      "grupo": {
+        "LABORATORIO": "مختبر",
+        "IMAGEM": "تصوير",
+        "OUTROS": "أخرى"
+      }
+    },
+    "diagnostico": {
+      "novo": "تشخيص جديد",
+      "editar": "تعديل التشخيص",
+      "codigo": "الرمز",
+      "codigoExemplo": "CL-01",
+      "codigoDica": "حروف وأرقام ونقطة وشرطة، حتى 20.",
+      "descricao": "الوصف",
+      "sistemaRotulo": "الجهاز",
+      "semSistema": "بلا جهاز",
+      "sistema": {
+        "CARDIOVASCULAR": "القلب والأوعية",
+        "RESPIRATORIO": "التنفسي",
+        "DIGESTORIO": "الهضمي",
+        "URINARIO": "البولي",
+        "TEGUMENTAR": "الجلدي",
+        "LOCOMOTOR": "الحركي",
+        "NEUROLOGICO": "العصبي",
+        "LINFONODOS": "العقد اللمفاوية"
+      }
     }
   }
 }
