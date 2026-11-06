@@ -160,6 +160,8 @@ type RotaDeModulo = {
   icon: string
   /** Tela que só existe pela API: a demonstração não tem os dados dela e esconde o item. */
   soComApi?: boolean
+  /** Só para quem não abre esta outra tela (a recepção vê as vagas; quem lê o mapa, o mapa). */
+  seNaoAbrir?: string
 }
 
 type BlocoDeModulo = { id: string; key: string; rotas: readonly RotaDeModulo[] }
@@ -198,6 +200,14 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         icon: 'ph ph-note-pencil',
       },
       { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
+      /* A recepção não lê o mapa: "tem vaga?" pelas contagens (E5-01). */
+      {
+        key: 'internacao.vagas.titulo',
+        to: '/clinica/internacao/vagas',
+        icon: 'ph ph-bed',
+        soComApi: true,
+        seNaoAbrir: '/clinica/internacao',
+      },
     ],
   },
   {
@@ -279,7 +289,12 @@ export function useAppNavigation() {
         id: bloco.id,
         label: t(bloco.key),
         items: bloco.rotas
-          .filter((rota) => podeAbrir(rota.to) && !(rota.soComApi && demonstracao.value))
+          .filter(
+            (rota) =>
+              podeAbrir(rota.to) &&
+              !(rota.soComApi && demonstracao.value) &&
+              !(rota.seNaoAbrir && podeAbrir(rota.seNaoAbrir)),
+          )
           .map(decorarRota),
       }))
       .filter((bloco) => bloco.items.length > 0)

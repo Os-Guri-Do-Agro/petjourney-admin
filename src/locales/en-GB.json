@@ -10023,6 +10023,7 @@
       "resumo": "Rooms, appointment types, blocks and the deadlines agreed with people who book through the app.",
       "abas": {
         "salas": "Rooms",
+        "leitos": "Beds",
         "tipos": "Appointment types",
         "bloqueios": "Blocks",
         "politica": "Policy",
@@ -12277,6 +12278,252 @@
       "erro": "Could not record the request.",
       "feito": "Request recorded.",
       "jaExistia": "There was already an open request for this patient and period: it is the same one."
+    }
+  },
+  "internacao": {
+    "titulo": "Inpatients",
+    "erroAoCarregar": "Could not load the ward.",
+    "erroAoCarregarUma": "Could not open this hospitalisation.",
+    "vazioTitulo": "No beds yet",
+    "vazioDescricao": "Add the beds of the ward room to admit patients and see the ward map.",
+    "vazioSemCadastro": "Whoever manages the clinic adds the beds in Settings.",
+    "irParaLeitos": "Add beds",
+    "paciente": "Patient",
+    "motivo": "Reason",
+    "diagnostico": "Working diagnosis",
+    "observacao": "Internal note",
+    "observacaoDica": "Stays in the clinic: never goes to the app or the map.",
+    "responsavel": "Responsible vet",
+    "gravidadeRotulo": "Severity",
+    "leito": "Bed",
+    "previsao": "Expected discharge",
+    "previsaoDica": "After now and up to 60 days from admission. Once overdue, it lights up on the map.",
+    "semPrevisao": "No expected discharge",
+    "mudar": "Change",
+    "definir": "Set",
+    "entrada": "Admission",
+    "pesoDeEntrada": "{peso} kg on admission",
+    "naoInformado": "Not provided",
+    "internadoPor": "Admitted by {nome}",
+    "respondePor": "responsible: {nome}",
+    "abrirFicha": "Open the record",
+    "abrirAtendimento": "Open the originating consultation",
+    "horas": "{n} h in hospital | {n} h in hospital",
+    "livre": "Free",
+    "foraDeOperacao": "Out of service",
+    "altaHoje": "Discharge expected today",
+    "avisado": "Owner told by phone",
+    "desfechoTitulo": "Outcome",
+    "naLinha": "Hospitalisation · {situacao}",
+    "semRegistro": "Nothing recorded for {n} h. Doses are no longer being created and the automatic update is paused: record, prescribe or close the hospitalisation.",
+    "semRegistroCurto": "Nothing recorded for {n} h",
+    "kind": {
+      "UTI": "ICU",
+      "GERAL": "General",
+      "FELINO": "Feline",
+      "ISOLAMENTO": "Isolation"
+    },
+    "gravidade": {
+      "ESTAVEL": "Stable",
+      "ATENCAO": "Watch",
+      "CRITICO": "Critical"
+    },
+    "status": {
+      "INTERNADO": "In hospital",
+      "ALTA": "Discharged",
+      "TRANSFERIDO": "Transferred",
+      "OBITO": "Died",
+      "ENCERRAMENTO_ADMINISTRATIVO": "Closed by management"
+    },
+    "desfecho": {
+      "ALTA": "Discharge",
+      "TRANSFERIDO": "Transfer",
+      "OBITO": "Death"
+    },
+    "aviso": {
+      "GATO_EM_LEITO_COMUM": "A cat in a bed that is not feline.",
+      "NAO_GATO_EM_LEITO_FELINO": "A feline bed for an animal that is not a cat."
+    },
+    "urgencia": {
+      "ALERGIA_NOVA": "New allergy on the prescription",
+      "BOLETIM_RETIDO": "Update on hold",
+      "DOSES_ATRASADAS": "{n} dose overdue | {n} doses overdue",
+      "DOSE_PROXIMA": "Dose in {n} min",
+      "ALTA_PREVISTA_VENCIDA": "Expected discharge overdue"
+    },
+    "urgenciaCurta": {
+      "ALERGIA_NOVA": "new allergy",
+      "BOLETIM_RETIDO": "update on hold",
+      "DOSES_ATRASADAS": "doses overdue",
+      "DOSE_PROXIMA": "dose within the hour",
+      "ALTA_PREVISTA_VENCIDA": "discharge overdue"
+    },
+    "resumo": {
+      "ocupacao": "{ocupados} of {ativos} beds taken",
+      "cobramAcao": "{n} patient needs action | {n} patients need action",
+      "criticos": "{n} critical | {n} critical",
+      "emDia": "all up to date"
+    },
+    "pauta": {
+      "titulo": "What needs action",
+      "vazio": "Nothing needs action now.",
+      "ninguem": "No patients in hospital.",
+      "ALERGIA_NOVA": "{pet}: new allergy on the prescription, call the vet",
+      "BOLETIM_RETIDO": "{pet}: update on hold, call the owner",
+      "DOSES_ATRASADAS": "{pet}: {n} dose overdue | {pet}: {n} doses overdue",
+      "DOSE_PROXIMA": "{pet}: dose in {minutos} min",
+      "ALTA_PREVISTA_VENCIDA": "{pet}: expected discharge overdue"
+    },
+    "planta": {
+      "titulo": "Beds",
+      "descricao": "By type, in the order they were added. A free bed admits; a taken one opens the hospitalisation.",
+      "ocupados": "{ocupados} of {ativos} taken",
+      "vagas": "{n} free | {n} free",
+      "semVaga": "No free bed"
+    },
+    "vagas": {
+      "titulo": "Ward vacancies",
+      "resumo": "{n} bed free now | {n} beds free now",
+      "semVaga": "No free beds right now.",
+      "ocupados": "{n} taken | {n} taken",
+      "inativos": "{n} out of service | {n} out of service",
+      "semLeitos": "The clinic has not added beds yet."
+    },
+    "leitos": {
+      "titulo": "Beds",
+      "descricao": "The beds of the ward rooms. A bed out of service leaves the vacancy count.",
+      "novo": "New bed",
+      "editar": "Edit bed",
+      "editarDe": "Edit bed {nome}",
+      "apagarDe": "Delete bed {nome}",
+      "apagado": "Bed deleted.",
+      "tipo": "Type",
+      "nome": "Name",
+      "nomeDica": "The name the team uses on the ward. The suggestion is the next free one of the type.",
+      "sala": "Ward room",
+      "vazio": "No beds yet.",
+      "inativos": "Out of service",
+      "ocupado": "with a patient",
+      "ocupadoSoNome": "Bed with a patient: only the name can change.",
+      "ocupadoNaoDesativa": "Move the patient to another bed or close the hospitalisation first.",
+      "semSala": "To add beds, create a room of type Ward.",
+      "irParaSalas": "Go to rooms",
+      "noLimite": "The clinic has reached the limit of {limite} beds.",
+      "erroAoCarregar": "Could not load the beds.",
+      "desativar": "Take out of service",
+      "desativarTitulo": "Take {nome} out of service",
+      "desativarDica": "The bed stays on the map, marked, and leaves the vacancy count until it is back in service.",
+      "porque": "Why",
+      "detalhe": "Details",
+      "motivo": {
+        "MANUTENCAO": "Maintenance",
+        "DESINFECCAO": "Disinfection",
+        "REFORMA": "Renovation",
+        "EQUIPAMENTO": "Equipment",
+        "OUTRO": "Other reason"
+      }
+    },
+    "internar": {
+      "acao": "Admit",
+      "titulo": "Admit to bed {leito}",
+      "noLeito": "Bed {leito} ({tipo}).",
+      "motivoExemplo": "E.g. post-op fracture care",
+      "peso": "Admission weight",
+      "pesoDica": "The basis for the ward doses. It does not change the weight on record.",
+      "pesoDivergente": "The last weight on record is {ultimo} kg and you typed {informado} kg. Type the weight again to confirm.",
+      "pesoDeNovo": "Admission weight, again",
+      "redigiteOPeso": "Type the weight again to confirm.",
+      "confirmoAviso": "I checked and confirm this bed.",
+      "confirmeAviso": "Tick the bed confirmation to continue.",
+      "mais": "Diagnosis, responsible vet, admission and discharge",
+      "eu": "Me, admitting",
+      "entrada": "Admission",
+      "agora": "Now",
+      "maisCedo": "Earlier",
+      "entradaDica": "Up to 24 h back.",
+      "comPrevisao": "Set the expected discharge",
+      "confirmar": "Admit",
+      "erro": "Could not admit."
+    },
+    "estado": {
+      "titulo": "Status"
+    },
+    "caso": {
+      "titulo": "The case",
+      "editar": "Edit the case"
+    },
+    "mudarLeito": {
+      "acao": "Change bed",
+      "titulo": "Change bed",
+      "dica": "Now in {leito}. The current bed is freed at once.",
+      "para": "To bed",
+      "escolha": "Choose a free bed",
+      "semLivre": "No free beds",
+      "motivo": "Reason",
+      "confirmar": "Change"
+    },
+    "hotel": {
+      "titulo": "What it was taking at the hotel",
+      "descricao": "The animal is also staying at the hotel. Read only: the hotel does not mark these doses while it is in hospital.",
+      "ultima": "Last dose at the hotel: {quando}, {quem}"
+    },
+    "historico": {
+      "titulo": "What changed",
+      "leito": "Bed: from {de} to {para}",
+      "gravidade": "Severity: from {de} to {para}",
+      "todas": "See all {n}",
+      "menos": "See less"
+    },
+    "encerrar": {
+      "acao": "Close hospitalisation",
+      "titulo": "Close the hospitalisation",
+      "desfecho": "Outcome",
+      "orientacao": "Discharge instructions",
+      "orientacaoAlta": "With the patient linked to the app, the owner reads this text in the discharge update. At least {min} characters.",
+      "orientacaoClinica": "Stays in the clinic. At least {min} characters.",
+      "quando": {
+        "ALTA": "When was the discharge",
+        "TRANSFERIDO": "When was the transfer",
+        "OBITO": "When was the death"
+      },
+      "ligacaoDica": "Before closing, the clinic calls the owner. Record who called and when.",
+      "quemLigou": "Who called",
+      "quandoLigou": "When they called",
+      "obitoDica": "The death goes to the record: the patient becomes inactive, the app link ends and their appointments are cancelled, without telling the owner.",
+      "confirmar": {
+        "ALTA": "Discharge",
+        "TRANSFERIDO": "Record the transfer",
+        "OBITO": "Record the death"
+      },
+      "feito": {
+        "ALTA": "Discharge recorded.",
+        "TRANSFERIDO": "Transfer recorded.",
+        "OBITO": "Death recorded.",
+        "ENCERRAMENTO_ADMINISTRATIVO": "Hospitalisation closed by management.",
+        "INTERNADO": "Hospitalisation updated."
+      },
+      "obitoFeito": "Death on {dia} on the record. Appointments cancelled: {agenda}. App links ended: {vinculos}.",
+      "hotelEncerrado": "The hotel stay was closed by the system.",
+      "aviso": {
+        "DOSE_PENDENTE": "A dose was pending at closing time.",
+        "DOSE_FUTURA": "Future doses were suspended.",
+        "BOLETIM_RETIDO": "An update was on hold."
+      },
+      "erro": "Could not close the hospitalisation."
+    },
+    "administrativo": {
+      "acao": "Close without a vet",
+      "titulo": "Administrative closing",
+      "dica": "Only when the clinic has no active vet with an up-to-date CRMV: closing is the vet’s job. Nothing goes to the owner. If the animal died, record the death on the record afterwards.",
+      "motivo": "Why close without a vet",
+      "motivoDica": "From {min} to {max} characters.",
+      "confirmar": "Close"
+    },
+    "selo": {
+      "SEM_SELO": "Admitting and closing need a checked CRMV: yours is waiting for the PetJourney check.",
+      "VENCIDO": "The check of your CRMV has expired: PetJourney needs to check it again.",
+      "SEM_IDENTIDADE": "To admit and close, confirm your identity.",
+      "CRMV_OBRIGATORIO": "To admit and close, add your CRMV and state to your professional record."
     }
   }
 }

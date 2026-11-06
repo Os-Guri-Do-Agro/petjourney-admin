@@ -108,11 +108,21 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   },
 
   /* Clínica: internação e estoque (E5, E6). */
+  /*
+   * O mapa e o detalhe pela API (E5-01, PJ-7G0NQI): quem lê o prontuário (DONO, veterinário,
+   * enfermagem). As vagas, sem paciente, também para a recepção.
+   */
   {
     prefixo: '/clinica/internacao',
     modulo: 'CLINICA',
-    permissao: 'internacao.executar',
-    integrada: false,
+    permissao: 'prontuario.ler',
+    integrada: true,
+  },
+  {
+    prefixo: '/clinica/internacao/vagas',
+    modulo: 'CLINICA',
+    permissao: 'agenda.ler',
+    integrada: true,
   },
   {
     prefixo: '/clinica/estoque',

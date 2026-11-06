@@ -185,7 +185,10 @@ export function useMeuDiaDaClinica() {
       const urgencia = item.urgencia
       linhas.push({
         id: `internado-${item.id}`,
-        to: seIntegrada('/clinica/internacao', `/clinica/ficha/${item.pacienteId ?? ''}`),
+        to: seIntegrada(
+          `/clinica/internacao/${item.id}`,
+          `/clinica/ficha/${item.pacienteId ?? ''}`,
+        ),
         frase: t('clinico.meuDia.pautaApi.internado', { pet: item.pacienteNome ?? '' }),
         detalhe: item.leitoNome ?? '',
         tom: urgencia === 'URGENTE' ? 'risco' : urgencia === 'ATENCAO' ? 'atencao' : 'neutro',

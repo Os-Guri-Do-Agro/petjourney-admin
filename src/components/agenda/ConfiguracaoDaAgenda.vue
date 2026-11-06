@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * Configuração da agenda da Clínica pela API (E3-01, PJ-GL3IVL): tudo o que a agenda precisa antes
- * do primeiro horário, em quatro abas (`?aba=`): Salas, Tipos de atendimento, Bloqueios e Política.
+ * do primeiro horário, em abas (`?aba=`): Salas, Leitos (E5-01, pela API), Tipos de atendimento,
+ * Bloqueios e Política.
  *
  * O horário da semana e os feriados continuam no Estabelecimento (E1-01): a agenda não duplica.
  * O expediente próprio de cada profissional mora na ficha dele, em Equipe › Profissionais.
@@ -19,15 +20,18 @@ import PoliticaAba from '@/components/agenda/PoliticaAba.vue'
 import SalasAba from '@/components/agenda/SalasAba.vue'
 import TiposAba from '@/components/agenda/TiposAba.vue'
 import CatalogoAba from '@/components/catalogo/CatalogoAba.vue'
+import LeitosAba from '@/components/internacao/LeitosAba.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { Aba } from '@/navegacao/espacos'
 
-const ABAS = ['salas', 'tipos', 'bloqueios', 'politica', 'catalogo'] as const
+const ABAS = ['salas', 'leitos', 'tipos', 'bloqueios', 'politica', 'catalogo'] as const
 type AbaDaTela = (typeof ABAS)[number]
 
 const ICONE: Record<AbaDaTela, string> = {
   salas: 'ph ph-door',
+  leitos: 'ph ph-bed',
   tipos: 'ph ph-stethoscope',
   bloqueios: 'ph ph-calendar-x',
   politica: 'ph ph-scales',
@@ -38,11 +42,26 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { store } = useParceiroPortal()
+const { ativo: demonstracao } = useModoDemonstracao()
 
 /** O catálogo da clínica (E4-02) só para quem gere o catálogo: DONO e GESTOR. */
 const geraCatalogo = computed(() => store.temPermissao('catalogo.gerir'))
 
-const abasVisiveis = computed(() => ABAS.filter((aba) => aba !== 'catalogo' || geraCatalogo.value))
+/*
+ * Os leitos da internação (E5-01): quem cadastra (DONO, GESTOR) e quem desativa (o veterinário e a
+ * enfermagem, `internacao.executar`). Só pela API: a demonstração tem o cadastro no mapa.
+ */
+const veLeitos = computed(
+  () =>
+    !demonstracao.value &&
+    (store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar')),
+)
+
+const abasVisiveis = computed(() =>
+  ABAS.filter(
+    (aba) => (aba !== 'catalogo' || geraCatalogo.value) && (aba !== 'leitos' || veLeitos.value),
+  ),
+)
 
 const abaAtual = computed<AbaDaTela>(() => {
   const pedida = route.query.aba
@@ -87,6 +106,13 @@ const podeBloquear = computed(() => clinicaEscreve.value && store.temPermissao('
     :aba-atual="destino(abaAtual)"
   >
     <SalasAba v-if="abaAtual === 'salas'" :pode-editar="podeConfigurar" />
+    <LeitosAba
+      v-else-if="abaAtual === 'leitos'"
+      :pode-editar="podeConfigurar"
+      :pode-desativar="
+        clinicaEscreve && (podeConfigurar || store.temPermissao('internacao.executar'))
+      "
+    />
     <TiposAba v-else-if="abaAtual === 'tipos'" :pode-editar="podeConfigurar" />
     <BloqueiosAba v-else-if="abaAtual === 'bloqueios'" :pode-editar="podeBloquear" />
     <PoliticaAba v-else-if="abaAtual === 'politica'" :pode-editar="podeConfigurar" />

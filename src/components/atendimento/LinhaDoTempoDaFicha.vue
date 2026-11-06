@@ -99,6 +99,12 @@ const opcoesDeFiltro = computed(() => [
 ])
 
 function titulo(item: ItemDaLinhaDoTempo) {
+  /* A internação (E5-01b) vem com o título cru e o desfecho em `situacao`. */
+  if (item.tipo === 'INTERNACAO') {
+    return item.situacao && te(`internacao.status.${item.situacao}`)
+      ? t('internacao.naLinha', { situacao: t(`internacao.status.${item.situacao}`) })
+      : t('internacao.titulo')
+  }
   if (item.tipo === 'ATENDIMENTO' && te(`agenda.config.tipo.kind.${item.titulo}`)) {
     return t(`agenda.config.tipo.kind.${item.titulo}`)
   }
@@ -117,6 +123,7 @@ function meta(item: ItemDaLinhaDoTempo) {
 
 function destino(item: ItemDaLinhaDoTempo) {
   if (item.tipo === 'ATENDIMENTO') return `/clinica/atendimento/${item.id}`
+  if (item.tipo === 'INTERNACAO') return `/clinica/internacao/${item.id}`
   if (item.tipo === 'FALTA') {
     return { path: '/clinica/agenda', query: { data: item.em.slice(0, 10), horario: item.id } }
   }

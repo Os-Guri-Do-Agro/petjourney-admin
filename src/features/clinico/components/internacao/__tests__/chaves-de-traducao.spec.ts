@@ -25,8 +25,6 @@ const ARQUIVOS = [
     .filter((nome) => nome.endsWith('.vue'))
     .map((nome) => `src/features/clinico/components/internacao/${nome}`),
   'src/features/clinico/stores/internacao.ts',
-  'src/pages/(accounts)/clinica/internacao.vue',
-  'src/pages/(accounts)/clinica/internacao/[internacaoId].vue',
 ]
 
 const LOCALES = ['pt', 'en', 'en-GB', 'es']

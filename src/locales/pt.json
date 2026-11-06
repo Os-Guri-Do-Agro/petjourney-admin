@@ -10023,6 +10023,7 @@
       "resumo": "Salas, tipos de atendimento, bloqueios e os prazos combinados com quem marca pelo app.",
       "abas": {
         "salas": "Salas",
+        "leitos": "Leitos",
         "tipos": "Tipos de atendimento",
         "bloqueios": "Bloqueios",
         "politica": "Política",
@@ -12277,6 +12278,252 @@
       "erro": "Não deu para registrar o pedido.",
       "feito": "Pedido registrado.",
       "jaExistia": "Já havia um pedido aberto deste paciente e período: é o mesmo."
+    }
+  },
+  "internacao": {
+    "titulo": "Internação",
+    "erroAoCarregar": "Não deu para carregar a internação.",
+    "erroAoCarregarUma": "Não deu para abrir esta internação.",
+    "vazioTitulo": "Nenhum leito cadastrado",
+    "vazioDescricao": "Cadastre os leitos da sala de internação para internar e ver o mapa da ala.",
+    "vazioSemCadastro": "Quem gere a clínica cadastra os leitos na Configuração.",
+    "irParaLeitos": "Cadastrar leitos",
+    "paciente": "Paciente",
+    "motivo": "Motivo",
+    "diagnostico": "Diagnóstico de trabalho",
+    "observacao": "Observação interna",
+    "observacaoDica": "Fica só na clínica: nunca vai ao app nem ao mapa.",
+    "responsavel": "Veterinário responsável",
+    "gravidadeRotulo": "Gravidade",
+    "leito": "Leito",
+    "previsao": "Previsão de alta",
+    "previsaoDica": "Depois de agora e até 60 dias da entrada. Vencida, ela acende no mapa.",
+    "semPrevisao": "Sem previsão",
+    "mudar": "Mudar",
+    "definir": "Definir",
+    "entrada": "Entrada",
+    "pesoDeEntrada": "{peso} kg na entrada",
+    "naoInformado": "Não informado",
+    "internadoPor": "Internado por {nome}",
+    "respondePor": "responsável: {nome}",
+    "abrirFicha": "Abrir a ficha",
+    "abrirAtendimento": "Abrir a consulta de origem",
+    "horas": "{n} h internado | {n} h internado",
+    "livre": "Livre",
+    "foraDeOperacao": "Fora de operação",
+    "altaHoje": "Alta prevista para hoje",
+    "avisado": "Responsável avisado por telefone",
+    "desfechoTitulo": "Desfecho",
+    "naLinha": "Internação · {situacao}",
+    "semRegistro": "Sem registro há {n} h. As doses pararam de ser criadas e o boletim automático está parado: registre, prescreva ou encerre a internação.",
+    "semRegistroCurto": "Sem registro há {n} h",
+    "kind": {
+      "UTI": "UTI",
+      "GERAL": "Geral",
+      "FELINO": "Felino",
+      "ISOLAMENTO": "Isolamento"
+    },
+    "gravidade": {
+      "ESTAVEL": "Estável",
+      "ATENCAO": "Atenção",
+      "CRITICO": "Crítico"
+    },
+    "status": {
+      "INTERNADO": "Internado",
+      "ALTA": "Alta",
+      "TRANSFERIDO": "Transferido",
+      "OBITO": "Óbito",
+      "ENCERRAMENTO_ADMINISTRATIVO": "Encerrada pela gestão"
+    },
+    "desfecho": {
+      "ALTA": "Alta",
+      "TRANSFERIDO": "Transferência",
+      "OBITO": "Óbito"
+    },
+    "aviso": {
+      "GATO_EM_LEITO_COMUM": "Gato em leito que não é felino.",
+      "NAO_GATO_EM_LEITO_FELINO": "Leito felino para um animal que não é gato."
+    },
+    "urgencia": {
+      "ALERGIA_NOVA": "Alergia nova na prescrição",
+      "BOLETIM_RETIDO": "Boletim retido",
+      "DOSES_ATRASADAS": "{n} dose atrasada | {n} doses atrasadas",
+      "DOSE_PROXIMA": "Dose em {n} min",
+      "ALTA_PREVISTA_VENCIDA": "Previsão de alta vencida"
+    },
+    "urgenciaCurta": {
+      "ALERGIA_NOVA": "alergia nova",
+      "BOLETIM_RETIDO": "boletim retido",
+      "DOSES_ATRASADAS": "doses atrasadas",
+      "DOSE_PROXIMA": "dose na próxima hora",
+      "ALTA_PREVISTA_VENCIDA": "alta vencida"
+    },
+    "resumo": {
+      "ocupacao": "{ocupados} de {ativos} leitos ocupados",
+      "cobramAcao": "{n} paciente pede ação | {n} pacientes pedem ação",
+      "criticos": "{n} crítico | {n} críticos",
+      "emDia": "tudo em dia"
+    },
+    "pauta": {
+      "titulo": "O que pede ação",
+      "vazio": "Nada pede ação agora.",
+      "ninguem": "Nenhum paciente internado.",
+      "ALERGIA_NOVA": "{pet}: alergia nova na prescrição, chame o veterinário",
+      "BOLETIM_RETIDO": "{pet}: boletim retido, ligue para o responsável",
+      "DOSES_ATRASADAS": "{pet}: {n} dose atrasada | {pet}: {n} doses atrasadas",
+      "DOSE_PROXIMA": "{pet}: dose em {minutos} min",
+      "ALTA_PREVISTA_VENCIDA": "{pet}: previsão de alta vencida"
+    },
+    "planta": {
+      "titulo": "Leitos",
+      "descricao": "Por tipo, na ordem do cadastro. O livre interna; o ocupado abre a internação.",
+      "ocupados": "{ocupados} de {ativos} ocupados",
+      "vagas": "{n} vaga | {n} vagas",
+      "semVaga": "Sem vaga"
+    },
+    "vagas": {
+      "titulo": "Vagas da internação",
+      "resumo": "{n} leito livre agora | {n} leitos livres agora",
+      "semVaga": "Nenhum leito livre agora.",
+      "ocupados": "{n} ocupado | {n} ocupados",
+      "inativos": "{n} fora de operação | {n} fora de operação",
+      "semLeitos": "A clínica ainda não cadastrou leitos."
+    },
+    "leitos": {
+      "titulo": "Leitos",
+      "descricao": "Os leitos das salas de internação. O leito parado sai da conta de vagas.",
+      "novo": "Novo leito",
+      "editar": "Editar leito",
+      "editarDe": "Editar o leito {nome}",
+      "apagarDe": "Apagar o leito {nome}",
+      "apagado": "Leito apagado.",
+      "tipo": "Tipo",
+      "nome": "Nome",
+      "nomeDica": "O nome que a equipe usa na ala. A sugestão é o próximo livre do tipo.",
+      "sala": "Sala de internação",
+      "vazio": "Nenhum leito ainda.",
+      "inativos": "Fora de operação",
+      "ocupado": "com paciente",
+      "ocupadoSoNome": "Leito com paciente: dá para mudar só o nome.",
+      "ocupadoNaoDesativa": "Mude o paciente de leito ou encerre a internação antes.",
+      "semSala": "Para cadastrar leitos, crie uma sala do tipo Internação.",
+      "irParaSalas": "Ir para as salas",
+      "noLimite": "A clínica chegou ao teto de {limite} leitos.",
+      "erroAoCarregar": "Não deu para carregar os leitos.",
+      "desativar": "Desativar",
+      "desativarTitulo": "Desativar {nome}",
+      "desativarDica": "O leito fica no mapa, marcado, e sai da conta de vagas até ser reativado.",
+      "porque": "Por quê",
+      "detalhe": "Detalhe",
+      "motivo": {
+        "MANUTENCAO": "Manutenção",
+        "DESINFECCAO": "Desinfecção",
+        "REFORMA": "Reforma",
+        "EQUIPAMENTO": "Equipamento",
+        "OUTRO": "Outro motivo"
+      }
+    },
+    "internar": {
+      "acao": "Internar",
+      "titulo": "Internar no leito {leito}",
+      "noLeito": "Leito {leito} ({tipo}).",
+      "motivoExemplo": "Ex.: pós-operatório de fratura",
+      "peso": "Peso de entrada",
+      "pesoDica": "A base das doses do plantão. Não muda o peso do cadastro.",
+      "pesoDivergente": "O último peso do cadastro é {ultimo} kg e você digitou {informado} kg. Digite o peso de novo para confirmar.",
+      "pesoDeNovo": "Peso de entrada, de novo",
+      "redigiteOPeso": "Digite o peso de novo para confirmar.",
+      "confirmoAviso": "Conferi e confirmo este leito.",
+      "confirmeAviso": "Marque a confirmação do leito para seguir.",
+      "mais": "Diagnóstico, responsável, entrada e previsão",
+      "eu": "Eu, quem interna",
+      "entrada": "Entrada",
+      "agora": "Agora",
+      "maisCedo": "Mais cedo",
+      "entradaDica": "Até 24 h para trás.",
+      "comPrevisao": "Definir a previsão de alta",
+      "confirmar": "Internar",
+      "erro": "Não deu para internar."
+    },
+    "estado": {
+      "titulo": "Estado"
+    },
+    "caso": {
+      "titulo": "O caso",
+      "editar": "Editar o caso"
+    },
+    "mudarLeito": {
+      "acao": "Mudar de leito",
+      "titulo": "Mudar de leito",
+      "dica": "Hoje no {leito}. O leito de agora fica livre na hora.",
+      "para": "Para o leito",
+      "escolha": "Escolha um leito livre",
+      "semLivre": "Nenhum leito livre",
+      "motivo": "Motivo",
+      "confirmar": "Mudar"
+    },
+    "hotel": {
+      "titulo": "O que ele tomava no hotel",
+      "descricao": "O animal também está hospedado. Só leitura: o hotel não marca estas doses enquanto ele está internado.",
+      "ultima": "Última dose no hotel: {quando}, {quem}"
+    },
+    "historico": {
+      "titulo": "O que mudou",
+      "leito": "Leito: de {de} para {para}",
+      "gravidade": "Gravidade: de {de} para {para}",
+      "todas": "Ver as {n}",
+      "menos": "Ver menos"
+    },
+    "encerrar": {
+      "acao": "Encerrar internação",
+      "titulo": "Encerrar a internação",
+      "desfecho": "Desfecho",
+      "orientacao": "Orientação de saída",
+      "orientacaoAlta": "Com o paciente ligado ao app, o responsável lê este texto no boletim de alta. Pelo menos {min} caracteres.",
+      "orientacaoClinica": "Fica só na clínica. Pelo menos {min} caracteres.",
+      "quando": {
+        "ALTA": "Quando foi a alta",
+        "TRANSFERIDO": "Quando foi a transferência",
+        "OBITO": "Quando foi o óbito"
+      },
+      "ligacaoDica": "Antes de encerrar, a clínica liga para o responsável. Registre quem ligou e quando.",
+      "quemLigou": "Quem ligou",
+      "quandoLigou": "Quando ligou",
+      "obitoDica": "O óbito vai ao cadastro: o paciente fica inativo, o vínculo com o app se encerra e a agenda dele é cancelada, sem aviso ao responsável.",
+      "confirmar": {
+        "ALTA": "Dar alta",
+        "TRANSFERIDO": "Registrar a transferência",
+        "OBITO": "Registrar o óbito"
+      },
+      "feito": {
+        "ALTA": "Alta registrada.",
+        "TRANSFERIDO": "Transferência registrada.",
+        "OBITO": "Óbito registrado.",
+        "ENCERRAMENTO_ADMINISTRATIVO": "Internação encerrada pela gestão.",
+        "INTERNADO": "Internação atualizada."
+      },
+      "obitoFeito": "Óbito em {dia} no cadastro. Horários cancelados: {agenda}. Vínculos com o app encerrados: {vinculos}.",
+      "hotelEncerrado": "A estadia no hotel foi encerrada pelo sistema.",
+      "aviso": {
+        "DOSE_PENDENTE": "Havia dose pendente na hora do encerramento.",
+        "DOSE_FUTURA": "As doses futuras foram suspensas.",
+        "BOLETIM_RETIDO": "Havia boletim retido."
+      },
+      "erro": "Não deu para encerrar a internação."
+    },
+    "administrativo": {
+      "acao": "Encerrar sem veterinário",
+      "titulo": "Encerramento administrativo",
+      "dica": "Só quando a clínica não tem nenhum veterinário ativo com CRMV em dia: quem encerra é o veterinário. Nada vai ao responsável. Se o animal morreu, registre o óbito no cadastro depois.",
+      "motivo": "Por que encerrar sem veterinário",
+      "motivoDica": "De {min} a {max} caracteres.",
+      "confirmar": "Encerrar"
+    },
+    "selo": {
+      "SEM_SELO": "Internar e encerrar pedem o CRMV conferido: o seu espera a conferência da PetJourney.",
+      "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo.",
+      "SEM_IDENTIDADE": "Para internar e encerrar, confirme sua identidade.",
+      "CRMV_OBRIGATORIO": "Para internar e encerrar, cadastre o CRMV e a UF na sua ficha de profissional."
     }
   }
 }

@@ -10023,6 +10023,7 @@
       "resumo": "Sale, vrste pregleda, blokade i rokovi dogovoreni sa onima koji zakazuju preko aplikacije.",
       "abas": {
         "salas": "Sale",
+        "leitos": "Kreveti",
         "tipos": "Vrste pregleda",
         "bloqueios": "Blokade",
         "politica": "Pravila",
@@ -12277,6 +12278,252 @@
       "erro": "Zahtev nije zabeležen.",
       "feito": "Zahtev je zabeležen.",
       "jaExistia": "Već postoji otvoren zahtev za ovog pacijenta i period: to je isti zahtev."
+    }
+  },
+  "internacao": {
+    "titulo": "Hospitalizacija",
+    "erroAoCarregar": "Hospitalizacija nije učitana.",
+    "erroAoCarregarUma": "Ova hospitalizacija nije otvorena.",
+    "vazioTitulo": "Nema unetih kreveta",
+    "vazioDescricao": "Unesite krevete sobe za hospitalizaciju da biste primali pacijente i videli mapu odeljenja.",
+    "vazioSemCadastro": "Ko upravlja klinikom unosi krevete u Podešavanjima.",
+    "irParaLeitos": "Unesi krevete",
+    "paciente": "Pacijent",
+    "motivo": "Razlog",
+    "diagnostico": "Radna dijagnoza",
+    "observacao": "Interna napomena",
+    "observacaoDica": "Ostaje samo u klinici: nikad ne ide u aplikaciju ni na mapu.",
+    "responsavel": "Odgovorni veterinar",
+    "gravidadeRotulo": "Težina stanja",
+    "leito": "Krevet",
+    "previsao": "Predviđeni otpust",
+    "previsaoDica": "Posle sadašnjeg trenutka i do 60 dana od prijema. Kada istekne, pali se na mapi.",
+    "semPrevisao": "Bez predviđenog otpusta",
+    "mudar": "Promeni",
+    "definir": "Odredi",
+    "entrada": "Prijem",
+    "pesoDeEntrada": "{peso} kg na prijemu",
+    "naoInformado": "Nije uneto",
+    "internadoPor": "Primio {nome}",
+    "respondePor": "odgovoran: {nome}",
+    "abrirFicha": "Otvori karton",
+    "abrirAtendimento": "Otvori pregled iz kog je došao",
+    "horas": "{n} h u bolnici | {n} h u bolnici | {n} h u bolnici",
+    "livre": "Slobodan",
+    "foraDeOperacao": "Van upotrebe",
+    "altaHoje": "Otpust predviđen za danas",
+    "avisado": "Vlasnik obavešten telefonom",
+    "desfechoTitulo": "Ishod",
+    "naLinha": "Hospitalizacija · {situacao}",
+    "semRegistro": "Bez zapisa već {n} h. Doze se više ne prave i automatski izveštaj je zaustavljen: zabeležite, propišite ili zatvorite hospitalizaciju.",
+    "semRegistroCurto": "Bez zapisa {n} h",
+    "kind": {
+      "UTI": "JIN",
+      "GERAL": "Opšti",
+      "FELINO": "Za mačke",
+      "ISOLAMENTO": "Izolacija"
+    },
+    "gravidade": {
+      "ESTAVEL": "Stabilno",
+      "ATENCAO": "Pod nadzorom",
+      "CRITICO": "Kritično"
+    },
+    "status": {
+      "INTERNADO": "Hospitalizovan",
+      "ALTA": "Otpušten",
+      "TRANSFERIDO": "Premešten",
+      "OBITO": "Uginuće",
+      "ENCERRAMENTO_ADMINISTRATIVO": "Zatvorila uprava"
+    },
+    "desfecho": {
+      "ALTA": "Otpust",
+      "TRANSFERIDO": "Premeštaj",
+      "OBITO": "Uginuće"
+    },
+    "aviso": {
+      "GATO_EM_LEITO_COMUM": "Mačka u krevetu koji nije za mačke.",
+      "NAO_GATO_EM_LEITO_FELINO": "Krevet za mačke za životinju koja nije mačka."
+    },
+    "urgencia": {
+      "ALERGIA_NOVA": "Nova alergija na propisanoj terapiji",
+      "BOLETIM_RETIDO": "Zadržan izveštaj",
+      "DOSES_ATRASADAS": "{n} doza kasni | {n} doze kasne | {n} doza kasni",
+      "DOSE_PROXIMA": "Doza za {n} min",
+      "ALTA_PREVISTA_VENCIDA": "Predviđeni otpust je prošao"
+    },
+    "urgenciaCurta": {
+      "ALERGIA_NOVA": "nova alergija",
+      "BOLETIM_RETIDO": "zadržan izveštaj",
+      "DOSES_ATRASADAS": "doze kasne",
+      "DOSE_PROXIMA": "doza u narednom satu",
+      "ALTA_PREVISTA_VENCIDA": "otpust je prošao"
+    },
+    "resumo": {
+      "ocupacao": "Zauzeto {ocupados} od {ativos} kreveta",
+      "cobramAcao": "{n} pacijent traži radnju | {n} pacijenta traže radnju | {n} pacijenata traži radnju",
+      "criticos": "{n} kritičan | {n} kritična | {n} kritičnih",
+      "emDia": "sve je ažurno"
+    },
+    "pauta": {
+      "titulo": "Šta traži radnju",
+      "vazio": "Ništa ne traži radnju sada.",
+      "ninguem": "Nema hospitalizovanih pacijenata.",
+      "ALERGIA_NOVA": "{pet}: nova alergija na propisanoj terapiji, pozovite veterinara",
+      "BOLETIM_RETIDO": "{pet}: zadržan izveštaj, pozovite vlasnika",
+      "DOSES_ATRASADAS": "{pet}: {n} doza kasni | {pet}: {n} doze kasne | {pet}: {n} doza kasni",
+      "DOSE_PROXIMA": "{pet}: doza za {minutos} min",
+      "ALTA_PREVISTA_VENCIDA": "{pet}: predviđeni otpust je prošao"
+    },
+    "planta": {
+      "titulo": "Kreveti",
+      "descricao": "Po vrsti, redom unosa. Slobodan prima pacijenta; zauzet otvara hospitalizaciju.",
+      "ocupados": "Zauzeto {ocupados} od {ativos}",
+      "vagas": "{n} slobodan | {n} slobodna | {n} slobodnih",
+      "semVaga": "Nema mesta"
+    },
+    "vagas": {
+      "titulo": "Slobodna mesta u bolnici",
+      "resumo": "{n} slobodan krevet sada | {n} slobodna kreveta sada | {n} slobodnih kreveta sada",
+      "semVaga": "Trenutno nema slobodnih kreveta.",
+      "ocupados": "{n} zauzet | {n} zauzeta | {n} zauzetih",
+      "inativos": "{n} van upotrebe | {n} van upotrebe | {n} van upotrebe",
+      "semLeitos": "Klinika još nije unela krevete."
+    },
+    "leitos": {
+      "titulo": "Kreveti",
+      "descricao": "Kreveti soba za hospitalizaciju. Krevet van upotrebe ne ulazi u broj slobodnih mesta.",
+      "novo": "Novi krevet",
+      "editar": "Izmeni krevet",
+      "editarDe": "Izmeni krevet {nome}",
+      "apagarDe": "Obriši krevet {nome}",
+      "apagado": "Krevet je obrisan.",
+      "tipo": "Vrsta",
+      "nome": "Naziv",
+      "nomeDica": "Naziv koji tim koristi na odeljenju. Predlog je sledeći slobodan naziv te vrste.",
+      "sala": "Soba za hospitalizaciju",
+      "vazio": "Još nema kreveta.",
+      "inativos": "Van upotrebe",
+      "ocupado": "sa pacijentom",
+      "ocupadoSoNome": "Krevet sa pacijentom: može se promeniti samo naziv.",
+      "ocupadoNaoDesativa": "Prvo premestite pacijenta u drugi krevet ili zatvorite hospitalizaciju.",
+      "semSala": "Da biste uneli krevete, napravite sobu vrste Hospitalizacija.",
+      "irParaSalas": "Idi na sobe",
+      "noLimite": "Klinika je dostigla gornju granicu od {limite} kreveta.",
+      "erroAoCarregar": "Kreveti nisu učitani.",
+      "desativar": "Isključi",
+      "desativarTitulo": "Isključi {nome}",
+      "desativarDica": "Krevet ostaje na mapi, označen, i ne ulazi u slobodna mesta dok se ponovo ne uključi.",
+      "porque": "Zašto",
+      "detalhe": "Pojedinosti",
+      "motivo": {
+        "MANUTENCAO": "Održavanje",
+        "DESINFECCAO": "Dezinfekcija",
+        "REFORMA": "Renoviranje",
+        "EQUIPAMENTO": "Oprema",
+        "OUTRO": "Drugi razlog"
+      }
+    },
+    "internar": {
+      "acao": "Primi",
+      "titulo": "Primi u krevet {leito}",
+      "noLeito": "Krevet {leito} ({tipo}).",
+      "motivoExemplo": "Npr. postoperativni oporavak posle preloma",
+      "peso": "Težina na prijemu",
+      "pesoDica": "Osnova za doze tokom dežurstva. Ne menja težinu u kartonu.",
+      "pesoDivergente": "Poslednja težina u kartonu je {ultimo} kg, a vi ste uneli {informado} kg. Unesite težinu ponovo da biste potvrdili.",
+      "pesoDeNovo": "Težina na prijemu, ponovo",
+      "redigiteOPeso": "Unesite težinu ponovo da biste potvrdili.",
+      "confirmoAviso": "Proverio sam i potvrđujem ovaj krevet.",
+      "confirmeAviso": "Označite potvrdu kreveta da biste nastavili.",
+      "mais": "Dijagnoza, odgovorni, prijem i otpust",
+      "eu": "Ja, koji primam",
+      "entrada": "Prijem",
+      "agora": "Sada",
+      "maisCedo": "Ranije",
+      "entradaDica": "Do 24 h unazad.",
+      "comPrevisao": "Odredi predviđeni otpust",
+      "confirmar": "Primi",
+      "erro": "Prijem nije uspeo."
+    },
+    "estado": {
+      "titulo": "Stanje"
+    },
+    "caso": {
+      "titulo": "Slučaj",
+      "editar": "Izmeni slučaj"
+    },
+    "mudarLeito": {
+      "acao": "Premesti u drugi krevet",
+      "titulo": "Premesti u drugi krevet",
+      "dica": "Sada u {leito}. Sadašnji krevet se odmah oslobađa.",
+      "para": "U krevet",
+      "escolha": "Izaberite slobodan krevet",
+      "semLivre": "Nema slobodnih kreveta",
+      "motivo": "Razlog",
+      "confirmar": "Premesti"
+    },
+    "hotel": {
+      "titulo": "Šta je primao u hotelu",
+      "descricao": "Životinja je i smeštena u hotelu. Samo za čitanje: hotel ne beleži ove doze dok je u bolnici.",
+      "ultima": "Poslednja doza u hotelu: {quando}, {quem}"
+    },
+    "historico": {
+      "titulo": "Šta se promenilo",
+      "leito": "Krevet: iz {de} u {para}",
+      "gravidade": "Težina stanja: iz {de} u {para}",
+      "todas": "Prikaži svih {n}",
+      "menos": "Prikaži manje"
+    },
+    "encerrar": {
+      "acao": "Zatvori hospitalizaciju",
+      "titulo": "Zatvorite hospitalizaciju",
+      "desfecho": "Ishod",
+      "orientacao": "Uputstva pri otpustu",
+      "orientacaoAlta": "Ako je pacijent povezan sa aplikacijom, vlasnik čita ovaj tekst u izveštaju o otpustu. Najmanje {min} znakova.",
+      "orientacaoClinica": "Ostaje samo u klinici. Najmanje {min} znakova.",
+      "quando": {
+        "ALTA": "Kada je bio otpust",
+        "TRANSFERIDO": "Kada je bio premeštaj",
+        "OBITO": "Kada je bilo uginuće"
+      },
+      "ligacaoDica": "Pre zatvaranja, klinika zove vlasnika. Zabeležite ko je zvao i kada.",
+      "quemLigou": "Ko je zvao",
+      "quandoLigou": "Kada je zvao",
+      "obitoDica": "Uginuće se upisuje u karton: pacijent postaje neaktivan, veza sa aplikacijom se zatvara i njegovi termini se otkazuju, bez obaveštenja vlasniku.",
+      "confirmar": {
+        "ALTA": "Otpusti",
+        "TRANSFERIDO": "Zabeleži premeštaj",
+        "OBITO": "Zabeleži uginuće"
+      },
+      "feito": {
+        "ALTA": "Otpust je zabeležen.",
+        "TRANSFERIDO": "Premeštaj je zabeležen.",
+        "OBITO": "Uginuće je zabeleženo.",
+        "ENCERRAMENTO_ADMINISTRATIVO": "Hospitalizaciju je zatvorila uprava.",
+        "INTERNADO": "Hospitalizacija je ažurirana."
+      },
+      "obitoFeito": "Uginuće {dia} u kartonu. Otkazani termini: {agenda}. Zatvorene veze sa aplikacijom: {vinculos}.",
+      "hotelEncerrado": "Boravak u hotelu je zatvorio sistem.",
+      "aviso": {
+        "DOSE_PENDENTE": "U trenutku zatvaranja bilo je doze na čekanju.",
+        "DOSE_FUTURA": "Buduće doze su obustavljene.",
+        "BOLETIM_RETIDO": "Bio je zadržan izveštaj."
+      },
+      "erro": "Hospitalizacija nije zatvorena."
+    },
+    "administrativo": {
+      "acao": "Zatvori bez veterinara",
+      "titulo": "Administrativno zatvaranje",
+      "dica": "Samo kada klinika nema nijednog aktivnog veterinara sa važećim CRMV-om: zatvara veterinar. Ništa ne ide vlasniku. Ako je životinja uginula, posle zabeležite uginuće u kartonu.",
+      "motivo": "Zašto zatvarate bez veterinara",
+      "motivoDica": "Od {min} do {max} znakova.",
+      "confirmar": "Zatvori"
+    },
+    "selo": {
+      "SEM_SELO": "Za prijem i zatvaranje potreban je provereni CRMV: vaš čeka proveru PetJourney-ja.",
+      "VENCIDO": "Provera vašeg CRMV-a je istekla: PetJourney mora ponovo da je obavi.",
+      "SEM_IDENTIDADE": "Za prijem i zatvaranje potvrdite identitet.",
+      "CRMV_OBRIGATORIO": "Za prijem i zatvaranje unesite CRMV i saveznu državu u svoj profesionalni karton."
     }
   }
 }
