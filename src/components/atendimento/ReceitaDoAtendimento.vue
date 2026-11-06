@@ -36,6 +36,7 @@ import {
   type Receita,
   type Repeticao,
 } from '@/service/parceiro/receitas-service'
+import { abrirAbaVazia, levarAoArquivo } from '@/utils/arquivo-assinado'
 
 import AssinarReceitaGaveta from './AssinarReceitaGaveta.vue'
 import CancelarReceitaGaveta from './CancelarReceitaGaveta.vue'
@@ -249,10 +250,10 @@ const abrindoPdf = ref<string | null>(null)
 /** A janela abre no toque (o navegador bloqueia a que abre depois de esperar a rede). */
 async function abrirPdf(receita: Receita) {
   abrindoPdf.value = receita.id
-  const janela = window.open('', '_blank')
+  const janela = abrirAbaVazia()
   try {
     const lido = await pdfDaReceita(receita.id, parceiroQuery())
-    if (lido.url && janela) janela.location.href = lido.url
+    if (lido.url) levarAoArquivo(janela, lido.url)
     else janela?.close()
   } catch (err) {
     janela?.close()
@@ -315,7 +316,7 @@ function nomeDoItem(receita: Receita) {
     <header class="ui-cartao__cabeca">
       <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-prescription" /></span>
       <span class="ui-cartao__titulos">
-        <h2 id="sa-receita" class="ui-cartao__titulo">{{ t('atendimento.secao.RECEITA') }}</h2>
+        <h2 id="sa-receita" class="ui-cartao__titulo">{{ t('atendimento.receita.titulo') }}</h2>
         <p class="ui-cartao__descricao">{{ t('atendimento.receita.descricao') }}</p>
       </span>
       <span class="ui-cartao__acoes">

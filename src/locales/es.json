@@ -9601,7 +9601,8 @@
       "pedidosDeReserva": "Solicitudes",
       "acomodacoes": "Alojamientos",
       "rotinaPadrao": "Rutina estándar",
-      "correcoes": "Correcciones"
+      "correcoes": "Correcciones",
+      "copias": "Copias"
     },
     "abasAria": "Pantallas de {destino}"
   },
@@ -11379,7 +11380,7 @@
       "EXAME_FISICO": "Examen físico",
       "DIAGNOSTICO": "Diagnóstico",
       "CONDUTA": "Conducta",
-      "RECEITA": "Receta"
+      "RECEITA": "Receta y documentos"
     },
     "lista": {
       "todos": "Todas",
@@ -11796,6 +11797,7 @@
       "verificar": "Verificar identidad"
     },
     "receita": {
+      "titulo": "Receta",
       "descricao": "Las prescripciones y la receta para el responsable. La receta va antes de finalizar.",
       "erro": "No se pudo cargar la receta.",
       "erroRemover": "No se pudo quitar la prescripción.",
@@ -11980,6 +11982,301 @@
     },
     "resumo": {
       "indisponivel": "No disponible ahora."
+    }
+  },
+  "documentos": {
+    "titulo": "Documentos",
+    "descricao": "Certificados, solicitudes de examen, derivaciones y consentimientos, con el PDF emitido.",
+    "novo": "Nuevo documento",
+    "vazio": "Todavía no hay documentos.",
+    "verMais": "Ver más",
+    "continuar": "Continuar",
+    "abrirPdf": "Abrir PDF",
+    "emitidoEm": "Emitido el {data}",
+    "criadoEm": "Creado el {data}",
+    "esperaNoApp": "esperando la respuesta en la app",
+    "gravado": "Borrador guardado.",
+    "emitido": "Documento emitido.",
+    "qualTipo": "Tipo de documento",
+    "escolherTipo": "Elija el tipo",
+    "identidade": "Paciente, responsable, clínica y quien firma salen del registro al emitir. Aquí va solo el texto clínico.",
+    "destinacaoAMao": "En blanco: sale una línea para completar a mano",
+    "removerExame": "Quitar {nome}",
+    "exameDica": "Nombre del examen",
+    "adicionarExame": "Agregar",
+    "aceitePeloApp": "Pedir la aceptación por la app",
+    "aceitePeloAppDica": "El responsable recibe el documento en la app y responde allí. Si no, la aceptación es en el mostrador.",
+    "eutanasiaNoBalcao": "El consentimiento de eutanasia solo se acepta en el mostrador, con la firma de quien responde por el animal.",
+    "senhaDica": "La contraseña de su cuenta firma el documento.",
+    "salvarRascunho": "Guardar borrador",
+    "emitir": "Emitir",
+    "tipo": {
+      "PRONTUARIO": "Historia clínica",
+      "PEDIDO_EXAME": "Solicitud de examen",
+      "ORIENTACOES": "Indicaciones",
+      "ENCAMINHAMENTO": "Derivación",
+      "RELATORIO_PLANO": "Informe y plan",
+      "ATESTADO_SAUDE": "Certificado de salud",
+      "ATESTADO_COMPARECIMENTO": "Certificado de asistencia",
+      "ATESTADO_VIAGEM": "Certificado para viaje",
+      "DECLARACAO_OBITO": "Certificado de defunción",
+      "COMPROVANTE_VACINACAO": "Comprobante de vacunación",
+      "TERMO_CONSENTIMENTO": "Consentimiento informado",
+      "TERMO_RECUSA": "Documento de rechazo",
+      "TERMO_EUTANASIA": "Consentimiento de eutanasia",
+      "ORCAMENTO": "Presupuesto"
+    },
+    "status": {
+      "RASCUNHO": "Borrador",
+      "EMITIDO": "Emitido",
+      "ANULADO": "Anulado"
+    },
+    "aceiteStatus": {
+      "NAO_SE_APLICA": "Sin aceptación",
+      "PENDENTE": "aceptación pendiente",
+      "ACEITO": "aceptado",
+      "RECUSADO": "rechazado"
+    },
+    "destinacao": {
+      "CREMACAO_INDIVIDUAL": "Cremación individual",
+      "CREMACAO_COLETIVA": "Cremación colectiva",
+      "SEPULTAMENTO": "Sepultura",
+      "RETIRADO_PELO_RESPONSAVEL": "Retirado por el responsable"
+    },
+    "campo": {
+      "dataDoExame": "Fecha del examen",
+      "semAlteracoes": "Examen sin alteraciones",
+      "constatacoes": "Hallazgos",
+      "recomendacoes": "Recomendaciones",
+      "finalidade": "Finalidad",
+      "antirrabica": "Vacuna antirrábica",
+      "vermifugacao": "Desparasitación",
+      "validadeExigida": "Validez exigida",
+      "destino": "Destino",
+      "causaProvavel": "Causa probable",
+      "necropsiaRealizada": "Necropsia realizada",
+      "destinacao": "Destino del cuerpo",
+      "observacoes": "Observaciones",
+      "exames": "Exámenes",
+      "indicacao": "Indicación clínica",
+      "orientacoesDeColeta": "Indicaciones de toma de muestra",
+      "destinatario": "Para quién",
+      "motivo": "Motivo de la derivación",
+      "historico": "Historial",
+      "achados": "Hallazgos",
+      "diagnostico": "Diagnóstico",
+      "medicacaoEmUso": "Medicación en uso",
+      "solicitacao": "Lo que se solicita",
+      "objeto": "Objeto del documento",
+      "detalhamento": "Detalle"
+    },
+    "aceite": {
+      "titulo": "Aceptación en el mostrador",
+      "acao": "Registrar aceptación",
+      "dica": "Quien responde por el animal lee el documento, dice si acepta y firma en el recuadro. Vale la primera respuesta, del mostrador o de la app.",
+      "nome": "Nombre de quien responde",
+      "documento": "Documento de identidad",
+      "resposta": "Respuesta",
+      "ACEITO": "Acepta",
+      "RECUSADO": "Rechaza",
+      "assinatura": "Firma",
+      "assinaturaDica": "Firme con el dedo o el lápiz en el recuadro.",
+      "limpar": "Borrar",
+      "confirmar": "Registrar",
+      "divergente": "El documento es distinto del que figura en el registro. Revise el documento de la persona y confirme la diferencia.",
+      "confirmoDivergencia": "Revisé el documento de la persona y confirmo la diferencia (queda en el registro).",
+      "confirmeDivergencia": "Marque la confirmación de la diferencia para registrar.",
+      "erro": "No se pudo registrar la aceptación.",
+      "feito": "Aceptación registrada."
+    },
+    "anular": {
+      "titulo": "Anular documento",
+      "acao": "Anular",
+      "dica": "El PDF deja de abrirse y la verificación pública pasa a decir \"anulado\", sin el motivo.",
+      "confirmar": "Anular documento",
+      "confirmeOutro": "Este documento es de otro veterinario. Marque la confirmación para anularlo.",
+      "outroResponsavel": "Confirmo que anulo un documento emitido por otro veterinario.",
+      "erro": "No se pudo anular el documento.",
+      "feito": "Documento anulado."
+    },
+    "erro": {
+      "carregar": "No se pudieron cargar los documentos.",
+      "salvar": "No se pudo guardar el borrador.",
+      "emitir": "No se pudo emitir el documento.",
+      "faltando": "Complete los campos resaltados para emitir.",
+      "pdf": "No se pudo abrir el PDF.",
+      "descartar": "No se pudo descartar el borrador."
+    },
+    "descartar": "Descartar",
+    "selo": {
+      "SEM_SELO": "Emitir y anular documentos requieren el CRMV revisado: el suyo espera la revisión de PetJourney.",
+      "VENCIDO": "La revisión de su CRMV venció: PetJourney debe revisarlo de nuevo para que usted emita documentos.",
+      "SEM_IDENTIDADE": "Para emitir documentos, confirme su identidad.",
+      "CRMV_OBRIGATORIO": "Para emitir documentos, registre el CRMV y el estado en su ficha profesional."
+    }
+  },
+  "laudos": {
+    "titulo": "Informes recibidos",
+    "descricao": "Resultados de examen que llegaron de fuera. El responsable los ve con el resumen, o cuando usted los libere.",
+    "vazio": "No hay informes adjuntos en esta consulta.",
+    "anexar": "Adjuntar informe",
+    "abrir": "Descargar",
+    "liberar": "Liberar al responsable",
+    "liberado": "Informe liberado en la app.",
+    "anexado": "Informe adjuntado.",
+    "removido": "quitado",
+    "noApp": "en la app del responsable",
+    "soNaClinica": "solo en la clínica",
+    "imagem": "Imagen",
+    "resultadoDe": "Resultado del {dia}",
+    "arquivos": "Archivos",
+    "escolher": "Elegir archivos",
+    "arquivosDica": "PDF, JPEG, PNG o WebP, hasta 4 por envío y 20 MB cada uno. Fotos de iPhone (HEIC): conviértalas a JPEG antes.",
+    "semArquivo": "Elija al menos un archivo.",
+    "tirar": "Quitar {nome}",
+    "exame": "Examen",
+    "exameDica": "Ej.: hemograma completo",
+    "dataDoResultado": "Fecha del resultado",
+    "enviar": "Adjuntar",
+    "remover": "Quitar informe",
+    "removerDe": "Quitar el informe {nome}",
+    "removerDica": "El informe de {nome} sale de la consulta y de la app. El archivo sigue guardado en el registro.",
+    "erro": {
+      "carregar": "No se pudieron cargar los informes.",
+      "abrir": "No se pudo abrir el informe.",
+      "liberar": "No se pudo liberar el informe.",
+      "anexar": "No se pudo adjuntar el informe.",
+      "remover": "No se pudo quitar el informe."
+    }
+  },
+  "copias": {
+    "titulo": "Copias de la historia clínica",
+    "abertos": "Abiertos",
+    "encerrados": "Cerrados",
+    "filtro": "Situación de los pedidos",
+    "acao": {
+      "gerar": "Generar copia",
+      "acompanhar": "Seguir",
+      "entregar": "Descargar y entregar",
+      "ver": "Ver pedido"
+    },
+    "peloApp": "Pedido por la app",
+    "noBalcao": "Pedido en el mostrador",
+    "noBalcaoPor": "En el mostrador, por {nome}",
+    "recebidoEm": "Recibido el {data}",
+    "prazo": "Plazo {dia}",
+    "venceuEm": "Venció el {dia}",
+    "periodo": {
+      "tudo": "Todo el historial",
+      "entre": "Del {de} al {ate}",
+      "desde": "Desde el {de}",
+      "ate": "Hasta el {ate}"
+    },
+    "resumo": "{n} pedido abierto | {n} pedidos abiertos",
+    "resumoVencidos": "{n} pedido pasó el plazo | {n} pedidos pasaron el plazo",
+    "resumoEmDia": "Ningún pedido abierto.",
+    "vazio": "Ningún pedido de copia abierto.",
+    "vazioEncerrados": "Todavía no hay pedidos cerrados.",
+    "verMais": "Ver más",
+    "status": {
+      "ABERTO": "Abierto",
+      "PRORROGADO": "Prorrogado",
+      "GERANDO": "Generando",
+      "PRONTO": "Listo",
+      "ENTREGUE": "Entregado",
+      "RECUSADO": "Rechazado",
+      "ENCERRADO_NA_EXCLUSAO": "Cerrado por eliminación"
+    },
+    "outroDono": "Revise quién lo pide: la ficha tiene historial de otro dueño.",
+    "fato": {
+      "quem": "Quién lo pidió",
+      "recebido": "Recibido el",
+      "periodo": "Período",
+      "prazo": "Plazo",
+      "prazoProrrogado": "Plazo prorrogado",
+      "conteudo": "En la copia",
+      "guardado": "PDF guardado hasta",
+      "entregue": "Entregado",
+      "justificativa": "Justificación de la prórroga",
+      "motivo": "Motivo del rechazo"
+    },
+    "atendimentos": "{n} consulta | {n} consultas",
+    "laudosNoPdf": "{n} informe en el PDF | {n} informes en el PDF",
+    "laudosAParte": "{n} informe aparte | {n} informes aparte",
+    "laudosAParteDica": "{n} informe no cupo en el PDF: el enlace aparece al descargar. | {n} informes no cupieron en el PDF: los enlaces aparecen al descargar.",
+    "historicoDesde": "Pedido por la app: la copia trae el historial desde el {dia}, el vínculo del dueño actual.",
+    "encerradoNaExclusao": "El responsable pidió eliminar sus datos con el pedido abierto. El pedido se cerró sin copia.",
+    "entregaPeloApp": "Cuando el dueño la descargue en la app, la entrega se registra sola.",
+    "gerando": "Generando la copia. Suele tardar unos segundos.",
+    "pdfSaiu": "El PDF pasó los 7 días de guarda. Vuelva a generarlo para entregar.",
+    "escolherPeriodo": "Período de la copia",
+    "grandeDemais": "El período tiene {n} consultas y la copia admite hasta {maximo}. Elija un período más corto y registre otro pedido para el resto.",
+    "periodoObrigatorio": "Elija el primer y el último día.",
+    "arquivo": "La copia",
+    "baixar": "Descargar PDF",
+    "comoEntregou": "Cómo se entregó",
+    "canal": {
+      "APP": "Por la app",
+      "MAOS": "En mano",
+      "EMAIL_DO_RESPONSAVEL": "Por el correo del responsable"
+    },
+    "doResponsavel": "Del responsable técnico",
+    "prorrogar": {
+      "acao": "Prorrogar plazo",
+      "titulo": "Prorrogar el plazo",
+      "dica": "Una vez, antes de vencer: el nuevo plazo es de 30 días corridos desde el pedido. La justificación queda en el pedido.",
+      "justificativa": "Justificación",
+      "confirmar": "Prorrogar"
+    },
+    "recusar": {
+      "acao": "Rechazar pedido",
+      "titulo": "Rechazar el pedido",
+      "dica": "El pedido de {nome} se cierra sin copia y el PDF guardado se elimina. El motivo queda en el pedido.",
+      "motivo": "Motivo del rechazo",
+      "confirmar": "Rechazar pedido"
+    },
+    "textoDica": "De {min} a 1000 caracteres.",
+    "outroPeriodo": "Otro período",
+    "gerar": "Generar copia",
+    "gerarDeNovo": "Generar de nuevo",
+    "entregar": "Registrar entrega",
+    "falha": {
+      "TEMPO": "La generación tardó demasiado. Intente de nuevo.",
+      "MEMORIA": "La copia quedó demasiado pesada. Pruebe un período más corto.",
+      "RENDER": "No se pudo armar el PDF. Intente de nuevo.",
+      "ARMAZEM": "No se pudo guardar el PDF. Intente de nuevo.",
+      "GRANDE_DEMAIS": "El período tiene demasiadas consultas. Elija un período más corto.",
+      "PDF_GRANDE": "El PDF superó el tamaño máximo. Elija un período más corto.",
+      "TENTATIVAS": "La generación falló en todos los intentos. Intente más tarde.",
+      "outra": "No se pudo generar la copia. Intente de nuevo."
+    },
+    "selo": {
+      "SEM_SELO": "Prorrogar y rechazar son del responsable técnico: su CRMV espera la revisión de PetJourney.",
+      "VENCIDO": "Prorrogar y rechazar son del responsable técnico: la revisión de su CRMV venció.",
+      "SEM_IDENTIDADE": "Prorrogar y rechazar son del responsable técnico: confirme su identidad.",
+      "CRMV_OBRIGATORIO": "Prorrogar y rechazar son del responsable técnico: registre el CRMV y el estado en su ficha profesional."
+    },
+    "erro": {
+      "carregar": "No se pudieron cargar los pedidos de copia.",
+      "gerar": "No se pudo generar la copia.",
+      "pdf": "No se pudo abrir el PDF.",
+      "entregar": "No se pudo registrar la entrega.",
+      "prorrogar": "No se pudo prorrogar.",
+      "recusar": "No se pudo rechazar el pedido."
+    },
+    "novo": {
+      "acao": "Registrar pedido",
+      "titulo": "Pedido del mostrador",
+      "dica": "El documento de quien pide queda solo en el pedido y no vuelve a la pantalla. El plazo es de 5 días hábiles.",
+      "paciente": "Paciente",
+      "nome": "Nombre de quien pide",
+      "documento": "Documento de quien pide",
+      "documentoDica": "DNI, pasaporte u otro documento con foto.",
+      "umPeriodo": "Un período",
+      "confirmar": "Registrar pedido",
+      "erro": "No se pudo registrar el pedido.",
+      "feito": "Pedido registrado.",
+      "jaExistia": "Ya había un pedido abierto de este paciente y período: es el mismo."
     }
   }
 }

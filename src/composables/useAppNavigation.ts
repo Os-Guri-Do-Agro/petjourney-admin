@@ -252,7 +252,14 @@ const PATIENT_ROUTES = [
   /* Os pedidos de correção do cadastro que os responsáveis mandam pelo app (E2-02). */
   { key: 'cadastro.correcoes.titulo', to: '/clinica/correcoes', icon: 'ph ph-pencil-line' },
   { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
-] as const
+  /* Os pedidos de cópia do prontuário (E4-06c): só existem pela API (`copia.gerir`). */
+  {
+    key: 'copias.titulo',
+    to: '/clinica/copias-do-prontuario',
+    icon: 'ph ph-copy',
+    soComApi: true,
+  },
+] as const satisfies readonly RotaDeModulo[]
 
 export function useAppNavigation() {
   const { t, te, locale } = useI18n()
@@ -487,7 +494,9 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map(decorarRota)
+    return PATIENT_ROUTES.filter(
+      (rota) => podeAbrir(rota.to) && !('soComApi' in rota && rota.soComApi && demonstracao.value),
+    ).map(decorarRota)
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {

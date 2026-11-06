@@ -9601,7 +9601,8 @@
       "pedidosDeReserva": "Zahtevi",
       "acomodacoes": "Smeštaj",
       "rotinaPadrao": "Standardna rutina",
-      "correcoes": "Ispravke"
+      "correcoes": "Ispravke",
+      "copias": "Kopije"
     },
     "abasAria": "Ekrani: {destino}"
   },
@@ -11379,7 +11380,7 @@
       "EXAME_FISICO": "Klinički pregled",
       "DIAGNOSTICO": "Dijagnoza",
       "CONDUTA": "Terapija i plan",
-      "RECEITA": "Recept"
+      "RECEITA": "Recept i dokumenti"
     },
     "lista": {
       "todos": "Svi",
@@ -11796,6 +11797,7 @@
       "verificar": "Potvrdi identitet"
     },
     "receita": {
+      "titulo": "Recept",
       "descricao": "Propisani lekovi i recept za vlasnika. Recept se pravi pre završavanja.",
       "erro": "Recept nije mogao da se učita.",
       "erroRemover": "Propisani lek nije mogao da se ukloni.",
@@ -11980,6 +11982,301 @@
     },
     "resumo": {
       "indisponivel": "Trenutno nedostupno."
+    }
+  },
+  "documentos": {
+    "titulo": "Dokumenti",
+    "descricao": "Potvrde, uputi za analize, uputi drugom veterinaru i saglasnosti, sa izdatim PDF-om.",
+    "novo": "Novi dokument",
+    "vazio": "Još nema dokumenata.",
+    "verMais": "Prikaži još",
+    "continuar": "Nastavi",
+    "abrirPdf": "Otvori PDF",
+    "emitidoEm": "Izdato {data}",
+    "criadoEm": "Napravljeno {data}",
+    "esperaNoApp": "čeka odgovor u aplikaciji",
+    "gravado": "Nacrt je sačuvan.",
+    "emitido": "Dokument je izdat.",
+    "qualTipo": "Vrsta dokumenta",
+    "escolherTipo": "Izaberite vrstu",
+    "identidade": "Pacijent, vlasnik, klinika i potpisnik preuzimaju se iz evidencije pri izdavanju. Ovde ide samo klinički tekst.",
+    "destinacaoAMao": "Prazno: štampa se linija za ručno popunjavanje",
+    "removerExame": "Ukloni {nome}",
+    "exameDica": "Naziv analize",
+    "adicionarExame": "Dodaj",
+    "aceitePeloApp": "Zatraži saglasnost u aplikaciji",
+    "aceitePeloAppDica": "Vlasnik dobija dokument u aplikaciji i tamo odgovara. U suprotnom, saglasnost se daje na pultu.",
+    "eutanasiaNoBalcao": "Saglasnost za eutanaziju daje se samo na pultu, uz potpis osobe odgovorne za životinju.",
+    "senhaDica": "Lozinka vašeg naloga potpisuje dokument.",
+    "salvarRascunho": "Sačuvaj nacrt",
+    "emitir": "Izdaj",
+    "tipo": {
+      "PRONTUARIO": "Zdravstveni karton",
+      "PEDIDO_EXAME": "Uput za analize",
+      "ORIENTACOES": "Uputstva",
+      "ENCAMINHAMENTO": "Uput",
+      "RELATORIO_PLANO": "Izveštaj i plan",
+      "ATESTADO_SAUDE": "Zdravstvena potvrda",
+      "ATESTADO_COMPARECIMENTO": "Potvrda o dolasku",
+      "ATESTADO_VIAGEM": "Potvrda za putovanje",
+      "DECLARACAO_OBITO": "Potvrda o uginuću",
+      "COMPROVANTE_VACINACAO": "Potvrda o vakcinaciji",
+      "TERMO_CONSENTIMENTO": "Saglasnost",
+      "TERMO_RECUSA": "Izjava o odbijanju",
+      "TERMO_EUTANASIA": "Saglasnost za eutanaziju",
+      "ORCAMENTO": "Predračun"
+    },
+    "status": {
+      "RASCUNHO": "Nacrt",
+      "EMITIDO": "Izdat",
+      "ANULADO": "Poništen"
+    },
+    "aceiteStatus": {
+      "NAO_SE_APLICA": "Bez saglasnosti",
+      "PENDENTE": "saglasnost na čekanju",
+      "ACEITO": "prihvaćeno",
+      "RECUSADO": "odbijeno"
+    },
+    "destinacao": {
+      "CREMACAO_INDIVIDUAL": "Pojedinačna kremacija",
+      "CREMACAO_COLETIVA": "Zajednička kremacija",
+      "SEPULTAMENTO": "Sahrana",
+      "RETIRADO_PELO_RESPONSAVEL": "Preuzeo vlasnik"
+    },
+    "campo": {
+      "dataDoExame": "Datum pregleda",
+      "semAlteracoes": "Pregled bez odstupanja",
+      "constatacoes": "Nalazi",
+      "recomendacoes": "Preporuke",
+      "finalidade": "Svrha",
+      "antirrabica": "Vakcina protiv besnila",
+      "vermifugacao": "Dehelmintizacija",
+      "validadeExigida": "Tražena važnost",
+      "destino": "Odredište",
+      "causaProvavel": "Verovatan uzrok",
+      "necropsiaRealizada": "Obavljena nekropsija",
+      "destinacao": "Postupanje sa telom",
+      "observacoes": "Napomene",
+      "exames": "Analize",
+      "indicacao": "Klinička indikacija",
+      "orientacoesDeColeta": "Uputstva za uzorkovanje",
+      "destinatario": "Kome",
+      "motivo": "Razlog upućivanja",
+      "historico": "Anamneza",
+      "achados": "Nalazi",
+      "diagnostico": "Dijagnoza",
+      "medicacaoEmUso": "Terapija koju koristi",
+      "solicitacao": "Šta se traži",
+      "objeto": "Predmet dokumenta",
+      "detalhamento": "Pojedinosti"
+    },
+    "aceite": {
+      "titulo": "Saglasnost na pultu",
+      "acao": "Zabeleži saglasnost",
+      "dica": "Osoba odgovorna za životinju čita dokument, kaže da li prihvata i potpisuje se u polju. Važi prvi odgovor, sa pulta ili iz aplikacije.",
+      "nome": "Ime osobe koja odgovara",
+      "documento": "Lični dokument",
+      "resposta": "Odgovor",
+      "ACEITO": "Prihvata",
+      "RECUSADO": "Odbija",
+      "assinatura": "Potpis",
+      "assinaturaDica": "Potpišite se prstom ili olovkom u polju.",
+      "limpar": "Obriši",
+      "confirmar": "Zabeleži",
+      "divergente": "Dokument se razlikuje od onog u evidenciji. Proverite dokument osobe i potvrdite razliku.",
+      "confirmoDivergencia": "Proverio sam dokument osobe i potvrđujem razliku (ostaje u zapisu).",
+      "confirmeDivergencia": "Označite potvrdu razlike da biste zabeležili.",
+      "erro": "Saglasnost nije zabeležena.",
+      "feito": "Saglasnost je zabeležena."
+    },
+    "anular": {
+      "titulo": "Poništi dokument",
+      "acao": "Poništi",
+      "dica": "PDF prestaje da se otvara, a javna provera prikazuje „poništen”, bez razloga.",
+      "confirmar": "Poništi dokument",
+      "confirmeOutro": "Ovaj dokument je izdao drugi veterinar. Označite potvrdu da biste ga poništili.",
+      "outroResponsavel": "Potvrđujem da poništavam dokument koji je izdao drugi veterinar.",
+      "erro": "Dokument nije poništen.",
+      "feito": "Dokument je poništen."
+    },
+    "erro": {
+      "carregar": "Dokumenti nisu učitani.",
+      "salvar": "Nacrt nije sačuvan.",
+      "emitir": "Dokument nije izdat.",
+      "faltando": "Popunite istaknuta polja da biste izdali dokument.",
+      "pdf": "PDF nije otvoren.",
+      "descartar": "Nacrt nije odbačen."
+    },
+    "descartar": "Odbaci",
+    "selo": {
+      "SEM_SELO": "Za izdavanje i poništavanje dokumenata potreban je provereni CRMV: vaš čeka proveru PetJourney-ja.",
+      "VENCIDO": "Provera vašeg CRMV-a je istekla: PetJourney mora ponovo da je obavi pre izdavanja dokumenata.",
+      "SEM_IDENTIDADE": "Da biste izdavali dokumente, potvrdite identitet.",
+      "CRMV_OBRIGATORIO": "Da biste izdavali dokumente, unesite CRMV i saveznu državu u svoj profesionalni karton."
+    }
+  },
+  "laudos": {
+    "titulo": "Primljeni nalazi",
+    "descricao": "Rezultati analiza koji su stigli spolja. Vlasnik ih vidi uz rezime ili kada ih vi oslobodite.",
+    "vazio": "Uz ovaj pregled nema priloženih nalaza.",
+    "anexar": "Priloži nalaz",
+    "abrir": "Preuzmi",
+    "liberar": "Oslobodi vlasniku",
+    "liberado": "Nalaz je dostupan u aplikaciji.",
+    "anexado": "Nalaz je priložen.",
+    "removido": "uklonjen",
+    "noApp": "u aplikaciji vlasnika",
+    "soNaClinica": "samo u klinici",
+    "imagem": "Slika",
+    "resultadoDe": "Rezultat od {dia}",
+    "arquivos": "Datoteke",
+    "escolher": "Izaberi datoteke",
+    "arquivosDica": "PDF, JPEG, PNG ili WebP, do 4 po slanju i do 20 MB svaka. Fotografije sa iPhone-a (HEIC) prvo pretvorite u JPEG.",
+    "semArquivo": "Izaberite bar jednu datoteku.",
+    "tirar": "Ukloni {nome}",
+    "exame": "Analiza",
+    "exameDica": "Npr. kompletna krvna slika",
+    "dataDoResultado": "Datum rezultata",
+    "enviar": "Priloži",
+    "remover": "Ukloni nalaz",
+    "removerDe": "Ukloni nalaz {nome}",
+    "removerDica": "Nalaz {nome} uklanja se iz pregleda i iz aplikacije. Datoteka ostaje sačuvana u zapisu.",
+    "erro": {
+      "carregar": "Nalazi nisu učitani.",
+      "abrir": "Nalaz nije otvoren.",
+      "liberar": "Nalaz nije oslobođen.",
+      "anexar": "Nalaz nije priložen.",
+      "remover": "Nalaz nije uklonjen."
+    }
+  },
+  "copias": {
+    "titulo": "Kopije kartona",
+    "abertos": "Otvoreni",
+    "encerrados": "Zatvoreni",
+    "filtro": "Status zahteva",
+    "acao": {
+      "gerar": "Napravi kopiju",
+      "acompanhar": "Prati",
+      "entregar": "Preuzmi i predaj",
+      "ver": "Pogledaj zahtev"
+    },
+    "peloApp": "Zahtev iz aplikacije",
+    "noBalcao": "Zahtev na pultu",
+    "noBalcaoPor": "Na pultu, {nome}",
+    "recebidoEm": "Primljeno {data}",
+    "prazo": "Rok {dia}",
+    "venceuEm": "Rok je istekao {dia}",
+    "periodo": {
+      "tudo": "Cela istorija",
+      "entre": "Od {de} do {ate}",
+      "desde": "Od {de}",
+      "ate": "Do {ate}"
+    },
+    "resumo": "{n} otvoren zahtev | {n} otvorena zahteva | {n} otvorenih zahteva",
+    "resumoVencidos": "{n} zahtev je prekoračio rok | {n} zahteva su prekoračila rok | {n} zahteva je prekoračilo rok",
+    "resumoEmDia": "Nema otvorenih zahteva.",
+    "vazio": "Nema otvorenih zahteva za kopiju.",
+    "vazioEncerrados": "Još nema zatvorenih zahteva.",
+    "verMais": "Prikaži još",
+    "status": {
+      "ABERTO": "Otvoren",
+      "PRORROGADO": "Produžen",
+      "GERANDO": "Pravi se",
+      "PRONTO": "Spreman",
+      "ENTREGUE": "Predat",
+      "RECUSADO": "Odbijen",
+      "ENCERRADO_NA_EXCLUSAO": "Zatvoren brisanjem podataka"
+    },
+    "outroDono": "Proverite ko traži: karton ima istoriju drugog vlasnika.",
+    "fato": {
+      "quem": "Ko je tražio",
+      "recebido": "Primljeno",
+      "periodo": "Period",
+      "prazo": "Rok",
+      "prazoProrrogado": "Produženi rok",
+      "conteudo": "U kopiji",
+      "guardado": "PDF se čuva do",
+      "entregue": "Predato",
+      "justificativa": "Obrazloženje produženja",
+      "motivo": "Razlog odbijanja"
+    },
+    "atendimentos": "{n} pregled | {n} pregleda | {n} pregleda",
+    "laudosNoPdf": "{n} nalaz u PDF-u | {n} nalaza u PDF-u | {n} nalaza u PDF-u",
+    "laudosAParte": "{n} nalaz posebno | {n} nalaza posebno | {n} nalaza posebno",
+    "laudosAParteDica": "{n} nalaz nije stao u PDF: link se pojavljuje kada preuzmete. | {n} nalaza nisu stala u PDF: linkovi se pojavljuju kada preuzmete. | {n} nalaza nije stalo u PDF: linkovi se pojavljuju kada preuzmete.",
+    "historicoDesde": "Zahtev iz aplikacije: kopija sadrži istoriju od {dia}, od veze sa sadašnjim vlasnikom.",
+    "encerradoNaExclusao": "Vlasnik je tražio brisanje podataka dok je zahtev bio otvoren. Zahtev je zatvoren bez kopije.",
+    "entregaPeloApp": "Kada vlasnik preuzme kopiju u aplikaciji, predaja se beleži sama.",
+    "gerando": "Kopija se pravi. Obično traje nekoliko sekundi.",
+    "pdfSaiu": "PDF je prešao 7 dana čuvanja. Napravite ga ponovo da biste ga predali.",
+    "escolherPeriodo": "Period kopije",
+    "grandeDemais": "Period ima {n} pregleda, a kopija prima najviše {maximo}. Izaberite kraći period i zabeležite drugi zahtev za ostatak.",
+    "periodoObrigatorio": "Izaberite prvi i poslednji dan.",
+    "arquivo": "Kopija",
+    "baixar": "Preuzmi PDF",
+    "comoEntregou": "Kako je predato",
+    "canal": {
+      "APP": "Kroz aplikaciju",
+      "MAOS": "Lično",
+      "EMAIL_DO_RESPONSAVEL": "Na e-poštu vlasnika"
+    },
+    "doResponsavel": "Za odgovornog veterinara",
+    "prorrogar": {
+      "acao": "Produži rok",
+      "titulo": "Produžite rok",
+      "dica": "Jednom, pre isteka: novi rok je 30 kalendarskih dana od zahteva. Obrazloženje ostaje u zahtevu.",
+      "justificativa": "Obrazloženje",
+      "confirmar": "Produži"
+    },
+    "recusar": {
+      "acao": "Odbij zahtev",
+      "titulo": "Odbijte zahtev",
+      "dica": "Zahtev za {nome} zatvara se bez kopije, a sačuvani PDF se briše. Razlog ostaje u zahtevu.",
+      "motivo": "Razlog odbijanja",
+      "confirmar": "Odbij zahtev"
+    },
+    "textoDica": "Od {min} do 1000 znakova.",
+    "outroPeriodo": "Drugi period",
+    "gerar": "Napravi kopiju",
+    "gerarDeNovo": "Napravi ponovo",
+    "entregar": "Zabeleži predaju",
+    "falha": {
+      "TEMPO": "Pravljenje je trajalo predugo. Pokušajte ponovo.",
+      "MEMORIA": "Kopija je preteška. Pokušajte sa kraćim periodom.",
+      "RENDER": "PDF nije napravljen. Pokušajte ponovo.",
+      "ARMAZEM": "PDF nije sačuvan. Pokušajte ponovo.",
+      "GRANDE_DEMAIS": "Period ima previše pregleda. Izaberite kraći period.",
+      "PDF_GRANDE": "PDF je prešao najveću veličinu. Izaberite kraći period.",
+      "TENTATIVAS": "Pravljenje nije uspelo ni u jednom pokušaju. Pokušajte kasnije.",
+      "outra": "Kopija nije napravljena. Pokušajte ponovo."
+    },
+    "selo": {
+      "SEM_SELO": "Produženje i odbijanje su na odgovornom veterinaru: vaš CRMV čeka proveru PetJourney-ja.",
+      "VENCIDO": "Produženje i odbijanje su na odgovornom veterinaru: provera vašeg CRMV-a je istekla.",
+      "SEM_IDENTIDADE": "Produženje i odbijanje su na odgovornom veterinaru: potvrdite identitet.",
+      "CRMV_OBRIGATORIO": "Produženje i odbijanje su na odgovornom veterinaru: unesite CRMV i saveznu državu u svoj profesionalni karton."
+    },
+    "erro": {
+      "carregar": "Zahtevi za kopiju nisu učitani.",
+      "gerar": "Kopija nije napravljena.",
+      "pdf": "PDF nije otvoren.",
+      "entregar": "Predaja nije zabeležena.",
+      "prorrogar": "Rok nije produžen.",
+      "recusar": "Zahtev nije odbijen."
+    },
+    "novo": {
+      "acao": "Zabeleži zahtev",
+      "titulo": "Zahtev na pultu",
+      "dica": "Dokument osobe koja traži ostaje samo u zahtevu i ne vraća se na ekran. Rok je 5 radnih dana.",
+      "paciente": "Pacijent",
+      "nome": "Ime osobe koja traži",
+      "documento": "Dokument osobe koja traži",
+      "documentoDica": "Lična karta, pasoš ili drugi dokument sa fotografijom.",
+      "umPeriodo": "Period",
+      "confirmar": "Zabeleži zahtev",
+      "erro": "Zahtev nije zabeležen.",
+      "feito": "Zahtev je zabeležen.",
+      "jaExistia": "Već postoji otvoren zahtev za ovog pacijenta i period: to je isti zahtev."
     }
   }
 }

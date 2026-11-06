@@ -52,6 +52,8 @@ import ExameDoAtendimento from './ExameDoAtendimento.vue'
 import FinalizarAtendimentoGaveta from './FinalizarAtendimentoGaveta.vue'
 import PreConsultaNoAtendimento from './PreConsultaNoAtendimento.vue'
 import ReceitaDoAtendimento from './ReceitaDoAtendimento.vue'
+import DocumentosDoPaciente from '@/components/documentos/DocumentosDoPaciente.vue'
+import LaudosDoAtendimento from '@/components/documentos/LaudosDoAtendimento.vue'
 import { ABAS, type AbaDoAtendimento } from './rascunho-do-atendimento'
 import { useEdicaoDoAtendimento } from './useEdicaoDoAtendimento'
 
@@ -692,17 +694,29 @@ const aguardaSelo = computed(
         :somente-leitura="somenteLeitura"
         :falta-diagnostico="faltaNa('DIAGNOSTICO')"
       />
-      <ReceitaDoAtendimento
-        v-else-if="secao === 'RECEITA'"
-        :atendimento="atendimento"
-        :editando="edicao.editando.value"
-        :dispositivo-id="edicao.dispositivoId"
-        :versao="() => edicao.versao.value"
-        :esperar-gravar="edicao.esperarGravar"
-        :falta="faltaNa('PRESCRICAO_SEM_RECEITA') || faltaNa('RECEITA_EM_RASCUNHO')"
-        @versao="edicao.versaoDoAto"
-        @mudou="edicao.reler"
-      />
+      <template v-else-if="secao === 'RECEITA'">
+        <ReceitaDoAtendimento
+          :atendimento="atendimento"
+          :editando="edicao.editando.value"
+          :dispositivo-id="edicao.dispositivoId"
+          :versao="() => edicao.versao.value"
+          :esperar-gravar="edicao.esperarGravar"
+          :falta="faltaNa('PRESCRICAO_SEM_RECEITA') || faltaNa('RECEITA_EM_RASCUNHO')"
+          @versao="edicao.versaoDoAto"
+          @mudou="edicao.reler"
+        />
+        <!-- Os documentos e os laudos do atendimento (E4-06). -->
+        <DocumentosDoPaciente
+          :paciente-id="atendimento.paciente.id"
+          :atendimento-id="atendimento.id"
+          :pode-criar="atendimento.status !== 'ANULADO'"
+          @versao="edicao.versaoDoAto"
+        />
+        <LaudosDoAtendimento
+          :atendimento-id="atendimento.id"
+          :anulado="atendimento.status === 'ANULADO'"
+        />
+      </template>
       <CondutaDoAtendimento
         v-else
         v-model="rascunho.conduta"

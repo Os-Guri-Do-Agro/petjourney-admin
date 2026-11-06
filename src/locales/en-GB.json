@@ -9601,7 +9601,8 @@
       "pedidosDeReserva": "Requests",
       "acomodacoes": "Rooms",
       "rotinaPadrao": "Standard routine",
-      "correcoes": "Corrections"
+      "correcoes": "Corrections",
+      "copias": "Copies"
     },
     "abasAria": "{destino} screens"
   },
@@ -11379,7 +11380,7 @@
       "EXAME_FISICO": "Physical exam",
       "DIAGNOSTICO": "Diagnosis",
       "CONDUTA": "Plan",
-      "RECEITA": "Prescription"
+      "RECEITA": "Prescription and documents"
     },
     "lista": {
       "todos": "All",
@@ -11796,6 +11797,7 @@
       "verificar": "Verify identity"
     },
     "receita": {
+      "titulo": "Prescription",
       "descricao": "Prescriptions and the prescription form for the owner. The form comes before finalising.",
       "erro": "Could not load the prescription.",
       "erroRemover": "Could not remove the prescription.",
@@ -11980,6 +11982,301 @@
     },
     "resumo": {
       "indisponivel": "Unavailable right now."
+    }
+  },
+  "documentos": {
+    "titulo": "Documents",
+    "descricao": "Certificates, test requests, referrals and consent forms, with the issued PDF.",
+    "novo": "New document",
+    "vazio": "No documents yet.",
+    "verMais": "Show more",
+    "continuar": "Continue",
+    "abrirPdf": "Open PDF",
+    "emitidoEm": "Issued on {data}",
+    "criadoEm": "Created on {data}",
+    "esperaNoApp": "waiting for the answer in the app",
+    "gravado": "Draft saved.",
+    "emitido": "Document issued.",
+    "qualTipo": "Document type",
+    "escolherTipo": "Choose the type",
+    "identidade": "Patient, owner, clinic and signer come from the records when you issue. Only the clinical text goes here.",
+    "destinacaoAMao": "Left blank: a line is printed to fill in by hand",
+    "removerExame": "Remove {nome}",
+    "exameDica": "Test name",
+    "adicionarExame": "Add",
+    "aceitePeloApp": "Ask for acceptance in the app",
+    "aceitePeloAppDica": "The owner receives the form in the app and answers there. Otherwise, acceptance is at the front desk.",
+    "eutanasiaNoBalcao": "The euthanasia consent is only accepted at the front desk, signed by the person responsible for the animal.",
+    "senhaDica": "Your account password signs the document.",
+    "salvarRascunho": "Save draft",
+    "emitir": "Issue",
+    "tipo": {
+      "PRONTUARIO": "Medical record",
+      "PEDIDO_EXAME": "Test request",
+      "ORIENTACOES": "Instructions",
+      "ENCAMINHAMENTO": "Referral",
+      "RELATORIO_PLANO": "Report and plan",
+      "ATESTADO_SAUDE": "Health certificate",
+      "ATESTADO_COMPARECIMENTO": "Attendance certificate",
+      "ATESTADO_VIAGEM": "Travel certificate",
+      "DECLARACAO_OBITO": "Death certificate",
+      "COMPROVANTE_VACINACAO": "Vaccination record",
+      "TERMO_CONSENTIMENTO": "Consent form",
+      "TERMO_RECUSA": "Refusal form",
+      "TERMO_EUTANASIA": "Euthanasia consent",
+      "ORCAMENTO": "Estimate"
+    },
+    "status": {
+      "RASCUNHO": "Draft",
+      "EMITIDO": "Issued",
+      "ANULADO": "Voided"
+    },
+    "aceiteStatus": {
+      "NAO_SE_APLICA": "No acceptance",
+      "PENDENTE": "acceptance pending",
+      "ACEITO": "accepted",
+      "RECUSADO": "refused"
+    },
+    "destinacao": {
+      "CREMACAO_INDIVIDUAL": "Individual cremation",
+      "CREMACAO_COLETIVA": "Communal cremation",
+      "SEPULTAMENTO": "Burial",
+      "RETIRADO_PELO_RESPONSAVEL": "Taken by the owner"
+    },
+    "campo": {
+      "dataDoExame": "Examination date",
+      "semAlteracoes": "No abnormal findings",
+      "constatacoes": "Findings",
+      "recomendacoes": "Recommendations",
+      "finalidade": "Purpose",
+      "antirrabica": "Rabies vaccine",
+      "vermifugacao": "Deworming",
+      "validadeExigida": "Required validity",
+      "destino": "Destination",
+      "causaProvavel": "Probable cause",
+      "necropsiaRealizada": "Necropsy performed",
+      "destinacao": "Body disposition",
+      "observacoes": "Notes",
+      "exames": "Tests",
+      "indicacao": "Clinical indication",
+      "orientacoesDeColeta": "Sample collection instructions",
+      "destinatario": "To",
+      "motivo": "Reason for referral",
+      "historico": "History",
+      "achados": "Findings",
+      "diagnostico": "Diagnosis",
+      "medicacaoEmUso": "Current medication",
+      "solicitacao": "Request",
+      "objeto": "Subject of the form",
+      "detalhamento": "Details"
+    },
+    "aceite": {
+      "titulo": "Front desk acceptance",
+      "acao": "Record acceptance",
+      "dica": "The person responsible for the animal reads the form, says whether they accept and signs in the box. The first answer counts, from the front desk or the app.",
+      "nome": "Name of the person answering",
+      "documento": "ID document",
+      "resposta": "Answer",
+      "ACEITO": "Accepts",
+      "RECUSADO": "Refuses",
+      "assinatura": "Signature",
+      "assinaturaDica": "Sign with a finger or stylus in the box.",
+      "limpar": "Clear",
+      "confirmar": "Record",
+      "divergente": "The document differs from the one in the records. Check the person’s document and confirm the difference.",
+      "confirmoDivergencia": "I checked the person’s document and confirm the difference (it stays on record).",
+      "confirmeDivergencia": "Tick the confirmation of the difference to record.",
+      "erro": "Could not record the acceptance.",
+      "feito": "Acceptance recorded."
+    },
+    "anular": {
+      "titulo": "Void document",
+      "acao": "Void",
+      "dica": "The PDF stops opening and the public check shows \"voided\", without the reason.",
+      "confirmar": "Void document",
+      "confirmeOutro": "This document belongs to another vet. Tick the confirmation to void it.",
+      "outroResponsavel": "I confirm I am voiding a document issued by another vet.",
+      "erro": "Could not void the document.",
+      "feito": "Document voided."
+    },
+    "erro": {
+      "carregar": "Could not load the documents.",
+      "salvar": "Could not save the draft.",
+      "emitir": "Could not issue the document.",
+      "faltando": "Fill in the highlighted fields to issue.",
+      "pdf": "Could not open the PDF.",
+      "descartar": "Could not discard the draft."
+    },
+    "descartar": "Discard",
+    "selo": {
+      "SEM_SELO": "Issuing and voiding documents need a checked CRMV: yours is waiting for the PetJourney check.",
+      "VENCIDO": "The check of your CRMV has expired: PetJourney needs to check it again before you issue documents.",
+      "SEM_IDENTIDADE": "To issue documents, confirm your identity.",
+      "CRMV_OBRIGATORIO": "To issue documents, add your CRMV and state to your professional record."
+    }
+  },
+  "laudos": {
+    "titulo": "Received reports",
+    "descricao": "Test results that came from outside. The owner sees them with the summary, or when you release them.",
+    "vazio": "No reports attached to this consultation.",
+    "anexar": "Attach report",
+    "abrir": "Download",
+    "liberar": "Release to the owner",
+    "liberado": "Report released in the app.",
+    "anexado": "Report attached.",
+    "removido": "removed",
+    "noApp": "in the owner’s app",
+    "soNaClinica": "clinic only",
+    "imagem": "Image",
+    "resultadoDe": "Result from {dia}",
+    "arquivos": "Files",
+    "escolher": "Choose files",
+    "arquivosDica": "PDF, JPEG, PNG or WebP, up to 4 per upload and 20 MB each. iPhone photos (HEIC): convert to JPEG first.",
+    "semArquivo": "Choose at least one file.",
+    "tirar": "Remove {nome}",
+    "exame": "Test",
+    "exameDica": "E.g. complete blood count",
+    "dataDoResultado": "Result date",
+    "enviar": "Attach",
+    "remover": "Remove report",
+    "removerDe": "Remove the report {nome}",
+    "removerDica": "The {nome} report leaves the consultation and the app. The file stays stored in the record.",
+    "erro": {
+      "carregar": "Could not load the reports.",
+      "abrir": "Could not open the report.",
+      "liberar": "Could not release the report.",
+      "anexar": "Could not attach the report.",
+      "remover": "Could not remove the report."
+    }
+  },
+  "copias": {
+    "titulo": "Medical record copies",
+    "abertos": "Open",
+    "encerrados": "Closed",
+    "filtro": "Request status",
+    "acao": {
+      "gerar": "Generate copy",
+      "acompanhar": "Follow",
+      "entregar": "Download and hand over",
+      "ver": "View request"
+    },
+    "peloApp": "Requested in the app",
+    "noBalcao": "Requested at the front desk",
+    "noBalcaoPor": "At the front desk, by {nome}",
+    "recebidoEm": "Received on {data}",
+    "prazo": "Due {dia}",
+    "venceuEm": "Overdue since {dia}",
+    "periodo": {
+      "tudo": "Full history",
+      "entre": "From {de} to {ate}",
+      "desde": "Since {de}",
+      "ate": "Until {ate}"
+    },
+    "resumo": "{n} open request | {n} open requests",
+    "resumoVencidos": "{n} request is overdue | {n} requests are overdue",
+    "resumoEmDia": "No open requests.",
+    "vazio": "No open copy requests.",
+    "vazioEncerrados": "No closed requests yet.",
+    "verMais": "Show more",
+    "status": {
+      "ABERTO": "Open",
+      "PRORROGADO": "Extended",
+      "GERANDO": "Generating",
+      "PRONTO": "Ready",
+      "ENTREGUE": "Handed over",
+      "RECUSADO": "Refused",
+      "ENCERRADO_NA_EXCLUSAO": "Closed by data deletion"
+    },
+    "outroDono": "Check who is asking: the record has history from another owner.",
+    "fato": {
+      "quem": "Requested by",
+      "recebido": "Received on",
+      "periodo": "Period",
+      "prazo": "Due date",
+      "prazoProrrogado": "Extended due date",
+      "conteudo": "In the copy",
+      "guardado": "PDF kept until",
+      "entregue": "Handed over",
+      "justificativa": "Reason for the extension",
+      "motivo": "Reason for refusal"
+    },
+    "atendimentos": "{n} consultation | {n} consultations",
+    "laudosNoPdf": "{n} report in the PDF | {n} reports in the PDF",
+    "laudosAParte": "{n} report separately | {n} reports separately",
+    "laudosAParteDica": "{n} report did not fit in the PDF: the link appears when you download. | {n} reports did not fit in the PDF: the links appear when you download.",
+    "historicoDesde": "Requested in the app: the copy has the history since {dia}, the current owner’s link.",
+    "encerradoNaExclusao": "The owner asked for their data to be deleted while the request was open. It closed without a copy.",
+    "entregaPeloApp": "When the owner downloads it in the app, the handover is recorded automatically.",
+    "gerando": "Generating the copy. It usually takes a few seconds.",
+    "pdfSaiu": "The PDF passed its 7-day storage. Generate it again to hand over.",
+    "escolherPeriodo": "Copy period",
+    "grandeDemais": "The period has {n} consultations and a copy holds up to {maximo}. Choose a shorter period and record another request for the rest.",
+    "periodoObrigatorio": "Choose the first and last day.",
+    "arquivo": "The copy",
+    "baixar": "Download PDF",
+    "comoEntregou": "How it was handed over",
+    "canal": {
+      "APP": "In the app",
+      "MAOS": "In person",
+      "EMAIL_DO_RESPONSAVEL": "By the owner’s email"
+    },
+    "doResponsavel": "For the responsible vet",
+    "prorrogar": {
+      "acao": "Extend deadline",
+      "titulo": "Extend the deadline",
+      "dica": "Once, before it is due: the new deadline is 30 calendar days from the request. The reason stays on the request.",
+      "justificativa": "Reason",
+      "confirmar": "Extend"
+    },
+    "recusar": {
+      "acao": "Refuse request",
+      "titulo": "Refuse the request",
+      "dica": "The request for {nome} closes without a copy, and the stored PDF is removed. The reason stays on the request.",
+      "motivo": "Reason for refusal",
+      "confirmar": "Refuse request"
+    },
+    "textoDica": "From {min} to 1000 characters.",
+    "outroPeriodo": "Another period",
+    "gerar": "Generate copy",
+    "gerarDeNovo": "Generate again",
+    "entregar": "Record handover",
+    "falha": {
+      "TEMPO": "Generation took too long. Try again.",
+      "MEMORIA": "The copy got too heavy. Try a shorter period.",
+      "RENDER": "Could not build the PDF. Try again.",
+      "ARMAZEM": "Could not store the PDF. Try again.",
+      "GRANDE_DEMAIS": "The period has too many consultations. Choose a shorter period.",
+      "PDF_GRANDE": "The PDF passed the maximum size. Choose a shorter period.",
+      "TENTATIVAS": "Generation failed on every attempt. Try again later.",
+      "outra": "Could not generate the copy. Try again."
+    },
+    "selo": {
+      "SEM_SELO": "Extending and refusing belong to the responsible vet: your CRMV is waiting for the PetJourney check.",
+      "VENCIDO": "Extending and refusing belong to the responsible vet: the check of your CRMV has expired.",
+      "SEM_IDENTIDADE": "Extending and refusing belong to the responsible vet: confirm your identity.",
+      "CRMV_OBRIGATORIO": "Extending and refusing belong to the responsible vet: add your CRMV and state to your professional record."
+    },
+    "erro": {
+      "carregar": "Could not load the copy requests.",
+      "gerar": "Could not generate the copy.",
+      "pdf": "Could not open the PDF.",
+      "entregar": "Could not record the handover.",
+      "prorrogar": "Could not extend.",
+      "recusar": "Could not refuse the request."
+    },
+    "novo": {
+      "acao": "Record request",
+      "titulo": "Front desk request",
+      "dica": "The requester’s document stays only on the request and never comes back to the screen. The deadline is 5 working days.",
+      "paciente": "Patient",
+      "nome": "Requester’s name",
+      "documento": "Requester’s document",
+      "documentoDica": "ID card, passport or another photo document.",
+      "umPeriodo": "A period",
+      "confirmar": "Record request",
+      "erro": "Could not record the request.",
+      "feito": "Request recorded.",
+      "jaExistia": "There was already an open request for this patient and period: it is the same one."
     }
   }
 }

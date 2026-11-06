@@ -77,6 +77,13 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     permissao: 'prontuario.ler',
     integrada: true,
   },
+  /* A cópia do prontuário (E4-06c): o dono e o gestor. */
+  {
+    prefixo: '/clinica/copias-do-prontuario',
+    modulo: 'CLINICA',
+    permissao: 'copia.gerir',
+    integrada: true,
+  },
   /* A recepção marca o retorno sem ler o prontuário: a lista é da agenda. */
   {
     prefixo: '/clinica/retornos-pendentes',

@@ -9601,7 +9601,8 @@
       "pedidosDeReserva": "Pedidos",
       "acomodacoes": "Acomodações",
       "rotinaPadrao": "Rotina padrão",
-      "correcoes": "Correções"
+      "correcoes": "Correções",
+      "copias": "Cópias"
     },
     "abasAria": "Telas de {destino}"
   },
@@ -11379,7 +11380,7 @@
       "EXAME_FISICO": "Exame físico",
       "DIAGNOSTICO": "Diagnóstico",
       "CONDUTA": "Conduta",
-      "RECEITA": "Receita"
+      "RECEITA": "Receita e documentos"
     },
     "lista": {
       "todos": "Todos",
@@ -11796,6 +11797,7 @@
       "verificar": "Verificar identidade"
     },
     "receita": {
+      "titulo": "Receita",
       "descricao": "As prescrições e a receita para o responsável. A receita vem antes de finalizar.",
       "erro": "Não deu para ler a receita.",
       "erroRemover": "Não deu para remover a prescrição.",
@@ -11980,6 +11982,301 @@
     },
     "resumo": {
       "indisponivel": "Indisponível agora."
+    }
+  },
+  "documentos": {
+    "titulo": "Documentos",
+    "descricao": "Atestados, pedidos de exame, encaminhamentos e termos, com o PDF emitido.",
+    "novo": "Novo documento",
+    "vazio": "Nenhum documento ainda.",
+    "verMais": "Ver mais",
+    "continuar": "Continuar",
+    "abrirPdf": "Abrir PDF",
+    "emitidoEm": "Emitido em {data}",
+    "criadoEm": "Criado em {data}",
+    "esperaNoApp": "esperando a resposta no app",
+    "gravado": "Rascunho salvo.",
+    "emitido": "Documento emitido.",
+    "qualTipo": "Tipo de documento",
+    "escolherTipo": "Escolha o tipo",
+    "identidade": "Paciente, responsável, clínica e quem assina saem do cadastro na hora de emitir. Aqui vai só o texto clínico.",
+    "destinacaoAMao": "Em branco: sai uma linha para preencher à mão",
+    "removerExame": "Tirar {nome}",
+    "exameDica": "Nome do exame",
+    "adicionarExame": "Adicionar",
+    "aceitePeloApp": "Pedir o aceite pelo app",
+    "aceitePeloAppDica": "O responsável recebe o termo no app e responde por lá. Sem isso, o aceite é no balcão.",
+    "eutanasiaNoBalcao": "O termo de eutanásia só se aceita no balcão, com a assinatura de quem responde pelo animal.",
+    "senhaDica": "A senha da sua conta assina o documento.",
+    "salvarRascunho": "Salvar rascunho",
+    "emitir": "Emitir",
+    "tipo": {
+      "PRONTUARIO": "Prontuário",
+      "PEDIDO_EXAME": "Pedido de exame",
+      "ORIENTACOES": "Orientações",
+      "ENCAMINHAMENTO": "Encaminhamento",
+      "RELATORIO_PLANO": "Relatório e plano",
+      "ATESTADO_SAUDE": "Atestado de saúde",
+      "ATESTADO_COMPARECIMENTO": "Atestado de comparecimento",
+      "ATESTADO_VIAGEM": "Atestado para viagem",
+      "DECLARACAO_OBITO": "Declaração de óbito",
+      "COMPROVANTE_VACINACAO": "Comprovante de vacinação",
+      "TERMO_CONSENTIMENTO": "Termo de consentimento",
+      "TERMO_RECUSA": "Termo de recusa",
+      "TERMO_EUTANASIA": "Termo de eutanásia",
+      "ORCAMENTO": "Orçamento"
+    },
+    "status": {
+      "RASCUNHO": "Rascunho",
+      "EMITIDO": "Emitido",
+      "ANULADO": "Anulado"
+    },
+    "aceiteStatus": {
+      "NAO_SE_APLICA": "Sem aceite",
+      "PENDENTE": "aceite pendente",
+      "ACEITO": "aceito",
+      "RECUSADO": "recusado"
+    },
+    "destinacao": {
+      "CREMACAO_INDIVIDUAL": "Cremação individual",
+      "CREMACAO_COLETIVA": "Cremação coletiva",
+      "SEPULTAMENTO": "Sepultamento",
+      "RETIRADO_PELO_RESPONSAVEL": "Retirado pelo responsável"
+    },
+    "campo": {
+      "dataDoExame": "Data do exame",
+      "semAlteracoes": "Exame sem alterações",
+      "constatacoes": "Constatações",
+      "recomendacoes": "Recomendações",
+      "finalidade": "Finalidade",
+      "antirrabica": "Vacina antirrábica",
+      "vermifugacao": "Vermifugação",
+      "validadeExigida": "Validade exigida",
+      "destino": "Destino",
+      "causaProvavel": "Causa provável",
+      "necropsiaRealizada": "Necropsia realizada",
+      "destinacao": "Destinação do corpo",
+      "observacoes": "Observações",
+      "exames": "Exames",
+      "indicacao": "Indicação clínica",
+      "orientacoesDeColeta": "Orientações de coleta",
+      "destinatario": "Para quem",
+      "motivo": "Motivo do encaminhamento",
+      "historico": "Histórico",
+      "achados": "Achados",
+      "diagnostico": "Diagnóstico",
+      "medicacaoEmUso": "Medicação em uso",
+      "solicitacao": "O que se pede",
+      "objeto": "Objeto do termo",
+      "detalhamento": "Detalhamento"
+    },
+    "aceite": {
+      "titulo": "Aceite no balcão",
+      "acao": "Registrar aceite",
+      "dica": "Quem responde pelo animal lê o termo, diz se aceita e assina no quadro. Vale a primeira resposta, do balcão ou do app.",
+      "nome": "Nome de quem responde",
+      "documento": "Documento (CPF ou RG)",
+      "resposta": "Resposta",
+      "ACEITO": "Aceita",
+      "RECUSADO": "Recusa",
+      "assinatura": "Assinatura",
+      "assinaturaDica": "Assine com o dedo ou a caneta no quadro.",
+      "limpar": "Limpar",
+      "confirmar": "Registrar",
+      "divergente": "O documento é diferente do CPF do cadastro. Confira o documento da pessoa e confirme a diferença.",
+      "confirmoDivergencia": "Conferi o documento da pessoa e confirmo a diferença (fica no registro).",
+      "confirmeDivergencia": "Marque a confirmação da diferença para registrar.",
+      "erro": "Não deu para registrar o aceite.",
+      "feito": "Aceite registrado."
+    },
+    "anular": {
+      "titulo": "Anular documento",
+      "acao": "Anular",
+      "dica": "O PDF deixa de abrir e a verificação pública passa a dizer \"anulado\", sem o motivo.",
+      "confirmar": "Anular documento",
+      "confirmeOutro": "Este documento é de outro veterinário. Marque a confirmação para anular.",
+      "outroResponsavel": "Confirmo que anulo um documento emitido por outro veterinário.",
+      "erro": "Não deu para anular o documento.",
+      "feito": "Documento anulado."
+    },
+    "erro": {
+      "carregar": "Não deu para carregar os documentos.",
+      "salvar": "Não deu para salvar o rascunho.",
+      "emitir": "Não deu para emitir o documento.",
+      "faltando": "Preencha os campos em destaque para emitir.",
+      "pdf": "Não deu para abrir o PDF.",
+      "descartar": "Não deu para descartar o rascunho."
+    },
+    "descartar": "Descartar",
+    "selo": {
+      "SEM_SELO": "Emitir e anular documentos pedem o CRMV conferido: o seu espera a conferência da PetJourney.",
+      "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo para você emitir documentos.",
+      "SEM_IDENTIDADE": "Para emitir documentos, confirme sua identidade.",
+      "CRMV_OBRIGATORIO": "Para emitir documentos, cadastre o CRMV e a UF na sua ficha de profissional."
+    }
+  },
+  "laudos": {
+    "titulo": "Laudos recebidos",
+    "descricao": "Resultados de exame que chegaram de fora. O responsável vê com o resumo, ou quando você liberar.",
+    "vazio": "Nenhum laudo anexado neste atendimento.",
+    "anexar": "Anexar laudo",
+    "abrir": "Baixar",
+    "liberar": "Liberar ao responsável",
+    "liberado": "Laudo liberado no app.",
+    "anexado": "Laudo anexado.",
+    "removido": "removido",
+    "noApp": "no app do responsável",
+    "soNaClinica": "só na clínica",
+    "imagem": "Imagem",
+    "resultadoDe": "Resultado de {dia}",
+    "arquivos": "Arquivos",
+    "escolher": "Escolher arquivos",
+    "arquivosDica": "PDF, JPEG, PNG ou WebP, até 4 por envio e 20 MB cada. Foto do iPhone (HEIC): converta para JPEG antes.",
+    "semArquivo": "Escolha pelo menos um arquivo.",
+    "tirar": "Tirar {nome}",
+    "exame": "Exame",
+    "exameDica": "Ex.: hemograma completo",
+    "dataDoResultado": "Data do resultado",
+    "enviar": "Anexar",
+    "remover": "Remover laudo",
+    "removerDe": "Remover o laudo {nome}",
+    "removerDica": "O laudo de {nome} sai do atendimento e do app. O arquivo continua guardado no registro.",
+    "erro": {
+      "carregar": "Não deu para carregar os laudos.",
+      "abrir": "Não deu para abrir o laudo.",
+      "liberar": "Não deu para liberar o laudo.",
+      "anexar": "Não deu para anexar o laudo.",
+      "remover": "Não deu para remover o laudo."
+    }
+  },
+  "copias": {
+    "titulo": "Cópias do prontuário",
+    "abertos": "Abertos",
+    "encerrados": "Encerrados",
+    "filtro": "Situação dos pedidos",
+    "acao": {
+      "gerar": "Gerar cópia",
+      "acompanhar": "Acompanhar",
+      "entregar": "Baixar e entregar",
+      "ver": "Ver pedido"
+    },
+    "peloApp": "Pedido pelo app",
+    "noBalcao": "Pedido no balcão",
+    "noBalcaoPor": "No balcão, por {nome}",
+    "recebidoEm": "Recebido em {data}",
+    "prazo": "Prazo {dia}",
+    "venceuEm": "Venceu em {dia}",
+    "periodo": {
+      "tudo": "Todo o histórico",
+      "entre": "De {de} a {ate}",
+      "desde": "Desde {de}",
+      "ate": "Até {ate}"
+    },
+    "resumo": "{n} pedido em aberto | {n} pedidos em aberto",
+    "resumoVencidos": "{n} pedido passou do prazo | {n} pedidos passaram do prazo",
+    "resumoEmDia": "Nenhum pedido em aberto.",
+    "vazio": "Nenhum pedido de cópia em aberto.",
+    "vazioEncerrados": "Nenhum pedido encerrado ainda.",
+    "verMais": "Ver mais",
+    "status": {
+      "ABERTO": "Aberto",
+      "PRORROGADO": "Prorrogado",
+      "GERANDO": "Gerando",
+      "PRONTO": "Pronto",
+      "ENTREGUE": "Entregue",
+      "RECUSADO": "Recusado",
+      "ENCERRADO_NA_EXCLUSAO": "Encerrado na exclusão"
+    },
+    "outroDono": "Confira quem está pedindo: a ficha tem histórico de outro dono.",
+    "fato": {
+      "quem": "Quem pediu",
+      "recebido": "Recebido em",
+      "periodo": "Período",
+      "prazo": "Prazo",
+      "prazoProrrogado": "Prazo prorrogado",
+      "conteudo": "Na cópia",
+      "guardado": "PDF guardado até",
+      "entregue": "Entregue",
+      "justificativa": "Justificativa da prorrogação",
+      "motivo": "Motivo da recusa"
+    },
+    "atendimentos": "{n} atendimento | {n} atendimentos",
+    "laudosNoPdf": "{n} laudo no PDF | {n} laudos no PDF",
+    "laudosAParte": "{n} laudo à parte | {n} laudos à parte",
+    "laudosAParteDica": "{n} laudo não coube no PDF: o link aparece quando você baixar. | {n} laudos não couberam no PDF: os links aparecem quando você baixar.",
+    "historicoDesde": "Pedido pelo app: a cópia traz o histórico desde {dia}, o vínculo do dono atual.",
+    "encerradoNaExclusao": "O responsável pediu a exclusão dos dados com o pedido aberto. O pedido fechou sem cópia.",
+    "entregaPeloApp": "Quando o dono baixar pelo app, a entrega se registra sozinha.",
+    "gerando": "Gerando a cópia. Costuma levar poucos segundos.",
+    "pdfSaiu": "O PDF passou dos 7 dias de guarda. Gere de novo para entregar.",
+    "escolherPeriodo": "Período da cópia",
+    "grandeDemais": "O período tem {n} atendimentos, e a cópia leva até {maximo}. Escolha um período menor e registre outro pedido para o resto.",
+    "periodoObrigatorio": "Escolha o primeiro e o último dia.",
+    "arquivo": "A cópia",
+    "baixar": "Baixar PDF",
+    "comoEntregou": "Como foi entregue",
+    "canal": {
+      "APP": "Pelo app",
+      "MAOS": "Em mãos",
+      "EMAIL_DO_RESPONSAVEL": "Pelo e-mail do responsável"
+    },
+    "doResponsavel": "Do responsável técnico",
+    "prorrogar": {
+      "acao": "Prorrogar prazo",
+      "titulo": "Prorrogar o prazo",
+      "dica": "Uma vez, antes de vencer: o novo prazo é de 30 dias corridos do pedido. A justificativa fica no pedido.",
+      "justificativa": "Justificativa",
+      "confirmar": "Prorrogar"
+    },
+    "recusar": {
+      "acao": "Recusar pedido",
+      "titulo": "Recusar o pedido",
+      "dica": "O pedido de {nome} fecha sem cópia, e o PDF guardado sai. O motivo fica no pedido.",
+      "motivo": "Motivo da recusa",
+      "confirmar": "Recusar pedido"
+    },
+    "textoDica": "De {min} a 1000 caracteres.",
+    "outroPeriodo": "Outro período",
+    "gerar": "Gerar cópia",
+    "gerarDeNovo": "Gerar de novo",
+    "entregar": "Registrar entrega",
+    "falha": {
+      "TEMPO": "A geração passou do tempo. Tente de novo.",
+      "MEMORIA": "A cópia ficou pesada demais. Tente um período menor.",
+      "RENDER": "Não deu para montar o PDF. Tente de novo.",
+      "ARMAZEM": "Não deu para guardar o PDF. Tente de novo.",
+      "GRANDE_DEMAIS": "O período tem atendimentos demais. Escolha um período menor.",
+      "PDF_GRANDE": "O PDF passou do tamanho máximo. Escolha um período menor.",
+      "TENTATIVAS": "A geração falhou em todas as tentativas. Tente de novo mais tarde.",
+      "outra": "Não deu para gerar a cópia. Tente de novo."
+    },
+    "selo": {
+      "SEM_SELO": "Prorrogar e recusar são do responsável técnico: seu CRMV espera a conferência da PetJourney.",
+      "VENCIDO": "Prorrogar e recusar são do responsável técnico: a conferência do seu CRMV venceu.",
+      "SEM_IDENTIDADE": "Prorrogar e recusar são do responsável técnico: confirme sua identidade.",
+      "CRMV_OBRIGATORIO": "Prorrogar e recusar são do responsável técnico: cadastre o CRMV e a UF na sua ficha de profissional."
+    },
+    "erro": {
+      "carregar": "Não deu para carregar os pedidos de cópia.",
+      "gerar": "Não deu para gerar a cópia.",
+      "pdf": "Não deu para abrir o PDF.",
+      "entregar": "Não deu para registrar a entrega.",
+      "prorrogar": "Não deu para prorrogar.",
+      "recusar": "Não deu para recusar o pedido."
+    },
+    "novo": {
+      "acao": "Registrar pedido",
+      "titulo": "Pedido do balcão",
+      "dica": "O documento de quem pede fica só no pedido e não volta para a tela. O prazo é de 5 dias úteis.",
+      "paciente": "Paciente",
+      "nome": "Nome de quem pede",
+      "documento": "Documento de quem pede",
+      "documentoDica": "CPF, RG ou outro documento com foto.",
+      "umPeriodo": "Um período",
+      "confirmar": "Registrar pedido",
+      "erro": "Não deu para registrar o pedido.",
+      "feito": "Pedido registrado.",
+      "jaExistia": "Já havia um pedido aberto deste paciente e período: é o mesmo."
     }
   }
 }
