@@ -65,6 +65,10 @@ export const SECOES: readonly SecaoDoAtendimento[] = [
   'CONDUTA',
 ]
 
+/** As abas da tela: as quatro seções do PATCH e a receita (E4-03), que grava por rotas próprias. */
+export type AbaDoAtendimento = SecaoDoAtendimento | 'RECEITA'
+export const ABAS: readonly AbaDoAtendimento[] = [...SECOES, 'RECEITA']
+
 /** O campo da anamnese de cada marca da pré-consulta (o `marca` do `CampoSugerido`). */
 export const CAMPO_DA_MARCA: Record<CampoDaAnamnese, keyof AnamneseNaTela> = {
   QUEIXA_PRINCIPAL: 'queixaPrincipal',
@@ -296,10 +300,12 @@ export const FALTAS_CONHECIDAS = [
 ] as const
 
 /** A seção que resolve cada falta: o "ir para" da revisão. */
-export const SECAO_DA_FALTA: Record<string, SecaoDoAtendimento> = {
+export const SECAO_DA_FALTA: Record<string, AbaDoAtendimento> = {
   QUEIXA: 'ANAMNESE',
   DIAGNOSTICO: 'DIAGNOSTICO',
   CONDUTA: 'CONDUTA',
+  PRESCRICAO_SEM_RECEITA: 'RECEITA',
+  RECEITA_EM_RASCUNHO: 'RECEITA',
 }
 
 /** O rótulo da aba para o outro dispositivo ver ("Chrome no Windows"), sem texto livre. */

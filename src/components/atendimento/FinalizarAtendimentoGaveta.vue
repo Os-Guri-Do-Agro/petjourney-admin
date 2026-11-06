@@ -29,13 +29,14 @@ import {
 } from '@/composables/useSeloDeAssinatura'
 import { ApiError } from '@/service/api'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
-import {
-  finalizarAtendimento,
-  type Atendimento,
-  type SecaoDoAtendimento,
-} from '@/service/parceiro/atendimentos-service'
+import { finalizarAtendimento, type Atendimento } from '@/service/parceiro/atendimentos-service'
 
-import { FALTAS_CONHECIDAS, SECAO_DA_FALTA, type RascunhoNaTela } from './rascunho-do-atendimento'
+import {
+  FALTAS_CONHECIDAS,
+  SECAO_DA_FALTA,
+  type AbaDoAtendimento,
+  type RascunhoNaTela,
+} from './rascunho-do-atendimento'
 import SenhaDaAssinatura from './SenhaDaAssinatura.vue'
 import { useSenhaDaAssinatura } from './useSenhaDaAssinatura'
 
@@ -51,7 +52,7 @@ const aberta = defineModel<boolean>('visible', { default: false })
 const emit = defineEmits<{
   finalizado: [atendimento: Atendimento]
   faltam: [faltam: string[]]
-  irPara: [secao: SecaoDoAtendimento]
+  irPara: [secao: AbaDoAtendimento]
   alterado: []
 }>()
 

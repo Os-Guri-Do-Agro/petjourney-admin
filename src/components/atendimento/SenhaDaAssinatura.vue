@@ -7,7 +7,14 @@ import Password from 'primevue/password'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
-defineProps<{ erro: string; semSenhaPropria: boolean; desabilitado: boolean; id: string }>()
+defineProps<{
+  erro: string
+  semSenhaPropria: boolean
+  desabilitado: boolean
+  id: string
+  /** A dica embaixo do campo; sem ela, a janela de 15 minutos do prontuário. */
+  dica?: string
+}>()
 const senha = defineModel<string>({ required: true })
 
 const { t } = useI18n()
@@ -35,6 +42,6 @@ const { t } = useI18n()
       fluid
     />
     <small v-if="erro" class="eg__invalido" role="alert">{{ erro }}</small>
-    <small v-else class="eg__dica">{{ t('atendimento.senha.dica') }}</small>
+    <small v-else class="eg__dica">{{ dica || t('atendimento.senha.dica') }}</small>
   </section>
 </template>

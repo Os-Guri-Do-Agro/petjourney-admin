@@ -86,6 +86,7 @@ export function textosDoPrimeVue(locale: Locale) {
     emptySelectionMessage: t('primevue.emptySelectionMessage'),
     searchMessage: comMarcador('primevue.searchMessage'),
     selectionMessage: comMarcador('primevue.selectionMessage'),
+    passwordPrompt: t('primevue.passwordPrompt'),
     aria: {
       close: t('primevue.aria.close'),
       previous: t('primevue.aria.previous'),

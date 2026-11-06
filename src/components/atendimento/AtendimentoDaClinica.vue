@@ -39,7 +39,6 @@ import {
   marcarRetorno,
   type Atendimento,
   type Ato,
-  type SecaoDoAtendimento,
 } from '@/service/parceiro/atendimentos-service'
 
 import AdendoGaveta from './AdendoGaveta.vue'
@@ -52,7 +51,8 @@ import DiagnosticoDoAtendimento from './DiagnosticoDoAtendimento.vue'
 import ExameDoAtendimento from './ExameDoAtendimento.vue'
 import FinalizarAtendimentoGaveta from './FinalizarAtendimentoGaveta.vue'
 import PreConsultaNoAtendimento from './PreConsultaNoAtendimento.vue'
-import { SECOES } from './rascunho-do-atendimento'
+import ReceitaDoAtendimento from './ReceitaDoAtendimento.vue'
+import { ABAS, type AbaDoAtendimento } from './rascunho-do-atendimento'
 import { useEdicaoDoAtendimento } from './useEdicaoDoAtendimento'
 
 const { t } = useI18n()
@@ -84,12 +84,12 @@ const somenteLeitura = computed(() => !edicao.editando.value)
 
 /* ------------------------------------------------------------------------- as seções */
 
-const secao = computed<SecaoDoAtendimento>(() => {
+const secao = computed<AbaDoAtendimento>(() => {
   const valor = route.query.secao
-  return SECOES.find((item) => item === valor) ?? 'ANAMNESE'
+  return ABAS.find((item) => item === valor) ?? 'ANAMNESE'
 })
 
-function irPara(valor: SecaoDoAtendimento) {
+function irPara(valor: AbaDoAtendimento) {
   const query = { ...route.query }
   if (valor === 'ANAMNESE') delete query.secao
   else query.secao = valor
@@ -101,11 +101,12 @@ const faltam = ref<string[]>([])
 const faltaNa = (codigo: string) => faltam.value.includes(codigo)
 
 const opcoesDeSecao = computed(() =>
-  SECOES.map((valor) => {
+  ABAS.map((valor) => {
     const falta =
       (valor === 'ANAMNESE' && faltaNa('QUEIXA')) ||
       (valor === 'DIAGNOSTICO' && faltaNa('DIAGNOSTICO')) ||
-      (valor === 'CONDUTA' && faltaNa('CONDUTA'))
+      (valor === 'CONDUTA' && faltaNa('CONDUTA')) ||
+      (valor === 'RECEITA' && (faltaNa('PRESCRICAO_SEM_RECEITA') || faltaNa('RECEITA_EM_RASCUNHO')))
     return { valor, rotulo: t(`atendimento.secao.${valor}`), falta }
   }),
 )
@@ -690,6 +691,17 @@ const aguardaSelo = computed(
         v-model="rascunho.diagnostico"
         :somente-leitura="somenteLeitura"
         :falta-diagnostico="faltaNa('DIAGNOSTICO')"
+      />
+      <ReceitaDoAtendimento
+        v-else-if="secao === 'RECEITA'"
+        :atendimento="atendimento"
+        :editando="edicao.editando.value"
+        :dispositivo-id="edicao.dispositivoId"
+        :versao="() => edicao.versao.value"
+        :esperar-gravar="edicao.esperarGravar"
+        :falta="faltaNa('PRESCRICAO_SEM_RECEITA') || faltaNa('RECEITA_EM_RASCUNHO')"
+        @versao="edicao.versaoDoAto"
+        @mudou="edicao.reler"
       />
       <CondutaDoAtendimento
         v-else
