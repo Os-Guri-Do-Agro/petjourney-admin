@@ -13,6 +13,7 @@ import {
   criarPrescricaoItemForm,
   DURACAO_MAX_DIAS,
   DURACAO_MIN_DIAS,
+  duracaoSemExemplo,
   LIMITES_ESCALARES,
   LIMITES_EXAME_SOLICITADO,
   LIMITES_PRESCRICAO,
@@ -124,6 +125,11 @@ function aConferir(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel) {
  */
 function semExemplo(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel, exemplo: string) {
   return aConferir(item, campo) ? undefined : exemplo
+}
+
+/** O "7" cinza parece "7 dias": fora do remédio sem prazo (contínuo, ou lido sem duração). */
+function exemploDeDuracao(item: PrescricaoItemForm) {
+  return duracaoSemExemplo(item) ? undefined : semExemplo(item, 'duracaoDias', '7')
 }
 
 /** Editar o campo é conferir: a marca sai, como na anamnese por voz aprovada. */
@@ -752,7 +758,7 @@ function removeExame(indice: number) {
                 :max="DURACAO_MAX_DIAS"
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.duracaoDias`))"
                 :aria-describedby="descricaoPresc(item, index, 'duracaoDias')"
-                :placeholder="semExemplo(item, 'duracaoDias', '7')"
+                :placeholder="exemploDeDuracao(item)"
                 @update:model-value="conferido(item, 'duracaoDias')"
               />
             </div>

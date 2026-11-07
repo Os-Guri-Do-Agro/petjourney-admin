@@ -6,6 +6,8 @@ import {
   criarAnotacaoEstruturadaForm,
   criarExameSolicitadoForm,
   criarPrescricaoItemForm,
+  doseComUnidade,
+  duracaoSemExemplo,
   dataHoraLocalParaIso,
   dataLocalParaIso,
   escalaresPreenchidos,
@@ -318,5 +320,63 @@ describe('leitura', () => {
     })
 
     expect(temEstruturados(item)).toBe(true)
+  })
+})
+
+describe('doseComUnidade', () => {
+  it('não repete a unidade que o texto da dose já traz', () => {
+    expect(doseComUnidade('1 (um) comprimido', 'comprimido')).toBe('1 (um) comprimido')
+    expect(doseComUnidade('10 gotas', 'gota')).toBe('10 gotas')
+    expect(doseComUnidade('2 comprimidos', 'comprimido')).toBe('2 comprimidos')
+    expect(doseComUnidade('1/2 comprimido', 'comprimido')).toBe('1/2 comprimido')
+  })
+
+  it('compara sem caixa, sem acento e com mL ou ml', () => {
+    expect(doseComUnidade('5 mL', 'mL')).toBe('5 mL')
+    expect(doseComUnidade('5 mL', 'ml')).toBe('5 mL')
+    expect(doseComUnidade('5ml', 'mL')).toBe('5ml')
+    expect(doseComUnidade('1 CÁPSULA.', 'capsula')).toBe('1 CÁPSULA.')
+    expect(doseComUnidade('2 aplicações', 'aplicação')).toBe('2 aplicações')
+  })
+
+  it('acrescenta a unidade quando a dose ainda não a diz, sem mexer no texto da dose', () => {
+    expect(doseComUnidade('1 comprimido', 'cápsula')).toBe('1 comprimido cápsula')
+    expect(doseComUnidade('10', 'mg')).toBe('10 mg')
+    expect(doseComUnidade('100 mg', 'g')).toBe('100 mg g')
+  })
+
+  it('dose vazia: só a unidade, ou nada', () => {
+    expect(doseComUnidade('', 'comprimido')).toBe('comprimido')
+    expect(doseComUnidade(null, 'comprimido')).toBe('comprimido')
+    expect(doseComUnidade('', '')).toBe('')
+    expect(doseComUnidade(undefined, undefined)).toBe('')
+  })
+
+  it('sem unidade, devolve a dose como veio', () => {
+    expect(doseComUnidade('1 (um) comprimido', null)).toBe('1 (um) comprimido')
+    expect(doseComUnidade('  10 gotas ', '')).toBe('10 gotas')
+  })
+})
+
+describe('duracaoSemExemplo', () => {
+  it('uso contínuo escrito nas instruções ou na frequência tira o exemplo', () => {
+    expect(duracaoSemExemplo(prescricao({ instrucoes: 'Via oral. Uso contínuo' }))).toBe(true)
+    expect(duracaoSemExemplo(prescricao({ frequencia: 'Contínuo' }))).toBe(true)
+    expect(duracaoSemExemplo(prescricao({ instrucoes: 'Continuous use' }))).toBe(true)
+  })
+
+  it('remédio lido da receita sem duração fica sem exemplo', () => {
+    expect(duracaoSemExemplo(prescricao({ conferir: { duracaoDias: false } }))).toBe(true)
+  })
+
+  it('remédio novo, à mão e com prazo, mantém o exemplo', () => {
+    expect(duracaoSemExemplo(prescricao())).toBe(false)
+    expect(duracaoSemExemplo(prescricao({ instrucoes: 'Descontinuar se vomitar' }))).toBe(false)
+  })
+
+  it('com duração preenchida nunca há o que esconder', () => {
+    expect(duracaoSemExemplo(prescricao({ duracaoDias: 7, instrucoes: 'uso contínuo' }))).toBe(
+      false,
+    )
   })
 })

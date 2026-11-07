@@ -36,6 +36,7 @@ import {
   type FichaDeEmergencia,
 } from '@/service/parceiro/emergencia-service'
 import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
+import { doseComUnidade } from '@/utils/parceiro/anotacao-estruturada'
 
 import '@/components/parceiro/estabelecimento/gaveta.css'
 
@@ -190,11 +191,7 @@ function alergiaSeria(severidade: string | null) {
 }
 
 function dose(item: FichaDeEmergencia['tratamentosContinuos'][number]) {
-  return [
-    item.dose && item.unidade ? `${item.dose} ${item.unidade}` : item.dose,
-    item.frequencia,
-    item.via,
-  ]
+  return [doseComUnidade(item.dose, item.unidade), item.frequencia, item.via]
     .filter(Boolean)
     .join(' · ')
 }

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { Anotacao } from '@/service/parceiro/types'
 import {
+  doseComUnidade,
   escalaresPreenchidos,
   temEstruturados,
   type CampoEscalar,
@@ -74,7 +75,7 @@ function formatarData(valor: string, options: Intl.DateTimeFormatOptions) {
 
 /** Linha compacta do item: só os campos que o prestador preencheu. */
 function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
-  const dose = [item.dose, item.unidade].filter(Boolean).join(' ')
+  const dose = doseComUnidade(item.dose, item.unidade)
 
   return [
     dose,

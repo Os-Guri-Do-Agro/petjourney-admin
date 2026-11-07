@@ -387,6 +387,84 @@ export function validarAnotacaoEstruturada(
   return erros
 }
 
+// ------------------------------------------------------------------ dose na tela
+
+/** Minúsculas e sem acento: "Cápsula" e "capsula" são a mesma palavra. */
+function semAcento(texto: string): string {
+  return texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+}
+
+/** Singular de uma palavra da dose: "comprimidos", "gotas", "colheres", "aplicações". */
+function singular(palavra: string): string {
+  if (palavra.endsWith('oes')) {
+    return `${palavra.slice(0, -3)}ao`
+  }
+
+  if (/[rz]es$/.test(palavra)) {
+    return palavra.slice(0, -2)
+  }
+
+  return palavra.length > 2 && palavra.endsWith('s') ? palavra.slice(0, -1) : palavra
+}
+
+/** Palavras do texto, sem acento, sem pontuação solta e com "5mL" aberto em "5" e "ml". */
+function palavrasDaDose(texto: string): string[] {
+  return semAcento(texto)
+    .replace(/(\d)([a-z])/g, '$1 $2')
+    .split(/[\s(),;:]+/)
+    .map((palavra) => palavra.replace(/\.+$/, ''))
+    .filter(Boolean)
+}
+
+/**
+ * A dose lida da receita já vem com a unidade ("1 (um) comprimido", "10 gotas") e a API ainda manda
+ * a `unidade` ("comprimido", "gota"). Juntar os dois repetia a unidade na tela.
+ *
+ * Devolve o texto da dose como veio (nunca reescrito) e só acrescenta a unidade quando a dose ainda
+ * não a diz. Compara sem acento, sem caixa, no singular ou plural e com "mL" ou "ml".
+ */
+export function doseComUnidade(dose?: string | null, unidade?: string | null): string {
+  const d = (dose ?? '').trim()
+  const u = (unidade ?? '').trim()
+
+  if (!d || !u) {
+    return d || u
+  }
+
+  const palavrasUnidade = palavrasDaDose(u).map(singular)
+  const palavrasDose = palavrasDaDose(d).map(singular)
+
+  if (palavrasUnidade.length === 0) {
+    return d
+  }
+
+  const jaDiz = palavrasDose.some((_, inicio) =>
+    palavrasUnidade.every((palavra, i) => palavrasDose[inicio + i] === palavra),
+  )
+
+  return jaDiz ? d : `${d} ${u}`
+}
+
+/**
+ * Remédio sem prazo: o formulário não tem chave de "uso contínuo", então vale o que o item diz.
+ * Item lido da receita (tem `conferir`) com duração vazia é "a receita não fixou prazo", e quem
+ * escreve "uso contínuo" nas instruções ou na frequência quer o mesmo. Nos dois casos o exemplo
+ * cinza "7" parece "7 dias", e o campo fica sem exemplo.
+ */
+export function duracaoSemExemplo(
+  item: Pick<PrescricaoItemForm, 'duracaoDias' | 'instrucoes' | 'frequencia' | 'conferir'>,
+): boolean {
+  if (item.duracaoDias != null) {
+    return false
+  }
+
+  if (item.conferir !== undefined) {
+    return true
+  }
+
+  return /(^|[^a-z])continu/.test(semAcento(`${item.instrucoes} ${item.frequencia}`))
+}
+
 /** Item em branco é linha que o prestador abriu e não usou: descartada, não é erro. */
 export function itemPrescricaoPreenchido(item: PrescricaoItemForm): boolean {
   return Boolean(
