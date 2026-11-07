@@ -1,0 +1,32 @@
+/*
+ * As listas da casa do hotel (tipos, tarifas, temporadas, serviços, exigências): o mesmo recado,
+ * a mesma nota e o mesmo grupo de botões, num arquivo só para as cinco não repetirem o CSS.
+ */
+
+.ca__erro {
+  margin: 0;
+  padding: 0 10px 12px;
+  color: var(--risco-tinta);
+  font-size: 13.5px;
+}
+
+.ca__nota {
+  margin: 0;
+  padding: 4px 10px 14px;
+  color: var(--tinta-2);
+  font-size: 14px;
+}
+
+.ca__acoes {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.ca__nome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}

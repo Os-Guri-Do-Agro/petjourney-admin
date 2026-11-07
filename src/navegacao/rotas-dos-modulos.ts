@@ -191,7 +191,8 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     soDemonstracao: true,
   },
 
-  /* Hotel (E7): ainda sem API. */
+  /* Hotel (E7): a casa pela API (E7-01); o resto ainda sem. */
+  { prefixo: '/hotel/acomodacoes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: false },
 ]
 
