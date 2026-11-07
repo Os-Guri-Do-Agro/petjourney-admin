@@ -145,7 +145,7 @@ function leitura(dose: DoseNaGrade): string {
     hora: formato.hora(dose.previstaEm),
   })
   const registro = dose.registro
-  const quem = registro ? (props.nomes[registro.cuidadorId] ?? '') : ''
+  const quem = registro ? (props.nomes[registro.familiarId] ?? '') : ''
 
   switch (dose.situacao) {
     case 'dada':

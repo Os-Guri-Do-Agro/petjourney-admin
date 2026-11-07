@@ -57,7 +57,7 @@ import { hashSeed } from './mock-runtime'
 import type { CasoDificil } from './seed'
 import type { ConsultaPlantada } from './seed-resumo'
 import type {
-  Cuidador,
+  Familiar,
   Encounter,
   ISODate,
   ISODateTime,
@@ -146,7 +146,7 @@ export const CONSULTAS_DA_ADESAO: ConsultaPlantada[] = [
  * terceiro jeito de estar na casa, e o celular da prévia precisa saber dizer por que o botão não
  * está ali.
  */
-const FAMILIA: Cuidador[] = [
+const FAMILIA: Familiar[] = [
   {
     id: FAMILIAR_DA_DEMONSTRACAO,
     tutorId: 'tutor-fatima',
@@ -173,8 +173,8 @@ const FAMILIA: Cuidador[] = [
   },
 ]
 
-export function cuidadoresDoDataset(tutores: Tutor[], pets: Pet[]): Cuidador[] {
-  const donos: Cuidador[] = tutores.map((tutor) => ({
+export function familiaresDoDataset(tutores: Tutor[], pets: Pet[]): Familiar[] {
+  const donos: Familiar[] = tutores.map((tutor) => ({
     id: tutor.id,
     tutorId: tutor.id,
     nome: tutor.nome,
@@ -191,8 +191,8 @@ export function cuidadoresDoDataset(tutores: Tutor[], pets: Pet[]): Cuidador[] {
 // ---------------------------------------------------------------------------
 
 type Plano =
-  | { situacao: 'dada'; cuidadorId: string; atrasoMin: number }
-  | { situacao: 'pulada'; cuidadorId: string; atrasoMin: number; motivo: MotivoDaDosePulada }
+  | { situacao: 'dada'; familiarId: string; atrasoMin: number }
+  | { situacao: 'pulada'; familiarId: string; atrasoMin: number; motivo: MotivoDaDosePulada }
   /** Sem registro: a dose passa sem ninguém marcar. */
   | null
 
@@ -207,15 +207,15 @@ type DoseDoRoteiro = {
   posicaoDoFim: number
 }
 
-const dada = (cuidadorId: string, atrasoMin: number): Plano => ({
+const dada = (familiarId: string, atrasoMin: number): Plano => ({
   situacao: 'dada',
-  cuidadorId,
+  familiarId,
   atrasoMin,
 })
 
-const pulada = (cuidadorId: string, atrasoMin: number, motivo: MotivoDaDosePulada): Plano => ({
+const pulada = (familiarId: string, atrasoMin: number, motivo: MotivoDaDosePulada): Plano => ({
   situacao: 'pulada',
-  cuidadorId,
+  familiarId,
   atrasoMin,
   motivo,
 })
@@ -276,7 +276,7 @@ function plantar(
         motivo: plano.situacao === 'pulada' ? plano.motivo : null,
         /* Nunca no futuro: a dose anterior à da vez pode ter sido marcada há pouco. */
         registradaEm: Date.parse(registradaEm) <= Date.parse(agora) ? registradaEm : agora,
-        cuidadorId: plano.cuidadorId,
+        familiarId: plano.familiarId,
       },
     ]
   })

@@ -39,7 +39,7 @@ import { tratamentoDaPrescricao } from '../seed-adesao'
 import { agoraIso, getDataset, novoId } from '../store'
 import type { SeedResult } from '../seed'
 import type {
-  Cuidador,
+  Familiar,
   Encounter,
   ISODateTime,
   Medication,
@@ -85,7 +85,7 @@ export type TratamentoNaFicha = {
 export type AdesaoDoPaciente = {
   tratamentos: TratamentoNaFicha[]
   /** Quem cuida deste pet em casa — o dono primeiro. */
-  cuidadores: Cuidador[]
+  familiares: Familiar[]
   /** A última consulta finalizada antes de hoje. É dela que "desde a última consulta" conta. */
   ultimaConsultaEm: ISODateTime | null
 }
@@ -202,7 +202,7 @@ export function tratamentosDoResumo(petId: string): TratamentoNoResumo[] {
   const agora = agoraIso()
   const ultimaConsultaEm = ultimaConsultaAntesDeHoje(dataset, petId)
   const nomes = Object.fromEntries(
-    cuidadoresDoPet(dataset, petId).map((cuidador) => [cuidador.id, cuidador.nome]),
+    familiaresDoPet(dataset, petId).map((familiar) => [familiar.id, familiar.nome]),
   )
 
   return dataset.tratamentos
@@ -236,9 +236,9 @@ function naOrdemDaFicha(a: TratamentoNaFicha, b: TratamentoNaFicha): number {
   )
 }
 
-function cuidadoresDoPet(dataset: SeedResult, petId: string): Cuidador[] {
-  return dataset.cuidadores
-    .filter((cuidador) => cuidador.petIds.includes(petId))
+function familiaresDoPet(dataset: SeedResult, petId: string): Familiar[] {
+  return dataset.familiares
+    .filter((familiar) => familiar.petIds.includes(petId))
     .sort((a, b) => Number(a.papel !== 'dono') - Number(b.papel !== 'dono'))
 }
 
@@ -253,10 +253,10 @@ function tratamentoOuFalha(dataset: SeedResult, tratamentoId: string): Tratament
 }
 
 /** Quem está registrando pode registrar para este pet? É o `SOMENTE_LEITURA` do contrato. */
-function editaOPet(dataset: SeedResult, cuidadorId: string, petId: string): boolean {
-  const cuidador = dataset.cuidadores.find((item) => item.id === cuidadorId)
+function editaOPet(dataset: SeedResult, familiarId: string, petId: string): boolean {
+  const familiar = dataset.familiares.find((item) => item.id === familiarId)
 
-  return cuidador?.acesso === 'edicao' && cuidador.petIds.includes(petId)
+  return familiar?.acesso === 'edicao' && familiar.petIds.includes(petId)
 }
 
 /**
@@ -319,7 +319,7 @@ export const tratamentoRepository = {
           .filter((tratamento) => tratamento.petId === petId)
           .map((tratamento) => lerTratamento(tratamento, dataset, agora, ultimaConsultaEm))
           .sort(naOrdemDaFicha),
-        cuidadores: cuidadoresDoPet(dataset, petId),
+        familiares: familiaresDoPet(dataset, petId),
         ultimaConsultaEm,
       }
     })
@@ -360,7 +360,7 @@ export const tratamentoRepository = {
             tutorNome: tutor?.nome ?? '',
             tutorTelefone: tutor?.telefone ?? '',
             nomes: Object.fromEntries(
-              cuidadoresDoPet(dataset, pet.id).map((cuidador) => [cuidador.id, cuidador.nome]),
+              familiaresDoPet(dataset, pet.id).map((familiar) => [familiar.id, familiar.nome]),
             ),
           }
         })
@@ -390,7 +390,7 @@ export const tratamentoRepository = {
   },
 
   /** O celular de quem cuida, na forma do contrato — o que a prévia desenha. */
-  noApp(petId: string, cuidadorId: string): Promise<TratamentosNoApp> {
+  noApp(petId: string, familiarId: string): Promise<TratamentosNoApp> {
     return simularChamada('tratamento.listar', () => {
       const dataset = getDataset()
       const agora = agoraIso()
@@ -404,9 +404,9 @@ export const tratamentoRepository = {
         : []
 
       return {
-        contrato: projetarTratamentos(petId, cuidadorId, ctx),
+        contrato: projetarTratamentos(petId, familiarId, ctx),
         aviso: avisosDeHoje[avisosDeHoje.length - 1] ?? null,
-        receitasSemLembrete: editaOPet(dataset, cuidadorId, petId)
+        receitasSemLembrete: editaOPet(dataset, familiarId, petId)
           ? receitasSemLembrete(dataset, petId, agora)
           : [],
       }
@@ -425,14 +425,14 @@ export const tratamentoRepository = {
     numero: number
     situacao: 'dada' | 'pulada'
     motivo: MotivoDaDosePulada | null
-    cuidadorId: string
+    familiarId: string
   }): Promise<RegistroDeDose> {
     return simularChamada('tratamento.registrar', () => {
       const dataset = getDataset()
       const tratamento = tratamentoOuFalha(dataset, input.tratamentoId)
       const agora = agoraIso()
 
-      if (!editaOPet(dataset, input.cuidadorId, tratamento.petId)) {
+      if (!editaOPet(dataset, input.familiarId, tratamento.petId)) {
         throw new DoseRecusadaError('somente-leitura')
       }
 
@@ -462,7 +462,7 @@ export const tratamentoRepository = {
         situacao: input.situacao,
         motivo: input.situacao === 'pulada' ? input.motivo : null,
         registradaEm: agora,
-        cuidadorId: input.cuidadorId,
+        familiarId: input.familiarId,
       }
 
       dataset.registrosDeDose.push(registro)
@@ -477,7 +477,7 @@ export const tratamentoRepository = {
    * O toque errado precisa de volta — "dei" por engano na dose do outro pet — e só quem tocou
    * pode voltar: desfazer o registro de outra pessoa da casa apagaria o que ela viu acontecer.
    */
-  desfazerDose(input: { tratamentoId: string; numero: number; cuidadorId: string }): Promise<void> {
+  desfazerDose(input: { tratamentoId: string; numero: number; familiarId: string }): Promise<void> {
     return simularChamada('tratamento.registrar', () => {
       const dataset = getDataset()
       const tratamento = tratamentoOuFalha(dataset, input.tratamentoId)
@@ -487,7 +487,7 @@ export const tratamentoRepository = {
       )
       const registro = dataset.registrosDeDose[indice]
 
-      if (!registro || registro.cuidadorId !== input.cuidadorId) {
+      if (!registro || registro.familiarId !== input.familiarId) {
         throw new DoseRecusadaError('somente-leitura')
       }
 
@@ -513,7 +513,7 @@ export const tratamentoRepository = {
   criarLembretes(input: {
     encounterId: string
     itens: Array<{ prescricaoId: string; primeiraDoseEm: ISODateTime }>
-    cuidadorId: string
+    familiarId: string
     compartilharComAClinica: boolean
   }): Promise<TratamentoEmCasa[]> {
     return simularChamada('tratamento.registrar', () => {
@@ -524,7 +524,7 @@ export const tratamentoRepository = {
         throw new Error(`tratamento.criarLembretes: ${input.encounterId} não foi liberado`)
       }
 
-      if (!editaOPet(dataset, input.cuidadorId, encounter.petId)) {
+      if (!editaOPet(dataset, input.familiarId, encounter.petId)) {
         throw new DoseRecusadaError('somente-leitura')
       }
 
@@ -551,7 +551,7 @@ export const tratamentoRepository = {
           id: novoId('trat'),
           inicioEm: item.primeiraDoseEm,
           lembreteCriadoEm: agora,
-          lembreteCriadoPor: input.cuidadorId,
+          lembreteCriadoPor: input.familiarId,
           compartilhadoComAClinica: input.compartilharComAClinica,
         })
 
@@ -566,14 +566,14 @@ export const tratamentoRepository = {
   alterarCompartilhamento(input: {
     tratamentoId: string
     compartilhado: boolean
-    cuidadorId: string
+    familiarId: string
   }): Promise<TratamentoEmCasa> {
     return simularChamada('tratamento.registrar', () => {
       const dataset = getDataset()
       const tratamento = tratamentoOuFalha(dataset, input.tratamentoId)
-      const cuidador = dataset.cuidadores.find((item) => item.id === input.cuidadorId)
+      const familiar = dataset.familiares.find((item) => item.id === input.familiarId)
 
-      if (cuidador?.papel !== 'dono' || cuidador.tutorId !== tratamento.tutorId) {
+      if (familiar?.papel !== 'dono' || familiar.tutorId !== tratamento.tutorId) {
         throw new DoseRecusadaError('somente-leitura')
       }
 

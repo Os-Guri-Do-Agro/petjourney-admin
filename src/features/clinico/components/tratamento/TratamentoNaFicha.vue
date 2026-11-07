@@ -251,7 +251,7 @@ const registroDaVez = computed(() => {
     return null
   }
 
-  const quem = rotulos.primeiroNome(props.nomes[registro.cuidadorId] ?? '')
+  const quem = rotulos.primeiroNome(props.nomes[registro.familiarId] ?? '')
 
   return {
     texto:
@@ -263,7 +263,7 @@ const registroDaVez = computed(() => {
           }),
     situacao: registro.situacao,
     /* Só quem marcou desfaz: desfazer o registro de outra pessoa apagaria o que ela viu. */
-    podeDesfazer: props.quemRegistra?.id === registro.cuidadorId,
+    podeDesfazer: props.quemRegistra?.id === registro.familiarId,
   }
 })
 
@@ -689,7 +689,7 @@ function textoDaSituacao(dose: DoseNaGrade): string {
       </template>
       <template #celula-quem="{ linha }">
         <template v-if="linha.registro">
-          <span class="trat__quem">{{ nomes[linha.registro.cuidadorId] ?? '' }}</span>
+          <span class="trat__quem">{{ nomes[linha.registro.familiarId] ?? '' }}</span>
           <span class="trat__meta ui-num">
             {{
               t('clinico.adesao.registros.registradaAs', {

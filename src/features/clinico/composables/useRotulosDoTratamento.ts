@@ -134,14 +134,14 @@ export function useRotulosDoTratamento() {
 
   /** "Registrado por Fátima (31) e Rafael (9)". Vazio quando ninguém registrou nada. */
   function quem(resumo: ResumoDaAdesao, nomes: Record<string, string>): string {
-    if (resumo.porCuidador.length === 0) {
+    if (resumo.porFamiliar.length === 0) {
       return ''
     }
 
     return t('clinico.adesao.quem', {
       lista: lista(
-        resumo.porCuidador.map(
-          (item) => `${primeiroNome(nomes[item.cuidadorId] ?? '')} (${item.registros})`,
+        resumo.porFamiliar.map(
+          (item) => `${primeiroNome(nomes[item.familiarId] ?? '')} (${item.registros})`,
         ),
       ),
     })

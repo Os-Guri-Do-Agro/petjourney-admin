@@ -52,7 +52,7 @@ function registro(
     situacao,
     motivo: situacao === 'pulada' ? 'esqueci' : null,
     registradaEm: '2026-09-01T08:10:00-04:00',
-    cuidadorId: 'tutor-a',
+    familiarId: 'tutor-a',
     ...parcial,
   }
 }
@@ -166,7 +166,7 @@ describe('o resumo do período', () => {
     const doses = grade(
       [
         ...dadasAte(4, [3]),
-        registro(5, 'dada', { cuidadorId: 'membro-b' }),
+        registro(5, 'dada', { familiarId: 'membro-b' }),
         registro(6, 'pulada', { motivo: 'acabou' }),
       ],
       agora,
@@ -175,9 +175,9 @@ describe('o resumo do período', () => {
 
     expect(resumo).toMatchObject({ dadas: 4, puladas: 1, semRegistro: 1, abertas: 1, fechadas: 6 })
     expect(resumo.motivos).toEqual([{ motivo: 'acabou', vezes: 1 }])
-    expect(resumo.porCuidador).toEqual([
-      { cuidadorId: 'tutor-a', registros: 4 },
-      { cuidadorId: 'membro-b', registros: 1 },
+    expect(resumo.porFamiliar).toEqual([
+      { familiarId: 'tutor-a', registros: 4 },
+      { familiarId: 'membro-b', registros: 1 },
     ])
   })
 

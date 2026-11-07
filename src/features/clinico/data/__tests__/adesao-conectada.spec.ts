@@ -52,8 +52,8 @@ async function daFicha(petId: string, tratamentoId: string) {
 }
 
 /** A dose que o celular oferece agora — a que dá para marcar. */
-async function doseDaVez(petId: string, cuidadorId: string, tratamentoId: string) {
-  const noApp = await tratamentoRepository.noApp(petId, cuidadorId)
+async function doseDaVez(petId: string, familiarId: string, tratamentoId: string) {
+  const noApp = await tratamentoRepository.noApp(petId, familiarId)
   const tratamento = noApp.contrato.tratamentos.find((item) => item.id === tratamentoId)!
 
   return tratamento.doses.find((dose) => dose.situacao === 'ABERTA')!
@@ -71,7 +71,7 @@ describe('o retorno da Pérola: o vet vê o que a casa registrou', () => {
 
   it('duas pessoas cuidando: os registros dizem quem deu', async () => {
     const { lido } = await daFicha('pet-perola', TRATAMENTO_DA_DEMONSTRACAO)
-    const quem = lido.periodo.porCuidador.map((item) => item.cuidadorId)
+    const quem = lido.periodo.porFamiliar.map((item) => item.familiarId)
 
     expect(quem).toEqual(expect.arrayContaining(['tutor-fatima', FAMILIAR_DA_DEMONSTRACAO]))
   })
@@ -104,7 +104,7 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
       numero: dose.numero,
       situacao: 'dada',
       motivo: null,
-      cuidadorId: FAMILIAR_DA_DEMONSTRACAO,
+      familiarId: FAMILIAR_DA_DEMONSTRACAO,
     })
 
     const { lido } = await daFicha('pet-perola', TRATAMENTO_DA_DEMONSTRACAO)
@@ -126,13 +126,13 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
 
   it('a Fátima tenta dar de novo: recusado, com o registro do Rafael — é o que evita a dose dobrada', async () => {
     const dose = await doseDaVez('pet-perola', 'tutor-fatima', TRATAMENTO_DA_DEMONSTRACAO)
-    const registrar = (cuidadorId: string) =>
+    const registrar = (familiarId: string) =>
       tratamentoRepository.registrarDose({
         tratamentoId: TRATAMENTO_DA_DEMONSTRACAO,
         numero: dose.numero,
         situacao: 'dada',
         motivo: null,
-        cuidadorId,
+        familiarId,
       })
 
     await registrar(FAMILIAR_DA_DEMONSTRACAO)
@@ -141,7 +141,7 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
 
     expect(recusa).toBeInstanceOf(DoseRecusadaError)
     expect((recusa as DoseRecusadaError).kind).toBe('dose-ja-registrada')
-    expect((recusa as DoseRecusadaError).registro?.cuidadorId).toBe(FAMILIAR_DA_DEMONSTRACAO)
+    expect((recusa as DoseRecusadaError).registro?.familiarId).toBe(FAMILIAR_DA_DEMONSTRACAO)
   })
 
   it('só quem tocou desfaz; o outro não apaga o que alguém viu acontecer', async () => {
@@ -152,21 +152,21 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
       numero: dose.numero,
       situacao: 'dada',
       motivo: null,
-      cuidadorId: FAMILIAR_DA_DEMONSTRACAO,
+      familiarId: FAMILIAR_DA_DEMONSTRACAO,
     })
 
     await expect(
       tratamentoRepository.desfazerDose({
         tratamentoId: TRATAMENTO_DA_DEMONSTRACAO,
         numero: dose.numero,
-        cuidadorId: 'tutor-fatima',
+        familiarId: 'tutor-fatima',
       }),
     ).rejects.toBeInstanceOf(DoseRecusadaError)
 
     await tratamentoRepository.desfazerDose({
       tratamentoId: TRATAMENTO_DA_DEMONSTRACAO,
       numero: dose.numero,
-      cuidadorId: FAMILIAR_DA_DEMONSTRACAO,
+      familiarId: FAMILIAR_DA_DEMONSTRACAO,
     })
 
     const { lido } = await daFicha('pet-perola', TRATAMENTO_DA_DEMONSTRACAO)
@@ -183,7 +183,7 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
         numero: dose.numero,
         situacao: 'pulada',
         motivo: null,
-        cuidadorId: 'tutor-fatima',
+        familiarId: 'tutor-fatima',
       }),
     ).rejects.toThrow('pulada sem motivo')
 
@@ -192,7 +192,7 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
       numero: dose.numero,
       situacao: 'pulada',
       motivo: 'cuspiu',
-      cuidadorId: 'tutor-fatima',
+      familiarId: 'tutor-fatima',
     })
 
     const noApp = await tratamentoRepository.noApp('pet-perola', 'tutor-fatima')
@@ -220,7 +220,7 @@ describe('confirmar no celular muda a ficha, com quem deu', () => {
         numero: dose.numero,
         situacao: 'dada',
         motivo: null,
-        cuidadorId: 'membro-clara',
+        familiarId: 'membro-clara',
       }),
     ).rejects.toMatchObject({ kind: 'somente-leitura' })
   })
@@ -247,7 +247,7 @@ describe('o alerta da clínica: a Duna ficou sem furosemida', () => {
     expect(clock.dateOf(adesao.ultimaConsultaEm!)).toBe(addDays(clock.today(), -60))
     expect(lido.tratamento.encounterId).not.toBeNull()
     expect(lido.periodo.dadas).toBeGreaterThan(100)
-    expect(adesao.cuidadores.map((item) => item.id)).toEqual(['tutor-eduardo', 'membro-lucia'])
+    expect(adesao.familiares.map((item) => item.id)).toEqual(['tutor-eduardo', 'membro-lucia'])
   })
 
   it('o celular só oferece a receita nova: as de consultas antigas ficam no resumo delas', async () => {
@@ -340,7 +340,7 @@ describe('prescrever: a receita vira lembrete, e o lembrete, tratamento', () => 
     const pedido = {
       encounterId: encounter.id,
       itens: [{ prescricaoId: prescricao.id, primeiraDoseEm: agoraIso() }],
-      cuidadorId: encounter.tutorId,
+      familiarId: encounter.tutorId,
       compartilharComAClinica: true,
     }
     const [criado] = await tratamentoRepository.criarLembretes(pedido)

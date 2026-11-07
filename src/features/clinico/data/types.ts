@@ -1018,7 +1018,7 @@ export type AtoClinico = {
  * porque o registro diz **quem** deu — e porque, com duas pessoas cuidando, a pergunta do vet no
  * retorno muda de "deu?" para "quem deu, e quando".
  */
-export type Cuidador = {
+export type Familiar = {
   id: string
   /** O responsável da conta. A família é a dele. */
   tutorId: string

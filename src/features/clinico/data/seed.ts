@@ -43,7 +43,7 @@ import { createPrng, hashSeed, intBetween, pickFrom } from './mock-runtime'
 import {
   CONSULTAS_DA_ADESAO,
   casosDaAdesao,
-  cuidadoresDoDataset,
+  familiaresDoDataset,
   gerarAdesao,
   petsDaAdesao,
 } from './seed-adesao'
@@ -85,7 +85,7 @@ import type {
   Block,
   CarePlan,
   Clinic,
-  Cuidador,
+  Familiar,
   Diagnosis,
   ConsentimentoDoResponsavel,
   Encounter,
@@ -237,7 +237,7 @@ export type SeedResult = {
   /** Prazos combinados com quem marca pelo app. Ver `domain/politica.ts`. */
   politica: PoliticaDaClinica
   /** Quem cuida de cada pet no app: o dono e a família dele. Ver `seed-adesao.ts`. */
-  cuidadores: Cuidador[]
+  familiares: Familiar[]
   /** Itens de receita que viraram lembrete no app. */
   tratamentos: TratamentoEmCasa[]
   /**
@@ -3401,7 +3401,7 @@ export function gerarDataset(semente: number = SEMENTE_PADRAO): SeedResult {
     /* Liberado numa noite de mês e meio atrás: o consentimento é anterior à consulta de hoje. */
     consentimentos: consentimentosDosResponsaveis(tutores, iso(addDays(hoje, -45), 20 * 60 + 15)),
     politica: { ...politicaDaClinicaFixture },
-    cuidadores: cuidadoresDoDataset(tutores, pets),
+    familiares: familiaresDoDataset(tutores, pets),
     tratamentos: adesao.tratamentos,
     registrosDeDose: adesao.registrosDeDose,
     pedidos: dosPedidos.pedidos,

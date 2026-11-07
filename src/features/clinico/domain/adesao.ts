@@ -73,7 +73,7 @@ export type RegistroDeDose = {
   motivo: MotivoDaDosePulada | null
   registradaEm: ISODateTime
   /** Quem tocou: o dono do pet ou alguém da família com acesso de edição. */
-  cuidadorId: string
+  familiarId: string
 }
 
 /** O pedaço do tratamento de que a grade depende. */
@@ -235,7 +235,7 @@ export type ResumoDaAdesao = {
   fechadas: number
   motivos: ContagemDeMotivo[]
   /** Quem registrou, e quantas vezes. Mais registros primeiro. */
-  porCuidador: Array<{ cuidadorId: string; registros: number }>
+  porFamiliar: Array<{ familiarId: string; registros: number }>
   /**
    * Por horário do dia, quando a grade repete os mesmos horários todo dia (de 6 em 6, de 8 em 8,
    * de 12 em 12, uma vez por dia). Vazio nas outras frequências.
@@ -282,13 +282,13 @@ export function resumirAdesao(
   const puladas = contar('pulada')
   const semRegistro = contar('sem-registro')
 
-  const porCuidador = new Map<string, number>()
+  const porFamiliar = new Map<string, number>()
 
   for (const dose of doPeriodo) {
     if (dose.registro) {
-      porCuidador.set(
-        dose.registro.cuidadorId,
-        (porCuidador.get(dose.registro.cuidadorId) ?? 0) + 1,
+      porFamiliar.set(
+        dose.registro.familiarId,
+        (porFamiliar.get(dose.registro.familiarId) ?? 0) + 1,
       )
     }
   }
@@ -320,8 +320,8 @@ export function resumirAdesao(
     abertas: contar('aberta'),
     fechadas: dadas + puladas + semRegistro,
     motivos: contarMotivos(doPeriodo),
-    porCuidador: [...porCuidador.entries()]
-      .map(([cuidadorId, registros]) => ({ cuidadorId, registros }))
+    porFamiliar: [...porFamiliar.entries()]
+      .map(([familiarId, registros]) => ({ familiarId, registros }))
       .sort((a, b) => b.registros - a.registros),
     porHorario: [...porHorario.values()].sort((a, b) => a.horario.localeCompare(b.horario)),
   }

@@ -1316,11 +1316,11 @@ function fimDoDia(agora: ISODateTime): ISODateTime {
   return clock.toIso(clock.dateOf(agora), 23 * 60 + 59)
 }
 
-function quemRegistrou(cuidadorId: string, eu: string, ctx: ContextoDaCarteirinha): QuemRegistrou {
+function quemRegistrou(familiarId: string, eu: string, ctx: ContextoDaCarteirinha): QuemRegistrou {
   return {
-    id: cuidadorId,
-    nome: ctx.dataset.cuidadores.find((item) => item.id === cuidadorId)?.nome ?? '',
-    eu: cuidadorId === eu,
+    id: familiarId,
+    nome: ctx.dataset.familiares.find((item) => item.id === familiarId)?.nome ?? '',
+    eu: familiarId === eu,
   }
 }
 
@@ -1338,10 +1338,10 @@ function projetarDose(
     situacao: SITUACAO_DA_DOSE[dose.situacao],
     motivo: registro?.motivo ? MOTIVO_DA_DOSE[registro.motivo] : null,
     registradaEm: registro?.registradaEm ?? null,
-    registradaPor: registro ? quemRegistrou(registro.cuidadorId, eu.id, ctx) : null,
+    registradaPor: registro ? quemRegistrou(registro.familiarId, eu.id, ctx) : null,
     podeRegistrar: eu.edita && !registro && dose.situacao === 'aberta',
     podeDesfazer:
-      eu.edita && registro?.cuidadorId === eu.id && ms(ctx.agora) < ms(dose.registravelAte),
+      eu.edita && registro?.familiarId === eu.id && ms(ctx.agora) < ms(dose.registravelAte),
   }
 }
 
@@ -1371,13 +1371,13 @@ function ultimosDias(doses: DoseNaGrade[], ultimo: string) {
 /** A tela de remédios de um pet, como quem está com o celular a vê. */
 export function projetarTratamentos(
   petId: string,
-  cuidadorId: string,
+  familiarId: string,
   ctx: ContextoDaCarteirinha,
 ): TratamentosDoPet {
   const { dataset, agora } = ctx
   const pet = dataset.pets.find((item) => item.id === petId)
-  const cuidador = dataset.cuidadores.find((item) => item.id === cuidadorId)
-  const edita = cuidador?.acesso === 'edicao' && cuidador.petIds.includes(petId)
+  const familiar = dataset.familiares.find((item) => item.id === familiarId)
+  const edita = familiar?.acesso === 'edicao' && familiar.petIds.includes(petId)
   const hoje = clock.dateOf(agora)
   const limiteDosEncerrados = ms(agora) - ENCERRADOS_VISIVEIS_DIAS * 86_400_000
 
@@ -1411,7 +1411,7 @@ export function projetarTratamentos(
         inicioEm: tratamento.inicioEm,
         situacao: ativo ? 'EM_CURSO' : 'ENCERRADO',
         compartilhadoComAClinica: tratamento.compartilhadoComAClinica,
-        podeAlterarCompartilhamento: cuidador?.papel === 'dono',
+        podeAlterarCompartilhamento: familiar?.papel === 'dono',
         avisos: {
           recebo: edita && ativo,
           comReaviso: tratamento.frequenciaHoras >= REGRAS_DA_DOSE.reavisoSoComIntervaloDeHoras,
@@ -1421,14 +1421,14 @@ export function projetarTratamentos(
             (dose) =>
               ativo && (clock.dateOf(dose.previstaEm) === hoje || dose.situacao === 'aberta'),
           )
-          .map((dose) => projetarDose(dose, { id: cuidadorId, edita }, ctx)),
+          .map((dose) => projetarDose(dose, { id: familiarId, edita }, ctx)),
         ultimosDias: ultimosDias(
           doses,
           ativo ? hoje : clock.dateOf(doses[doses.length - 1]?.previstaEm ?? agora),
         ).map(({ dia, doDia }) => ({
           dia,
           doses: doDia.map((dose) => {
-            const projetada = projetarDose(dose, { id: cuidadorId, edita }, ctx)
+            const projetada = projetarDose(dose, { id: familiarId, edita }, ctx)
 
             return {
               numero: projetada.numero,
@@ -1464,8 +1464,8 @@ export function projetarTratamentos(
   return {
     pet: { id: petId, nome: pet?.nome ?? '', fotoUrl: null },
     eu: {
-      id: cuidadorId,
-      nome: cuidador?.nome ?? '',
+      id: familiarId,
+      nome: familiar?.nome ?? '',
       eu: true,
       acesso: edita ? 'LEITURA_ESCRITA' : 'LEITURA',
     },

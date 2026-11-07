@@ -51,7 +51,7 @@ import {
   type AdesaoDoPaciente,
   type TratamentosNoApp,
 } from '@/features/clinico/data/repositories'
-import type { Cuidador, Pet, Tutor } from '@/features/clinico/data/types'
+import type { Familiar, Pet, Tutor } from '@/features/clinico/data/types'
 import {
   diasDaFaixa,
   faixaMostraAConsulta,
@@ -77,7 +77,7 @@ const celularAberto = ref(false)
 const recusa = ref<{ tratamentoId: string; numero: number; texto: string } | null>(null)
 
 /** De quem é o celular da prévia. Começa no responsável: é quem criou os lembretes. */
-const cuidadorId = ref('')
+const familiarId = ref('')
 
 const petId = computed(() => String(route.params.petId ?? ''))
 
@@ -92,7 +92,7 @@ async function carregar() {
 
     pet.value = dados?.pet ?? null
     tutor.value = dados?.tutor ?? null
-    cuidadorId.value = dados?.pet.tutorId ?? ''
+    familiarId.value = dados?.pet.tutorId ?? ''
     await recarregar()
   } catch {
     erro.value = t('clinico.erros.prontuario')
@@ -110,7 +110,7 @@ async function carregar() {
 async function recarregar() {
   const [daFicha, doCelular] = await Promise.all([
     tratamentoRepository.doPaciente(petId.value),
-    tratamentoRepository.noApp(petId.value, cuidadorId.value),
+    tratamentoRepository.noApp(petId.value, familiarId.value),
   ])
 
   adesao.value = daFicha
@@ -120,7 +120,7 @@ async function recarregar() {
 onMounted(carregar)
 watch(petId, carregar)
 
-watch(cuidadorId, async (novo, antigo) => {
+watch(familiarId, async (novo, antigo) => {
   if (antigo && novo !== antigo) {
     recusa.value = null
     noApp.value = await tratamentoRepository.noApp(petId.value, novo)
@@ -130,7 +130,7 @@ watch(cuidadorId, async (novo, antigo) => {
 // ------------------------------------------------------------------ a ficha
 
 const nomes = computed<Record<string, string>>(() =>
-  Object.fromEntries((adesao.value?.cuidadores ?? []).map((item) => [item.id, item.nome])),
+  Object.fromEntries((adesao.value?.familiares ?? []).map((item) => [item.id, item.nome])),
 )
 
 const emCurso = computed(() => (adesao.value?.tratamentos ?? []).filter((item) => item.emCurso))
@@ -212,23 +212,23 @@ async function registrarContato(
 
 // ------------------------------------------------------------------ o celular
 
-function papel(cuidador: Cuidador): string {
-  if (cuidador.acesso === 'leitura') {
+function papel(familiar: Familiar): string {
+  if (familiar.acesso === 'leitura') {
     return t('clinico.adesao.ficha.papel.leitura')
   }
 
-  return t(`clinico.adesao.ficha.papel.${cuidador.papel}`)
+  return t(`clinico.adesao.ficha.papel.${familiar.papel}`)
 }
 
 const celulares = computed(() =>
-  (adesao.value?.cuidadores ?? []).map((cuidador) => ({
-    valor: cuidador.id,
-    rotulo: `${rotulos.primeiroNome(cuidador.nome)} · ${papel(cuidador)}`,
+  (adesao.value?.familiares ?? []).map((familiar) => ({
+    valor: familiar.id,
+    rotulo: `${rotulos.primeiroNome(familiar.nome)} · ${papel(familiar)}`,
   })),
 )
 
 const donoDoCelular = computed(
-  () => adesao.value?.cuidadores.find((item) => item.id === cuidadorId.value) ?? null,
+  () => adesao.value?.familiares.find((item) => item.id === familiarId.value) ?? null,
 )
 
 /**
@@ -237,7 +237,7 @@ const donoDoCelular = computed(
  * quem a clínica atende ao telefone.
  */
 const quemRegistraNaFicha = computed(() => {
-  const cuidadores = adesao.value?.cuidadores ?? []
+  const familiares = adesao.value?.familiares ?? []
   const escolhido = donoDoCelular.value
 
   if (escolhido && escolhido.acesso === 'edicao') {
@@ -245,8 +245,8 @@ const quemRegistraNaFicha = computed(() => {
   }
 
   const quemEdita =
-    cuidadores.find((item) => item.papel === 'dono' && item.acesso === 'edicao') ??
-    cuidadores.find((item) => item.acesso === 'edicao')
+    familiares.find((item) => item.papel === 'dono' && item.acesso === 'edicao') ??
+    familiares.find((item) => item.acesso === 'edicao')
 
   return quemEdita ? { id: quemEdita.id, nome: quemEdita.nome } : null
 })
@@ -285,7 +285,7 @@ async function salvar<T>(acao: () => Promise<T>) {
 function textoDaRecusa(erroDaDose: DoseRecusadaError): string {
   if (erroDaDose.kind === 'dose-ja-registrada' && erroDaDose.registro) {
     return t('clinico.adesao.app.jaRegistrada', {
-      nome: rotulos.primeiroNome(nomes.value[erroDaDose.registro.cuidadorId] ?? ''),
+      nome: rotulos.primeiroNome(nomes.value[erroDaDose.registro.familiarId] ?? ''),
       hora: formato.hora(erroDaDose.registro.registradaEm),
     })
   }
@@ -302,10 +302,10 @@ async function registrar(
     situacao: 'dada' | 'pulada'
     motivo: MotivoDaDosePulada | null
   },
-  quem: string = cuidadorId.value,
+  quem: string = familiarId.value,
 ) {
   try {
-    await salvar(() => tratamentoRepository.registrarDose({ ...dose, cuidadorId: quem }))
+    await salvar(() => tratamentoRepository.registrarDose({ ...dose, familiarId: quem }))
   } catch (falha) {
     recusa.value = {
       tratamentoId: dose.tratamentoId,
@@ -328,7 +328,7 @@ async function registrarVarias(doses: Array<{ tratamentoId: string; numero: numb
           ...dose,
           situacao: 'dada',
           motivo: null,
-          cuidadorId: cuidadorId.value,
+          familiarId: familiarId.value,
         })
       } catch (falha) {
         if (!(falha instanceof DoseRecusadaError) || falha.kind !== 'dose-ja-registrada') {
@@ -343,10 +343,10 @@ async function registrarVarias(doses: Array<{ tratamentoId: string; numero: numb
 
 async function desfazer(
   dose: { tratamentoId: string; numero: number },
-  quem: string = cuidadorId.value,
+  quem: string = familiarId.value,
 ) {
   try {
-    await salvar(() => tratamentoRepository.desfazerDose({ ...dose, cuidadorId: quem }))
+    await salvar(() => tratamentoRepository.desfazerDose({ ...dose, familiarId: quem }))
   } catch (falha) {
     recusa.value = {
       ...dose,
@@ -378,7 +378,7 @@ async function criarLembretes(pedido: {
     tratamentoRepository.criarLembretes({
       encounterId: pedido.encounterId,
       itens: pedido.itens,
-      cuidadorId: cuidadorId.value,
+      familiarId: familiarId.value,
       compartilharComAClinica: pedido.compartilhar,
     }),
   ).catch(() => undefined)
@@ -386,7 +386,7 @@ async function criarLembretes(pedido: {
 
 async function compartilhar(pedido: { tratamentoId: string; compartilhado: boolean }) {
   await salvar(() =>
-    tratamentoRepository.alterarCompartilhamento({ ...pedido, cuidadorId: cuidadorId.value }),
+    tratamentoRepository.alterarCompartilhamento({ ...pedido, familiarId: familiarId.value }),
   ).catch(() => undefined)
 }
 </script>
@@ -544,7 +544,7 @@ async function compartilhar(pedido: { tratamentoId: string; compartilhado: boole
               com o papel não cabem lado a lado na largura da gaveta.
             -->
             <Select
-              v-model="cuidadorId"
+              v-model="familiarId"
               class="gaveta__celular"
               :input-id="`${petId}-celular-de`"
               :options="celulares"
