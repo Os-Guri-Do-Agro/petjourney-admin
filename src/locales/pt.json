@@ -9557,7 +9557,9 @@
       "selectAll": "Selecionar tudo",
       "unselectAll": "Desmarcar tudo",
       "navigation": "Navegação"
-    }
+    },
+    "noFileChosenMessage": "Nenhum arquivo escolhido",
+    "fileChosenMessage": "{0} arquivos"
   },
   "espacos": {
     "clinica": {
@@ -13302,6 +13304,285 @@
       "VACINA_POLIVALENTE": "Vacina polivalente",
       "VACINA_TOSSE_CANIS": "Vacina da tosse dos canis",
       "VERMIFUGO": "Vermífugo"
+    }
+  },
+  "reservasDoHotel": {
+    "titulo": "Reservas",
+    "periodo": "De {de} a {ate}",
+    "diarias": "{n} diária | {n} diárias",
+    "motivoMinimo": "Pelo menos {min} caracteres.",
+    "vistas": {
+      "rotulo": "Partes das reservas",
+      "lista": "Lista",
+      "grade": "Grade",
+      "espera": "Espera"
+    },
+    "motivo": {
+      "ANIMAL_DOENTE": "Animal doente",
+      "HOTEL_INDISPONIVEL": "Hotel sem vaga",
+      "OUTRO": "Outro motivo",
+      "PRECO": "Preço",
+      "RESPONSAVEL_DESISTIU": "Responsável desistiu",
+      "VIAGEM_CANCELADA": "Viagem cancelada",
+      "OBITO_DO_ANIMAL": "Óbito do animal",
+      "EXCLUSAO_DO_TITULAR": "Cancelada pelo pedido de exclusão de dados"
+    },
+    "impedimento": {
+      "INATIVA": "fora de operação",
+      "PORTE": "porte",
+      "ESPECIE": "espécie",
+      "CAPACIDADE": "capacidade",
+      "OCUPADA": "ocupada",
+      "HIGIENIZACAO": "higienização"
+    },
+    "vaga": {
+      "LIVRE": "Livre",
+      "OCUPADA": "Ocupada",
+      "RESERVADA": "Reservada",
+      "HIGIENIZACAO": "Em higienização",
+      "FORA_DE_OPERACAO": "Fora de operação"
+    },
+    "lista": {
+      "proximas": "Próximas",
+      "historico": "Histórico",
+      "quando": "Quais reservas",
+      "filtro": "Situação",
+      "todas": "Todas",
+      "total": "total {valor}",
+      "pago": "pago {valor}",
+      "semSinal": "Sem sinal",
+      "pendenteHa": "pendente há {n} hora | pendente há {n} horas",
+      "vazio": "Nenhuma reserva de ontem em diante.",
+      "vazioHistorico": "Nenhuma reserva com esse filtro.",
+      "verMais": "Ver mais",
+      "erro": "Não foi possível carregar as reservas."
+    },
+    "grade": {
+      "janela": "De {de} a {ate}",
+      "descricao": "Uma linha por acomodação. A barra abre a reserva.",
+      "anterior": "Semana anterior",
+      "seguinte": "Semana seguinte",
+      "hoje": "Hoje",
+      "atrasada": "passou da saída prevista",
+      "semAvaliacao": "documentação sem avaliação",
+      "documentacao": "documentação pendente",
+      "truncado": "A grade mostra parte das reservas do período; encurte a janela.",
+      "semAcomodacao": "A casa ainda não tem acomodações.",
+      "erro": "Não foi possível carregar a grade."
+    },
+    "espera": {
+      "titulo": "Lista de espera",
+      "descricao": "Quem pediu vaga e não coube. Ofertar avisa, mas não segura a baia.",
+      "nova": "Pôr na espera",
+      "criar": "Pôr na espera",
+      "periodo": "Período desejado",
+      "tipos": "Tipos que servem",
+      "tiposDica": "Nenhum marcado aceita qualquer tipo.",
+      "qualquerTipo": "qualquer tipo",
+      "expiraEm": "oferta vale até {quando}",
+      "reservar": "Reservar",
+      "ofertar": "Ofertar vaga",
+      "desistir": "Tirar {nome} da espera",
+      "vazio": "Ninguém na lista de espera.",
+      "truncado": "A lista mostra só parte da espera.",
+      "erro": "Não foi possível carregar a lista de espera.",
+      "status": {
+        "AGUARDANDO": "Aguardando",
+        "OFERTADA": "Vaga ofertada",
+        "CONVERTIDA": "Reservou",
+        "DESISTIU": "Desistiu",
+        "EXPIRADA": "Oferta vencida"
+      }
+    },
+    "nova": {
+      "titulo": "Nova reserva",
+      "quem": "Quem",
+      "hospede": "Hóspede",
+      "acompanhante": "Acompanhante",
+      "acompanhanteDica": "Outro animal do mesmo responsável, na mesma acomodação.",
+      "quando": "Período",
+      "entradaHora": "Hora da entrada",
+      "saidaHora": "Hora da saída",
+      "horasDica": "Em branco, valem os horários da política da casa.",
+      "onde": "Acomodação",
+      "antesDaVaga": "Escolha o hóspede e o período antes",
+      "escolhaVaga": "Escolha a acomodação",
+      "livres": "{n} acomodação serve | {n} acomodações servem",
+      "servicos": "Serviços",
+      "servico": "Serviço",
+      "quantidade": "Quantidade",
+      "tirarServico": "Tirar o serviço",
+      "acrescentarServico": "Acrescentar serviço",
+      "semServicos": "A casa não tem serviço à venda.",
+      "origem": "Como chegou",
+      "observacao": "Observação",
+      "total": "total {total}, sinal {sinal}",
+      "jaHospedado": "Este animal já está hospedado ou reservado nesse período.",
+      "indisponivel": "A acomodação não serve nesse período: {motivos}.",
+      "criar": "Criar reserva",
+      "erroMapa": "Não foi possível ver as vagas do período.",
+      "erroSimular": "Não foi possível calcular o orçamento."
+    },
+    "detalhe": {
+      "erro": "Não foi possível carregar a reserva.",
+      "estadia": "A estadia",
+      "animais": "Animais",
+      "acompanhante": "acompanhante",
+      "porDiaria": "por diária",
+      "semServicos": "Nenhum serviço.",
+      "politica": "Combinado na venda",
+      "saidaAte": "saída até {hora}, meia diária até {limite}",
+      "meia": "meia diária {p}%",
+      "sinal": "sinal {p}%",
+      "cancelada": "Cancelada",
+      "responsavel": "Responsável",
+      "pendente": "Pendente há {n} hora, à espera do sinal. Não expira sozinha. | Pendente há {n} horas, à espera do sinal. Não expira sozinha.",
+      "naoCompareceu": "Não compareceu",
+      "naoCompareceuDica": "Só a partir do fim do dia da entrada. Solta a acomodação na hora.",
+      "naoCompareceuFeito": "Marcada como não compareceu; a acomodação ficou livre."
+    },
+    "orcamento": {
+      "titulo": "Orçamento",
+      "resumo": "Total {total} · sinal {sinal} · pago {pago} · saldo {saldo}",
+      "abaixoDoSinal": "Pago abaixo do sinal",
+      "diaria": "Diária",
+      "acompanhante": "Acompanhante ({p}% da diária)",
+      "temporada": "{nome} (+{p}%)",
+      "saidaTardia": "Saída tardia ({p}% da diária)",
+      "pagamentos": "Pagamentos",
+      "entrou": "Entrou {valor}",
+      "baixou": "Baixou {valor}",
+      "totalDepois": "total pago {valor}"
+    },
+    "pagamento": {
+      "titulo": "Registrar pagamento",
+      "contexto": "Total {total}, sinal {sinal}. Pago até agora: {pago}.",
+      "totalPago": "Total pago até agora",
+      "totalDica": "O total acumulado, não só o desta vez. A reserva confirma quando cobre o sinal.",
+      "motivo": "Por que o total baixou",
+      "motivoDica": "Pelo menos {min} caracteres.",
+      "registrar": "Registrar",
+      "feito": "Pagamento registrado."
+    },
+    "cancelar": {
+      "acao": "Cancelar reserva",
+      "titulo": "Cancelar a reserva",
+      "prazo": "cancelamento sem custo até {n} dia antes da entrada | cancelamento sem custo até {n} dias antes da entrada",
+      "motivo": "Motivo",
+      "voltar": "Voltar",
+      "confirmar": "Cancelar reserva",
+      "reembolsavel": "Reserva cancelada a {n} dia da entrada: o sinal é reembolsável. Acerte no balcão. | Reserva cancelada a {n} dias da entrada: o sinal é reembolsável. Acerte no balcão.",
+      "naoReembolsavel": "Reserva cancelada a {n} dia da entrada: fora do prazo, o sinal não é reembolsável. | Reserva cancelada a {n} dias da entrada: fora do prazo, o sinal não é reembolsável.",
+      "feito": "Reserva cancelada."
+    },
+    "editar": {
+      "acao": "Editar",
+      "titulo": "Editar a reserva",
+      "soSaida": "Com o hóspede na casa, só a saída, os serviços e a observação mudam.",
+      "diferenca": "total de {antes} para {depois}",
+      "reprecificada": "Reserva salva: o total foi de {antes} para {depois}.",
+      "salva": "Reserva salva."
+    },
+    "admissao": {
+      "titulo": "Documentação",
+      "descricao": "O que cada animal apresenta para entrar.",
+      "semExigencias": "A casa não pede documento para estes animais.",
+      "liberada": "Pode entrar",
+      "travada": "Falta documento",
+      "soAvisa": "só avisa",
+      "apresentado": "apresentado em {data}",
+      "valeAte": "vale até {data}",
+      "naoVence": "não vence",
+      "por": "por {nome}",
+      "venceAntes": "vence {n} dia antes da saída | vence {n} dias antes da saída",
+      "naoConta": "Não conta: {detalhe}",
+      "dispensada": "Dispensada por {nome} em {data}: {motivo}",
+      "registrar": "Registrar comprovante",
+      "anular": "Anular comprovante",
+      "anularTitulo": "Anular o comprovante",
+      "anularDica": "O comprovante errado deixa de contar. Fica registrado quem anulou e por quê.",
+      "motivo": "Motivo",
+      "dispensar": "Dispensar",
+      "dispensarTitulo": "Dispensar {exigencia} de {animal}",
+      "dispensarDica": "A dispensa vale só para este animal nesta reserva e fica registrada com o seu nome.",
+      "revogar": "Revogar dispensa",
+      "verDocumento": "Ver o documento",
+      "origem": {
+        "BALCAO_COM_DOCUMENTO": "no balcão, com documento",
+        "BALCAO_SEM_DOCUMENTO": "visto no balcão, sem documento",
+        "APP_COMPROVADA": "carteirinha do app, por clínica",
+        "APP_DECLARADA": "lançada pelo responsável no app"
+      },
+      "dica": {
+        "BALCAO_SEM_DOCUMENTO": "Visto no balcão, sem documento: anexe a foto ou o PDF, ou peça a dispensa à gestão.",
+        "DECLARADA_NAO_ACEITA": "O responsável lançou no app, mas a casa não aceita a vacina lançada por ele: peça o comprovante ou a dispensa."
+      }
+    },
+    "comprovante": {
+      "titulo": "{exigencia} de {animal}",
+      "data": "Data da aplicação ou da emissão",
+      "dataDica": "A que está no documento, não a de hoje. A validade conta a partir dela.",
+      "arquivo": "Foto ou PDF",
+      "escolher": "Escolher arquivo",
+      "arquivoDica": "JPG, PNG, WEBP ou PDF, até 8 MB.",
+      "exige": "Esta exigência impede a entrada: sem o arquivo, o comprovante não conta. JPG, PNG, WEBP ou PDF, até 8 MB.",
+      "referencia": "Referência (lote, número)",
+      "registrar": "Registrar"
+    },
+    "autorizados": {
+      "titulo": "Quem pode buscar",
+      "dica": "Até {max} pessoas. Mudar a lista não muda o preço.",
+      "pessoa": "Pessoa {n}",
+      "tirar": "Tirar {nome}",
+      "nome": "Nome",
+      "telefone": "Telefone",
+      "relacao": "Relação",
+      "documento": "Documento",
+      "documentoDica": "A reserva guarda só os 4 últimos caracteres.",
+      "acrescentar": "Acrescentar pessoa",
+      "editar": "Editar",
+      "vazio": "Só o responsável pode buscar.",
+      "final": "documento final {final}",
+      "salvos": "Lista de quem pode buscar salva."
+    },
+    "mapa": {
+      "titulo": "Mapa",
+      "procurar": "Período e vaga",
+      "livres": "{n} de {total} livres",
+      "para": "para {porte}, {especie}",
+      "naoServe": "não serve: {motivos}",
+      "soHigienizacao": "só a higienização encosta",
+      "truncado": "O mapa mostra só parte das acomodações.",
+      "vazio": "A casa ainda não tem acomodações.",
+      "erro": "Não foi possível carregar o mapa.",
+      "porte": "Porte",
+      "especie": "Espécie",
+      "filtroDica": "Porte e espécie juntos procuram vaga sem o animal cadastrado. Em branco, mostra a situação de cada acomodação.",
+      "ver": "Ver o mapa"
+    },
+    "status": {
+      "CANCELADA": "Cancelada",
+      "CONFIRMADA": "Confirmada",
+      "ENCERRADA": "Encerrada",
+      "HOSPEDADO": "Na casa",
+      "NAO_COMPARECEU": "Não compareceu",
+      "PENDENTE": "Pendente"
+    },
+    "origem": {
+      "APP": "Aplicativo",
+      "BALCAO": "Balcão",
+      "INDICACAO": "Indicação",
+      "RETORNO": "Retorno",
+      "TELEFONE": "Telefone",
+      "WHATSAPP": "WhatsApp",
+      "LINK": "Link do hotel"
+    },
+    "situacao": {
+      "AUSENTE": "Não apresentado",
+      "DISPENSADO": "Dispensado",
+      "OK": "Em dia",
+      "VENCE_DURANTE": "Vence durante",
+      "VENCIDO": "Vencido"
     }
   }
 }

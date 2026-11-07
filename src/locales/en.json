@@ -9557,7 +9557,9 @@
       "selectAll": "Select all",
       "unselectAll": "Unselect all",
       "navigation": "Navigation"
-    }
+    },
+    "noFileChosenMessage": "No file chosen",
+    "fileChosenMessage": "{0} files"
   },
   "espacos": {
     "clinica": {
@@ -13302,6 +13304,285 @@
       "VACINA_POLIVALENTE": "Multivalent vaccine",
       "VACINA_TOSSE_CANIS": "Kennel cough vaccine",
       "VERMIFUGO": "Deworming"
+    }
+  },
+  "reservasDoHotel": {
+    "titulo": "Bookings",
+    "periodo": "From {de} to {ate}",
+    "diarias": "{n} night | {n} nights",
+    "motivoMinimo": "At least {min} characters.",
+    "vistas": {
+      "rotulo": "Booking views",
+      "lista": "List",
+      "grade": "Grid",
+      "espera": "Waitlist"
+    },
+    "motivo": {
+      "ANIMAL_DOENTE": "Animal unwell",
+      "HOTEL_INDISPONIVEL": "Hotel fully booked",
+      "OUTRO": "Other reason",
+      "PRECO": "Price",
+      "RESPONSAVEL_DESISTIU": "Owner changed their mind",
+      "VIAGEM_CANCELADA": "Trip cancelled",
+      "OBITO_DO_ANIMAL": "Death of the animal",
+      "EXCLUSAO_DO_TITULAR": "Cancelled by a data deletion request"
+    },
+    "impedimento": {
+      "INATIVA": "out of service",
+      "PORTE": "size",
+      "ESPECIE": "species",
+      "CAPACIDADE": "capacity",
+      "OCUPADA": "taken",
+      "HIGIENIZACAO": "cleaning"
+    },
+    "vaga": {
+      "LIVRE": "Free",
+      "OCUPADA": "Taken",
+      "RESERVADA": "Booked",
+      "HIGIENIZACAO": "Being cleaned",
+      "FORA_DE_OPERACAO": "Out of service"
+    },
+    "lista": {
+      "proximas": "Upcoming",
+      "historico": "History",
+      "quando": "Which bookings",
+      "filtro": "Status",
+      "todas": "All",
+      "total": "total {valor}",
+      "pago": "paid {valor}",
+      "semSinal": "No deposit",
+      "pendenteHa": "pending for {n} hour | pending for {n} hours",
+      "vazio": "No bookings from yesterday on.",
+      "vazioHistorico": "No bookings with this filter.",
+      "verMais": "See more",
+      "erro": "Couldn't load the bookings."
+    },
+    "grade": {
+      "janela": "From {de} to {ate}",
+      "descricao": "One row per accommodation. The bar opens the booking.",
+      "anterior": "Previous week",
+      "seguinte": "Next week",
+      "hoje": "Today",
+      "atrasada": "past the expected check-out",
+      "semAvaliacao": "documents not assessed",
+      "documentacao": "documents pending",
+      "truncado": "The grid shows only part of the bookings in this period; shorten the window.",
+      "semAcomodacao": "The house has no accommodations yet.",
+      "erro": "Couldn't load the grid."
+    },
+    "espera": {
+      "titulo": "Waitlist",
+      "descricao": "Who asked for a spot and didn't fit. Offering notifies, but does not hold the spot.",
+      "nova": "Add to waitlist",
+      "criar": "Add to waitlist",
+      "periodo": "Desired period",
+      "tipos": "Types that work",
+      "tiposDica": "None selected accepts any type.",
+      "qualquerTipo": "any type",
+      "expiraEm": "offer valid until {quando}",
+      "reservar": "Book",
+      "ofertar": "Offer a spot",
+      "desistir": "Remove {nome} from the waitlist",
+      "vazio": "No one on the waitlist.",
+      "truncado": "The list shows only part of the waitlist.",
+      "erro": "Couldn't load the waitlist.",
+      "status": {
+        "AGUARDANDO": "Waiting",
+        "OFERTADA": "Spot offered",
+        "CONVERTIDA": "Booked",
+        "DESISTIU": "Gave up",
+        "EXPIRADA": "Offer expired"
+      }
+    },
+    "nova": {
+      "titulo": "New booking",
+      "quem": "Who",
+      "hospede": "Guest",
+      "acompanhante": "Companion",
+      "acompanhanteDica": "Another animal of the same owner, in the same accommodation.",
+      "quando": "Period",
+      "entradaHora": "Check-in time",
+      "saidaHora": "Check-out time",
+      "horasDica": "Left blank, the house policy times apply.",
+      "onde": "Accommodation",
+      "antesDaVaga": "Choose the guest and the period first",
+      "escolhaVaga": "Choose the accommodation",
+      "livres": "{n} accommodation fits | {n} accommodations fit",
+      "servicos": "Services",
+      "servico": "Service",
+      "quantidade": "Quantity",
+      "tirarServico": "Remove the service",
+      "acrescentarServico": "Add service",
+      "semServicos": "The house has no service on sale.",
+      "origem": "How it came in",
+      "observacao": "Note",
+      "total": "total {total}, deposit {sinal}",
+      "jaHospedado": "This animal is already staying or booked in this period.",
+      "indisponivel": "The accommodation doesn't fit this period: {motivos}.",
+      "criar": "Create booking",
+      "erroMapa": "Couldn't see the spots for this period.",
+      "erroSimular": "Couldn't calculate the quote."
+    },
+    "detalhe": {
+      "erro": "Couldn't load the booking.",
+      "estadia": "The stay",
+      "animais": "Animals",
+      "acompanhante": "companion",
+      "porDiaria": "per night",
+      "semServicos": "No services.",
+      "politica": "Agreed at sale",
+      "saidaAte": "check-out by {hora}, half day until {limite}",
+      "meia": "half day {p}%",
+      "sinal": "deposit {p}%",
+      "cancelada": "Cancelled",
+      "responsavel": "Owner",
+      "pendente": "Pending for {n} hour, waiting for the deposit. It does not expire on its own. | Pending for {n} hours, waiting for the deposit. It does not expire on its own.",
+      "naoCompareceu": "No-show",
+      "naoCompareceuDica": "Only after the end of the check-in day. Frees the accommodation right away.",
+      "naoCompareceuFeito": "Marked as no-show; the accommodation is free."
+    },
+    "orcamento": {
+      "titulo": "Quote",
+      "resumo": "Total {total} · deposit {sinal} · paid {pago} · balance {saldo}",
+      "abaixoDoSinal": "Paid below the deposit",
+      "diaria": "Night",
+      "acompanhante": "Companion ({p}% of the night)",
+      "temporada": "{nome} (+{p}%)",
+      "saidaTardia": "Late check-out ({p}% of the night)",
+      "pagamentos": "Payments",
+      "entrou": "{valor} in",
+      "baixou": "{valor} lowered",
+      "totalDepois": "total paid {valor}"
+    },
+    "pagamento": {
+      "titulo": "Record payment",
+      "contexto": "Total {total}, deposit {sinal}. Paid so far: {pago}.",
+      "totalPago": "Total paid so far",
+      "totalDica": "The running total, not just this payment. The booking is confirmed when it covers the deposit.",
+      "motivo": "Why the total went down",
+      "motivoDica": "At least {min} characters.",
+      "registrar": "Record",
+      "feito": "Payment recorded."
+    },
+    "cancelar": {
+      "acao": "Cancel booking",
+      "titulo": "Cancel the booking",
+      "prazo": "free cancellation up to {n} day before check-in | free cancellation up to {n} days before check-in",
+      "motivo": "Reason",
+      "voltar": "Back",
+      "confirmar": "Cancel booking",
+      "reembolsavel": "Booking cancelled {n} day before check-in: the deposit is refundable. Settle it at the desk. | Booking cancelled {n} days before check-in: the deposit is refundable. Settle it at the desk.",
+      "naoReembolsavel": "Booking cancelled {n} day before check-in: past the deadline, the deposit is not refundable. | Booking cancelled {n} days before check-in: past the deadline, the deposit is not refundable.",
+      "feito": "Booking cancelled."
+    },
+    "editar": {
+      "acao": "Edit",
+      "titulo": "Edit the booking",
+      "soSaida": "With the guest in the house, only check-out, services and the note can change.",
+      "diferenca": "total from {antes} to {depois}",
+      "reprecificada": "Booking saved: the total went from {antes} to {depois}.",
+      "salva": "Booking saved."
+    },
+    "admissao": {
+      "titulo": "Documents",
+      "descricao": "What each animal shows to check in.",
+      "semExigencias": "The house asks no documents for these animals.",
+      "liberada": "Can check in",
+      "travada": "Missing documents",
+      "soAvisa": "warning only",
+      "apresentado": "shown on {data}",
+      "valeAte": "valid until {data}",
+      "naoVence": "does not expire",
+      "por": "by {nome}",
+      "venceAntes": "expires {n} day before check-out | expires {n} days before check-out",
+      "naoConta": "Doesn't count: {detalhe}",
+      "dispensada": "Waived by {nome} on {data}: {motivo}",
+      "registrar": "Record proof",
+      "anular": "Void proof",
+      "anularTitulo": "Void the proof",
+      "anularDica": "The wrong proof stops counting. Who voided it and why are recorded.",
+      "motivo": "Reason",
+      "dispensar": "Waive",
+      "dispensarTitulo": "Waive {exigencia} for {animal}",
+      "dispensarDica": "The waiver applies only to this animal in this booking and is recorded with your name.",
+      "revogar": "Revoke waiver",
+      "verDocumento": "See the document",
+      "origem": {
+        "BALCAO_COM_DOCUMENTO": "at the desk, with a document",
+        "BALCAO_SEM_DOCUMENTO": "seen at the desk, no document",
+        "APP_COMPROVADA": "app card, by a clinic",
+        "APP_DECLARADA": "entered by the owner in the app"
+      },
+      "dica": {
+        "BALCAO_SEM_DOCUMENTO": "Seen at the desk, no document: attach the photo or PDF, or ask management for a waiver.",
+        "DECLARADA_NAO_ACEITA": "The owner entered it in the app, but the house doesn't accept owner entries: ask for proof or a waiver."
+      }
+    },
+    "comprovante": {
+      "titulo": "{exigencia} for {animal}",
+      "data": "Date given or issued",
+      "dataDica": "The one on the document, not today's. Validity counts from it.",
+      "arquivo": "Photo or PDF",
+      "escolher": "Choose file",
+      "arquivoDica": "JPG, PNG, WEBP or PDF, up to 8 MB.",
+      "exige": "This requirement blocks check-in: without the file, the proof doesn't count. JPG, PNG, WEBP or PDF, up to 8 MB.",
+      "referencia": "Reference (lot, number)",
+      "registrar": "Record"
+    },
+    "autorizados": {
+      "titulo": "Who can pick up",
+      "dica": "Up to {max} people. Changing the list doesn't change the price.",
+      "pessoa": "Person {n}",
+      "tirar": "Remove {nome}",
+      "nome": "Name",
+      "telefone": "Phone",
+      "relacao": "Relationship",
+      "documento": "ID document",
+      "documentoDica": "The booking keeps only the last 4 characters.",
+      "acrescentar": "Add person",
+      "editar": "Edit",
+      "vazio": "Only the owner can pick up.",
+      "final": "document ending {final}",
+      "salvos": "Pick-up list saved."
+    },
+    "mapa": {
+      "titulo": "Map",
+      "procurar": "Period and spot",
+      "livres": "{n} of {total} free",
+      "para": "for {porte}, {especie}",
+      "naoServe": "doesn't fit: {motivos}",
+      "soHigienizacao": "only the cleaning overlaps",
+      "truncado": "The map shows only part of the accommodations.",
+      "vazio": "The house has no accommodations yet.",
+      "erro": "Couldn't load the map.",
+      "porte": "Size",
+      "especie": "Species",
+      "filtroDica": "Size and species together look for a spot without a registered animal. Left blank, it shows the status of each accommodation.",
+      "ver": "See the map"
+    },
+    "status": {
+      "CANCELADA": "Cancelled",
+      "CONFIRMADA": "Confirmed",
+      "ENCERRADA": "Closed",
+      "HOSPEDADO": "In the house",
+      "NAO_COMPARECEU": "No-show",
+      "PENDENTE": "Pending"
+    },
+    "origem": {
+      "APP": "App",
+      "BALCAO": "Front desk",
+      "INDICACAO": "Referral",
+      "RETORNO": "Returning",
+      "TELEFONE": "Phone",
+      "WHATSAPP": "WhatsApp",
+      "LINK": "Hotel link"
+    },
+    "situacao": {
+      "AUSENTE": "Not presented",
+      "DISPENSADO": "Waived",
+      "OK": "Valid",
+      "VENCE_DURANTE": "Expires mid-stay",
+      "VENCIDO": "Expired"
     }
   }
 }

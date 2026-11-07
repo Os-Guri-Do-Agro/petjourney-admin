@@ -9557,7 +9557,9 @@
       "selectAll": "Izaberi sve",
       "unselectAll": "Poništi izbor",
       "navigation": "Navigacija"
-    }
+    },
+    "noFileChosenMessage": "Nijedan fajl nije izabran",
+    "fileChosenMessage": "Fajlova: {0}"
   },
   "espacos": {
     "clinica": {
@@ -13302,6 +13304,285 @@
       "VACINA_POLIVALENTE": "Polivalentna vakcina",
       "VACINA_TOSSE_CANIS": "Vakcina protiv odgajivačkog kašlja",
       "VERMIFUGO": "Tretman protiv parazita"
+    }
+  },
+  "reservasDoHotel": {
+    "titulo": "Rezervacije",
+    "periodo": "Od {de} do {ate}",
+    "diarias": "{n} noćenje | {n} noćenja | {n} noćenja",
+    "motivoMinimo": "Najmanje {min} znakova.",
+    "vistas": {
+      "rotulo": "Delovi rezervacija",
+      "lista": "Lista",
+      "grade": "Mreža",
+      "espera": "Čekanje"
+    },
+    "motivo": {
+      "ANIMAL_DOENTE": "Životinja je bolesna",
+      "HOTEL_INDISPONIVEL": "Hotel je popunjen",
+      "OUTRO": "Drugi razlog",
+      "PRECO": "Cena",
+      "RESPONSAVEL_DESISTIU": "Vlasnik je odustao",
+      "VIAGEM_CANCELADA": "Put je otkazan",
+      "OBITO_DO_ANIMAL": "Uginuće životinje",
+      "EXCLUSAO_DO_TITULAR": "Otkazano zbog zahteva za brisanje podataka"
+    },
+    "impedimento": {
+      "INATIVA": "van upotrebe",
+      "PORTE": "veličina",
+      "ESPECIE": "vrsta",
+      "CAPACIDADE": "kapacitet",
+      "OCUPADA": "zauzeto",
+      "HIGIENIZACAO": "čišćenje"
+    },
+    "vaga": {
+      "LIVRE": "Slobodno",
+      "OCUPADA": "Zauzeto",
+      "RESERVADA": "Rezervisano",
+      "HIGIENIZACAO": "Na čišćenju",
+      "FORA_DE_OPERACAO": "Van upotrebe"
+    },
+    "lista": {
+      "proximas": "Predstojeće",
+      "historico": "Istorija",
+      "quando": "Koje rezervacije",
+      "filtro": "Status",
+      "todas": "Sve",
+      "total": "ukupno {valor}",
+      "pago": "plaćeno {valor}",
+      "semSinal": "Bez kapare",
+      "pendenteHa": "na čekanju {n} sat | na čekanju {n} sata | na čekanju {n} sati",
+      "vazio": "Nema rezervacija od juče nadalje.",
+      "vazioHistorico": "Nema rezervacija sa ovim filterom.",
+      "verMais": "Prikaži još",
+      "erro": "Nije moguće učitati rezervacije."
+    },
+    "grade": {
+      "janela": "Od {de} do {ate}",
+      "descricao": "Jedan red po smeštaju. Traka otvara rezervaciju.",
+      "anterior": "Prethodna nedelja",
+      "seguinte": "Sledeća nedelja",
+      "hoje": "Danas",
+      "atrasada": "prekoračio predviđeni odlazak",
+      "semAvaliacao": "dokumentacija nije procenjena",
+      "documentacao": "nedostaje dokumentacija",
+      "truncado": "Mreža prikazuje samo deo rezervacija u periodu; skratite prozor.",
+      "semAcomodacao": "Kuća još nema smeštaje.",
+      "erro": "Nije moguće učitati mrežu."
+    },
+    "espera": {
+      "titulo": "Lista čekanja",
+      "descricao": "Ko je tražio mesto, a nije ga bilo. Ponuda obaveštava, ali ne drži mesto.",
+      "nova": "Stavi na čekanje",
+      "criar": "Stavi na čekanje",
+      "periodo": "Željeni period",
+      "tipos": "Tipovi koji odgovaraju",
+      "tiposDica": "Ako nijedan nije označen, prihvata bilo koji tip.",
+      "qualquerTipo": "bilo koji tip",
+      "expiraEm": "ponuda važi do {quando}",
+      "reservar": "Rezerviši",
+      "ofertar": "Ponudi mesto",
+      "desistir": "Ukloni {nome} sa čekanja",
+      "vazio": "Niko nije na listi čekanja.",
+      "truncado": "Lista prikazuje samo deo čekanja.",
+      "erro": "Nije moguće učitati listu čekanja.",
+      "status": {
+        "AGUARDANDO": "Čeka",
+        "OFERTADA": "Mesto ponuđeno",
+        "CONVERTIDA": "Rezervisao",
+        "DESISTIU": "Odustao",
+        "EXPIRADA": "Ponuda istekla"
+      }
+    },
+    "nova": {
+      "titulo": "Nova rezervacija",
+      "quem": "Ko",
+      "hospede": "Gost",
+      "acompanhante": "Pratilac",
+      "acompanhanteDica": "Druga životinja istog vlasnika, u istom smeštaju.",
+      "quando": "Period",
+      "entradaHora": "Vreme dolaska",
+      "saidaHora": "Vreme odlaska",
+      "horasDica": "Ako je prazno, važe vremena iz pravila kuće.",
+      "onde": "Smeštaj",
+      "antesDaVaga": "Prvo izaberite gosta i period",
+      "escolhaVaga": "Izaberite smeštaj",
+      "livres": "{n} smeštaj odgovara | {n} smeštaja odgovaraju | {n} smeštaja odgovara",
+      "servicos": "Usluge",
+      "servico": "Usluga",
+      "quantidade": "Količina",
+      "tirarServico": "Ukloni uslugu",
+      "acrescentarServico": "Dodaj uslugu",
+      "semServicos": "Kuća nema usluga u prodaji.",
+      "origem": "Kako je stiglo",
+      "observacao": "Napomena",
+      "total": "ukupno {total}, kapara {sinal}",
+      "jaHospedado": "Ova životinja je već smeštena ili rezervisana u tom periodu.",
+      "indisponivel": "Smeštaj ne odgovara u tom periodu: {motivos}.",
+      "criar": "Napravi rezervaciju",
+      "erroMapa": "Nije moguće videti mesta za period.",
+      "erroSimular": "Nije moguće izračunati ponudu."
+    },
+    "detalhe": {
+      "erro": "Nije moguće učitati rezervaciju.",
+      "estadia": "Boravak",
+      "animais": "Životinje",
+      "acompanhante": "pratilac",
+      "porDiaria": "po noćenju",
+      "semServicos": "Nema usluga.",
+      "politica": "Dogovoreno pri prodaji",
+      "saidaAte": "odlazak do {hora}, pola dana do {limite}",
+      "meia": "pola dana {p}%",
+      "sinal": "kapara {p}%",
+      "cancelada": "Otkazano",
+      "responsavel": "Vlasnik",
+      "pendente": "Na čekanju {n} sat, čeka kaparu. Ne ističe sama. | Na čekanju {n} sata, čeka kaparu. Ne ističe sama. | Na čekanju {n} sati, čeka kaparu. Ne ističe sama.",
+      "naoCompareceu": "Nije se pojavio",
+      "naoCompareceuDica": "Tek posle kraja dana dolaska. Odmah oslobađa smeštaj.",
+      "naoCompareceuFeito": "Označeno kao nepojavljivanje; smeštaj je slobodan."
+    },
+    "orcamento": {
+      "titulo": "Ponuda",
+      "resumo": "Ukupno {total} · kapara {sinal} · plaćeno {pago} · saldo {saldo}",
+      "abaixoDoSinal": "Plaćeno ispod kapare",
+      "diaria": "Noćenje",
+      "acompanhante": "Pratilac ({p}% noćenja)",
+      "temporada": "{nome} (+{p}%)",
+      "saidaTardia": "Kasni odlazak ({p}% noćenja)",
+      "pagamentos": "Uplate",
+      "entrou": "Uplaćeno {valor}",
+      "baixou": "Umanjeno {valor}",
+      "totalDepois": "ukupno plaćeno {valor}"
+    },
+    "pagamento": {
+      "titulo": "Evidentiraj uplatu",
+      "contexto": "Ukupno {total}, kapara {sinal}. Plaćeno do sada: {pago}.",
+      "totalPago": "Ukupno plaćeno do sada",
+      "totalDica": "Ukupan iznos, ne samo ova uplata. Rezervacija se potvrđuje kada pokrije kaparu.",
+      "motivo": "Zašto je ukupan iznos smanjen",
+      "motivoDica": "Najmanje {min} znakova.",
+      "registrar": "Evidentiraj",
+      "feito": "Uplata je evidentirana."
+    },
+    "cancelar": {
+      "acao": "Otkaži rezervaciju",
+      "titulo": "Otkazivanje rezervacije",
+      "prazo": "besplatno otkazivanje do {n} dan pre dolaska | besplatno otkazivanje do {n} dana pre dolaska | besplatno otkazivanje do {n} dana pre dolaska",
+      "motivo": "Razlog",
+      "voltar": "Nazad",
+      "confirmar": "Otkaži rezervaciju",
+      "reembolsavel": "Rezervacija otkazana {n} dan pre dolaska: kapara se vraća. Uredite to na pultu. | Rezervacija otkazana {n} dana pre dolaska: kapara se vraća. Uredite to na pultu. | Rezervacija otkazana {n} dana pre dolaska: kapara se vraća. Uredite to na pultu.",
+      "naoReembolsavel": "Rezervacija otkazana {n} dan pre dolaska: posle roka, kapara se ne vraća. | Rezervacija otkazana {n} dana pre dolaska: posle roka, kapara se ne vraća. | Rezervacija otkazana {n} dana pre dolaska: posle roka, kapara se ne vraća.",
+      "feito": "Rezervacija je otkazana."
+    },
+    "editar": {
+      "acao": "Izmeni",
+      "titulo": "Izmena rezervacije",
+      "soSaida": "Dok je gost u kući, menjaju se samo odlazak, usluge i napomena.",
+      "diferenca": "ukupno sa {antes} na {depois}",
+      "reprecificada": "Rezervacija sačuvana: ukupan iznos je sa {antes} prešao na {depois}.",
+      "salva": "Rezervacija je sačuvana."
+    },
+    "admissao": {
+      "titulo": "Dokumentacija",
+      "descricao": "Šta svaka životinja pokazuje da bi ušla.",
+      "semExigencias": "Kuća ne traži dokumente za ove životinje.",
+      "liberada": "Može da uđe",
+      "travada": "Nedostaju dokumenti",
+      "soAvisa": "samo upozorava",
+      "apresentado": "pokazano {data}",
+      "valeAte": "važi do {data}",
+      "naoVence": "ne ističe",
+      "por": "upisao {nome}",
+      "venceAntes": "ističe {n} dan pre odlaska | ističe {n} dana pre odlaska | ističe {n} dana pre odlaska",
+      "naoConta": "Ne važi: {detalhe}",
+      "dispensada": "Oslobođeno: {nome}, {data}: {motivo}",
+      "registrar": "Upiši dokaz",
+      "anular": "Poništi dokaz",
+      "anularTitulo": "Poništavanje dokaza",
+      "anularDica": "Pogrešan dokaz prestaje da važi. Beleži se ko ga je poništio i zašto.",
+      "motivo": "Razlog",
+      "dispensar": "Oslobodi",
+      "dispensarTitulo": "Oslobodi {animal} uslova: {exigencia}",
+      "dispensarDica": "Oslobađanje važi samo za ovu životinju u ovoj rezervaciji i beleži se sa vašim imenom.",
+      "revogar": "Opozovi oslobađanje",
+      "verDocumento": "Pogledaj dokument",
+      "origem": {
+        "BALCAO_COM_DOCUMENTO": "na pultu, sa dokumentom",
+        "BALCAO_SEM_DOCUMENTO": "viđeno na pultu, bez dokumenta",
+        "APP_COMPROVADA": "knjižica iz aplikacije, od klinike",
+        "APP_DECLARADA": "vlasnik upisao u aplikaciji"
+      },
+      "dica": {
+        "BALCAO_SEM_DOCUMENTO": "Viđeno na pultu, bez dokumenta: priložite fotografiju ili PDF, ili tražite oslobađanje od uprave.",
+        "DECLARADA_NAO_ACEITA": "Vlasnik je upisao u aplikaciji, ali kuća ne prihvata njegov upis: tražite dokaz ili oslobađanje."
+      }
+    },
+    "comprovante": {
+      "titulo": "{exigencia}: {animal}",
+      "data": "Datum primene ili izdavanja",
+      "dataDica": "Onaj sa dokumenta, ne današnji. Važenje se računa od njega.",
+      "arquivo": "Fotografija ili PDF",
+      "escolher": "Izaberi fajl",
+      "arquivoDica": "JPG, PNG, WEBP ili PDF, do 8 MB.",
+      "exige": "Ovaj uslov sprečava ulazak: bez fajla dokaz ne važi. JPG, PNG, WEBP ili PDF, do 8 MB.",
+      "referencia": "Oznaka (serija, broj)",
+      "registrar": "Upiši"
+    },
+    "autorizados": {
+      "titulo": "Ko može da preuzme",
+      "dica": "Do {max} osoba. Izmena liste ne menja cenu.",
+      "pessoa": "Osoba {n}",
+      "tirar": "Ukloni {nome}",
+      "nome": "Ime",
+      "telefone": "Telefon",
+      "relacao": "Odnos",
+      "documento": "Dokument",
+      "documentoDica": "Rezervacija čuva samo poslednja 4 znaka.",
+      "acrescentar": "Dodaj osobu",
+      "editar": "Izmeni",
+      "vazio": "Samo vlasnik može da preuzme.",
+      "final": "dokument se završava na {final}",
+      "salvos": "Lista onih koji mogu da preuzmu je sačuvana."
+    },
+    "mapa": {
+      "titulo": "Mapa",
+      "procurar": "Period i mesto",
+      "livres": "slobodno {n} od {total}",
+      "para": "za {porte}, {especie}",
+      "naoServe": "ne odgovara: {motivos}",
+      "soHigienizacao": "preklapa se samo čišćenje",
+      "truncado": "Mapa prikazuje samo deo smeštaja.",
+      "vazio": "Kuća još nema smeštaje.",
+      "erro": "Nije moguće učitati mapu.",
+      "porte": "Veličina",
+      "especie": "Vrsta",
+      "filtroDica": "Veličina i vrsta zajedno traže mesto bez upisane životinje. Ako je prazno, prikazuje stanje svakog smeštaja.",
+      "ver": "Prikaži mapu"
+    },
+    "status": {
+      "CANCELADA": "Otkazana",
+      "CONFIRMADA": "Potvrđena",
+      "ENCERRADA": "Zatvorena",
+      "HOSPEDADO": "U kući",
+      "NAO_COMPARECEU": "Nije došao",
+      "PENDENTE": "Na čekanju"
+    },
+    "origem": {
+      "APP": "Aplikacija",
+      "BALCAO": "Recepcija",
+      "INDICACAO": "Preporuka",
+      "RETORNO": "Povratak",
+      "TELEFONE": "Telefon",
+      "WHATSAPP": "WhatsApp",
+      "LINK": "Link hotela"
+    },
+    "situacao": {
+      "AUSENTE": "Nije predato",
+      "DISPENSADO": "Oslobođeno",
+      "OK": "Važi",
+      "VENCE_DURANTE": "Ističe tokom boravka",
+      "VENCIDO": "Isteklo"
     }
   }
 }
