@@ -12965,6 +12965,99 @@
       "erro": "Analiza nije učitana.",
       "lotes": "{n} serija | {n} serije | {n} serija",
       "doses": "{n} doza | {n} doze | {n} doza"
+    },
+    "metas": {
+      "todasAsVacinas": "Sve vakcine",
+      "doses": "{n} doza | {n} doze | {n} doza",
+      "situacao": {
+        "piso": {
+          "cumprida": "Ostvaren",
+          "no-ritmo": "U ritmu",
+          "atencao": "Ispod ritma",
+          "falhou": "Nije ostvaren"
+        },
+        "teto": {
+          "cumprida": "U granici",
+          "no-ritmo": "U granici",
+          "atencao": "Blizu granice",
+          "falhou": "Prekoračen"
+        }
+      },
+      "de": "od {alvo}",
+      "ritmo": "po današnjem ritmu, završava na: {n}",
+      "limite": "· ograničenje {alvo}",
+      "planejar": "Planiraj {mes}",
+      "doMes": "Ciljevi za {mes}",
+      "emCurso": "U toku · poslednji dan | U toku · ostao je {n} dan | U toku · ostala su {n} dana | U toku · ostalo je {n} dana",
+      "placar": "ostvareno ili u ritmu: {bem} od {total}",
+      "editar": "Izmeni ciljeve",
+      "semPlanoAtual": "Ovaj mesec još nema dogovorene ciljeve.",
+      "combinar": "Dogovori ciljeve za {mes}",
+      "semPlanoProximo": "Još nema ciljeva. Predlog dolazi iz brojeva za {base} do danas.",
+      "historico": "Prethodni meseci",
+      "placarFechado": "ostvareno: {bem} od {total}",
+      "tipo": {
+        "APLICACOES": "Primene",
+        "PERDAS": "Gubici",
+        "COMPRAS": "Nabavka"
+      },
+      "mede": {
+        "APLICACOES": "primenjene doze u mesecu",
+        "PERDAS": "gornja granica izgubljenih doza u mesecu",
+        "COMPRAS": "budžet nabavke za mesec"
+      },
+      "combinadoEm": "Dogovoreno {data}.",
+      "semPlanoProximoLeitura": "Još nema dogovorenih ciljeva.",
+      "historicoTruncado": "Najstariji meseci su izostavljeni.",
+      "erro": "Nije moguće učitati ciljeve.",
+      "salvas": "Ciljevi za {mes} su dogovoreni.",
+      "limpas": "Ciljevi za {mes} su obrisani."
+    },
+    "pedido": {
+      "titulo": "Porudžbina za {mes}",
+      "peloPlano": "Po dogovorenim ciljevima: mesec se završava na minimumu svake vakcine posle primene cilja.",
+      "pelaSugestao": "Po predlogu, dok mesec nema dogovorene ciljeve.",
+      "copiar": "Kopiraj porudžbinu",
+      "copiado": "Kopirano",
+      "vazio": "Ništa za nabavku za {mes}: frižider pokriva ciljeve i minimum.",
+      "total": "{doses} · procena: {valor}",
+      "semFornecedor": "Bez dobavljača",
+      "conta": "cilj + minimum − ostatak: {conta}",
+      "custoLinha": "{valor} ({unitario} po dozi)",
+      "semCusto": "Budžet bez ovih vakcina, koje nikad nisu imale seriju: {lista}.",
+      "truncado": "Lista prikazuje samo deo stavki; kopirani tekst sadrži celu porudžbinu.",
+      "erro": "Nije moguće sastaviti porudžbinu."
+    },
+    "plano": {
+      "titulo": "Planiraj {mes}",
+      "tituloEditar": "Ciljevi za {mes}",
+      "lede": "Predloženo na osnovu brojeva za {base} do danas. Menjajte šta želite: porudžbina za {mes} se preračunava sa svakim brojem.",
+      "aplicacoes": "Primene",
+      "noRitmo": "{mes}, u ritmu",
+      "media": "Prosek 3 meseca",
+      "reforcos": "Revakcinacije u: {mes}",
+      "meta": "Cilj (doze)",
+      "metaDe": "Cilj za {vacina}",
+      "removerMeta": "Ukloni cilj {meta}",
+      "daClinica": "Gubici i nabavka",
+      "perdasDica": "{base}: izgubljeno do danas: {n}; mesečni prosek: {media}.",
+      "comprasDica": "Porudžbina za ove ciljeve košta {valor}.",
+      "noMaximo": "najviše",
+      "acrescentar": "Dodaj cilj",
+      "novaAplicacao": "Primene: {vacina}",
+      "novaTotal": "Primene svih vakcina",
+      "novaPerdas": "Granica gubitaka",
+      "novaCompras": "Budžet nabavke",
+      "pedido": "Sa ovim ciljevima, porudžbina za {mes}: {doses} · {valor}.",
+      "semPedido": "Sa ovim ciljevima, frižider pokriva {mes} bez nabavke.",
+      "salvar": "Dogovori ciljeve za {mes}",
+      "tetoDePerdas": "Granica gubitaka (doze)",
+      "poucosMeses": "Malo istorije ({n} od 3 meseca sa primenama): prosek manje govori.",
+      "truncado": "Predlog je doneo 118 vakcina sa najvećim brojem; dodajte druge ako treba.",
+      "alterado": "Neko drugi je sačuvao ove ciljeve dok ste uređivali. Otvorili smo ono što je sada sačuvano: ponovite izmene.",
+      "vazio": "Bez ciljeva: čuvanje briše ciljeve za {mes}.",
+      "erro": "Nije moguće sačuvati ciljeve.",
+      "erroSugestao": "Predlog se nije učitao; ciljeve možete ipak dogovoriti."
     }
   }
 }

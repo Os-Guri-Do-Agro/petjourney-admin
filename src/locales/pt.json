@@ -12965,6 +12965,99 @@
       "erro": "Não deu para carregar a análise.",
       "lotes": "{n} lote | {n} lotes",
       "doses": "{n} dose | {n} doses"
+    },
+    "metas": {
+      "todasAsVacinas": "Todas as vacinas",
+      "doses": "{n} dose | {n} doses",
+      "situacao": {
+        "piso": {
+          "cumprida": "Batida",
+          "no-ritmo": "No ritmo",
+          "atencao": "Abaixo do ritmo",
+          "falhou": "Não batida"
+        },
+        "teto": {
+          "cumprida": "Dentro do limite",
+          "no-ritmo": "Dentro do limite",
+          "atencao": "Perto do limite",
+          "falhou": "Estourou"
+        }
+      },
+      "de": "de {alvo}",
+      "ritmo": "no ritmo de hoje, fecha em {n}",
+      "limite": "· limite {alvo}",
+      "planejar": "Planejar {mes}",
+      "doMes": "Metas de {mes}",
+      "emCurso": "Em curso · último dia | Em curso · falta {n} dia | Em curso · faltam {n} dias",
+      "placar": "{bem} de {total} metas batidas ou no ritmo",
+      "editar": "Editar metas",
+      "semPlanoAtual": "Este mês ainda não tem metas combinadas.",
+      "combinar": "Combinar metas de {mes}",
+      "semPlanoProximo": "Ainda sem metas. A sugestão sai dos números de {base} até hoje.",
+      "historico": "Meses anteriores",
+      "placarFechado": "{bem} de {total} metas cumpridas",
+      "tipo": {
+        "APLICACOES": "Aplicações",
+        "PERDAS": "Perdas",
+        "COMPRAS": "Compras"
+      },
+      "mede": {
+        "APLICACOES": "doses aplicadas no mês",
+        "PERDAS": "teto de doses perdidas no mês",
+        "COMPRAS": "orçamento de compra do mês"
+      },
+      "combinadoEm": "Combinado em {data}.",
+      "semPlanoProximoLeitura": "Ainda sem metas combinadas.",
+      "historicoTruncado": "Os meses mais antigos ficaram de fora.",
+      "erro": "Não foi possível carregar as metas.",
+      "salvas": "Metas de {mes} combinadas.",
+      "limpas": "As metas de {mes} foram apagadas."
+    },
+    "pedido": {
+      "titulo": "Pedido de compra para {mes}",
+      "peloPlano": "Pelas metas combinadas: o mês fecha no mínimo de cada vacina depois de aplicar a meta.",
+      "pelaSugestao": "Pela sugestão, enquanto o mês não tem metas combinadas.",
+      "copiar": "Copiar pedido",
+      "copiado": "Copiado",
+      "vazio": "Nada a comprar para {mes}: a geladeira cobre as metas e o mínimo.",
+      "total": "{doses} · {valor} estimados",
+      "semFornecedor": "Sem fornecedor",
+      "conta": "meta + mínimo − sobra: {conta}",
+      "custoLinha": "{valor} ({unitario} a dose)",
+      "semCusto": "Orçamento sem estas vacinas, que nunca tiveram lote: {lista}.",
+      "truncado": "A lista mostra só parte das linhas; o texto copiado leva o pedido inteiro.",
+      "erro": "Não foi possível montar o pedido."
+    },
+    "plano": {
+      "titulo": "Planejar {mes}",
+      "tituloEditar": "Metas de {mes}",
+      "lede": "Sugeridas com os números de {base} até hoje. Ajuste o que quiser: o pedido de compra de {mes} se refaz a cada número.",
+      "aplicacoes": "Aplicações",
+      "noRitmo": "{mes}, no ritmo",
+      "media": "Média de 3 meses",
+      "reforcos": "Reforços em {mes}",
+      "meta": "Meta (doses)",
+      "metaDe": "Meta de {vacina}",
+      "removerMeta": "Remover a meta {meta}",
+      "daClinica": "Perdas e compras",
+      "perdasDica": "Em {base}: {n} perdidas até hoje; média de {media} por mês.",
+      "comprasDica": "O pedido destas metas custa {valor}.",
+      "noMaximo": "no máximo",
+      "acrescentar": "Acrescentar meta",
+      "novaAplicacao": "Aplicações de {vacina}",
+      "novaTotal": "Aplicações de todas as vacinas",
+      "novaPerdas": "Teto de perdas",
+      "novaCompras": "Orçamento de compra",
+      "pedido": "Com estas metas, o pedido de {mes} sai em {doses} · {valor}.",
+      "semPedido": "Com estas metas, a geladeira cobre {mes} sem compra.",
+      "salvar": "Combinar metas de {mes}",
+      "tetoDePerdas": "Teto de perdas (doses)",
+      "poucosMeses": "Poucos meses de histórico ({n} de 3 com aplicação): a média diz menos.",
+      "truncado": "A sugestão trouxe as 118 vacinas de maior número; acrescente outras se precisar.",
+      "alterado": "Outra pessoa salvou estas metas enquanto você editava. Abrimos o que está salvo agora: refaça o que tinha mudado.",
+      "vazio": "Sem metas: salvar apaga as metas de {mes}.",
+      "erro": "Não foi possível salvar as metas.",
+      "erroSugestao": "A sugestão não carregou; dá para combinar as metas mesmo assim."
     }
   }
 }

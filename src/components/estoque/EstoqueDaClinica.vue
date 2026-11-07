@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
- * O estoque de vacinas pela API (E6, PJ-RFFOKT): a geladeira (o trabalho de todo dia), os
- * movimentos (a conferência) e a análise (os gráficos, que não pedem ação), num controle logo
- * abaixo do título. A aba vive na URL (`?aba=movimentos|analise`; a geladeira é o endereço limpo).
+ * O estoque de vacinas pela API (E6, PJ-RFFOKT e PJ-ZXGZ7P): a geladeira (o trabalho de todo dia),
+ * as metas (o começo e o fim do mês), os movimentos (a conferência) e a análise (os gráficos, que
+ * não pedem ação), num controle logo abaixo do título. A aba vive na URL
+ * (`?aba=metas|movimentos|analise`; a geladeira é o endereço limpo).
  */
 import SelectButton from 'primevue/selectbutton'
 import { computed, ref } from 'vue'
@@ -13,9 +14,10 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 
 import AnaliseDoEstoque from './AnaliseDoEstoque.vue'
 import GeladeiraDoEstoque from './GeladeiraDoEstoque.vue'
+import MetasDoEstoque from './MetasDoEstoque.vue'
 import MovimentosDoEstoque from './MovimentosDoEstoque.vue'
 
-const ABAS = ['geladeira', 'movimentos', 'analise'] as const
+const ABAS = ['geladeira', 'metas', 'movimentos', 'analise'] as const
 type AbaDoEstoque = (typeof ABAS)[number]
 
 const { t } = useI18n()
@@ -60,6 +62,7 @@ const resumo = ref('')
         class="ec__abas"
       />
       <GeladeiraDoEstoque v-if="aba === 'geladeira'" @resumo="(texto) => (resumo = texto)" />
+      <MetasDoEstoque v-else-if="aba === 'metas'" />
       <MovimentosDoEstoque v-else-if="aba === 'movimentos'" />
       <AnaliseDoEstoque v-else />
     </div>

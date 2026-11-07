@@ -8,6 +8,10 @@
  * - Ler (geladeira, fornecedores, movimentos, análise): `estoque.ler`, inclui a recepção.
  * - Receber, corrigir e dar baixa: `estoque.movimentar`.
  * - Mínimo e estorno: `estoque.planejar` (DONO, GESTOR).
+ *
+ * Metas do mês (E6-02, PJ-ZXGZ7P, seções 15 e 16): ler é `estoque.ler`; salvar, a sugestão e a
+ * simulação do pedido são `estoque.planejar` (levam custo). A situação, o ritmo, o placar, a
+ * sugestão e a conta do pedido são do servidor.
  */
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
@@ -19,9 +23,18 @@ import type {
   FornecedoresDto,
   GeladeiraDto,
   LoteDto,
+  MetaDto,
+  MetaEntradaDto,
+  MetasDto,
+  MesFechadoDto,
   MovimentoDto,
   PaginaDeMovimentosDto,
+  PedidoDto,
+  PlanoDto,
+  ProgressoDto,
   ReceberLoteDto,
+  SalvarPlanoDto,
+  SugestaoDto,
 } from '../contrato/openapi'
 import { comIdempotencia } from '../idempotencia'
 
@@ -37,6 +50,19 @@ export type Movimento = MovimentoDto
 export type PaginaDeMovimentos = PaginaDeMovimentosDto
 export type Analise = AnaliseDto
 export type FaixaDeValidade = AnaliseDto['validade']['faixas'][number]['faixa']
+export type Metas = MetasDto
+export type PlanoDeMetas = PlanoDto
+export type Meta = MetaDto
+export type TipoDeMeta = MetaDto['tipo']
+export type MetaNova = MetaEntradaDto
+export type ProgressoDaMeta = ProgressoDto
+export type SituacaoDaMeta = ProgressoDto['situacao']
+export type SentidoDaMeta = ProgressoDto['sentido']
+export type MesFechado = MesFechadoDto
+export type SugestaoDeMetas = SugestaoDto
+export type ReferenciaDaSugestao = SugestaoDto['referencias'][number]
+export type PedidoDeCompra = PedidoDto
+export type LinhaDoPedido = PedidoDto['linhas'][number]
 
 export const MOTIVOS_DA_BAIXA: readonly MotivoDaBaixa[] = [
   'QUEBRA',
@@ -55,6 +81,13 @@ export const MOTIVO_DO_ESTORNO_MAX = 300
 export const OBSERVACAO_DA_BAIXA_MAX = 300
 /** O lote recebido pode ser registrado até 60 dias depois. */
 export const RECEBIDO_DIAS_PARA_TRAS = 60
+/** Faixas do alvo da meta (guia e6 15.2). */
+export const ALVO_MAX_POR_VACINA = 9999
+export const ALVO_MAX_DA_CLINICA = 99_999
+export const COMPRAS_MAX_CENTAVOS = 1_000_000_000
+export const METAS_MAX = 120
+/** A simulação do pedido acompanha o que se digita, com folga (300 por hora por pessoa). */
+export const SIMULAR_DEBOUNCE_MS = 400
 
 type ParceiroQuery = { parceiroId?: string | null }
 
@@ -177,6 +210,49 @@ export function lerAnalise(meses: number, params?: ParceiroQuery) {
   return dados(
     apiFetch<ApiEnvelope<Analise>>(
       comQuery(`${BASE}/analise`, { meses, parceiroId: params?.parceiroId }),
+    ),
+  )
+}
+
+/* ---------------------------------------------------------------------------- metas */
+
+export function lerMetas(params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<Metas>>(comQuery(`${BASE}/metas`, { parceiroId: params?.parceiroId })),
+  )
+}
+
+/**
+ * Substitui o plano inteiro do mês (`AAAA-MM`, o em curso ou o seguinte): meta omitida é meta
+ * apagada e `metas: []` esvazia. `versao` é a que a tela abriu (0 sem plano); outra pessoa no meio
+ * dá 409 `PLANO_ALTERADO`.
+ */
+export function salvarPlano(mes: string, corpo: SalvarPlanoDto, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<PlanoDeMetas>>(
+      comQuery(`${BASE}/metas/${encodeURIComponent(mes)}`, { parceiroId: params?.parceiroId }),
+      json('PUT', corpo),
+    ),
+  )
+}
+
+/** Sem `mes`, o seguinte. O `pedido` vem sem `texto`: para copiar, simule. */
+export function lerSugestao(mes?: string | null, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<SugestaoDeMetas>>(
+      comQuery(`${BASE}/metas/sugestao`, { mes, parceiroId: params?.parceiroId }),
+    ),
+  )
+}
+
+/** Não grava nada. Só as metas de aplicação por vacina entram na conta. */
+export function simularPedido(mes: string, metas: MetaNova[], params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<PedidoDeCompra>>(
+      comQuery(`${BASE}/metas/${encodeURIComponent(mes)}/simular-pedido`, {
+        parceiroId: params?.parceiroId,
+      }),
+      json('POST', { metas }),
     ),
   )
 }

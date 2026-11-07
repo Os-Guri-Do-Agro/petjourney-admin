@@ -12965,6 +12965,99 @@
       "erro": "Could not load the analysis.",
       "lotes": "{n} lot | {n} lots",
       "doses": "{n} dose | {n} doses"
+    },
+    "metas": {
+      "todasAsVacinas": "All vaccines",
+      "doses": "{n} dose | {n} doses",
+      "situacao": {
+        "piso": {
+          "cumprida": "Met",
+          "no-ritmo": "On pace",
+          "atencao": "Behind pace",
+          "falhou": "Missed"
+        },
+        "teto": {
+          "cumprida": "Within limit",
+          "no-ritmo": "Within limit",
+          "atencao": "Near limit",
+          "falhou": "Over limit"
+        }
+      },
+      "de": "of {alvo}",
+      "ritmo": "at today's pace, ends at {n}",
+      "limite": "· limit {alvo}",
+      "planejar": "Plan {mes}",
+      "doMes": "{mes} targets",
+      "emCurso": "In progress · last day | In progress · {n} day left | In progress · {n} days left",
+      "placar": "{bem} of {total} targets met or on pace",
+      "editar": "Edit targets",
+      "semPlanoAtual": "This month has no agreed targets yet.",
+      "combinar": "Set {mes} targets",
+      "semPlanoProximo": "No targets yet. The suggestion comes from {base} numbers so far.",
+      "historico": "Previous months",
+      "placarFechado": "{bem} of {total} targets met",
+      "tipo": {
+        "APLICACOES": "Doses given",
+        "PERDAS": "Losses",
+        "COMPRAS": "Purchases"
+      },
+      "mede": {
+        "APLICACOES": "doses given in the month",
+        "PERDAS": "cap on doses lost in the month",
+        "COMPRAS": "month's purchasing budget"
+      },
+      "combinadoEm": "Agreed on {data}.",
+      "semPlanoProximoLeitura": "No targets agreed yet.",
+      "historicoTruncado": "The oldest months were left out.",
+      "erro": "Couldn't load the targets.",
+      "salvas": "{mes} targets agreed.",
+      "limpas": "The {mes} targets were cleared."
+    },
+    "pedido": {
+      "titulo": "Purchase order for {mes}",
+      "peloPlano": "From the agreed targets: the month ends at each vaccine minimum after giving the target doses.",
+      "pelaSugestao": "From the suggestion, while the month has no agreed targets.",
+      "copiar": "Copy order",
+      "copiado": "Copied",
+      "vazio": "Nothing to buy for {mes}: the fridge covers the targets and the minimum.",
+      "total": "{doses} · {valor} estimated",
+      "semFornecedor": "No supplier",
+      "conta": "target + minimum − left over: {conta}",
+      "custoLinha": "{valor} ({unitario} per dose)",
+      "semCusto": "Budget without these vaccines, which never had a lot: {lista}.",
+      "truncado": "The list shows only some lines; the copied text has the whole order.",
+      "erro": "Couldn't build the order."
+    },
+    "plano": {
+      "titulo": "Plan {mes}",
+      "tituloEditar": "{mes} targets",
+      "lede": "Suggested from {base} numbers so far. Adjust anything: the {mes} purchase order is recalculated with every number.",
+      "aplicacoes": "Doses given",
+      "noRitmo": "{mes}, on pace",
+      "media": "3-month average",
+      "reforcos": "Boosters due in {mes}",
+      "meta": "Target (doses)",
+      "metaDe": "Target for {vacina}",
+      "removerMeta": "Remove the {meta} target",
+      "daClinica": "Losses and purchases",
+      "perdasDica": "In {base}: {n} lost so far; average of {media} per month.",
+      "comprasDica": "The order for these targets costs {valor}.",
+      "noMaximo": "at most",
+      "acrescentar": "Add target",
+      "novaAplicacao": "Doses of {vacina}",
+      "novaTotal": "Doses of all vaccines",
+      "novaPerdas": "Loss cap",
+      "novaCompras": "Purchasing budget",
+      "pedido": "With these targets, the {mes} order comes to {doses} · {valor}.",
+      "semPedido": "With these targets, the fridge covers {mes} without buying.",
+      "salvar": "Set {mes} targets",
+      "tetoDePerdas": "Loss cap (doses)",
+      "poucosMeses": "Little history ({n} of 3 months with doses given): the average says less.",
+      "truncado": "The suggestion brought the 118 vaccines with the highest numbers; add others if needed.",
+      "alterado": "Someone else saved these targets while you were editing. We opened what is saved now: redo your changes.",
+      "vazio": "No targets: saving clears the {mes} targets.",
+      "erro": "Couldn't save the targets.",
+      "erroSugestao": "The suggestion didn't load; you can still set the targets."
     }
   }
 }
