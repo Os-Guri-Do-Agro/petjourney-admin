@@ -2,13 +2,16 @@
 /**
  * Aplicar uma vacina (E4-04, guia e4 3.2 e 3.4). A dose não vem da tela: a API calcula e congela.
  *
- * - O lote: os já usados nesta clínica (o que vence antes vem sugerido; o vencido aparece travado,
+ * - O lote: os do estoque (E6-01: com o saldo, vão por `loteId` e baixam a dose na mesma gravação;
+ *   o último frasco disputado volta com `LOTE_SEM_SALDO` e a lista se relê) ou, sem estoque, os já
+ *   usados nesta clínica (o que vence antes vem sugerido; o vencido aparece travado,
  *   para ninguém digitá-lo à mão), ou digitado. O lote vencido trava no servidor.
  * - A idade mínima: antes dela, a API pergunta; o veterinário confirma e a tela reenvia.
  * - A próxima dose na agenda, no mesmo gesto, só para quem tem `agenda.escrever` (até 60 dias).
  * - O CRMV de outro aplicador só vai ao app se quem grava é ele, o DONO ou o GESTOR.
  */
 import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
 import DatePicker from 'primevue/datepicker'
 import InputMask from 'primevue/inputmask'
 import InputText from 'primevue/inputtext'
@@ -62,6 +65,12 @@ const proximoDia = ref<Date | null>(null)
 const proximaHora = ref('09:00')
 
 const lotes = ref<LoteParaAplicar[]>([])
+/** A clínica guarda lotes desta vacina no estoque (E6-01): o lote vai por `loteId` e baixa a dose. */
+const doEstoque = ref(false)
+const loteId = ref<string | null>(null)
+/** O código digitado tem letra fora do A a Z numa clínica que guarda a vacina: conferir o frasco. */
+const codigoEstranho = ref(false)
+const confirmoCodigo = ref(false)
 const salvando = ref(false)
 const tentou = ref(false)
 const erro = ref('')
@@ -91,29 +100,48 @@ watch(aberta, (agora) => {
   tentou.value = false
   erro.value = ''
   idadeMinima.value = null
+  loteId.value = null
+  codigoEstranho.value = false
+  confirmoCodigo.value = false
 })
 
-/* Outra vacina: as vias dela (a de rotina primeiro) e os lotes já usados. */
+/* Outra vacina: as vias dela (a de rotina primeiro) e os lotes (do estoque, ou os já usados). */
 watch(vacinaId, async (id) => {
   via.value = vacina.value?.vias[0] ?? null
+  void lerLotes(id)
+})
+
+async function lerLotes(id: string | null) {
   lotes.value = []
+  doEstoque.value = false
+  loteId.value = null
   if (!id) return
   try {
     const lidos = await lotesParaAplicar(id, parceiroQuery())
     lotes.value = lidos.lotes
+    doEstoque.value = lidos.estoque
     const sugerido = lidos.lotes.find((lote) => lote.sugerido && lote.avaliacao.pode)
     if (sugerido && !loteCodigo.value) usarLote(sugerido)
   } catch {
     lotes.value = []
   }
-})
+}
 
 function usarLote(lote: LoteParaAplicar) {
   if (!lote.avaliacao.pode) return
+  loteId.value = lote.loteId
   loteCodigo.value = lote.codigo
   const [a, m, d] = lote.validade.split('-').map(Number)
   validade.value = new Date(a!, m! - 1, d!)
 }
+
+/* Digitou outro código: deixa de ser o lote escolhido do estoque. */
+watch(loteCodigo, (agora) => {
+  const escolhido = lotes.value.find((lote) => lote.loteId === loteId.value)
+  if (escolhido && escolhido.codigo !== agora.trim()) loteId.value = null
+  codigoEstranho.value = false
+  confirmoCodigo.value = false
+})
 
 const opcoesDeVacina = computed(() =>
   props.vacinas.map((v) => ({
@@ -169,8 +197,10 @@ const valido = computed(
 function corpo(confirmarIdade: boolean): NovaAplicacao {
   return {
     vacinaId: vacinaId.value!,
-    loteCodigo: loteCodigo.value.trim(),
-    validadeLote: iso(validade.value!),
+    ...(loteId.value
+      ? { loteId: loteId.value }
+      : { loteCodigo: loteCodigo.value.trim(), validadeLote: iso(validade.value!) }),
+    ...(codigoEstranho.value && confirmoCodigo.value ? { confirmarCodigoDoLote: true } : {}),
     via: via.value as NovaAplicacao['via'],
     profissionalId: profissionalId.value!,
     ...(outroDia.value && dia.value ? { aplicadaEm: momento(dia.value, '12:00') } : {}),
@@ -193,6 +223,8 @@ function frase(err: unknown) {
   switch (lido.codigo) {
     case 'LOTE_VENCIDO':
       return t('vacinas.erro.loteVencido')
+    case 'LOTE_SEM_SALDO':
+      return t('vacinas.erro.semSaldo')
     case 'VIA_INVALIDA':
       return t('vacinas.erro.via')
     case 'APLICACAO_REPETIDA':
@@ -229,7 +261,13 @@ async function aplicar(confirmarIdade = false) {
     aberta.value = false
     emit('aplicada', resultado)
   } catch (err) {
-    if (err instanceof ApiError && err.codigo === 'IDADE_MINIMA_NAO_ATINGIDA') {
+    if (err instanceof ApiError && err.codigo === 'LOTE_CODIGO_NAO_ASCII') {
+      codigoEstranho.value = true
+      erro.value = t('vacinas.erro.codigoEstranho')
+    } else if (err instanceof ApiError && err.codigo === 'LOTE_SEM_SALDO') {
+      erro.value = frase(err)
+      void lerLotes(vacinaId.value)
+    } else if (err instanceof ApiError && err.codigo === 'IDADE_MINIMA_NAO_ATINGIDA') {
       idadeMinima.value = rotulos.dia(String(err.detalhes.aPartirDe ?? '').slice(0, 10))
     } else {
       erro.value = frase(err)
@@ -279,7 +317,11 @@ function avisoDoLote(lote: LoteParaAplicar) {
               severity="secondary"
               :outlined="loteCodigo !== lote.codigo"
               :disabled="!lote.avaliacao.pode || salvando"
-              :label="`${lote.codigo} · ${rotulos.dia(lote.validade)}`"
+              :label="
+                lote.saldo !== null
+                  ? `${lote.codigo} · ${rotulos.dia(lote.validade)} · ${t('vacinas.aplicar.saldo', { n: lote.saldo }, lote.saldo)}`
+                  : `${lote.codigo} · ${rotulos.dia(lote.validade)}`
+              "
               @click="usarLote(lote)"
             />
             <small v-if="avisoDoLote(lote)">{{ avisoDoLote(lote) }}</small>
@@ -307,6 +349,18 @@ function avisoDoLote(lote: LoteParaAplicar) {
             />
           </section>
         </div>
+        <small v-if="doEstoque && !loteId" class="eg__dica">{{
+          t('vacinas.aplicar.foraDoEstoque')
+        }}</small>
+        <label v-if="codigoEstranho" class="apl__confirmar" for="apl-codigo-confere">
+          <Checkbox
+            v-model="confirmoCodigo"
+            input-id="apl-codigo-confere"
+            binary
+            :disabled="salvando"
+          />
+          <span>{{ t('vacinas.aplicar.confirmoCodigo') }}</span>
+        </label>
       </div>
 
       <div class="eg__linha">
@@ -434,6 +488,15 @@ function avisoDoLote(lote: LoteParaAplicar) {
 </template>
 
 <style scoped>
+.apl__confirmar {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--tinta);
+  font-size: 14px;
+  cursor: pointer;
+}
+
 .apl__lotes {
   display: flex;
   flex-wrap: wrap;

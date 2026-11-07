@@ -11235,7 +11235,9 @@
       "foraDeOrdem": "The last dose of this vaccine was on {data}: record in order or void the wrong one.",
       "foraDaJanela": "The next dose or the time is over 60 days away: the booster goes to the call list.",
       "semTipo": "The clinic has no active vaccine appointment type to book the next dose.",
-      "especie": "This vaccine is not for the patient's species."
+      "especie": "This vaccine is not for the patient's species.",
+      "semSaldo": "This lot has just run out: choose another.",
+      "codigoEstranho": "The code has a letter outside A to Z. Check the vial and confirm to continue."
     },
     "situacao": {
       "ATRASADA": "Overdue",
@@ -11275,7 +11277,8 @@
       "aviso": {
         "LOTE_VENCE_HOJE": "This batch expires today.",
         "LOTE_VENCENDO": "This batch expires first: use it before the others.",
-        "IDADE_MINIMA_CONFIRMADA": "Given before the minimum age, with the vet's confirmation."
+        "IDADE_MINIMA_CONFIRMADA": "Given before the minimum age, with the vet's confirmation.",
+        "LOTE_FORA_DO_ESTOQUE": "This lot is not in stock: add the vial in Stock so the fridge adds up."
       }
     },
     "lote": {
@@ -11304,7 +11307,10 @@
       "hora": "Time",
       "idadeMinima": "The patient is only old enough for this vaccine from {data}.",
       "mesmoAssim": "Give it anyway",
-      "confirmar": "Give and record"
+      "confirmar": "Give and record",
+      "saldo": "{n} dose | {n} doses",
+      "foraDoEstoque": "This lot is not one of the stock lots: the dose does not come off the fridge.",
+      "confirmoCodigo": "I checked the vial: this is the code."
     },
     "externa": {
       "titulo": "Record from elsewhere",
@@ -12806,6 +12812,159 @@
         "FORA_DO_PRAZO": "Out of time: it did not go out.",
         "FALHOU": "Sending failed."
       }
+    }
+  },
+  "estoque": {
+    "titulo": "Vaccine stock",
+    "erroAoCarregar": "Could not load the fridge.",
+    "doses": "doses",
+    "vacina": "Vaccine",
+    "validade": "Expiry",
+    "fornecedor": "Supplier",
+    "notaFiscal": "Invoice",
+    "vacinas": "Vaccines",
+    "vacinasDescricao": "The ones the clinic keeps: the usable balance today against the minimum.",
+    "lotes": "Lots",
+    "lotesDescricao": "Expired with doses first (pending disposal), then the ones that expire sooner.",
+    "vazio": "The clinic does not keep vaccines yet: receive the first lot or set a minimum.",
+    "truncado": "There are more lots than fit here: the empty ones and the ones expiring later were left out.",
+    "saldoMinimo": "{saldo} of {minimo} minimum",
+    "semConsumo": "no usage",
+    "cobertura": "lasts {n} day | lasts {n} days",
+    "descartePendente": "{n} expired dose to dispose of | {n} expired doses to dispose of",
+    "abas": {
+      "rotulo": "Stock sections",
+      "geladeira": "Fridge",
+      "movimentos": "Movements",
+      "analise": "Analysis",
+      "metas": "Targets"
+    },
+    "resumo": {
+      "doses": "{n} dose in the fridge | {n} doses in the fridge",
+      "abaixo": "{n} vaccine below minimum | {n} vaccines below minimum",
+      "vencendo": "{n} dose expiring | {n} doses expiring",
+      "vencidas": "{n} dose expired | {n} doses expired",
+      "parado": "{valor} sitting idle"
+    },
+    "situacao": {
+      "ABAIXO_DO_MINIMO": "Below minimum",
+      "PERTO_DE_VENCER": "Expiring soon",
+      "OK": "Up to date",
+      "zerada": "Out of stock"
+    },
+    "lote": {
+      "situacao": {
+        "VENCIDO": "Expired",
+        "VENCENDO": "Expiring",
+        "ATIVO": "Active",
+        "ESGOTADO": "Empty"
+      },
+      "saldo": "{saldo} of {recebidas} doses",
+      "vence": "expires {dia}, in {n} day | expires {dia}, in {n} days",
+      "venceHoje": "expires today (still usable)",
+      "venceu": "expired {dia}",
+      "valor": "{valor} sitting idle",
+      "esgotados": "Empty ({n})"
+    },
+    "receber": {
+      "acao": "Receive lot",
+      "lote": "Lot",
+      "titulo": "Receive lot",
+      "codigo": "Vial code",
+      "doses": "Doses",
+      "dosesDica": "In doses, not vials (up to 999).",
+      "custo": "Cost per dose",
+      "conferiu": "Who checked the vial",
+      "quando": "When it arrived",
+      "hoje": "Today",
+      "outroDia": "Another day",
+      "confirmar": "Receive",
+      "erro": "Could not receive the lot.",
+      "feito": "Lot {codigo} received, {n} dose. | Lot {codigo} received, {n} doses."
+    },
+    "baixa": {
+      "acao": "Write off",
+      "titulo": "Write off from lot {codigo}",
+      "descartarTitulo": "Dispose of lot {codigo}",
+      "dica": "{vacina}: {saldo} dose in the lot. | {vacina}: {saldo} doses in the lot.",
+      "porque": "Why",
+      "quantidade": "Doses that left",
+      "contadas": "Doses you found",
+      "contadasDica": "The write-off is the difference to the balance. Found more? Check the applications.",
+      "vencimentoDica": "The lot expired: {n} dose leaves the stock. | The lot expired: the {n} doses leave the stock.",
+      "observacao": "Note",
+      "confirmar": "Write off",
+      "descartar": "Dispose of",
+      "erro": "Could not write off.",
+      "feita": "Wrote off {n} dose; the lot now has {saldo}. | Wrote off {n} doses; the lot now has {saldo}.",
+      "motivo": {
+        "QUEBRA": "Breakage",
+        "TEMPERATURA": "Temperature",
+        "CONTAGEM": "Count",
+        "VENCIMENTO": "Expiry"
+      }
+    },
+    "corrigir": {
+      "titulo": "Correct lot {codigo}",
+      "de": "Correct lot {codigo}",
+      "dica": "Only the supplier, invoice and cost. The quantity is fixed by a count.",
+      "feito": "Lot corrected."
+    },
+    "minimo": {
+      "acao": "Minimum",
+      "titulo": "Minimum for {vacina}",
+      "rotulo": "Minimum",
+      "dica": "Below it, the fridge and the menu warn. Zero means \"do not warn me\".",
+      "padrao": "The catalogue’s is {n} dose. | The catalogue’s is {n} doses.",
+      "voltar": "Back to the catalogue’s",
+      "feito": "Minimum saved."
+    },
+    "movimentos": {
+      "filtro": "Movement type",
+      "todos": "All",
+      "entradas": "In",
+      "baixas": "Write-offs",
+      "periodo": "From {de} to {ate}",
+      "entrou": "{n} dose of {vacina} in | {n} doses of {vacina} in",
+      "saiu": "{n} dose of {vacina} out | {n} doses of {vacina} out",
+      "estornada": "Reversed by {quem}: {motivo}",
+      "estornar": "Reverse",
+      "estornarTitulo": "Reverse the write-off",
+      "estornarDica": "The doses go back to the balance. The write-off stays on the list, struck through, with the reason.",
+      "motivo": "Reason",
+      "motivoDica": "At least {min} characters.",
+      "vazio": "No movements in this period.",
+      "verMais": "Show more",
+      "erro": "Could not load the movements.",
+      "erroEstorno": "Could not reverse."
+    },
+    "analise": {
+      "periodo": "Analysis period",
+      "meses": "Last month | Last {n} months",
+      "giro": "Doses given per month",
+      "giroDica": "Only the ones the clinic gave.",
+      "giroParcial": "Only the ones the clinic gave. The month with * is still in progress.",
+      "semGiro": "No doses given in the period.",
+      "truncado": "Showing the fastest-moving vaccines.",
+      "saldo": "Balance against minimum",
+      "saldoDica": "Below minimum first.",
+      "perdasTitulo": "Losses",
+      "perdas": "{perdidas} of {recebidas} doses lost ({percentual})",
+      "valorPerdido": "{valor} lost",
+      "semPerdas": "No losses in the period.",
+      "validade": "Expiry",
+      "validadeDica": "Lots with doses, by how long until they expire.",
+      "emRisco": "{valor} at risk (expired and within 60 days)",
+      "descartePendente": "Pending disposal",
+      "faixa": {
+        "VENCIDO": "Expired",
+        "ATE_30_DIAS": "Within 30 days",
+        "DE_31_A_60_DIAS": "31 to 60 days",
+        "ACIMA_DE_60_DIAS": "Over 60 days"
+      },
+      "erro": "Could not load the analysis.",
+      "lotes": "{n} lot | {n} lots",
+      "doses": "{n} dose | {n} doses"
     }
   }
 }

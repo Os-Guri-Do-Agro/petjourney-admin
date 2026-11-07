@@ -135,7 +135,8 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     prefixo: '/clinica/estoque',
     modulo: 'CLINICA',
     permissao: 'estoque.ler',
-    integrada: false,
+    /* A geladeira, os movimentos e a análise pela API (E6-01, PJ-RFFOKT). */
+    integrada: true,
   },
 
   /*

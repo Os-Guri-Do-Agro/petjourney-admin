@@ -11235,7 +11235,9 @@
       "foraDeOrdem": "La última dosis de esta vacuna fue el {data}: registre en orden o anule la incorrecta.",
       "foraDaJanela": "La próxima dosis o el horario pasan de 60 días: el refuerzo va a la lista de llamadas.",
       "semTipo": "La clínica no tiene un tipo de atención de vacuna activo para agendar la próxima dosis.",
-      "especie": "Esta vacuna no es para la especie del paciente."
+      "especie": "Esta vacuna no es para la especie del paciente.",
+      "semSaldo": "Este lote acaba de quedar en cero: elija otro.",
+      "codigoEstranho": "El código tiene una letra fuera de la A a la Z. Revise el frasco y confirme para seguir."
     },
     "situacao": {
       "ATRASADA": "Atrasada",
@@ -11275,7 +11277,8 @@
       "aviso": {
         "LOTE_VENCE_HOJE": "Este lote vence hoy.",
         "LOTE_VENCENDO": "Este lote es el primero en vencer: úselo antes que los otros.",
-        "IDADE_MINIMA_CONFIRMADA": "Aplicada antes de la edad mínima, con la confirmación del veterinario."
+        "IDADE_MINIMA_CONFIRMADA": "Aplicada antes de la edad mínima, con la confirmación del veterinario.",
+        "LOTE_FORA_DO_ESTOQUE": "Este lote no está en el stock: registre el frasco en Stock para que la heladera cuadre."
       }
     },
     "lote": {
@@ -11304,7 +11307,10 @@
       "hora": "Hora",
       "idadeMinima": "El paciente solo tiene edad para esta vacuna a partir del {data}.",
       "mesmoAssim": "Aplicar de todos modos",
-      "confirmar": "Aplicar y registrar"
+      "confirmar": "Aplicar y registrar",
+      "saldo": "{n} dosis | {n} dosis",
+      "foraDoEstoque": "Este lote no está entre los del stock: la dosis no se descuenta de la heladera.",
+      "confirmoCodigo": "Revisé el frasco: el código es este."
     },
     "externa": {
       "titulo": "Registrar de otro lugar",
@@ -12806,6 +12812,159 @@
         "FORA_DO_PRAZO": "Fuera de plazo: no salió.",
         "FALHOU": "El envío falló."
       }
+    }
+  },
+  "estoque": {
+    "titulo": "Stock de vacunas",
+    "erroAoCarregar": "No se pudo cargar la heladera.",
+    "doses": "dosis",
+    "vacina": "Vacuna",
+    "validade": "Vencimiento",
+    "fornecedor": "Proveedor",
+    "notaFiscal": "Factura",
+    "vacinas": "Vacunas",
+    "vacinasDescricao": "Las que la clínica guarda: el saldo que aplica hoy contra el mínimo.",
+    "lotes": "Lotes",
+    "lotesDescricao": "El vencido con dosis primero (descarte pendiente), después el que vence antes.",
+    "vazio": "La clínica todavía no guarda vacunas: reciba el primer lote o defina un mínimo.",
+    "truncado": "Hay más lotes de los que caben aquí: los agotados y los que vencen más tarde quedaron fuera.",
+    "saldoMinimo": "{saldo} de {minimo} de mínimo",
+    "semConsumo": "sin consumo",
+    "cobertura": "alcanza {n} día | alcanza {n} días",
+    "descartePendente": "{n} dosis vencida para descartar | {n} dosis vencidas para descartar",
+    "abas": {
+      "rotulo": "Partes del stock",
+      "geladeira": "Heladera",
+      "movimentos": "Movimientos",
+      "analise": "Análisis",
+      "metas": "Metas"
+    },
+    "resumo": {
+      "doses": "{n} dosis en la heladera | {n} dosis en la heladera",
+      "abaixo": "{n} vacuna bajo el mínimo | {n} vacunas bajo el mínimo",
+      "vencendo": "{n} dosis por vencer | {n} dosis por vencer",
+      "vencidas": "{n} dosis vencida | {n} dosis vencidas",
+      "parado": "{valor} inmovilizados"
+    },
+    "situacao": {
+      "ABAIXO_DO_MINIMO": "Bajo el mínimo",
+      "PERTO_DE_VENCER": "Por vencer",
+      "OK": "Al día",
+      "zerada": "Agotada"
+    },
+    "lote": {
+      "situacao": {
+        "VENCIDO": "Vencido",
+        "VENCENDO": "Por vencer",
+        "ATIVO": "Activo",
+        "ESGOTADO": "Agotado"
+      },
+      "saldo": "{saldo} de {recebidas} dosis",
+      "vence": "vence el {dia}, en {n} día | vence el {dia}, en {n} días",
+      "venceHoje": "vence hoy (todavía se aplica)",
+      "venceu": "venció el {dia}",
+      "valor": "{valor} inmovilizados",
+      "esgotados": "Agotados ({n})"
+    },
+    "receber": {
+      "acao": "Recibir lote",
+      "lote": "Lote",
+      "titulo": "Recibir lote",
+      "codigo": "Código del frasco",
+      "doses": "Dosis",
+      "dosesDica": "En dosis, no en frascos (hasta 999).",
+      "custo": "Costo por dosis",
+      "conferiu": "Quién revisó el frasco",
+      "quando": "Cuándo llegó",
+      "hoje": "Hoy",
+      "outroDia": "Otro día",
+      "confirmar": "Recibir",
+      "erro": "No se pudo recibir el lote.",
+      "feito": "Lote {codigo} recibido, {n} dosis. | Lote {codigo} recibido, {n} dosis."
+    },
+    "baixa": {
+      "acao": "Dar de baja",
+      "titulo": "Dar de baja en el lote {codigo}",
+      "descartarTitulo": "Descartar el lote {codigo}",
+      "dica": "{vacina}: {saldo} dosis en el lote. | {vacina}: {saldo} dosis en el lote.",
+      "porque": "Por qué",
+      "quantidade": "Dosis que salieron",
+      "contadas": "Dosis que encontró",
+      "contadasDica": "La baja es la diferencia con el saldo. ¿Encontró de más? Revise las aplicaciones.",
+      "vencimentoDica": "El lote venció: {n} dosis sale del stock. | El lote venció: las {n} dosis salen del stock.",
+      "observacao": "Observación",
+      "confirmar": "Dar de baja",
+      "descartar": "Descartar",
+      "erro": "No se pudo dar de baja.",
+      "feita": "Baja de {n} dosis; el lote quedó con {saldo}. | Baja de {n} dosis; el lote quedó con {saldo}.",
+      "motivo": {
+        "QUEBRA": "Rotura",
+        "TEMPERATURA": "Temperatura",
+        "CONTAGEM": "Conteo",
+        "VENCIMENTO": "Vencimiento"
+      }
+    },
+    "corrigir": {
+      "titulo": "Corregir el lote {codigo}",
+      "de": "Corregir el lote {codigo}",
+      "dica": "Solo el proveedor, la factura y el costo. La cantidad se ajusta por conteo.",
+      "feito": "Lote corregido."
+    },
+    "minimo": {
+      "acao": "Mínimo",
+      "titulo": "Mínimo de {vacina}",
+      "rotulo": "Mínimo",
+      "dica": "Por debajo, la heladera y el menú avisan. Cero es \"no me avise\".",
+      "padrao": "El del catálogo es {n} dosis. | El del catálogo es {n} dosis.",
+      "voltar": "Volver al del catálogo",
+      "feito": "Mínimo guardado."
+    },
+    "movimentos": {
+      "filtro": "Tipo de movimiento",
+      "todos": "Todo",
+      "entradas": "Entradas",
+      "baixas": "Bajas",
+      "periodo": "Del {de} al {ate}",
+      "entrou": "Entró {n} dosis de {vacina} | Entraron {n} dosis de {vacina}",
+      "saiu": "Salió {n} dosis de {vacina} | Salieron {n} dosis de {vacina}",
+      "estornada": "Revertida por {quem}: {motivo}",
+      "estornar": "Revertir",
+      "estornarTitulo": "Revertir la baja",
+      "estornarDica": "Las dosis vuelven al saldo. La baja queda en la lista, tachada, con el motivo.",
+      "motivo": "Motivo",
+      "motivoDica": "Al menos {min} caracteres.",
+      "vazio": "Ningún movimiento en este período.",
+      "verMais": "Ver más",
+      "erro": "No se pudieron cargar los movimientos.",
+      "erroEstorno": "No se pudo revertir."
+    },
+    "analise": {
+      "periodo": "Período del análisis",
+      "meses": "Último mes | Últimos {n} meses",
+      "giro": "Dosis aplicadas por mes",
+      "giroDica": "Solo las que aplicó la clínica.",
+      "giroParcial": "Solo las que aplicó la clínica. El mes con * todavía está en curso.",
+      "semGiro": "Ninguna dosis aplicada en el período.",
+      "truncado": "Se muestran las vacunas de mayor rotación.",
+      "saldo": "Saldo contra el mínimo",
+      "saldoDica": "Las que están bajo el mínimo primero.",
+      "perdasTitulo": "Pérdidas",
+      "perdas": "{perdidas} de {recebidas} dosis perdidas ({percentual})",
+      "valorPerdido": "{valor} perdidos",
+      "semPerdas": "Ninguna pérdida en el período.",
+      "validade": "Vencimiento",
+      "validadeDica": "Los lotes con dosis, por cuánto falta para vencer.",
+      "emRisco": "{valor} en riesgo (vencido y hasta 60 días)",
+      "descartePendente": "Descarte pendiente",
+      "faixa": {
+        "VENCIDO": "Vencido",
+        "ATE_30_DIAS": "Hasta 30 días",
+        "DE_31_A_60_DIAS": "De 31 a 60 días",
+        "ACIMA_DE_60_DIAS": "Más de 60 días"
+      },
+      "erro": "No se pudo cargar el análisis.",
+      "lotes": "{n} lote | {n} lotes",
+      "doses": "{n} dosis | {n} dosis"
     }
   }
 }

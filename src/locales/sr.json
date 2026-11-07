@@ -11235,7 +11235,9 @@
       "foraDeOrdem": "Poslednja doza ove vakcine je bila {data}: upišite redom ili poništite pogrešnu.",
       "foraDaJanela": "Sledeća doza ili termin je dalje od 60 dana: revakcinacija ide na listu za pozivanje.",
       "semTipo": "Klinika nema aktivan tip pregleda za vakcinu da zakaže sledeću dozu.",
-      "especie": "Ova vakcina nije za vrstu pacijenta."
+      "especie": "Ova vakcina nije za vrstu pacijenta.",
+      "semSaldo": "Ova serija je upravo ostala bez doza: izaberite drugu.",
+      "codigoEstranho": "Šifra ima slovo van A do Z. Proverite bočicu i potvrdite da biste nastavili."
     },
     "situacao": {
       "ATRASADA": "Zakasnela",
@@ -11275,7 +11277,8 @@
       "aviso": {
         "LOTE_VENCE_HOJE": "Ova serija ističe danas.",
         "LOTE_VENCENDO": "Ova serija prva ističe: koristite je pre ostalih.",
-        "IDADE_MINIMA_CONFIRMADA": "Data pre minimalnog uzrasta, uz potvrdu veterinara."
+        "IDADE_MINIMA_CONFIRMADA": "Data pre minimalnog uzrasta, uz potvrdu veterinara.",
+        "LOTE_FORA_DO_ESTOQUE": "Ova serija nije na zalihama: unesite bočicu u Zalihe da bi frižider bio tačan."
       }
     },
     "lote": {
@@ -11304,7 +11307,10 @@
       "hora": "Vreme",
       "idadeMinima": "Pacijent ima uzrast za ovu vakcinu tek od {data}.",
       "mesmoAssim": "Ipak daj",
-      "confirmar": "Daj i upiši"
+      "confirmar": "Daj i upiši",
+      "saldo": "{n} doza | {n} doze | {n} doza",
+      "foraDoEstoque": "Ova serija nije među serijama na zalihama: doza se ne skida iz frižidera.",
+      "confirmoCodigo": "Proverio sam bočicu: šifra je ova."
     },
     "externa": {
       "titulo": "Upiši iz drugog mesta",
@@ -12806,6 +12812,159 @@
         "FORA_DO_PRAZO": "Van roka: nije otišlo.",
         "FALHOU": "Slanje nije uspelo."
       }
+    }
+  },
+  "estoque": {
+    "titulo": "Zalihe vakcina",
+    "erroAoCarregar": "Frižider nije učitan.",
+    "doses": "doza",
+    "vacina": "Vakcina",
+    "validade": "Rok trajanja",
+    "fornecedor": "Dobavljač",
+    "notaFiscal": "Račun",
+    "vacinas": "Vakcine",
+    "vacinasDescricao": "One koje klinika drži: stanje koje se danas može primeniti prema minimumu.",
+    "lotes": "Serije",
+    "lotesDescricao": "Istekle sa dozama prvo (čekaju odlaganje), zatim one koje ranije ističu.",
+    "vazio": "Klinika još ne drži vakcine: primite prvu seriju ili odredite minimum.",
+    "truncado": "Ima više serija nego što ovde staje: potrošene i one koje kasnije ističu su izostavljene.",
+    "saldoMinimo": "{saldo} od minimuma {minimo}",
+    "semConsumo": "bez potrošnje",
+    "cobertura": "traje {n} dan | traje {n} dana | traje {n} dana",
+    "descartePendente": "{n} istekla doza za odlaganje | {n} istekle doze za odlaganje | {n} isteklih doza za odlaganje",
+    "abas": {
+      "rotulo": "Delovi zaliha",
+      "geladeira": "Frižider",
+      "movimentos": "Promet",
+      "analise": "Analiza",
+      "metas": "Ciljevi"
+    },
+    "resumo": {
+      "doses": "{n} doza u frižideru | {n} doze u frižideru | {n} doza u frižideru",
+      "abaixo": "{n} vakcina ispod minimuma | {n} vakcine ispod minimuma | {n} vakcina ispod minimuma",
+      "vencendo": "{n} doza ističe | {n} doze ističu | {n} doza ističe",
+      "vencidas": "{n} istekla doza | {n} istekle doze | {n} isteklih doza",
+      "parado": "{valor} stoji neiskorišćeno"
+    },
+    "situacao": {
+      "ABAIXO_DO_MINIMO": "Ispod minimuma",
+      "PERTO_DE_VENCER": "Uskoro ističe",
+      "OK": "U redu",
+      "zerada": "Nema na stanju"
+    },
+    "lote": {
+      "situacao": {
+        "VENCIDO": "Istekla",
+        "VENCENDO": "Ističe",
+        "ATIVO": "Aktivna",
+        "ESGOTADO": "Potrošena"
+      },
+      "saldo": "{saldo} od {recebidas} doza",
+      "vence": "ističe {dia}, za {n} dan | ističe {dia}, za {n} dana | ističe {dia}, za {n} dana",
+      "venceHoje": "ističe danas (još se primenjuje)",
+      "venceu": "istekla {dia}",
+      "valor": "{valor} stoji neiskorišćeno",
+      "esgotados": "Potrošene ({n})"
+    },
+    "receber": {
+      "acao": "Primi seriju",
+      "lote": "Serija",
+      "titulo": "Primi seriju",
+      "codigo": "Šifra bočice",
+      "doses": "Doze",
+      "dosesDica": "U dozama, ne u bočicama (do 999).",
+      "custo": "Cena po dozi",
+      "conferiu": "Ko je proverio bočicu",
+      "quando": "Kada je stigla",
+      "hoje": "Danas",
+      "outroDia": "Drugi dan",
+      "confirmar": "Primi",
+      "erro": "Serija nije primljena.",
+      "feito": "Serija {codigo} primljena, {n} doza. | Serija {codigo} primljena, {n} doze. | Serija {codigo} primljena, {n} doza."
+    },
+    "baixa": {
+      "acao": "Otpiši",
+      "titulo": "Otpis iz serije {codigo}",
+      "descartarTitulo": "Odloži seriju {codigo}",
+      "dica": "{vacina}: {saldo} doza u seriji. | {vacina}: {saldo} doze u seriji. | {vacina}: {saldo} doza u seriji.",
+      "porque": "Zašto",
+      "quantidade": "Doze koje su izašle",
+      "contadas": "Doze koje ste našli",
+      "contadasDica": "Otpis je razlika do stanja. Našli ste više? Proverite primene.",
+      "vencimentoDica": "Serija je istekla: {n} doza izlazi sa zaliha. | Serija je istekla: {n} doze izlaze sa zaliha. | Serija je istekla: {n} doza izlazi sa zaliha.",
+      "observacao": "Napomena",
+      "confirmar": "Otpiši",
+      "descartar": "Odloži",
+      "erro": "Otpis nije uspeo.",
+      "feita": "Otpisana {n} doza; u seriji je ostalo {saldo}. | Otpisane {n} doze; u seriji je ostalo {saldo}. | Otpisano {n} doza; u seriji je ostalo {saldo}.",
+      "motivo": {
+        "QUEBRA": "Lom",
+        "TEMPERATURA": "Temperatura",
+        "CONTAGEM": "Prebrojavanje",
+        "VENCIMENTO": "Istek roka"
+      }
+    },
+    "corrigir": {
+      "titulo": "Ispravi seriju {codigo}",
+      "de": "Ispravi seriju {codigo}",
+      "dica": "Samo dobavljač, račun i cena. Količina se ispravlja prebrojavanjem.",
+      "feito": "Serija je ispravljena."
+    },
+    "minimo": {
+      "acao": "Minimum",
+      "titulo": "Minimum za {vacina}",
+      "rotulo": "Minimum",
+      "dica": "Ispod njega frižider i meni upozoravaju. Nula znači \"ne upozoravaj me\".",
+      "padrao": "Iz kataloga je {n} doza. | Iz kataloga je {n} doze. | Iz kataloga je {n} doza.",
+      "voltar": "Vrati na katalog",
+      "feito": "Minimum je sačuvan."
+    },
+    "movimentos": {
+      "filtro": "Vrsta prometa",
+      "todos": "Sve",
+      "entradas": "Ulazi",
+      "baixas": "Otpisi",
+      "periodo": "Od {de} do {ate}",
+      "entrou": "Ušla {n} doza vakcine {vacina} | Ušle {n} doze vakcine {vacina} | Ušlo {n} doza vakcine {vacina}",
+      "saiu": "Izašla {n} doza vakcine {vacina} | Izašle {n} doze vakcine {vacina} | Izašlo {n} doza vakcine {vacina}",
+      "estornada": "Poništio {quem}: {motivo}",
+      "estornar": "Poništi",
+      "estornarTitulo": "Poništi otpis",
+      "estornarDica": "Doze se vraćaju u stanje. Otpis ostaje na listi, precrtan, sa razlogom.",
+      "motivo": "Razlog",
+      "motivoDica": "Najmanje {min} znakova.",
+      "vazio": "Nema prometa u ovom periodu.",
+      "verMais": "Prikaži još",
+      "erro": "Promet nije učitan.",
+      "erroEstorno": "Poništavanje nije uspelo."
+    },
+    "analise": {
+      "periodo": "Period analize",
+      "meses": "Poslednji {n} mesec | Poslednja {n} meseca | Poslednjih {n} meseci",
+      "giro": "Primenjene doze po mesecu",
+      "giroDica": "Samo one koje je klinika primenila.",
+      "giroParcial": "Samo one koje je klinika primenila. Mesec sa * je još u toku.",
+      "semGiro": "Nijedna doza nije primenjena u periodu.",
+      "truncado": "Prikazane su vakcine sa najvećim prometom.",
+      "saldo": "Stanje prema minimumu",
+      "saldoDica": "One ispod minimuma prvo.",
+      "perdasTitulo": "Gubici",
+      "perdas": "{perdidas} od {recebidas} doza izgubljeno ({percentual})",
+      "valorPerdido": "{valor} izgubljeno",
+      "semPerdas": "Nema gubitaka u periodu.",
+      "validade": "Rok trajanja",
+      "validadeDica": "Serije sa dozama, po tome koliko je ostalo do isteka.",
+      "emRisco": "{valor} u riziku (isteklo i do 60 dana)",
+      "descartePendente": "Čeka odlaganje",
+      "faixa": {
+        "VENCIDO": "Isteklo",
+        "ATE_30_DIAS": "Do 30 dana",
+        "DE_31_A_60_DIAS": "Od 31 do 60 dana",
+        "ACIMA_DE_60_DIAS": "Preko 60 dana"
+      },
+      "erro": "Analiza nije učitana.",
+      "lotes": "{n} serija | {n} serije | {n} serija",
+      "doses": "{n} doza | {n} doze | {n} doza"
     }
   }
 }
