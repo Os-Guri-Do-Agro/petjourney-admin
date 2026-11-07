@@ -392,7 +392,7 @@
         },
         "expired": {
           "title": "Código expirado",
-          "message": "Código expirado. Peça pro cliente gerar um novo no app (leva 2 toques)."
+          "message": "Código expirado. Peça para o cliente gerar um novo no app (leva 2 toques)."
         },
         "conflict": {
           "title": "Não foi possível validar"
@@ -2140,7 +2140,7 @@
     },
     "feedbackSaque": {
       "titulo": "Saque solicitado",
-      "intro": "Enquanto processamos, conta pra gente como está sendo. Leva menos de 1 minuto.",
+      "intro": "Enquanto processamos, conte para a gente como está sendo. Leva menos de 1 minuto.",
       "nps": {
         "pergunta": "De 0 a 10, quanto você recomendaria o programa de indicação da PetJourney a um colega?",
         "legenda": "0 = nada provável, 10 = muito provável",

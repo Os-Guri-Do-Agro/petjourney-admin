@@ -40,7 +40,7 @@ export function resolveValidarCupomError(error: unknown): ValidarCupomErrorView 
   if (error.statusCode === 410) {
     return {
       title: 'Código expirado',
-      message: 'Código expirado. Peça pro cliente gerar um novo no app (leva 2 toques).',
+      message: 'Código expirado. Peça para o cliente gerar um novo no app (leva 2 toques).',
     }
   }
 
