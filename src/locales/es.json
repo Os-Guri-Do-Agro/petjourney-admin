@@ -13909,5 +13909,129 @@
       "vence-durante": "Vence durante",
       "vencido": "Caducado"
     }
+  },
+  "resumoDoHotel": {
+    "semDados": "Sin datos",
+    "atualizadoAs": "actualizado a las {hora}",
+    "intervalo": "{de} a {ate}",
+    "verDias": "Ver el último día | Ver los últimos {dias} días",
+    "frase": "{ocupacao} de ocupación en {dias} día | {ocupacao} de ocupación media en {dias} días",
+    "fraseSemDados": "Ninguna noche con el hotel operando en {dias} día | Ninguna noche con el hotel operando en {dias} días",
+    "fraseReceita": "{receita} de ingresos en {dias} día | {receita} de ingresos en {dias} días",
+    "periodo": {
+      "rotulo": "Período",
+      "hoje": "Hoy",
+      "semana": "Esta semana",
+      "semana-passada": "Semana pasada",
+      "trinta-dias": "30 días"
+    },
+    "outro": {
+      "abrir": "Otro período",
+      "titulo": "Otro período",
+      "quando": "Del primer al último día",
+      "ajuda": "Elija el primer y el último día, hasta {max} días.",
+      "dias": "{n} día | {n} días",
+      "faltaData": "Elija el primer y el último día.",
+      "ver": "Ver el período"
+    },
+    "erro": {
+      "ler": "No fue posible cargar el resumen.",
+      "excedida": "El hotel tiene demasiadas reservas para leer este período de una vez. Caben {dias} días.",
+      "casaGrande": "El hotel tiene demasiados alojamientos para armar el resumen; un período menor no lo resuelve.",
+      "taxa": "Demasiadas solicitudes de resumen seguidas. Intente de nuevo en {segundos} segundo. | Demasiadas solicitudes de resumen seguidas. Intente de nuevo en {segundos} segundos.",
+      "taxaSemTempo": "Demasiadas solicitudes de resumen seguidas. Intente de nuevo en un momento.",
+      "ocupado": "El resumen está ocupado ahora. Intente de nuevo en un momento.",
+      "muitosDias": "El período llega hasta {max} días."
+    },
+    "numero": {
+      "aria": "Los números del período",
+      "ocupacao": "Ocupación media",
+      "noites": "{parte} de {de} noche | {parte} de {de} noches",
+      "ocupacaoSemBase": "ninguna noche con el hotel operando",
+      "diarias": "Noches vendidas",
+      "diariasNota": "de las estadías cerradas en el período",
+      "retorno": "Retorno",
+      "voltaram": "{parte} de {de} cliente volvió | {parte} de {de} clientes volvieron",
+      "desde": "datos desde {data}",
+      "semHistorico": "aún sin historial",
+      "semDesfecho": "Sin desenlace",
+      "semDesfechoNota": "reservas con la entrada ya pasada, aún pendientes o confirmadas"
+    },
+    "ocupacao": {
+      "titulo": "Ocupación por noche",
+      "descricao": "Cuánto del hotel estuvo ocupado cada noche, con la capacidad de ese día.",
+      "dica": "{dia}: {ocupadas} de {total} ({taxa})",
+      "dicaFechado": "{dia}: ningún alojamiento operando",
+      "dicaPendentes": "{n} pendiente sin seña | {n} pendientes sin seña",
+      "prevista": "previsto",
+      "previstas": "Días que aún no llegaron, fuera de la media",
+      "fimDeSemana": "Sábado y domingo",
+      "diaDeSemana": "Días de semana",
+      "media": "Ocupación media de {media}.",
+      "comPico": "Media de {media}; la noche más llena fue {dia}, con {ocupadas} de {total}.",
+      "pendentes": "{n} noche retenida solo por una reserva pendiente, sin seña: queda fuera de la ocupación. | {n} noches retenidas solo por reservas pendientes, sin seña: quedan fuera de la ocupación.",
+      "capacidadeEstimada": "Capacidad estimada: el período comienza antes del historial de los alojamientos.",
+      "datasPrevistas": "La ocupación usa las fechas previstas: la estadía que terminó antes de lo previsto cuenta un poco por encima de lo real."
+    },
+    "perdas": {
+      "titulo": "Cancelaciones e inasistencias",
+      "descricao": "Por el día de la entrada prevista.",
+      "cancelamento": "Cancelación",
+      "naoComparecimento": "Inasistencia",
+      "reservas": "{parte} de {de} reserva | {parte} de {de} reservas",
+      "prazo": "{dentro} dentro del plazo, {fora} fuera del plazo",
+      "diarias": "{n} noche perdida | {n} noches perdidas",
+      "obito": "{n} reserva cancelada por el fallecimiento del animal, fuera de la tasa y de las pérdidas. | {n} reservas canceladas por el fallecimiento del animal, fuera de la tasa y de las pérdidas."
+    },
+    "origem": {
+      "titulo": "Origen de las reservas",
+      "descricao": "Estadías cerradas, por el día del cierre.",
+      "vazio": "Ninguna estadía cerrada en el período."
+    },
+    "ocorrencias": {
+      "titulo": "Incidentes",
+      "vazio": "Ningún incidente en el período.",
+      "falhou": "Los incidentes no se pudieron leer ahora; el resto del resumen vale.",
+      "graves": "{n} grave | {n} graves"
+    },
+    "receita": {
+      "titulo": "Facturación",
+      "descricao": "Estadías cerradas, por el día del cierre.",
+      "pelaReserva": "Ingresos por el valor de la reserva.",
+      "receita": "Ingresos",
+      "diariaMedia": "Tarifa media por noche",
+      "diariaMediaNota": "solo el alojamiento, por noche vendida",
+      "porDiaria": "Ingresos por noche",
+      "porDiariaNota": "alojamiento, servicios y salida tardía",
+      "porOrigem": "Ingresos por origen",
+      "porServico": "Servicios más vendidos",
+      "vazio": "Ninguna estadía cerrada en el período.",
+      "semServicos": "Ningún servicio vendido en el período.",
+      "servicosFalharam": "Servicios no disponibles ahora; intente un período menor.",
+      "sinalTitulo": "Señas y devoluciones",
+      "informativo": "Por el día de la entrada prevista. Valores registrados en el mostrador. PetJourney no cobra ni devuelve.",
+      "retido": "Seña retenida",
+      "retidoAjuda": "Lo pagado, hasta el valor de la seña, en las canceladas fuera del plazo.",
+      "aDevolver": "Por devolver",
+      "aDevolverAjuda": "La devolución se hace en el mostrador; el valor sigue aquí hasta que exista el registro de devolución.",
+      "naoCompareceu": "Pagado en inasistencias",
+      "naoCompareceuAjuda": "Aparte: el sistema no decide qué hacer con él.",
+      "obito": "Canceladas por fallecimiento",
+      "obitoAjuda": "El valor pagado que quedó detenido, fuera de lo retenido y de lo por devolver.",
+      "reservas": "{n} reserva | {n} reservas"
+    },
+    "ocorrenciaKind": {
+      "APATIA": "Apatía",
+      "BRIGA": "Pelea",
+      "DESTRUICAO": "Destrozos",
+      "DIARREIA": "Diarrea",
+      "ESTRESSE": "Estrés",
+      "LESAO": "Lesión",
+      "OUTRO": "Otro",
+      "RECUSA_ALIMENTAR": "Rechazo de comida",
+      "TENTATIVA_DE_FUGA": "Intento de fuga",
+      "TOSSE": "Tos",
+      "VOMITO": "Vómito"
+    }
   }
 }

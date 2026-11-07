@@ -39,8 +39,17 @@ const props = withDefaults(
      * por profissional não ranqueia ninguém (E3-08, guia 8.3).
      */
     ordenada?: boolean
+    /** O valor já escrito (dinheiro, no resumo do hotel); sem ele, o número com a `unidade`. */
+    escreverValor?: (fatia: Fatia) => string
   }>(),
-  { unidade: '', tom: 'acento', vazio: '', corDaFatia: undefined, ordenada: true },
+  {
+    unidade: '',
+    tom: 'acento',
+    vazio: '',
+    corDaFatia: undefined,
+    ordenada: true,
+    escreverValor: undefined,
+  },
 )
 
 const formato = useClinicFormat()
@@ -65,7 +74,9 @@ function largura(fatia: Fatia) {
         />
       </span>
       <span class="ranking__valor">
-        <strong>{{ unidade ? `${fatia.valor} ${unidade}` : fatia.valor }}</strong>
+        <strong>{{
+          escreverValor ? escreverValor(fatia) : unidade ? `${fatia.valor} ${unidade}` : fatia.valor
+        }}</strong>
         ({{ formato.percentual(fatia.parte) }})
       </span>
     </li>

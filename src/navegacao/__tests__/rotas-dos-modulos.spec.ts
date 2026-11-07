@@ -94,4 +94,13 @@ describe('podeAbrirRotaDeModulo', () => {
     expect(podeAbrirRotaDeModulo(pacientes, acesso(['HOTEL'], ['paciente.ler']))).toBe(true)
     expect(podeAbrirRotaDeModulo(pacientes, acesso([], ['paciente.ler']))).toBe(false)
   })
+
+  it('o resumo do hotel abre para quem lê a casa e para o financeiro, que só vê o faturamento', () => {
+    const resumo = rotaDoModulo('/hotel/resumo')!
+
+    expect(podeAbrirRotaDeModulo(resumo, acesso(['HOTEL'], ['hotel.ler']))).toBe(true)
+    expect(podeAbrirRotaDeModulo(resumo, acesso(['HOTEL'], ['hotel.faturamento']))).toBe(true)
+    expect(podeAbrirRotaDeModulo(resumo, acesso(['HOTEL'], ['hotel.valores']))).toBe(false)
+    expect(podeAbrirRotaDeModulo(resumo, acesso([], ['hotel.faturamento']))).toBe(false)
+  })
 })

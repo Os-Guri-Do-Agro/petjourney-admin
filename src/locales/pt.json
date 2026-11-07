@@ -13909,5 +13909,129 @@
       "vence-durante": "Vence durante",
       "vencido": "Vencido"
     }
+  },
+  "resumoDoHotel": {
+    "semDados": "Sem dados",
+    "atualizadoAs": "atualizado às {hora}",
+    "intervalo": "{de} a {ate}",
+    "verDias": "Ver o último dia | Ver os últimos {dias} dias",
+    "frase": "{ocupacao} de ocupação em {dias} dia | {ocupacao} de ocupação média em {dias} dias",
+    "fraseSemDados": "Nenhuma noite com a casa operando em {dias} dia | Nenhuma noite com a casa operando em {dias} dias",
+    "fraseReceita": "{receita} de receita em {dias} dia | {receita} de receita em {dias} dias",
+    "periodo": {
+      "rotulo": "Período",
+      "hoje": "Hoje",
+      "semana": "Esta semana",
+      "semana-passada": "Semana passada",
+      "trinta-dias": "30 dias"
+    },
+    "outro": {
+      "abrir": "Outro período",
+      "titulo": "Outro período",
+      "quando": "Do primeiro ao último dia",
+      "ajuda": "Escolha o primeiro e o último dia, até {max} dias.",
+      "dias": "{n} dia | {n} dias",
+      "faltaData": "Escolha o primeiro e o último dia.",
+      "ver": "Ver o período"
+    },
+    "erro": {
+      "ler": "Não foi possível carregar o resumo.",
+      "excedida": "A casa tem reservas demais para ler este período de uma vez. Cabem {dias} dias.",
+      "casaGrande": "A casa tem acomodações demais para montar o resumo; um período menor não resolve.",
+      "taxa": "Muitos pedidos de resumo seguidos. Tente de novo em {segundos} segundo. | Muitos pedidos de resumo seguidos. Tente de novo em {segundos} segundos.",
+      "taxaSemTempo": "Muitos pedidos de resumo seguidos. Tente de novo daqui a pouco.",
+      "ocupado": "O resumo está ocupado agora. Tente de novo daqui a pouco.",
+      "muitosDias": "O período vai até {max} dias."
+    },
+    "numero": {
+      "aria": "Os números do período",
+      "ocupacao": "Ocupação média",
+      "noites": "{parte} de {de} noite | {parte} de {de} noites",
+      "ocupacaoSemBase": "nenhuma noite com a casa operando",
+      "diarias": "Diárias vendidas",
+      "diariasNota": "das estadias encerradas no período",
+      "retorno": "Retorno",
+      "voltaram": "{parte} de {de} cliente voltou | {parte} de {de} clientes voltaram",
+      "desde": "dados desde {data}",
+      "semHistorico": "ainda sem histórico",
+      "semDesfecho": "Sem desfecho",
+      "semDesfechoNota": "reservas com a entrada já passada, ainda pendentes ou confirmadas"
+    },
+    "ocupacao": {
+      "titulo": "Ocupação por noite",
+      "descricao": "Quanto da casa estava ocupado em cada noite, com a capacidade daquele dia.",
+      "dica": "{dia}: {ocupadas} de {total} ({taxa})",
+      "dicaFechado": "{dia}: nenhuma acomodação operando",
+      "dicaPendentes": "{n} pendente sem sinal | {n} pendentes sem sinal",
+      "prevista": "previsto",
+      "previstas": "Dias que ainda não chegaram, fora da média",
+      "fimDeSemana": "Sábado e domingo",
+      "diaDeSemana": "Dias de semana",
+      "media": "Ocupação média de {media}.",
+      "comPico": "Média de {media}; a noite mais cheia foi {dia}, com {ocupadas} de {total}.",
+      "pendentes": "{n} noite segurada só por reserva pendente, sem sinal: fica fora da ocupação. | {n} noites seguradas só por reserva pendente, sem sinal: ficam fora da ocupação.",
+      "capacidadeEstimada": "Capacidade estimada: o período começa antes do histórico das acomodações.",
+      "datasPrevistas": "A ocupação usa as datas previstas: a estadia que saiu antes do previsto conta um pouco acima do real."
+    },
+    "perdas": {
+      "titulo": "Cancelamentos e faltas",
+      "descricao": "Pelo dia da entrada prevista.",
+      "cancelamento": "Cancelamento",
+      "naoComparecimento": "Não comparecimento",
+      "reservas": "{parte} de {de} reserva | {parte} de {de} reservas",
+      "prazo": "{dentro} dentro do prazo, {fora} fora do prazo",
+      "diarias": "{n} diária perdida | {n} diárias perdidas",
+      "obito": "{n} reserva cancelada pelo óbito do animal, fora da taxa e das perdas. | {n} reservas canceladas pelo óbito do animal, fora da taxa e das perdas."
+    },
+    "origem": {
+      "titulo": "Origem das reservas",
+      "descricao": "Estadias encerradas, pelo dia do encerramento.",
+      "vazio": "Nenhuma estadia encerrada no período."
+    },
+    "ocorrencias": {
+      "titulo": "Ocorrências",
+      "vazio": "Nenhuma ocorrência no período.",
+      "falhou": "As ocorrências não puderam ser lidas agora; o resto do resumo vale.",
+      "graves": "{n} grave | {n} graves"
+    },
+    "receita": {
+      "titulo": "Faturamento",
+      "descricao": "Estadias encerradas, pelo dia do encerramento.",
+      "pelaReserva": "Receita pelo valor da reserva.",
+      "receita": "Receita",
+      "diariaMedia": "Diária média",
+      "diariaMediaNota": "só a hospedagem, por diária vendida",
+      "porDiaria": "Receita por diária",
+      "porDiariaNota": "hospedagem, serviços e saída tardia",
+      "porOrigem": "Receita por origem",
+      "porServico": "Serviços mais vendidos",
+      "vazio": "Nenhuma estadia encerrada no período.",
+      "semServicos": "Nenhum serviço vendido no período.",
+      "servicosFalharam": "Serviços indisponíveis agora; tente um período menor.",
+      "sinalTitulo": "Sinal e devoluções",
+      "informativo": "Pelo dia da entrada prevista. Valores registrados no balcão. A PetJourney não cobra nem devolve.",
+      "retido": "Sinal retido",
+      "retidoAjuda": "O pago, até o valor do sinal, nas canceladas fora do prazo.",
+      "aDevolver": "A devolver",
+      "aDevolverAjuda": "A devolução é feita no balcão; o valor continua aqui até existir o registro de devolução.",
+      "naoCompareceu": "Pago em não comparecimento",
+      "naoCompareceuAjuda": "À parte: o sistema não decide o que fazer com ele.",
+      "obito": "Canceladas pelo óbito",
+      "obitoAjuda": "O valor pago que ficou parado, fora do retido e do a devolver.",
+      "reservas": "{n} reserva | {n} reservas"
+    },
+    "ocorrenciaKind": {
+      "APATIA": "Apatia",
+      "BRIGA": "Briga",
+      "DESTRUICAO": "Destruição",
+      "DIARREIA": "Diarreia",
+      "ESTRESSE": "Estresse",
+      "LESAO": "Lesão",
+      "OUTRO": "Outro",
+      "RECUSA_ALIMENTAR": "Recusa alimentar",
+      "TENTATIVA_DE_FUGA": "Tentativa de fuga",
+      "TOSSE": "Tosse",
+      "VOMITO": "Vômito"
+    }
   }
 }

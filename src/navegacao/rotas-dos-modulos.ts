@@ -24,6 +24,8 @@ export type RotaDeModulo = {
   prefixo: string
   modulo: ModuloDaRota
   permissao: Permissao
+  /** Outras permissões que também abrem a tela (o resumo do hotel abre para o financeiro). */
+  ouPermissoes?: readonly Permissao[]
   integrada: boolean
   /** Só existe na demonstração, com ou sem API (vitrine de design, páginas públicas de mock). */
   soDemonstracao?: boolean
@@ -199,6 +201,14 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   { prefixo: '/hotel/pedidos', modulo: 'HOTEL', permissao: 'hotel.reserva', integrada: true },
   { prefixo: '/hotel/hospedes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/hospedagem', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
+  /* O resumo (E7-06): `hotel.ler`, ou só o faturamento (o financeiro não lê a casa). */
+  {
+    prefixo: '/hotel/resumo',
+    modulo: 'HOTEL',
+    permissao: 'hotel.ler',
+    ouPermissoes: ['hotel.faturamento'],
+    integrada: true,
+  },
   { prefixo: '/hotel', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: false },
 ]
 
@@ -250,7 +260,12 @@ export function podeAbrirRotaDeModulo(rota: RotaDeModulo, acesso: AcessoDaConta)
       ? acesso.podeLer('CLINICA') || acesso.podeLer('HOTEL')
       : acesso.podeLer(rota.modulo)
 
-  return moduloLiberado && acesso.temPermissao(rota.permissao)
+  return (
+    moduloLiberado &&
+    [rota.permissao, ...(rota.ouPermissoes ?? [])].some((permissao) =>
+      acesso.temPermissao(permissao),
+    )
+  )
 }
 
 /** Atalho para o guard e para o menu: caminho que não é de módulo sempre abre. */

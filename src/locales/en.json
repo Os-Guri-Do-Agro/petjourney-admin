@@ -13909,5 +13909,129 @@
       "vence-durante": "Expires mid-stay",
       "vencido": "Expired"
     }
+  },
+  "resumoDoHotel": {
+    "semDados": "No data",
+    "atualizadoAs": "updated at {hora}",
+    "intervalo": "{de} to {ate}",
+    "verDias": "See the last day | See the last {dias} days",
+    "frase": "{ocupacao} occupancy in {dias} day | {ocupacao} average occupancy in {dias} days",
+    "fraseSemDados": "No nights with the hotel operating in {dias} day | No nights with the hotel operating in {dias} days",
+    "fraseReceita": "{receita} in revenue in {dias} day | {receita} in revenue in {dias} days",
+    "periodo": {
+      "rotulo": "Period",
+      "hoje": "Today",
+      "semana": "This week",
+      "semana-passada": "Last week",
+      "trinta-dias": "30 days"
+    },
+    "outro": {
+      "abrir": "Other period",
+      "titulo": "Other period",
+      "quando": "From the first to the last day",
+      "ajuda": "Choose the first and the last day, up to {max} days.",
+      "dias": "{n} day | {n} days",
+      "faltaData": "Choose the first and the last day.",
+      "ver": "See the period"
+    },
+    "erro": {
+      "ler": "Could not load the summary.",
+      "excedida": "The hotel has too many bookings to read this period at once. {dias} days fit.",
+      "casaGrande": "The hotel has too many accommodations to build the summary; a shorter period will not help.",
+      "taxa": "Too many summary requests in a row. Try again in {segundos} second. | Too many summary requests in a row. Try again in {segundos} seconds.",
+      "taxaSemTempo": "Too many summary requests in a row. Try again shortly.",
+      "ocupado": "The summary is busy right now. Try again shortly.",
+      "muitosDias": "The period goes up to {max} days."
+    },
+    "numero": {
+      "aria": "The numbers for the period",
+      "ocupacao": "Average occupancy",
+      "noites": "{parte} of {de} night | {parte} of {de} nights",
+      "ocupacaoSemBase": "no nights with the hotel operating",
+      "diarias": "Nights sold",
+      "diariasNota": "from stays closed in the period",
+      "retorno": "Return",
+      "voltaram": "{parte} of {de} client came back | {parte} of {de} clients came back",
+      "desde": "data since {data}",
+      "semHistorico": "no history yet",
+      "semDesfecho": "No outcome",
+      "semDesfechoNota": "bookings whose check-in date has passed, still pending or confirmed"
+    },
+    "ocupacao": {
+      "titulo": "Occupancy per night",
+      "descricao": "How much of the hotel was occupied each night, against that day’s capacity.",
+      "dica": "{dia}: {ocupadas} of {total} ({taxa})",
+      "dicaFechado": "{dia}: no accommodation operating",
+      "dicaPendentes": "{n} pending without deposit | {n} pending without deposit",
+      "prevista": "forecast",
+      "previstas": "Days still to come, outside the average",
+      "fimDeSemana": "Saturday and Sunday",
+      "diaDeSemana": "Weekdays",
+      "media": "Average occupancy of {media}.",
+      "comPico": "Average of {media}; the fullest night was {dia}, with {ocupadas} of {total}.",
+      "pendentes": "{n} night held only by a pending booking, without deposit: it stays out of occupancy. | {n} nights held only by pending bookings, without deposit: they stay out of occupancy.",
+      "capacidadeEstimada": "Estimated capacity: the period starts before the accommodation history.",
+      "datasPrevistas": "Occupancy uses the planned dates: a stay that ended early counts slightly above the real figure."
+    },
+    "perdas": {
+      "titulo": "Cancellations and no-shows",
+      "descricao": "By the planned check-in date.",
+      "cancelamento": "Cancellation",
+      "naoComparecimento": "No-show",
+      "reservas": "{parte} of {de} booking | {parte} of {de} bookings",
+      "prazo": "{dentro} within the deadline, {fora} after the deadline",
+      "diarias": "{n} night lost | {n} nights lost",
+      "obito": "{n} booking canceled due to the animal’s death, outside the rate and the losses. | {n} bookings canceled due to the animal’s death, outside the rate and the losses."
+    },
+    "origem": {
+      "titulo": "Where bookings came from",
+      "descricao": "Stays closed, by the closing date.",
+      "vazio": "No stays closed in the period."
+    },
+    "ocorrencias": {
+      "titulo": "Incidents",
+      "vazio": "No incidents in the period.",
+      "falhou": "The incidents could not be read right now; the rest of the summary stands.",
+      "graves": "{n} serious | {n} serious"
+    },
+    "receita": {
+      "titulo": "Revenue",
+      "descricao": "Stays closed, by the closing date.",
+      "pelaReserva": "Revenue at the booking value.",
+      "receita": "Revenue",
+      "diariaMedia": "Average nightly rate",
+      "diariaMediaNota": "boarding only, per night sold",
+      "porDiaria": "Revenue per night",
+      "porDiariaNota": "boarding, services and late check-out",
+      "porOrigem": "Revenue by source",
+      "porServico": "Best-selling services",
+      "vazio": "No stays closed in the period.",
+      "semServicos": "No services sold in the period.",
+      "servicosFalharam": "Services unavailable right now; try a shorter period.",
+      "sinalTitulo": "Deposits and refunds",
+      "informativo": "By the planned check-in date. Amounts recorded at the front desk. PetJourney does not charge or refund.",
+      "retido": "Deposit kept",
+      "retidoAjuda": "What was paid, up to the deposit, on bookings canceled after the deadline.",
+      "aDevolver": "To refund",
+      "aDevolverAjuda": "The refund is made at the front desk; the amount stays here until a refund record exists.",
+      "naoCompareceu": "Paid on no-shows",
+      "naoCompareceuAjuda": "Kept apart: the system does not decide what to do with it.",
+      "obito": "Canceled due to death",
+      "obitoAjuda": "Paid amount left on hold, outside the kept and to-refund amounts.",
+      "reservas": "{n} booking | {n} bookings"
+    },
+    "ocorrenciaKind": {
+      "APATIA": "Lethargy",
+      "BRIGA": "Fight",
+      "DESTRUICAO": "Damage",
+      "DIARREIA": "Diarrhoea",
+      "ESTRESSE": "Stress",
+      "LESAO": "Injury",
+      "OUTRO": "Other",
+      "RECUSA_ALIMENTAR": "Refusing food",
+      "TENTATIVA_DE_FUGA": "Escape attempt",
+      "TOSSE": "Coughing",
+      "VOMITO": "Vomiting"
+    }
   }
 }

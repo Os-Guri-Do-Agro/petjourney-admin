@@ -13909,5 +13909,129 @@
       "vence-durante": "Ističe tokom boravka",
       "vencido": "Isteklo"
     }
+  },
+  "resumoDoHotel": {
+    "semDados": "Nema podataka",
+    "atualizadoAs": "ažurirano u {hora}",
+    "intervalo": "{de} do {ate}",
+    "verDias": "Prikaži poslednji {dias} dan | Prikaži poslednja {dias} dana | Prikaži poslednjih {dias} dana",
+    "frase": "{ocupacao} popunjenosti za {dias} dan | {ocupacao} prosečne popunjenosti za {dias} dana | {ocupacao} prosečne popunjenosti za {dias} dana",
+    "fraseSemDados": "Nijedna noć sa hotelom u radu za {dias} dan | Nijedna noć sa hotelom u radu za {dias} dana | Nijedna noć sa hotelom u radu za {dias} dana",
+    "fraseReceita": "{receita} prihoda za {dias} dan | {receita} prihoda za {dias} dana | {receita} prihoda za {dias} dana",
+    "periodo": {
+      "rotulo": "Period",
+      "hoje": "Danas",
+      "semana": "Ova nedelja",
+      "semana-passada": "Prošla nedelja",
+      "trinta-dias": "30 dana"
+    },
+    "outro": {
+      "abrir": "Drugi period",
+      "titulo": "Drugi period",
+      "quando": "Od prvog do poslednjeg dana",
+      "ajuda": "Izaberite prvi i poslednji dan, najviše {max} dana.",
+      "dias": "{n} dan | {n} dana | {n} dana",
+      "faltaData": "Izaberite prvi i poslednji dan.",
+      "ver": "Prikaži period"
+    },
+    "erro": {
+      "ler": "Pregled nije mogao da se učita.",
+      "excedida": "Hotel ima previše rezervacija da bi se ovaj period pročitao odjednom. Staje {dias} dana.",
+      "casaGrande": "Hotel ima previše smeštajnih jedinica za pregled; kraći period ne pomaže.",
+      "taxa": "Previše uzastopnih zahteva za pregled. Pokušajte ponovo za {segundos} sekundu. | Previše uzastopnih zahteva za pregled. Pokušajte ponovo za {segundos} sekunde. | Previše uzastopnih zahteva za pregled. Pokušajte ponovo za {segundos} sekundi.",
+      "taxaSemTempo": "Previše uzastopnih zahteva za pregled. Pokušajte ponovo uskoro.",
+      "ocupado": "Pregled je trenutno zauzet. Pokušajte ponovo uskoro.",
+      "muitosDias": "Period može da traje najviše {max} dana."
+    },
+    "numero": {
+      "aria": "Brojevi za period",
+      "ocupacao": "Prosečna popunjenost",
+      "noites": "{parte} od {de} noći | {parte} od {de} noći | {parte} od {de} noći",
+      "ocupacaoSemBase": "nijedna noć sa hotelom u radu",
+      "diarias": "Prodate noći",
+      "diariasNota": "iz boravaka završenih u periodu",
+      "retorno": "Povratak",
+      "voltaram": "{parte} od {de} klijenta se vratilo | {parte} od {de} klijenta se vratilo | {parte} od {de} klijenata se vratilo",
+      "desde": "podaci od {data}",
+      "semHistorico": "još nema istorije",
+      "semDesfecho": "Bez ishoda",
+      "semDesfechoNota": "rezervacije kojima je ulazak prošao, još na čekanju ili potvrđene"
+    },
+    "ocupacao": {
+      "titulo": "Popunjenost po noći",
+      "descricao": "Koliko je hotela bilo zauzeto svake noći, prema kapacitetu tog dana.",
+      "dica": "{dia}: {ocupadas} od {total} ({taxa})",
+      "dicaFechado": "{dia}: nijedna smeštajna jedinica u radu",
+      "dicaPendentes": "{n} na čekanju bez kapare | {n} na čekanju bez kapare | {n} na čekanju bez kapare",
+      "prevista": "predviđeno",
+      "previstas": "Dani koji još nisu došli, van proseka",
+      "fimDeSemana": "Subota i nedelja",
+      "diaDeSemana": "Radni dani",
+      "media": "Prosečna popunjenost {media}.",
+      "comPico": "Prosek {media}; najpunija noć je bila {dia}, sa {ocupadas} od {total}.",
+      "pendentes": "{n} noć zadržana samo rezervacijom na čekanju, bez kapare: ostaje van popunjenosti. | {n} noći zadržane samo rezervacijama na čekanju, bez kapare: ostaju van popunjenosti. | {n} noći zadržanih samo rezervacijama na čekanju, bez kapare: ostaju van popunjenosti.",
+      "capacidadeEstimada": "Procenjeni kapacitet: period počinje pre istorije smeštajnih jedinica.",
+      "datasPrevistas": "Popunjenost koristi predviđene datume: boravak koji se završio ranije računa se malo iznad stvarnog."
+    },
+    "perdas": {
+      "titulo": "Otkazivanja i nedolasci",
+      "descricao": "Prema danu predviđenog ulaska.",
+      "cancelamento": "Otkazivanje",
+      "naoComparecimento": "Nedolazak",
+      "reservas": "{parte} od {de} rezervacije | {parte} od {de} rezervacije | {parte} od {de} rezervacija",
+      "prazo": "{dentro} u roku, {fora} van roka",
+      "diarias": "{n} izgubljena noć | {n} izgubljene noći | {n} izgubljenih noći",
+      "obito": "{n} rezervacija otkazana zbog uginuća životinje, van stope i gubitaka. | {n} rezervacije otkazane zbog uginuća životinje, van stope i gubitaka. | {n} rezervacija otkazanih zbog uginuća životinje, van stope i gubitaka."
+    },
+    "origem": {
+      "titulo": "Poreklo rezervacija",
+      "descricao": "Završeni boravci, prema danu završetka.",
+      "vazio": "Nijedan boravak nije završen u periodu."
+    },
+    "ocorrencias": {
+      "titulo": "Incidenti",
+      "vazio": "Nijedan incident u periodu.",
+      "falhou": "Incidenti trenutno ne mogu da se pročitaju; ostatak pregleda važi.",
+      "graves": "{n} ozbiljan | {n} ozbiljna | {n} ozbiljnih"
+    },
+    "receita": {
+      "titulo": "Prihod",
+      "descricao": "Završeni boravci, prema danu završetka.",
+      "pelaReserva": "Prihod prema vrednosti rezervacije.",
+      "receita": "Prihod",
+      "diariaMedia": "Prosečna cena noćenja",
+      "diariaMediaNota": "samo smeštaj, po prodatoj noći",
+      "porDiaria": "Prihod po noći",
+      "porDiariaNota": "smeštaj, usluge i kasni izlazak",
+      "porOrigem": "Prihod po poreklu",
+      "porServico": "Najprodavanije usluge",
+      "vazio": "Nijedan boravak nije završen u periodu.",
+      "semServicos": "Nijedna usluga nije prodata u periodu.",
+      "servicosFalharam": "Usluge trenutno nisu dostupne; probajte kraći period.",
+      "sinalTitulo": "Kapare i povraćaji",
+      "informativo": "Prema danu predviđenog ulaska. Iznosi zabeleženi na recepciji. PetJourney ne naplaćuje i ne vraća novac.",
+      "retido": "Zadržana kapara",
+      "retidoAjuda": "Plaćeno, do iznosa kapare, kod otkazanih van roka.",
+      "aDevolver": "Za povraćaj",
+      "aDevolverAjuda": "Povraćaj se vrši na recepciji; iznos ostaje ovde dok ne postoji zapis o povraćaju.",
+      "naoCompareceu": "Plaćeno kod nedolazaka",
+      "naoCompareceuAjuda": "Posebno: sistem ne odlučuje šta da se radi s tim.",
+      "obito": "Otkazane zbog uginuća",
+      "obitoAjuda": "Plaćeni iznos koji je stao, van zadržanog i iznosa za povraćaj.",
+      "reservas": "{n} rezervacija | {n} rezervacije | {n} rezervacija"
+    },
+    "ocorrenciaKind": {
+      "APATIA": "Apatija",
+      "BRIGA": "Sukob",
+      "DESTRUICAO": "Oštećenje",
+      "DIARREIA": "Proliv",
+      "ESTRESSE": "Stres",
+      "LESAO": "Povreda",
+      "OUTRO": "Drugo",
+      "RECUSA_ALIMENTAR": "Odbijanje hrane",
+      "TENTATIVA_DE_FUGA": "Pokušaj bekstva",
+      "TOSSE": "Kašalj",
+      "VOMITO": "Povraćanje"
+    }
   }
 }
