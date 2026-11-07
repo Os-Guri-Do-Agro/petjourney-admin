@@ -118,6 +118,13 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     permissao: 'prontuario.ler',
     integrada: true,
   },
+  /* A fila de boletins (E5-03): também a recepção, que liga e envia sem ler o mapa. */
+  {
+    prefixo: '/clinica/internacao/boletins-pendentes',
+    modulo: 'CLINICA',
+    permissao: 'boletim.enviar',
+    integrada: true,
+  },
   {
     prefixo: '/clinica/internacao/vagas',
     modulo: 'CLINICA',

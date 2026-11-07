@@ -200,6 +200,13 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         icon: 'ph ph-note-pencil',
       },
       { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
+      /* O boletim a ligar ou a enviar (E5-03): a recepção liga e envia; o selo é o contador. */
+      {
+        key: 'internacao.boletim.fila',
+        to: '/clinica/internacao/boletins-pendentes',
+        icon: 'ph ph-phone',
+        soComApi: true,
+      },
       /* A recepção não lê o mapa: "tem vaga?" pelas contagens (E5-01). */
       {
         key: 'internacao.vagas.titulo',

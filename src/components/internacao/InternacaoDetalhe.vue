@@ -11,8 +11,8 @@
  * - Sem registro há 72 h: o aviso de que as doses e o boletim automático pararam.
  * - O animal também hospedado: a medicação do hotel, só leitura.
  *
- * O cuidado (E5-02): as prescrições, o checklist e a evolução, logo depois do estado. Os
- * boletins entram com a E5-03.
+ * O cuidado (E5-02): as prescrições, o checklist e a evolução, logo depois do estado; o boletim ao
+ * responsável (E5-03) em seguida.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -35,6 +35,7 @@ import {
 } from '@/service/parceiro/internacao-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
 
+import BoletinsDaInternacao from './BoletinsDaInternacao.vue'
 import ChecklistDaInternacao from './ChecklistDaInternacao.vue'
 import EditarCasoGaveta from './EditarCasoGaveta.vue'
 import EncerrarAdministrativoGaveta from './EncerrarAdministrativoGaveta.vue'
@@ -396,6 +397,15 @@ function encerrou(encerrada: Internacao) {
           @desatualizada="carregar"
         />
       </template>
+
+      <!-- O boletim ao responsável (E5-03): a conversa, a ligação e o envio. -->
+      <BoletinsDaInternacao
+        v-if="store.temPermissao('boletim.compor') || store.temPermissao('boletim.enviar')"
+        :internacao-id="internacao.id"
+        :paciente="internacao.paciente.nome"
+        :encerrada="internacao.encerrada"
+        :profissionais="profissionais"
+      />
 
       <!-- O caso: o que a equipe precisa saber, nunca no mapa. -->
       <section class="ui-folha ui-cartao" aria-labelledby="id-caso">
