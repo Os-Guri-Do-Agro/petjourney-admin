@@ -191,12 +191,14 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     soDemonstracao: true,
   },
 
-  /* Hotel (E7): a casa (E7-01), as reservas (E7-02) e a caixa de pedidos (E7-03) pela API. */
+  /* Hotel (E7): a casa (E7-01), as reservas (E7-02) e a caixa de pedidos (E7-03) e a estadia (E7-04) pela API. */
   { prefixo: '/hotel/acomodacoes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/reservas', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/reserva', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/mapa', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/pedidos', modulo: 'HOTEL', permissao: 'hotel.reserva', integrada: true },
+  { prefixo: '/hotel/hospedes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
+  { prefixo: '/hotel/hospedagem', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: false },
 ]
 

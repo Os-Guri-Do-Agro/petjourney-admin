@@ -7,6 +7,9 @@
  *
  * As ações seguem o status: registrar pagamento (`hotel.valores`), editar, cancelar e não
  * comparecimento (`hotel.reserva`). A pendente diz há quanto tempo espera e não expira sozinha.
+ * A estadia (E7-04): check-in da confirmada (`hotel.checkin`), check-out e mudar de baia da
+ * hospedada (`hotel.checkout`, `hotel.rotina`), o atalho para a estadia de cada animal e anular a
+ * estadia publicada no app (`estabelecimento.editar`).
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -16,7 +19,17 @@ import { RouterLink } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import CheckInGaveta from '@/components/hotel/estadia/CheckInGaveta.vue'
+import CheckOutGaveta from '@/components/hotel/estadia/CheckOutGaveta.vue'
+import MudarDeBaiaGaveta from '@/components/hotel/estadia/MudarDeBaiaGaveta.vue'
 import { lerCasa, type CasaDoHotel } from '@/service/parceiro/hotel-casa-service'
+import {
+  anularEstadiaPublicada,
+  lerEstadia,
+  MOTIVO_DA_ANULACAO_MAX,
+  MOTIVO_DA_ANULACAO_MIN,
+  type Hospedagem,
+} from '@/service/parceiro/hotel-estadia-service'
 import {
   lerReserva,
   marcarNaoCompareceu,
@@ -28,6 +41,7 @@ import AutorizadosGaveta from './AutorizadosGaveta.vue'
 import CancelarReservaGaveta from './CancelarReservaGaveta.vue'
 import ConfirmarPagamentoGaveta from './ConfirmarPagamentoGaveta.vue'
 import EditarReservaGaveta from './EditarReservaGaveta.vue'
+import MotivoGaveta from './MotivoGaveta.vue'
 import { TOM_DO_STATUS, useRotulosDasReservas } from './useRotulosDasReservas'
 import '@/components/hotel/casa/casa.css'
 
@@ -38,6 +52,7 @@ const rotulos = useRotulosDasReservas()
 const { store, parceiroQuery } = useParceiroPortal()
 
 const reserva = ref<ReservaDetalhe | null>(null)
+const hospedagens = ref<Hospedagem[]>([])
 const casa = ref<CasaDoHotel | null>(null)
 const carregando = ref(false)
 const erro = ref('')
@@ -49,6 +64,9 @@ async function carregar() {
   erro.value = ''
   try {
     reserva.value = await lerReserva(props.reservaId, parceiroQuery())
+    hospedagens.value = ['HOSPEDADO', 'ENCERRADA'].includes(reserva.value.status)
+      ? ((await lerEstadia(props.reservaId, parceiroQuery()).catch(() => null))?.hospedagens ?? [])
+      : []
   } catch (err) {
     erro.value = lerErroDoCadastro(err, t('reservasDoHotel.detalhe.erro')).mensagem
   } finally {
@@ -69,6 +87,21 @@ const escreve = computed(() => Boolean(store.modulo('HOTEL')?.podeEscrever))
 const podeReservar = computed(() => escreve.value && store.temPermissao('hotel.reserva'))
 const podePagamento = computed(() => escreve.value && store.temPermissao('hotel.valores'))
 const gestao = computed(() => store.temPermissao('estabelecimento.editar'))
+const podeCheckIn = computed(
+  () =>
+    escreve.value && store.temPermissao('hotel.checkin') && reserva.value?.status === 'CONFIRMADA',
+)
+const podeCheckOut = computed(
+  () =>
+    escreve.value && store.temPermissao('hotel.checkout') && reserva.value?.status === 'HOSPEDADO',
+)
+const podeMudarBaia = computed(
+  () =>
+    escreve.value && store.temPermissao('hotel.rotina') && reserva.value?.status === 'HOSPEDADO',
+)
+const podeAnular = computed(
+  () => escreve.value && gestao.value && reserva.value?.status === 'ENCERRADA',
+)
 
 const viva = computed(() => ['PENDENTE', 'CONFIRMADA'].includes(reserva.value?.status ?? ''))
 const editavel = computed(() =>
@@ -131,6 +164,10 @@ const pagamentoAberto = ref(false)
 const editarAberto = ref(false)
 const cancelarAberto = ref(false)
 const autorizadosAberto = ref(false)
+const checkInAberto = ref(false)
+const checkOutAberto = ref(false)
+const baiaAberta = ref(false)
+const anularAberto = ref(false)
 const marcando = ref(false)
 
 function feito(texto: string) {
@@ -171,6 +208,38 @@ async function naoCompareceu() {
     </template>
 
     <template v-if="reserva" #acoes>
+      <Button
+        v-if="podeAnular"
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-prohibit"
+        :label="t('estadiaDoHotel.anular.acao')"
+        @click="anularAberto = true"
+      />
+      <Button
+        v-if="podeMudarBaia"
+        type="button"
+        severity="secondary"
+        outlined
+        icon="ph ph-arrows-left-right"
+        :label="t('estadiaDoHotel.baia.titulo')"
+        @click="baiaAberta = true"
+      />
+      <Button
+        v-if="podeCheckIn"
+        type="button"
+        icon="ph ph-sign-in"
+        :label="t('estadiaDoHotel.checkin.titulo')"
+        @click="checkInAberto = true"
+      />
+      <Button
+        v-if="podeCheckOut"
+        type="button"
+        icon="ph ph-sign-out"
+        :label="t('estadiaDoHotel.checkout.titulo')"
+        @click="checkOutAberto = true"
+      />
       <Button
         v-if="podeReservar && viva"
         type="button"
@@ -272,6 +341,19 @@ async function naoCompareceu() {
             <dd>
               {{ rotulos.periodo(reserva.entradaPrevista, reserva.saidaPrevista) }} ·
               {{ rotulos.diarias(reserva.diarias) }}
+            </dd>
+          </div>
+          <div v-if="hospedagens.length" class="rd__fato">
+            <dt>{{ t('estadiaDoHotel.estadias') }}</dt>
+            <dd class="rd__estadias">
+              <RouterLink v-for="h in hospedagens" :key="h.id" :to="`/hotel/hospedagem/${h.id}`">
+                {{ h.pacienteNome }} ·
+                {{
+                  h.status === 'HOSPEDADO'
+                    ? t('estadiaDoHotel.naCasa')
+                    : t('estadiaDoHotel.encerrada')
+                }}
+              </RouterLink>
             </dd>
           </div>
           <div class="rd__fato">
@@ -477,6 +559,21 @@ async function naoCompareceu() {
         :reserva="reserva"
         @salvo="feito(t('reservasDoHotel.autorizados.salvos'))"
       />
+      <CheckInGaveta v-model:visible="checkInAberto" :reserva="reserva" @feito="feito" />
+      <CheckOutGaveta v-model:visible="checkOutAberto" :reserva="reserva" @feito="feito" />
+      <MudarDeBaiaGaveta v-model:visible="baiaAberta" :reserva="reserva" @feito="feito" />
+      <MotivoGaveta
+        v-model:visible="anularAberto"
+        :titulo="t('estadiaDoHotel.anular.titulo')"
+        icone="ph ph-prohibit"
+        :dica="t('estadiaDoHotel.anular.dica')"
+        :rotulo="t('reservasDoHotel.admissao.motivo')"
+        :confirmar="t('estadiaDoHotel.anular.acao')"
+        :min="MOTIVO_DA_ANULACAO_MIN"
+        :max="MOTIVO_DA_ANULACAO_MAX"
+        :acao="(motivo) => anularEstadiaPublicada(reserva!.id, motivo, parceiroQuery())"
+        @feito="feito(t('estadiaDoHotel.anular.feito'))"
+      />
     </template>
   </UiPagina>
 </template>
@@ -543,6 +640,16 @@ async function naoCompareceu() {
 
 .rd__fato:last-child {
   border-bottom: 0;
+}
+
+.rd__estadias {
+  display: grid;
+  gap: 4px;
+}
+
+.rd__estadias a {
+  color: var(--tinta);
+  font-weight: 600;
 }
 
 .rd__fato dt {

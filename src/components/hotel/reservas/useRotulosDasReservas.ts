@@ -86,6 +86,10 @@ export function useRotulosDasReservas() {
     return t('reservasDoHotel.periodo', { de: quando(entrada), ate: quando(saida) })
   }
 
+  function numero(n: number, casas = 0) {
+    return new Intl.NumberFormat(casa.intl(), { maximumFractionDigits: casas }).format(n)
+  }
+
   function diarias(n: number) {
     return t('reservasDoHotel.diarias', { n }, n)
   }
@@ -104,5 +108,6 @@ export function useRotulosDasReservas() {
     quando,
     periodo,
     diarias,
+    numero,
   }
 }
