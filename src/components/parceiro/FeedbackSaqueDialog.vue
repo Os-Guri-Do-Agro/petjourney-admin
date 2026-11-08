@@ -20,6 +20,7 @@ import { useI18n } from 'vue-i18n'
 import EscalaDeNota from '@/components/parceiro/EscalaDeNota.vue'
 import {
   INCENTIVOS_INDICACAO,
+  NOTA_MAXIMA_SAQUE,
   PONTOS_POSITIVOS,
   SUGESTAO_MAX_LENGTH,
   useFeedbackSaque,
@@ -122,6 +123,7 @@ async function aoEnviar() {
         </p>
         <EscalaDeNota
           v-model="nota"
+          :max="NOTA_MAXIMA_SAQUE"
           aria-labelledby="feedback-saque-nps"
           aria-describedby="feedback-saque-nps-legenda"
           :rotulo-de="(n) => t('carteira.feedbackSaque.nps.a11y', { nota: n })"

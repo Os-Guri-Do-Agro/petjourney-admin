@@ -30,7 +30,10 @@ import type { IncentivoIndicacaoFeedback, PontoPositivoFeedback } from '@/servic
  */
 
 /** Versão das perguntas na tela. Mudou pergunta: sobe aqui e na API. */
-export const VERSAO_QUESTIONARIO_SAQUE = 1
+export const VERSAO_QUESTIONARIO_SAQUE = 2
+
+/** Maior nota da pergunta de recomendação (0 a 5). Vai à API como `escalaMax`; sem ele a API assume 10. */
+export const NOTA_MAXIMA_SAQUE = 5
 
 /** O mesmo teto que a API cobra. */
 export const SUGESTAO_MAX_LENGTH = 1000
@@ -160,6 +163,7 @@ export function useFeedbackSaque() {
           saqueId: atual.saqueId,
           status: 'RESPONDIDO',
           versaoQuestionario: VERSAO_QUESTIONARIO_SAQUE,
+          escalaMax: NOTA_MAXIMA_SAQUE,
           notaRecomendacao: resposta.notaRecomendacao,
           pontosPositivos: resposta.pontosPositivos,
           incentivos: resposta.incentivos,

@@ -258,8 +258,10 @@ export type RegistrarFeedbackSaquePayload = {
   saqueId: string
   status: StatusFeedbackSaque
   versaoQuestionario: number
-  /** Obrigatória em `RESPONDIDO`, de 0 a 10. */
+  /** Obrigatória em `RESPONDIDO`, de 0 até `escalaMax`. */
   notaRecomendacao?: number
+  /** Maior nota da escala usada na tela (5 ou 10). Ausente, a API assume 10 (cliente antigo). */
+  escalaMax?: 5 | 10
   pontosPositivos?: PontoPositivoFeedback[]
   incentivos?: IncentivoIndicacaoFeedback[]
   /** Até 1000 caracteres; a API faz o trim. */

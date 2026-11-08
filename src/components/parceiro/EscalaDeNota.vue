@@ -1,21 +1,21 @@
 <script setup lang="ts">
 /**
- * A nota de 0 a 10 (NPS), em onze casas iguais numa linha.
+ * A escala de nota de 0 até `max` (hoje 5, no questionário pós-saque), em casas iguais numa linha.
  *
  * É um `radiogroup`, com o teclado que a função pede: uma parada de Tab para a escala inteira
  * (tabindex móvel), setas andam e escolhem, Home e End vão às pontas, Enter e espaço marcam a casa
- * em foco. Onze paradas de Tab para atravessar uma pergunta seriam onze toques à toa.
+ * em foco. Uma parada de Tab por casa seria toque à toa para atravessar uma pergunta.
  *
- * A escala é neutra de propósito: nada de vermelho no 0 e verde no 10. Cor ali puxaria a resposta,
+ * A escala é neutra de propósito: nada de vermelho na menor nota e verde na maior. Cor ali puxaria a resposta,
  * e a casa marcada já se distingue por fundo cheio e peso, sem depender de enxergar cor.
  */
 import Button from 'primevue/button'
 import { computed, nextTick, ref } from 'vue'
 
-const NOTAS = Array.from({ length: 11 }, (_, nota) => nota)
-
 const props = defineProps<{
   modelValue: number | null
+  /** Maior nota da escala; a menor é sempre 0. */
+  max: number
   /** Rótulo de cada casa para o leitor de tela, ex.: "Nota 7". */
   rotuloDe: (nota: number) => string
 }>()
@@ -23,6 +23,8 @@ const props = defineProps<{
 const emit = defineEmits<{ 'update:modelValue': [nota: number] }>()
 
 const escala = ref<HTMLElement | null>(null)
+
+const notas = computed(() => Array.from({ length: props.max + 1 }, (_, nota) => nota))
 
 /** Sem nota, o 0 é a porta de entrada do grupo. */
 const notaComParada = computed(() => props.modelValue ?? 0)
@@ -43,12 +45,12 @@ function aoTeclar(evento: KeyboardEvent, nota: number) {
   const avancar = rtl ? 'ArrowLeft' : 'ArrowRight'
   const voltar = rtl ? 'ArrowRight' : 'ArrowLeft'
   const alvos: Record<string, number> = {
-    [avancar]: Math.min(10, nota + 1),
-    ArrowDown: Math.min(10, nota + 1),
+    [avancar]: Math.min(props.max, nota + 1),
+    ArrowDown: Math.min(props.max, nota + 1),
     [voltar]: Math.max(0, nota - 1),
     ArrowUp: Math.max(0, nota - 1),
     Home: 0,
-    End: 10,
+    End: props.max,
   }
   const alvo = alvos[evento.key]
 
@@ -62,9 +64,14 @@ function aoTeclar(evento: KeyboardEvent, nota: number) {
 </script>
 
 <template>
-  <div ref="escala" class="escala-nota" role="radiogroup">
+  <div
+    ref="escala"
+    class="escala-nota"
+    role="radiogroup"
+    :style="{ gridTemplateColumns: `repeat(${notas.length}, minmax(0, 1fr))` }"
+  >
     <Button
-      v-for="nota in NOTAS"
+      v-for="nota in notas"
       :key="nota"
       type="button"
       class="escala-nota__casa"
@@ -84,11 +91,10 @@ function aoTeclar(evento: KeyboardEvent, nota: number) {
 .escala-nota {
   display: grid;
   gap: 4px;
-  grid-template-columns: repeat(11, minmax(0, 1fr));
 }
 
 /*
- * 44 px de altura: alvo de toque de tablet, mesmo com as onze casas numa linha. A casa marcada é
+ * 44 px de altura: alvo de toque de tablet, mesmo com todas as casas numa linha. A casa marcada é
  * a única cheia (musgo, a cor da ação); as outras são contorno, todas iguais.
  */
 .escala-nota .escala-nota__casa.p-button {

@@ -34,7 +34,7 @@ async function carregar() {
 }
 
 const RESPOSTA = {
-  notaRecomendacao: 9,
+  notaRecomendacao: 4,
   pontosPositivos: ['RAPIDEZ_SAQUE' as const],
   incentivos: [],
   sugestao: '  Mais material  ',
@@ -156,7 +156,7 @@ describe('fechar sem enviar — a dispensa', () => {
 
     expect(feedback.aberto.value).toBe(false)
     expect(chamadasCom('DISPENSADO')).toEqual([
-      [{ saqueId: 's1', status: 'DISPENSADO', versaoQuestionario: 1 }, { parceiroId: 'p1' }],
+      [{ saqueId: 's1', status: 'DISPENSADO', versaoQuestionario: 2 }, { parceiroId: 'p1' }],
     ])
   })
 
@@ -196,8 +196,9 @@ describe('enviar — a resposta', () => {
     expect(chamadasCom('RESPONDIDO')[0]?.[0]).toEqual({
       saqueId: 's1',
       status: 'RESPONDIDO',
-      versaoQuestionario: 1,
-      notaRecomendacao: 9,
+      versaoQuestionario: 2,
+      escalaMax: 5,
+      notaRecomendacao: 4,
       pontosPositivos: ['RAPIDEZ_SAQUE'],
       incentivos: [],
       sugestao: 'Mais material',

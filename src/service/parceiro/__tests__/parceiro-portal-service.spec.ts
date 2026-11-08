@@ -175,8 +175,9 @@ describe('questionário pós-saque', () => {
       {
         saqueId: 's1',
         status: 'RESPONDIDO',
-        versaoQuestionario: 1,
-        notaRecomendacao: 9,
+        versaoQuestionario: 2,
+        escalaMax: 5,
+        notaRecomendacao: 4,
         pontosPositivos: ['RAPIDEZ_SAQUE'],
         incentivos: [],
       },
@@ -191,8 +192,9 @@ describe('questionário pós-saque', () => {
     expect(corpoEnviado(fetchMock)).toEqual({
       saqueId: 's1',
       status: 'RESPONDIDO',
-      versaoQuestionario: 1,
-      notaRecomendacao: 9,
+      versaoQuestionario: 2,
+      escalaMax: 5,
+      notaRecomendacao: 4,
       pontosPositivos: ['RAPIDEZ_SAQUE'],
       incentivos: [],
     })
@@ -215,7 +217,7 @@ describe('questionário pós-saque', () => {
     )
 
     await expect(
-      registrarFeedbackSaque({ saqueId: 's1', status: 'DISPENSADO', versaoQuestionario: 1 }),
+      registrarFeedbackSaque({ saqueId: 's1', status: 'DISPENSADO', versaoQuestionario: 2 }),
     ).rejects.toMatchObject({ statusCode: 409, reason: 'FEEDBACK_FORA_DO_PRAZO' })
   })
 })

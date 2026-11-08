@@ -2162,8 +2162,8 @@
       "titulo": "Isplata je zatražena",
       "intro": "Dok je obrađujemo, recite nam kako Vam ide. Traje manje od 1 minuta.",
       "nps": {
-        "pergunta": "Na skali od 0 do 10, koliko je verovatno da biste program preporuka PetJourney preporučili kolegi?",
-        "legenda": "0 = nimalo verovatno, 10 = veoma verovatno",
+        "pergunta": "Na skali od 0 do 5, koliko je verovatno da biste program preporuka PetJourney preporučili kolegi?",
+        "legenda": "0 = nimalo verovatno, 5 = veoma verovatno",
         "a11y": "Ocena {nota}"
       },
       "multiplaEscolha": "Opciono. Možete izabrati više opcija.",
@@ -2193,7 +2193,7 @@
         "placeholder": "Pišite ovde (opciono)",
         "contador": "{atual}/{max}"
       },
-      "notaObrigatoria": "Izaberite ocenu od 0 do 10 da biste poslali.",
+      "notaObrigatoria": "Izaberite ocenu od 0 do 5 da biste poslali.",
       "agoraNao": "Ne sada",
       "erroEnvio": "Trenutno nije moguće poslati. Pokušajte ponovo.",
       "obrigado": {
