@@ -10,6 +10,7 @@ import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 import { tirarTokenDoConvite } from './convite-da-equipe'
 import { routes } from './file-routes'
 import { moduloDaPaginaAberta } from './paginas-abertas'
+import { recarregarSeATelaSumiu } from './pagina-velha'
 
 export const partnerLegacyRedirects: RouteRecordRaw[] = [
   { path: '/parceiro', redirect: '/inicio' },
@@ -67,6 +68,14 @@ export const partnerLegacyRedirects: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [...partnerLegacyRedirects, ...routes],
+})
+
+/*
+ * Arquivo da tela que sumiu depois de uma publicação nova: sem isto o clique (a seta de Acessos,
+ * por exemplo) não faz nada. Recarrega na rota pedida. Ver `pagina-velha.ts`.
+ */
+router.onError((erro, to) => {
+  recarregarSeATelaSumiu(erro, router.resolve(to.fullPath).href)
 })
 
 const publicRoutes = new Set(['/auth/login', '/auth/register', '/auth/forgot-password'])
