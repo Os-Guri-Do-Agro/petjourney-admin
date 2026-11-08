@@ -201,6 +201,13 @@ const faltaObrigatorio = computed(
 const DOCUMENTOS_SEM_ROLAGEM = 5
 
 const submittingAnotacao = ref(false)
+/**
+ * A anotação que acabou de entrar: o rodapé do botão confirma ali mesmo e o histórico a destaca.
+ * Só o aviso no topo da tela (toast) passava despercebido, e a anotação nova nascia no cartão de
+ * baixo: o formulário esvaziava e parecia que nada tinha acontecido.
+ */
+const anotacaoRegistradaId = ref<string | null>(null)
+let esquecerAnotacaoRegistrada: ReturnType<typeof setTimeout> | undefined
 const abrindoAnexoId = ref<string | null>(null)
 /** Chave `acao:arquivoId`: abrir e baixar o mesmo arquivo não podem girar juntos. */
 const arquivoOcupado = ref<string | null>(null)
@@ -978,6 +985,7 @@ async function submitAnotacao() {
 
   submittingAnotacao.value = true
   formError.value = ''
+  anotacaoRegistradaId.value = null
 
   try {
     const nova = await criarAnotacao(
@@ -1021,6 +1029,7 @@ async function submitAnotacao() {
       summary: t('acessos.anotacao.criada'),
       life: 3500,
     })
+    void mostrarAnotacaoRegistrada(nova.id)
   } catch (err) {
     if (err instanceof ApiError && err.statusCode === 409) {
       formError.value = t('acessos.anotacao.encerrado')
@@ -1038,13 +1047,38 @@ async function submitAnotacao() {
       // vínculo, ficam os remédios, e o próximo envio vai sem ela.
       leituraReceita.limpar()
       formError.value = err.message || t('acessos.leituraReceita.vinculoPerdido')
-    } else {
+    } else if (err instanceof ApiError && err.statusCode !== 403 && err.message) {
       // ANEXOS_ACIMA_DO_LIMITE e o resto: a mensagem da API diz o que fazer.
-      formError.value = err instanceof Error ? err.message : t('acessos.anotacao.erro')
+      formError.value = err.message
+    } else {
+      /*
+       * Sem resposta do servidor (o `fetch` solta "Failed to fetch", em inglês) ou 403 (a API
+       * devolve "Forbidden resource"): a mensagem crua não diz nada a quem anota. O que foi
+       * digitado fica no formulário e o erro aparece ao lado do botão.
+       */
+      formError.value = t('acessos.anotacao.erro')
     }
   } finally {
     submittingAnotacao.value = false
   }
+}
+
+/** Confirma ao lado do botão e leva o histórico à anotação nova, destacando-a por alguns segundos. */
+async function mostrarAnotacaoRegistrada(id: string) {
+  anotacaoRegistradaId.value = id
+  clearTimeout(esquecerAnotacaoRegistrada)
+  esquecerAnotacaoRegistrada = setTimeout(() => {
+    anotacaoRegistradaId.value = null
+  }, 8000)
+
+  await nextTick()
+
+  const reduzMovimento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
+  document.getElementById(`atd-nota-${id}`)?.scrollIntoView({
+    block: 'nearest',
+    behavior: reduzMovimento ? 'auto' : 'smooth',
+  })
 }
 
 async function abrirAnexo(anexoId: string) {
@@ -2038,6 +2072,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                   <i class="ph ph-warning-circle" aria-hidden="true" />
                   {{ formError }}
                 </p>
+                <p v-else-if="anotacaoRegistradaId" class="folha__ok" role="status">
+                  <i class="ph ph-check-circle" aria-hidden="true" />
+                  {{ t('acessos.anotacao.criada') }}
+                </p>
                 <p v-else class="folha__dica">
                   <i class="ph ph-arrow-bend-down-right" aria-hidden="true" />
                   {{ t('acessos.anotacao.rodape', { pet: detalhe.petNome }) }}
@@ -2087,7 +2125,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
               <ol v-else class="notas">
                 <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id">
-                  <article class="nota">
+                  <article
+                    :id="`atd-nota-${anotacao.id}`"
+                    class="nota"
+                    :class="{ 'nota--nova': anotacao.id === anotacaoRegistradaId }"
+                  >
                     <span class="nota__no ui-ladrilho ui-ladrilho--p" aria-hidden="true">
                       <i class="ph ph-note-pencil" />
                     </span>
@@ -3006,8 +3048,12 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   --docs-fade-baixo: 0px;
 
   display: grid;
+  max-block-size: min(26rem, 60vh);
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y proximity;
   list-style: none;
   mask-image: linear-gradient(
     to bottom,
@@ -3442,6 +3488,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 }
 
 .folha__erro,
+.folha__ok,
 .folha__dica {
   display: flex;
   min-width: 0;
@@ -3458,11 +3505,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   font-weight: 550;
 }
 
+.folha__ok {
+  color: var(--ok-tinta);
+  font-weight: 600;
+}
+
 .folha__dica {
   color: var(--tinta-2);
 }
 
 .folha__erro i,
+.folha__ok i,
 .folha__dica i {
   margin-top: 1px;
   font-size: 16px;
@@ -3529,6 +3582,15 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   display: grid;
   gap: 14px;
   grid-template-columns: 30px minmax(0, 1fr);
+}
+
+/* A anotação que acabou de entrar: um fundo suave que some quando o aviso de confirmação some. */
+.nota--nova {
+  margin: -8px -10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--ok-fundo) 45%, transparent);
+  transition: background-color 0.4s ease;
 }
 
 .notas > li:not(:last-child) .nota::before {
