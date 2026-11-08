@@ -45302,7 +45302,16 @@
             "type": "number",
             "minimum": 0,
             "maximum": 10,
-            "description": "Obrigatoria quando status=RESPONDIDO."
+            "description": "Obrigatoria quando status=RESPONDIDO. De 0 a escalaMax (0 a 10 sem escalaMax)."
+          },
+          "escalaMax": {
+            "type": "number",
+            "enum": [
+              5,
+              10
+            ],
+            "default": 10,
+            "description": "Teto da escala da nota (5 no questionario v2). Ausente = 10 (clientes antigos)."
           },
           "pontosPositivos": {
             "type": "array",
@@ -48192,6 +48201,11 @@
             "type": "string",
             "description": "Ultimo instante em que ainda pode nascer ocorrencia (ISO 8601, inclusivo). So vale com recorrente=true; nas demais e ignorado (gravado como null). Mande o instante ja convertido para o fim do dia no fuso do aparelho.",
             "example": "2026-12-15T03:59:59.999Z"
+          },
+          "dosesPassadasDadas": {
+            "type": "boolean",
+            "description": "\"Já dei as doses desde ...\" do tratamento contínuo. Só vale no POST /tratamento-fixo e no POST /tratamento-fixo/{id}/lembrete; nas demais rotas é ignorado. Com true, recorrente=true, frequencia e proximaDataHora no passado: cada horário da grade de proximaDataHora até agora (e até repetirAte) nasce como dose dada (CONCLUIDO, administradoEm = o horário), e a pendente nasce no primeiro horário depois de agora. Tratamento todo no passado: nenhuma pendente e a série nasce encerrada pelo prazo. Nesse modo o \"Começou em\" (inicioInformadoEm) não é gravado. Mais de 500 doses: 400 LEMBRETE_DOSES_PASSADAS_DEMAIS. Ausente ou false: comportamento de sempre.",
+            "default": false
           }
         },
         "required": [
@@ -48802,6 +48816,11 @@
             "type": "string",
             "description": "Ultimo instante em que ainda pode nascer ocorrencia (ISO 8601, inclusivo). So vale com recorrente=true; nas demais e ignorado (gravado como null). Mande o instante ja convertido para o fim do dia no fuso do aparelho.",
             "example": "2026-12-15T03:59:59.999Z"
+          },
+          "dosesPassadasDadas": {
+            "type": "boolean",
+            "description": "\"Já dei as doses desde ...\" do tratamento contínuo. Só vale no POST /tratamento-fixo e no POST /tratamento-fixo/{id}/lembrete; nas demais rotas é ignorado. Com true, recorrente=true, frequencia e proximaDataHora no passado: cada horário da grade de proximaDataHora até agora (e até repetirAte) nasce como dose dada (CONCLUIDO, administradoEm = o horário), e a pendente nasce no primeiro horário depois de agora. Tratamento todo no passado: nenhuma pendente e a série nasce encerrada pelo prazo. Nesse modo o \"Começou em\" (inicioInformadoEm) não é gravado. Mais de 500 doses: 400 LEMBRETE_DOSES_PASSADAS_DEMAIS. Ausente ou false: comportamento de sempre.",
+            "default": false
           },
           "proximaDataHora": {
             "type": "string",

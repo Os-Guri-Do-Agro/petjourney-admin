@@ -13275,8 +13275,14 @@ export interface components {
             status: "RESPONDIDO" | "DISPENSADO";
             /** @description Versao das perguntas que o app exibiu. */
             versaoQuestionario: number;
-            /** @description Obrigatoria quando status=RESPONDIDO. */
+            /** @description Obrigatoria quando status=RESPONDIDO. De 0 a escalaMax (0 a 10 sem escalaMax). */
             notaRecomendacao?: number;
+            /**
+             * @description Teto da escala da nota (5 no questionario v2). Ausente = 10 (clientes antigos).
+             * @default 10
+             * @enum {number}
+             */
+            escalaMax?: 5 | 10;
             pontosPositivos?: ("FACILIDADE_INDICAR" | "ACOMPANHAR_INDICADOS" | "CLAREZA_CARTEIRA" | "RAPIDEZ_SAQUE" | "VALOR_PARTICIPACAO" | "APP_GERAL")[];
             incentivos?: ("MATERIAL_DIVULGACAO" | "PARTICIPACAO_MAIOR" | "TUTORES_ENGAJADOS" | "FERRAMENTAS_NEGOCIO" | "ENTENDER_PROGRAMA")[];
             sugestao?: string;
@@ -14526,6 +14532,11 @@ export interface components {
              * @example 2026-12-15T03:59:59.999Z
              */
             repetirAte?: string;
+            /**
+             * @description "Já dei as doses desde ..." do tratamento contínuo. Só vale no POST /tratamento-fixo e no POST /tratamento-fixo/{id}/lembrete; nas demais rotas é ignorado. Com true, recorrente=true, frequencia e proximaDataHora no passado: cada horário da grade de proximaDataHora até agora (e até repetirAte) nasce como dose dada (CONCLUIDO, administradoEm = o horário), e a pendente nasce no primeiro horário depois de agora. Tratamento todo no passado: nenhuma pendente e a série nasce encerrada pelo prazo. Nesse modo o "Começou em" (inicioInformadoEm) não é gravado. Mais de 500 doses: 400 LEMBRETE_DOSES_PASSADAS_DEMAIS. Ausente ou false: comportamento de sempre.
+             * @default false
+             */
+            dosesPassadasDadas?: boolean;
         };
         CreateVacinaDto: {
             nome: string;
@@ -14789,6 +14800,11 @@ export interface components {
              * @example 2026-12-15T03:59:59.999Z
              */
             repetirAte?: string;
+            /**
+             * @description "Já dei as doses desde ..." do tratamento contínuo. Só vale no POST /tratamento-fixo e no POST /tratamento-fixo/{id}/lembrete; nas demais rotas é ignorado. Com true, recorrente=true, frequencia e proximaDataHora no passado: cada horário da grade de proximaDataHora até agora (e até repetirAte) nasce como dose dada (CONCLUIDO, administradoEm = o horário), e a pendente nasce no primeiro horário depois de agora. Tratamento todo no passado: nenhuma pendente e a série nasce encerrada pelo prazo. Nesse modo o "Começou em" (inicioInformadoEm) não é gravado. Mais de 500 doses: 400 LEMBRETE_DOSES_PASSADAS_DEMAIS. Ausente ou false: comportamento de sempre.
+             * @default false
+             */
+            dosesPassadasDadas?: boolean;
             /** @description Data/hora da primeira dose (ISO 8601). Obrigatória, salvo com iniciarAposIndice. */
             proximaDataHora?: string;
             /** @description Total de doses quando a receita escreve a contagem. Sem ele, o total vem de duracaoDias e do regime. */
