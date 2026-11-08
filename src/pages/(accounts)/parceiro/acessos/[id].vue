@@ -197,6 +197,9 @@ const faltaObrigatorio = computed(
   () => formError.value !== '' && formError.value === t('acessos.anotacao.camposObrigatorios'),
 )
 
+/** Até aqui os documentos cabem no cartão; acima disso a lista rola por dentro (`.docs`). */
+const DOCUMENTOS_SEM_ROLAGEM = 5
+
 const submittingAnotacao = ref(false)
 const abrindoAnexoId = ref<string | null>(null)
 /** Chave `acao:arquivoId`: abrir e baixar o mesmo arquivo não podem girar juntos. */
@@ -488,6 +491,27 @@ const documentos = computed(() => {
     }
   })
 })
+
+/**
+ * A lista rolável de documentos esmaece a borda onde ainda há o que ver, para o último item não
+ * parecer cortado por engano: em cima só depois de rolar, embaixo até chegar ao fim.
+ */
+const documentosLista = ref<HTMLElement | null>(null)
+const documentosMaisAcima = ref(false)
+const documentosMaisAbaixo = ref(false)
+
+function medirRolagemDosDocumentos() {
+  const el = documentosLista.value
+
+  if (!el) {
+    return
+  }
+
+  documentosMaisAcima.value = el.scrollTop > 1
+  documentosMaisAbaixo.value = el.scrollTop + el.clientHeight < el.scrollHeight - 1
+}
+
+watch(documentosLista, () => void nextTick(medirRolagemDosDocumentos))
 
 const documentosEstado = computed(() =>
   estadoDoBloco(fonteSnapshot.value, 'documentos', documentos.value.length),
@@ -1665,7 +1689,20 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
               <p v-if="documentosVazioTexto" class="ui-vazio">{{ documentosVazioTexto }}</p>
 
-              <ul v-else class="docs">
+              <!-- Altura máxima com rolagem própria: 10 documentos não esticam a página. Rolando, a
+                   lista entra na ordem do Tab (para rolar com as setas) e tem nome, para o leitor
+                   de tela dizer onde está; poucos documentos cabem inteiros e não ganham o foco. -->
+              <ul
+                v-else
+                ref="documentosLista"
+                class="docs"
+                :class="{ 'docs--acima': documentosMaisAcima, 'docs--abaixo': documentosMaisAbaixo }"
+                :tabindex="documentos.length > DOCUMENTOS_SEM_ROLAGEM ? 0 : undefined"
+                :aria-labelledby="
+                  documentos.length > DOCUMENTOS_SEM_ROLAGEM ? 'atd-docs-titulo' : undefined
+                "
+                @scroll.passive="medirRolagemDosDocumentos"
+              >
                 <li v-for="doc in documentos" :key="doc.key" class="doc">
                   <span class="doc__icone" aria-hidden="true"><i class="ph ph-file-text" /></span>
 
@@ -2959,11 +2996,43 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
 /* -------- documentos */
 
+/*
+ * O cartão de documentos para de crescer: com mais de cinco, a lista rola por dentro. A máscara
+ * esmaece a borda onde ainda há o que rolar (`--docs-fade-*`, ligados pela rolagem), e o encaixe
+ * `proximity` faz o fim da rolagem parar no começo de um documento, não no meio dele.
+ */
 .docs {
+  --docs-fade-cima: 0px;
+  --docs-fade-baixo: 0px;
+
   display: grid;
   margin: 0;
   padding: 0;
   list-style: none;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--docs-fade-cima),
+    #000 calc(100% - var(--docs-fade-baixo)),
+    transparent 100%
+  );
+}
+
+.docs--acima {
+  --docs-fade-cima: 28px;
+}
+
+.docs--abaixo {
+  --docs-fade-baixo: 28px;
+}
+
+.docs:focus-visible {
+  outline: 2px solid var(--pj-lugar, var(--musgo));
+  outline-offset: -2px;
+}
+
+.docs > .doc {
+  scroll-snap-align: start;
 }
 
 .doc {
