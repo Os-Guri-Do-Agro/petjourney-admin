@@ -860,6 +860,696 @@
         ]
       }
     },
+    "/notificacao": {
+      "get": {
+        "operationId": "NotificacaoController_listar",
+        "parameters": [
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "So as notificacoes deste parceiro (dados.parceiroId). Com o filtro, a resposta traz tambem naoLidasDoParceiro; naoLidas continua sendo o total do inbox (badge do app)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Id da ultima notificacao da pagina anterior (cursor)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Tamanho da pagina (default 20, max 50)",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lista paginada (cursor) do inbox do usuario logado, com naoLidas para o badge. ?parceiroId= recorta pelos avisos daquele parceiro (portal) e soma naoLidasDoParceiro",
+        "tags": [
+          "notificacao"
+        ]
+      },
+      "delete": {
+        "operationId": "NotificacaoController_limpar",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apaga todas as notificacoes do usuario (limpar inbox)",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/preferencias": {
+      "get": {
+        "operationId": "NotificacaoController_listarPreferencias",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Preferencia por categoria + assuntos silenciados do usuario logado",
+        "tags": [
+          "notificacao"
+        ]
+      },
+      "patch": {
+        "operationId": "NotificacaoController_atualizarPreferencias",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AtualizarPreferenciaDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Liga ou desliga categorias de notificacao",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/silencio": {
+      "post": {
+        "operationId": "NotificacaoController_silenciar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarSilencioDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Silencia o push de um pet ou da familia; 403 se o alvo nao for do usuario",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/silencio/{escopo}/{alvoId}": {
+      "delete": {
+        "operationId": "NotificacaoController_dessilenciar",
+        "parameters": [
+          {
+            "name": "escopo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "alvoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove um silencio; devolve a lista atual. Inexistente nao e erro",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/read-all": {
+      "patch": {
+        "operationId": "NotificacaoController_marcarTodas",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marca todas as notificacoes do usuario como lidas; devolve naoLidas para o badge",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/{id}/toque": {
+      "patch": {
+        "operationId": "NotificacaoController_registrarToque",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrarToqueDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra que o usuario tocou a notificacao (grava tocadoEm, lidaEm e a origem do toque); devolve naoLidas para o badge",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/notificacao/{id}/read": {
+      "patch": {
+        "operationId": "NotificacaoController_marcarLida",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Marca uma notificacao como lida (idempotente); devolve naoLidas para o badge",
+        "tags": [
+          "notificacao"
+        ]
+      }
+    },
+    "/device-token": {
+      "post": {
+        "operationId": "DeviceTokenController_registrar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra (ou reativa/reatribui) o Expo push token do device logado",
+        "tags": [
+          "device-token"
+        ]
+      },
+      "delete": {
+        "operationId": "DeviceTokenController_remover",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveDeviceTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Desativa o token do device no logout (idempotente; token alheio e no-op)",
+        "tags": [
+          "device-token"
+        ]
+      }
+    },
+    "/notificacao/admin/health": {
+      "get": {
+        "operationId": "NotificacaoAdminController_obterHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Retrato unico do motor: ultima rodada por job, push por status, funil do inbox e bloqueios",
+        "tags": [
+          "notificacao-admin"
+        ]
+      }
+    },
+    "/notificacao/admin/rodadas": {
+      "get": {
+        "operationId": "NotificacaoAdminController_listarRodadas",
+        "parameters": [
+          {
+            "name": "job",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por job. Ausente traz todos.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TICK",
+                "ENGAJAMENTO",
+                "RECIBOS",
+                "RETENCAO",
+                "WATCHDOG"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dias",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 14,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ultimas rodadas dos crons, opcionalmente filtradas por job",
+        "tags": [
+          "notificacao-admin"
+        ]
+      }
+    },
+    "/notificacao/admin/watchdog": {
+      "get": {
+        "operationId": "NotificacaoAdminController_verificarAgora",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Executa a verificacao do watchdog agora e devolve os achados",
+        "tags": [
+          "notificacao-admin"
+        ]
+      }
+    },
+    "/notificacao/admin/rodadas/retencao": {
+      "delete": {
+        "operationId": "NotificacaoAdminController_podarRodadas",
+        "parameters": [
+          {
+            "name": "job",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por job. Ausente traz todos.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "TICK",
+                "ENGAJAMENTO",
+                "RECIBOS",
+                "RETENCAO",
+                "WATCHDOG"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "maximum": 500,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dias",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 14,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Apaga rodadas mais antigas que o numero de dias informado (default 14)",
+        "tags": [
+          "notificacao-admin"
+        ]
+      }
+    },
+    "/subscription/usuario/{usuarioId}": {
+      "get": {
+        "operationId": "SubscriptionController_findAllForUsuario",
+        "parameters": [
+          {
+            "name": "usuarioId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/subscription/tutor/{tutorId}": {
+      "get": {
+        "operationId": "SubscriptionController_findForTutor",
+        "parameters": [
+          {
+            "name": "tutorId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Locale de `planoNome` e `beneficios[].titulo`",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/subscription/veterinario/{veterinarioId}": {
+      "get": {
+        "operationId": "SubscriptionController_findForVeterinario",
+        "parameters": [
+          {
+            "name": "veterinarioId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "410": {
+            "description": "LEGADO_DESLIGADO (reason VETERINARIO): rota do modelo antigo desligada."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/subscription/test/trigger-downgrade": {
+      "post": {
+        "operationId": "SubscriptionController_testTriggerDowngrade",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Subscription"
+        ]
+      }
+    },
+    "/plano": {
+      "post": {
+        "operationId": "PlanoController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "plano"
+        ]
+      },
+      "get": {
+        "operationId": "PlanoController_findAll",
+        "parameters": [
+          {
+            "name": "incluirTraducoes",
+            "required": false,
+            "in": "query",
+            "description": "\"true\" = mapa traducoes cru (CMS)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": false,
+            "in": "query",
+            "description": "Locale do conteúdo (pt-BR | en-US | en-GB | es-419)",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "plano"
+        ]
+      }
+    },
+    "/plano/precos": {
+      "get": {
+        "description": "Referencia para quando a loja nao devolve o pacote. Nunca e o preco cobrado: quem cobra e a loja. Lista vazia quando nao ha preco registrado para o pais nessa loja.",
+        "operationId": "PlanoPrecosController_obter",
+        "parameters": [
+          {
+            "name": "pais",
+            "required": true,
+            "in": "query",
+            "description": "Pais da conta da loja (storefront), ISO alpha-2 ou alpha-3.",
+            "schema": {
+              "example": "BRA",
+              "type": "string"
+            }
+          },
+          {
+            "name": "loja",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "example": "APP_STORE",
+              "type": "string",
+              "enum": [
+                "APP_STORE",
+                "PLAY_STORE"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Preco de referencia dos planos para o pais da conta da loja",
+        "tags": [
+          "plano"
+        ]
+      }
+    },
     "/parceiro/portal/feedback/elegibilidade": {
       "get": {
         "operationId": "FeedbackParceiroController_elegibilidade",
@@ -2543,696 +3233,6 @@
         "summary": "Numeros do menu e do Inicio do portal (selos), calculados no servidor. So os contadores que o usuario pode ver (permissao da matriz, CRMV quando o ato exige e modulo com leitura; PORTAL sempre). Zero vem na lista: quem omite e o front. Cache de 30 s por parceiro e usuario",
         "tags": [
           "parceiro-portal"
-        ]
-      }
-    },
-    "/notificacao": {
-      "get": {
-        "operationId": "NotificacaoController_listar",
-        "parameters": [
-          {
-            "name": "parceiroId",
-            "required": false,
-            "in": "query",
-            "description": "So as notificacoes deste parceiro (dados.parceiroId). Com o filtro, a resposta traz tambem naoLidasDoParceiro; naoLidas continua sendo o total do inbox (badge do app)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cursor",
-            "required": false,
-            "in": "query",
-            "description": "Id da ultima notificacao da pagina anterior (cursor)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "description": "Tamanho da pagina (default 20, max 50)",
-            "schema": {
-              "default": 20,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Lista paginada (cursor) do inbox do usuario logado, com naoLidas para o badge. ?parceiroId= recorta pelos avisos daquele parceiro (portal) e soma naoLidasDoParceiro",
-        "tags": [
-          "notificacao"
-        ]
-      },
-      "delete": {
-        "operationId": "NotificacaoController_limpar",
-        "parameters": [],
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Apaga todas as notificacoes do usuario (limpar inbox)",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/preferencias": {
-      "get": {
-        "operationId": "NotificacaoController_listarPreferencias",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Preferencia por categoria + assuntos silenciados do usuario logado",
-        "tags": [
-          "notificacao"
-        ]
-      },
-      "patch": {
-        "operationId": "NotificacaoController_atualizarPreferencias",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AtualizarPreferenciaDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Liga ou desliga categorias de notificacao",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/silencio": {
-      "post": {
-        "operationId": "NotificacaoController_silenciar",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CriarSilencioDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Silencia o push de um pet ou da familia; 403 se o alvo nao for do usuario",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/silencio/{escopo}/{alvoId}": {
-      "delete": {
-        "operationId": "NotificacaoController_dessilenciar",
-        "parameters": [
-          {
-            "name": "escopo",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "alvoId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove um silencio; devolve a lista atual. Inexistente nao e erro",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/read-all": {
-      "patch": {
-        "operationId": "NotificacaoController_marcarTodas",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Marca todas as notificacoes do usuario como lidas; devolve naoLidas para o badge",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/{id}/toque": {
-      "patch": {
-        "operationId": "NotificacaoController_registrarToque",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegistrarToqueDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Registra que o usuario tocou a notificacao (grava tocadoEm, lidaEm e a origem do toque); devolve naoLidas para o badge",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/notificacao/{id}/read": {
-      "patch": {
-        "operationId": "NotificacaoController_marcarLida",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Marca uma notificacao como lida (idempotente); devolve naoLidas para o badge",
-        "tags": [
-          "notificacao"
-        ]
-      }
-    },
-    "/device-token": {
-      "post": {
-        "operationId": "DeviceTokenController_registrar",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterDeviceTokenDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Registra (ou reativa/reatribui) o Expo push token do device logado",
-        "tags": [
-          "device-token"
-        ]
-      },
-      "delete": {
-        "operationId": "DeviceTokenController_remover",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RemoveDeviceTokenDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Desativa o token do device no logout (idempotente; token alheio e no-op)",
-        "tags": [
-          "device-token"
-        ]
-      }
-    },
-    "/notificacao/admin/health": {
-      "get": {
-        "operationId": "NotificacaoAdminController_obterHealth",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Retrato unico do motor: ultima rodada por job, push por status, funil do inbox e bloqueios",
-        "tags": [
-          "notificacao-admin"
-        ]
-      }
-    },
-    "/notificacao/admin/rodadas": {
-      "get": {
-        "operationId": "NotificacaoAdminController_listarRodadas",
-        "parameters": [
-          {
-            "name": "job",
-            "required": false,
-            "in": "query",
-            "description": "Filtra por job. Ausente traz todos.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "TICK",
-                "ENGAJAMENTO",
-                "RECIBOS",
-                "RETENCAO",
-                "WATCHDOG"
-              ]
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "maximum": 500,
-              "default": 50,
-              "type": "number"
-            }
-          },
-          {
-            "name": "dias",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 14,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Ultimas rodadas dos crons, opcionalmente filtradas por job",
-        "tags": [
-          "notificacao-admin"
-        ]
-      }
-    },
-    "/notificacao/admin/watchdog": {
-      "get": {
-        "operationId": "NotificacaoAdminController_verificarAgora",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Executa a verificacao do watchdog agora e devolve os achados",
-        "tags": [
-          "notificacao-admin"
-        ]
-      }
-    },
-    "/notificacao/admin/rodadas/retencao": {
-      "delete": {
-        "operationId": "NotificacaoAdminController_podarRodadas",
-        "parameters": [
-          {
-            "name": "job",
-            "required": false,
-            "in": "query",
-            "description": "Filtra por job. Ausente traz todos.",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "TICK",
-                "ENGAJAMENTO",
-                "RECIBOS",
-                "RETENCAO",
-                "WATCHDOG"
-              ]
-            }
-          },
-          {
-            "name": "limit",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "maximum": 500,
-              "default": 50,
-              "type": "number"
-            }
-          },
-          {
-            "name": "dias",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "default": 14,
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Apaga rodadas mais antigas que o numero de dias informado (default 14)",
-        "tags": [
-          "notificacao-admin"
-        ]
-      }
-    },
-    "/subscription/usuario/{usuarioId}": {
-      "get": {
-        "operationId": "SubscriptionController_findAllForUsuario",
-        "parameters": [
-          {
-            "name": "usuarioId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Subscription"
-        ]
-      }
-    },
-    "/subscription/tutor/{tutorId}": {
-      "get": {
-        "operationId": "SubscriptionController_findForTutor",
-        "parameters": [
-          {
-            "name": "tutorId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
-            "required": false,
-            "in": "query",
-            "description": "Locale de `planoNome` e `beneficios[].titulo`",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Subscription"
-        ]
-      }
-    },
-    "/subscription/veterinario/{veterinarioId}": {
-      "get": {
-        "operationId": "SubscriptionController_findForVeterinario",
-        "parameters": [
-          {
-            "name": "veterinarioId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "410": {
-            "description": "LEGADO_DESLIGADO (reason VETERINARIO): rota do modelo antigo desligada."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Subscription"
-        ]
-      }
-    },
-    "/subscription/test/trigger-downgrade": {
-      "post": {
-        "operationId": "SubscriptionController_testTriggerDowngrade",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Subscription"
-        ]
-      }
-    },
-    "/plano": {
-      "post": {
-        "operationId": "PlanoController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePlanoDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "plano"
-        ]
-      },
-      "get": {
-        "operationId": "PlanoController_findAll",
-        "parameters": [
-          {
-            "name": "incluirTraducoes",
-            "required": false,
-            "in": "query",
-            "description": "\"true\" = mapa traducoes cru (CMS)",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
-            "required": false,
-            "in": "query",
-            "description": "Locale do conteúdo (pt-BR | en-US | en-GB | es-419)",
-            "schema": {}
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "plano"
-        ]
-      }
-    },
-    "/plano/precos": {
-      "get": {
-        "description": "Referencia para quando a loja nao devolve o pacote. Nunca e o preco cobrado: quem cobra e a loja. Lista vazia quando nao ha preco registrado para o pais nessa loja.",
-        "operationId": "PlanoPrecosController_obter",
-        "parameters": [
-          {
-            "name": "pais",
-            "required": true,
-            "in": "query",
-            "description": "Pais da conta da loja (storefront), ISO alpha-2 ou alpha-3.",
-            "schema": {
-              "example": "BRA",
-              "type": "string"
-            }
-          },
-          {
-            "name": "loja",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "example": "APP_STORE",
-              "type": "string",
-              "enum": [
-                "APP_STORE",
-                "PLAY_STORE"
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Preco de referencia dos planos para o pais da conta da loja",
-        "tags": [
-          "plano"
         ]
       }
     },
@@ -7786,6 +7786,45 @@
         ]
       }
     },
+    "/tratamento-fixo/{id}/lembrete": {
+      "post": {
+        "operationId": "TratamentoFixoController_ligarLembrete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CriarLembreteDerivadoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ligar o lembrete das doses de um tratamento ja salvo. 409 TRATAMENTO_JA_TEM_LEMBRETE se ja ha aviso vivo; 403 para tratamento alheio ou inexistente. Responde o tratamento com `gerouLembrete`.",
+        "tags": [
+          "tratamento-fixo"
+        ]
+      }
+    },
     "/tratamento-fixo/{id}": {
       "get": {
         "operationId": "TratamentoFixoController_findOne",
@@ -7940,6 +7979,36 @@
           }
         ],
         "summary": "Listar medicamentos administrados de um pet (petId obrigatório, exceto admin)",
+        "tags": [
+          "medicamento"
+        ]
+      }
+    },
+    "/medicamento/da-receita": {
+      "get": {
+        "operationId": "MedicamentoController_findDaReceita",
+        "parameters": [
+          {
+            "name": "petId",
+            "required": true,
+            "in": "query",
+            "description": "Pet dos remédios das receitas",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remédios das receitas do pet para a aba Medicamentos (leitura com IA, receita da clínica, consulta): os sem lembrete e os de lembrete encerrado, com estado EM_USO, ENCERRADO ou SEM_PRAZO, início e fim em dia civil. Uso contínuo fica em Remédios de uso contínuo; lembrete ativo, no calendário. Receita repetida aparece uma vez.",
         "tags": [
           "medicamento"
         ]
@@ -15249,6 +15318,51 @@
         ]
       }
     },
+    "/parceiro/portal/estabelecimento/qr": {
+      "get": {
+        "operationId": "EstabelecimentoController_qrDaPagina",
+        "parameters": [
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tipo",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/TipoPaginaPublica"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QrDaPaginaPublicaDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "QR da pagina publica no padrao da marca (WFQR, sage com a pata), um por pagina: CLINICA (/agendar) ou HOTEL (/reservar). Nasce na primeira leitura e segue o endereco quando o slug muda",
+        "tags": [
+          "parceiro-portal"
+        ]
+      }
+    },
     "/parceiro/portal/estabelecimento/horarios": {
       "put": {
         "operationId": "EstabelecimentoController_salvarHorarios",
@@ -15385,6 +15499,53 @@
           }
         ],
         "summary": "Copia os feriados nacionais do ano como dias fechados (DONO); os ja cadastrados ficam",
+        "tags": [
+          "parceiro-portal"
+        ]
+      }
+    },
+    "/parceiro/portal/estabelecimento/dias-especiais/remover": {
+      "post": {
+        "operationId": "EstabelecimentoController_removerDiasEspeciais",
+        "parameters": [
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoverDiasEspeciaisDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemocaoDeDiasEspeciaisDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove varios dias especiais de uma vez (DONO); os que nao existem voltam em naoEncontrados",
         "tags": [
           "parceiro-portal"
         ]
@@ -44975,6 +45136,137 @@
           "motivo"
         ]
       },
+      "CriarSilencioDto": {
+        "type": "object",
+        "properties": {
+          "escopo": {
+            "type": "string",
+            "enum": [
+              "PET",
+              "FAMILIA"
+            ],
+            "description": "PET silencia um pet; FAMILIA silencia o plano familia inteiro."
+          },
+          "alvoId": {
+            "type": "string",
+            "description": "Pet.id ou FamiliaPlano.id, conforme o escopo. 403 se nao for do usuario."
+          }
+        },
+        "required": [
+          "escopo",
+          "alvoId"
+        ]
+      },
+      "AtualizarPreferenciaDto": {
+        "type": "object",
+        "properties": {
+          "CLINICO": {
+            "type": "boolean",
+            "description": "Lembrete de remédio, vacina e consulta. Desligado, o push para mas o inbox continua."
+          },
+          "ENGAJAMENTO": {
+            "type": "boolean",
+            "description": "Convites para voltar ao app. Desligado, nada é criado."
+          },
+          "ASSINATURA": {
+            "type": "boolean",
+            "description": "Teste grátis, plano e cobrança. Desligado, nada é criado."
+          },
+          "PARCEIRO": {
+            "type": "boolean",
+            "description": "Funil do parceiro, indicações, cupons e acesso ao prontuário. Desligado, o push para."
+          },
+          "FAMILIA": {
+            "type": "boolean",
+            "description": "Plano família: convites, pedidos e pets compartilhados. Desligado, o push para."
+          }
+        }
+      },
+      "RegistrarToqueDto": {
+        "type": "object",
+        "properties": {
+          "origem": {
+            "type": "string",
+            "enum": [
+              "PUSH",
+              "INBOX"
+            ],
+            "description": "PUSH quando o app foi aberto pela notificação do sistema; INBOX quando o item foi tocado na lista. Omitido, o toque é contado sem origem."
+          }
+        }
+      },
+      "RegisterDeviceTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Expo push token do device",
+            "example": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+          },
+          "plataforma": {
+            "type": "string",
+            "enum": [
+              "IOS",
+              "ANDROID"
+            ]
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone IANA do device",
+            "example": "America/Sao_Paulo"
+          },
+          "locale": {
+            "type": "string",
+            "description": "Locale BCP 47 do device",
+            "example": "pt-BR"
+          }
+        },
+        "required": [
+          "token",
+          "plataforma"
+        ]
+      },
+      "RemoveDeviceTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Expo push token a desativar"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CreatePlanoDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome do plano",
+            "example": "Plano Usual 3 Pets"
+          },
+          "preco": {
+            "type": "number",
+            "description": "Preço do plano",
+            "example": 100
+          },
+          "nivel": {
+            "type": "number",
+            "description": "Nível hierárquico do plano (maior = mais acesso)",
+            "example": 1
+          },
+          "traducoes": {
+            "type": "object",
+            "description": "Traduções por locale (pt-BR é o principal). Ex.: { \"en-US\": { \"nome\": \"...\", \"descricao\": \"...\" } }"
+          }
+        },
+        "required": [
+          "nome",
+          "preco",
+          "nivel"
+        ]
+      },
       "ElegibilidadeFeedbackDto": {
         "type": "object",
         "properties": {
@@ -46707,137 +46999,6 @@
           "rota"
         ]
       },
-      "CriarSilencioDto": {
-        "type": "object",
-        "properties": {
-          "escopo": {
-            "type": "string",
-            "enum": [
-              "PET",
-              "FAMILIA"
-            ],
-            "description": "PET silencia um pet; FAMILIA silencia o plano familia inteiro."
-          },
-          "alvoId": {
-            "type": "string",
-            "description": "Pet.id ou FamiliaPlano.id, conforme o escopo. 403 se nao for do usuario."
-          }
-        },
-        "required": [
-          "escopo",
-          "alvoId"
-        ]
-      },
-      "AtualizarPreferenciaDto": {
-        "type": "object",
-        "properties": {
-          "CLINICO": {
-            "type": "boolean",
-            "description": "Lembrete de remédio, vacina e consulta. Desligado, o push para mas o inbox continua."
-          },
-          "ENGAJAMENTO": {
-            "type": "boolean",
-            "description": "Convites para voltar ao app. Desligado, nada é criado."
-          },
-          "ASSINATURA": {
-            "type": "boolean",
-            "description": "Teste grátis, plano e cobrança. Desligado, nada é criado."
-          },
-          "PARCEIRO": {
-            "type": "boolean",
-            "description": "Funil do parceiro, indicações, cupons e acesso ao prontuário. Desligado, o push para."
-          },
-          "FAMILIA": {
-            "type": "boolean",
-            "description": "Plano família: convites, pedidos e pets compartilhados. Desligado, o push para."
-          }
-        }
-      },
-      "RegistrarToqueDto": {
-        "type": "object",
-        "properties": {
-          "origem": {
-            "type": "string",
-            "enum": [
-              "PUSH",
-              "INBOX"
-            ],
-            "description": "PUSH quando o app foi aberto pela notificação do sistema; INBOX quando o item foi tocado na lista. Omitido, o toque é contado sem origem."
-          }
-        }
-      },
-      "RegisterDeviceTokenDto": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string",
-            "description": "Expo push token do device",
-            "example": "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
-          },
-          "plataforma": {
-            "type": "string",
-            "enum": [
-              "IOS",
-              "ANDROID"
-            ]
-          },
-          "timezone": {
-            "type": "string",
-            "description": "Timezone IANA do device",
-            "example": "America/Sao_Paulo"
-          },
-          "locale": {
-            "type": "string",
-            "description": "Locale BCP 47 do device",
-            "example": "pt-BR"
-          }
-        },
-        "required": [
-          "token",
-          "plataforma"
-        ]
-      },
-      "RemoveDeviceTokenDto": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string",
-            "description": "Expo push token a desativar"
-          }
-        },
-        "required": [
-          "token"
-        ]
-      },
-      "CreatePlanoDto": {
-        "type": "object",
-        "properties": {
-          "nome": {
-            "type": "string",
-            "description": "Nome do plano",
-            "example": "Plano Usual 3 Pets"
-          },
-          "preco": {
-            "type": "number",
-            "description": "Preço do plano",
-            "example": 100
-          },
-          "nivel": {
-            "type": "number",
-            "description": "Nível hierárquico do plano (maior = mais acesso)",
-            "example": 1
-          },
-          "traducoes": {
-            "type": "object",
-            "description": "Traduções por locale (pt-BR é o principal). Ex.: { \"en-US\": { \"nome\": \"...\", \"descricao\": \"...\" } }"
-          }
-        },
-        "required": [
-          "nome",
-          "preco",
-          "nivel"
-        ]
-      },
       "CreateTutorDto": {
         "type": "object",
         "properties": {
@@ -46947,6 +47108,45 @@
           "cep"
         ]
       },
+      "AtribuicaoCadastroDto": {
+        "type": "object",
+        "properties": {
+          "utmSource": {
+            "type": "string",
+            "description": "utm_source do primeiro toque (cortado em 100)",
+            "example": "instagram"
+          },
+          "utmMedium": {
+            "type": "string",
+            "description": "utm_medium do primeiro toque (cortado em 100)",
+            "example": "social"
+          },
+          "utmCampaign": {
+            "type": "string",
+            "description": "utm_campaign do primeiro toque (cortado em 100)",
+            "example": "lancamento"
+          },
+          "utmTerm": {
+            "type": "string",
+            "description": "utm_term do primeiro toque (cortado em 100)"
+          },
+          "utmContent": {
+            "type": "string",
+            "description": "utm_content do primeiro toque (cortado em 100)",
+            "example": "post-1"
+          },
+          "paginaEntrada": {
+            "type": "string",
+            "description": "Caminho da pagina de entrada, sem query nem host (cortado em 300)",
+            "example": "/r/PJ-AB12CD"
+          },
+          "primeiroToqueEm": {
+            "type": "string",
+            "description": "Quando o primeiro toque aconteceu (ISO 8601, relogio do aparelho)",
+            "example": "2026-11-05T13:20:00.000Z"
+          }
+        }
+      },
       "CreateUsuarioDto": {
         "type": "object",
         "properties": {
@@ -46992,7 +47192,14 @@
               "FACEBOOK",
               "LINKEDIN",
               "SITE",
-              "INDICACAO"
+              "INDICACAO",
+              "TIKTOK",
+              "YOUTUBE",
+              "GOOGLE",
+              "LOJA_DE_APPS",
+              "CLINICA_OU_PET_SHOP",
+              "EVENTO",
+              "OUTRO"
             ],
             "description": "Como o usuário conheceu a PetJourney"
           },
@@ -47030,6 +47237,14 @@
             "type": "string",
             "description": "Codigo de indicacao do parceiro (opcional)",
             "example": "PJ-AB12CD"
+          },
+          "atribuicao": {
+            "description": "Primeiro toque do site (UTM e pagina de entrada). Opcional; nunca derruba o cadastro.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AtribuicaoCadastroDto"
+              }
+            ]
           }
         },
         "required": [
@@ -47113,7 +47328,14 @@
               "FACEBOOK",
               "LINKEDIN",
               "SITE",
-              "INDICACAO"
+              "INDICACAO",
+              "TIKTOK",
+              "YOUTUBE",
+              "GOOGLE",
+              "LOJA_DE_APPS",
+              "CLINICA_OU_PET_SHOP",
+              "EVENTO",
+              "OUTRO"
             ],
             "description": "Como o usuário conheceu a PetJourney"
           },
@@ -47958,6 +48180,14 @@
             "maximum": 72,
             "example": 12
           },
+          "aCada": {
+            "type": "integer",
+            "description": "Repete a cada N unidades da frequencia: DIARIO+3 = a cada 3 dias, SEMANAL+2 = a cada 2 semanas, MENSAL+4 = a cada 4 meses, ANUAL+3 = a cada 3 anos. Ausente ou 1 = todo dia/semana/mes/ano. Faixa: DIARIO 1-365, SEMANAL 1-52, MENSAL 1-24, ANUAL 1-10. Ignorado (gravado null) em QUINZENAL e INTERVALO_HORAS.",
+            "minimum": 1,
+            "maximum": 365,
+            "example": 4,
+            "nullable": true
+          },
           "repetirAte": {
             "type": "string",
             "description": "Ultimo instante em que ainda pode nascer ocorrencia (ISO 8601, inclusivo). So vale com recorrente=true; nas demais e ignorado (gravado como null). Mande o instante ja convertido para o fim do dia no fuso do aparelho.",
@@ -48339,6 +48569,14 @@
             "maximum": 72,
             "example": 12
           },
+          "aCada": {
+            "type": "integer",
+            "description": "Repete a cada N unidades da frequencia: DIARIO+3 = a cada 3 dias, SEMANAL+2 = a cada 2 semanas, MENSAL+4 = a cada 4 meses, ANUAL+3 = a cada 3 anos. Ausente ou 1 = todo dia/semana/mes/ano. Faixa: DIARIO 1-365, SEMANAL 1-52, MENSAL 1-24, ANUAL 1-10. Ignorado (gravado null) em QUINZENAL e INTERVALO_HORAS.",
+            "minimum": 1,
+            "maximum": 365,
+            "example": 4,
+            "nullable": true
+          },
           "repetirAte": {
             "type": "string",
             "description": "Ultimo instante em que ainda pode nascer ocorrencia (ISO 8601, inclusivo). So vale com recorrente=true; nas demais e ignorado (gravado como null). Mande o instante ja convertido para o fim do dia no fuso do aparelho.",
@@ -48420,6 +48658,14 @@
             "minimum": 1,
             "maximum": 72,
             "example": 12
+          },
+          "aCada": {
+            "type": "integer",
+            "description": "Repete a cada N unidades da frequencia: DIARIO+3 = a cada 3 dias, SEMANAL+2 = a cada 2 semanas, MENSAL+4 = a cada 4 meses, ANUAL+3 = a cada 3 anos. Ausente ou 1 = todo dia/semana/mes/ano. Faixa: DIARIO 1-365, SEMANAL 1-52, MENSAL 1-24, ANUAL 1-10. Ignorado (gravado null) em QUINZENAL e INTERVALO_HORAS.",
+            "minimum": 1,
+            "maximum": 365,
+            "example": 4,
+            "nullable": true
           },
           "repetirAte": {
             "type": "string",
@@ -48543,6 +48789,14 @@
             "minimum": 1,
             "maximum": 72,
             "example": 12
+          },
+          "aCada": {
+            "type": "integer",
+            "description": "Repete a cada N unidades da frequencia: DIARIO+3 = a cada 3 dias, SEMANAL+2 = a cada 2 semanas, MENSAL+4 = a cada 4 meses, ANUAL+3 = a cada 3 anos. Ausente ou 1 = todo dia/semana/mes/ano. Faixa: DIARIO 1-365, SEMANAL 1-52, MENSAL 1-24, ANUAL 1-10. Ignorado (gravado null) em QUINZENAL e INTERVALO_HORAS.",
+            "minimum": 1,
+            "maximum": 365,
+            "example": 4,
+            "nullable": true
           },
           "repetirAte": {
             "type": "string",
@@ -49446,7 +49700,7 @@
         "properties": {
           "inicio": {
             "type": "string",
-            "description": "Quando o tratamento começou (primeira dose), pode estar no passado (até 365 dias). Com ele, a API calcula as doses que já passaram e a próxima no horário do regime, se `dosesJaDadas` e `proximaDataHora` não vierem. Todas as doses no passado: 400 DOSES_ESGOTADAS. Não combina com iniciarAposIndice."
+            "description": "Quando o tratamento começou (primeira dose), pode estar no passado (até 30 anos; até 365 dias no futuro). Receita antiga de uso contínuo: o tratamento guarda esse início e o lembrete segue a grade até a próxima dose. Com ele, a API calcula as doses que já passaram e a próxima no horário do regime, se `dosesJaDadas` e `proximaDataHora` não vierem. Todas as doses no passado: 400 DOSES_ESGOTADAS. Não combina com iniciarAposIndice."
           },
           "proximaDataHora": {
             "type": "string",
@@ -50710,6 +50964,137 @@
           "observacao"
         ]
       },
+      "DiarioDaAnotacaoDto": {
+        "type": "object",
+        "properties": {
+          "vitalidade": {
+            "type": "string",
+            "enum": [
+              "AGITADO",
+              "ATIVO",
+              "NORMAL",
+              "CALMO",
+              "SONOLENTO",
+              "DESANIMADO",
+              "APATICO",
+              "LETARGICO"
+            ],
+            "nullable": true
+          },
+          "alimentacao": {
+            "type": "string",
+            "enum": [
+              "MUITO",
+              "NORMAL",
+              "POUCO",
+              "NADA",
+              "RECUSOU",
+              "VOMITOU_APOS"
+            ],
+            "nullable": true
+          },
+          "hidratacao": {
+            "type": "string",
+            "enum": [
+              "MUITO",
+              "NORMAL",
+              "POUCO",
+              "NADA",
+              "RECUSOU",
+              "VOMITOU_APOS"
+            ],
+            "nullable": true
+          },
+          "fezes": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "MOLE",
+              "PASTOSA",
+              "DIARREIA",
+              "RESSECADA",
+              "COM_SANGUE",
+              "COM_MUCO",
+              "COM_VERMES",
+              "ESCURA",
+              "CLARA",
+              "NAO_DEFECOU"
+            ],
+            "nullable": true
+          },
+          "urina": {
+            "type": "string",
+            "enum": [
+              "NORMAL",
+              "MUITO",
+              "POUCO",
+              "NADA",
+              "COM_SANGUE",
+              "ESCURA",
+              "COM_DIFICULDADE",
+              "COM_ODOR_FORTE"
+            ],
+            "nullable": true
+          },
+          "sintomas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FEBRE",
+                "VOMITO",
+                "DIARREIA",
+                "FRAQUEZA",
+                "LETARGIA",
+                "TREMORES",
+                "COCEIRA",
+                "ESPIRRO",
+                "TOSSE",
+                "CONVULSAO",
+                "FALTA_DE_AR",
+                "SECRECAO_OCULAR",
+                "SECRECAO_NASAL",
+                "HALITOSE",
+                "CLAUDICACAO",
+                "SANGRAMENTO",
+                "DESIDRATACAO",
+                "INCHACO",
+                "PERDA_DE_PESO",
+                "QUEDA_DE_PELO",
+                "LAMBEDURA_EXCESSIVA"
+              ]
+            }
+          },
+          "temperamento": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "BRINCANDO",
+                "AGITADO",
+                "CALMO",
+                "CARINHOSO",
+                "BAGUNCEIRO",
+                "ESTRESSADO",
+                "ANSIOSO",
+                "AGRESSIVO",
+                "AMEDRONTADO",
+                "RETRAIDO",
+                "VOCALIZANDO_MUITO"
+              ]
+            }
+          }
+        },
+        "required": [
+          "vitalidade",
+          "alimentacao",
+          "hidratacao",
+          "fezes",
+          "urina",
+          "sintomas",
+          "temperamento"
+        ]
+      },
       "AnexoPrestadorDto": {
         "type": "object",
         "properties": {
@@ -50719,6 +51104,11 @@
           "tipoDocumento": {
             "type": "string",
             "nullable": true
+          },
+          "descricao": {
+            "type": "string",
+            "nullable": true,
+            "description": "Descricao curta do anexo (ex.: tipo Outro)."
           },
           "nome": {
             "type": "string"
@@ -50733,6 +51123,7 @@
         "required": [
           "id",
           "tipoDocumento",
+          "descricao",
           "nome",
           "mimeType",
           "tamanhoBytes"
@@ -50821,6 +51212,15 @@
               "$ref": "#/components/schemas/ExameSolicitadoDaAnotacaoDto"
             }
           },
+          "diario": {
+            "nullable": true,
+            "description": "null sem escolha.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiarioDaAnotacaoDto"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -50869,6 +51269,7 @@
           "intercorrencias",
           "prescricaoItens",
           "examesSolicitados",
+          "diario",
           "id",
           "empresaNome",
           "profissionalNome",
@@ -50920,6 +51321,26 @@
           "petCastrado": {
             "type": "boolean",
             "nullable": true
+          },
+          "petRaca": {
+            "type": "string",
+            "nullable": true,
+            "description": "Raca (cachorro, gato, coelho) ou o tipo escrito (ave, roedor, peixe, reptil), lida ao vivo. Null quando nao ha, para OUTRO (o tipo vem em tipoEspecie) ou quando o cabecalho e a copia gravada."
+          },
+          "petSexo": {
+            "type": "string",
+            "enum": [
+              "MACHO",
+              "FEMEA"
+            ],
+            "nullable": true,
+            "description": "Lido ao vivo; null quando nao ha."
+          },
+          "petDataNascimento": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Lido ao vivo; o cliente calcula a idade. Null quando nao ha."
           },
           "tipoServico": {
             "type": "string"
@@ -50990,6 +51411,9 @@
           "tipoEspecie",
           "petFoto",
           "petCastrado",
+          "petRaca",
+          "petSexo",
+          "petDataNascimento",
           "tipoServico",
           "servicoOutroLabel",
           "empresaNome",
@@ -51477,6 +51901,15 @@
               "$ref": "#/components/schemas/ExameSolicitadoDaAnotacaoDto"
             }
           },
+          "diario": {
+            "nullable": true,
+            "description": "null sem escolha.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DiarioDaAnotacaoDto"
+              }
+            ]
+          },
           "id": {
             "type": "string"
           },
@@ -51506,6 +51939,10 @@
             "type": "boolean",
             "description": "Nasce false."
           },
+          "diarioRegistrado": {
+            "type": "boolean",
+            "description": "true = a entrada foi gravada no Diario do pet do responsavel."
+          },
           "criadaEm": {
             "type": "string",
             "format": "date-time"
@@ -51533,6 +51970,7 @@
           "intercorrencias",
           "prescricaoItens",
           "examesSolicitados",
+          "diario",
           "id",
           "compartilhamentoId",
           "empresaNome",
@@ -51541,6 +51979,7 @@
           "servicoRealizado",
           "texto",
           "lida",
+          "diarioRegistrado",
           "criadaEm",
           "anexos"
         ]
@@ -55284,6 +55723,46 @@
           "podeEditar"
         ]
       },
+      "TipoPaginaPublica": {
+        "type": "string",
+        "enum": [
+          "CLINICA",
+          "HOTEL"
+        ]
+      },
+      "QrDaPaginaPublicaDto": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TipoPaginaPublica"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "nullable": true,
+            "description": "O endereco da pagina no site (petjourney.health/agendar/<slug> ou /reservar/<slug>): o que a tela mostra e o \"Copiar link\" copia. null = ainda sem endereco (cadastro nao aprovado ou perfil nunca salvo)"
+          },
+          "qrCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "Codigo do QR no WFQR. null = sem endereco ou WFQR fora"
+          },
+          "qrImageUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Imagem do QR no padrao da marca (sage, arredondado, pata no centro). PNG de 320 px; aceita ?size=64..2000 e ?format=svg. null = WFQR fora agora: desenhe o QR a partir de `url`"
+          }
+        },
+        "required": [
+          "tipo",
+          "url",
+          "qrCode",
+          "qrImageUrl"
+        ]
+      },
       "SalvarEstabelecimentoDto": {
         "type": "object",
         "properties": {
@@ -55501,6 +55980,49 @@
         "required": [
           "copiados",
           "jaExistiam"
+        ]
+      },
+      "RemoverDiasEspeciaisDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60,
+              "pattern": "^[A-Za-z0-9_-]{1,60}$"
+            },
+            "minItems": 1,
+            "maxItems": 500,
+            "description": "Ids dos dias especiais (1 a 500, cada um de 1 a 60 caracteres); repetidos contam uma vez"
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "RemocaoDeDiasEspeciaisDto": {
+        "type": "object",
+        "properties": {
+          "removidos": {
+            "description": "Os ids que eram deste estabelecimento e sairam agora",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "naoEncontrados": {
+            "description": "Ids que nao existem, que ja tinham saido ou que sao de outro parceiro. Nao e erro: o dia ja esta fora",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "removidos",
+          "naoEncontrados"
         ]
       },
       "TrocarSlugDto": {
@@ -99416,6 +99938,8 @@
           "ESTABELECIMENTO_NAO_APROVADO",
           "ESTABELECIMENTO_SLUG_EM_USO",
           "ESTABELECIMENTO_SLUG_INVALIDO",
+          "ESTABELECIMENTO_SLUG_TAXA_EXCEDIDA",
+          "ESTABELECIMENTO_QR_TAXA_EXCEDIDA",
           "MODULO_APENAS_DONO",
           "MODULO_TRANSICAO_INVALIDA",
           "PARCEIRO_CADASTRO_SUSPENSO",
