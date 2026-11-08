@@ -1478,7 +1478,9 @@
         "body": "Možete da čitate karton ove posete, ali ne možete da unosite beleške dok je registracija suspendovana."
       },
       "quemAtendeu": "Ko je pružio uslugu",
-      "rodape": "Kada je zabeležite, beleška ide u karton ljubimca {pet} u aplikaciji vlasnika."
+      "rodape": "Kada je zabeležite, beleška ide u karton ljubimca {pet} u aplikaciji vlasnika.",
+      "descricaoAnexo": "Opis priloga",
+      "descricaoAnexoPlaceholder": "Npr. fotografija perutave kože"
     },
     "especialidade": {
       "CLINICO_GERAL": "Opšta praksa",
@@ -1769,6 +1771,24 @@
         "limite": "Dnevno ograničenje je dostignuto: 10 kartona po osobi i 30 po klinici u 24 sata.",
         "motivo": "Razlog mora imati od {min} do {max} znakova.",
         "generico": "Karton nije mogao da se otvori. Pokušajte ponovo."
+      }
+    },
+    "diarioAnotacao": {
+      "titulo": "Kako je ljubimac bio (ide u dnevnik ljubimca)",
+      "ajuda": "Dodirnite opcije. Zapis se pojavljuje u dnevniku ljubimca, u aplikaciji odgovorne osobe, sa nazivom objekta.",
+      "indisponivel": "Opcije dnevnika nisu učitane. I dalje možete pisati ispod.",
+      "carregando": "Učitavanje opcija dnevnika...",
+      "variasOpcoes": "(možete izabrati više)",
+      "prefereEscrever": "Radije pišete? (opciono)",
+      "registrado": "Dodato u dnevnik ljubimca",
+      "grupos": {
+        "vitalidade": "Raspoloženje",
+        "alimentacao": "Ishrana",
+        "hidratacao": "Voda",
+        "fezes": "Stolica",
+        "urina": "Urin",
+        "temperamento": "Ponašanje",
+        "sintomas": "Simptomi"
       }
     }
   },

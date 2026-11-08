@@ -1,9 +1,11 @@
 import { CAMPOS_LISTA, filtrarEstruturadoPorTipo } from '@/utils/parceiro/anotacao-estruturada'
+import { filtrarDiarioPorTipo, normalizarDescricoesAnexos } from '@/utils/parceiro/anotacao-diario'
 
 import { apiFetch } from '../api'
 import type { ApiEnvelope, CursorPage } from '../api-envelope'
 import type {
   Anotacao,
+  CatalogoDiario,
   CompartilhamentoDetalhe,
   CompartilhamentoResumo,
   CompartilhamentosQuery,
@@ -170,6 +172,12 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
 
   appendEstruturado(form, payload)
 
+  // Diário do pet: JSON string, só com as chaves aceitas pelo tipo (campo no tipo errado é 400).
+  const diario = filtrarDiarioPorTipo(payload.tipoServico, payload.diario)
+  if (diario) {
+    form.set('diario', JSON.stringify(diario))
+  }
+
   if (payload.anexos?.length) {
     for (const file of payload.anexos) {
       form.append('anexos', file)
@@ -177,6 +185,12 @@ export function criarAnotacao(id: string, payload: NovaAnotacaoPayload, params?:
 
     if (payload.tiposDocumento?.length) {
       form.set('tiposDocumento', JSON.stringify(payload.tiposDocumento))
+    }
+
+    // Paralelo aos anexos, como `tiposDocumento`. Sem nenhuma descrição, o campo não vai.
+    const descricoes = normalizarDescricoesAnexos(payload.descricoesAnexos, payload.anexos.length)
+    if (descricoes) {
+      form.set('descricoesAnexos', JSON.stringify(descricoes))
     }
   }
 
@@ -250,4 +264,19 @@ export function getArquivoSignedUrl(id: string, arquivoId: string, params?: Parc
       `${BASE}/${id}/arquivos/${arquivoId}/url${buildQuery({ parceiroId: params?.parceiroId })}`,
     ),
   )
+}
+
+/** Catálogo público das opções do Diário (`GET /diario-pet/enums`, rótulos pt-BR, cache 24 h). */
+let catalogoDiarioEmVoo: Promise<CatalogoDiario> | null = null
+
+/** Uma ida por sessão: o histórico tem várias anotações e todas usam o mesmo catálogo. */
+export function catalogoDiario(): Promise<CatalogoDiario> {
+  catalogoDiarioEmVoo ??= apiFetch<ApiEnvelope<CatalogoDiario> | CatalogoDiario>('/diario-pet/enums')
+    // O interceptor global embrulha em `{ data }`; aceita os dois formatos.
+    .then((r) => ('data' in r && r.data ? (r.data as CatalogoDiario) : (r as CatalogoDiario)))
+    .catch((e: unknown) => {
+      catalogoDiarioEmVoo = null
+      throw e
+    })
+  return catalogoDiarioEmVoo
 }

@@ -33,6 +33,8 @@ import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import AnotacaoDiarioFields from '@/components/parceiro/AnotacaoDiarioFields.vue'
+import AnotacaoDiarioView from '@/components/parceiro/AnotacaoDiarioView.vue'
 import AnotacaoEstruturadaFields from '@/components/parceiro/AnotacaoEstruturadaFields.vue'
 import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaView.vue'
 import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
@@ -60,6 +62,7 @@ import type {
   BlocoSnapshot,
   CompartilhamentoDetalhe,
   TipoDocumentoAnexo,
+  AnotacaoDiarioInput,
   TipoServicoPrestador,
 } from '@/service/parceiro/types'
 import {
@@ -84,6 +87,7 @@ import {
   tipoAceitaEstruturado,
   validarAnotacaoEstruturada,
 } from '@/utils/parceiro/anotacao-estruturada'
+import { camposDiarioDoTipo, MAX_DESCRICAO_ANEXO } from '@/utils/parceiro/anotacao-diario'
 import { mesclarPrescricaoLida, temCampoAConferir } from '@/utils/parceiro/leitura-receita'
 import type {
   BlocoLista,
@@ -137,6 +141,8 @@ const TIPOS_DOCUMENTO: TipoDocumentoAnexo[] = [
 type AnexoForm = {
   file: File
   tipoDocumento: TipoDocumentoAnexo | null
+  /** O que é o arquivo; só aparece (e só vai) com o tipo "Outro". */
+  descricao: string
 }
 
 const anotacaoForm = reactive({
@@ -189,6 +195,8 @@ function autorDaAnotacao(anotacao: Anotacao): string | null {
   return area ? anotacao.profissionalNome + ' (' + area + ')' : anotacao.profissionalNome
 }
 const estruturadaForm = ref(criarAnotacaoEstruturadaForm())
+/** Escolhas do Diário do pet (hotel, banho e tosa); vão para o Diário no app do responsável. */
+const diarioForm = ref<AnotacaoDiarioInput>({})
 const estruturadaErros = ref<Record<string, string>>({})
 const anexosForm = ref<AnexoForm[]>([])
 const formError = ref('')
@@ -243,6 +251,9 @@ const podeLigarAoCadastro = computed(
 const somenteLeitura = computed(() => isAtivo.value && !store.podeOperar)
 
 /** OUTRO segue só com o formulário livre; os demais tipos ganham campos próprios. */
+const temCamposDiario = computed(() =>
+  detalhe.value ? camposDiarioDoTipo(detalhe.value.tipoServico).length > 0 : false,
+)
 const temCamposEstruturados = computed(() =>
   detalhe.value ? tipoAceitaEstruturado(detalhe.value.tipoServico) : false,
 )
@@ -829,6 +840,7 @@ function resetAnotacaoForm() {
   anotacaoForm.especialidade = null
   anotacaoForm.especialidadeOutra = ''
   estruturadaForm.value = criarAnotacaoEstruturadaForm()
+  diarioForm.value = {}
   estruturadaErros.value = {}
   anexosForm.value = []
   formError.value = ''
@@ -911,7 +923,7 @@ function onAnexosSelected(event: Event) {
       continue
     }
 
-    anexosForm.value.push({ file, tipoDocumento: null })
+    anexosForm.value.push({ file, tipoDocumento: null, descricao: '' })
   }
 
   input.value = ''
@@ -1000,6 +1012,10 @@ async function submitAnotacao() {
           montarAnotacaoEstruturada(detalhe.value.tipoServico, estruturadaForm.value) ?? undefined,
         anexos: anexosForm.value.map((a) => a.file),
         tiposDocumento: anexosForm.value.map((a) => a.tipoDocumento),
+        descricoesAnexos: anexosForm.value.map((a) =>
+          a.tipoDocumento === 'Outro' ? a.descricao.trim() || null : null,
+        ),
+        diario: diarioForm.value,
         leituraReceitaId,
       },
       parceiroQuery(),
@@ -1027,6 +1043,7 @@ async function submitAnotacao() {
     toast.add({
       severity: 'success',
       summary: t('acessos.anotacao.criada'),
+      detail: nova.diarioRegistrado ? t('acessos.diarioAnotacao.registrado') : undefined,
       life: 3500,
     })
     void mostrarAnotacaoRegistrada(nova.id)
@@ -1930,6 +1947,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </div>
               </div>
 
+              <AnotacaoDiarioFields
+                v-if="temCamposDiario && detalhe"
+                v-model="diarioForm"
+                :tipo-servico="detalhe.tipoServico"
+                :disabled="submittingAnotacao"
+              />
+              <p v-if="temCamposDiario && temCamposEstruturados" class="folha__nota diario-escrever">
+                <i class="ph ph-pencil-simple" aria-hidden="true" />
+                {{ t('acessos.diarioAnotacao.prefereEscrever') }}
+              </p>
+
               <AnotacaoEstruturadaFields
                 v-if="temCamposEstruturados && detalhe"
                 v-model="estruturadaForm"
@@ -2037,6 +2065,15 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       option-value="value"
                       :placeholder="t('acessos.anotacao.tipoDocumentoPlaceholder')"
                       show-clear
+                    />
+                    <InputText
+                      v-if="anexo.tipoDocumento === 'Outro'"
+                      v-model="anexo.descricao"
+                      class="anexos__descricao"
+                      :aria-label="t('acessos.anotacao.descricaoAnexo')"
+                      :placeholder="t('acessos.anotacao.descricaoAnexoPlaceholder')"
+                      :maxlength="MAX_DESCRICAO_ANEXO"
+                      :data-teste="`anexo-descricao-${index}`"
                     />
                     <Button
                       type="button"
@@ -2156,6 +2193,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       <p class="nota__texto">{{ anotacao.texto }}</p>
 
                       <AnotacaoEstruturadaView :anotacao="anotacao" />
+                      <AnotacaoDiarioView :diario="anotacao.diario" />
 
                       <ul
                         v-if="anotacao.anexos.length"
@@ -2181,6 +2219,9 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                             </span>
                             <span class="nota__anexo-texto">
                               <span class="nota__anexo-nome">{{ anexo.nome }}</span>
+                              <span v-if="anexo.descricao" class="nota__anexo-descricao">{{
+                                anexo.descricao
+                              }}</span>
                               <small class="ui-num">
                                 <template v-if="anexo.tipoDocumento">
                                   {{ anexo.tipoDocumento }} ·
@@ -3738,6 +3779,21 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   display: grid;
   min-width: 0;
   line-height: 1.3;
+}
+
+.anexos__descricao {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.diario-escrever {
+  padding: 0 var(--folha-pad-x);
+}
+
+.nota__anexo-descricao {
+  display: block;
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .nota__anexo-nome {

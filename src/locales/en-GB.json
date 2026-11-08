@@ -1478,7 +1478,9 @@
         "body": "You can read this appointment record, but you cannot record your notes while the registration is suspended."
       },
       "quemAtendeu": "Who attended",
-      "rodape": "Once recorded, the note goes to {pet}'s record in the owner's app."
+      "rodape": "Once recorded, the note goes to {pet}'s record in the owner's app.",
+      "descricaoAnexo": "Attachment description",
+      "descricaoAnexoPlaceholder": "E.g. photo of flaky skin"
     },
     "especialidade": {
       "CLINICO_GERAL": "General practice",
@@ -1769,6 +1771,24 @@
         "limite": "Daily limit reached: 10 records per person and 30 per clinic in 24 hours.",
         "motivo": "The reason must have {min} to {max} characters.",
         "generico": "Could not open the record. Please try again."
+      }
+    },
+    "diarioAnotacao": {
+      "titulo": "How the pet was (goes to the pet diary)",
+      "ajuda": "Tap the options. The entry shows in the pet diary, in the owner app, with your business name.",
+      "indisponivel": "The diary options did not load. You can still write below.",
+      "carregando": "Loading the diary options...",
+      "variasOpcoes": "(choose as many as apply)",
+      "prefereEscrever": "Prefer to write? (optional)",
+      "registrado": "Added to the pet diary",
+      "grupos": {
+        "vitalidade": "Mood",
+        "alimentacao": "Food",
+        "hidratacao": "Water",
+        "fezes": "Stool",
+        "urina": "Urine",
+        "temperamento": "Behaviour",
+        "sintomas": "Symptoms"
       }
     }
   },

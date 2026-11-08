@@ -462,6 +462,8 @@ export type AnexoAnotacao = {
   tamanhoBytes: number
   salvoNosDocumentos: boolean
   documentoId: string | null
+  /** O que é o arquivo, escrito por quem anexou (tipo "Outro"). Ausente na API antiga. */
+  descricao?: string | null
 }
 
 export type AnotacaoPrescricaoItem = {
@@ -518,7 +520,74 @@ export type Anotacao = AnotacaoEstruturada & {
   texto: string
   criadaEm: string
   anexos: AnexoAnotacao[]
+  /** Escolhas do Diário do pet (hotel, banho e tosa). `null`/ausente = nenhuma. */
+  diario?: AnotacaoDiario | null
+  /** Só na resposta da criação: `true` = foi para o Diário do pet no app do responsável. */
+  diarioRegistrado?: boolean
 }
+
+// ------------------------------------------------- Diário do pet na anotação
+
+export type VitalidadePet =
+  | 'AGITADO'
+  | 'ATIVO'
+  | 'NORMAL'
+  | 'CALMO'
+  | 'SONOLENTO'
+  | 'DESANIMADO'
+  | 'APATICO'
+  | 'LETARGICO'
+export type ConsumoDiario = 'MUITO' | 'NORMAL' | 'POUCO' | 'NADA' | 'RECUSOU' | 'VOMITOU_APOS'
+export type AspectoFezes =
+  | 'NORMAL'
+  | 'MOLE'
+  | 'PASTOSA'
+  | 'DIARREIA'
+  | 'RESSECADA'
+  | 'COM_SANGUE'
+  | 'COM_MUCO'
+  | 'COM_VERMES'
+  | 'ESCURA'
+  | 'CLARA'
+  | 'NAO_DEFECOU'
+export type EstadoUrina =
+  | 'NORMAL'
+  | 'MUITO'
+  | 'POUCO'
+  | 'NADA'
+  | 'COM_SANGUE'
+  | 'ESCURA'
+  | 'COM_DIFICULDADE'
+  | 'COM_ODOR_FORTE'
+
+/** Mesmas chaves do `POST /diario-pet`: o Diário do app é a fonte de verdade. */
+export type AnotacaoDiario = {
+  vitalidade: VitalidadePet | null
+  alimentacao: ConsumoDiario | null
+  hidratacao: ConsumoDiario | null
+  fezes: AspectoFezes | null
+  urina: EstadoUrina | null
+  sintomas: string[]
+  temperamento: string[]
+}
+
+/** O que vai no multipart: só as chaves preenchidas. */
+export type AnotacaoDiarioInput = Partial<{
+  vitalidade: VitalidadePet
+  alimentacao: ConsumoDiario
+  hidratacao: ConsumoDiario
+  fezes: AspectoFezes
+  urina: EstadoUrina
+  sintomas: string[]
+  temperamento: string[]
+}>
+
+/** `GET /diario-pet/enums`: catálogo com rótulo pt-BR. */
+export type OpcaoDiario = { value: string; label: string }
+export type CatalogoDiario = Record<
+  'vitalidade' | 'alimentacao' | 'hidratacao' | 'fezes' | 'urina' | 'sintomas' | 'temperamento',
+  OpcaoDiario[]
+>
 
 export type CompartilhamentoResumo = {
   id: string
@@ -659,6 +728,10 @@ export type NovaAnotacaoPayload = {
   anexos?: File[]
   /** Mesmo length de `anexos`; `null` = sem classificação. */
   tiposDocumento?: (TipoDocumentoAnexo | null)[]
+  /** Mesmo length de `anexos`; texto curto (tipo "Outro") ou `null`. */
+  descricoesAnexos?: (string | null)[]
+  /** Escolhas do Diário (HOTEL: todas; BANHO/TOSA: humor, comportamento e sintomas). */
+  diario?: AnotacaoDiarioInput
   /**
    * Leitura de receita com IA usada nesta anotação. A API copia os arquivos dela como anexo
    * "Receita Médica" (contam no limite de 3): o arquivo da receita não vai de novo em `anexos`.

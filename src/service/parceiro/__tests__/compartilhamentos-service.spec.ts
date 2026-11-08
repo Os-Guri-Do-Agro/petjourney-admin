@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   criarAnotacaoEstruturadaForm,
@@ -15,6 +15,16 @@ async function loadService() {
 
   return import('../compartilhamentos-service')
 }
+
+/*
+ * A primeira importação transforma o service e as dependências; numa máquina carregada isso
+ * passa dos 5 s do teste. Aquece uma vez aqui, com prazo próprio: o `resetModules` de cada
+ * teste limpa o registro, não o cache de transformação.
+ */
+beforeAll(async () => {
+  vi.stubEnv('VITE_API_URL', 'https://api.exemplo.test')
+  await import('../compartilhamentos-service')
+}, 30_000)
 
 function mockFetch() {
   const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
@@ -171,6 +181,106 @@ describe('criarAnotacao — multipart estruturado', () => {
 
     expect(form.getAll('anexos')).toHaveLength(1)
     expect(JSON.parse(String(form.get('tiposDocumento')))).toEqual(['Ultrassom'])
+    // Nenhuma descrição: o campo não vai (API antiga não estranha nada).
+    expect(form.has('descricoesAnexos')).toBe(false)
+  })
+
+  it('HOTEL manda o Diário como JSON só com as chaves preenchidas', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao(
+      'c1',
+      payload({
+        tipoServico: 'HOTEL',
+        diario: {
+          vitalidade: 'CALMO',
+          alimentacao: 'NORMAL',
+          hidratacao: undefined,
+          temperamento: ['BRINCANDO'],
+          sintomas: [],
+        },
+      }),
+    )
+
+    expect(JSON.parse(String(corpoEnviado(fetchMock).get('diario')))).toEqual({
+      vitalidade: 'CALMO',
+      alimentacao: 'NORMAL',
+      temperamento: ['BRINCANDO'],
+    })
+  })
+
+  it('BANHO só leva humor, comportamento e sintomas do Diário', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao(
+      'c1',
+      payload({
+        tipoServico: 'BANHO',
+        diario: { vitalidade: 'AGITADO', fezes: 'MOLE', sintomas: ['COCEIRA'] },
+      }),
+    )
+
+    expect(JSON.parse(String(corpoEnviado(fetchMock).get('diario')))).toEqual({
+      vitalidade: 'AGITADO',
+      sintomas: ['COCEIRA'],
+    })
+  })
+
+  it('CONSULTA não manda o campo `diario`', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao('c1', payload({ tipoServico: 'CONSULTA', diario: { vitalidade: 'CALMO' } }))
+    expect(corpoEnviado(fetchMock).has('diario')).toBe(false)
+  })
+
+  it('HOTEL com o Diário vazio não manda o campo `diario`', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao('c1', payload({ tipoServico: 'HOTEL', diario: { sintomas: [] } }))
+    expect(corpoEnviado(fetchMock).has('diario')).toBe(false)
+  })
+
+  it('descricoesAnexos vai alinhado aos anexos, com null onde não há texto', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao(
+      'c1',
+      payload({
+        anexos: [
+          new File(['x'], 'laudo.pdf', { type: 'application/pdf' }),
+          new File(['y'], 'pele.jpg', { type: 'image/jpeg' }),
+        ],
+        tiposDocumento: ['Ultrassom', 'Outro'],
+        descricoesAnexos: [null, '  Pele descamada na orelha  '],
+      }),
+    )
+
+    expect(JSON.parse(String(corpoEnviado(fetchMock).get('descricoesAnexos')))).toEqual([
+      null,
+      'Pele descamada na orelha',
+    ])
+  })
+
+  it('corta a descrição do anexo em 120 caracteres', async () => {
+    const { criarAnotacao } = await loadService()
+    const fetchMock = mockFetch()
+
+    await criarAnotacao(
+      'c1',
+      payload({
+        anexos: [new File(['y'], 'pele.jpg', { type: 'image/jpeg' })],
+        tiposDocumento: ['Outro'],
+        descricoesAnexos: ['a'.repeat(200)],
+      }),
+    )
+
+    const [descricao] = JSON.parse(String(corpoEnviado(fetchMock).get('descricoesAnexos')))
+    expect(descricao).toHaveLength(120)
   })
 })
 

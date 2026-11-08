@@ -1478,7 +1478,9 @@
         "body": "Você pode ler o prontuário deste atendimento, mas não registrar o retorno enquanto o cadastro estiver suspenso."
       },
       "quemAtendeu": "Quem atendeu",
-      "rodape": "Ao registrar, a anotação vai para o prontuário de {pet} no app do responsável."
+      "rodape": "Ao registrar, a anotação vai para o prontuário de {pet} no app do responsável.",
+      "descricaoAnexo": "Descrição do anexo",
+      "descricaoAnexoPlaceholder": "Ex.: foto da pele descamada"
     },
     "especialidade": {
       "CLINICO_GERAL": "Clínico geral",
@@ -1769,6 +1771,24 @@
         "limite": "Limite do dia atingido: 10 fichas por pessoa e 30 por clínica em 24 horas.",
         "motivo": "O motivo precisa ter de {min} a {max} caracteres.",
         "generico": "Não foi possível abrir a ficha. Tente de novo."
+      }
+    },
+    "diarioAnotacao": {
+      "titulo": "Como o pet estava (vai para o Diário do pet)",
+      "ajuda": "Toque nas opções. O registro aparece no Diário do pet, no app do responsável, com o nome do estabelecimento.",
+      "indisponivel": "As opções do Diário não carregaram. Você ainda pode escrever abaixo.",
+      "carregando": "Carregando as opções do Diário...",
+      "variasOpcoes": "(pode marcar várias)",
+      "prefereEscrever": "Prefere escrever? (opcional)",
+      "registrado": "Registrado no Diário do pet",
+      "grupos": {
+        "vitalidade": "Humor",
+        "alimentacao": "Alimentação",
+        "hidratacao": "Água",
+        "fezes": "Fezes",
+        "urina": "Urina",
+        "temperamento": "Comportamento",
+        "sintomas": "Sintomas"
       }
     }
   },

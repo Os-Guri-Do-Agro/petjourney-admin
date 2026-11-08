@@ -1478,7 +1478,9 @@
         "body": "Puede leer el historial de esta atención, pero no registrar su devolución mientras el registro esté suspendido."
       },
       "quemAtendeu": "Quién atendió",
-      "rodape": "Al registrar, la nota va a la historia de {pet} en la app del responsable."
+      "rodape": "Al registrar, la nota va a la historia de {pet} en la app del responsable.",
+      "descricaoAnexo": "Descripción del adjunto",
+      "descricaoAnexoPlaceholder": "Ej.: foto de la piel descamada"
     },
     "especialidade": {
       "CLINICO_GERAL": "Clínica general",
@@ -1769,6 +1771,24 @@
         "limite": "Límite del día alcanzado: 10 fichas por persona y 30 por clínica en 24 horas.",
         "motivo": "El motivo debe tener de {min} a {max} caracteres.",
         "generico": "No se pudo abrir la ficha. Intente de nuevo."
+      }
+    },
+    "diarioAnotacao": {
+      "titulo": "Cómo estaba la mascota (va al Diario de la mascota)",
+      "ajuda": "Toque las opciones. El registro aparece en el Diario de la mascota, en la app del responsable, con el nombre del establecimiento.",
+      "indisponivel": "Las opciones del Diario no cargaron. Aún puede escribir abajo.",
+      "carregando": "Cargando las opciones del Diario...",
+      "variasOpcoes": "(puede marcar varias)",
+      "prefereEscrever": "¿Prefiere escribir? (opcional)",
+      "registrado": "Registrado en el Diario de la mascota",
+      "grupos": {
+        "vitalidade": "Ánimo",
+        "alimentacao": "Alimentación",
+        "hidratacao": "Agua",
+        "fezes": "Heces",
+        "urina": "Orina",
+        "temperamento": "Comportamiento",
+        "sintomas": "Síntomas"
       }
     }
   },
