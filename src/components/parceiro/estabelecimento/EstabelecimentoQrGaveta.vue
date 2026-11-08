@@ -4,6 +4,11 @@
  * três formas de levar para fora (PNG, SVG e a folha para imprimir) e o link.
  *
  * Abre pelo QR pequeno da aba Página pública ou pelo botão "Baixar ou imprimir" ao lado dele.
+ *
+ * O QR é a imagem do WFQR (`qrImageUrl`, no padrão da marca) nos tamanhos de cada uso: 1024 na tela
+ * e no PNG, vetor no SVG e 2000 na folha. Sem `qrImageUrl` (WFQR fora), com a imagem que não carrega
+ * ou com o download que falha, cai no QR desenhado no navegador (`qr-da-pagina.ts`), que sai fora
+ * do padrão mas deixa o balcão com um QR que lê.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -17,7 +22,15 @@ import { isRTLLocale, type Locale } from '@/i18n/locales'
 import type { LinkDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
 import EstabelecimentoFolhaDoBalcao from './EstabelecimentoFolhaDoBalcao.vue'
-import { baixar, imagemDoQr, nomeDoArquivo, svgDoQr } from './qr-da-pagina'
+import {
+  baixar,
+  baixarImagemDoQr,
+  imagemDoQr,
+  nomeDoArquivo,
+  svgDoQr,
+  TAMANHO_DO_QR,
+  urlDoQr,
+} from './qr-da-pagina'
 import './gaveta.css'
 
 const props = defineProps<{
@@ -25,6 +38,8 @@ const props = defineProps<{
   slug: string
   /** O nome público da casa: vai no alto da folha impressa. */
   nome: string
+  /** A imagem do WFQR desta página (sem tamanho); `null` é o WFQR fora: vale a reserva local. */
+  qrImageUrl: string | null
 }>()
 
 const visible = defineModel<boolean>('visible', { default: false })
@@ -42,13 +57,38 @@ useSidePanelOffset(
 
 const drawerPosition = computed(() => (isRTLLocale(locale.value as Locale) ? 'left' : 'right'))
 
-/** 1024 px: a mesma imagem serve para a tela grande, o PNG e a folha, sem borrar. */
-const imagem = ref('')
+/** A imagem do WFQR não carregou nesta abertura: a tela e os arquivos passam para a reserva. */
+const wfqrFalhou = ref(false)
+const usaWfqr = computed(() => Boolean(props.qrImageUrl) && !wfqrFalhou.value)
+
+/** A reserva desenhada no navegador, em 1024 px; só sai quando o WFQR não serve. */
+const reserva = ref('')
+
+async function garantirReserva() {
+  if (!reserva.value && props.link) reserva.value = await imagemDoQr(props.link.url, 1024, 2)
+
+  return reserva.value
+}
+
+/** 1024 px: a mesma imagem serve para a tela grande e o PNG, sem borrar. */
+const imagem = computed(() =>
+  usaWfqr.value && props.qrImageUrl
+    ? urlDoQr(props.qrImageUrl, { size: TAMANHO_DO_QR.gaveta })
+    : reserva.value,
+)
 
 watch(
-  () => [visible.value, props.link?.url] as const,
-  async ([aberta, url]) => {
-    if (aberta && url) imagem.value = await imagemDoQr(url, 1024, 2)
+  () => [props.link?.url, props.qrImageUrl],
+  () => {
+    wfqrFalhou.value = false
+    reserva.value = ''
+  },
+)
+
+watch(
+  () => [visible.value, props.link?.url, usaWfqr.value] as const,
+  async ([aberta, url, wfqr]) => {
+    if (aberta && url && !wfqr) await garantirReserva()
   },
   { immediate: true },
 )
@@ -58,21 +98,73 @@ const instrucao = computed(() =>
   props.link ? t(`parceiro.estabelecimento.qr.instrucao.${props.link.tipo}`) : '',
 )
 
-function baixarPng() {
-  if (props.link && imagem.value) baixar(imagem.value, nomeDoArquivo(props.slug, props.link, 'png'))
+/** A imagem do WFQR não abriu: a tela troca para a reserva. A reserva em si não passa por aqui. */
+function aoFalharImagem() {
+  if (usaWfqr.value) wfqrFalhou.value = true
+}
+
+async function baixarPng() {
+  if (!props.link || !imagem.value) return
+
+  const nome = nomeDoArquivo(props.slug, props.link, 'png')
+
+  if (usaWfqr.value) {
+    try {
+      baixar(await baixarImagemDoQr(imagem.value), nome)
+
+      return
+    } catch {
+      /* O WFQR não respondeu a este download: o PNG sai da reserva, nunca fica sem arquivo. */
+    }
+  }
+
+  baixar(await garantirReserva(), nome)
 }
 
 async function baixarSvg() {
   if (!props.link) return
 
+  const nome = nomeDoArquivo(props.slug, props.link, 'svg')
+
+  if (usaWfqr.value && props.qrImageUrl) {
+    try {
+      baixar(await baixarImagemDoQr(urlDoQr(props.qrImageUrl, { svg: true })), nome)
+
+      return
+    } catch {
+      /* Igual ao PNG: sem o vetor do WFQR, sai o da reserva. */
+    }
+  }
+
   const svg = await svgDoQr(props.link.url)
 
-  baixar(new Blob([svg], { type: 'image/svg+xml' }), nomeDoArquivo(props.slug, props.link, 'svg'))
+  baixar(new Blob([svg], { type: 'image/svg+xml' }), nome)
 }
 
 /* ------------------------------------------------------------------- a folha do balcão */
 
 const imprimindo = ref(false)
+
+/** O QR da folha: 2000 px do WFQR (o maior que ele entrega) ou, sem ele, a reserva. */
+const imagemDaFolha = ref('')
+
+/**
+ * Baixa o QR da folha antes de imprimir: se o WFQR falhar aqui, a folha sai com a reserva em vez
+ * de sair com a imagem quebrada. O endereço `blob:` é devolvido ao navegador depois da impressão.
+ */
+async function prepararImagemDaFolha() {
+  if (usaWfqr.value && props.qrImageUrl) {
+    try {
+      const blob = await baixarImagemDoQr(urlDoQr(props.qrImageUrl, { size: TAMANHO_DO_QR.folha }))
+
+      return URL.createObjectURL(blob)
+    } catch {
+      /* Cai na reserva. */
+    }
+  }
+
+  return garantirReserva()
+}
 
 /** Espera as imagens da folha (o QR, a pata, o nome PetJourney): sem isso a página sai sem elas. */
 async function imagensProntas() {
@@ -94,6 +186,7 @@ async function imprimir() {
   if (!imagem.value || !props.link || imprimindo.value) return
 
   imprimindo.value = true
+  imagemDaFolha.value = await prepararImagemDaFolha()
   await imagensProntas()
 
   const pagina = document.createElement('style')
@@ -111,6 +204,10 @@ async function imprimir() {
       document.title = tituloAntes
       pagina.remove()
       imprimindo.value = false
+
+      if (imagemDaFolha.value.startsWith('blob:')) URL.revokeObjectURL(imagemDaFolha.value)
+
+      imagemDaFolha.value = ''
     },
     { once: true },
   )
@@ -173,6 +270,7 @@ const OPCOES = [
             :src="imagem"
             :alt="t('parceiro.estabelecimento.link.qrAlt', { endereco })"
             class="qr__imagem"
+            @error="aoFalharImagem"
           />
           <span v-else class="qr__imagem qr__imagem--vazio" aria-hidden="true" />
         </span>
@@ -228,11 +326,11 @@ const OPCOES = [
 
   <!-- Só existe durante a impressão: escondida, ela fica fora da tela e do leitor de tela. -->
   <EstabelecimentoFolhaDoBalcao
-    v-if="imprimindo && link && imagem"
+    v-if="imprimindo && link && imagemDaFolha"
     :nome
     :tipo="link.tipo"
     :endereco
-    :imagem
+    :imagem="imagemDaFolha"
   />
 </template>
 

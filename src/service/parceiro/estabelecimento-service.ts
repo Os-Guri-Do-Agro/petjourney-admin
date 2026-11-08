@@ -14,8 +14,10 @@ import type {
   FeriadosCopiadosDto,
   FuncionamentoDto,
   HorarioDiaRespostaDto,
+  QrDaPaginaPublicaDto,
   RemocaoDeDiasEspeciaisDto,
   RemoverDiasEspeciaisDto,
+  TipoPaginaPublica,
 } from '../contrato/openapi'
 
 type ParceiroQuery = {
@@ -226,5 +228,23 @@ export function despublicarEstabelecimento(params?: ParceiroQuery) {
     apiFetch<ApiEnvelope<Estabelecimento>>(comParceiro('/despublicar', params), {
       method: 'POST',
     }),
+  )
+}
+
+export type QrDaPagina = QrDaPaginaPublicaDto
+export type TipoDaPaginaPublica = TipoPaginaPublica
+
+/**
+ * O QR da página pública no padrão da marca (WFQR: sage, arredondado, pata no centro). Nasce na
+ * primeira leitura e segue o endereço quando o slug muda. Limite de 300 leituras por hora: chame
+ * uma vez por página ao abrir a aba e de novo só quando o endereço muda, nunca em laço.
+ * `qrImageUrl: null` é o WFQR fora do ar: quem chama desenha o QR local de reserva.
+ */
+export function obterQrDaPagina(tipo: TipoDaPaginaPublica, params?: ParceiroQuery) {
+  const caminho = comParceiro('/qr', params)
+  const separador = caminho.includes('?') ? '&' : '?'
+
+  return dados(
+    apiFetch<ApiEnvelope<QrDaPagina>>(`${caminho}${separador}tipo=${encodeURIComponent(tipo)}`),
   )
 }

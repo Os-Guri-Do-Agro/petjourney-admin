@@ -2,38 +2,101 @@
 /**
  * "Sua página pública": o link e o QR que apontam para a página no site (E1-01, PJ-KE667M).
  *
- * Aparece só com a página no ar: um link que não abre não serve para o balcão. O QR é gerado aqui
- * mesmo, no navegador (o endereço não passa por serviço de terceiro). Na tela ele é uma miniatura
- * que amplia: o clique (ou "Baixar ou imprimir") abre a gaveta com o QR grande, o PNG, o SVG para a
- * gráfica e a folha para imprimir.
+ * Aparece só com a página no ar: um link que não abre não serve para o balcão. O QR vem da API, que
+ * o pede ao WFQR (o serviço de QR da casa): sage, arredondado, com a pata no centro, igual a todo QR
+ * da PetJourney, e o WFQR conta as leituras e leva o QR já impresso para o endereço novo. Na tela ele
+ * é uma miniatura que amplia: o clique (ou "Baixar ou imprimir") abre a gaveta com o QR grande, o
+ * PNG, o SVG para a gráfica e a folha para imprimir.
+ *
+ * Com o WFQR fora (a API devolve `qrImageUrl` nulo, a chamada falha ou a imagem não carrega), a
+ * miniatura cai no QR desenhado aqui no navegador (`qr-da-pagina.ts`). É só a reserva: sai fora do
+ * padrão, mas a tela nunca fica em branco.
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
 import { reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { obterQrDaPagina } from '@/service/parceiro/estabelecimento-service'
 import type { LinkDaPaginaPublica } from '@/utils/parceiro/pagina-publica'
 
 import EstabelecimentoQrGaveta from './EstabelecimentoQrGaveta.vue'
-import { imagemDoQr } from './qr-da-pagina'
+import { imagemDoQr, TAMANHO_DO_QR, urlDoQr } from './qr-da-pagina'
 
-const props = defineProps<{ links: LinkDaPaginaPublica[]; slug: string; nome: string }>()
+const props = defineProps<{
+  links: LinkDaPaginaPublica[]
+  slug: string
+  nome: string
+  /** O mesmo `parceiroId` das outras rotas do estabelecimento (quem tem mais de um parceiro). */
+  parceiroId?: string | null
+}>()
 
 const { t } = useI18n()
 const toast = useToast()
 
-const qrDaTela = reactive<Record<string, string>>({})
+/**
+ * A imagem do WFQR de cada página, pelo `tipo` do link. `null` é "sem imagem do WFQR": a chamada
+ * falhou (429 incluso) ou o WFQR está fora. Sem entrada ainda, a resposta não chegou.
+ */
+const qrDaApi = reactive<Record<string, string | null>>({})
+/** Páginas cuja imagem do WFQR não carregou no navegador. */
+const imagemFalhou = reactive<Record<string, boolean>>({})
+/** A reserva desenhada no navegador, pelo endereço da página. */
+const qrLocal = reactive<Record<string, string>>({})
 
+/** Resposta velha (de antes da troca de endereço) não passa por cima da nova. */
+let rodada = 0
+
+function imagemDoWfqr(link: LinkDaPaginaPublica) {
+  const base = qrDaApi[link.tipo]
+
+  return base && !imagemFalhou[link.tipo] ? base : null
+}
+
+/**
+ * Uma chamada por página ao abrir a aba e outra quando o endereço muda (o `url` novo vem da API; o
+ * código e a imagem continuam os mesmos). Nunca em laço: a API corta com 429 depois de 300 por hora.
+ */
 watch(
-  () => props.links.map((link) => link.url),
-  async (urls) => {
-    for (const url of urls) {
-      if (!qrDaTela[url]) {
-        qrDaTela[url] = await imagemDoQr(url, 280)
+  () => [props.parceiroId, ...props.links.map((link) => `${link.tipo}|${link.url}`)],
+  async () => {
+    const minha = ++rodada
+
+    await Promise.all(
+      props.links.map(async (link) => {
+        let imagem: string | null = null
+
+        try {
+          const qr = await obterQrDaPagina(link.tipo === 'hotel' ? 'HOTEL' : 'CLINICA', {
+            parceiroId: props.parceiroId,
+          })
+
+          imagem = qr.qrImageUrl ?? null
+        } catch {
+          imagem = null
+        }
+
+        if (minha !== rodada) return
+
+        qrDaApi[link.tipo] = imagem
+        imagemFalhou[link.tipo] = false
+      }),
+    )
+  },
+  { immediate: true },
+)
+
+/* Só desenha a reserva de quem não tem a imagem do WFQR (e já sabe que não tem). */
+watch(
+  () => [props.links, qrDaApi, imagemFalhou] as const,
+  async () => {
+    for (const link of props.links) {
+      if (link.tipo in qrDaApi && !imagemDoWfqr(link) && !qrLocal[link.url]) {
+        qrLocal[link.url] = await imagemDoQr(link.url, 280)
       }
     }
   },
-  { immediate: true },
+  { immediate: true, deep: true },
 )
 
 /** O endereço sem o `https://`: é como a pessoa o escreve e o lê. */
@@ -81,9 +144,18 @@ function abrir(link: LinkDaPaginaPublica) {
         @click="abrir(link)"
       >
         <img
-          v-if="qrDaTela[link.url]"
+          v-if="imagemDoWfqr(link)"
           class="link__imagem"
-          :src="qrDaTela[link.url]"
+          :src="urlDoQr(imagemDoWfqr(link)!, { size: TAMANHO_DO_QR.miniatura })"
+          :alt="t('parceiro.estabelecimento.link.qrAlt', { endereco: semProtocolo(link.url) })"
+          width="112"
+          height="112"
+          @error="imagemFalhou[link.tipo] = true"
+        />
+        <img
+          v-else-if="qrLocal[link.url]"
+          class="link__imagem"
+          :src="qrLocal[link.url]"
           :alt="t('parceiro.estabelecimento.link.qrAlt', { endereco: semProtocolo(link.url) })"
           width="112"
           height="112"
@@ -120,7 +192,13 @@ function abrir(link: LinkDaPaginaPublica) {
     </li>
   </ul>
 
-  <EstabelecimentoQrGaveta v-model:visible="gavetaAberta" :link="linkAberto" :slug :nome />
+  <EstabelecimentoQrGaveta
+    v-model:visible="gavetaAberta"
+    :link="linkAberto"
+    :slug
+    :nome
+    :qr-image-url="linkAberto ? imagemDoWfqr(linkAberto) : null"
+  />
 </template>
 
 <style scoped>

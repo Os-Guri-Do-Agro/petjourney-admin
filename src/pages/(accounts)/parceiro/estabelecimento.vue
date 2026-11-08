@@ -712,6 +712,7 @@ async function salvarSlug(slug: string) {
               :links="linksPublicos"
               :slug="estabelecimento.slug"
               :nome="perfil?.nomePublico ?? store.parceiroNome"
+              :parceiro-id="store.parceiroId"
             />
 
             <div class="endereco-da-pagina">
