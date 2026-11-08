@@ -87,7 +87,11 @@ import {
   tipoAceitaEstruturado,
   validarAnotacaoEstruturada,
 } from '@/utils/parceiro/anotacao-estruturada'
-import { camposDiarioDoTipo, MAX_DESCRICAO_ANEXO } from '@/utils/parceiro/anotacao-diario'
+import {
+  camposDiarioDoTipo,
+  indicesAnexosSemTipo,
+  MAX_DESCRICAO_ANEXO,
+} from '@/utils/parceiro/anotacao-diario'
 import { mesclarPrescricaoLida, temCampoAConferir } from '@/utils/parceiro/leitura-receita'
 import type {
   BlocoLista,
@@ -200,6 +204,8 @@ const diarioForm = ref<AnotacaoDiarioInput>({})
 const estruturadaErros = ref<Record<string, string>>({})
 const anexosForm = ref<AnexoForm[]>([])
 const formError = ref('')
+/** O envio barrou por anexo sem tipo de documento: cada select vazio ganha a borda e a mensagem. */
+const mostrarErroTipoAnexo = ref(false)
 /** O envio barrou por falta de serviço ou texto: o campo vazio ganha a borda de erro. */
 const faltaObrigatorio = computed(
   () => formError.value !== '' && formError.value === t('acessos.anotacao.camposObrigatorios'),
@@ -843,6 +849,7 @@ function resetAnotacaoForm() {
   diarioForm.value = {}
   estruturadaErros.value = {}
   anexosForm.value = []
+  mostrarErroTipoAnexo.value = false
   formError.value = ''
   leituraReceita.limpar()
 
@@ -933,6 +940,16 @@ function removeAnexo(index: number) {
   anexosForm.value.splice(index, 1)
 }
 
+/** Escolher o tipo que faltava apaga o aviso; o erro só some do rodapé quando nenhum faltar. */
+watch(
+  () => anexosForm.value.map((a) => a.tipoDocumento),
+  (tipos) => {
+    if (!mostrarErroTipoAnexo.value || indicesAnexosSemTipo(tipos).length > 0) return
+    mostrarErroTipoAnexo.value = false
+    if (formError.value === t('acessos.anotacao.tipoDocumentoObrigatorio')) formError.value = ''
+  },
+)
+
 /** Erros dos campos estruturados, já traduzidos e indexados pelo id do campo. */
 function validarEstruturada() {
   if (!detalhe.value || !temCamposEstruturados.value) {
@@ -973,6 +990,17 @@ async function submitAnotacao() {
     anotacaoForm.profissionalNome.trim().length > LIMITES_CAMPOS_LIVRES.profissionalNome
   ) {
     formError.value = t('acessos.anotacao.textoLongo')
+    return
+  }
+
+  // O tipo do documento é obrigatório em cada anexo: sem ele o arquivo cai sem classificação
+  // no cofre do responsável. Destaca o select que falta e leva o foco até ele.
+  const semTipo = indicesAnexosSemTipo(anexosForm.value.map((a) => a.tipoDocumento))
+  if (semTipo.length > 0) {
+    mostrarErroTipoAnexo.value = true
+    formError.value = t('acessos.anotacao.tipoDocumentoObrigatorio')
+    await nextTick()
+    document.getElementById(`anexo-tipo-${semTipo[0]}`)?.focus()
     return
   }
 
@@ -1064,6 +1092,14 @@ async function submitAnotacao() {
       // vínculo, ficam os remédios, e o próximo envio vai sem ela.
       leituraReceita.limpar()
       formError.value = err.message || t('acessos.leituraReceita.vinculoPerdido')
+    } else if (
+      err instanceof ApiError &&
+      err.statusCode === 400 &&
+      err.reason === 'ANEXO_SEM_TIPO'
+    ) {
+      // Rede de segurança: o formulário já barra, mas a API é quem manda. Destaca os selects.
+      mostrarErroTipoAnexo.value = true
+      formError.value = t('acessos.anotacao.tipoDocumentoObrigatorio')
     } else if (err instanceof ApiError && err.statusCode !== 403 && err.message) {
       // ANEXOS_ACIMA_DO_LIMITE e o resto: a mensagem da API diz o que fazer.
       formError.value = err.message
@@ -2064,7 +2100,8 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       option-label="label"
                       option-value="value"
                       :placeholder="t('acessos.anotacao.tipoDocumentoPlaceholder')"
-                      show-clear
+                      :invalid="mostrarErroTipoAnexo && !anexo.tipoDocumento"
+                      aria-required="true"
                     />
                     <InputText
                       v-if="anexo.tipoDocumento === 'Outro'"
@@ -2086,6 +2123,13 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                       :title="t('acessos.anotacao.removerAnexo')"
                       @click="removeAnexo(index)"
                     />
+                    <p
+                      v-if="mostrarErroTipoAnexo && !anexo.tipoDocumento"
+                      class="anexos__erro"
+                      role="alert"
+                    >
+                      {{ t('acessos.anotacao.tipoDocumentoObrigatorio') }}
+                    </p>
                   </li>
                 </ul>
 
@@ -3495,6 +3539,14 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 .anexos__tipo {
   width: 14rem;
   max-width: 100%;
+}
+
+.anexos__erro {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--risco-tinta);
+  font-size: 12.5px;
+  font-weight: 550;
 }
 
 .folha__nota {

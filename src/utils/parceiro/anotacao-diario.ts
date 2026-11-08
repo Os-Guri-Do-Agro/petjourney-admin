@@ -56,3 +56,15 @@ export function normalizarDescricoesAnexos(
   })
   return alinhadas.some((d) => d != null) ? alinhadas : null
 }
+
+/**
+ * Posições dos anexos sem tipo de documento. O tipo é obrigatório em cada anexo (a API recusa
+ * com 400 e o site também barra): sem ele o documento cai bagunçado no cofre do responsável.
+ */
+export function indicesAnexosSemTipo(tipos: readonly (string | null | undefined)[]): number[] {
+  const indices: number[] = []
+  tipos.forEach((tipo, i) => {
+    if (!tipo || !tipo.trim()) indices.push(i)
+  })
+  return indices
+}
