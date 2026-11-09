@@ -2363,7 +2363,10 @@
         "saiu": "Você saiu da equipe",
         "erro": "Não deu certo",
         "funcoesSalvas": "Funções salvas",
-        "funcoesSalvasDetalhe": "{nome} passa a ver o que essas funções abrem."
+        "funcoesSalvasDetalhe": "{nome} passa a ver o que essas funções abrem.",
+        "fichaCadastrada": "Ficha de profissional de {nome} cadastrada.",
+        "fichaReativada": "Ficha de profissional de {nome} reativada.",
+        "fichaFalhou": "As funções foram salvas, mas a ficha de profissional não: {motivo}"
       },
       "gaveta": {
         "titulo": "Convidar para a equipe",
@@ -2401,7 +2404,10 @@
         "titulo": "Funções na clínica e no hotel",
         "lede": "O que a pessoa faz decide o que ela vê no menu. Dá para marcar mais de uma.",
         "nenhuma": "Sem função, a pessoa vê só o portal comercial: programas, divulgação e acessos.",
-        "salvar": "Salvar funções"
+        "salvar": "Salvar funções",
+        "fichaCadastrar": "Cadastrar também a ficha de profissional",
+        "fichaReativar": "Reativar também a ficha de profissional",
+        "fichaDica": "Quem cuida dos hóspedes precisa de ficha de profissional ativa para marcar as tarefas da rotina do hotel."
       }
     },
     "profissionais": {

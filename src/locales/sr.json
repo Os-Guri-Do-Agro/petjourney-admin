@@ -2363,7 +2363,10 @@
         "saiu": "Napustili ste tim",
         "erro": "Nije uspelo",
         "funcoesSalvas": "Uloge su sačuvane",
-        "funcoesSalvasDetalhe": "Osoba {nome} sada vidi ono što te uloge otvaraju."
+        "funcoesSalvasDetalhe": "Osoba {nome} sada vidi ono što te uloge otvaraju.",
+        "fichaCadastrada": "Profil profesionalca za {nome} je napravljen.",
+        "fichaReativada": "Profil profesionalca za {nome} je ponovo aktiviran.",
+        "fichaFalhou": "Uloge su sačuvane, ali profil profesionalca nije: {motivo}"
       },
       "gaveta": {
         "titulo": "Pozovite u tim",
@@ -2401,7 +2404,10 @@
         "titulo": "Uloge u klinici i hotelu",
         "lede": "Ono što osoba radi određuje šta vidi u meniju. Možete označiti više od jedne.",
         "nenhuma": "Bez uloge osoba vidi samo poslovni portal: programe, promociju i pristupe.",
-        "salvar": "Sačuvajte uloge"
+        "salvar": "Sačuvajte uloge",
+        "fichaCadastrar": "Napravi i profil profesionalca",
+        "fichaReativar": "Ponovo aktiviraj i profil profesionalca",
+        "fichaDica": "Ko brine o gostima mora imati aktivan profil profesionalca da bi označavao zadatke rutine hotela."
       }
     },
     "profissionais": {

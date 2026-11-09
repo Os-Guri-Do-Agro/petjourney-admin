@@ -2363,7 +2363,10 @@
         "saiu": "Usted salió del equipo",
         "erro": "No funcionó",
         "funcoesSalvas": "Funciones guardadas",
-        "funcoesSalvasDetalhe": "{nome} ahora ve lo que esas funciones habilitan."
+        "funcoesSalvasDetalhe": "{nome} ahora ve lo que esas funciones habilitan.",
+        "fichaCadastrada": "Ficha de profesional de {nome} registrada.",
+        "fichaReativada": "Ficha de profesional de {nome} reactivada.",
+        "fichaFalhou": "Las funciones se guardaron, pero la ficha de profesional no: {motivo}"
       },
       "gaveta": {
         "titulo": "Invitar al equipo",
@@ -2401,7 +2404,10 @@
         "titulo": "Funciones en la clínica y el hotel",
         "lede": "Lo que hace la persona decide lo que ve en el menú. Puede marcar más de una.",
         "nenhuma": "Sin función, la persona ve solo el portal comercial: programas, divulgación y accesos.",
-        "salvar": "Guardar funciones"
+        "salvar": "Guardar funciones",
+        "fichaCadastrar": "Registrar también la ficha de profesional",
+        "fichaReativar": "Reactivar también la ficha de profesional",
+        "fichaDica": "Quien cuida a los huéspedes necesita una ficha de profesional activa para marcar las tareas de la rutina del hotel."
       }
     },
     "profissionais": {

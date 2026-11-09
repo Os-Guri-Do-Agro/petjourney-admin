@@ -5,6 +5,10 @@
  * Cada função diz o que abre, porque a escolha muda o menu dela: recepção vê agenda e pacientes,
  * enfermagem vê vacinas e internação, quem não tem função nenhuma vê só o portal comercial. A
  * matriz é da API; o texto aqui só traduz o que ela libera.
+ *
+ * Papel do hotel (Cuidador, Banhista, Adestrador) pede ficha de profissional ativa para marcar a
+ * rotina (403 `PROFISSIONAL_OBRIGATORIO`). Sem ela, a gaveta oferece cadastrar (ou reativar) a
+ * ficha na mesma hora, já marcado (guia e7 §42).
  */
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
@@ -22,9 +26,11 @@ const props = defineProps<{
   atuais: PapelOperacional[]
   salvando: boolean
   erro: Error | null
+  /** A ficha de profissional da pessoa: nenhuma, desativada, ativa ou ainda não lida (`null`). */
+  ficha?: 'NENHUMA' | 'INATIVA' | 'ATIVA' | null
 }>()
 
-const emit = defineEmits<{ salvar: [papeis: PapelOperacional[]] }>()
+const emit = defineEmits<{ salvar: [papeis: PapelOperacional[], opcoes: { ficha: boolean }] }>()
 
 const visible = defineModel<boolean>('visible', { default: false })
 
@@ -52,10 +58,25 @@ useSidePanelOffset(
 
 const drawerPosition = computed(() => (isRTLLocale(locale.value as Locale) ? 'left' : 'right'))
 const escolhidas = ref<PapelOperacional[]>([])
+const comFicha = ref(true)
+
+const PAPEIS_DO_HOTEL: PapelOperacional[] = ['CUIDADOR', 'BANHISTA', 'ADESTRADOR']
+
+/** A oferta da ficha: algum papel do hotel marcado e a pessoa sem ficha ativa. */
+const ofereceFicha = computed(
+  () =>
+    (props.ficha === 'NENHUMA' || props.ficha === 'INATIVA') &&
+    escolhidas.value.some((papel) => PAPEIS_DO_HOTEL.includes(papel)),
+)
+
+function salvar() {
+  emit('salvar', escolhidas.value, { ficha: ofereceFicha.value && comFicha.value })
+}
 
 watch(visible, (aberta) => {
   if (aberta) {
     escolhidas.value = [...props.atuais]
+    comFicha.value = true
   }
 })
 </script>
@@ -82,29 +103,42 @@ watch(visible, (aberta) => {
       </h2>
     </template>
 
-    <form id="funcoes-equipe" class="fg" novalidate @submit.prevent="emit('salvar', escolhidas)">
+    <form id="funcoes-equipe" class="fg" novalidate @submit.prevent="salvar">
       <p class="fg__lede">{{ t('parceiro.equipe.funcoes.lede') }}</p>
 
       <fieldset class="fg__lista">
         <legend class="fg__invisivel">{{ t('parceiro.equipe.funcoes.titulo') }}</legend>
-        <label
-          v-for="funcao in FUNCOES"
-          :key="funcao"
-          class="fg__opcao"
-          :class="{ 'fg__opcao--ativa': escolhidas.includes(funcao) }"
-        >
-          <Checkbox
-            v-model="escolhidas"
-            :input-id="`funcao-${funcao}`"
-            name="funcoes"
-            :value="funcao"
-            :disabled="salvando"
-          />
-          <span class="fg__texto">
-            <strong>{{ t(`parceiro.equipe.funcao.${funcao}`) }}</strong>
-            <small>{{ t(`parceiro.equipe.funcaoDica.${funcao}`) }}</small>
-          </span>
-        </label>
+        <template v-for="funcao in FUNCOES" :key="funcao">
+          <label class="fg__opcao" :class="{ 'fg__opcao--ativa': escolhidas.includes(funcao) }">
+            <Checkbox
+              v-model="escolhidas"
+              :input-id="`funcao-${funcao}`"
+              name="funcoes"
+              :value="funcao"
+              :disabled="salvando"
+            />
+            <span class="fg__texto">
+              <strong>{{ t(`parceiro.equipe.funcao.${funcao}`) }}</strong>
+              <small>{{ t(`parceiro.equipe.funcaoDica.${funcao}`) }}</small>
+            </span>
+          </label>
+          <!-- Logo depois dos papéis do hotel, onde a pessoa acabou de marcar. -->
+          <label
+            v-if="funcao === 'ADESTRADOR' && ofereceFicha"
+            class="fg__opcao fg__ficha"
+            :class="{ 'fg__opcao--ativa': comFicha }"
+          >
+            <Checkbox v-model="comFicha" binary input-id="funcoes-ficha" :disabled="salvando" />
+            <span class="fg__texto">
+              <strong>{{
+                ficha === 'INATIVA'
+                  ? t('parceiro.equipe.funcoes.fichaReativar')
+                  : t('parceiro.equipe.funcoes.fichaCadastrar')
+              }}</strong>
+              <small>{{ t('parceiro.equipe.funcoes.fichaDica') }}</small>
+            </span>
+          </label>
+        </template>
       </fieldset>
 
       <p v-if="!escolhidas.length" class="fg__nota">
@@ -182,6 +216,12 @@ watch(visible, (aberta) => {
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+/* A ficha de profissional: sub-opção dos papéis do hotel, recuada sob eles. */
+.fg__ficha {
+  margin-inline-start: 28px;
+  border-style: dashed;
 }
 
 .fg__invisivel {

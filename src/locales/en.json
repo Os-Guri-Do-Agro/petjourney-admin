@@ -2363,7 +2363,10 @@
         "saiu": "You left the team",
         "erro": "That did not work",
         "funcoesSalvas": "Roles saved",
-        "funcoesSalvasDetalhe": "{nome} now sees what these roles open."
+        "funcoesSalvasDetalhe": "{nome} now sees what these roles open.",
+        "fichaCadastrada": "Professional profile for {nome} created.",
+        "fichaReativada": "Professional profile for {nome} reactivated.",
+        "fichaFalhou": "The roles were saved, but the professional profile was not: {motivo}"
       },
       "gaveta": {
         "titulo": "Invite to the team",
@@ -2401,7 +2404,10 @@
         "titulo": "Roles at the clinic and hotel",
         "lede": "What the person does decides what they see in the menu. You can pick more than one.",
         "nenhuma": "With no role, the person only sees the business portal: programs, promotion and accesses.",
-        "salvar": "Save roles"
+        "salvar": "Save roles",
+        "fichaCadastrar": "Also create the professional profile",
+        "fichaReativar": "Also reactivate the professional profile",
+        "fichaDica": "Whoever looks after the guests needs an active professional profile to tick off the hotel routine tasks."
       }
     },
     "profissionais": {

@@ -42,6 +42,12 @@ import {
   trocarPapelDoMembro,
   type PapelOperacional,
 } from '@/service/parceiro/equipe-service'
+import {
+  alterarProfissional,
+  cadastrarProfissional,
+  listarProfissionais,
+  type Profissional,
+} from '@/service/parceiro/profissionais-service'
 import type { PapelParceiro } from '@/service/parceiro/types'
 import { getDefaultLandingPath } from '@/utils/navigation/default-landing'
 
@@ -312,18 +318,80 @@ const membroDasFuncoes = ref<MembroEquipeDto | null>(null)
 const funcoesAbertas = ref(false)
 const salvandoFuncoes = ref(false)
 const erroDasFuncoes = ref<Error | null>(null)
+/** A ficha de profissional de quem está na gaveta: a oferta do papel do hotel depende dela. */
+const fichaDoMembro = ref<Profissional | null>(null)
+const situacaoDaFicha = ref<'NENHUMA' | 'INATIVA' | 'ATIVA' | null>(null)
 
-function abrirFuncoes(membro: MembroEquipeDto) {
+async function abrirFuncoes(membro: MembroEquipeDto) {
   membroDasFuncoes.value = membro
   erroDasFuncoes.value = null
+  fichaDoMembro.value = null
+  situacaoDaFicha.value = null
   funcoesAbertas.value = true
+
+  /* Sem a lista (falha ou sem permissão), a gaveta só não oferece a ficha. */
+  try {
+    const fichas = await listarProfissionais(parceiroQuery())
+    if (membroDasFuncoes.value?.usuarioId !== membro.usuarioId) return
+    const daPessoa =
+      fichas.find((ficha) => ficha.usuarioId === membro.usuarioId && ficha.ativo) ??
+      fichas.find((ficha) => ficha.usuarioId === membro.usuarioId) ??
+      null
+    fichaDoMembro.value = daPessoa
+    situacaoDaFicha.value = !daPessoa ? 'NENHUMA' : daPessoa.ativo ? 'ATIVA' : 'INATIVA'
+  } catch {
+    situacaoDaFicha.value = null
+  }
+}
+
+/**
+ * Cadastra (ou reativa) a ficha de profissional de quem ganhou papel do hotel. As funções já
+ * foram salvas: a falha aqui vira aviso, não desfaz nada. Ficha repetida já é o que se queria.
+ */
+async function garantirFicha(membro: MembroEquipeDto) {
+  const ficha = fichaDoMembro.value
+
+  try {
+    if (ficha && !ficha.ativo) {
+      await alterarProfissional(ficha.id, { ativo: true }, parceiroQuery())
+      toast.add({
+        severity: 'success',
+        summary: t('parceiro.equipe.toast.fichaReativada', { nome: membro.nome }),
+        life: 4000,
+      })
+    } else if (!ficha) {
+      await cadastrarProfissional(
+        {
+          nome: membro.nome,
+          usuarioId: membro.usuarioId,
+          conselho: 'NENHUM',
+          atendeNaAgenda: false,
+        },
+        parceiroQuery(),
+      )
+      toast.add({
+        severity: 'success',
+        summary: t('parceiro.equipe.toast.fichaCadastrada', { nome: membro.nome }),
+        life: 4000,
+      })
+    }
+  } catch (err) {
+    if (err instanceof ApiError && err.codigo === 'PROFISSIONAL_DUPLICADO') return
+    toast.add({
+      severity: 'warn',
+      summary: t('parceiro.equipe.toast.fichaFalhou', {
+        motivo: err instanceof Error ? err.message : String(err),
+      }),
+      life: 6000,
+    })
+  }
 }
 
 function nomesDasFuncoes(papeis: PapelOperacional[]) {
   return papeis.map((papel) => t(`parceiro.equipe.funcao.${papel}`)).join(', ')
 }
 
-async function salvarFuncoes(papeis: PapelOperacional[]) {
+async function salvarFuncoes(papeis: PapelOperacional[], opcoes?: { ficha: boolean }) {
   const membro = membroDasFuncoes.value
 
   if (!membro) {
@@ -335,6 +403,9 @@ async function salvarFuncoes(papeis: PapelOperacional[]) {
 
   try {
     await definirFuncoesDoMembro(membro.usuarioId, papeis, parceiroQuery())
+    if (opcoes?.ficha) {
+      await garantirFicha(membro)
+    }
     funcoesAbertas.value = false
     toast.add({
       severity: 'success',
@@ -590,6 +661,7 @@ onMounted(async () => {
       :atuais="membroDasFuncoes?.papeisOperacionais ?? []"
       :salvando="salvandoFuncoes"
       :erro="erroDasFuncoes"
+      :ficha="situacaoDaFicha"
       @salvar="salvarFuncoes"
     />
 
