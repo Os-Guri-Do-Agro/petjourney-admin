@@ -184,6 +184,16 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     integrada: true,
   },
 
+  /*
+   * O histórico que viaja com o pet (PJ-QDDJOQ, doc 19): protótipo sobre os dados locais, só na
+   * demonstração. A emergência de verdade é a de Acessos (PJ-4NARE1).
+   */
+  {
+    prefixo: '/clinica/historico-liberado',
+    modulo: 'CLINICA',
+    permissao: 'paciente.ler',
+    integrada: false,
+  },
   /* Vitrine de design do módulo: não é tela de trabalho. */
   {
     prefixo: '/design/clinico',
