@@ -76,6 +76,17 @@ describe('pendencias-service', () => {
     ])
   })
 
+  it('os contadores da rotina do hotel chegam nas telas do portal', async () => {
+    const { rotaDoPortal } = await loadServices()
+
+    expect(rotaDoPortal('/hotel/prancheta')).toBe('/hotel/rotina')
+    expect(rotaDoPortal('/hotel/passagem')).toBe('/hotel/rotina')
+    expect(rotaDoPortal('/hotel/boletins')).toBe('/hotel/hospedes')
+    expect(rotaDoPortal('/hotel/prancheta?filtro=x')).toBe('/hotel/rotina?filtro=x')
+    expect(rotaDoPortal('/hotel/hospedes')).toBe('/hotel/hospedes')
+    expect(rotaDoPortal('/hotel/boletins-velhos')).toBe('/hotel/boletins-velhos')
+  })
+
   it('a tela do contador é a rota sem a busca', async () => {
     const { telaDaRota } = await loadServices()
 

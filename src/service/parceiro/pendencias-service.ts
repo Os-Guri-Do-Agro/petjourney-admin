@@ -21,8 +21,25 @@ export type TomDaPendencia = PendenciaDto['tom']
  * da rota de hoje para achar o item do menu.
  */
 export function rotaDoPortal(rota: string) {
-  return rota.replace(/^\/veterinario(?=[/?#]|$)/, '/clinica')
+  return rota
+    .replace(/^\/veterinario(?=[/?#]|$)/, '/clinica')
+    .replace(
+      /^\/hotel\/(prancheta|passagem|boletins)(?=[?#]|$)/,
+      (_, tela: keyof typeof TELA_DO_HOTEL) => TELA_DO_HOTEL[tela],
+    )
 }
+
+/**
+ * Os contadores da rotina do hotel (E7-05, guia e7 42 a 44) apontam para telas com nome da API. No
+ * portal, a prancheta e o turno moram em `/hotel/rotina` (a passagem é o fim da prancheta), e o
+ * boletim mora na estadia de cada hóspede: sem lista de boletins da casa na API, o selo leva aos
+ * Hóspedes (lacuna N39).
+ */
+const TELA_DO_HOTEL = {
+  prancheta: '/hotel/rotina',
+  passagem: '/hotel/rotina',
+  boletins: '/hotel/hospedes',
+} as const
 
 /**
  * A tela do contador, sem a busca: `/clinica/tratamentos?filtro=PEDEM_ATENCAO` é a tela de

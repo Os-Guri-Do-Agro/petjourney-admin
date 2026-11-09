@@ -203,7 +203,7 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     soDemonstracao: true,
   },
 
-  /* Hotel (E7): a casa (E7-01), as reservas (E7-02) e a caixa de pedidos (E7-03) e a estadia (E7-04) pela API. */
+  /* Hotel (E7): a casa (E7-01), as reservas (E7-02), a caixa de pedidos (E7-03), a estadia (E7-04) e a rotina (E7-05) pela API. */
   { prefixo: '/hotel/acomodacoes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/reservas', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/reserva', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
@@ -211,6 +211,9 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
   { prefixo: '/hotel/pedidos', modulo: 'HOTEL', permissao: 'hotel.reserva', integrada: true },
   { prefixo: '/hotel/hospedes', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   { prefixo: '/hotel/hospedagem', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
+  /* A prancheta com o turno, e a rotina da casa (E7-05): ler é `hotel.ler` (o veterinário também). */
+  { prefixo: '/hotel/rotina', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
+  { prefixo: '/hotel/rotina-padrao', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: true },
   /* O resumo (E7-06): `hotel.ler`, ou só o faturamento (o financeiro não lê a casa). */
   {
     prefixo: '/hotel/resumo',

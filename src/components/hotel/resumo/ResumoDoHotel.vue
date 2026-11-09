@@ -530,6 +530,19 @@ const ocorrencias = computed(() => {
   }
 })
 
+/**
+ * As graves criadas e comunicadas pela mesma pessoa em menos de 10 minutos (E7-05b, guia e7 43): um
+ * aviso discreto ao gestor, para conferir (a grave criada só para ver o telefone do responsável).
+ */
+const gravesDoProprioAutor = computed(() =>
+  store.temPermissao('estabelecimento.editar')
+    ? (resumo.value?.ocorrencias ?? []).reduce(
+        (soma, item) => soma + (item.graveDoProprioAutor ?? 0),
+        0,
+      )
+    : 0,
+)
+
 /* ------------------------------------------------------------------------------ dinheiro */
 
 const pelaReserva = computed(
@@ -868,6 +881,16 @@ const sinal = computed(() => {
               :escrever-valor="ocorrencias.escrever"
               :vazio="t('resumoDoHotel.ocorrencias.vazio')"
             />
+            <p v-if="gravesDoProprioAutor > 0" class="relatorio__nota">
+              <i class="ph ph-eye" aria-hidden="true" />
+              {{
+                t(
+                  'resumoDoHotel.ocorrencias.doProprioAutor',
+                  { n: gravesDoProprioAutor },
+                  gravesDoProprioAutor,
+                )
+              }}
+            </p>
           </div>
         </section>
       </template>

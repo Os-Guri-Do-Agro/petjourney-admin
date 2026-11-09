@@ -103,4 +103,17 @@ describe('podeAbrirRotaDeModulo', () => {
     expect(podeAbrirRotaDeModulo(resumo, acesso(['HOTEL'], ['hotel.valores']))).toBe(false)
     expect(podeAbrirRotaDeModulo(resumo, acesso([], ['hotel.faturamento']))).toBe(false)
   })
+
+  it('a prancheta e a rotina da casa do hotel abrem pela API para quem lê a casa', () => {
+    for (const caminho of ['/hotel/rotina', '/hotel/rotina-padrao']) {
+      const rota = rotaDoModulo(caminho)!
+
+      expect(rota.integrada).toBe(true)
+      expect(podeAbrirRotaDeModulo(rota, acesso(['HOTEL'], ['hotel.ler']))).toBe(true)
+      expect(podeAbrirRotaDeModulo(rota, acesso([], ['hotel.ler']))).toBe(false)
+    }
+
+    /* O painel do dia continua só na demonstração. */
+    expect(rotaDoModulo('/hotel/painel')!.integrada).toBe(false)
+  })
 })

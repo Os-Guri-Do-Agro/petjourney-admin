@@ -6,15 +6,22 @@
  * acrescentados, as fotos (URL assinada pedida ao abrir) e, depois do check-out, a saída (peso,
  * variação, quem retirou). Encerrada pelo óbito ou pela exclusão do cadastro, a saída não se mostra
  * (não houve retirada). Não há dinheiro na estadia.
+ *
+ * A rotina da estadia (E7-05, guia e7 43 e 44): as ocorrências com a ligação ao responsável (R3), o
+ * boletim ao responsável (só para quem cuida da rotina), o diário e a rotina deste hóspede.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
+import BoletinsDaEstadia from '@/components/hotel/rotina/BoletinsDaEstadia.vue'
+import DiarioDaEstadia from '@/components/hotel/rotina/DiarioDaEstadia.vue'
+import OcorrenciasDaEstadia from '@/components/hotel/rotina/OcorrenciasDaEstadia.vue'
+import RotinaDoHospede from '@/components/hotel/rotina/RotinaDoHospede.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
@@ -40,6 +47,7 @@ const props = defineProps<{ hospedagemId: string }>()
 const { t } = useI18n()
 const rotulos = useRotulosDasReservas()
 const { store, parceiroQuery } = useParceiroPortal()
+const route = useRoute()
 
 const h = ref<Hospedagem | null>(null)
 const carregando = ref(false)
@@ -51,8 +59,11 @@ const mexendo = ref<string | null>(null)
 async function carregar() {
   carregando.value = true
   erro.value = ''
+  const primeira = !h.value
   try {
     h.value = await lerHospedagem(props.hospedagemId, parceiroQuery())
+    /* O atalho do turno e da passagem (#ocorrencias) leva direto à caixa das ocorrências. */
+    if (primeira && route.hash === '#ocorrencias') void nextTick(irParaOcorrencias)
   } catch (err) {
     erro.value = lerErroDoCadastro(err, t('estadiaDoHotel.erro')).mensagem
   } finally {
@@ -89,6 +100,24 @@ const resumo = computed(() =>
         .join(' · ')
     : '',
 )
+
+/** Quem cuida da rotina vê o boletim; o veterinário (só `hotel.ler`) não. */
+const veBoletim = computed(() => store.temPermissao('hotel.rotina'))
+const boletinsRef = ref<InstanceType<typeof BoletinsDaEstadia> | null>(null)
+const diarioRef = ref<InstanceType<typeof DiarioDaEstadia> | null>(null)
+
+function irParaOcorrencias() {
+  const caixa = document.getElementById('ocorrencias')
+  if (!caixa) return
+  const calmo = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  caixa.scrollIntoView({ behavior: calmo ? 'auto' : 'smooth', block: 'start' })
+}
+
+/* Uma ligação registrada libera o boletim retido; uma ocorrência nova entra no diário. */
+function ocorrenciaMudou() {
+  void boletinsRef.value?.carregar()
+  void diarioRef.value?.carregar()
+}
 
 const opcoesDeAdaptacao = computed(() =>
   ADAPTACOES.map((valor) => ({ valor, rotulo: t(`estadiaDoHotel.adaptacao.${valor}`) })),
@@ -295,6 +324,22 @@ function novoItem(tipo: 'MEDICACAO' | 'CUIDADO') {
           </div>
         </dl>
       </section>
+
+      <OcorrenciasDaEstadia
+        :hospedagem-id="h.id"
+        :pode-escrever="rotina"
+        @mudou="ocorrenciaMudou"
+      />
+      <BoletinsDaEstadia
+        v-if="veBoletim"
+        ref="boletinsRef"
+        :hospedagem-id="h.id"
+        :paciente="h.pacienteNome"
+        :pode-escrever="rotina"
+        @ir-para-ocorrencias="irParaOcorrencias"
+      />
+      <DiarioDaEstadia ref="diarioRef" :hospedagem-id="h.id" :pode-escrever="rotina" />
+      <RotinaDoHospede :hospedagem-id="h.id" :pode-escrever="rotina" />
 
       <section class="ui-folha ui-cartao" aria-labelledby="hd-remedios">
         <header class="ui-cartao__cabeca">
