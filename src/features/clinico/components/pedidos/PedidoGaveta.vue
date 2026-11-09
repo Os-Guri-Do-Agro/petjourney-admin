@@ -617,6 +617,10 @@ const podeRecusar = computed(() => mensagem.value.trim().length > 0)
               <span v-if="TIPO_DO_MOTIVO[primeiro.motivo] === 'consulta'" class="gp__motivo">
                 · {{ t(`clinico.pedidos.motivo.${primeiro.motivo}`) }}
               </span>
+              <!-- O tempo que o serviço do motivo separa na agenda (PJ-NLA4JS). -->
+              <span v-if="tipo?.duracaoMinutos" class="gp__motivo">
+                · {{ t('clinico.pedidos.minutos', { n: tipo.duracaoMinutos }) }}
+              </span>
             </p>
             <p class="gp__frase">{{ fraseDoPedido }}</p>
             <p v-if="escolheu && !linha.horarioLivre" class="gp__linha gp__linha--atencao">

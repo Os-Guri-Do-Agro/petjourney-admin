@@ -269,6 +269,10 @@ const rotuloDoCanal = computed(() => t(`clinico.pedidos.canal.${primeiro.value.c
         <span v-if="TIPO_DO_MOTIVO[primeiro.motivo] === 'consulta'" class="pedido__motivo">
           · {{ t(`clinico.pedidos.motivo.${primeiro.motivo}`) }}
         </span>
+        <!-- O tempo que o serviço do motivo separa na agenda (PJ-NLA4JS). -->
+        <span v-if="tipo?.duracaoMinutos" class="pedido__motivo">
+          · {{ t('clinico.pedidos.minutos', { n: tipo.duracaoMinutos }) }}
+        </span>
         <i
           v-if="primeiro.remarcaAppointmentId"
           class="ph ph-arrows-clockwise pedido__remarca"

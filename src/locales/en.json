@@ -7562,7 +7562,8 @@
         "faixa": {
           "manha": "before 12 pm",
           "tarde": "after 12 pm"
-        }
+        },
+        "reserva": "The clinic sets aside {n} min"
       },
       "linha": {
         "qualquerHora": "any time",
@@ -7598,7 +7599,8 @@
         "horarioOcupado": "That time is no longer free. Choose another one in \"Reply\".",
         "horaPedida": "Requested",
         "qualquerHora": "Any time"
-      }
+      },
+      "minutos": "{n} min"
     },
     "fita": {
       "rotulo": "The clinic's day",

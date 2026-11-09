@@ -64,6 +64,11 @@ const sintoma = computed(() => fluxo.pedido.motivo === 'SINTOMA')
             <span class="fx-opcao__texto">
               <strong>{{ t(`clinico.pedidos.app.motivo.${motivo}`) }}</strong>
               <span>{{ t(`clinico.pedidos.app.motivoAjuda.${motivo}`) }}</span>
+              <!-- O motivo diz quanto tempo a clínica separa na agenda (PJ-NLA4JS). -->
+              <span v-if="fluxo.duracaoDoMotivo(motivo)" class="motivo__reserva">
+                <i class="ph ph-clock" aria-hidden="true" />
+                {{ t('clinico.pedidos.app.reserva', { n: fluxo.duracaoDoMotivo(motivo) }) }}
+              </span>
             </span>
             <i
               class="ph fx-opcao__fim"
@@ -111,6 +116,13 @@ const sintoma = computed(() => fluxo.pedido.motivo === 'SINTOMA')
 </template>
 
 <style scoped>
+.motivo__reserva {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .motivo__sinal {
   display: flex;
   align-items: center;

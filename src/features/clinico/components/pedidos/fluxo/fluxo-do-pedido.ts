@@ -382,8 +382,28 @@ export function criarFluxoDoPedido(opcoes: {
 
   // ------------------------------------------------------------------ etapas
 
+  /**
+   * Começar pelo app: com um pet só (que pode marcar), ele já vem escolhido e a etapa de escolher
+   * some (PJ-NLA4JS). Com mais de um, ou com o único internado, a pessoa escolhe.
+   */
   function comecarPedido() {
-    irPara(opcoes.canal === 'app' ? 'pets' : 'motivo')
+    if (opcoes.canal !== 'app') {
+      irPara('motivo')
+      return
+    }
+    const [unico] = petsDaConta.value
+    if (petsDaConta.value.length === 1 && unico && !unico.internado) {
+      pedido.petIds = [unico.id]
+      irPara(petIncompleto.value ? 'completar' : 'motivo')
+      return
+    }
+    irPara('pets')
+  }
+
+  /** O tempo que a clínica reserva para o motivo: a duração do serviço que ele pede. */
+  function duracaoDoMotivo(motivo: MotivoNaTela): number | null {
+    if (motivo === 'EMERGENCIA') return null
+    return clinica.value?.servicos.find((item) => item.tipo === SERVICO_DO_MOTIVO[motivo])?.duracaoMinutos ?? null
   }
 
   function alternarPet(petId: string) {
@@ -757,6 +777,7 @@ export function criarFluxoDoPedido(opcoes: {
     recomecar,
     recarregarConta,
     comecarPedido,
+    duracaoDoMotivo,
     alternarPet,
     confirmarPets,
     completarPet,

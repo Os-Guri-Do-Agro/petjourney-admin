@@ -163,6 +163,9 @@ const mensagemDeErro = computed(() => {
               </template>
             </strong>
             <span>{{ nomesDosPets }}</span>
+            <span v-if="fluxo.servico.value?.duracaoMinutos">
+              {{ t('clinico.pedidos.app.reserva', { n: fluxo.servico.value.duracaoMinutos }) }}
+            </span>
             <span class="revisar__clinica">
               <i class="ph ph-map-pin" aria-hidden="true" />
               {{ fluxo.clinica.value?.clinica.nome }}

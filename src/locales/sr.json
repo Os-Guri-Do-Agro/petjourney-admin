@@ -7562,7 +7562,8 @@
         "faixa": {
           "manha": "do 12 h",
           "tarde": "posle 12 h"
-        }
+        },
+        "reserva": "Klinika rezerviše {n} min"
       },
       "linha": {
         "qualquerHora": "bilo koje vreme",
@@ -7598,7 +7599,8 @@
         "horarioOcupado": "Termin više nije slobodan. Izaberite drugi preko dugmeta \"Odgovorite\".",
         "horaPedida": "Traženo",
         "qualquerHora": "Bilo koje vreme"
-      }
+      },
+      "minutos": "{n} min"
     },
     "fita": {
       "rotulo": "Dan klinike",

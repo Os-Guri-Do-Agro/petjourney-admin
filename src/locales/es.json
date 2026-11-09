@@ -7562,7 +7562,8 @@
         "faixa": {
           "manha": "hasta las 12:00",
           "tarde": "después de las 12:00"
-        }
+        },
+        "reserva": "La clínica reserva {n} min"
       },
       "linha": {
         "qualquerHora": "cualquier hora",
@@ -7598,7 +7599,8 @@
         "horarioOcupado": "El horario ya no está libre. En \"Responder\", elija otro.",
         "horaPedida": "Pedido",
         "qualquerHora": "Cualquier hora"
-      }
+      },
+      "minutos": "{n} min"
     },
     "fita": {
       "rotulo": "El día de la clínica",
