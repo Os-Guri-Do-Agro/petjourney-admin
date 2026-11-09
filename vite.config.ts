@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig, normalizePath } from 'vite'
@@ -23,8 +23,19 @@ const substituidos = readdirSync(iconesDoPrimeVue)
   .filter((arquivo) => arquivo.endsWith('.vue'))
   .map((arquivo) => arquivo.slice(0, -'.vue'.length))
 
+/*
+ * Versão do portal, a do `package.json`. Sobe a cada push para `develop` ou `main` (Regra 5 do
+ * CLAUDE.md) e aparece no pé do menu da conta: é por ela que se confere o que está no ar.
+ */
+const versaoDoPortal: string = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+).version
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __VERSAO_DO_PORTAL__: JSON.stringify(versaoDoPortal),
+  },
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: [

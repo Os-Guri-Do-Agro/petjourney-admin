@@ -339,7 +339,8 @@
       "perfil": "الملف الشخصي",
       "settings": "الإعدادات",
       "trocarEmpresa": "تبديل الشركة",
-      "logout": "تسجيل الخروج"
+      "logout": "تسجيل الخروج",
+      "versao": "الإصدار {versao}"
     },
     "logoutConfirm": {
       "title": "تسجيل الخروج؟",

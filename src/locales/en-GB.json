@@ -339,7 +339,8 @@
       "perfil": "Profile",
       "settings": "Settings",
       "trocarEmpresa": "Switch company",
-      "logout": "Sign out"
+      "logout": "Sign out",
+      "versao": "Version {versao}"
     },
     "logoutConfirm": {
       "title": "Sign out?",

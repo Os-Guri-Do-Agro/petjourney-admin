@@ -339,7 +339,8 @@
       "perfil": "Perfil",
       "settings": "Configuración",
       "trocarEmpresa": "Cambiar de empresa",
-      "logout": "Cerrar sesión"
+      "logout": "Cerrar sesión",
+      "versao": "Versión {versao}"
     },
     "logoutConfirm": {
       "title": "¿Cerrar sesión?",

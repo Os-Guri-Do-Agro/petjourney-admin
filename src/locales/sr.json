@@ -339,7 +339,8 @@
       "perfil": "Profil",
       "settings": "Podešavanja",
       "trocarEmpresa": "Promenite firmu",
-      "logout": "Odjava"
+      "logout": "Odjava",
+      "versao": "Verzija {versao}"
     },
     "logoutConfirm": {
       "title": "Želite da se odjavite?",

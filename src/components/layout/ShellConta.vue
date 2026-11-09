@@ -22,6 +22,7 @@ import { LOCALES, type Locale } from '@/i18n/locales'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { isDarkMode, toggleColorMode } from '@/theme/color-mode'
+import { VERSAO_DO_PORTAL } from '@/utils/versao'
 
 defineProps<{ recolhida: boolean }>()
 
@@ -241,16 +242,22 @@ async function sair() {
 
         <hr class="conta__divisa" />
 
-        <Button
-          class="conta__sair"
-          type="button"
-          role="menuitem"
-          text
-          severity="danger"
-          icon="ph ph-sign-out"
-          :label="t('shell.user.logout')"
-          @click="pedirSaida"
-        />
+        <div class="conta__pe" role="none">
+          <Button
+            class="conta__sair"
+            type="button"
+            role="menuitem"
+            text
+            severity="danger"
+            icon="ph ph-sign-out"
+            :label="t('shell.user.logout')"
+            @click="pedirSaida"
+          />
+          <!-- A versão que está no ar: sobe a cada push (Regra 5 do CLAUDE.md). -->
+          <span class="conta__versao">{{
+            t('shell.user.versao', { versao: VERSAO_DO_PORTAL })
+          }}</span>
+        </div>
       </div>
     </Popover>
 
@@ -536,12 +543,30 @@ button.conta__item {
   font-size: 15px;
 }
 
+.conta__pe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .conta__sair.p-button {
+  flex: 1;
   justify-content: flex-start;
   gap: 12px;
   min-height: 42px;
   padding: 0 10px;
   font-weight: 500;
+}
+
+/* A versão no ar, discreta no canto do pé: para conferir o que subiu, não para chamar atenção. */
+.conta__versao {
+  flex: none;
+  padding-inline-end: 10px;
+  color: var(--tinta-3);
+  font-family: var(--font-dados);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {
