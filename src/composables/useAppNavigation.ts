@@ -269,6 +269,12 @@ const PATIENT_ROUTES = [
   /* Os pedidos de correção do cadastro que os responsáveis mandam pelo app (E2-02). */
   { key: 'cadastro.correcoes.titulo', to: '/clinica/correcoes', icon: 'ph ph-pencil-line' },
   { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
+  /* O paciente que chegou com o histórico liberado pelo responsável (doc 19): protótipo, só na demonstração. */
+  {
+    key: 'clinico.historicoLiberado.titulo',
+    to: '/clinica/historico-liberado',
+    icon: 'ph ph-share-network',
+  },
   /* Os pedidos de cópia do prontuário (E4-06c): só existem pela API (`copia.gerir`). */
   {
     key: 'copias.titulo',
