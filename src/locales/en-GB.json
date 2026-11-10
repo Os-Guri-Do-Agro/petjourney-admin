@@ -340,7 +340,8 @@
       "settings": "Settings",
       "trocarEmpresa": "Switch company",
       "logout": "Sign out",
-      "versao": "Version {versao}"
+      "versao": "Version {versao}",
+      "build": "Built {data}"
     },
     "logoutConfirm": {
       "title": "Sign out?",

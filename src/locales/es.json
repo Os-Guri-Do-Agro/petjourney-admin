@@ -340,7 +340,8 @@
       "settings": "Configuración",
       "trocarEmpresa": "Cambiar de empresa",
       "logout": "Cerrar sesión",
-      "versao": "Versión {versao}"
+      "versao": "Versión {versao}",
+      "build": "Generada el {data}"
     },
     "logoutConfirm": {
       "title": "¿Cerrar sesión?",

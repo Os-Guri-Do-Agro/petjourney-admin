@@ -340,7 +340,8 @@
       "settings": "الإعدادات",
       "trocarEmpresa": "تبديل الشركة",
       "logout": "تسجيل الخروج",
-      "versao": "الإصدار {versao}"
+      "versao": "الإصدار {versao}",
+      "build": "أُنشئت في {data}"
     },
     "logoutConfirm": {
       "title": "تسجيل الخروج؟",

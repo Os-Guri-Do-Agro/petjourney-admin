@@ -22,11 +22,15 @@ import { LOCALES, type Locale } from '@/i18n/locales'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 import { isDarkMode, toggleColorMode } from '@/theme/color-mode'
-import { VERSAO_DO_PORTAL } from '@/utils/versao'
+import { VERSAO_DO_PORTAL, descricaoDoBuild } from '@/utils/versao'
 
 defineProps<{ recolhida: boolean }>()
 
 const { t, locale } = useI18n()
+
+const dicaDoBuild = computed(() =>
+  descricaoDoBuild((data) => t('shell.user.build', { data }), locale.value),
+)
 const perfil = useUsuarioPerfilStore()
 const { logout } = useLogout()
 const router = useRouter()
@@ -254,7 +258,7 @@ async function sair() {
             @click="pedirSaida"
           />
           <!-- A versão que está no ar: sobe a cada push (Regra 5 do CLAUDE.md). -->
-          <span class="conta__versao">{{
+          <span class="conta__versao" :title="dicaDoBuild">{{
             t('shell.user.versao', { versao: VERSAO_DO_PORTAL })
           }}</span>
         </div>

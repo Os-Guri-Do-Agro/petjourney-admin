@@ -18,6 +18,7 @@ import bgDarkUrl from '@/assets/login/login-dark-bg.jpg'
 import bgLightUrl from '@/assets/login/login-ligth-bg.jpg'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import { isDarkMode } from '@/theme/color-mode'
+import { VERSAO_DO_PORTAL, descricaoDoBuild } from '@/utils/versao'
 
 defineProps<{
   eyebrow?: string
@@ -25,7 +26,11 @@ defineProps<{
   description: string
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+
+const dicaDoBuild = computed(() =>
+  descricaoDoBuild((data) => t('shell.user.build', { data }), locale.value),
+)
 
 const logoSemPata = computed(() => (isDarkMode.value ? logoDarkUrl : logoLightUrl))
 
@@ -114,6 +119,11 @@ onBeforeUnmount(() => {
           </div>
 
           <slot />
+
+          <!-- A versão no ar, visível sem entrar: sobe a cada push (Regra 5 do CLAUDE.md). -->
+          <p class="auth-versao" :title="dicaDoBuild">
+            {{ t('shell.user.versao', { versao: VERSAO_DO_PORTAL }) }}
+          </p>
         </div>
       </div>
 
@@ -291,6 +301,16 @@ onBeforeUnmount(() => {
   font-size: clamp(2rem, 3vw, 2.6rem);
   font-weight: 650;
   letter-spacing: -0.03em;
+}
+
+/* A versão no ar, no pé do formulário: para conferir o que subiu, não para chamar atenção. */
+.auth-versao {
+  margin: 2.5rem 0 0;
+  color: var(--auth-muted);
+  font-family: var(--font-dados);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
 }
 
 .auth-heading p {

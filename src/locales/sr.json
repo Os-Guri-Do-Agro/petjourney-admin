@@ -340,7 +340,8 @@
       "settings": "Podešavanja",
       "trocarEmpresa": "Promenite firmu",
       "logout": "Odjava",
-      "versao": "Verzija {versao}"
+      "versao": "Verzija {versao}",
+      "build": "Napravljena {data}"
     },
     "logoutConfirm": {
       "title": "Želite da se odjavite?",

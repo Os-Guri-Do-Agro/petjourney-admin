@@ -340,7 +340,8 @@
       "settings": "Configurações",
       "trocarEmpresa": "Trocar de empresa",
       "logout": "Sair da conta",
-      "versao": "Versão {versao}"
+      "versao": "Versão {versao}",
+      "build": "Gerada em {data}"
     },
     "logoutConfirm": {
       "title": "Sair da conta?",
