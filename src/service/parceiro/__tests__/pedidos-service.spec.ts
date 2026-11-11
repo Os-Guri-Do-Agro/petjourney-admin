@@ -13,14 +13,25 @@ function tokenCom(parceiroAtivoId: string) {
   return `${parte({ alg: 'HS256' })}.${parte({ userId: 'u1', parceiroAtivoId, exp: 4102444800 })}.x`
 }
 
-async function loadService(parceiroAtivoId = 'p1') {
+const sessao = { parceiroAtivoId: undefined as string | undefined }
+const trocarParaParceiro = vi.fn()
+
+async function loadService(
+  parceiroAtivoId: string | undefined = 'p1',
+  troca: (parceiroId: string) => Promise<unknown> = async (parceiroId) => {
+    sessao.parceiroAtivoId = parceiroId
+  },
+) {
   vi.resetModules()
   vi.stubEnv('VITE_API_URL', 'https://api.exemplo.test')
+  sessao.parceiroAtivoId = parceiroAtivoId
+  trocarParaParceiro.mockReset().mockImplementation(troca)
   vi.doMock('../../auth/auth-session', async (original) => ({
     ...(await original<typeof import('../../auth/auth-session')>()),
-    getAuthUser: () => ({ userId: 'u1', parceiroAtivoId }),
-    getAccessToken: () => tokenCom(parceiroAtivoId),
+    getAuthUser: () => ({ userId: 'u1', parceiroAtivoId: sessao.parceiroAtivoId }),
+    getAccessToken: () => tokenCom(sessao.parceiroAtivoId ?? ''),
   }))
+  vi.doMock('../../auth/auth-service', () => ({ trocarParaParceiro }))
 
   return import('../pedidos-service')
 }
@@ -49,6 +60,7 @@ afterEach(() => {
   vi.unstubAllGlobals()
   vi.unstubAllEnvs()
   vi.doUnmock('../../auth/auth-session')
+  vi.doUnmock('../../auth/auth-service')
 })
 
 describe('rotas da caixa', () => {
@@ -76,8 +88,27 @@ describe('rotas da caixa', () => {
     ])
   })
 
-  it('com outro parceiro, o parceiroId vai junto (nunca a caixa de outra empresa)', async () => {
-    const servico = await loadService('p-do-token')
+  it('token sem o claim ou de outra empresa: realinha o token e lista sem o parceiroId', async () => {
+    for (const doToken of [undefined, 'p-do-token']) {
+      const servico = await loadService(doToken)
+      const fetchMock = responder({ itens: [], proximoCursor: null, sugestoes: [] })
+
+      await servico.listarPedidos({ status: 'PENDENTES' }, { parceiroId: 'p2' })
+      await servico.sugestoesDoPedido('g1', 6, { parceiroId: 'p2' })
+
+      expect(trocarParaParceiro).toHaveBeenCalledOnce()
+      expect(trocarParaParceiro).toHaveBeenCalledWith('p2')
+      expect(chamadas(fetchMock)).toEqual([
+        ['GET', '/parceiro/portal/clinica/pedidos?status=PENDENTES'],
+        ['GET', '/parceiro/portal/clinica/pedidos/g1/sugestoes?limite=6'],
+      ])
+    }
+  })
+
+  it('se o realinhamento falha, o parceiroId vai junto (nunca a caixa de outra empresa)', async () => {
+    const servico = await loadService('p-do-token', async () => {
+      throw new Error('403')
+    })
     const fetchMock = responder({ itens: [], proximoCursor: null })
 
     await servico.listarPedidos({ status: 'PENDENTES' }, { parceiroId: 'p2' })

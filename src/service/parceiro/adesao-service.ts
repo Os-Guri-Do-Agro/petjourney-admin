@@ -11,7 +11,6 @@
  * que é o da clínica para quem trabalha nela.
  */
 import { apiFetch } from '../api'
-import { getAuthUser } from '../auth/auth-session'
 import type { ApiEnvelope } from '../api-envelope'
 import type {
   AdesaoDoPacienteDto,
@@ -87,25 +86,23 @@ export function lerAdesaoDoPaciente(pacienteId: string, params?: ParceiroQuery) 
 
 /**
  * Lacuna N34 (a mesma da N22): a lista recusa `?parceiroId=` (400 "property parceiroId should not
- * exist"). Sem ele, a API usa o parceiro ativo do token: só se omite quando é o mesmo parceiro.
+ * exist") e usa o parceiro ativo do token, realinhado antes da chamada (`parceiroPeloToken`).
  */
-function parceiroDaQueryDaLista(params?: ParceiroQuery) {
-  const parceiroId = params?.parceiroId
-  return parceiroId && parceiroId === getAuthUser()?.parceiroAtivoId ? undefined : parceiroId
-}
 
 /** A lista da clínica; `PEDEM_ATENCAO` = os críticos com alerta aberto (o que o cron gravou). */
-export function listarTratamentos(
+export async function listarTratamentos(
   filtro: { pedemAtencao?: boolean; cursor?: string | null; limit?: number } = {},
   params?: ParceiroQuery,
 ) {
+  const parceiroId = await parceiroPeloToken(params?.parceiroId)
+
   return dados(
     apiFetch<ApiEnvelope<PaginaDeTratamentos>>(
       comQuery(TRATAMENTOS, {
         filtro: filtro.pedemAtencao ? 'PEDEM_ATENCAO' : undefined,
         cursor: filtro.cursor,
         limit: filtro.limit ?? 30,
-        parceiroId: parceiroDaQueryDaLista(params),
+        parceiroId,
       }),
       comFuso(),
     ),

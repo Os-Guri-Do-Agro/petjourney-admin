@@ -11,7 +11,6 @@
  * tela leva às sugestões, à recusa ou ao encaixe de propósito (`professional-overlap`).
  */
 import { apiFetch } from '../api'
-import { getAuthUser } from '../auth/auth-session'
 import type { ApiEnvelope } from '../api-envelope'
 import type {
   AceitarPedidoDto,
@@ -26,6 +25,8 @@ import type {
   SugestaoDoPedidoDto,
   SugestoesDoPedidoDto,
 } from '../contrato/openapi'
+
+import { parceiroPeloToken } from './parceiro-do-token'
 
 export type ConfiguracaoOnline = AgendamentoOnlineConfigDto
 export type ConfiguracaoOnlineSalva = SalvarAgendamentoOnlineDto
@@ -127,24 +128,21 @@ export function configuracaoParaSalvar(atual: ConfiguracaoOnline): ConfiguracaoO
 
 /**
  * Lacuna N22: a lista da caixa e as sugestões recusam `?parceiroId=` (400 "property parceiroId
- * should not exist"), embora o contrato o declare. Sem ele, a API usa o parceiro ativo do token. Só
- * se omite quando é o mesmo parceiro: com outro, o pedido vai com ele (e dá o 400 até a API
- * corrigir), nunca a caixa de outra empresa.
+ * should not exist"), embora o contrato o declare. Elas usam o parceiro ativo do token, que é
+ * realinhado à empresa em uso antes da chamada (`parceiroPeloToken`).
  */
-function parceiroDaQueryDaCaixa(params?: ParceiroQuery) {
-  const parceiroId = params?.parceiroId
-  return parceiroId && parceiroId === getAuthUser()?.parceiroAtivoId ? undefined : parceiroId
-}
 
 /** PENDENTES vêm do mais antigo; o resto, do mais recente. `cursor` é o `proximoCursor`. */
-export function listarPedidos(
+export async function listarPedidos(
   filtro: { status: AbaDaCaixa; cursor?: string | null },
   params?: ParceiroQuery,
 ) {
+  const parceiroId = await parceiroPeloToken(params?.parceiroId)
+
   return dados(
     apiFetch<ApiEnvelope<PaginaDaCaixa>>(
       comQuery(`${CLINICA}/pedidos`, {
-        parceiroId: parceiroDaQueryDaCaixa(params),
+        parceiroId,
         status: filtro.status,
         cursor: filtro.cursor,
       }),
@@ -164,11 +162,13 @@ export function obterPedido(id: string, params?: ParceiroQuery) {
  * Dentro do que a pessoa pediu (ou perto do horário que sumiu), um por profissional por dia. Sem
  * nada, até 7 dias depois com `foraDaPreferencia` (ofereça, não marque calado).
  */
-export function sugestoesDoPedido(id: string, limite: number, params?: ParceiroQuery) {
+export async function sugestoesDoPedido(id: string, limite: number, params?: ParceiroQuery) {
+  const parceiroId = await parceiroPeloToken(params?.parceiroId)
+
   return dados(
     apiFetch<ApiEnvelope<SugestoesDoPedido>>(
       comQuery(`${CLINICA}/pedidos/${encodeURIComponent(id)}/sugestoes`, {
-        parceiroId: parceiroDaQueryDaCaixa(params),
+        parceiroId,
         limite,
       }),
     ),
