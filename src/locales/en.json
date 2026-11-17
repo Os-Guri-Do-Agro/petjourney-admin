@@ -4034,6 +4034,54 @@
       "onde": {
         "faltas": "No-shows",
         "agenda": "Schedule"
+      },
+      "vazio": {
+        "heroTitulo": "Nobody at the clinic right now",
+        "heroTexto": "Nothing else booked for today. Whoever calls or walks in without a booking goes through the schedule.",
+        "marcar": "Book a slot",
+        "abrirAgenda": "Open the schedule",
+        "filaTitulo": "Nobody up next today",
+        "filaTexto": "Whoever is booked today or arrives at the front desk shows up here, in the order they will be seen.",
+        "guiaTitulo": "How the day's list fills up",
+        "passos": {
+          "agenda": {
+            "titulo": "The schedule books",
+            "texto": "The front desk books the slot, or accepts a request that came in through the app or the link."
+          },
+          "chegada": {
+            "titulo": "Check them in",
+            "texto": "In the schedule, Check in puts the patient at the front desk, on this list."
+          },
+          "sala": {
+            "titulo": "Start the consult",
+            "texto": "On the patient's row, Start consult opens the visit and moves them to the room."
+          }
+        },
+        "pautaTitulo": "Nothing needs action",
+        "pautaTexto": "Drafts, no-shows, follow-ups and pre-visits show up here when they need someone.",
+        "adiantar": {
+          "titulo": "To get ahead",
+          "marcar": {
+            "rotulo": "Book a slot",
+            "dica": "For whoever called or walked in without a booking."
+          },
+          "chamada": {
+            "rotulo": "Call list",
+            "dica": "Who has a vaccine overdue or about to be."
+          },
+          "pedidos": {
+            "rotulo": "Booking requests",
+            "dica": "The ones that came in through the app and the clinic link."
+          },
+          "espera": {
+            "rotulo": "Waitlist",
+            "dica": "Who is waiting for a slot to open in the schedule."
+          },
+          "paciente": {
+            "rotulo": "New patient",
+            "dica": "Step-by-step registration, with the owner."
+          }
+        }
       }
     },
     "resumo": {

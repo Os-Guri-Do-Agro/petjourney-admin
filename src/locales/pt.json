@@ -4034,6 +4034,54 @@
       "onde": {
         "faltas": "Faltas",
         "agenda": "Agenda"
+      },
+      "vazio": {
+        "heroTitulo": "Ninguém na clínica agora",
+        "heroTexto": "Nada mais marcado para hoje. Quem ligar ou chegar sem horário entra pela agenda.",
+        "marcar": "Marcar horário",
+        "abrirAgenda": "Abrir a agenda",
+        "filaTitulo": "Ninguém na fila de hoje",
+        "filaTexto": "Quem tem horário hoje ou chega à recepção aparece aqui, na ordem em que vai ser atendido.",
+        "guiaTitulo": "Como a fila do dia se forma",
+        "passos": {
+          "agenda": {
+            "titulo": "A agenda marca",
+            "texto": "A recepção marca o horário, ou aceita um pedido que chegou pelo app ou pelo link."
+          },
+          "chegada": {
+            "titulo": "Registre a chegada",
+            "texto": "Na agenda, Registrar chegada põe o paciente na recepção, nesta lista."
+          },
+          "sala": {
+            "titulo": "Inicie a consulta",
+            "texto": "Na linha do paciente, Iniciar consulta abre o atendimento e leva para a sala."
+          }
+        },
+        "pautaTitulo": "Nada pedindo ação",
+        "pautaTexto": "Rascunhos, faltas, retornos e pré-consultas aparecem aqui quando precisam de alguém.",
+        "adiantar": {
+          "titulo": "Para adiantar",
+          "marcar": {
+            "rotulo": "Marcar horário",
+            "dica": "Para quem ligou ou chegou sem horário."
+          },
+          "chamada": {
+            "rotulo": "Lista de chamada",
+            "dica": "Quem está com vacina vencida ou para vencer."
+          },
+          "pedidos": {
+            "rotulo": "Pedidos de horário",
+            "dica": "Os que chegaram pelo app e pelo link da clínica."
+          },
+          "espera": {
+            "rotulo": "Lista de espera",
+            "dica": "Quem espera uma vaga abrir na agenda."
+          },
+          "paciente": {
+            "rotulo": "Novo paciente",
+            "dica": "Cadastro em passos, com o responsável."
+          }
+        }
       }
     },
     "resumo": {

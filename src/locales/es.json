@@ -4034,6 +4034,54 @@
       "onde": {
         "faltas": "Ausencias",
         "agenda": "Agenda"
+      },
+      "vazio": {
+        "heroTitulo": "Nadie en la clínica ahora",
+        "heroTexto": "Nada más agendado para hoy. Quien llame o llegue sin turno entra por la agenda.",
+        "marcar": "Agendar horario",
+        "abrirAgenda": "Abrir la agenda",
+        "filaTitulo": "Nadie en la fila de hoy",
+        "filaTexto": "Quien tiene horario hoy o llega a recepción aparece aquí, en el orden en que será atendido.",
+        "guiaTitulo": "Cómo se forma la fila del día",
+        "passos": {
+          "agenda": {
+            "titulo": "La agenda marca",
+            "texto": "Recepción agenda el horario, o acepta una solicitud que llegó por la app o por el enlace."
+          },
+          "chegada": {
+            "titulo": "Registre la llegada",
+            "texto": "En la agenda, Registrar llegada pone al paciente en recepción, en esta lista."
+          },
+          "sala": {
+            "titulo": "Inicie la consulta",
+            "texto": "En la fila del paciente, Iniciar consulta abre la atención y lo lleva a la sala."
+          }
+        },
+        "pautaTitulo": "Nada requiere acción",
+        "pautaTexto": "Borradores, ausencias, controles y preconsultas aparecen aquí cuando necesitan a alguien.",
+        "adiantar": {
+          "titulo": "Para adelantar",
+          "marcar": {
+            "rotulo": "Agendar horario",
+            "dica": "Para quien llamó o llegó sin turno."
+          },
+          "chamada": {
+            "rotulo": "Lista de llamadas",
+            "dica": "Quién tiene una vacuna vencida o por vencer."
+          },
+          "pedidos": {
+            "rotulo": "Solicitudes de horario",
+            "dica": "Las que llegaron por la app y por el enlace de la clínica."
+          },
+          "espera": {
+            "rotulo": "Lista de espera",
+            "dica": "Quién espera que se abra un hueco en la agenda."
+          },
+          "paciente": {
+            "rotulo": "Nuevo paciente",
+            "dica": "Registro por pasos, con el tutor."
+          }
+        }
       }
     },
     "resumo": {

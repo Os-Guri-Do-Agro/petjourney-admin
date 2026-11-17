@@ -4034,6 +4034,54 @@
       "onde": {
         "faltas": "Izostanci",
         "agenda": "Raspored"
+      },
+      "vazio": {
+        "heroTitulo": "Trenutno nema nikoga u klinici",
+        "heroTexto": "Za danas nema više zakazanih termina. Ko pozove ili dođe bez termina ulazi preko rasporeda.",
+        "marcar": "Zakažite termin",
+        "abrirAgenda": "Otvorite raspored",
+        "filaTitulo": "Danas niko nije sledeći",
+        "filaTexto": "Ko danas ima termin ili dođe na recepciju pojavljuje se ovde, redom kojim će biti primljen.",
+        "guiaTitulo": "Kako se formira današnji red",
+        "passos": {
+          "agenda": {
+            "titulo": "Raspored zakazuje",
+            "texto": "Recepcija zakazuje termin ili prihvata zahtev koji je stigao preko aplikacije ili linka."
+          },
+          "chegada": {
+            "titulo": "Zabeležite dolazak",
+            "texto": "U rasporedu, Zabeležite dolazak stavlja pacijenta na recepciju, na ovu listu."
+          },
+          "sala": {
+            "titulo": "Započnite pregled",
+            "texto": "U redu pacijenta, Započni pregled otvara posetu i vodi ga u salu."
+          }
+        },
+        "pautaTitulo": "Ništa ne čeka na akciju",
+        "pautaTexto": "Nacrti, izostanci, kontrole i predpregledi pojavljuju se ovde kada nekome trebaju.",
+        "adiantar": {
+          "titulo": "Da se odradi unapred",
+          "marcar": {
+            "rotulo": "Zakažite termin",
+            "dica": "Za one koji su zvali ili došli bez termina."
+          },
+          "chamada": {
+            "rotulo": "Lista za pozivanje",
+            "dica": "Ko ima vakcinu kojoj je istekao ili ističe rok."
+          },
+          "pedidos": {
+            "rotulo": "Zahtevi za termin",
+            "dica": "Oni koji su stigli preko aplikacije i linka klinike."
+          },
+          "espera": {
+            "rotulo": "Lista čekanja",
+            "dica": "Ko čeka da se otvori termin u rasporedu."
+          },
+          "paciente": {
+            "rotulo": "Novi pacijent",
+            "dica": "Upis korak po korak, sa starateljem."
+          }
+        }
       }
     },
     "resumo": {
