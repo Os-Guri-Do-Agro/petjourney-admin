@@ -50,7 +50,8 @@ const erro = ref('')
 /** O tipo é do veterinário: com ele escolhido, a recepção não troca. */
 const tipoFixo = computed(() => Boolean(props.retorno?.tipoId))
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.retorno?.atendimentoId] as const, ([agora]) => {
   if (!agora || !props.retorno) return
   tipoId.value =
     props.retorno.tipoId ?? props.tipos.find((tipo) => tipo.kind === 'RETORNO')?.id ?? null

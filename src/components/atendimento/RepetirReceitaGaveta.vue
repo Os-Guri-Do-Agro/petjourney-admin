@@ -41,7 +41,8 @@ const carregando = ref(false)
 const salvando = ref(false)
 const erro = ref('')
 
-watch(aberta, async (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.receita?.id] as const, async ([agora]) => {
   if (!agora) return
   erro.value = ''
   destino.value = NOVO

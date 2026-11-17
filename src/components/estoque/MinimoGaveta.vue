@@ -29,7 +29,8 @@ const minimo = ref<number | null>(null)
 const salvando = ref(false)
 const erro = ref('')
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.vacina?.vacinaId] as const, ([agora]) => {
   if (!agora) return
   minimo.value = props.vacina?.minimo ?? 0
   erro.value = ''

@@ -33,7 +33,8 @@ const custoReais = ref<number | null>(null)
 const salvando = ref(false)
 const erro = ref('')
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.lote?.id] as const, ([agora]) => {
   if (!agora || !props.lote) return
   fornecedor.value = props.lote.fornecedor ?? ''
   notaFiscal.value = props.lote.notaFiscal ?? ''

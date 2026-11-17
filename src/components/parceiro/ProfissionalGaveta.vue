@@ -162,7 +162,8 @@ function salvar() {
   })
 }
 
-watch(visible, (aberta) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([visible, () => props.profissional?.id] as const, ([aberta]) => {
   if (aberta) {
     preencher()
   }

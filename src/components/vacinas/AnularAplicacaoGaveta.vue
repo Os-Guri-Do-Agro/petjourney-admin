@@ -34,7 +34,8 @@ const erro = ref('')
 /** Anulada agora, com o horário da próxima dose ainda na agenda. */
 const horarioQueFicou = ref<{ id: string; dia: string } | null>(null)
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.aplicacao?.id] as const, ([agora]) => {
   if (!agora) return
   motivo.value = ''
   tentou.value = false

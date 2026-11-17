@@ -54,7 +54,8 @@ const opcoesDeSeveridade = computed(() =>
   SEVERIDADES.map((valor) => ({ valor, rotulo: t(`cadastro.alerta.severidade.${valor}`) })),
 )
 
-watch(visible, (aberta) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([visible, () => props.alerta?.id] as const, ([aberta]) => {
   if (!aberta) return
 
   tipo.value = props.alerta?.tipo ?? null

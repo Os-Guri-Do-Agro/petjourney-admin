@@ -96,7 +96,8 @@ function terminar() {
   desenhando = false
 }
 
-watch(aberta, async (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.documento?.id] as const, async ([agora]) => {
   if (!agora) return
   nome.value = ''
   documentoDaPessoa.value = ''

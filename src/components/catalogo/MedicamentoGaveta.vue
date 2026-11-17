@@ -121,7 +121,8 @@ const linhas = (texto: string) =>
     .filter(Boolean)
     .slice(0, 30)
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.medicamento?.id] as const, ([agora]) => {
   if (!agora) return
   const m = props.medicamento
   tentou.value = false

@@ -95,7 +95,8 @@ const campoPeso = ref<{ $el?: HTMLElement } | null>(null)
 
 const editando = computed(() => Boolean(props.prescricao))
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.prescricao?.id] as const, ([agora]) => {
   if (!agora) return
   const p = props.prescricao
   origem.value = p?.nomeLivre ? 'LIVRE' : 'CATALOGO'
