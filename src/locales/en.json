@@ -11632,7 +11632,19 @@
       "venceEm": "Due in {n} day | Due in {n} days",
       "marcado": "booked for {dia}",
       "vazio": "No one to call right now.",
-      "resumo": "Who to call: most overdue first."
+      "resumo": "Who to call: most overdue first.",
+      "cartao": {
+        "titulo": "Vaccination card",
+        "ultima": "Last dose",
+        "proxima": "Next dose",
+        "dose": "dose {n} missing",
+        "marcado": "Booked for {dia}"
+      },
+      "carimbo": {
+        "VENCIDO": "Overdue",
+        "SERIE_INCOMPLETA": "Open series",
+        "PROXIMO": "Due soon"
+      }
     },
     "aplicadas": {
       "titulo": "Given",

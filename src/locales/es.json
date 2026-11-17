@@ -11632,7 +11632,19 @@
       "venceEm": "Vence en {n} día | Vence en {n} días",
       "marcado": "agendado para el {dia}",
       "vazio": "Nadie para llamar ahora.",
-      "resumo": "A quién llamar: del más atrasado al menos."
+      "resumo": "A quién llamar: del más atrasado al menos.",
+      "cartao": {
+        "titulo": "Cartilla de vacunación",
+        "ultima": "Última dosis",
+        "proxima": "Próxima dosis",
+        "dose": "falta la dosis {n}",
+        "marcado": "Reservado para {dia}"
+      },
+      "carimbo": {
+        "VENCIDO": "Vencida",
+        "SERIE_INCOMPLETA": "Serie abierta",
+        "PROXIMO": "Por vencer"
+      }
     },
     "aplicadas": {
       "titulo": "Aplicadas",

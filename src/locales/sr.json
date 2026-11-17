@@ -11632,7 +11632,19 @@
       "venceEm": "Ističe za {n} dan | Ističe za {n} dana | Ističe za {n} dana",
       "marcado": "zakazano za {dia}",
       "vazio": "Trenutno nema koga zvati.",
-      "resumo": "Koga zvati: od najviše zakasnelih."
+      "resumo": "Koga zvati: od najviše zakasnelih.",
+      "cartao": {
+        "titulo": "Knjižica vakcinacije",
+        "ultima": "Poslednja doza",
+        "proxima": "Sledeća doza",
+        "dose": "nedostaje doza {n}",
+        "marcado": "Zakazano za {dia}"
+      },
+      "carimbo": {
+        "VENCIDO": "Istekla",
+        "SERIE_INCOMPLETA": "Otvorena serija",
+        "PROXIMO": "Uskoro ističe"
+      }
     },
     "aplicadas": {
       "titulo": "Date",
