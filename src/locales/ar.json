@@ -5300,7 +5300,13 @@
         "acao": {
           "responder": "الرد",
           "contato": "تسجيل التواصل",
-          "verPaciente": "عرض المريض"
+          "verPaciente": "عرض المريض",
+          "continuar": "متابعة السجل",
+          "abrirProntuario": "فتح السجل",
+          "liberarResumo": "إرسال الملخص",
+          "ligarAoApp": "الربط بالتطبيق",
+          "verAtendimento": "عرض الزيارة",
+          "aplicarVacina": "إعطاء لقاح"
         },
         "motivo": {
           "REMOVIDO_PELO_RESPONSAVEL": "أزاله المسؤول من التطبيق",
@@ -5346,7 +5352,20 @@
           }
         },
         "haDias": "اليوم | منذ يوم واحد | منذ يومين | منذ {total} أيام | منذ {total} يومًا | منذ {total} يوم",
-        "hoje": "اليوم"
+        "hoje": "اليوم",
+        "abertoPor": "فتحه {nome} في {quando}",
+        "abertoEm": "فُتح في {quando}",
+        "iniciadoPor": "بدأ لـ {nome} في {quando}",
+        "iniciadoEm": "بدأ في {quando}",
+        "detalhe": {
+          "nuncaAberto": "لم يفتح الطبيب البيطري السجل بعد.",
+          "NAO_LIBERADO": "انتهت وجاهزة: ينقص الإرسال فقط.",
+          "SEM_VINCULO": "اربط المريض بتطبيق صاحب الحيوان ليصل الملخص.",
+          "REMOVIDO_PELO_RESPONSAVEL": "يبقى الملخص في سجل العيادة فقط.",
+          "OBITO": "يبقى الملخص في سجل العيادة فقط."
+        },
+        "atendimentosDoPaciente": "لا زيارات تنتظر | زيارة واحدة تنتظر | زيارتان تنتظران | {n} زيارات تنتظر | {n} زيارة تنتظر | {n} زيارة تنتظر",
+        "ultimoEm": "الأحدث في {quando}"
       }
     },
     "atalhos": {

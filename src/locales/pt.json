@@ -5300,7 +5300,13 @@
         "acao": {
           "responder": "Responder",
           "contato": "Registrar contato",
-          "verPaciente": "Ver o paciente"
+          "verPaciente": "Ver o paciente",
+          "continuar": "Continuar o prontuário",
+          "abrirProntuario": "Abrir o prontuário",
+          "liberarResumo": "Liberar o resumo",
+          "ligarAoApp": "Ligar ao app",
+          "verAtendimento": "Ver o atendimento",
+          "aplicarVacina": "Aplicar vacina"
         },
         "motivo": {
           "REMOVIDO_PELO_RESPONSAVEL": "O responsável removeu do app",
@@ -5346,7 +5352,20 @@
           }
         },
         "haDias": "Há {total} dia | Há {total} dias",
-        "hoje": "Hoje"
+        "hoje": "Hoje",
+        "abertoPor": "Aberto por {nome} em {quando}",
+        "abertoEm": "Aberto em {quando}",
+        "iniciadoPor": "Iniciado para {nome} em {quando}",
+        "iniciadoEm": "Iniciado em {quando}",
+        "detalhe": {
+          "nuncaAberto": "O veterinário ainda não abriu o prontuário.",
+          "NAO_LIBERADO": "Finalizado e pronto: falta só liberar.",
+          "SEM_VINCULO": "Ligue o paciente ao app do responsável para o resumo chegar.",
+          "REMOVIDO_PELO_RESPONSAVEL": "O resumo fica só no prontuário da clínica.",
+          "OBITO": "O resumo fica só no prontuário da clínica."
+        },
+        "atendimentosDoPaciente": "{n} atendimento esperando | {n} atendimentos esperando",
+        "ultimoEm": "Último em {quando}"
       }
     },
     "atalhos": {

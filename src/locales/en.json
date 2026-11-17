@@ -5300,7 +5300,13 @@
         "acao": {
           "responder": "Reply",
           "contato": "Log contact",
-          "verPaciente": "See the patient"
+          "verPaciente": "See the patient",
+          "continuar": "Continue the record",
+          "abrirProntuario": "Open the record",
+          "liberarResumo": "Release the summary",
+          "ligarAoApp": "Link to the app",
+          "verAtendimento": "See the visit",
+          "aplicarVacina": "Give vaccine"
         },
         "motivo": {
           "REMOVIDO_PELO_RESPONSAVEL": "The owner removed it from the app",
@@ -5346,7 +5352,20 @@
           }
         },
         "haDias": "{total} day ago | {total} days ago",
-        "hoje": "Today"
+        "hoje": "Today",
+        "abertoPor": "Opened by {nome} on {quando}",
+        "abertoEm": "Opened on {quando}",
+        "iniciadoPor": "Started for {nome} on {quando}",
+        "iniciadoEm": "Started on {quando}",
+        "detalhe": {
+          "nuncaAberto": "The vet has not opened the record yet.",
+          "NAO_LIBERADO": "Finished and ready: it only needs to be released.",
+          "SEM_VINCULO": "Link the patient to the owner's app so the summary arrives.",
+          "REMOVIDO_PELO_RESPONSAVEL": "The summary stays in the clinic's record only.",
+          "OBITO": "The summary stays in the clinic's record only."
+        },
+        "atendimentosDoPaciente": "{n} visit waiting | {n} visits waiting",
+        "ultimoEm": "Latest on {quando}"
       }
     },
     "atalhos": {

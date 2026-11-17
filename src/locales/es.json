@@ -5300,7 +5300,13 @@
         "acao": {
           "responder": "Responder",
           "contato": "Registrar contacto",
-          "verPaciente": "Ver el paciente"
+          "verPaciente": "Ver el paciente",
+          "continuar": "Continuar la historia",
+          "abrirProntuario": "Abrir la historia",
+          "liberarResumo": "Liberar el resumen",
+          "ligarAoApp": "Vincular a la app",
+          "verAtendimento": "Ver la atención",
+          "aplicarVacina": "Aplicar vacuna"
         },
         "motivo": {
           "REMOVIDO_PELO_RESPONSAVEL": "El responsable lo quitó de la app",
@@ -5346,7 +5352,20 @@
           }
         },
         "haDias": "Hace {total} día | Hace {total} días",
-        "hoje": "Hoy"
+        "hoje": "Hoy",
+        "abertoPor": "Abierto por {nome} el {quando}",
+        "abertoEm": "Abierto el {quando}",
+        "iniciadoPor": "Iniciado para {nome} el {quando}",
+        "iniciadoEm": "Iniciado el {quando}",
+        "detalhe": {
+          "nuncaAberto": "El veterinario todavía no abrió la historia.",
+          "NAO_LIBERADO": "Finalizada y lista: solo falta liberar.",
+          "SEM_VINCULO": "Vincule el paciente a la app del responsable para que llegue el resumen.",
+          "REMOVIDO_PELO_RESPONSAVEL": "El resumen queda solo en la historia de la clínica.",
+          "OBITO": "El resumen queda solo en la historia de la clínica."
+        },
+        "atendimentosDoPaciente": "{n} atención esperando | {n} atenciones esperando",
+        "ultimoEm": "Última el {quando}"
       }
     },
     "atalhos": {

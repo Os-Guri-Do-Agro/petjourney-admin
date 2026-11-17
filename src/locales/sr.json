@@ -5300,7 +5300,13 @@
         "acao": {
           "responder": "Odgovori",
           "contato": "Zabeleži kontakt",
-          "verPaciente": "Prikaži pacijenta"
+          "verPaciente": "Prikaži pacijenta",
+          "continuar": "Nastavi karton",
+          "abrirProntuario": "Otvori karton",
+          "liberarResumo": "Pošalji rezime",
+          "ligarAoApp": "Poveži sa aplikacijom",
+          "verAtendimento": "Pogledaj pregled",
+          "aplicarVacina": "Daj vakcinu"
         },
         "motivo": {
           "REMOVIDO_PELO_RESPONSAVEL": "Odgovorna osoba je uklonila iz aplikacije",
@@ -5346,7 +5352,20 @@
           }
         },
         "haDias": "Pre {total} dan | Pre {total} dana | Pre {total} dana",
-        "hoje": "Danas"
+        "hoje": "Danas",
+        "abertoPor": "Otvorio {nome}, {quando}",
+        "abertoEm": "Otvoreno {quando}",
+        "iniciadoPor": "Započeto za {nome}, {quando}",
+        "iniciadoEm": "Započeto {quando}",
+        "detalhe": {
+          "nuncaAberto": "Veterinar još nije otvorio karton.",
+          "NAO_LIBERADO": "Završeno i spremno: ostaje samo da se pošalje.",
+          "SEM_VINCULO": "Povežite pacijenta sa aplikacijom vlasnika da bi rezime stigao.",
+          "REMOVIDO_PELO_RESPONSAVEL": "Rezime ostaje samo u kartonu klinike.",
+          "OBITO": "Rezime ostaje samo u kartonu klinike."
+        },
+        "atendimentosDoPaciente": "{n} pregled čeka | {n} pregleda čekaju | {n} pregleda čeka",
+        "ultimoEm": "Poslednji {quando}"
       }
     },
     "atalhos": {

@@ -14,8 +14,9 @@
 import Button from 'primevue/button'
 import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
@@ -41,8 +42,11 @@ const props = defineProps<{ paciente: Paciente; podeEscrever: boolean }>()
 
 const { t } = useI18n()
 const toast = useToast()
+const route = useRoute()
+const router = useRouter()
 const { parceiroQuery } = useParceiroPortal()
 const rotulos = useRotulosDoCadastro()
+const raiz = ref<HTMLElement | null>(null)
 
 const vinculo = ref<Vinculo | null>(null)
 const propostas = ref<Proposta[]>([])
@@ -71,6 +75,21 @@ async function carregar() {
   } finally {
     carregando.value = false
   }
+  void atenderPedidoDeLigar()
+}
+
+/*
+ * `?ligar=app` (da pilha "Resumos que não chegaram ao app", nas Pendências): o cartão aparece na
+ * tela e a gaveta de ligar abre, se o paciente ainda não está no app. O pedido sai da URL.
+ */
+async function atenderPedidoDeLigar() {
+  if (route.query.ligar !== 'app') return
+  const query = { ...route.query }
+  delete query.ligar
+  void router.replace({ query })
+  await nextTick()
+  raiz.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  if (!vinculo.value && props.podeEscrever && props.paciente.ativo) ligando.value = true
 }
 
 watch(
@@ -204,7 +223,7 @@ const liberado = computed(() =>
 </script>
 
 <template>
-  <section class="ui-folha ui-cartao vc" aria-labelledby="vc-titulo">
+  <section ref="raiz" class="ui-folha ui-cartao vc" aria-labelledby="vc-titulo">
     <header class="ui-cartao__cabeca">
       <span class="ui-ladrilho" :class="{ 'ui-ladrilho--ok': vinculo }" aria-hidden="true">
         <i class="ph ph-device-mobile" />
