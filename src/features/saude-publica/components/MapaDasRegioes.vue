@@ -178,9 +178,6 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
           {{ rotulo }}
         </li>
       </ol>
-      <span class="mapa-regioes__nota">
-        Mapa esquemático: cada hexágono é uma região urbana, na posição dela em volta do Centro.
-      </span>
     </figcaption>
 
     <table class="sr-only">
@@ -215,9 +212,9 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
  * inverte, do verde perto do fundo ao verde-água claro.
  */
 .mapa-regioes {
-  --faixa-0: #dff2ea;
-  --faixa-1: #b4e0cf;
-  --faixa-2: #7fc4aa;
+  --faixa-0: #cdeadf;
+  --faixa-1: #a4d8c4;
+  --faixa-2: #6fb89d;
   --faixa-3: #357d66;
   --faixa-4: #24604f;
   --tinta-0: #142721;
@@ -263,7 +260,8 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
 }
 
 .hexagono__forma {
-  stroke: var(--superficie);
+  /* O fio entre os hexágonos é o fundo da caixa em que o mapa mora. */
+  stroke: var(--app-painel, var(--app-veu, var(--superficie)));
   stroke-linejoin: round;
   stroke-width: 5;
   transition: filter var(--pj-tempo-curto) var(--pj-curva-chega);

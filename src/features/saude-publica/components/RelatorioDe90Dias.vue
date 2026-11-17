@@ -23,6 +23,9 @@ import {
 } from '@/features/saude-publica/dados'
 import { useEstadoDoPrototipo } from '@/features/saude-publica/estado'
 
+/** `papel`: a cópia que vai para a impressão, com as cores fixas de papel. */
+defineProps<{ papel?: boolean }>()
+
 const { campanhas, adocoes } = useEstadoDoPrototipo()
 
 const indicadores = INDICADORES.map((definicao) => {
@@ -41,7 +44,7 @@ const adocoesNoPeriodo = computed(
 </script>
 
 <template>
-  <article class="rel">
+  <article class="rel" :class="papel ? 'rel--papel' : 'ui-folha ui-cartao'">
     <header class="rel__cabeca">
       <span class="rel__empresa">Pet Journey Saúde e Tecnologia Ltda.</span>
       <h1>Relatório de 90 dias</h1>
@@ -190,27 +193,32 @@ const adocoesNoPeriodo = computed(
 </template>
 
 <style scoped>
-/* A folha: cores fixas de papel nos dois temas, para a tela e o PDF ficarem iguais. */
+/*
+ * Na tela, o relatório é uma caixa de véu na largura toda, nas cores do tema. No papel (a cópia
+ * `papel`), as cores são fixas, para o PDF sair igual no claro e no escuro.
+ */
 .rel {
+  --rel-tinta: var(--tinta);
+  --rel-tinta-2: var(--tinta-2);
+  --rel-tinta-3: var(--tinta-3);
+  --rel-linha: var(--app-regua, var(--linha));
+  --rel-verde: var(--pets-tinta);
+
+  display: grid;
+  gap: 18px;
+  color: var(--rel-tinta-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.rel--papel {
   --rel-tinta: #142721;
   --rel-tinta-2: #40524b;
   --rel-tinta-3: #5e6d67;
   --rel-linha: #dfe7e3;
   --rel-verde: #285e4e;
 
-  display: grid;
-  gap: 18px;
-  width: 100%;
-  max-width: 210mm;
-  box-sizing: border-box;
-  padding: 18mm 16mm;
-  border-radius: 6px;
   background: #fff;
-  box-shadow: 0 16px 40px -24px rgb(0 0 0 / 45%);
-  color: var(--rel-tinta-2);
-  font-size: 13px;
-  line-height: 1.5;
-  justify-self: center;
 }
 
 .rel__cabeca {
@@ -268,12 +276,11 @@ const adocoesNoPeriodo = computed(
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+/* Os números em faixa, sem caixa: a caixa é a do relatório. */
 .rel__numeros div {
   display: grid;
+  align-content: start;
   gap: 2px;
-  padding: 8px 10px;
-  border: 1px solid var(--rel-linha);
-  border-radius: 8px;
 }
 
 .rel__numeros dt {
@@ -283,8 +290,9 @@ const adocoesNoPeriodo = computed(
 .rel__numeros dd {
   margin: 0;
   color: var(--rel-tinta);
-  font-size: 18px;
-  font-weight: 800;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 .rel__tabela {
@@ -338,15 +346,5 @@ const adocoesNoPeriodo = computed(
   border-top: 1px solid var(--rel-linha);
   color: var(--rel-tinta-3);
   font-size: 11.5px;
-}
-
-/* No papel: sem a sombra e sem o recuo de tela (a margem é a do `@page`). */
-@media print {
-  .rel {
-    max-width: none;
-    padding: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
 }
 </style>

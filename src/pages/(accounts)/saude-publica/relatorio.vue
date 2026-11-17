@@ -32,7 +32,7 @@ function imprimir() {
 
     <Teleport to="body">
       <div class="clinic-print-root rl-impressao" aria-hidden="true">
-        <RelatorioDe90Dias />
+        <RelatorioDe90Dias papel />
       </div>
     </Teleport>
   </UiPagina>

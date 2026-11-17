@@ -1,16 +1,18 @@
 <script setup lang="ts">
 /**
  * Saúde pública › Painel (protótipo, Ofício 001/2026, item 4e): o que a Superintendência de
- * Bem-Estar Animal e o Centro de Controle de Zoonoses recebem. A abertura com os números do
- * programa; o problema (os casos humanos de leishmaniose, da Sesau); os quatro indicadores de
- * prevenção da cidade, que também escolhem o que o mapa pinta; o mapa das 7 regiões; e os bairros
- * que pedem atenção. Clicar numa região abre o detalhe dela, com o atalho para criar uma campanha.
+ * Bem-Estar Animal e o Centro de Controle de Zoonoses recebem.
+ *
+ * Na anatomia das telas do portal: a abertura no verde dos pets com os números do programa numa
+ * fileira; embaixo, uma caixa por assunto. O problema (os casos humanos de leishmaniose, da Sesau)
+ * ao lado da prevenção na cidade, cujos quatro números também escolhem o que o mapa pinta; depois o
+ * mapa das 7 regiões e os bairros que pedem atenção. Clicar numa região abre o detalhe dela numa
+ * gaveta, com o atalho para criar uma campanha.
  */
 import { computed, ref } from 'vue'
 
 import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
 import MapaDasRegioes from '@/features/saude-publica/components/MapaDasRegioes.vue'
 import RegiaoGaveta from '@/features/saude-publica/components/RegiaoGaveta.vue'
@@ -60,13 +62,11 @@ const abertura: IndicadorDaAbertura[] = [
 const exameHoje = coberturaDaCidade('leishmaniose')
 const exameInicio = coberturaDaCidade('leishmaniose', 'inicio')
 
-const quadros = computed(() =>
-  INDICADORES.map((item) => {
-    const hoje = coberturaDaCidade(item.id)
-    const inicio = coberturaDaCidade(item.id, 'inicio')
-    return { definicao: item, hoje, inicio, delta: hoje - inicio }
-  }),
-)
+const quadros = INDICADORES.map((item) => {
+  const hoje = coberturaDaCidade(item.id)
+  const inicio = coberturaDaCidade(item.id, 'inicio')
+  return { definicao: item, hoje, inicio, delta: hoje - inicio }
+})
 
 /** Os bairros mais atrasados no indicador escolhido, com a cor da mesma faixa do mapa. */
 const FAIXAS = [40, 50, 60, 70]
@@ -104,7 +104,7 @@ function aoFecharGaveta(aberta: boolean) {
   <UiPagina titulo="Painel" icone="ph ph-map-trifold">
     <template #cabecalho>
       <UiAbertura
-        class="pj-lugar--pets"
+        class="sp-abertura pj-lugar--pets"
         sobre="Campo Grande · simulação de 90 dias de programa"
         titulo="Saúde de cães e gatos na cidade"
         :indicadores="abertura"
@@ -121,78 +121,94 @@ function aoFecharGaveta(aberta: boolean) {
     <div class="sp">
       <AvisoDoPrototipo />
 
-      <!-- O problema, com os números de verdade (Sesau, citados no ofício). -->
-      <section class="sp-contexto" aria-labelledby="sp-contexto-titulo">
-        <span class="ui-ladrilho sp-contexto__icone" aria-hidden="true">
-          <i class="ph ph-warning-octagon" />
-        </span>
-        <div class="sp-contexto__texto">
-          <h2 id="sp-contexto-titulo">Leishmaniose visceral em Campo Grande</h2>
-          <p>
-            O cão é o principal reservatório na cidade. A prevenção depende do exame em dia e da
-            coleira trocada no prazo, e é isso que o painel acompanha por região e bairro.
-          </p>
-          <small>Fonte dos casos humanos: {{ CONTEXTO_LEISHMANIOSE.fonte }}.</small>
-        </div>
-        <dl class="sp-contexto__numeros">
-          <div v-for="ano in CONTEXTO_LEISHMANIOSE.anos" :key="ano.ano">
-            <dt>{{ ano.ano }} · {{ ano.observacao }}</dt>
-            <dd>
-              <strong class="ui-num">{{ ano.casos }}</strong> casos humanos
-              <template v-if="ano.obitos">
-                · <strong class="ui-num">{{ ano.obitos }}</strong> óbitos</template
+      <div class="sp-pilha">
+        <!-- O problema, com os números de verdade (Sesau, citados no ofício). -->
+        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-leish">
+          <header class="ui-cartao__cabeca sp-cabeca">
+            <span class="ui-ladrilho sp-cabeca__risco" aria-hidden="true">
+              <i class="ph ph-warning-octagon" />
+            </span>
+            <span class="ui-cartao__titulos">
+              <h2 id="sp-leish" class="ui-cartao__titulo">Leishmaniose visceral</h2>
+              <p class="ui-cartao__descricao">
+                O cão é o principal reservatório na cidade. Prevenir depende do exame em dia e da
+                coleira no prazo.
+              </p>
+            </span>
+          </header>
+          <ul class="sp-numeros sp-numeros--quatro">
+            <li v-for="ano in CONTEXTO_LEISHMANIOSE.anos" :key="ano.ano" class="sp-numero">
+              <strong class="sp-numero__valor ui-num">{{ ano.casos }}</strong>
+              <span class="sp-numero__rotulo">casos humanos em {{ ano.ano }}</span>
+              <span class="sp-numero__meta">
+                {{ ano.observacao }}{{ ano.obitos ? `, ${ano.obitos} óbitos` : '' }}
+              </span>
+            </li>
+          </ul>
+          <p class="sp-fonte">Fonte: {{ CONTEXTO_LEISHMANIOSE.fonte }}.</p>
+        </section>
+
+        <!-- Os quatro indicadores da cidade; cada um também escolhe o que o mapa pinta. -->
+        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-prevencao">
+          <header class="ui-cartao__cabeca sp-cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-shield-plus" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="sp-prevencao" class="ui-cartao__titulo">Prevenção na cidade</h2>
+              <p class="ui-cartao__descricao">
+                Quanto está em dia hoje, e quanto subiu desde o início. Escolha um para ver no mapa.
+              </p>
+            </span>
+          </header>
+          <ul class="sp-numeros sp-numeros--quatro" aria-label="Indicador do mapa">
+            <li v-for="quadro in quadros" :key="quadro.definicao.id">
+              <button
+                type="button"
+                class="sp-numero sp-numero--botao"
+                :class="{ 'sp-numero--ativo': indicador === quadro.definicao.id }"
+                :aria-pressed="indicador === quadro.definicao.id"
+                @click="indicador = quadro.definicao.id"
               >
-            </dd>
-          </div>
-        </dl>
-      </section>
+                <strong class="sp-numero__valor ui-num">{{ quadro.hoje }}%</strong>
+                <span class="sp-numero__rotulo">{{ quadro.definicao.rotulo }}</span>
+                <span class="sp-numero__meta sp-numero__meta--alta">
+                  +{{ quadro.delta }} pontos desde o início
+                </span>
+              </button>
+            </li>
+          </ul>
+        </section>
+      </div>
 
-      <!-- Os quatro indicadores da cidade: cada um também escolhe o que o mapa mostra. -->
-      <UiSecao titulo="Prevenção na cidade" icone="ph ph-shield-plus">
-        <div class="sp-quadros" role="group" aria-label="Indicador do mapa">
-          <button
-            v-for="quadro in quadros"
-            :key="quadro.definicao.id"
-            type="button"
-            class="sp-quadro"
-            :class="{ 'sp-quadro--ativo': indicador === quadro.definicao.id }"
-            :aria-pressed="indicador === quadro.definicao.id"
-            @click="indicador = quadro.definicao.id"
-          >
-            <span class="sp-quadro__topo">
-              <i :class="quadro.definicao.icone" aria-hidden="true" />
-              {{ quadro.definicao.rotulo }}
+      <div class="sp-linha">
+        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-mapa">
+          <header class="ui-cartao__cabeca sp-cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-trifold" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="sp-mapa" class="ui-cartao__titulo">Por região urbana</h2>
+              <p class="ui-cartao__descricao">
+                {{ definicao.rotulo }}: percentual de {{ definicao.frase }}. Mapa esquemático: cada
+                hexágono é uma região, na posição dela em volta do Centro. Clique para ver o
+                detalhe.
+              </p>
             </span>
-            <span class="sp-quadro__valor ui-num">{{ quadro.hoje }}%</span>
-            <span class="sp-quadro__delta">
-              <i class="ph ph-trend-up" aria-hidden="true" />
-              +{{ quadro.delta }} pontos (era {{ quadro.inicio }}%)
-            </span>
-            <span class="sp-quadro__regra">{{ quadro.definicao.regra }}</span>
-          </button>
-        </div>
-      </UiSecao>
-
-      <div class="sp-duas">
-        <UiSecao
-          titulo="Por região urbana"
-          :descricao="`Percentual de ${definicao.frase}. Clique numa região para ver o detalhe.`"
-          icone="ph ph-map-trifold"
-          folha
-        >
+          </header>
           <MapaDasRegioes
             :indicador="indicador"
             :selecionada="regiaoEscolhida"
             @update:selecionada="escolherRegiao"
           />
-        </UiSecao>
+        </section>
 
-        <UiSecao
-          titulo="Bairros que pedem atenção"
-          :descricao="`Os oito com o menor percentual de ${definicao.frase}.`"
-          icone="ph ph-map-pin"
-          folha
-        >
+        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-bairros">
+          <header class="ui-cartao__cabeca sp-cabeca">
+            <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-pin" /></span>
+            <span class="ui-cartao__titulos">
+              <h2 id="sp-bairros" class="ui-cartao__titulo">Bairros que pedem atenção</h2>
+              <p class="ui-cartao__descricao">
+                Os oito com o menor percentual de {{ definicao.frase }}.
+              </p>
+            </span>
+          </header>
           <ol class="sp-bairros">
             <li v-for="bairro in bairros" :key="bairro.nome" class="sp-bairro">
               <span class="sp-bairro__nome">{{ bairro.nome }}</span>
@@ -210,12 +226,12 @@ function aoFecharGaveta(aberta: boolean) {
               </span>
             </li>
           </ol>
-          <p class="sp-nota">
+          <p class="sp-fonte">
             <i class="ph ph-lock-simple" aria-hidden="true" />
-            Só contagens e percentuais, sem nenhum tutor identificado. Bairro com menos de
+            Só contagens e percentuais, sem tutor identificado. Bairro com menos de
             {{ MINIMO_POR_BAIRRO }} animais não aparece.
           </p>
-        </UiSecao>
+        </section>
       </div>
     </div>
 
@@ -228,178 +244,149 @@ function aoFecharGaveta(aberta: boolean) {
 </template>
 
 <style scoped>
+/* A abertura ocupa a largura toda, como a do Início (o cabeçalho da página é flex). */
+.sp-abertura {
+  flex: 1;
+  min-width: 0;
+}
+
 .sp {
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
-/* ------------------------------------------------------------------------------ contexto */
-
-.sp-contexto {
+/* Duas caixas lado a lado; abaixo de ~1100 px de conteúdo, uma embaixo da outra. */
+.sp-linha {
   display: grid;
-  align-items: center;
-  gap: 14px 18px;
-  padding: 16px 18px;
-  border: 1px solid color-mix(in oklab, var(--risco-tinta) 25%, var(--linha));
-  border-radius: 18px;
-  background: color-mix(in oklab, var(--risco-fundo) 35%, var(--superficie));
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
 }
 
-.sp-contexto__icone {
+/* O problema e a prevenção: cada um na largura toda, como os cartões dos espaços no Início. */
+.sp-pilha {
+  display: grid;
+  gap: 18px;
+}
+
+.sp-caixa {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.sp-cabeca {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Urgência no ícone, não na caixa. */
+.sp-cabeca__risco {
   background: var(--risco-fundo);
   color: var(--risco-tinta);
 }
 
-.sp-contexto__texto {
+/* ------------------------------------------------------- os números, como os do Início */
+
+.sp-numeros {
   display: grid;
-  gap: 4px;
-}
-
-.sp-contexto__texto h2 {
+  gap: 12px 14px;
   margin: 0;
-  color: var(--tinta);
-  font-size: 16px;
-  font-weight: 750;
+  padding: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 112px), 1fr));
+  list-style: none;
 }
 
-.sp-contexto__texto p {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
+/* Quatro colunas fixas: os dois números da doença alinham com os quatro da prevenção embaixo. */
+.sp-numeros--quatro {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.sp-contexto__texto small {
-  color: var(--tinta-3);
-  font-size: 12px;
-}
-
-.sp-contexto__numeros {
-  display: flex;
-  gap: 10px;
-  margin: 0;
-}
-
-.sp-contexto__numeros div {
-  display: grid;
-  gap: 2px;
-  min-width: 9.5rem;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: var(--superficie);
-}
-
-.sp-contexto__numeros dt {
-  color: var(--tinta-3);
-  font-size: 12px;
-  font-weight: 650;
-}
-
-.sp-contexto__numeros dd {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.sp-contexto__numeros strong {
-  color: var(--risco-tinta);
-  font-size: 22px;
-  font-weight: 800;
-}
-
-@media (max-width: 1100px) {
-  .sp-contexto {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .sp-contexto__numeros {
-    grid-column: 1 / -1;
+@media (max-width: 900px) {
+  .sp-numeros--quatro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* ------------------------------------------------------------------------------- quadros */
-
-.sp-quadros {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-}
-
-.sp-quadro {
+.sp-numero {
   display: grid;
   align-content: start;
-  gap: 4px;
-  padding: 14px 16px;
-  border: 1.5px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
+  gap: 2px;
+}
+
+.sp-numero__valor {
+  color: var(--tinta);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.sp-numero__rotulo {
   color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.3;
+}
+
+.sp-numero__meta {
+  color: var(--tinta-3);
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.sp-numero__meta--alta {
+  color: var(--ok-tinta);
+  font-weight: 600;
+}
+
+/* O número que escolhe o mapa: o véu do hover sai um pouco para fora, como no Início. */
+.sp-numero--botao {
+  width: calc(100% + 14px);
+  margin: -6px -7px;
+  padding: 6px 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
   cursor: pointer;
   font: inherit;
   text-align: start;
   transition:
-    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
-    background-color var(--pj-tempo-curto) var(--pj-curva-chega);
+    background-color var(--pj-tempo-curto) ease,
+    border-color var(--pj-tempo-curto) ease;
 }
 
-.sp-quadro:hover {
-  border-color: var(--linha-media);
+.sp-numero--botao:hover {
+  border-color: var(--linha-suave);
+  background: var(--superficie-2);
 }
 
-.sp-quadro:focus-visible {
+.sp-numero--botao:focus-visible {
   outline: 2px solid var(--p-primary-color);
-  outline-offset: 2px;
+  outline-offset: 1px;
 }
 
-/* O escolhido: a borda e o fundo do verde dos pets, e o mapa ao lado pinta ele. */
-.sp-quadro--ativo,
-.sp-quadro--ativo:hover {
-  border-color: var(--pets);
-  background: color-mix(in oklab, var(--pets-fundo) 40%, var(--superficie));
+/* O escolhido: o verde dos pets por trás, e o mapa embaixo pinta ele. */
+.sp-numero--ativo,
+.sp-numero--ativo:hover {
+  border-color: color-mix(in oklab, var(--pets) 45%, transparent);
+  background: color-mix(in oklab, var(--pets-fundo) 45%, transparent);
 }
 
-.sp-quadro__topo {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--tinta);
-  font-size: 13.5px;
-  font-weight: 700;
-}
-
-.sp-quadro__topo i {
-  font-size: 18px;
-}
-
-.sp-quadro__valor {
-  color: var(--tinta);
-  font-size: 30px;
-  font-weight: 800;
-  line-height: 1.15;
-}
-
-.sp-quadro__delta {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--ok-tinta);
-  font-size: 13px;
-  font-weight: 650;
-}
-
-.sp-quadro__regra {
+.sp-fonte {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
   color: var(--tinta-3);
   font-size: 12px;
 }
 
-/* ------------------------------------------------------------------- mapa e bairros */
-
-.sp-duas {
-  display: grid;
-  align-items: start;
-  gap: 22px;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+.sp-fonte i {
+  margin-top: 2px;
 }
+
+/* ---------------------------------------------------------------------------- bairros */
 
 .sp-bairros {
   display: grid;
@@ -407,7 +394,6 @@ function aoFecharGaveta(aberta: boolean) {
   margin: 0;
   padding: 0;
   list-style: none;
-  counter-reset: bairro;
 }
 
 .sp-bairro {
@@ -429,14 +415,14 @@ function aoFecharGaveta(aberta: boolean) {
 .sp-bairro__valor {
   color: var(--tinta);
   font-size: 14px;
-  font-weight: 750;
+  font-weight: 700;
 }
 
 .sp-bairro__trilho {
   position: relative;
-  height: 10px;
+  height: 8px;
   border-radius: 999px;
-  background: var(--superficie-3);
+  background: var(--superficie);
   grid-column: 1 / -1;
 }
 
@@ -455,11 +441,11 @@ function aoFecharGaveta(aberta: boolean) {
 
 /* As mesmas cinco faixas do mapa: a barra do bairro tem a cor que o hexágono teria. */
 .sp-faixa-0 {
-  background: #b4e0cf;
+  background: #a4d8c4;
 }
 
 .sp-faixa-1 {
-  background: #7fc4aa;
+  background: #6fb89d;
 }
 
 .sp-faixa-2 {
@@ -494,21 +480,8 @@ function aoFecharGaveta(aberta: boolean) {
   background: #8fd1b8;
 }
 
-.sp-nota {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin: 16px 0 0;
-  color: var(--tinta-3);
-  font-size: 12.5px;
-}
-
-.sp-nota i {
-  margin-top: 2px;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .sp-quadro {
+  .sp-numero--botao {
     transition: none;
   }
 }

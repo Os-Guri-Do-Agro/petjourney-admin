@@ -2,15 +2,15 @@
 /**
  * Saúde pública › ONGs e adoção (protótipo, Ofício 001/2026, itens 4b e 4c): os sistemas liberados
  * sem custo para as ONGs e os protetores, e a adoção que leva o histórico de saúde para o app de
- * quem adota, com 3 meses do plano completo. As adoções recentes em cima (é o que emociona e o que
- * prova), as ONGs embaixo. "Registrar adoção" abre a gaveta do lado da ONG.
+ * quem adota, com 3 meses do plano completo. Os totais na frase do alto; embaixo, uma caixa com as
+ * adoções recentes (é o que prova) e outra com as ONGs. "Registrar adoção" abre a gaveta do lado da
+ * ONG.
  */
 import Button from 'primevue/button'
 import { computed, ref } from 'vue'
 
 import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
 import RegistrarAdocaoGaveta from '@/features/saude-publica/components/RegistrarAdocaoGaveta.vue'
@@ -20,25 +20,18 @@ import { useEstadoDoPrototipo } from '@/features/saude-publica/estado'
 const { adocoes } = useEstadoDoPrototipo()
 
 /** As adoções do período (as das ONGs) mais as registradas na apresentação. */
-const totais = computed(() => {
+const resumo = computed(() => {
   const novas = adocoes.value.length - ADOCOES.length
-  return {
-    ongs: ONGS.filter((item) => item.tipo === 'ONG').length,
-    protetores: ONGS.filter((item) => item.tipo !== 'ONG').length,
-    animais: ONGS.reduce((soma, item) => soma + item.animais, 0) - novas,
-    adocoes: ONGS.reduce((soma, item) => soma + item.adocoes, 0) + novas,
-  }
+  const animais = ONGS.reduce((soma, item) => soma + item.animais, 0) - novas
+  const adotados = ONGS.reduce((soma, item) => soma + item.adocoes, 0) + novas
+  return `${ONGS.length} ONGs e protetores · ${numero(animais)} animais sob cuidado · ${numero(adotados)} adoções com o histórico junto`
 })
 
 const gavetaAberta = ref(false)
 </script>
 
 <template>
-  <UiPagina
-    titulo="ONGs e adoção"
-    icone="ph ph-hand-heart"
-    resumo="Os sistemas sem custo para quem protege, e o animal adotado saindo com a saúde em dia e registrada."
-  >
+  <UiPagina titulo="ONGs e adoção" icone="ph ph-hand-heart" :resumo="resumo">
     <template #acoes>
       <Button
         type="button"
@@ -51,61 +44,65 @@ const gavetaAberta = ref(false)
     <div class="og">
       <AvisoDoPrototipo />
 
-      <dl class="og-totais">
-        <div>
-          <dt>ONGs</dt>
-          <dd class="ui-num">{{ totais.ongs }}</dd>
-        </div>
-        <div>
-          <dt>Protetores independentes</dt>
-          <dd class="ui-num">{{ totais.protetores }}</dd>
-        </div>
-        <div>
-          <dt>Animais sob cuidado</dt>
-          <dd class="ui-num">{{ numero(totais.animais) }}</dd>
-        </div>
-        <div>
-          <dt>Adoções com o histórico junto</dt>
-          <dd class="ui-num">{{ numero(totais.adocoes) }}</dd>
-        </div>
-      </dl>
+      <section class="ui-folha ui-cartao og-caixa" aria-labelledby="og-adocoes">
+        <header class="ui-cartao__cabeca og-cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-heart" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="og-adocoes" class="ui-cartao__titulo">
+              Adoções recentes
+              <span class="ui-contagem">{{ adocoes.length }}</span>
+            </h2>
+            <p class="ui-cartao__descricao">
+              Cada animal sai com o histórico de saúde no app de quem adotou, e o adotante ganha 3
+              meses do plano completo.
+            </p>
+          </span>
+        </header>
 
-      <UiSecao titulo="Adoções recentes" icone="ph ph-heart" :contagem="adocoes.length">
-        <ul class="og-adocoes">
-          <li v-for="adocao in adocoes" :key="adocao.id" class="og-adocao">
+        <ul class="og-lista">
+          <li v-for="adocao in adocoes" :key="adocao.id" class="og-linha">
             <PetAvatar
               :nome="adocao.animal"
               :iniciais="iniciais(adocao.animal)"
               :especie="adocao.especie === 'GATO' ? 'felina' : 'canina'"
-              tamanho="md"
+              tamanho="sm"
             />
-            <span class="og-adocao__texto">
+            <span class="og-linha__texto">
               <strong>{{ adocao.animal }}</strong>
               <span>
                 De {{ ong(adocao.ongId).nome }} para {{ adocao.adotante }} ·
                 {{ dataCurta(adocao.data) }}
               </span>
             </span>
-            <span class="og-adocao__selos">
-              <span class="og-selo og-selo--historico">
+            <span class="og-linha__selos">
+              <span class="ui-selo og-selo--historico">
                 <i class="ph ph-clipboard-text" aria-hidden="true" />
                 {{ adocao.registros }} registros no app
               </span>
-              <span class="og-selo og-selo--plano">
+              <span class="ui-selo og-selo--plano">
                 <i class="ph ph-gift" aria-hidden="true" />
                 3 meses do plano
               </span>
             </span>
           </li>
         </ul>
-      </UiSecao>
+      </section>
 
-      <UiSecao
-        titulo="ONGs e protetores"
-        icone="ph ph-house-line"
-        descricao="Com os sistemas da PetJourney liberados sem custo: o histórico de cada animal, os avisos de vacina e retorno, e a adoção."
-        folha
-      >
+      <section class="ui-folha ui-cartao og-caixa" aria-labelledby="og-ongs">
+        <header class="ui-cartao__cabeca og-cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-house-line" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="og-ongs" class="ui-cartao__titulo">
+              ONGs e protetores
+              <span class="ui-contagem">{{ ONGS.length }}</span>
+            </h2>
+            <p class="ui-cartao__descricao">
+              Com os sistemas da PetJourney sem custo: o histórico de cada animal, os avisos de
+              vacina e retorno, e a adoção.
+            </p>
+          </span>
+        </header>
+
         <table class="og-tabela">
           <thead>
             <tr>
@@ -126,7 +123,7 @@ const gavetaAberta = ref(false)
             </tr>
           </tbody>
         </table>
-      </UiSecao>
+      </section>
     </div>
 
     <RegistrarAdocaoGaveta v-model:visible="gavetaAberta" />
@@ -136,86 +133,65 @@ const gavetaAberta = ref(false)
 <style scoped>
 .og {
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
-.og-totais {
+.og-caixa {
+  container: ongs / inline-size;
   display: grid;
+  align-content: start;
+  gap: 4px;
+}
+
+.og-cabeca {
+  display: flex;
+  align-items: flex-start;
   gap: 12px;
-  margin: 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
 }
 
-.og-totais div {
+.og-lista {
   display: grid;
-  gap: 2px;
-  padding: 14px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
-}
-
-.og-totais dt {
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.og-totais dd {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 26px;
-  font-weight: 800;
-}
-
-.og-adocoes {
-  display: grid;
-  gap: 12px;
   margin: 0;
   padding: 0;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
   list-style: none;
 }
 
-.og-adocao {
+.og-linha {
   display: grid;
   align-items: center;
-  gap: 10px 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
-  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 14px;
+  padding: 12px 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
-.og-adocao__texto {
+.og-linha + .og-linha {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.og-linha__texto {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  gap: 1px;
   color: var(--tinta-2);
   font-size: 13px;
 }
 
-.og-adocao__texto strong {
+.og-linha__texto strong {
   color: var(--tinta);
-  font-size: 15px;
+  font-size: 14.5px;
 }
 
-.og-adocao__selos {
+.og-linha__selos {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
-  grid-column: 1 / -1;
 }
 
-.og-selo {
+.og-linha__selos .ui-selo {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
 }
 
 .og-selo--historico {
@@ -228,6 +204,17 @@ const gavetaAberta = ref(false)
   color: var(--portal-tinta);
 }
 
+@container ongs (max-width: 760px) {
+  .og-linha {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .og-linha__selos {
+    justify-content: flex-start;
+    grid-column: 2;
+  }
+}
+
 .og-tabela {
   width: 100%;
   border-collapse: collapse;
@@ -236,8 +223,8 @@ const gavetaAberta = ref(false)
 
 .og-tabela th,
 .og-tabela td {
-  padding: 10px 12px 10px 0;
-  border-bottom: 1px solid var(--linha-suave);
+  padding: 11px 12px 11px 0;
+  border-bottom: 1px solid var(--app-regua, var(--linha-suave));
   color: var(--tinta-2);
   text-align: start;
 }

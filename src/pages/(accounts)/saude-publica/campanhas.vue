@@ -10,7 +10,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiSecao from '@/components/ui/UiSecao.vue'
+
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
 import NovaCampanhaGaveta from '@/features/saude-publica/components/NovaCampanhaGaveta.vue'
 import {
@@ -75,7 +75,7 @@ watch(
   <UiPagina
     titulo="Campanhas"
     icone="ph ph-megaphone"
-    resumo="O aviso chega no celular de quem está com o cuidado pendente, na região da campanha."
+    :resumo="`${campanhas.length} campanhas no período · ${numero(totais.avisados)} tutores avisados · ${numero(totais.atendidos)} animais atendidos`"
   >
     <template #acoes>
       <Button type="button" icon="ph ph-plus" label="Nova campanha" @click="novaCampanha" />
@@ -84,71 +84,64 @@ watch(
     <div class="cp">
       <AvisoDoPrototipo />
 
-      <dl class="cp-totais">
-        <div>
-          <dt>Campanhas no período</dt>
-          <dd class="ui-num">{{ campanhas.length }}</dd>
-        </div>
-        <div>
-          <dt>Tutores avisados</dt>
-          <dd class="ui-num">{{ numero(totais.avisados) }}</dd>
-        </div>
-        <div>
-          <dt>Animais atendidos nas encerradas</dt>
-          <dd class="ui-num">{{ numero(totais.atendidos) }}</dd>
-        </div>
-      </dl>
-
-      <UiSecao
+      <!-- Uma caixa por grupo, uma linha por campanha: o que é, quando, onde e o que o aviso rendeu. -->
+      <section
         v-for="grupo in [
-          { id: 'agendadas', titulo: 'Agendadas', itens: agendadas },
-          { id: 'encerradas', titulo: 'Encerradas', itens: encerradas },
+          {
+            id: 'agendadas',
+            titulo: 'Agendadas',
+            icone: 'ph ph-calendar-dots',
+            descricao: 'O aviso já saiu; o atendimento conta depois do dia.',
+            itens: agendadas,
+          },
+          {
+            id: 'encerradas',
+            titulo: 'Encerradas',
+            icone: 'ph ph-check-circle',
+            descricao: 'Quantos foram avisados, abriram o aviso e foram atendidos.',
+            itens: encerradas,
+          },
         ]"
         :key="grupo.id"
-        :titulo="grupo.titulo"
-        :contagem="grupo.itens.length"
+        class="ui-folha ui-cartao cp-caixa"
+        :aria-labelledby="`cp-${grupo.id}`"
       >
+        <header class="ui-cartao__cabeca cp-cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i :class="grupo.icone" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 :id="`cp-${grupo.id}`" class="ui-cartao__titulo">
+              {{ grupo.titulo }}
+              <span class="ui-contagem">{{ grupo.itens.length }}</span>
+            </h2>
+            <p class="ui-cartao__descricao">{{ grupo.descricao }}</p>
+          </span>
+        </header>
+
         <ul v-if="grupo.itens.length" class="cp-lista">
           <li
             v-for="campanha in grupo.itens"
             :key="campanha.id"
-            class="cp-cartao"
-            :class="`cp-cartao--${tipoDeCampanha(campanha.tipo).tom}`"
+            class="cp-linha"
+            :class="`cp-linha--${tipoDeCampanha(campanha.tipo).tom}`"
           >
-            <div class="cp-cartao__topo">
-              <span class="cp-cartao__icone" aria-hidden="true">
-                <i :class="tipoDeCampanha(campanha.tipo).icone" />
+            <span class="cp-linha__icone" aria-hidden="true">
+              <i :class="tipoDeCampanha(campanha.tipo).icone" />
+            </span>
+            <span class="cp-linha__texto">
+              <strong>{{ campanha.titulo }}</strong>
+              <span>{{ dataPorExtenso(campanha.data) }} · {{ nomesDasRegioes(campanha) }}</span>
+              <span class="cp-linha__local">
+                <i class="ph ph-map-pin" aria-hidden="true" />
+                {{ campanha.local }}
               </span>
-              <span class="cp-cartao__titulo">
-                <strong>{{ campanha.titulo }}</strong>
-                <span>{{ dataPorExtenso(campanha.data) }} · {{ nomesDasRegioes(campanha) }}</span>
-              </span>
-              <span
-                class="cp-cartao__situacao"
-                :class="`cp-cartao__situacao--${campanha.situacao}`"
-              >
-                <i
-                  :class="
-                    campanha.situacao === 'agendada' ? 'ph ph-calendar-dots' : 'ph ph-check-circle'
-                  "
-                  aria-hidden="true"
-                />
-                {{ campanha.situacao === 'agendada' ? 'Agendada' : 'Encerrada' }}
-              </span>
-            </div>
-
-            <p class="cp-cartao__local">
-              <i class="ph ph-map-pin" aria-hidden="true" />
-              {{ campanha.local }}
-            </p>
-
-            <dl class="cp-cartao__numeros">
+            </span>
+            <dl class="cp-linha__numeros">
               <div>
                 <dt>Avisados</dt>
                 <dd class="ui-num">{{ numero(campanha.avisados) }}</dd>
               </div>
               <div>
-                <dt>Abriram o aviso</dt>
+                <dt>Abriram</dt>
                 <dd class="ui-num">
                   {{
                     campanha.abriram ? `${percentual(campanha.abriram, campanha.avisados)}%` : '—'
@@ -158,17 +151,14 @@ watch(
               <div>
                 <dt>Atendidos</dt>
                 <dd class="ui-num">
-                  <template v-if="campanha.atendidos !== null">
-                    {{ numero(campanha.atendidos) }}
-                  </template>
-                  <span v-else class="cp-cartao__depois">depois do dia</span>
+                  {{ campanha.atendidos === null ? '—' : numero(campanha.atendidos) }}
                 </dd>
               </div>
             </dl>
           </li>
         </ul>
         <p v-else class="ui-vazio cp-vazio">Nenhuma campanha.</p>
-      </UiSecao>
+      </section>
     </div>
 
     <NovaCampanhaGaveta v-model:visible="gavetaAberta" :regiao-inicial="regiaoInicial" />
@@ -178,170 +168,127 @@ watch(
 <style scoped>
 .cp {
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
-.cp-totais {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
-}
-
-.cp-totais div {
-  display: grid;
-  gap: 2px;
-  padding: 14px 16px;
-  border: 1px solid var(--linha);
-  border-radius: 16px;
-  background: var(--superficie);
-}
-
-.cp-totais dt {
-  color: var(--tinta-2);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.cp-totais dd {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 26px;
-  font-weight: 800;
-}
-
-.cp-lista {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  padding: 0;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
-  list-style: none;
-}
-
-.cp-cartao {
+/* A linha quebra pela largura da caixa (a gaveta aberta empurra a página), não da janela. */
+.cp-caixa {
+  container: campanhas / inline-size;
   display: grid;
   align-content: start;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--linha);
-  border-radius: 18px;
-  background: var(--superficie);
+  gap: 4px;
 }
 
-.cp-cartao--pets {
-  --tom-fundo: var(--pets-fundo);
-  --tom-tinta: var(--pets-tinta);
-}
-
-.cp-cartao--clinica {
-  --tom-fundo: var(--clinica-fundo);
-  --tom-tinta: var(--clinica-tinta);
-}
-
-.cp-cartao--hotel {
-  --tom-fundo: var(--hotel-fundo);
-  --tom-tinta: var(--hotel-tinta);
-}
-
-.cp-cartao--portal {
-  --tom-fundo: var(--portal-fundo);
-  --tom-tinta: var(--portal-tinta);
-}
-
-.cp-cartao__topo {
+.cp-cabeca {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.cp-cartao__icone {
+.cp-lista {
   display: grid;
-  flex: none;
-  width: 42px;
-  height: 42px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A linha: o ícone do tipo, o texto, e os três números à direita (embaixo, no tablet). */
+.cp-linha {
+  display: grid;
+  align-items: center;
+  gap: 10px 16px;
+  padding: 14px 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.cp-linha + .cp-linha {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.cp-linha--pets {
+  --tom-fundo: var(--pets-fundo);
+  --tom-tinta: var(--pets-tinta);
+}
+
+.cp-linha--clinica {
+  --tom-fundo: var(--clinica-fundo);
+  --tom-tinta: var(--clinica-tinta);
+}
+
+.cp-linha--hotel {
+  --tom-fundo: var(--hotel-fundo);
+  --tom-tinta: var(--hotel-tinta);
+}
+
+.cp-linha--portal {
+  --tom-fundo: var(--portal-fundo);
+  --tom-tinta: var(--portal-tinta);
+}
+
+.cp-linha__icone {
+  display: grid;
+  width: 36px;
+  height: 36px;
   place-items: center;
-  border-radius: 13px;
+  border-radius: 11px;
   background: var(--tom-fundo);
   color: var(--tom-tinta);
-  font-size: 21px;
+  font-size: 18px;
 }
 
-.cp-cartao__titulo {
+.cp-linha__texto {
   display: grid;
-  flex: 1;
   min-width: 0;
-  gap: 2px;
+  gap: 1px;
   color: var(--tinta-2);
   font-size: 13px;
 }
 
-.cp-cartao__titulo strong {
+.cp-linha__texto strong {
   color: var(--tinta);
-  font-size: 15px;
+  font-size: 14.5px;
 }
 
-.cp-cartao__situacao {
+.cp-linha__local {
   display: inline-flex;
-  flex: none;
   align-items: center;
   gap: 5px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--tinta-3);
+  font-size: 12.5px;
 }
 
-.cp-cartao__situacao--agendada {
-  background: var(--clinica-fundo);
-  color: var(--clinica-tinta);
-}
-
-.cp-cartao__situacao--encerrada {
-  background: var(--ok-fundo);
-  color: var(--ok-tinta);
-}
-
-.cp-cartao__local {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.cp-cartao__numeros {
+.cp-linha__numeros {
   display: grid;
-  gap: 8px;
+  gap: 18px;
   margin: 0;
-  padding-top: 12px;
-  border-top: 1px solid var(--linha-suave);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 5.5rem);
 }
 
-.cp-cartao__numeros div {
+.cp-linha__numeros div {
   display: grid;
   gap: 1px;
 }
 
-.cp-cartao__numeros dt {
+.cp-linha__numeros dt {
   color: var(--tinta-3);
   font-size: 12px;
-  font-weight: 600;
 }
 
-.cp-cartao__numeros dd {
+.cp-linha__numeros dd {
   margin: 0;
   color: var(--tinta);
-  font-size: 17px;
-  font-weight: 750;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-.cp-cartao__depois {
-  color: var(--tinta-3);
-  font-size: 12.5px;
-  font-weight: 500;
+@container campanhas (max-width: 760px) {
+  .cp-linha {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cp-linha__numeros {
+    grid-column: 2;
+  }
 }
 
 .cp-vazio {
