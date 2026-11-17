@@ -1311,9 +1311,9 @@
       "minutos": "expira em {m}min"
     },
     "vincular": {
-      "cta": "Vincular código",
+      "cta": "Novo acesso temporário",
       "bloqueado": "Disponível após a aprovação do cadastro.",
-      "title": "Vincular código do responsável",
+      "title": "Novo acesso temporário",
       "lede": "Digite o código de 6 dígitos que o responsável gerou no app. O acesso passa a aparecer na sua lista.",
       "eyebrow": "Portal do parceiro",
       "codigoLabel": "Código de acesso",
@@ -1705,7 +1705,7 @@
       },
       "passo2": {
         "titulo": "Você vincula o código",
-        "texto": "Em Vincular código, digite os 6 dígitos. O pet aparece aqui com o resumo, a mensagem e os documentos liberados."
+        "texto": "Em Novo acesso temporário, digite os 6 dígitos. O pet aparece aqui com o resumo, a mensagem e os documentos liberados."
       },
       "passo3": {
         "titulo": "Sua anotação volta para o app",

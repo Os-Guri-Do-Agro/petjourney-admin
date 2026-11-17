@@ -1311,9 +1311,9 @@
       "minutos": "vence en {m}min"
     },
     "vincular": {
-      "cta": "Vincular código",
+      "cta": "Nuevo acceso temporal",
       "bloqueado": "Disponible después de la aprobación del registro.",
-      "title": "Vincular código del tutor",
+      "title": "Nuevo acceso temporal",
       "lede": "Ingrese el código de 6 dígitos que el tutor generó en la app. El acceso pasa a aparecer en su lista.",
       "eyebrow": "Portal del socio",
       "codigoLabel": "Código de acceso",
@@ -1705,7 +1705,7 @@
       },
       "passo2": {
         "titulo": "Usted vincula el código",
-        "texto": "En Vincular código, escriba los 6 dígitos. La mascota aparece aquí con el resumen, el mensaje y los documentos liberados."
+        "texto": "En Nuevo acceso temporal, escriba los 6 dígitos. La mascota aparece aquí con el resumen, el mensaje y los documentos liberados."
       },
       "passo3": {
         "titulo": "Su nota vuelve a la app",

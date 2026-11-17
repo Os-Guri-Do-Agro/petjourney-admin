@@ -1311,9 +1311,9 @@
       "minutos": "ističe za {m} min"
     },
     "vincular": {
-      "cta": "Povežite kod",
+      "cta": "Novi privremeni pristup",
       "bloqueado": "Dostupno nakon odobrenja registracije.",
-      "title": "Povežite kod staratelja",
+      "title": "Novi privremeni pristup",
       "lede": "Unesite šestocifreni kod koji je staratelj generisao u aplikaciji. Pristup će se pojaviti na Vašoj listi.",
       "eyebrow": "Partnerski portal",
       "codigoLabel": "Pristupni kod",
@@ -1705,7 +1705,7 @@
       },
       "passo2": {
         "titulo": "Vi povezujete kod",
-        "texto": "U opciji Poveži kod unesite 6 cifara. Ljubimac se pojavljuje ovde sa rezimeom, porukom i podeljenim dokumentima."
+        "texto": "U opciji Novi privremeni pristup unesite 6 cifara. Ljubimac se pojavljuje ovde sa rezimeom, porukom i podeljenim dokumentima."
       },
       "passo3": {
         "titulo": "Vaša beleška se vraća u aplikaciju",

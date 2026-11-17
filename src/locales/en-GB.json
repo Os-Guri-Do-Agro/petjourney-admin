@@ -1311,9 +1311,9 @@
       "minutos": "expires in {m}min"
     },
     "vincular": {
-      "cta": "Link code",
+      "cta": "New temporary access",
       "bloqueado": "Available after registration approval.",
-      "title": "Link the pet parent's code",
+      "title": "New temporary access",
       "lede": "Enter the 6-digit code the pet parent generated in the app. The access will show up in your list.",
       "eyebrow": "Partner portal",
       "codigoLabel": "Access code",
@@ -1705,7 +1705,7 @@
       },
       "passo2": {
         "titulo": "You link the code",
-        "texto": "In Link code, type the 6 digits. The pet shows up here with the summary, the message and the shared documents."
+        "texto": "In New temporary access, type the 6 digits. The pet shows up here with the summary, the message and the shared documents."
       },
       "passo3": {
         "titulo": "Your note goes back to the app",
