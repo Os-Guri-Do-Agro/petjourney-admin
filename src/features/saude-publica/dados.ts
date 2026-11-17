@@ -869,7 +869,13 @@ export function percentual(meta: Pick<MetaDoPiloto, 'feitos' | 'base'>) {
   return Math.round((meta.feitos / meta.base) * 100)
 }
 
-export type Procedimento = 'castracao' | 'antirrabica' | 'coleira' | 'consulta' | 'microchip'
+export type Procedimento =
+  | 'castracao'
+  | 'antirrabica'
+  | 'coleira'
+  | 'exame'
+  | 'consulta'
+  | 'microchip'
 
 /** A meta que anda quando o tutor confirma o cuidado marcado pelo procedimento. */
 export const META_DO_PROCEDIMENTO: Partial<Record<Procedimento, MetaDoPiloto['id']>> = {
@@ -906,6 +912,12 @@ export const PROCEDIMENTOS: DefinicaoDoProcedimento[] = [
     proximo: { rotulo: 'Troca da coleira', dias: 180 },
   },
   {
+    id: 'exame',
+    rotulo: 'Exame de leishmaniose',
+    icone: 'ph ph-test-tube',
+    proximo: { rotulo: 'Repetir o exame', dias: 365 },
+  },
+  {
     id: 'consulta',
     rotulo: 'Consulta',
     icone: 'ph ph-stethoscope',
@@ -913,6 +925,98 @@ export const PROCEDIMENTOS: DefinicaoDoProcedimento[] = [
   },
   { id: 'microchip', rotulo: 'Microchip', icone: 'ph ph-cpu' },
 ]
+
+/** O procedimento que cada tipo de campanha faz: é o que o registro da equipe já traz marcado. */
+export const PROCEDIMENTO_DA_CAMPANHA: Record<TipoDeCampanha, Procedimento> = {
+  antirrabica: 'antirrabica',
+  castracao: 'castracao',
+  encoleiramento: 'coleira',
+  exame: 'exame',
+}
+
+/* ------------------------------------------------------------- o resultado do atendimento */
+
+/**
+ * Por que um procedimento não foi feito (17/11/2026, "status do atendimento: se conseguiu ou não e o
+ * motivo, em opções rápidas"). Os que só valem para alguns procedimentos dizem quais; o resto vale
+ * para todos. "Outro" pede uma frase.
+ */
+export type MotivoDeNaoFeito =
+  | 'faltou'
+  | 'agitado'
+  | 'doente'
+  | 'idade-peso'
+  | 'prenhe-cio'
+  | 'sem-jejum'
+  | 'ja-em-dia'
+  | 'sem-insumo'
+  | 'recusou'
+  | 'outro'
+
+export type DefinicaoDoMotivo = {
+  id: MotivoDeNaoFeito
+  rotulo: string
+  icone: string
+  /** Só aparece para estes procedimentos. Sem a lista, vale para todos. */
+  procedimentos?: Procedimento[]
+}
+
+export const MOTIVOS: DefinicaoDoMotivo[] = [
+  { id: 'faltou', rotulo: 'Não compareceu', icone: 'ph ph-user-minus' },
+  { id: 'agitado', rotulo: 'Animal agitado, sem contenção', icone: 'ph ph-warning' },
+  { id: 'doente', rotulo: 'Animal doente: encaminhado', icone: 'ph ph-first-aid' },
+  { id: 'idade-peso', rotulo: 'Fora da idade ou do peso', icone: 'ph ph-scales' },
+  {
+    id: 'prenhe-cio',
+    rotulo: 'Prenhe ou no cio',
+    icone: 'ph ph-gender-female',
+    procedimentos: ['castracao'],
+  },
+  {
+    id: 'sem-jejum',
+    rotulo: 'Sem jejum',
+    icone: 'ph ph-bowl-food',
+    procedimentos: ['castracao', 'exame'],
+  },
+  {
+    id: 'ja-em-dia',
+    rotulo: 'Já estava em dia',
+    icone: 'ph ph-calendar-check',
+    procedimentos: ['antirrabica', 'coleira', 'exame'],
+  },
+  { id: 'sem-insumo', rotulo: 'Faltou vacina ou material', icone: 'ph ph-package' },
+  { id: 'recusou', rotulo: 'Tutor recusou', icone: 'ph ph-hand-palm' },
+  { id: 'outro', rotulo: 'Outro motivo', icone: 'ph ph-dots-three' },
+]
+
+export function motivo(id: MotivoDeNaoFeito) {
+  return MOTIVOS.find((item) => item.id === id)!
+}
+
+/** Os motivos que fazem sentido para o procedimento, na ordem da lista. */
+export function motivosDo(id: Procedimento) {
+  return MOTIVOS.filter((item) => !item.procedimentos || item.procedimentos.includes(id))
+}
+
+/** O que aconteceu com cada procedimento do atendimento: feito, ou não feito e por quê. */
+export type ResultadoDoProcedimento = {
+  procedimento: Procedimento
+  feito: boolean
+  motivo?: MotivoDeNaoFeito
+  /** A frase do "Outro motivo", ou um detalhe de qualquer motivo. */
+  observacao?: string
+}
+
+/** O atendimento inteiro: todos feitos, parte feita, ou nenhum. */
+export type SituacaoDoAtendimento = 'realizado' | 'parcial' | 'nao-realizado'
+
+export function situacaoDoAtendimento(
+  resultados: readonly Pick<ResultadoDoProcedimento, 'feito'>[],
+): SituacaoDoAtendimento {
+  const feitos = resultados.filter((item) => item.feito).length
+  if (feitos === resultados.length) return 'realizado'
+  return feitos ? 'parcial' : 'nao-realizado'
+}
 
 export function procedimento(id: Procedimento) {
   return PROCEDIMENTOS.find((item) => item.id === id)!
@@ -946,6 +1050,11 @@ export type AtendimentoDoPiloto = {
   procedimentos: Procedimento[]
   situacao: SituacaoNoPiloto
   sinpatinhas: boolean
+  /**
+   * O que foi feito e o que não deu, com o motivo. Sem a lista, tudo o que está em
+   * `procedimentos` foi feito (os atendimentos de antes do resultado existir).
+   */
+  resultados?: ResultadoDoProcedimento[]
 }
 
 export const ATENDIMENTOS_DO_PILOTO: AtendimentoDoPiloto[] = [

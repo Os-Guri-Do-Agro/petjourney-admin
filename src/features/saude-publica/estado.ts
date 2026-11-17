@@ -48,6 +48,9 @@ export type CadastroDoAtendimento = {
   cpf?: string
   /** Letras e números, sem máscara (o CNPJ alfanumérico também vale). */
   cnpj?: string
+  /** O responsável e o pet no cadastro de campo (`campo.ts`), com endereço e lugar. */
+  responsavelId?: string
+  petId?: string
 }
 
 const cadastros = ref<Record<string, CadastroDoAtendimento>>({})
@@ -82,7 +85,7 @@ export function useEstadoDoPrototipo() {
 
   function atualizarAtendimento(
     id: string,
-    mudanca: Partial<Pick<AtendimentoDoPiloto, 'situacao' | 'sinpatinhas'>>,
+    mudanca: Partial<Pick<AtendimentoDoPiloto, 'situacao' | 'sinpatinhas' | 'resultados'>>,
   ) {
     atendimentos.value = atendimentos.value.map((item) =>
       item.id === id ? { ...item, ...mudanca } : item,

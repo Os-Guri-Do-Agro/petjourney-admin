@@ -3,3 +3,4 @@ src/service/contrato/openapi.ts
 
 # Contorno de Campo Grande (IBGE, Censo 2022) do protótipo de Saúde pública: gerado e compacto.
 src/features/saude-publica/mapa/campo-grande.json
+src/features/saude-publica/mapa/ceps.json
