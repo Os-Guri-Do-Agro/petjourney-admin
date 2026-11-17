@@ -11670,16 +11670,32 @@
       "vazio": "Nadie para llamar ahora.",
       "resumo": "A quién llamar: del más atrasado al menos.",
       "cartao": {
-        "titulo": "Cartilla de vacunación",
         "ultima": "Última dosis",
         "proxima": "Próxima dosis",
         "dose": "falta la dosis {n}",
         "marcado": "Reservado para {dia}"
       },
-      "carimbo": {
+      "vazioTexto": "La lista se arma sola con las dosis que registra la clínica: entra la mascota con vacuna vencida, con la serie abierta o con refuerzo en los próximos 30 días.",
+      "visao": {
+        "rotulo": "Cómo ver la lista",
+        "urgencia": "Por urgencia",
+        "mes": "Por mes"
+      },
+      "mes": {
+        "atrasadas": "Atrasadas",
+        "pets": "{n} mascota | {n} mascotas",
+        "vacinas": "{n} vacuna | {n} vacunas"
+      },
+      "estado": {
         "VENCIDO": "Vencida",
         "SERIE_INCOMPLETA": "Serie abierta",
         "PROXIMO": "Por vencer"
+      },
+      "menu": {
+        "rotulo": "Más acciones de {pet}",
+        "detalhes": "Ver detalles",
+        "editar": "Editar registro",
+        "apagar": "Borrar registro"
       }
     },
     "aplicadas": {
@@ -11690,6 +11706,64 @@
       "anulada": "anulada",
       "vazio": "Ninguna aplicación en este período.",
       "resumo": "Lo que aplicó la clínica, con el lote y quién aplicó."
+    },
+    "lembrete": {
+      "ativar": "Activar recordatorio",
+      "ativo": "Recordatorio activo",
+      "titulo": "Recordatorio en la app",
+      "de": "{pet} · próxima dosis el {dia}",
+      "quem": "Lo que {responsavel} recibe en la app",
+      "agora": "ahora",
+      "push": {
+        "atrasada": {
+          "titulo": "Vacuna de {pet} atrasada",
+          "texto": "Una vacuna registrada por la clínica pasó de la fecha. Abra la cartilla para verla."
+        },
+        "chegando": {
+          "titulo": "Vacuna de {pet} se acerca",
+          "texto": "Una vacuna registrada por la clínica vence el {dia}. Abra la cartilla para verla."
+        }
+      },
+      "semNomes": "Sin el nombre de la vacuna ni el de la clínica en la notificación: el responsable ve los detalles al abrir la cartilla.",
+      "quando": "Cuándo sale",
+      "regra": {
+        "agora": "Ahora, apenas lo active.",
+        "deNovoNoDia": "De nuevo el {dia}, si la dosis aún falta.",
+        "deNovoEm7": "De nuevo en 7 días, si la dosis aún falta.",
+        "para": "Se detiene solo cuando se aplica la dosis."
+      },
+      "ligadoEm": "Activado el {quando}.",
+      "soNesteNavegador": "Por ahora, el recordatorio queda marcado solo en este navegador: el envío por la app empieza cuando la API tenga la ruta.",
+      "desligar": "Desactivar recordatorio",
+      "fechar": "Cerrar",
+      "erro": {
+        "generico": "No se pudo cambiar el recordatorio.",
+        "semApp": "{responsavel} no tiene la mascota en la app. Llame al teléfono del registro."
+      }
+    },
+    "detalhes": {
+      "titulo": "Vacunas de {pet}",
+      "carregando": "Cargando las vacunas",
+      "ultima": "Última dosis",
+      "deOutroLugar": "De otro lugar",
+      "aplicadaPor": "Aplicada por",
+      "lote": "Lote",
+      "loteValidade": "{codigo} · vence {validade}",
+      "proxima": "Próxima dosis",
+      "marcado": "Horario reservado",
+      "noApp": "En la app",
+      "naCarteirinha": "En la cartilla del responsable",
+      "foraDoApp": "Fuera de la app: la mascota no está vinculada a un responsable en la app",
+      "antes": "Dosis anteriores ({n})",
+      "abrirFicha": "Abrir la ficha",
+      "doseDe": "dosis del {dia}"
+    },
+    "corrigir": {
+      "titulo": "Editar registro",
+      "dica": "Una dosis registrada no cambia: para corregirla, anule esta con el motivo y registre la correcta enseguida. En la app, el responsable ve \"Registro corregido por la clínica\".",
+      "confirmar": "Anular y registrar la correcta",
+      "feita": "Dosis anulada. Ahora registre la correcta en la ficha.",
+      "registrar": "Registrar la dosis correcta"
     }
   },
   "atendimento": {

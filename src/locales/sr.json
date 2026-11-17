@@ -11670,16 +11670,32 @@
       "vazio": "Trenutno nema koga zvati.",
       "resumo": "Koga zvati: od najviše zakasnelih.",
       "cartao": {
-        "titulo": "Knjižica vakcinacije",
         "ultima": "Poslednja doza",
         "proxima": "Sledeća doza",
         "dose": "nedostaje doza {n}",
         "marcado": "Zakazano za {dia}"
       },
-      "carimbo": {
+      "vazioTexto": "Lista se pravi sama od doza koje klinika upiše: ulazi ljubimac sa isteklom vakcinom, otvorenom serijom ili revakcinacijom u narednih 30 dana.",
+      "visao": {
+        "rotulo": "Kako prikazati listu",
+        "urgencia": "Po hitnosti",
+        "mes": "Po mesecu"
+      },
+      "mes": {
+        "atrasadas": "Kasne",
+        "pets": "{n} ljubimac | {n} ljubimca | {n} ljubimaca",
+        "vacinas": "{n} vakcina | {n} vakcine | {n} vakcina"
+      },
+      "estado": {
         "VENCIDO": "Istekla",
         "SERIE_INCOMPLETA": "Otvorena serija",
         "PROXIMO": "Uskoro ističe"
+      },
+      "menu": {
+        "rotulo": "Još radnji za {pet}",
+        "detalhes": "Pogledaj detalje",
+        "editar": "Izmeni zapis",
+        "apagar": "Obriši zapis"
       }
     },
     "aplicadas": {
@@ -11690,6 +11706,64 @@
       "anulada": "poništena",
       "vazio": "Nema primena u ovom periodu.",
       "resumo": "Šta je klinika dala, sa serijom i ko je dao."
+    },
+    "lembrete": {
+      "ativar": "Uključi podsetnik",
+      "ativo": "Podsetnik uključen",
+      "titulo": "Podsetnik u aplikaciji",
+      "de": "{pet} · sledeća doza {dia}",
+      "quem": "Šta {responsavel} dobija u aplikaciji",
+      "agora": "sada",
+      "push": {
+        "atrasada": {
+          "titulo": "Vakcina za {pet} kasni",
+          "texto": "Vakcina koju je upisala klinika prošla je datum. Otvorite knjižicu da vidite."
+        },
+        "chegando": {
+          "titulo": "Vakcina za {pet} se bliži",
+          "texto": "Vakcina koju je upisala klinika ističe {dia}. Otvorite knjižicu da vidite."
+        }
+      },
+      "semNomes": "Bez naziva vakcine i klinike u obaveštenju: vlasnik vidi detalje kada otvori knjižicu.",
+      "quando": "Kada se šalje",
+      "regra": {
+        "agora": "Sada, čim ga uključite.",
+        "deNovoNoDia": "Ponovo {dia}, ako doza još nedostaje.",
+        "deNovoEm7": "Ponovo za 7 dana, ako doza još nedostaje.",
+        "para": "Prestaje sam kada se doza da."
+      },
+      "ligadoEm": "Uključeno {quando}.",
+      "soNesteNavegador": "Za sada je podsetnik označen samo u ovom pregledaču: slanje kroz aplikaciju počinje kada API dobije rutu.",
+      "desligar": "Isključi podsetnik",
+      "fechar": "Zatvori",
+      "erro": {
+        "generico": "Podsetnik nije moguće promeniti.",
+        "semApp": "{responsavel} nema ljubimca u aplikaciji. Pozovite broj iz kartona."
+      }
+    },
+    "detalhes": {
+      "titulo": "Vakcine za {pet}",
+      "carregando": "Učitavanje vakcina",
+      "ultima": "Poslednja doza",
+      "deOutroLugar": "Na drugom mestu",
+      "aplicadaPor": "Dao/la",
+      "lote": "Serija",
+      "loteValidade": "{codigo} · rok {validade}",
+      "proxima": "Sledeća doza",
+      "marcado": "Zakazan termin",
+      "noApp": "U aplikaciji",
+      "naCarteirinha": "U knjižici vlasnika",
+      "foraDoApp": "Van aplikacije: ljubimac nije povezan sa vlasnikom u aplikaciji",
+      "antes": "Ranije doze ({n})",
+      "abrirFicha": "Otvori karton",
+      "doseDe": "doza od {dia}"
+    },
+    "corrigir": {
+      "titulo": "Izmeni zapis",
+      "dica": "Upisana doza se ne menja: da biste je ispravili, poništite ovu uz razlog i odmah upišite tačnu. U aplikaciji vlasnik vidi \"Zapis je ispravila klinika\".",
+      "confirmar": "Poništi i upiši tačnu",
+      "feita": "Doza je poništena. Sada upišite tačnu u kartonu.",
+      "registrar": "Upiši tačnu dozu"
     }
   },
   "atendimento": {

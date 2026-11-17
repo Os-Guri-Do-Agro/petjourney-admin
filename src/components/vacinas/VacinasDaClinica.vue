@@ -4,24 +4,31 @@
  * a clínica aplicou. Duas vistas (`?aba=`):
  *
  * - **Lista de chamada**: do mais atrasado ao menos, com o filtro da situação (vencidas, série
- *   aberta, a vencer em até 30 dias), o responsável com o telefone e o horário já marcado. Desde
- *   17/11/2026 (pedido do Luís: "cada pet deveria parecer um cartão de vacina") cada pet é um
- *   cartão, como a carteira de vacinação: a capa com o pet, o picote, uma linha por vacina com a
- *   última dose, a próxima e o carimbo da situação, e no pé o responsável e o "Aplicar".
+ *   aberta, a vencer em até 30 dias). Um cartão por pet (pedido do Luís, 17/11/2026): o pet no alto
+ *   com o menu "…" (ver detalhes, editar e apagar o registro), uma caixa por vacina com a última
+ *   dose, a próxima, o quanto falta e o "Ativar lembrete", e no pé o responsável e o "Aplicar".
+ *   `?ver=mes` separa os cartões pelo mês em que a dose vence, com as atrasadas primeiro.
  * - **Aplicadas**: o registro de um período (até 92 dias), com o lote e quem aplicou, as anuladas
  *   riscadas. É a lista da farmacovigilância.
+ *
+ * "Editar registro" é corrigir: a API não edita uma dose (guia e4 3.5, "nada se apaga"), então a
+ * gaveta anula com o motivo e leva a registrar a certa. O lembrete ainda não tem rota na API
+ * (`lembrete-de-vacina-service`, lacuna N42).
  */
 import Button from 'primevue/button'
+import Menu from 'primevue/menu'
+import type { MenuItem } from 'primevue/menuitem'
 import SelectButton from 'primevue/selectbutton'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import UiRabiscos from '@/components/ui/UiRabiscos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
@@ -34,15 +41,23 @@ import {
 } from '@/service/parceiro/vacinacao-service'
 import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
+import AnularAplicacaoGaveta from './AnularAplicacaoGaveta.vue'
+import DetalhesDaVacinaGaveta from './DetalhesDaVacinaGaveta.vue'
+import LembreteDaVacinaGaveta from './LembreteDaVacinaGaveta.vue'
+import { useLembretesDaChamada } from './useLembretesDaChamada'
+
 const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const rotulos = useRotulosDoCadastro()
 const { store, parceiroQuery } = useParceiroPortal()
+const lembretes = useLembretesDaChamada()
 
 type Aba = 'chamada' | 'aplicadas'
+type Visao = 'urgencia' | 'mes'
 
 const aba = computed<Aba>(() => (route.query.aba === 'aplicadas' ? 'aplicadas' : 'chamada'))
+const visao = computed<Visao>(() => (route.query.ver === 'mes' ? 'mes' : 'urgencia'))
 
 function trocarAba(valor: Aba) {
   const query = { ...route.query }
@@ -51,9 +66,21 @@ function trocarAba(valor: Aba) {
   void router.replace({ query })
 }
 
+function trocarVisao(valor: Visao) {
+  const query = { ...route.query }
+  if (valor === 'urgencia') delete query.ver
+  else query.ver = valor
+  void router.replace({ query })
+}
+
 const opcoesDeAba = computed(() => [
   { valor: 'chamada', rotulo: t('vacinas.chamada.titulo') },
   { valor: 'aplicadas', rotulo: t('vacinas.aplicadas.titulo') },
+])
+
+const opcoesDeVisao = computed(() => [
+  { valor: 'urgencia', rotulo: t('vacinas.chamada.visao.urgencia'), icone: 'ph ph-list-numbers' },
+  { valor: 'mes', rotulo: t('vacinas.chamada.visao.mes'), icone: 'ph ph-calendar-dots' },
 ])
 
 /* ------------------------------------------------------------------- lista de chamada */
@@ -77,6 +104,7 @@ const opcoesDeSituacao = computed(() => [
 async function carregarChamada(mais = false) {
   carregando.value = true
   erro.value = ''
+  lembretes.ler()
   try {
     const pagina = await lerChamada(
       {
@@ -108,28 +136,96 @@ const TOM: Record<SituacaoDaChamada, 'risco' | 'atencao' | 'calmo'> = {
   PROXIMO: 'calmo',
 }
 
+/** A data vencida pesa mais que a situação: a série aberta que passou da data também é risco. */
+function tomDa(item: Chamada) {
+  return item.diasParaVencer < 0 ? 'risco' : TOM[item.situacao]
+}
+
+/**
+ * Quanto do intervalo entre a última dose e a próxima já passou: a barra da caixa da vacina. Na
+ * vencida, cheia. Um mínimo visível, para a barra nunca parecer vazia por engano.
+ */
+function andamento(item: Chamada) {
+  if (item.diasParaVencer <= 0) return 1
+  const ultima = Date.parse(item.ultimaEm.slice(0, 10))
+  const proxima = Date.parse(item.proximaDoseEm)
+  const total = proxima - ultima
+  if (!(total > 0)) return 1
+  return Math.min(1, Math.max(0.04, 1 - (item.diasParaVencer * 86_400_000) / total))
+}
+
+type Cartao = { paciente: Chamada['paciente']; cliente: Chamada['cliente']; itens: Chamada[] }
+
 /**
  * Um cartão por pet. A lista vem por vacina, do mais atrasado ao menos: o cartão entra na ordem
  * da vacina mais atrasada dele, e as outras vacinas do mesmo pet vão para dentro do cartão.
  */
-const cartoes = computed(() => {
-  const porPet = new Map<
-    string,
-    { paciente: Chamada['paciente']; cliente: Chamada['cliente']; itens: Chamada[] }
-  >()
-
-  for (const item of chamada.value) {
-    const cartao = porPet.get(item.paciente.id)
+function porPet(itens: Chamada[]): Cartao[] {
+  const cartoes = new Map<string, Cartao>()
+  for (const item of itens) {
+    const cartao = cartoes.get(item.paciente.id)
     if (cartao) cartao.itens.push(item)
     else
-      porPet.set(item.paciente.id, {
+      cartoes.set(item.paciente.id, {
         paciente: item.paciente,
         cliente: item.cliente,
         itens: [item],
       })
   }
+  return [...cartoes.values()]
+}
 
-  return [...porPet.values()]
+function nomeDoMes(chave: string) {
+  const [ano, mes] = chave.split('-').map(Number)
+  const nome = new Intl.DateTimeFormat(INTL_LOCALE[locale.value as Locale], {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(Date.UTC(ano!, mes! - 1, 1))
+  return nome.charAt(0).toLocaleUpperCase(locale.value) + nome.slice(1)
+}
+
+type Grupo = {
+  chave: string
+  titulo: string
+  contagem: string
+  atrasadas: boolean
+  cartoes: Cartao[]
+}
+
+/**
+ * As seções da lista. Por urgência, uma só, sem título (a ordem da API). Por mês (`?ver=mes`,
+ * pedido do Luís, 17/11/2026), uma para cada mês em que alguma dose vence, na ordem do calendário;
+ * as que já passaram da data vêm antes, numa seção só (o mês delas ficou para trás, o que importa
+ * é chamar). Um pet com doses em meses diferentes aparece em cada mês, só com as doses daquele mês.
+ */
+const grupos = computed<Grupo[]>(() => {
+  if (visao.value === 'urgencia') {
+    return [
+      { chave: 'tudo', titulo: '', contagem: '', atrasadas: false, cartoes: porPet(chamada.value) },
+    ]
+  }
+
+  const porMes = new Map<string, Chamada[]>()
+  for (const item of chamada.value) {
+    const chave = item.diasParaVencer < 0 ? 'atrasadas' : item.proximaDoseEm.slice(0, 7)
+    porMes.set(chave, [...(porMes.get(chave) ?? []), item])
+  }
+  return [...porMes.entries()]
+    .sort(([a], [b]) => (a === 'atrasadas' ? -1 : b === 'atrasadas' ? 1 : a.localeCompare(b)))
+    .map(([chave, itens]) => {
+      const pets = new Set(itens.map((item) => item.paciente.id)).size
+      return {
+        chave,
+        atrasadas: chave === 'atrasadas',
+        titulo: chave === 'atrasadas' ? t('vacinas.chamada.mes.atrasadas') : nomeDoMes(chave),
+        contagem: [
+          t('vacinas.chamada.mes.pets', { n: pets }, pets),
+          t('vacinas.chamada.mes.vacinas', { n: itens.length }, itens.length),
+        ].join(' · '),
+        cartoes: porPet(itens),
+      }
+    })
 })
 
 function sobreOPet(paciente: Chamada['paciente']) {
@@ -143,26 +239,130 @@ function sobreOPet(paciente: Chamada['paciente']) {
 }
 
 /**
- * A data como na carteira de papel, em números (18/10/2025). `AAAA-MM-DD` é o dia como está;
- * instante (`date-time`) é o dia no fuso de quem olha.
+ * A data como na carteira de papel, em números (18/10/2025). O instante vem com o fuso da clínica
+ * (`2026-11-08T00:32:08-03:00`): vale o dia da clínica, como no resto do portal, e não o de quem
+ * olha (em Cuiabá, aquele 00:32 viraria 07/11).
  */
 function dataDaCarteira(valor: string | null) {
   if (!valor) return ''
-  const formato = new Intl.DateTimeFormat(INTL_LOCALE[locale.value as Locale], {
+  const dia = valor.slice(0, 10)
+  const data = new Date(`${dia}T00:00:00Z`)
+  if (Number.isNaN(data.getTime())) return valor
+  return new Intl.DateTimeFormat(INTL_LOCALE[locale.value as Locale], {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-    ...(valor.length === 10 ? { timeZone: 'UTC' } : {}),
-  })
-  const instante = valor.length === 10 ? `${valor}T00:00:00Z` : valor
-  const data = new Date(instante)
-  return Number.isNaN(data.getTime()) ? valor : formato.format(data)
+    timeZone: 'UTC',
+  }).format(data)
 }
 
-/** Aplicar leva à ficha, que abre a gaveta de aplicar (o mesmo atalho das Ações rápidas). */
-const podeAplicar = computed(
-  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('vacina.aplicar'),
-)
+/** Aplicar, editar e apagar pedem `vacina.aplicar`; o lembrete, quem cuida da agenda. */
+const podeEscrever = computed(() => Boolean(store.modulo('CLINICA')?.podeEscrever))
+const podeAplicar = computed(() => podeEscrever.value && store.temPermissao('vacina.aplicar'))
+const podeLembrar = computed(() => podeEscrever.value && store.temPermissao('agenda.escrever'))
+const podeVerDetalhes = computed(() => store.temPermissao('paciente.ler'))
+
+/** Aplicar leva à ficha, que abre a gaveta de aplicar; com uma vacina só, já nela. */
+function paraAplicar(cartao: Cartao) {
+  const query: Record<string, string> = { aplicar: 'vacina' }
+  if (cartao.itens.length === 1) query.vacina = cartao.itens[0]!.vacina.id
+  return { path: `/clinica/ficha/${cartao.paciente.id}`, query }
+}
+
+/* ------------------------------------------------------------- menu "…" e as gavetas */
+
+const menu = ref<InstanceType<typeof Menu> | null>(null)
+const doMenu = ref<Cartao | null>(null)
+
+const detalhesAberta = ref(false)
+const detalhesDe = ref<Cartao | null>(null)
+const anularAberta = ref(false)
+const aAnular = ref<{ item: Chamada; corrigir: boolean } | null>(null)
+const lembreteAberta = ref(false)
+const lembreteDe = ref<Chamada | null>(null)
+
+/* Uma gaveta por vez: abrir uma fecha a outra. */
+function fecharGavetas() {
+  detalhesAberta.value = false
+  anularAberta.value = false
+  lembreteAberta.value = false
+}
+
+function verDetalhes(cartao: Cartao) {
+  fecharGavetas()
+  detalhesDe.value = cartao
+  detalhesAberta.value = true
+}
+
+function anular(item: Chamada, corrigir: boolean) {
+  fecharGavetas()
+  aAnular.value = { item, corrigir }
+  anularAberta.value = true
+}
+
+function abrirLembrete(item: Chamada) {
+  fecharGavetas()
+  lembreteDe.value = item
+  lembreteAberta.value = true
+}
+
+function sobreADose(item: Chamada) {
+  const dia = rotulos.dia(item.ultimaEm.slice(0, 10))
+  return `${item.vacina.nome} · ${t('vacinas.detalhes.doseDe', { dia })}`
+}
+
+/** Editar e apagar são da dose: com mais de uma vacina no cartão, um grupo por vacina. */
+const itensDoMenu = computed<MenuItem[]>(() => {
+  const cartao = doMenu.value
+  if (!cartao) return []
+
+  const daDose = (item: Chamada): MenuItem[] => [
+    {
+      label: t('vacinas.chamada.menu.editar'),
+      icon: 'ph ph-pencil-simple',
+      command: () => anular(item, true),
+    },
+    {
+      label: t('vacinas.chamada.menu.apagar'),
+      icon: 'ph ph-trash',
+      command: () => anular(item, false),
+    },
+  ]
+
+  const itens: MenuItem[] = []
+  if (podeVerDetalhes.value) {
+    itens.push({
+      label: t('vacinas.chamada.menu.detalhes'),
+      icon: 'ph ph-info',
+      command: () => verDetalhes(cartao),
+    })
+  }
+  if (podeAplicar.value) {
+    if (itens.length) itens.push({ separator: true })
+    if (cartao.itens.length === 1) itens.push(...daDose(cartao.itens[0]!))
+    else
+      for (const item of cartao.itens) itens.push({ label: item.vacina.nome, items: daDose(item) })
+  }
+  return itens
+})
+
+/* Um menu só para todos os cartões: o "…" de outro cartão troca o conteúdo e reabre ali. */
+async function abrirMenu(evento: Event, cartao: Cartao) {
+  if (doMenu.value === cartao) {
+    menu.value?.toggle(evento)
+    return
+  }
+  const alvo = evento.currentTarget as HTMLElement | null
+  menu.value?.hide()
+  doMenu.value = cartao
+  await nextTick()
+  menu.value?.show(evento, alvo ?? undefined)
+}
+
+function anulada() {
+  invalidarPendenciasDoPortal()
+  void carregarChamada()
+}
 
 /* -------------------------------------------------------------------------- aplicadas */
 
@@ -207,6 +407,7 @@ function carregar() {
 
 watch(aba, () => {
   lido.value = false
+  fecharGavetas()
   void carregar()
 })
 watch(situacao, () => void carregarChamada())
@@ -254,102 +455,200 @@ const resumo = computed(() =>
           :allow-empty="false"
           :aria-label="t('vacinas.aplicadas.periodo')"
         />
+        <SelectButton
+          v-if="aba === 'chamada'"
+          class="vc__visao"
+          :model-value="visao"
+          :options="opcoesDeVisao"
+          option-label="rotulo"
+          option-value="valor"
+          :allow-empty="false"
+          :aria-label="t('vacinas.chamada.visao.rotulo')"
+          @update:model-value="trocarVisao"
+        >
+          <template #option="{ option }">
+            <i :class="option.icone" aria-hidden="true" />
+            <span>{{ option.rotulo }}</span>
+          </template>
+        </SelectButton>
       </div>
 
       <p v-if="erro && lido" class="vc__erro" role="alert">{{ erro }}</p>
 
-      <!-- Lista de chamada: quem ligar hoje, um cartão de vacina por pet. -->
-      <section v-if="aba === 'chamada'" :aria-busy="carregando">
-        <ul v-if="cartoes.length" class="vc__cartoes">
-          <li v-for="cartao in cartoes" :key="cartao.paciente.id" class="cartao">
-            <!-- A capa: o pet, como na frente da carteira. -->
-            <header class="cartao__capa">
-              <UiRabiscos estreito />
-              <PetAvatar
-                class="cartao__avatar"
-                :nome="cartao.paciente.nome"
-                :iniciais="iniciais(cartao.paciente.nome)"
-                :especie="ESPECIE_DO_AVATAR[cartao.paciente.especie] ?? null"
-                tamanho="md"
-              />
-              <span class="cartao__quem">
-                <span class="cartao__titulo">
-                  <i class="ph ph-syringe" aria-hidden="true" />
-                  {{ t('vacinas.chamada.cartao.titulo') }}
-                </span>
-                <RouterLink class="cartao__nome" :to="`/clinica/ficha/${cartao.paciente.id}`">{{
-                  cartao.paciente.nome
-                }}</RouterLink>
-                <span class="cartao__sobre">{{ sobreOPet(cartao.paciente) }}</span>
+      <!-- Lista de chamada: quem ligar hoje, um cartão por pet (por mês, uma seção por mês). -->
+      <section v-if="aba === 'chamada'" class="vc__chamada" :aria-busy="carregando">
+        <template v-if="chamada.length">
+          <component
+            :is="visao === 'mes' ? 'section' : 'div'"
+            v-for="grupo in grupos"
+            :key="grupo.chave"
+            :class="visao === 'mes' ? 'ui-folha ui-cartao vc__mes' : 'vc__grupo'"
+            :aria-labelledby="visao === 'mes' ? `vc-mes-${grupo.chave}` : undefined"
+          >
+            <header v-if="visao === 'mes'" class="ui-cartao__cabeca vc__mes-cabeca">
+              <span
+                class="ui-ladrilho"
+                :class="{ 'vc__mes-ladrilho--atrasadas': grupo.atrasadas }"
+                aria-hidden="true"
+              >
+                <i :class="grupo.atrasadas ? 'ph ph-warning-circle' : 'ph ph-calendar-blank'" />
+              </span>
+              <span class="ui-cartao__titulos">
+                <h2 :id="`vc-mes-${grupo.chave}`" class="ui-cartao__titulo">{{ grupo.titulo }}</h2>
+                <p class="ui-cartao__descricao">{{ grupo.contagem }}</p>
               </span>
             </header>
 
-            <!-- As vacinas a chamar, cada uma com o carimbo da situação. -->
-            <ul class="cartao__vacinas">
-              <li v-for="item in cartao.itens" :key="item.aplicacaoId" class="dose">
-                <span class="dose__topo">
-                  <strong class="dose__nome">{{ item.vacina.nome }}</strong>
-                  <span class="carimbo" :class="`carimbo--${TOM[item.situacao]}`">{{
-                    t(`vacinas.chamada.carimbo.${item.situacao}`)
-                  }}</span>
-                </span>
-                <dl class="dose__datas">
-                  <div>
-                    <dt>{{ t('vacinas.chamada.cartao.ultima') }}</dt>
-                    <dd class="ui-num">{{ dataDaCarteira(item.ultimaEm) }}</dd>
-                  </div>
-                  <div>
-                    <dt>{{ t('vacinas.chamada.cartao.proxima') }}</dt>
-                    <dd class="ui-num">{{ dataDaCarteira(item.proximaDoseEm) }}</dd>
-                  </div>
-                </dl>
-                <span class="dose__quando" :class="`dose__quando--${TOM[item.situacao]}`">
-                  {{
-                    [
-                      quandoVence(item),
-                      item.doseSeguinte
-                        ? t('vacinas.chamada.cartao.dose', { n: item.doseSeguinte })
-                        : '',
-                    ]
-                      .filter(Boolean)
-                      .join(' · ')
-                  }}
-                </span>
-                <span v-if="item.agendamentoProxima" class="dose__marcado">
-                  <i class="ph ph-calendar-check" aria-hidden="true" />
-                  {{
-                    t('vacinas.chamada.cartao.marcado', {
-                      dia: rotulos.dia(item.agendamentoProxima.inicio.slice(0, 10)),
-                    })
-                  }}
-                </span>
+            <ul class="vc__cartoes">
+              <li v-for="cartao in grupo.cartoes" :key="cartao.paciente.id" class="cartao">
+                <!-- O pet, e o "…" com o que se faz com o registro. -->
+                <header class="cartao__cabeca">
+                  <PetAvatar
+                    class="cartao__avatar"
+                    :nome="cartao.paciente.nome"
+                    :iniciais="iniciais(cartao.paciente.nome)"
+                    :especie="ESPECIE_DO_AVATAR[cartao.paciente.especie] ?? null"
+                    tamanho="md"
+                  />
+                  <span class="cartao__quem">
+                    <RouterLink class="cartao__nome" :to="`/clinica/ficha/${cartao.paciente.id}`">{{
+                      cartao.paciente.nome
+                    }}</RouterLink>
+                    <span class="cartao__sobre">{{ sobreOPet(cartao.paciente) }}</span>
+                  </span>
+                  <Button
+                    v-if="podeVerDetalhes || podeAplicar"
+                    type="button"
+                    class="cartao__mais"
+                    size="small"
+                    severity="secondary"
+                    outlined
+                    rounded
+                    icon="ph ph-dots-three"
+                    :aria-label="t('vacinas.chamada.menu.rotulo', { pet: cartao.paciente.nome })"
+                    aria-haspopup="menu"
+                    @click="abrirMenu($event, cartao)"
+                  />
+                </header>
+
+                <!-- Uma caixa por vacina: as datas, o quanto falta e o lembrete. -->
+                <ul class="cartao__vacinas">
+                  <li
+                    v-for="item in cartao.itens"
+                    :key="item.aplicacaoId"
+                    class="dose"
+                    :class="`dose--${tomDa(item)}`"
+                  >
+                    <span class="dose__topo">
+                      <strong class="dose__nome">{{ item.vacina.nome }}</strong>
+                      <span class="dose__estado">{{
+                        t(`vacinas.chamada.estado.${item.situacao}`)
+                      }}</span>
+                    </span>
+                    <span class="dose__quando">
+                      <i
+                        :class="
+                          item.diasParaVencer < 0
+                            ? 'ph ph-warning-circle'
+                            : 'ph ph-hourglass-medium'
+                        "
+                        aria-hidden="true"
+                      />
+                      {{
+                        [
+                          quandoVence(item),
+                          item.doseSeguinte
+                            ? t('vacinas.chamada.cartao.dose', { n: item.doseSeguinte })
+                            : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')
+                      }}
+                    </span>
+
+                    <span class="dose__trilho" aria-hidden="true">
+                      <span
+                        class="dose__feito"
+                        :style="{ inlineSize: `${andamento(item) * 100}%` }"
+                      />
+                    </span>
+                    <dl class="dose__datas">
+                      <div>
+                        <dt>{{ t('vacinas.chamada.cartao.ultima') }}</dt>
+                        <dd class="ui-num">{{ dataDaCarteira(item.ultimaEm) }}</dd>
+                      </div>
+                      <div class="dose__data-fim">
+                        <dt>{{ t('vacinas.chamada.cartao.proxima') }}</dt>
+                        <dd class="ui-num">{{ dataDaCarteira(item.proximaDoseEm) }}</dd>
+                      </div>
+                    </dl>
+
+                    <span v-if="item.agendamentoProxima" class="dose__marcado">
+                      <i class="ph ph-calendar-check" aria-hidden="true" />
+                      {{
+                        t('vacinas.chamada.cartao.marcado', {
+                          dia: rotulos.dia(item.agendamentoProxima.inicio.slice(0, 10)),
+                        })
+                      }}
+                    </span>
+
+                    <!-- O lembrete fecha a caixa: a largura toda, fácil de achar e de tocar. -->
+                    <Button
+                      v-if="podeLembrar"
+                      type="button"
+                      size="small"
+                      severity="secondary"
+                      outlined
+                      class="dose__lembrete"
+                      :class="{ 'dose__lembrete--ativo': lembretes.doItem(item.aplicacaoId) }"
+                      :icon="
+                        lembretes.doItem(item.aplicacaoId)
+                          ? 'ph ph-bell-ringing'
+                          : 'ph ph-bell-simple'
+                      "
+                      :label="
+                        lembretes.doItem(item.aplicacaoId)
+                          ? t('vacinas.lembrete.ativo')
+                          : t('vacinas.lembrete.ativar')
+                      "
+                      @click="abrirLembrete(item)"
+                    />
+                  </li>
+                </ul>
+
+                <!-- O pé: quem atende o telefone, e o atalho para aplicar. -->
+                <footer class="cartao__pe">
+                  <span class="cartao__tutor">
+                    <i class="ph ph-user" aria-hidden="true" />
+                    <span class="cartao__tutor-texto">
+                      <strong>{{ cartao.cliente.nome }}</strong>
+                      <bdi v-if="cartao.cliente.telefone" dir="ltr" class="ui-num">{{
+                        telefoneNaTela(cartao.cliente.telefone)
+                      }}</bdi>
+                    </span>
+                  </span>
+                  <Button
+                    v-if="podeAplicar"
+                    :as="RouterLink"
+                    :to="paraAplicar(cartao)"
+                    size="small"
+                    severity="secondary"
+                    outlined
+                    icon="ph ph-syringe"
+                    :label="t('vacinas.plano.aplicar')"
+                  />
+                </footer>
               </li>
             </ul>
+          </component>
+        </template>
 
-            <!-- O pé: quem atende o telefone, e o atalho para aplicar. -->
-            <footer class="cartao__pe">
-              <span class="cartao__tutor">
-                <strong>{{ cartao.cliente.nome }}</strong>
-                <bdi v-if="cartao.cliente.telefone" dir="ltr" class="ui-num">{{
-                  telefoneNaTela(cartao.cliente.telefone)
-                }}</bdi>
-              </span>
-              <Button
-                v-if="podeAplicar"
-                :as="RouterLink"
-                :to="{ path: `/clinica/ficha/${cartao.paciente.id}`, query: { aplicar: 'vacina' } }"
-                size="small"
-                severity="secondary"
-                outlined
-                icon="ph ph-syringe"
-                :label="t('vacinas.plano.aplicar')"
-              />
-            </footer>
-          </li>
-        </ul>
-        <p v-else-if="lido && !carregando" class="ui-folha ui-vazio vc__vazio">
-          {{ t('vacinas.chamada.vazio') }}
-        </p>
+        <UiVazioIlustrado
+          v-else-if="lido && !carregando"
+          icone="ph ph-syringe"
+          :titulo="t('vacinas.chamada.vazio')"
+          :texto="t('vacinas.chamada.vazioTexto')"
+        />
       </section>
 
       <!-- Aplicadas: o registro do período. -->
@@ -402,6 +701,25 @@ const resumo = computed(() =>
         @click="aba === 'chamada' ? carregarChamada(true) : carregarAplicadas(true)"
       />
     </div>
+
+    <template #sempre>
+      <Menu ref="menu" :model="itensDoMenu" popup />
+      <DetalhesDaVacinaGaveta
+        v-model:visible="detalhesAberta"
+        :paciente="detalhesDe?.paciente ?? null"
+        :itens="detalhesDe?.itens ?? []"
+      />
+      <AnularAplicacaoGaveta
+        v-model:visible="anularAberta"
+        :aplicacao="aAnular ? { id: aAnular.item.aplicacaoId } : null"
+        :corrigir="aAnular?.corrigir ?? false"
+        :sobre="aAnular ? sobreADose(aAnular.item) : ''"
+        :paciente-id="aAnular?.item.paciente.id"
+        :vacina-id="aAnular?.item.vacina.id"
+        @anulada="anulada"
+      />
+      <LembreteDaVacinaGaveta v-model:visible="lembreteAberta" :item="lembreteDe" />
+    </template>
   </UiPagina>
 </template>
 
@@ -416,6 +734,15 @@ const resumo = computed(() =>
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+}
+
+/* A visão (por urgência, por mês) é outra pergunta: fica na ponta, longe dos filtros. */
+.vc__visao {
+  margin-inline-start: auto;
+}
+
+.vc__visao :deep(.p-togglebutton-content) {
+  gap: 7px;
 }
 
 .vc__erro {
@@ -434,7 +761,30 @@ const resumo = computed(() =>
   text-underline-offset: 3px;
 }
 
-/* ------------------------------------------------------------------ os cartões de vacina */
+.vc__chamada {
+  display: grid;
+  gap: 16px;
+}
+
+/* ------------------------------------------------------------------------ por mês */
+
+.vc__mes {
+  display: grid;
+  gap: 16px;
+}
+
+.vc__mes-cabeca {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.vc__mes-ladrilho--atrasadas {
+  background: var(--risco-fundo);
+  color: var(--risco-tinta);
+}
+
+/* ------------------------------------------------------------------------ os cartões */
 
 /* Lado a lado, quantos couberem: três na folha de 1440, dois no tablet. */
 .vc__cartoes {
@@ -446,70 +796,40 @@ const resumo = computed(() =>
   list-style: none;
 }
 
-/*
- * O cartão: capa, picote e corpo, como a carteira de vacinação de papel. Os dois semicírculos do
- * picote são cortados no próprio cartão (máscara), sem depender da cor da página atrás.
- */
+/* O cartão: o pet no alto, as vacinas em caixas, o responsável no pé. Sem enfeite de papel. */
 .cartao {
-  --corte: 86px;
-
   display: grid;
-  grid-template-rows: var(--corte) 1fr auto;
-  overflow: hidden;
+  grid-template-rows: auto 1fr auto;
   border: 1px solid var(--linha);
-  border-radius: 18px;
+  border-radius: 16px;
   background: var(--superficie);
-  mask:
-    radial-gradient(circle 9px at 0 var(--corte), #0000 96%, #000 100%),
-    radial-gradient(circle 9px at 100% var(--corte), #0000 96%, #000 100%);
-  mask-composite: intersect;
+  box-shadow: var(--sombra-xs);
 }
 
-/* A capa: o verde dos pets com os rabiscos do app, o retrato e o nome. */
-.cartao__capa {
-  position: relative;
+.cartao__cabeca {
   display: flex;
-  overflow: hidden;
   align-items: center;
   gap: 12px;
-  padding: 0 18px;
-  isolation: isolate;
-  background: var(--pets-fundo);
-  color: var(--pets-tinta);
-  --rabiscos-forca: 0.55;
-}
-
-.app-dark .cartao__capa {
-  --rabiscos-forca: 0.1;
+  padding: 16px 16px 12px;
 }
 
 .cartao__avatar {
   flex: none;
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--superficie) 70%, transparent);
 }
 
 .cartao__quem {
   display: grid;
   min-width: 0;
+  flex: 1;
   gap: 1px;
-}
-
-.cartao__titulo {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 1px;
-  font-size: 10.5px;
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
 }
 
 .cartao__nome {
   overflow: hidden;
   color: var(--tinta);
-  font-size: 17px;
-  font-weight: 750;
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
   text-decoration: none;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -528,140 +848,163 @@ const resumo = computed(() =>
   white-space: nowrap;
 }
 
-/* O corpo, com o picote no alto: a linha tracejada entre os dois cortes. */
+.cartao__mais {
+  flex: none;
+  align-self: flex-start;
+}
+
 .cartao__vacinas {
-  position: relative;
   display: grid;
   align-content: start;
+  gap: 8px;
   margin: 0;
-  padding: 4px 18px 6px;
+  padding: 0 12px;
   list-style: none;
 }
 
-.cartao__vacinas::before {
-  position: absolute;
-  top: 0;
-  inset-inline: 16px;
-  border-top: 2px dashed color-mix(in oklab, var(--pets-tinta) 45%, var(--linha));
-  content: '';
-}
-
+/*
+ * A caixa da vacina. A urgência está na bolinha da situação e na barra (a cor do tom), não no
+ * fundo da caixa: o fundo é o mesmo para todas.
+ */
 .dose {
+  --tom-tinta: var(--pets-tinta);
+  --tom-fundo: var(--pets-fundo);
+
   display: grid;
   gap: 10px;
-  padding: 14px 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  /* Um passo da tinta sobre o cartão: no escuro, `--superficie-2` é igual à superfície. */
+  background: color-mix(in oklab, var(--tinta) 4.5%, var(--superficie));
 }
 
-.dose + .dose {
-  border-top: 1px solid var(--linha-suave);
+.dose--atencao {
+  --tom-tinta: var(--atencao-tinta);
+  --tom-fundo: var(--atencao-fundo);
+}
+
+.dose--risco {
+  --tom-tinta: var(--risco-tinta);
+  --tom-fundo: var(--risco-fundo);
 }
 
 .dose__topo {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
 }
 
 .dose__nome {
+  min-width: 0;
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
+  font-size: 14.5px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
-/*
- * O carimbo da situação: borda dupla, letra de caixa alta e meio torto, como o da clínica na
- * carteira. A cor diz a urgência; o texto, a situação.
- */
-.carimbo {
+.dose__estado {
+  display: inline-flex;
   flex: none;
-  margin: 3px 4px 0 0;
-  padding: 3px 8px;
-  border: 1.5px solid currentColor;
-  border-radius: 7px;
-  outline: 1px solid currentColor;
-  outline-offset: 2px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.09em;
-  line-height: 1.3;
-  rotate: -6deg;
-  text-transform: uppercase;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
 }
 
-.carimbo--risco {
-  color: var(--risco-tinta);
+.dose__estado::before {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--tom-tinta) 70%, var(--tom-fundo));
+  content: '';
 }
 
-.carimbo--atencao {
-  color: var(--atencao-tinta);
+/* O caminho da última dose até a próxima: quanto já passou. */
+.dose__trilho {
+  display: block;
+  overflow: hidden;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--linha);
 }
 
-.carimbo--calmo {
-  color: var(--pets-tinta);
+.dose__feito {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: color-mix(in oklab, var(--tom-tinta) 55%, var(--tom-fundo));
 }
 
-:dir(rtl) .carimbo {
-  rotate: 6deg;
-}
-
-/* As duas datas, como os campos da carteira: o nome miúdo e a data na linha tracejada. */
 .dose__datas {
-  display: grid;
-  gap: 14px;
-  margin: 0;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px 0 0;
 }
 
 .dose__datas div {
   display: grid;
-  gap: 2px;
+  gap: 1px;
+}
+
+.dose__datas .dose__data-fim {
+  text-align: end;
 }
 
 .dose__datas dt {
-  color: var(--tinta-3);
-  font-size: 11px;
-  font-weight: 650;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  color: var(--tinta-2);
+  font-size: 12px;
 }
 
 .dose__datas dd {
   margin: 0;
-  padding-bottom: 3px;
-  border-bottom: 1px dashed var(--linha-media);
   color: var(--tinta);
-  font-size: 15px;
-  font-weight: 650;
+  font-size: 13.5px;
+  font-weight: 600;
 }
 
+/* O prazo, logo abaixo do nome: é o que a recepção lê primeiro. */
 .dose__quando {
-  color: var(--tinta-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -6px;
+  color: var(--tinta);
   font-size: 13px;
   font-weight: 600;
 }
 
-.dose__quando--risco {
-  color: var(--risco-tinta);
+.dose__quando i {
+  color: var(--tom-tinta);
+  font-size: 16px;
 }
 
-.dose__quando--atencao {
-  color: var(--atencao-tinta);
+.dose__lembrete.p-button {
+  width: 100%;
+  margin-top: 2px;
+  background: var(--superficie);
+}
+
+/* Ativo: a borda e a letra no verde do "feito", o fundo igual (urgência e estado não pintam a caixa). */
+.dose__lembrete--ativo.p-button {
+  border-color: color-mix(in oklab, var(--ok-tinta) 35%, var(--linha));
+  color: var(--ok-tinta);
 }
 
 .dose__marcado {
   display: inline-flex;
   align-items: center;
-  justify-self: start;
   gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--ok-fundo);
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.dose__marcado i {
   color: var(--ok-tinta);
-  font-size: 12.5px;
-  font-weight: 650;
+  font-size: 16px;
 }
 
 /* O pé: o responsável (quem atende a ligação) e o atalho de aplicar. */
@@ -670,17 +1013,29 @@ const resumo = computed(() =>
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 18px;
+  margin-top: 12px;
+  padding: 12px 16px 14px;
   border-top: 1px solid var(--linha-suave);
-  background: var(--superficie-2);
 }
 
 .cartao__tutor {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.cartao__tutor > i {
+  flex: none;
+  font-size: 18px;
+}
+
+.cartao__tutor-texto {
   display: grid;
   min-width: 0;
   gap: 1px;
-  color: var(--tinta-2);
-  font-size: 13px;
 }
 
 .cartao__tutor strong {

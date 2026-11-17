@@ -155,11 +155,14 @@ watch(() => props.pacienteId, mudou)
 onMounted(() => {
   void carregar()
   if (route.query.aplicar !== 'vacina') return
+  /* Da lista de chamada vem também a vacina (`?vacina=`): a gaveta abre nela. */
+  const vacinaId = typeof route.query.vacina === 'string' ? route.query.vacina : null
   const query = { ...route.query }
   delete query.aplicar
+  delete query.vacina
   void router.replace({ query })
   raiz.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-  if (podeAplicar.value) void abrirAplicar()
+  if (podeAplicar.value) void abrirAplicar(vacinaId)
 })
 
 /* --------------------------------------------------------------------------- leitura */

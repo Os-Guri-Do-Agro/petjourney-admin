@@ -11670,16 +11670,32 @@
       "vazio": "Ninguém para chamar agora.",
       "resumo": "Quem ligar: do mais atrasado ao menos.",
       "cartao": {
-        "titulo": "Carteira de vacinação",
         "ultima": "Última dose",
         "proxima": "Próxima dose",
         "dose": "falta a dose {n}",
         "marcado": "Marcado para {dia}"
       },
-      "carimbo": {
+      "vazioTexto": "A lista se monta sozinha com as doses que a clínica registra: entra o pet com vacina vencida, com a série aberta ou com reforço nos próximos 30 dias.",
+      "visao": {
+        "rotulo": "Como ver a lista",
+        "urgencia": "Por urgência",
+        "mes": "Por mês"
+      },
+      "mes": {
+        "atrasadas": "Atrasadas",
+        "pets": "{n} pet | {n} pets",
+        "vacinas": "{n} vacina | {n} vacinas"
+      },
+      "estado": {
         "VENCIDO": "Vencida",
         "SERIE_INCOMPLETA": "Série aberta",
         "PROXIMO": "A vencer"
+      },
+      "menu": {
+        "rotulo": "Mais ações de {pet}",
+        "detalhes": "Ver detalhes",
+        "editar": "Editar registro",
+        "apagar": "Apagar registro"
       }
     },
     "aplicadas": {
@@ -11690,6 +11706,64 @@
       "anulada": "anulada",
       "vazio": "Nenhuma aplicação neste período.",
       "resumo": "O que a clínica aplicou, com o lote e quem aplicou."
+    },
+    "lembrete": {
+      "ativar": "Ativar lembrete",
+      "ativo": "Lembrete ativo",
+      "titulo": "Lembrete no app",
+      "de": "{pet} · próxima dose em {dia}",
+      "quem": "O que {responsavel} recebe no app",
+      "agora": "agora",
+      "push": {
+        "atrasada": {
+          "titulo": "Vacina de {pet} atrasada",
+          "texto": "Uma vacina registrada pela clínica passou da data. Abra a carteirinha para ver."
+        },
+        "chegando": {
+          "titulo": "Vacina de {pet} chegando",
+          "texto": "Uma vacina registrada pela clínica vence em {dia}. Abra a carteirinha para ver."
+        }
+      },
+      "semNomes": "Sem o nome da vacina nem o da clínica na notificação: o responsável vê os detalhes ao abrir a carteirinha.",
+      "quando": "Quando sai",
+      "regra": {
+        "agora": "Agora, assim que você ativar.",
+        "deNovoNoDia": "De novo no dia {dia}, se a dose ainda faltar.",
+        "deNovoEm7": "De novo em 7 dias, se a dose ainda faltar.",
+        "para": "Para sozinho quando a dose for aplicada."
+      },
+      "ligadoEm": "Ativado em {quando}.",
+      "soNesteNavegador": "Por enquanto, o lembrete fica marcado só neste navegador: o envio pelo app começa quando a API tiver a rota.",
+      "desligar": "Desligar lembrete",
+      "fechar": "Fechar",
+      "erro": {
+        "generico": "Não deu para mudar o lembrete.",
+        "semApp": "{responsavel} não tem o pet no app. Ligue para o telefone do cadastro."
+      }
+    },
+    "detalhes": {
+      "titulo": "Vacinas de {pet}",
+      "carregando": "Carregando as vacinas",
+      "ultima": "Última dose",
+      "deOutroLugar": "De outro lugar",
+      "aplicadaPor": "Aplicada por",
+      "lote": "Lote",
+      "loteValidade": "{codigo} · validade {validade}",
+      "proxima": "Próxima dose",
+      "marcado": "Horário marcado",
+      "noApp": "No app",
+      "naCarteirinha": "Na carteirinha do responsável",
+      "foraDoApp": "Fora do app: o pet não está ligado a um responsável no app",
+      "antes": "Doses anteriores ({n})",
+      "abrirFicha": "Abrir a ficha",
+      "doseDe": "dose de {dia}"
+    },
+    "corrigir": {
+      "titulo": "Editar registro",
+      "dica": "Uma dose registrada não muda: para corrigir, anule esta com o motivo e registre a certa em seguida. No app, o responsável vê \"Registro corrigido pela clínica\".",
+      "confirmar": "Anular e registrar a certa",
+      "feita": "Dose anulada. Agora registre a certa na ficha.",
+      "registrar": "Registrar a dose certa"
     }
   },
   "atendimento": {
