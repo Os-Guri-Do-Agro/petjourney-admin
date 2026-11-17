@@ -46,7 +46,12 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
+import {
+  invalidarPendenciasDoPortal,
+  usePendenciasDoPortal,
+} from '@/composables/usePendenciasDoPortal'
+import { useEspacos } from '@/navegacao/espacos'
 import {
   instanteNoFuso,
   listarSalas,
@@ -77,7 +82,7 @@ import {
 import { listarProfissionais } from '@/service/parceiro/profissionais-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -245,6 +250,100 @@ const diaNaTela = computed(() =>
 )
 const semanaNaTela = computed(() =>
   semana.value && semana.value.de === segundaDe(data.value) ? semana.value : null,
+)
+
+/* ------------------------------------------------------------------------------ dia livre */
+
+/*
+ * O dia sem nada marcado (17/11/2026, "não podemos pôr algo em vez de mostrar algo tão grande e
+ * vazio?"): no lugar da grade das 7 às 22 em branco, quem atende, o "Marcar horário", o próximo dia
+ * que tem horário e quem está esperando para encher o dia. A grade fica a um clique, para quem marca
+ * clicando no horário. Qualquer agendamento no dia (até cancelado) traz a grade de volta.
+ */
+const gradeAberta = ref(false)
+watch(data, () => {
+  gradeAberta.value = false
+})
+
+const diaLivre = computed(
+  () =>
+    visao.value === 'dia' &&
+    Boolean(diaNaTela.value?.colunas.length) &&
+    !diaNaTela.value?.agendamentos.length &&
+    !diaNaTela.value?.clinicaFechada &&
+    !gradeAberta.value,
+)
+
+const diaPassou = computed(() => data.value < hoje.value)
+
+const quemAtende = computed(() => {
+  const nomes = diaNaTela.value?.colunas.map((coluna) => coluna.nome) ?? []
+  if (!nomes.length) return ''
+  const lista = new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' })
+  return t(nomes.length === 1 ? 'agendamentos.livre.quemUm' : 'agendamentos.livre.quem', {
+    nomes: lista.format(nomes),
+  })
+})
+
+/** O próximo dia com horário, pela carga da semana (desta e, se preciso, da seguinte). */
+const proximoComHorario = ref<string | null>(null)
+const leituraDoProximo = criarUltimaLeitura()
+
+async function acharProximo() {
+  const vez = leituraDoProximo.nova()
+  proximoComHorario.value = null
+  if (!diaLivre.value) return
+  try {
+    for (const semanaDe of [data.value, somarDias(data.value, 7)]) {
+      const lida = await obterSemana(semanaDe, parceiroQuery())
+      if (!leituraDoProximo.valendo(vez)) return
+      const achado = lida.dias.find((item) => item.data > data.value && item.agendados > 0)
+      if (achado) {
+        proximoComHorario.value = achado.data
+        return
+      }
+    }
+  } catch {
+    /* Sem a semana, o botão só não aparece: o resto do dia livre vale. */
+  }
+}
+
+watch(diaLivre, (livre) => {
+  if (livre) void acharProximo()
+})
+
+/* Quem está esperando, pelos números do menu (a mesma leitura do servidor, sem pedir de novo). */
+const { ativo: demonstracao } = useModoDemonstracao()
+const { espacos } = useEspacos()
+const pendencias = usePendenciasDoPortal(
+  () =>
+    !demonstracao.value &&
+    store.loadState === 'ready' &&
+    !store.semAcessoParceiro &&
+    !store.cadastroSuspenso,
+)
+
+function temTela(to: string) {
+  return espacos.value.some((espaco) =>
+    espaco.destinos.some((destino) => destino.abas.some((aba) => aba.to === to)),
+  )
+}
+
+const paraEncher = computed(() =>
+  (
+    [
+      { id: 'espera', icone: 'ph ph-hourglass-medium', to: '/clinica/fila' },
+      { id: 'retornos', icone: 'ph ph-arrow-u-up-left', to: '/clinica/retornos-pendentes' },
+      { id: 'pedidos', icone: 'ph ph-tray-arrow-down', to: '/clinica/pedidos' },
+    ] as const
+  )
+    .filter((item) => temTela(item.to))
+    .map((item) => ({
+      ...item,
+      rotulo: t(`agendamentos.livre.encher.${item.id}.rotulo`),
+      dica: t(`agendamentos.livre.encher.${item.id}.dica`),
+      total: pendencias.selos.value.get(item.to)?.total ?? 0,
+    })),
 )
 
 /* --------------------------------------------------------------------- tipos e equipe */
@@ -956,6 +1055,69 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() =>
           </template>
         </UiVazioIlustrado>
 
+        <section v-else-if="diaLivre" class="ag-livre ui-folha" aria-labelledby="ag-livre">
+          <div class="ag-livre__recado">
+            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+              <i class="ph ph-calendar-blank" />
+            </span>
+            <h2 id="ag-livre" class="ag-livre__titulo">{{ t('agendamentos.livre.titulo') }}</h2>
+            <p class="ag-livre__texto">
+              <span v-if="quemAtende">{{ quemAtende }}</span>
+              {{ diaPassou ? t('agendamentos.livre.passado') : t('agendamentos.livre.convite') }}
+            </p>
+            <div class="ag-livre__acoes">
+              <Button
+                v-if="podeEscrever && !diaPassou"
+                type="button"
+                icon="ph ph-calendar-plus"
+                :label="t('agendamentos.marcar.titulo')"
+                @click="abrirMarcacao()"
+              />
+              <Button
+                v-if="proximoComHorario"
+                type="button"
+                severity="secondary"
+                outlined
+                icon="ph ph-arrow-right"
+                icon-pos="right"
+                :label="
+                  t('agendamentos.livre.proximo', {
+                    dia: frases.diaPorExtenso(proximoComHorario),
+                  })
+                "
+                @click="irPara({ data: proximoComHorario })"
+              />
+              <Button
+                type="button"
+                severity="secondary"
+                outlined
+                icon="ph ph-rows"
+                :label="t('agendamentos.livre.grade')"
+                @click="gradeAberta = true"
+              />
+            </div>
+          </div>
+
+          <div v-if="paraEncher.length && !diaPassou" class="ag-livre__encher">
+            <h3 class="ag-livre__subtitulo">{{ t('agendamentos.livre.encher.titulo') }}</h3>
+            <ul class="ag-livre__lista">
+              <li v-for="item in paraEncher" :key="item.id">
+                <RouterLink class="ag-livre__item" :to="item.to">
+                  <span class="ui-ladrilho" aria-hidden="true"><i :class="item.icone" /></span>
+                  <span class="ag-livre__item-texto">
+                    <strong>{{ item.rotulo }}</strong>
+                    <small>{{ item.dica }}</small>
+                  </span>
+                  <span v-if="item.total" class="ui-contagem">{{
+                    rotulos.numero(item.total)
+                  }}</span>
+                  <i class="ph ph-caret-right ag-livre__seta" aria-hidden="true" />
+                </RouterLink>
+              </li>
+            </ul>
+          </div>
+        </section>
+
         <div
           v-else
           class="ag__folha ui-folha"
@@ -1212,6 +1374,123 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() =>
 @media (prefers-reduced-motion: reduce) {
   .ag__folha {
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------- dia livre */
+
+/*
+ * O recado à esquerda (o ladrilho, o título, quem atende e as ações) e, à direita, quem está
+ * esperando para encher o dia. Sem largura, um embaixo do outro.
+ */
+.ag-livre {
+  container: dia-livre / inline-size;
+  display: grid;
+  align-items: start;
+  gap: 24px 40px;
+  padding: 28px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.ag-livre__recado {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.ag-livre__titulo {
+  margin: 6px 0 0;
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.ag-livre__texto {
+  display: grid;
+  max-width: 52ch;
+  gap: 2px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ag-livre__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ag-livre__encher {
+  display: grid;
+  gap: 8px;
+}
+
+.ag-livre__subtitulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.ag-livre__lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-livre__lista > li + li {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.ag-livre__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ag-livre__item:hover {
+  background: color-mix(in oklab, var(--tinta) 4.5%, transparent);
+}
+
+.ag-livre__item:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: -2px;
+}
+
+.ag-livre__item-texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+.ag-livre__item-texto strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.ag-livre__item-texto small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.ag-livre__seta {
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+@container dia-livre (max-width: 760px) {
+  .ag-livre {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

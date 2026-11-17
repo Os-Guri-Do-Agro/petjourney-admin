@@ -11530,6 +11530,30 @@
         "texto": "Haga clic en un horario libre de la columna o use Agendar turno, arriba de la agenda."
       },
       "abrirProfissionais": "Abrir Profesionales"
+    },
+    "livre": {
+      "titulo": "Ningún horario en este día",
+      "quem": "Atienden este día: {nomes}.",
+      "quemUm": "Atiende este día: {nomes}.",
+      "convite": "Agende un horario o traiga a quien espera un hueco.",
+      "passado": "Este día pasó sin horarios agendados.",
+      "proximo": "Próximo con horarios: {dia}",
+      "grade": "Mostrar la grilla del día",
+      "encher": {
+        "titulo": "Para llenar el día",
+        "espera": {
+          "rotulo": "Lista de espera",
+          "dica": "Quién espera que se abra un hueco."
+        },
+        "retornos": {
+          "rotulo": "Controles sin horario",
+          "dica": "Indicados por el veterinario y todavía sin día."
+        },
+        "pedidos": {
+          "rotulo": "Solicitudes de horario",
+          "dica": "Las que llegaron por la app y por el enlace."
+        }
+      }
     }
   },
   "faltas": {

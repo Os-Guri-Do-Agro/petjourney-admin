@@ -11530,6 +11530,30 @@
         "texto": "Kliknite slobodan termin u koloni ili koristite Zakaži termin, na vrhu rasporeda."
       },
       "abrirProfissionais": "Otvori Stručnjake"
+    },
+    "livre": {
+      "titulo": "Nema termina ovog dana",
+      "quem": "Ovog dana rade: {nomes}.",
+      "quemUm": "Ovog dana radi: {nomes}.",
+      "convite": "Zakažite termin ili pozovite one koji čekaju slobodno mesto.",
+      "passado": "Ovaj dan je prošao bez zakazanih termina.",
+      "proximo": "Sledeći dan sa terminima: {dia}",
+      "grade": "Prikaži mrežu dana",
+      "encher": {
+        "titulo": "Da se popuni dan",
+        "espera": {
+          "rotulo": "Lista čekanja",
+          "dica": "Ko čeka da se otvori termin."
+        },
+        "retornos": {
+          "rotulo": "Kontrole bez termina",
+          "dica": "Preporučio ih je veterinar, a još nemaju dan."
+        },
+        "pedidos": {
+          "rotulo": "Zahtevi za termin",
+          "dica": "Oni koji su stigli preko aplikacije i linka."
+        }
+      }
     }
   },
   "faltas": {

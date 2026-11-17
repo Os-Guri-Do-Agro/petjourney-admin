@@ -11530,6 +11530,30 @@
         "texto": "Click a free time in the column or use Book appointment, at the top of the schedule."
       },
       "abrirProfissionais": "Open Professionals"
+    },
+    "livre": {
+      "titulo": "No bookings on this day",
+      "quem": "On duty this day: {nomes}.",
+      "quemUm": "On duty this day: {nomes}.",
+      "convite": "Book a slot or bring in whoever is waiting for one.",
+      "passado": "This day went by with nothing booked.",
+      "proximo": "Next day with bookings: {dia}",
+      "grade": "Show the day's grid",
+      "encher": {
+        "titulo": "To fill the day",
+        "espera": {
+          "rotulo": "Waitlist",
+          "dica": "Who is waiting for a slot to open."
+        },
+        "retornos": {
+          "rotulo": "Follow-ups without a slot",
+          "dica": "Recommended by the vet and still without a day."
+        },
+        "pedidos": {
+          "rotulo": "Booking requests",
+          "dica": "The ones that came in through the app and the link."
+        }
+      }
     }
   },
   "faltas": {

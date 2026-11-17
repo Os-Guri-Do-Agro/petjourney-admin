@@ -11530,6 +11530,30 @@
         "texto": "Clique num horário livre da coluna ou use Marcar horário, no alto da agenda."
       },
       "abrirProfissionais": "Abrir Profissionais"
+    },
+    "livre": {
+      "titulo": "Nenhum horário neste dia",
+      "quem": "Atendem neste dia: {nomes}.",
+      "quemUm": "Atende neste dia: {nomes}.",
+      "convite": "Marque um horário ou traga quem está esperando uma vaga.",
+      "passado": "Este dia passou sem horário marcado.",
+      "proximo": "Próximo com horário: {dia}",
+      "grade": "Mostrar a grade do dia",
+      "encher": {
+        "titulo": "Para encher o dia",
+        "espera": {
+          "rotulo": "Lista de espera",
+          "dica": "Quem espera uma vaga abrir."
+        },
+        "retornos": {
+          "rotulo": "Retornos sem horário",
+          "dica": "Indicados pelo veterinário e ainda sem dia."
+        },
+        "pedidos": {
+          "rotulo": "Pedidos de horário",
+          "dica": "Os que chegaram pelo app e pelo link."
+        }
+      }
     }
   },
   "faltas": {
