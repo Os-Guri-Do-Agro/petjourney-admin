@@ -32,6 +32,8 @@ import {
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { ApiError } from '@/service/api'
@@ -210,6 +212,25 @@ const fraseDoResumo = computed(() => {
 })
 
 /*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem paciente ativo, como o cadastro
+ * enche, em três etapas (a gaveta em passos, a planilha antiga, a busca do balcão), com Cadastrar e
+ * Importar embaixo para quem pode. Inativos só diz o que vai aparecer ali; a busca sem resultado
+ * fica só com o recado.
+ */
+const passosDoCadastro = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'passos', icone: 'ph ph-list-numbers' },
+    { id: 'importar', icone: 'ph ph-file-arrow-up' },
+    { id: 'buscar', icone: 'ph ph-magnifying-glass' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`cadastro.lista.guia.${id}.titulo`),
+    texto: t(`cadastro.lista.guia.${id}.texto`),
+  })),
+)
+
+/*
  * Cadastrar abre a gaveta em passos aqui mesmo, sem sair da lista (pedido do Luís, 17/11/2026).
  * Quem chega de fora (Ações rápidas do Início, o endereço antigo `/clinica/paciente/novo`) vem com
  * `?novo=1`: a gaveta abre e o pedido sai da URL, para recarregar não abrir de novo.
@@ -334,28 +355,50 @@ watch(
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-vazio cl__vazio">
-        <i class="ph ph-paw-print" aria-hidden="true" />
-        <strong>
-          {{
-            filtrando
-              ? t('cadastro.lista.vazioBusca')
-              : situacao === 'ativos'
-                ? t('cadastro.lista.vazio')
-                : t('cadastro.lista.vazioInativos')
-          }}
-        </strong>
-        <span v-if="situacao === 'ativos'">{{ t('cadastro.lista.vazioDica') }}</span>
-        <Button
-          v-if="podeCadastrar && situacao === 'ativos'"
-          type="button"
-          icon="ph ph-plus"
-          severity="secondary"
-          outlined
-          :label="t('cadastro.lista.cadastrar')"
-          @click="cadastrar"
-        />
-      </div>
+      <!-- A busca sem resultado não ensina nada: a lista não está vazia, o filtro está. -->
+      <UiVazioIlustrado
+        v-else-if="!itens.length && filtrando"
+        aninhado
+        icone="ph ph-magnifying-glass"
+        :titulo="t('cadastro.lista.vazioBusca')"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length && situacao === 'ativos'"
+        aninhado
+        icone="ph ph-paw-print"
+        :titulo="t('cadastro.lista.vazio')"
+        :texto="t('cadastro.lista.vazioDica')"
+        :guia-titulo="t('cadastro.lista.guia.titulo')"
+        :passos="passosDoCadastro"
+      >
+        <template v-if="podeCadastrar || podeImportar" #acao>
+          <Button
+            v-if="podeCadastrar"
+            type="button"
+            icon="ph ph-plus"
+            :label="t('cadastro.lista.cadastrar')"
+            @click="cadastrar"
+          />
+          <Button
+            v-if="podeImportar"
+            type="button"
+            severity="secondary"
+            outlined
+            icon="ph ph-file-arrow-up"
+            :label="t('cadastro.lista.importar')"
+            @click="router.push('/clinica/paciente/importar')"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        aninhado
+        icone="ph ph-archive"
+        :titulo="t('cadastro.lista.vazioInativos')"
+        :texto="t('cadastro.lista.guia.inativosTexto')"
+      />
 
       <ul v-else class="ui-lista cl__lista" :class="{ 'cl__lista--velha': carregando }">
         <li v-for="paciente in itens" :key="paciente.id">
@@ -553,17 +596,6 @@ watch(
   display: flex;
   justify-content: center;
   padding: 12px;
-}
-
-.cl__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.cl__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .cl__esqueleto {

@@ -12,6 +12,8 @@ import { RouterLink } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { listarHospedes, type Hospede } from '@/service/parceiro/hotel-estadia-service'
 
@@ -68,13 +70,35 @@ function meta(h: Hospede) {
 }
 
 const TOM = { RISCO: 'ui-selo--risco', ATENCAO: 'ui-selo--atencao', OK: '' } as const
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): ninguém na casa, como um hóspede chega
+ * aqui, em três etapas (a reserva confirmada, o check-in na reserva, a estadia), e as reservas
+ * embaixo, de onde sai o check-in.
+ */
+const passosDoHospede = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'reserva', icone: 'ph ph-calendar-check' },
+    { id: 'checkin', icone: 'ph ph-sign-in' },
+    { id: 'estadia', icone: 'ph ph-heart' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`estadiaDoHotel.hospedes.guia.${id}.titulo`),
+    texto: t(`estadiaDoHotel.hospedes.guia.${id}.texto`),
+  })),
+)
 </script>
 
 <template>
   <UiPagina :titulo="t('estadiaDoHotel.hospedes.titulo')" :resumo="resumo" icone="ph ph-heart">
     <div class="hh">
       <p v-if="erro" class="hh__erro" role="alert">{{ erro }}</p>
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
+      <section
+        v-if="ordenados.length || carregando"
+        class="ui-folha ui-lista"
+        :aria-busy="carregando"
+      >
         <ul v-if="ordenados.length" class="ui-lista">
           <li v-for="h in ordenados" :key="h.hospedagemId">
             <RouterLink :to="`/hotel/hospedagem/${h.hospedagemId}`" class="ui-linha hh__linha">
@@ -91,8 +115,25 @@ const TOM = { RISCO: 'ui-selo--risco', ATENCAO: 'ui-selo--atencao', OK: '' } as 
             </RouterLink>
           </li>
         </ul>
-        <p v-else-if="!carregando" class="ui-vazio">{{ t('estadiaDoHotel.hospedes.vazio') }}</p>
       </section>
+
+      <UiVazioIlustrado
+        v-else-if="!erro"
+        icone="ph ph-heart"
+        :titulo="t('estadiaDoHotel.hospedes.vazio')"
+        :texto="t('estadiaDoHotel.hospedes.vazioTexto')"
+        :guia-titulo="t('estadiaDoHotel.hospedes.guia.titulo')"
+        :passos="passosDoHospede"
+      >
+        <template #acao>
+          <Button
+            :as="RouterLink"
+            to="/hotel/reservas"
+            icon="ph ph-calendar-blank"
+            :label="t('hotel.mapa.verReservas')"
+          />
+        </template>
+      </UiVazioIlustrado>
       <Button
         v-if="cursor"
         type="button"

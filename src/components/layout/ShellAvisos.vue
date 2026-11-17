@@ -14,6 +14,7 @@ import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useAvisosDoParceiro } from '@/composables/useAvisosDoParceiro'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
@@ -206,11 +207,13 @@ function irPara(aviso: Aviso) {
         />
       </div>
 
-      <p v-else-if="listaCarregada && avisos.length === 0" class="ui-vazio avisos__vazio">
-        <i class="ph ph-bell-simple" aria-hidden="true" />
-        <strong>{{ t('shell.avisos.vazioTitulo') }}</strong>
-        <span>{{ t('shell.avisos.vazio') }}</span>
-      </p>
+      <UiVazioIlustrado
+        v-else-if="listaCarregada && avisos.length === 0"
+        aninhado
+        icone="ph ph-bell-simple"
+        :titulo="t('shell.avisos.vazioTitulo')"
+        :texto="t('shell.avisos.vazio')"
+      />
 
       <ul v-else class="avisos__lista">
         <li v-for="aviso in avisos" :key="aviso.id">
@@ -462,16 +465,6 @@ function irPara(aviso: Aviso) {
   margin-top: 6px;
   border-radius: 999px;
   background: var(--pj-lugar, var(--musgo));
-}
-
-.avisos__vazio {
-  justify-items: start;
-  padding: 24px 4px;
-}
-
-.avisos__vazio > i {
-  color: var(--tinta-3);
-  font-size: 22px;
 }
 
 .avisos__erro {

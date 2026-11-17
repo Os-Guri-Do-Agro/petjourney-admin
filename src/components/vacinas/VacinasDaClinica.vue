@@ -652,8 +652,8 @@ const resumo = computed(() =>
       </section>
 
       <!-- Aplicadas: o registro do período. -->
-      <section v-else class="ui-folha ui-lista" :aria-busy="carregando">
-        <ul v-if="aplicadas.length" class="ui-lista">
+      <section v-else-if="aplicadas.length" class="ui-folha ui-lista" :aria-busy="carregando">
+        <ul class="ui-lista">
           <li
             v-for="item in aplicadas"
             :key="item.id"
@@ -685,10 +685,13 @@ const resumo = computed(() =>
             </span>
           </li>
         </ul>
-        <p v-else-if="lido && !carregando" class="ui-vazio vc__vazio">
-          {{ t('vacinas.aplicadas.vazio') }}
-        </p>
       </section>
+      <UiVazioIlustrado
+        v-else-if="lido && !carregando"
+        icone="ph ph-syringe"
+        :titulo="t('vacinas.aplicadas.vazio')"
+        :texto="t('vacinas.aplicadas.vazioTexto')"
+      />
 
       <Button
         v-if="aba === 'chamada' ? cursorDaChamada : cursorDasAplicadas"
@@ -1045,12 +1048,6 @@ const resumo = computed(() =>
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.vc__vazio {
-  margin: 0;
-  padding: 24px 16px;
-  color: var(--tinta-2);
 }
 
 .vc__anulada .ui-linha__titulo,

@@ -13,13 +13,15 @@ import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import HistoricoDeFaltasGaveta from '@/components/faltas/HistoricoDeFaltasGaveta.vue'
 import { hojeNoFuso } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { listarFaltas, type ResumoDeFaltas } from '@/service/parceiro/faltas-service'
@@ -177,6 +179,27 @@ function abrir(item: ResumoDeFaltas) {
   historicoAberto.value = true
 }
 
+/* ---------------------------------------------------------------------------- o vazio */
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem reincidente, como as faltas andam,
+ * em três etapas (a falta sai da agenda, quem repete vira reincidente, a recepção registra o
+ * contato), e o caminho para a agenda, onde a falta se marca. "A justificar" e "Todas" só dizem o
+ * que vai aparecer nelas.
+ */
+const passosDasFaltas = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'marcar', icone: 'ph ph-user-minus' },
+    { id: 'reincidir', icone: 'ph ph-repeat' },
+    { id: 'contato', icone: 'ph ph-chat-circle-text' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`faltas.guia.${id}.titulo`),
+    texto: t(`faltas.guia.${id}.texto`, { n: limite.value }),
+  })),
+)
+
 /** Uma escrita no histórico (contato, reagendar): o painel e o selo de pendência releem. */
 function mudou() {
   invalidarPendenciasDoPortal()
@@ -223,11 +246,30 @@ function mudou() {
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-folha ui-vazio fa__vazio">
-        <i class="ph ph-calendar-check" aria-hidden="true" />
-        <strong>{{ t(`faltas.vazio.${recorte}`) }}</strong>
-        <span>{{ t('faltas.vazio.descricao') }}</span>
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!itens.length && recorte === 'reincidentes'"
+        icone="ph ph-calendar-check"
+        :titulo="t('faltas.vazio.reincidentes')"
+        :texto="t('faltas.vazio.descricao')"
+        :guia-titulo="t('faltas.guia.titulo')"
+        :passos="passosDasFaltas"
+      >
+        <template v-if="podeEscrever" #acao>
+          <Button
+            :as="RouterLink"
+            to="/clinica/agenda"
+            icon="ph ph-calendar-blank"
+            :label="t('faltas.guia.abrirAgenda')"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        :icone="recorte === 'pendentes' ? 'ph ph-phone-x' : 'ph ph-user-minus'"
+        :titulo="t(`faltas.vazio.${recorte}`)"
+        :texto="t(`faltas.vazioTexto.${recorte}`)"
+      />
 
       <ul v-else class="ui-lista ui-folha" :aria-busy="carregando">
         <li v-for="item in itens" :key="`${item.cliente.id}-${item.paciente.id}`" class="fa__item">

@@ -17,6 +17,7 @@ import { RouterLink } from 'vue-router'
 
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 // Volta junto com o teaser de cupom (ver o comentário no fim do template).
 // import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
@@ -565,13 +566,17 @@ watch(lastSuccessAt, (at) => {
         <header class="ui-cartao__cabeca regras__cabeca">
           <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-percent" /></span>
           <div class="ui-cartao__titulos">
-            <h2 id="div-terms-titulo" class="ui-cartao__titulo">{{ t('divulgacao.regras.titulo') }}</h2>
+            <h2 id="div-terms-titulo" class="ui-cartao__titulo">
+              {{ t('divulgacao.regras.titulo') }}
+            </h2>
             <p class="ui-cartao__descricao regras__frase">{{ t('divulgacao.regras.frase') }}</p>
           </div>
           <div class="ui-cartao__acoes">
             <Button
               type="button"
-              :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
+              :label="
+                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
+              "
               :icon="termsOpen ? 'ph ph-caret-up' : 'ph ph-caret-down'"
               icon-pos="right"
               severity="secondary"
@@ -588,7 +593,9 @@ watch(lastSuccessAt, (at) => {
         <dl v-show="termsOpen" id="div-terms-full" class="regras__lista">
           <div v-for="term in indicacaoTerms" :key="term.id" class="regra ui-poco">
             <dt>
-              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i :class="term.icon" /></span>
+              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"
+                ><i :class="term.icon"
+              /></span>
               {{ term.title }}
             </dt>
             <dd>{{ term.body }}</dd>
@@ -627,7 +634,13 @@ watch(lastSuccessAt, (at) => {
                 </div>
               </header>
 
-              <p v-if="cupons.length === 0" class="ui-vazio">{{ t('divulgacao.cupons.empty') }}</p>
+              <UiVazioIlustrado
+                v-if="cupons.length === 0"
+                aninhado
+                icone="ph ph-ticket"
+                :titulo="t('divulgacao.cupons.empty')"
+                :texto="t('divulgacao.cupons.vazioTexto')"
+              />
 
               <ul v-else class="ui-lista">
                 <li v-for="cupom in cupons" :key="cupom.id" class="ui-linha cupom">
@@ -640,7 +653,9 @@ watch(lastSuccessAt, (at) => {
                   </span>
                   <span class="ui-linha__fim">
                     <span class="cupom__usos ui-num">
-                      {{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates) }}
+                      {{
+                        t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates)
+                      }}
                     </span>
                     <strong class="cupom__desconto ui-num">{{ cupom.descontoPercentual }}%</strong>
                     <span class="ui-selo" :class="{ 'ui-selo--ok': cupom.ativo }">
@@ -649,7 +664,11 @@ watch(lastSuccessAt, (at) => {
                         :class="cupom.ativo ? 'ph-check-circle' : 'ph-pause-circle'"
                         aria-hidden="true"
                       />
-                      {{ cupom.ativo ? t('programas.card.status.ativo') : t('programas.card.status.suspenso') }}
+                      {{
+                        cupom.ativo
+                          ? t('programas.card.status.ativo')
+                          : t('programas.card.status.suspenso')
+                      }}
                     </span>
                   </span>
                 </li>
@@ -686,9 +705,13 @@ watch(lastSuccessAt, (at) => {
                 </div>
               </header>
 
-              <p v-if="resgates.length === 0" class="ui-vazio">
-                {{ t('divulgacao.resgates.empty') }}
-              </p>
+              <UiVazioIlustrado
+                v-if="resgates.length === 0"
+                aninhado
+                icone="ph ph-receipt"
+                :titulo="t('divulgacao.resgates.empty')"
+                :texto="t('divulgacao.resgates.vazioTexto')"
+              />
 
               <ul v-else class="ui-lista">
                 <li v-for="resgate in resgates" :key="resgate.resgateId" class="ui-linha">

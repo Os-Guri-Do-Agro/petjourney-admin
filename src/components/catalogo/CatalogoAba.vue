@@ -16,6 +16,7 @@ import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import ItemSimplesGaveta from '@/components/catalogo/ItemSimplesGaveta.vue'
 import MedicamentoGaveta from '@/components/catalogo/MedicamentoGaveta.vue'
 import VacinaGaveta from '@/components/catalogo/VacinaGaveta.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   editarAcrescimo,
@@ -255,9 +256,13 @@ async function alternar(tipo: TipoDeAcrescimo, linha: Linha) {
           </span>
         </li>
       </ul>
-      <p v-else-if="!carregando" class="cat__vazio">
-        {{ t(`catalogo.secao.${secao.tipo}.vazio`) }}
-      </p>
+      <UiVazioIlustrado
+        v-else-if="!carregando"
+        aninhado
+        :icone="secao.icone"
+        :titulo="t(`catalogo.secao.${secao.tipo}.vazio`)"
+        :texto="t(`catalogo.secao.${secao.tipo}.vazioTexto`)"
+      />
 
       <div v-if="secao.inativos.length" class="cat__inativos">
         <Button

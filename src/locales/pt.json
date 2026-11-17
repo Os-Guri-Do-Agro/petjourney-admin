@@ -740,7 +740,8 @@
       "expandir": "Expandir {modulo}",
       "tratamentos": "{total} tratamento crítico com a adesão em queda | {total} tratamentos críticos com a adesão em queda",
       "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta",
-      "pedidosDeReserva": "{total} pedido de reserva esperando resposta | {total} pedidos de reserva esperando resposta"
+      "pedidosDeReserva": "{total} pedido de reserva esperando resposta | {total} pedidos de reserva esperando resposta",
+      "calmaTexto": "Quando algo parar neste espaço, aparece aqui, do mais grave para o menos grave."
     },
     "resumo": {
       "portal": "Acompanhe seus ganhos e compartilhe seu código.",
@@ -905,7 +906,8 @@
       "posicao": "{atual} de {total}",
       "compromissoAnterior": "Compromisso anterior",
       "proximoCompromisso": "Próximo compromisso",
-      "tituloSemana": "Agenda da semana"
+      "tituloSemana": "Agenda da semana",
+      "vazioTexto": "Os compromissos marcados para este dia aparecem aqui, em ordem de hora."
     },
     "saudacao": {
       "manha": "Bom dia",
@@ -1910,7 +1912,8 @@
       "lede": "Descontos para os responsáveis pelos pets. Não geram participação.",
       "empty": "Nenhum cupom no momento.",
       "usos": "{n} usos",
-      "loadMore": "Mais cupons"
+      "loadMore": "Mais cupons",
+      "vazioTexto": "Os cupons de desconto para os responsáveis aparecem aqui, com o código, o desconto e quantas vezes foram usados."
     },
     "resgates": {
       "title": "Resgates",
@@ -1918,7 +1921,8 @@
       "empty": "Nenhum resgate ainda.",
       "canalQr": "Via QR Code",
       "canalManual": "Código manual",
-      "loadMore": "Mais resgates"
+      "loadMore": "Mais resgates",
+      "vazioTexto": "Cada cupom validado no balcão, pelo QR ou pelo código, aparece aqui com o desconto e o dia."
     },
     "terms": {
       "title": "As regras da participação",
@@ -2565,6 +2569,21 @@
       "indisponivel": {
         "titulo": "Lista ainda não disponível",
         "corpo": "Essa lista está chegando. Tente de novo em alguns dias."
+      },
+      "guia": {
+        "titulo": "Como a lista se forma",
+        "codigo": {
+          "titulo": "A pessoa usa seu código",
+          "texto": "No cadastro da PetJourney, ela digita o seu código ou lê o seu QR."
+        },
+        "lista": {
+          "titulo": "O nome aparece aqui",
+          "texto": "Com o dia em que entrou e se já assinou um plano ou ainda não."
+        },
+        "situacao": {
+          "titulo": "A lista se atualiza",
+          "texto": "Se a pessoa assina, cancela ou apaga a conta, a lista acompanha sem você fazer nada."
+        }
       }
     },
     "estabelecimento": {
@@ -2679,7 +2698,6 @@
         "umDia": "Um feriado",
         "feriadosDe": "Feriados nacionais de {ano}",
         "adicionar": "Adicionar feriado",
-        "vazio": "Nenhum feriado cadastrado. Feriados e dias com outro horário entram aqui e valem no lugar da semana.",
         "remover": "Remover {nome}",
         "data": "Data",
         "faltaData": "Escolha a data no calendário.",
@@ -2697,7 +2715,9 @@
         "apagarVarios": "Apagar vários",
         "marcados": "{total} marcado | {total} marcados",
         "marcarPassados": "Marcar os que já passaram",
-        "apagarMarcados": "Apagar | Apagar {total} | Apagar {total}"
+        "apagarMarcados": "Apagar | Apagar {total} | Apagar {total}",
+        "vazioTitulo": "Nenhum feriado cadastrado",
+        "vazioTexto": "Feriados e dias com outro horário entram aqui e valem no lugar do horário da semana."
       },
       "mensagens": {
         "titulo": "Mensagens ao responsável"
@@ -2933,6 +2953,21 @@
         "diario_do_app": "o diário do app",
         "trilha_clinica": "a auditoria",
         "outro": "um registro ({tipo})"
+      },
+      "guia": {
+        "titulo": "Como a auditoria funciona",
+        "acao": {
+          "titulo": "A equipe usa o prontuário",
+          "texto": "Abrir uma ficha, escrever um atendimento, imprimir, exportar ou publicar no app: cada gesto vira um evento."
+        },
+        "anota": {
+          "titulo": "O portal anota sozinho",
+          "texto": "Quem fez, quando e em qual registro. O conteúdo clínico nunca entra, só o nome dos campos."
+        },
+        "consulta": {
+          "titulo": "Você confere aqui",
+          "texto": "Filtre pela ação, pela pessoa e pelo período para descobrir quem mexeu em um registro."
+        }
       }
     }
   },
@@ -4088,7 +4123,8 @@
         "avulsos": "Nenhum atendimento avulso | 1 deles sem horário na agenda (avulso) | {n} deles sem horário na agenda (avulsos)",
         "diagnosticosSemPermissao": "Os diagnósticos aparecem para quem lê o prontuário.",
         "semDesfecho": "Nenhum horário sem desfecho | 1 horário ficou sem desfecho (nem chegada, nem falta) e fica fora do comparecimento. | {n} horários ficaram sem desfecho (nem chegada, nem falta) e ficam fora do comparecimento."
-      }
+      },
+      "semMovimentoTexto": "Os números e os gráficos aparecem quando houver atendimento no período escolhido."
     },
     "bulario": {
       "titulo": "Bulário",
@@ -4254,6 +4290,22 @@
           "HEPATICO": "hepático",
           "CARDIACO": "cardíaco",
           "GASTRICO": "gástrico"
+        },
+        "vazioTitulo": "Nenhum medicamento da clínica ainda",
+        "guia": {
+          "titulo": "Como o bulário funciona",
+          "acrescentar": {
+            "titulo": "A clínica acrescenta",
+            "texto": "No catálogo da Configuração, com o princípio ativo, a apresentação e a dose de cada espécie."
+          },
+          "buscar": {
+            "titulo": "Busque como lembrar",
+            "texto": "Pelo nome, pelo princípio ativo ou pela indicação, mesmo com erro de digitação."
+          },
+          "ficha": {
+            "titulo": "A ficha ao lado",
+            "texto": "A dose de cada espécie, as vias, as contraindicações e as interações, num lugar só."
+          }
         }
       }
     },
@@ -5365,7 +5417,22 @@
           "OBITO": "O resumo fica só no prontuário da clínica."
         },
         "atendimentosDoPaciente": "{n} atendimento esperando | {n} atendimentos esperando",
-        "ultimoEm": "Último em {quando}"
+        "ultimoEm": "Último em {quando}",
+        "guia": {
+          "titulo": "Como as atividades funcionam",
+          "prazo": {
+            "titulo": "Passou do prazo, entra",
+            "texto": "Pedido sem resposta, falta sem contato, retorno ou vacina vencidos viram uma linha no cartão do assunto."
+          },
+          "papel": {
+            "titulo": "Cada um vê o seu",
+            "texto": "Os cartões seguem o papel de quem entra: cada um diz o porquê, e cada linha traz a ação."
+          },
+          "resolver": {
+            "titulo": "Resolvido, sai daqui",
+            "texto": "Respondido o pedido, marcado o retorno ou registrado o contato, a linha some do cartão."
+          }
+        }
       }
     },
     "atalhos": {
@@ -7853,6 +7920,21 @@
       },
       "erros": {
         "carregar": "Não foi possível carregar o histórico liberado."
+      },
+      "guia": {
+        "titulo": "Como o histórico chega",
+        "escolher": {
+          "titulo": "O responsável escolhe",
+          "texto": "Decide no app o que a clínica vê, como vacinas, alergias e peso, e até quando vale."
+        },
+        "codigo": {
+          "titulo": "O código vale uma vez",
+          "texto": "Para a primeira clínica que receber. Pet que ainda não é paciente ganha a ficha com o histórico."
+        },
+        "valer": {
+          "titulo": "Fica em Valendo",
+          "texto": "Até o prazo acabar ou o responsável encerrar no app. Depois, passa para Terminados."
+        }
       }
     }
   },
@@ -8638,7 +8720,11 @@
         "estadia": "Estadia",
         "reserva": "Reserva"
       },
-      "movimentoDoDia": "Movimento do dia"
+      "movimentoDoDia": "Movimento do dia",
+      "guiaTitulo": "O caminho do hóspede pela casa",
+      "semChegadasTexto": "As reservas com entrada prevista para hoje aparecem aqui, com a documentação e o check-in.",
+      "naCasaVaziaTexto": "Depois do check-in, cada hóspede aparece aqui com o que pede atenção agora.",
+      "semSaidasTexto": "Quem tem saída prevista para hoje aparece aqui, com o que falta para o check-out."
     },
     "planoDaEstadia": {
       "desde": "desde {data}",
@@ -9990,7 +10076,23 @@
       "erro": "Não foi possível carregar os pacientes.",
       "importar": "Importar planilha",
       "importacaoParada": "Uma importação está pausada ou parou no meio. | {n} importações estão pausadas ou pararam no meio.",
-      "verImportacao": "Ver a importação"
+      "verImportacao": "Ver a importação",
+      "guia": {
+        "titulo": "Como o cadastro funciona",
+        "passos": {
+          "titulo": "Um passo por vez",
+          "texto": "Quem responde pelo pet, depois o pet e, por fim, os detalhes, que são opcionais."
+        },
+        "importar": {
+          "titulo": "Ou traga a base antiga",
+          "texto": "O dono da conta ou o gestor importa a planilha do sistema anterior, em .csv ou .xlsx."
+        },
+        "buscar": {
+          "titulo": "Ache pela busca",
+          "texto": "Pelo nome do pet ou do responsável, telefone, CPF ou microchip. Cada linha abre a ficha."
+        },
+        "inativosTexto": "Paciente inativado ou com óbito registrado sai dos ativos e fica aqui, com a ficha."
+      }
     },
     "campos": {
       "nome": "Nome do pet",
@@ -10309,7 +10411,24 @@
       "abrir": "Abrir cadastro",
       "resolver": "Marcar como resolvido",
       "resolvido": "Pedido resolvido",
-      "semPaciente": "Não achamos um paciente deste responsável. Procure em Pacientes."
+      "semPaciente": "Não achamos um paciente deste responsável. Procure em Pacientes.",
+      "guia": {
+        "titulo": "Como a correção chega",
+        "texto": "Os pedidos que os responsáveis fazem pelo app esperam aqui até a recepção corrigir.",
+        "pedir": {
+          "titulo": "O responsável pede pelo app",
+          "texto": "Escreve, com as palavras dele, o que está errado no cadastro que a clínica tem."
+        },
+        "corrigir": {
+          "titulo": "A recepção corrige",
+          "texto": "Abrir cadastro leva à ficha de um paciente dele, onde os dados do responsável se editam."
+        },
+        "resolver": {
+          "titulo": "Marca como resolvido",
+          "texto": "O pedido sai dos abertos e fica em Resolvidos, com a data, como histórico."
+        },
+        "resolvidosTexto": "Os pedidos marcados como resolvidos ficam aqui, com a data, como histórico."
+      }
     },
     "porAcesso": {
       "botao": "Ligar ao cadastro",
@@ -10369,6 +10488,22 @@
           "BANHO": "Banho e tosa",
           "INTERNACAO": "Internação",
           "EXAME": "Exames"
+        },
+        "vazioTexto": "Cadastre onde a clínica atende: as salas organizam a agenda e recebem os tipos de atendimento.",
+        "guia": {
+          "titulo": "Como as salas funcionam",
+          "tipo": {
+            "titulo": "Cada sala tem um tipo",
+            "texto": "Consultório, centro cirúrgico, banho e tosa, internação ou exames: o tipo diz o que acontece nela."
+          },
+          "colunas": {
+            "titulo": "Viram colunas da agenda",
+            "texto": "Cada sala ativa é uma coluna da agenda, na ordem desta lista."
+          },
+          "atendimentos": {
+            "titulo": "Os atendimentos usam as salas",
+            "texto": "Cada tipo de atendimento diz em quais salas acontece. A de internação também guarda os leitos."
+          }
         }
       },
       "tipo": {
@@ -10404,6 +10539,22 @@
           "CIRURGIA": "Cirurgia",
           "BANHO": "Banho e tosa",
           "EMERGENCIA": "Emergência"
+        },
+        "vazioTexto": "Os tipos dizem o que a clínica atende e quanto tempo cada atendimento ocupa na agenda.",
+        "guia": {
+          "titulo": "Como os tipos funcionam",
+          "nome": {
+            "titulo": "Nome e categoria",
+            "texto": "O nome é o da clínica, como Check-up felino. A categoria diz o que ele é: consulta, vacina, cirurgia."
+          },
+          "duracao": {
+            "titulo": "Duração e salas",
+            "texto": "De 5 em 5 minutos, nas salas compatíveis. Sem nenhuma sala marcada, vale qualquer uma."
+          },
+          "marcar": {
+            "titulo": "A recepção marca",
+            "texto": "Ao marcar, o tipo já traz a duração. Marcado como online, ele também pode ser pedido pela página da clínica."
+          }
         }
       },
       "politica": {
@@ -10529,7 +10680,8 @@
         "tirarDiaTexto": "Tirar o bloqueio de {dia}? Os outros dias continuam.",
         "tirarEsteDia": "Tirar este dia",
         "diaTirado": "Este dia saiu do bloqueio",
-        "apagarSerieTexto": "Apagar este bloqueio de toda semana? Ele sai de todos os dias."
+        "apagarSerieTexto": "Apagar este bloqueio de toda semana? Ele sai de todos os dias.",
+        "vazioTexto": "Os bloqueios das próximas semanas aparecem aqui, por dia. O de toda semana aparece uma vez, com os dias."
       },
       "expediente": {
         "titulo": "Expediente de {nome}",
@@ -10821,7 +10973,6 @@
     "semCanalCurto": "sem canal no app: ligue",
     "semCanalLigue": "Sem canal no app: ligue para o responsável e registre o sim ou o não na fila.",
     "semNaoResponderam": "Ninguém deixou de responder nos últimos 7 dias",
-    "semVagas": "Nenhuma vaga liberada com alguém da fila que caiba, nos próximos 14 dias.",
     "servico": "Serviço",
     "situacaoRotulo": "Quais entradas mostrar",
     "situacoes": {
@@ -10854,7 +11005,9 @@
         "texto": "O responsável confirma dentro do prazo e o horário entra na agenda. Sem resposta, a vaga volta para a clínica."
       }
     },
-    "semNaoResponderamTexto": "Ofertas que venceram sem resposta nos últimos 7 dias ficam aqui, para a recepção ligar."
+    "semNaoResponderamTexto": "Ofertas que venceram sem resposta nos últimos 7 dias ficam aqui, para a recepção ligar.",
+    "semVagasTitulo": "Nenhuma vaga para ofertar",
+    "semVagasTexto": "Quando um horário dos próximos 14 dias fica livre e alguém da fila cabe nele, a vaga aparece aqui."
   },
   "importacao": {
     "erroAoCarregar": "Não foi possível carregar a importação.",
@@ -11311,6 +11464,24 @@
       "fotoIndisponivel": "Foto indisponível agora",
       "recorte": "O restante fica com quem lê o prontuário.",
       "observacao": "Mais alguma coisa, nas palavras do responsável"
+    },
+    "guia": {
+      "titulo": "Como a agenda se monta",
+      "vazioTitulo": "Ninguém atende na agenda ainda",
+      "vazioTexto": "A agenda abre uma coluna para cada profissional que atende nela. Sem ninguém assim, todo dia fica vazio.",
+      "equipe": {
+        "titulo": "Cadastre quem atende",
+        "texto": "Em Equipe, na aba Profissionais, com Atende na agenda ligado na ficha de cada um."
+      },
+      "expediente": {
+        "titulo": "Cada um no seu horário",
+        "texto": "A coluna segue o horário da clínica ou o expediente próprio de cada um, também em Profissionais."
+      },
+      "marcar": {
+        "titulo": "A recepção marca",
+        "texto": "Clique num horário livre da coluna ou use Marcar horário, no alto da agenda."
+      },
+      "abrirProfissionais": "Abrir Profissionais"
     }
   },
   "faltas": {
@@ -11433,6 +11604,26 @@
       "voltou": "Voltou em {dia}",
       "registros": "{n} registro | {n} registros",
       "voltar": "Voltar às faltas"
+    },
+    "guia": {
+      "titulo": "Como as faltas funcionam",
+      "marcar": {
+        "titulo": "A falta sai da agenda",
+        "texto": "No horário de quem não veio ou em Fechar o turno, que marca de uma vez quem não chegou."
+      },
+      "reincidir": {
+        "titulo": "Quem repete é reincidente",
+        "texto": "Quem faltou {n} vezes ou mais nos últimos 12 meses aparece em Reincidentes."
+      },
+      "contato": {
+        "titulo": "A recepção registra o contato",
+        "texto": "Abra a linha para anotar a conversa com o responsável e reagendar, se ele quiser voltar."
+      },
+      "abrirAgenda": "Abrir a agenda"
+    },
+    "vazioTexto": {
+      "pendentes": "Falta sem contato registrado fica aqui até a recepção anotar a conversa com o responsável.",
+      "todas": "As faltas dos últimos 12 meses ficam aqui, por responsável e paciente."
     }
   },
   "catalogo": {
@@ -11444,25 +11635,29 @@
         "titulo": "Medicamentos da clínica",
         "descricao": "Aparecem no bulário e na receita marcados como da clínica.",
         "novo": "Novo medicamento",
-        "vazio": "A clínica ainda não acrescentou medicamentos."
+        "vazio": "A clínica ainda não acrescentou medicamentos.",
+        "vazioTexto": "O manipulado, o importado e o que falta no bulário entram aqui, com a dose de cada espécie."
       },
       "vacinas": {
         "titulo": "Vacinas da clínica",
         "descricao": "Com o protocolo da série: a API calcula o plano vacinal.",
         "novo": "Nova vacina",
-        "vazio": "A clínica ainda não acrescentou vacinas."
+        "vazio": "A clínica ainda não acrescentou vacinas.",
+        "vazioTexto": "A vacina importada ou que falta no catálogo entra aqui, com as espécies e o protocolo da série."
       },
       "exames": {
         "titulo": "Exames da clínica",
         "descricao": "Os exames do laboratório parceiro e os próprios.",
         "novo": "Novo exame",
-        "vazio": "A clínica ainda não acrescentou exames."
+        "vazio": "A clínica ainda não acrescentou exames.",
+        "vazioTexto": "Os exames do laboratório parceiro e os que a clínica faz entram aqui, por grupo."
       },
       "diagnosticos": {
         "titulo": "Diagnósticos da clínica",
         "descricao": "Códigos próprios, ao lado dos da PetJourney.",
         "novo": "Novo diagnóstico",
-        "vazio": "A clínica ainda não acrescentou diagnósticos."
+        "vazio": "A clínica ainda não acrescentou diagnósticos.",
+        "vazioTexto": "Os códigos próprios da clínica entram aqui e aparecem ao lado dos da PetJourney."
       }
     },
     "erro": {
@@ -11612,7 +11807,8 @@
       "aplicar": "Aplicar",
       "vazio": "Nenhuma vacina no plano deste paciente.",
       "eMais": "e mais {n} vacinas em dia",
-      "opcionais": "Opcionais não iniciadas ({n})"
+      "opcionais": "Opcionais não iniciadas ({n})",
+      "vazioTexto": "O plano se monta pelas vacinas do catálogo para a espécie do paciente, com a dose da vez e a próxima."
     },
     "historico": {
       "titulo": "Histórico ({n})",
@@ -11743,7 +11939,8 @@
       "externa": "de outro lugar",
       "anulada": "anulada",
       "vazio": "Nenhuma aplicação neste período.",
-      "resumo": "O que a clínica aplicou, com o lote e quem aplicou."
+      "resumo": "O que a clínica aplicou, com o lote e quem aplicou.",
+      "vazioTexto": "Cada dose que a clínica registra aparece aqui, com o lote e quem aplicou. As anuladas ficam riscadas."
     },
     "lembrete": {
       "ativar": "Ativar lembrete",
@@ -11850,7 +12047,25 @@
       "resumoFiltro": "Do mais recente para trás.",
       "vazioTitulo": "Nenhum atendimento por aqui",
       "vazioDica": "O atendimento nasce no Iniciar da agenda ou, fora dela, na ficha do paciente.",
-      "verMais": "Ver mais"
+      "verMais": "Ver mais",
+      "vazioStatus": {
+        "RASCUNHO": {
+          "titulo": "Nenhum rascunho aberto",
+          "texto": "Atendimento começado e ainda não finalizado fica aqui, do mais antigo para o mais novo."
+        },
+        "FINALIZADO": {
+          "titulo": "Nenhum atendimento finalizado",
+          "texto": "Os atendimentos finalizados ficam aqui, do mais recente para trás, por dia do atendimento."
+        },
+        "ANULADO": {
+          "titulo": "Nenhum atendimento anulado",
+          "texto": "Atendimento finalizado e depois anulado fica aqui, para consulta."
+        }
+      },
+      "vazioMeus": {
+        "titulo": "Nenhum atendimento seu ainda",
+        "texto": "Aqui entram só os atendimentos em que você é o veterinário. Desligue Só os meus para ver os da clínica."
+      }
     },
     "linha": {
       "titulo": "Histórico clínico",
@@ -11908,7 +12123,24 @@
       "tipoDoVet": "Escolhido pelo veterinário.",
       "comQuem": "Com quem",
       "horarios": "Horários livres",
-      "semSugestao": "Nenhum horário livre nesse período."
+      "semSugestao": "Nenhum horário livre nesse período.",
+      "guia": {
+        "titulo": "Como o retorno chega aqui",
+        "texto": "O retorno que o veterinário indicou e ainda não tem horário na agenda aparece aqui.",
+        "indicar": {
+          "titulo": "O veterinário indica",
+          "texto": "Na conduta do atendimento, com os dias até a volta e, se quiser, o tipo."
+        },
+        "esperar": {
+          "titulo": "Sem horário, espera aqui",
+          "texto": "Com o vencimento contado da consulta. Volta para cá se o horário for cancelado ou virar falta."
+        },
+        "marcar": {
+          "titulo": "A recepção marca",
+          "texto": "Marcar põe no primeiro horário livre de quem atendeu. Sem vaga, dá para pôr na fila."
+        },
+        "vencidosTexto": "Retorno que passou do vencimento sem horário aparece aqui, para a recepção marcar."
+      }
     },
     "anamnese": {
       "descricao": "Na ordem da conversa. A queixa é o que o finalizar cobra.",
@@ -12390,6 +12622,20 @@
       "adendoTitulo": "Esqueceu alguma coisa?",
       "adendoAcao": "Escrever adendo",
       "ficar": "Ficar no atendimento"
+    },
+    "guia": {
+      "titulo": "Como o atendimento funciona",
+      "texto": "Aqui ficam os prontuários da clínica: os rascunhos para finalizar e os registros já fechados.",
+      "iniciar": "Começa na agenda",
+      "registrar": {
+        "titulo": "O veterinário registra",
+        "texto": "Anamnese, exame físico, diagnóstico, conduta e receita, cada parte gravada sozinha enquanto ele escreve."
+      },
+      "finalizar": {
+        "titulo": "Finalizar fecha o registro",
+        "texto": "O rascunho vira registro. O resumo vai ao responsável só depois de liberado."
+      },
+      "abrirAgenda": "Abrir a agenda"
     }
   },
   "adesao": {
@@ -12438,6 +12684,22 @@
     },
     "resumo": {
       "indisponivel": "Indisponível agora."
+    },
+    "guia": {
+      "titulo": "Como o tratamento em casa funciona",
+      "texto": "Aqui ficam os remédios críticos com doses puladas ou com os registros em queda no app.",
+      "doses": {
+        "titulo": "A casa registra as doses",
+        "texto": "O responsável cria os lembretes da receita no app e marca cada dose dada ou pulada."
+      },
+      "critico": {
+        "titulo": "A clínica marca o crítico",
+        "texto": "Na ficha do paciente, ligue Crítico no remédio que não pode falhar."
+      },
+      "alerta": {
+        "titulo": "A queda aparece aqui",
+        "texto": "Doses puladas em 3 dias ou registros em queda num crítico entram nesta lista, para a equipe falar com a família."
+      }
     }
   },
   "documentos": {
@@ -12733,6 +12995,23 @@
       "erro": "Não deu para registrar o pedido.",
       "feito": "Pedido registrado.",
       "jaExistia": "Já havia um pedido aberto deste paciente e período: é o mesmo."
+    },
+    "guia": {
+      "titulo": "Como a cópia funciona",
+      "texto": "Quando alguém pede a cópia do prontuário de um paciente, o pedido fica aqui até a entrega.",
+      "pedir": {
+        "titulo": "O pedido chega",
+        "texto": "Pelo app, quando o responsável pede, ou no balcão, em Registrar pedido. O prazo é de 5 dias úteis."
+      },
+      "gerar": {
+        "titulo": "A clínica gera a cópia",
+        "texto": "Gerar monta o PDF do prontuário em poucos segundos, e ele fica guardado por 7 dias."
+      },
+      "entregar": {
+        "titulo": "Entrega e fecha",
+        "texto": "Baixe e entregue no balcão. Se o responsável baixar pelo app, a entrega se registra sozinha."
+      },
+      "encerradosTexto": "Os pedidos entregues, recusados ou encerrados ficam aqui, sem nada a fazer."
     }
   },
   "internacao": {
@@ -12842,7 +13121,22 @@
       "semVaga": "Nenhum leito livre agora.",
       "ocupados": "{n} ocupado | {n} ocupados",
       "inativos": "{n} fora de operação | {n} fora de operação",
-      "semLeitos": "A clínica ainda não cadastrou leitos."
+      "semLeitos": "A clínica ainda não cadastrou leitos.",
+      "guia": {
+        "titulo": "Como as vagas funcionam",
+        "leitos": {
+          "titulo": "A clínica cadastra os leitos",
+          "texto": "Na Configuração, cada leito com o tipo: geral, felino, isolamento ou UTI."
+        },
+        "internar": {
+          "titulo": "Internar ocupa o leito",
+          "texto": "Enquanto o paciente está internado, o leito sai das vagas. O leito parado também sai."
+        },
+        "aparece": {
+          "titulo": "A vaga aparece aqui",
+          "texto": "Cada tipo de leito com quantos estão livres, para responder ao telefone se há vaga."
+        }
+      }
     },
     "leitos": {
       "titulo": "Leitos",
@@ -12876,6 +13170,21 @@
         "REFORMA": "Reforma",
         "EQUIPAMENTO": "Equipamento",
         "OUTRO": "Outro motivo"
+      },
+      "guia": {
+        "titulo": "Como os leitos funcionam",
+        "sala": {
+          "titulo": "Uma sala de internação",
+          "texto": "O leito mora numa sala do tipo Internação, criada na aba Salas desta tela."
+        },
+        "leito": {
+          "titulo": "Cadastre o leito",
+          "texto": "Com o nome que a equipe usa na ala e o tipo: geral, felino, isolamento ou UTI."
+        },
+        "mapa": {
+          "titulo": "Ele entra no mapa",
+          "texto": "Cada leito vira um lugar no mapa da Internação. O parado sai da conta de vagas."
+        }
       }
     },
     "internar": {
@@ -12993,7 +13302,8 @@
       "vazioPlantao": "Nenhuma dose neste plantão.",
       "truncado": "Há mais doses do que cabem aqui: abra a internação para ver uma janela menor.",
       "foraDaLista": "{n} dose atrasada há mais tempo não está na lista: abra a internação. | {n} doses atrasadas há mais tempo não estão na lista: abra a internação.",
-      "erro": "Não deu para carregar o checklist."
+      "erro": "Não deu para carregar o checklist.",
+      "vazioTexto": "As doses aparecem aqui quando o paciente tem medicamento prescrito com horário dentro desta janela."
     },
     "dose": {
       "item": "Item",
@@ -13106,7 +13416,8 @@
         "ALIMENTACAO": "Ex.: ração úmida, 1/3 da lata",
         "MONITORAMENTO": "Ex.: temperatura e frequência cardíaca",
         "PROCEDIMENTO": "Ex.: limpeza do acesso venoso"
-      }
+      },
+      "vazioTexto": "Cada medicamento prescrito aparece aqui com a dose e a frequência, e vira doses com hora no checklist."
     },
     "evolucao": {
       "titulo": "Evolução",
@@ -13131,7 +13442,8 @@
       "versao": "Escrita por {quem} em {quando}, trocada por {por}",
       "desatualizada": "A internação mudou enquanto você escrevia. Abra de novo para ver a versão atual.",
       "erro": "Não deu para salvar a evolução.",
-      "erroAoCarregar": "Não deu para carregar as evoluções."
+      "erroAoCarregar": "Não deu para carregar as evoluções.",
+      "vazioTexto": "A evolução de cada plantão aparece aqui, da mais nova. A do plantão aberto se reescreve; a entregue congela."
     },
     "plantao": {
       "titulo": "Plantão",
@@ -13281,6 +13593,38 @@
         "SUPERADO": "Superado antes de sair.",
         "FORA_DO_PRAZO": "Fora do prazo: não saiu.",
         "FALHOU": "O envio falhou."
+      },
+      "guiaFila": {
+        "titulo": "Como a fila funciona",
+        "piora": {
+          "titulo": "A piora pede ligação",
+          "texto": "Quando o internado piora ou entra crítico, o boletim espera até alguém da clínica ligar."
+        },
+        "ligar": {
+          "titulo": "A recepção liga e registra",
+          "texto": "Pelo telefone do cadastro. Registre aqui quem ligou: sem app, a ligação já fecha a pendência."
+        },
+        "enviar": {
+          "titulo": "O boletim vai ao app",
+          "texto": "Com a ligação feita, o boletim pronto aparece aqui para enviar ao responsável."
+        }
+      },
+      "filaVaziaTexto": "Aparece aqui o internado com ligação a fazer ou boletim a enviar, em ordem de entrada e sem texto clínico.",
+      "vazioTexto": "Os boletins ao responsável aparecem aqui, do mais recente: os escritos pela equipe e os automáticos."
+    },
+    "guia": {
+      "titulo": "Como a internação funciona",
+      "leitos": {
+        "titulo": "Cadastre os leitos",
+        "texto": "Na Configuração, cada leito numa sala de internação, com o tipo e o nome que a equipe usa."
+      },
+      "internar": {
+        "titulo": "Interne no leito livre",
+        "texto": "No mapa, o leito livre abre a internação, com o paciente, o motivo, a gravidade e o peso de entrada."
+      },
+      "acompanhar": {
+        "titulo": "O mapa mostra quem precisa",
+        "texto": "Dose atrasada, boletim a ligar e alta vencida aparecem no alto, do mais urgente para o menos."
       }
     }
   },
@@ -13406,7 +13750,8 @@
       "vazio": "Nenhum movimento neste período.",
       "verMais": "Ver mais",
       "erro": "Não deu para carregar os movimentos.",
-      "erroEstorno": "Não deu para estornar."
+      "erroEstorno": "Não deu para estornar.",
+      "vazioTexto": "Cada lote recebido e cada baixa aparecem aqui, com quem registrou. A aplicação de vacina tem lista própria."
     },
     "analise": {
       "periodo": "Período da análise",
@@ -13481,7 +13826,8 @@
       "historicoTruncado": "Os meses mais antigos ficaram de fora.",
       "erro": "Não foi possível carregar as metas.",
       "salvas": "Metas de {mes} combinadas.",
-      "limpas": "As metas de {mes} foram apagadas."
+      "limpas": "As metas de {mes} foram apagadas.",
+      "semPlanoAtualTexto": "Combinadas as metas, cada uma aparece aqui contra o ritmo de hoje, até o fim do mês."
     },
     "pedido": {
       "titulo": "Pedido de compra para {mes}",
@@ -13528,6 +13874,22 @@
       "vazio": "Sem metas: salvar apaga as metas de {mes}.",
       "erro": "Não foi possível salvar as metas.",
       "erroSugestao": "A sugestão não carregou; dá para combinar as metas mesmo assim."
+    },
+    "vazioTitulo": "Nenhuma vacina na geladeira",
+    "guia": {
+      "titulo": "Como o estoque funciona",
+      "receber": {
+        "titulo": "Receba o lote",
+        "texto": "Com o código do frasco, a validade e as doses. O lote entra na geladeira com o saldo."
+      },
+      "aplicar": {
+        "titulo": "A aplicação dá baixa",
+        "texto": "Ao aplicar a vacina com um lote do estoque, a dose sai do saldo na mesma hora."
+      },
+      "avisar": {
+        "titulo": "O mínimo avisa",
+        "texto": "Abaixo do mínimo, a geladeira e o menu avisam. O lote vencido pede descarte."
+      }
     }
   },
   "casaDoHotel": {
@@ -13557,7 +13919,6 @@
       "ocupada": "Ocupada",
       "desativar": "Tirar de operação",
       "reativar": "Devolver à operação",
-      "vazio": "A casa ainda não tem corredores. Comece por um corredor e cadastre as acomodações dentro dele.",
       "semAcomodacao": "Nenhuma acomodação neste corredor.",
       "foraDeOperacao": "Fora de operação",
       "desde": "{motivo} desde {data}",
@@ -13568,7 +13929,24 @@
       "apagarDe": "Apagar {nome}",
       "noLimite": "A casa chegou ao limite de {limite} acomodações.",
       "blocosNoLimite": "A casa chegou ao limite de {limite} corredores.",
-      "antes": "Para cadastrar acomodação, a casa precisa de um corredor, um tipo e uma tarifa."
+      "antes": "Para cadastrar acomodação, a casa precisa de um corredor, um tipo e uma tarifa.",
+      "vazioTitulo": "A casa ainda não tem corredores",
+      "vazioTexto": "As acomodações moram dentro dos corredores. Com a casa montada, o mapa e as reservas passam a funcionar.",
+      "guia": {
+        "titulo": "Como montar a casa",
+        "corredor": {
+          "titulo": "Crie um corredor",
+          "texto": "O corredor agrupa as acomodações, e a ordem dos corredores é a ordem da casa no mapa."
+        },
+        "tipoTarifa": {
+          "titulo": "Tenha tipo e tarifa",
+          "texto": "Cada acomodação pede um tipo e uma tarifa, que se cadastram em Tipos e em Tarifas."
+        },
+        "acomodacao": {
+          "titulo": "Cadastre as acomodações",
+          "texto": "Com quantos animais cabem, o porte máximo e as espécies. Elas entram no mapa e nas reservas."
+        }
+      }
     },
     "bloco": {
       "novo": "Novo corredor",
@@ -13820,10 +14198,32 @@
       "pago": "pago {valor}",
       "semSinal": "Sem sinal",
       "pendenteHa": "pendente há {n} hora | pendente há {n} horas",
-      "vazio": "Nenhuma reserva de ontem em diante.",
       "vazioHistorico": "Nenhuma reserva com esse filtro.",
       "verMais": "Ver mais",
-      "erro": "Não foi possível carregar as reservas."
+      "erro": "Não foi possível carregar as reservas.",
+      "proximasVazio": {
+        "titulo": "Nenhuma reserva pela frente",
+        "texto": "A lista mostra as reservas de ontem em diante. As que já passaram ficam no Histórico."
+      },
+      "historicoVazio": {
+        "titulo": "Nenhuma reserva na casa ainda",
+        "texto": "O histórico mostra todas as reservas, também as encerradas, as canceladas e as de quem não compareceu."
+      },
+      "guia": {
+        "titulo": "Como uma reserva anda",
+        "entra": {
+          "titulo": "A reserva entra",
+          "texto": "Pela Nova reserva, no balcão, ou quando o hotel aceita um pedido do app ou do link."
+        },
+        "sinal": {
+          "titulo": "Confirma com o sinal",
+          "texto": "Fica pendente até o pagamento registrado cobrir o sinal. A pendente não vence sozinha."
+        },
+        "estadia": {
+          "titulo": "Check-in e check-out",
+          "texto": "No dia, o check-in põe o pet na casa. O check-out encerra a reserva, que fica no Histórico."
+        }
+      }
     },
     "grade": {
       "janela": "De {de} a {ate}",
@@ -14026,7 +14426,24 @@
       "porte": "Porte",
       "especie": "Espécie",
       "filtroDica": "Porte e espécie juntos procuram vaga sem o animal cadastrado. Em branco, mostra a situação de cada acomodação.",
-      "ver": "Ver o mapa"
+      "ver": "Ver o mapa",
+      "vazioTexto": "O mapa desenha as acomodações cadastradas na casa. Sem elas, não há vaga para mostrar.",
+      "montarCasa": "Montar a casa",
+      "guia": {
+        "titulo": "Como o mapa funciona",
+        "casa": {
+          "titulo": "A casa é montada",
+          "texto": "Em Acomodações, os corredores e as acomodações, com o porte e as espécies de cada uma."
+        },
+        "situacao": {
+          "titulo": "Cada uma mostra a situação",
+          "texto": "Livre, ocupada, reservada, em higienização ou fora de operação, no período escolhido."
+        },
+        "vaga": {
+          "titulo": "Procure vaga",
+          "texto": "Porte e espécie juntos mostram onde um animal cabe, mesmo antes do cadastro dele."
+        }
+      }
     },
     "status": {
       "CANCELADA": "Cancelada",
@@ -14160,6 +14577,28 @@
       "EXIGENCIAS": "Vacina ou documento",
       "PERFIL": "Não é o perfil da casa",
       "OUTRO": "Outro"
+    },
+    "guia": {
+      "titulo": "Como os pedidos chegam",
+      "pedir": {
+        "titulo": "O responsável pede",
+        "texto": "Pelo app ou pelo link do hotel, dá as datas e escolhe o tipo de acomodação ou deixa o hotel escolher."
+      },
+      "chegar": {
+        "titulo": "O pedido chega aqui",
+        "texto": "Com o prazo para responder, que só corre com o balcão aberto. O pedido ainda não segura vaga."
+      },
+      "responder": {
+        "titulo": "O balcão responde",
+        "texto": "Reserva numa acomodação livre ou recusa com uma mensagem. A resposta vai para o responsável."
+      },
+      "ligar": "Ligar a reserva online"
+    },
+    "vazioTexto": {
+      "PENDENTES": "Os pedidos de hospedagem que chegam pelo app e pelo link do hotel esperam aqui pela resposta do balcão.",
+      "ACEITOS": "Os pedidos aceitos ficam aqui, cada um com a reserva que nasceu dele.",
+      "RECUSADOS": "Os pedidos recusados ficam aqui, com o motivo que o responsável recebeu.",
+      "ENCERRADOS": "Ficam aqui os pedidos que perderam o prazo e os que o responsável desistiu de fazer."
     }
   },
   "estadiaDoHotel": {
@@ -14196,7 +14635,23 @@
       "saida": "sai {quando}",
       "tarefasAtrasadas": "{n} tarefa atrasada | {n} tarefas atrasadas",
       "vazio": "Ninguém hospedado agora.",
-      "erro": "Não foi possível carregar os hóspedes."
+      "erro": "Não foi possível carregar os hóspedes.",
+      "vazioTexto": "A lista mostra só quem está na casa agora, do check-in ao check-out.",
+      "guia": {
+        "titulo": "Como um hóspede chega aqui",
+        "reserva": {
+          "titulo": "A reserva é confirmada",
+          "texto": "Com o sinal coberto, ela espera o dia da entrada na lista de Reservas."
+        },
+        "checkin": {
+          "titulo": "O balcão faz o check-in",
+          "texto": "Na reserva, a partir do dia da entrada: peso, alimentação, remédios, autorizações e pertences."
+        },
+        "estadia": {
+          "titulo": "A estadia começa",
+          "texto": "O pet aparece aqui com a acomodação, a saída prevista e os alertas. A linha abre a estadia."
+        }
+      }
     },
     "alerta": {
       "ATRASADO": "Passou da saída",
@@ -14779,7 +15234,8 @@
       "vazio": "Nada no diário ainda.",
       "erro": "Não foi possível escrever no diário.",
       "erroAoCarregar": "Não foi possível carregar o diário.",
-      "erroFoto": "Não foi possível abrir a foto."
+      "erroFoto": "Não foi possível abrir a foto.",
+      "vazioTexto": "Refeições, passeios, sono e as ocorrências leves e moderadas da estadia aparecem aqui, da mais recente."
     },
     "ocorrencia": {
       "titulo": "Ocorrências",
@@ -14823,7 +15279,8 @@
       "registradaGrave": "Ocorrência grave registrada. Ligue para o responsável e registre a ligação.",
       "vazio": "Nenhuma ocorrência nesta estadia.",
       "erro": "Não foi possível registrar a ocorrência.",
-      "erroAoCarregar": "Não foi possível carregar as ocorrências."
+      "erroAoCarregar": "Não foi possível carregar as ocorrências.",
+      "vazioTexto": "O que fugir da rotina, como vômito, briga ou recusa alimentar, fica registrado aqui com a gravidade."
     },
     "ligacao": {
       "titulo": "Registrar a ligação",
@@ -14954,6 +15411,7 @@
       "h48": "Às 07:00, dia sim, dia não."
     },
     "fotoSempre": "Foto quando houver",
-    "fotoSempreDica": "Um desejo do responsável, nunca uma obrigação da casa."
+    "fotoSempreDica": "Um desejo do responsável, nunca uma obrigação da casa.",
+    "vazioTexto": "Os boletins ao responsável ficam aqui, os escritos pela equipe e os automáticos, com a entrega de cada um."
   }
 }

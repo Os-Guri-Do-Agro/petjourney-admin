@@ -19,6 +19,8 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
@@ -65,6 +67,24 @@ onMounted(() => void carregar())
 
 const ativos = computed(() => tipos.value.filter((tipo) => tipo.ativo))
 const inativos = computed(() => tipos.value.filter((tipo) => !tipo.ativo))
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem tipo nenhum, o que
+ * um tipo leva (nome e categoria, duração e salas) e onde ele aparece (ao marcar e no pedido
+ * online), e o "Novo tipo" embaixo para quem configura.
+ */
+const passosDosTipos = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'nome', icone: 'ph ph-tag' },
+    { id: 'duracao', icone: 'ph ph-clock' },
+    { id: 'marcar', icone: 'ph ph-calendar-plus' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`agenda.config.tipo.guia.${id}.titulo`),
+    texto: t(`agenda.config.tipo.guia.${id}.texto`),
+  })),
+)
 
 function resumo(tipo: TipoDeAtendimento) {
   const salas = tipo.salasCompativeis.length
@@ -245,9 +265,26 @@ async function mover(indice: number, passo: -1 | 1) {
       <li v-for="n in 3" :key="n" class="ui-linha"><Skeleton width="14rem" height="1rem" /></li>
     </ul>
 
-    <p v-else-if="!tipos.length" class="cfa__vazio">{{ t('agenda.config.tipo.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="!tipos.length && !erro"
+      aninhado
+      icone="ph ph-stethoscope"
+      :titulo="t('agenda.config.tipo.vazio')"
+      :texto="t('agenda.config.tipo.vazioTexto')"
+      :guia-titulo="t('agenda.config.tipo.guia.titulo')"
+      :passos="passosDosTipos"
+    >
+      <template v-if="props.podeEditar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('agenda.config.tipo.novo')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
-    <template v-else>
+    <template v-else-if="tipos.length">
       <ul class="ui-lista">
         <li v-for="(tipo, indice) in ativos" :key="tipo.id" class="ui-linha">
           <span class="ui-linha__texto">
@@ -474,12 +511,6 @@ async function mover(indice: number, passo: -1 | 1) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.cfa__vazio {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .cfa__subtitulo {

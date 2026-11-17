@@ -100,7 +100,11 @@ function criada(r: Reserva) {
         />
       </div>
 
-      <ListaDeReservas v-if="vista === 'lista'" />
+      <ListaDeReservas
+        v-if="vista === 'lista'"
+        :pode-reservar="reserva && Boolean(casa)"
+        @nova="nova()"
+      />
       <GradeDeReservas v-else-if="vista === 'grade'" />
       <EsperaDoHotel
         v-else

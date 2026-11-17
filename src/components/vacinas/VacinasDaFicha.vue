@@ -14,6 +14,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import AnularAplicacaoGaveta from '@/components/vacinas/AnularAplicacaoGaveta.vue'
 import AplicarVacinaGaveta from '@/components/vacinas/AplicarVacinaGaveta.vue'
 import DoseExternaGaveta from '@/components/vacinas/DoseExternaGaveta.vue'
@@ -286,7 +287,13 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
         </span>
       </li>
     </ul>
-    <p v-else-if="plano" class="vf__nota">{{ t('vacinas.plano.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="plano"
+      aninhado
+      icone="ph ph-syringe"
+      :titulo="t('vacinas.plano.vazio')"
+      :texto="t('vacinas.plano.vazioTexto')"
+    />
 
     <p v-if="plano?.truncado && plano.vacinasOmitidas" class="vf__nota">
       {{ t('vacinas.plano.eMais', { n: plano.vacinasOmitidas }) }}

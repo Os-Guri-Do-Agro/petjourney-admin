@@ -6,16 +6,24 @@
  */
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { KINDS_DO_LEITO, lerVagas, type Vagas } from '@/service/parceiro/internacao-service'
 
 import { ICONE_DO_KIND } from './rotulos-da-internacao'
 
 const { t } = useI18n()
-const { parceiroQuery } = useParceiroPortal()
+const router = useRouter()
+const { store, parceiroQuery } = useParceiroPortal()
+
+/* Quem cadastra (DONO, GESTOR) ou desativa leitos (veterinário, enfermagem), como no mapa. */
+const veLeitos = computed(
+  () => store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar'),
+)
 
 const vagas = ref<Vagas | null>(null)
 const carregando = ref(false)
@@ -43,8 +51,29 @@ const tipos = computed(() =>
   ),
 )
 
+/* Sem leito nenhum, a frase mora no vazio: o resumo não repete. */
+const semLeitos = computed(() => Boolean(vagas.value) && !tipos.value.length)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem leito nenhum, de onde as vagas vêm,
+ * em três etapas (o cadastro dos leitos, internar ocupa, a vaga aparece aqui), e o "Cadastrar
+ * leitos" para quem mexe nos leitos.
+ */
+const passosDasVagas = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'leitos', icone: 'ph ph-bed' },
+    { id: 'internar', icone: 'ph ph-first-aid-kit' },
+    { id: 'aparece', icone: 'ph ph-phone' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`internacao.vagas.guia.${id}.titulo`),
+    texto: t(`internacao.vagas.guia.${id}.texto`),
+  })),
+)
+
 const resumo = computed(() => {
-  if (!vagas.value) return ''
+  if (!vagas.value || semLeitos.value) return ''
   return vagas.value.livres
     ? t('internacao.vagas.resumo', { n: vagas.value.livres }, vagas.value.livres)
     : t('internacao.vagas.semVaga')
@@ -67,11 +96,19 @@ function meta(item: { ocupados: number; inativos: number }) {
     icone="ph ph-bed"
     :carregando="carregando && !vagas"
     :erro="vagas ? '' : erro"
+    :vazio="semLeitos"
+    :vazio-titulo="t('internacao.vazioTitulo')"
+    :vazio-descricao="veLeitos ? t('internacao.vazioDescricao') : t('internacao.vazioSemCadastro')"
+    :vazio-acao="veLeitos ? t('internacao.irParaLeitos') : ''"
+    vazio-icone="ph ph-bed"
+    :vazio-guia-titulo="t('internacao.vagas.guia.titulo')"
+    :vazio-passos="passosDasVagas"
     @tentar-de-novo="carregar"
+    @acao-do-vazio="router.push({ path: '/clinica/configuracao', query: { aba: 'leitos' } })"
   >
     <section v-if="vagas" class="ui-folha ui-lista" aria-labelledby="vagas-titulo">
       <h2 id="vagas-titulo" class="sr-only">{{ t('internacao.vagas.titulo') }}</h2>
-      <ul v-if="tipos.length" class="ui-lista">
+      <ul class="ui-lista">
         <li v-for="item in tipos" :key="item.kind" class="ui-linha">
           <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
             <i :class="ICONE_DO_KIND[item.kind]" />
@@ -91,7 +128,6 @@ function meta(item: { ocupados: number; inativos: number }) {
           </span>
         </li>
       </ul>
-      <p v-else class="ui-vazio">{{ t('internacao.vagas.semLeitos') }}</p>
     </section>
   </UiPagina>
 </template>

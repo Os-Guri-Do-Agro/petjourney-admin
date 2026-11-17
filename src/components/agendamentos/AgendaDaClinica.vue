@@ -20,7 +20,7 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AgendamentoGaveta from '@/components/agendamentos/AgendamentoGaveta.vue'
 import DesfazerNaAgenda from '@/components/agendamentos/DesfazerNaAgenda.vue'
@@ -43,6 +43,8 @@ import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/us
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { hojeNoFuso } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import {
@@ -250,18 +252,23 @@ const semanaNaTela = computed(() =>
 const tipos = ref<TipoDeAtendimento[]>([])
 const salas = ref<Sala[]>([])
 const equipe = ref<{ id: string; nome: string }[]>([])
+/** A equipe que atende na agenda foi lida de fato (a falha não conta como "ninguém"). */
+const equipeLida = ref(false)
 const passo = ref(15)
 
 async function carregarApoio() {
   const [listaDeTipos, listaDeSalas, listaDeProfissionais, politica] = await Promise.all([
     listarTipos(parceiroQuery()).catch(() => [] as TipoDeAtendimento[]),
     listarSalas(parceiroQuery()).catch(() => [] as Sala[]),
-    listarProfissionais({ ...parceiroQuery(), ativo: true, atendeNaAgenda: true }).catch(() => []),
+    listarProfissionais({ ...parceiroQuery(), ativo: true, atendeNaAgenda: true }).catch(
+      () => null,
+    ),
     obterPolitica(parceiroQuery()).catch(() => null),
   ])
   tipos.value = listaDeTipos
   salas.value = listaDeSalas
-  equipe.value = listaDeProfissionais.map((item) => ({ id: item.id, nome: item.nome }))
+  equipe.value = (listaDeProfissionais ?? []).map((item) => ({ id: item.id, nome: item.nome }))
+  equipeLida.value = listaDeProfissionais !== null
   if (politica?.granularidadeMinutos) passo.value = politica.granularidadeMinutos
 }
 
@@ -704,6 +711,30 @@ async function moverPelaGrade(movimento: Movimento, confirmar = false) {
 /* ------------------------------------------------------------------------------ avisos */
 
 const feriado = computed(() => diaNaTela.value?.feriado ?? null)
+
+/* ---------------------------------------------------------------------------- o vazio */
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem ninguém que atenda na agenda, todo
+ * dia fica sem coluna; aí o vazio mostra como a agenda se monta, em três etapas, e leva a
+ * Profissionais quem gere a equipe. Com equipe, o dia sem coluna é folga de todos: só o recado e
+ * o "Ver a semana".
+ */
+const semEquipeNaAgenda = computed(() => equipeLida.value && equipe.value.length === 0)
+const podeGerirEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
+
+const passosDaAgenda = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'equipe', icone: 'ph ph-user-plus' },
+    { id: 'expediente', icone: 'ph ph-clock' },
+    { id: 'marcar', icone: 'ph ph-calendar-plus' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`agendamentos.guia.${id}.titulo`),
+    texto: t(`agendamentos.guia.${id}.texto`),
+  })),
+)
 </script>
 
 <template>
@@ -889,21 +920,41 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
           <Skeleton height="24rem" />
         </div>
 
-        <div v-else-if="!diaNaTela.colunas.length" class="ui-folha ui-vazio ag__vazio">
-          <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
-            <i class="ph ph-moon" />
-          </span>
-          <h2>{{ t('agendamentos.vazio.titulo') }}</h2>
-          <p>{{ t('agendamentos.vazio.descricao') }}</p>
-          <Button
-            type="button"
-            severity="secondary"
-            outlined
-            icon="ph ph-calendar-blank"
-            :label="t('agendamentos.vazio.semana')"
-            @click="irPara({ visao: 'semana' })"
-          />
-        </div>
+        <UiVazioIlustrado
+          v-else-if="!diaNaTela.colunas.length && semEquipeNaAgenda"
+          icone="ph ph-users-three"
+          :titulo="t('agendamentos.guia.vazioTitulo')"
+          :texto="t('agendamentos.guia.vazioTexto')"
+          :guia-titulo="t('agendamentos.guia.titulo')"
+          :passos="passosDaAgenda"
+        >
+          <template v-if="podeGerirEquipe" #acao>
+            <Button
+              :as="RouterLink"
+              to="/parceiro/profissionais"
+              icon="ph ph-user-plus"
+              :label="t('agendamentos.guia.abrirProfissionais')"
+            />
+          </template>
+        </UiVazioIlustrado>
+
+        <UiVazioIlustrado
+          v-else-if="!diaNaTela.colunas.length"
+          icone="ph ph-moon"
+          :titulo="t('agendamentos.vazio.titulo')"
+          :texto="t('agendamentos.vazio.descricao')"
+        >
+          <template #acao>
+            <Button
+              type="button"
+              severity="secondary"
+              outlined
+              icon="ph ph-calendar-blank"
+              :label="t('agendamentos.vazio.semana')"
+              @click="irPara({ visao: 'semana' })"
+            />
+          </template>
+        </UiVazioIlustrado>
 
         <div
           v-else
@@ -1121,10 +1172,6 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
 
 .ag__folha--lendo {
   opacity: 0.7;
-}
-
-.ag__vazio .p-button {
-  justify-self: center;
 }
 
 .ag__turno {

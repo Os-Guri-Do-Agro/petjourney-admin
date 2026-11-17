@@ -9,6 +9,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { Gravidade } from '@/service/parceiro/internacao-service'
 import {
@@ -227,9 +228,13 @@ function desatualizada() {
         </ul>
       </li>
     </ul>
-    <p v-else-if="!carregando && !erro" class="ev__nota ev__vazio">
-      {{ t('internacao.evolucao.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-else-if="!carregando && !erro"
+      aninhado
+      icone="ph ph-notepad"
+      :titulo="t('internacao.evolucao.vazio')"
+      :texto="t('internacao.evolucao.vazioTexto')"
+    />
 
     <Button
       v-if="cursor"
@@ -258,11 +263,6 @@ function desatualizada() {
 .ev__nota {
   margin: 0;
   padding: 0 24px 12px;
-}
-
-.ev__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .ev__nome {

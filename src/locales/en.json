@@ -740,7 +740,8 @@
       "expandir": "Expand {modulo}",
       "tratamentos": "{total} critical treatment with dropping adherence | {total} critical treatments with dropping adherence",
       "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply",
-      "pedidosDeReserva": "{total} booking request awaiting a reply | {total} booking requests awaiting a reply"
+      "pedidosDeReserva": "{total} booking request awaiting a reply | {total} booking requests awaiting a reply",
+      "calmaTexto": "When something gets stuck in this space, it shows up here, most serious first."
     },
     "resumo": {
       "portal": "Track your earnings and share your code.",
@@ -905,7 +906,8 @@
       "posicao": "{atual} of {total}",
       "compromissoAnterior": "Previous appointment",
       "proximoCompromisso": "Next appointment",
-      "tituloSemana": "This week's schedule"
+      "tituloSemana": "This week's schedule",
+      "vazioTexto": "Appointments booked for this day show up here, by time."
     },
     "saudacao": {
       "manha": "Good morning",
@@ -1910,7 +1912,8 @@
       "lede": "Discounts for pet parents. They do not generate participation.",
       "empty": "No coupons right now.",
       "usos": "{n} uses",
-      "loadMore": "More coupons"
+      "loadMore": "More coupons",
+      "vazioTexto": "Discount coupons for pet parents show up here, with the code, the discount and how many times they were used."
     },
     "resgates": {
       "title": "Redemptions",
@@ -1918,7 +1921,8 @@
       "empty": "No redemptions yet.",
       "canalQr": "Via QR Code",
       "canalManual": "Manual code",
-      "loadMore": "More redemptions"
+      "loadMore": "More redemptions",
+      "vazioTexto": "Each coupon validated at the front desk, by QR or by code, shows up here with the discount and the day."
     },
     "terms": {
       "title": "The participation rules",
@@ -2565,6 +2569,21 @@
       "indisponivel": {
         "titulo": "List not available yet",
         "corpo": "This list is on its way. Please try again in a few days."
+      },
+      "guia": {
+        "titulo": "How the list fills up",
+        "codigo": {
+          "titulo": "They use your code",
+          "texto": "When signing up for PetJourney, they type your code or scan your QR."
+        },
+        "lista": {
+          "titulo": "Their name shows up here",
+          "texto": "With the day they joined and whether they have subscribed to a plan yet."
+        },
+        "situacao": {
+          "titulo": "The list keeps up",
+          "texto": "If they subscribe, cancel or delete their account, the list follows without you doing anything."
+        }
       }
     },
     "estabelecimento": {
@@ -2679,7 +2698,6 @@
         "umDia": "A holiday",
         "feriadosDe": "National holidays of {ano}",
         "adicionar": "Add holiday",
-        "vazio": "No holidays yet. Holidays and days with different hours go here and replace the weekly hours.",
         "remover": "Remove {nome}",
         "data": "Date",
         "faltaData": "Pick the date on the calendar.",
@@ -2697,7 +2715,9 @@
         "apagarVarios": "Delete several",
         "marcados": "{total} selected | {total} selected",
         "marcarPassados": "Select past days",
-        "apagarMarcados": "Delete | Delete {total} | Delete {total}"
+        "apagarMarcados": "Delete | Delete {total} | Delete {total}",
+        "vazioTitulo": "No holidays yet",
+        "vazioTexto": "Holidays and days with different hours go here and replace the weekly hours."
       },
       "mensagens": {
         "titulo": "Messages to pet parents"
@@ -2933,6 +2953,21 @@
         "diario_do_app": "the app diary",
         "trilha_clinica": "the audit log",
         "outro": "a record ({tipo})"
+      },
+      "guia": {
+        "titulo": "How the audit log works",
+        "acao": {
+          "titulo": "The team uses the records",
+          "texto": "Opening a file, writing a visit, printing, exporting or publishing to the app: each action becomes an event."
+        },
+        "anota": {
+          "titulo": "The portal logs it by itself",
+          "texto": "Who did it, when and on which record. Clinical content never goes in, only the field names."
+        },
+        "consulta": {
+          "titulo": "You check it here",
+          "texto": "Filter by action, person and period to find out who touched a record."
+        }
       }
     }
   },
@@ -4088,7 +4123,8 @@
         "avulsos": "No walk-in visits | 1 of them without a time on the schedule (walk-in) | {n} of them without a time on the schedule (walk-ins)",
         "diagnosticosSemPermissao": "Diagnoses show for whoever reads medical records.",
         "semDesfecho": "No appointments without an outcome | 1 appointment was left without an outcome (no arrival, no no-show) and stays out of attendance. | {n} appointments were left without an outcome (no arrival, no no-show) and stay out of attendance."
-      }
+      },
+      "semMovimentoTexto": "The numbers and charts show up once there are visits in the chosen period."
     },
     "bulario": {
       "titulo": "Drug formulary",
@@ -4254,6 +4290,22 @@
           "HEPATICO": "liver",
           "CARDIACO": "heart",
           "GASTRICO": "stomach"
+        },
+        "vazioTitulo": "No clinic medicines yet",
+        "guia": {
+          "titulo": "How the formulary works",
+          "acrescentar": {
+            "titulo": "The clinic adds",
+            "texto": "In the catalogue in Settings, with the active ingredient, the presentation and the dose for each species."
+          },
+          "buscar": {
+            "titulo": "Search as you remember",
+            "texto": "By name, active ingredient or indication, even with a typo."
+          },
+          "ficha": {
+            "titulo": "The details alongside",
+            "texto": "The dose for each species, the routes, the contraindications and the interactions, in one place."
+          }
         }
       }
     },
@@ -5365,7 +5417,22 @@
           "OBITO": "The summary stays in the clinic's record only."
         },
         "atendimentosDoPaciente": "{n} visit waiting | {n} visits waiting",
-        "ultimoEm": "Latest on {quando}"
+        "ultimoEm": "Latest on {quando}",
+        "guia": {
+          "titulo": "How activities work",
+          "prazo": {
+            "titulo": "Past the deadline, it comes in",
+            "texto": "An unanswered request, a no-show without contact, an overdue follow-up or vaccine become a row on the matching card."
+          },
+          "papel": {
+            "titulo": "Each person sees their own",
+            "texto": "The cards follow the role of whoever signs in: each says why, and each row brings the action."
+          },
+          "resolver": {
+            "titulo": "Done, it leaves",
+            "texto": "Once the request is answered, the follow-up booked or the contact recorded, the row leaves the card."
+          }
+        }
       }
     },
     "atalhos": {
@@ -7853,6 +7920,21 @@
       },
       "erros": {
         "carregar": "Could not load the shared history."
+      },
+      "guia": {
+        "titulo": "How the history arrives",
+        "escolher": {
+          "titulo": "The pet parent chooses",
+          "texto": "In the app, they decide what the clinic sees, like vaccines, allergies and weight, and until when."
+        },
+        "codigo": {
+          "titulo": "The code works once",
+          "texto": "For the first clinic that receives it. A pet that is not a patient yet gets a file with the history."
+        },
+        "valer": {
+          "titulo": "It stays in Active",
+          "texto": "Until the deadline ends or the pet parent ends it in the app. Then it moves to Ended."
+        }
       }
     }
   },
@@ -8638,7 +8720,11 @@
         "estadia": "Stay",
         "reserva": "Booking"
       },
-      "movimentoDoDia": "Today's movements"
+      "movimentoDoDia": "Today's movements",
+      "guiaTitulo": "The guest's path through the house",
+      "semChegadasTexto": "Bookings arriving today show up here, with the paperwork and the check-in.",
+      "naCasaVaziaTexto": "After check-in, each guest shows up here with what needs attention now.",
+      "semSaidasTexto": "Guests due to leave today show up here, with what is still missing for check-out."
     },
     "planoDaEstadia": {
       "desde": "since {data}",
@@ -9990,7 +10076,23 @@
       "erro": "Could not load the patients.",
       "importar": "Import spreadsheet",
       "importacaoParada": "An import is paused or stopped halfway. | {n} imports are paused or stopped halfway.",
-      "verImportacao": "See the import"
+      "verImportacao": "See the import",
+      "guia": {
+        "titulo": "How registration works",
+        "passos": {
+          "titulo": "One step at a time",
+          "texto": "Who is responsible for the pet, then the pet and, last, the details, which are optional."
+        },
+        "importar": {
+          "titulo": "Or bring your old base",
+          "texto": "The account owner or a manager imports the spreadsheet from the previous system, in .csv or .xlsx."
+        },
+        "buscar": {
+          "titulo": "Find it by search",
+          "texto": "By the pet's or the guardian's name, phone, CPF or microchip. Each row opens the file."
+        },
+        "inativosTexto": "A patient made inactive or with a recorded death leaves the active list and stays here, with the file."
+      }
     },
     "campos": {
       "nome": "Pet's name",
@@ -10309,7 +10411,24 @@
       "abrir": "Open record",
       "resolver": "Mark as resolved",
       "resolvido": "Request resolved",
-      "semPaciente": "We couldn't find a patient for this guardian. Search in Patients."
+      "semPaciente": "We couldn't find a patient for this guardian. Search in Patients.",
+      "guia": {
+        "titulo": "How a correction arrives",
+        "texto": "Requests owners make in the app wait here until the front desk corrects them.",
+        "pedir": {
+          "titulo": "The owner asks in the app",
+          "texto": "They write, in their own words, what is wrong in the record the clinic has."
+        },
+        "corrigir": {
+          "titulo": "The front desk corrects",
+          "texto": "Open record takes you to one of their patients' files, where the owner's details are edited."
+        },
+        "resolver": {
+          "titulo": "Mark as resolved",
+          "texto": "The request leaves the open ones and stays in Resolved, with the date, as history."
+        },
+        "resolvidosTexto": "Requests marked as resolved stay here, with the date, as history."
+      }
     },
     "porAcesso": {
       "botao": "Link to the record",
@@ -10369,6 +10488,22 @@
           "BANHO": "Grooming",
           "INTERNACAO": "Inpatient",
           "EXAME": "Diagnostics"
+        },
+        "vazioTexto": "Add where the clinic works: rooms organize the schedule and take the appointment types.",
+        "guia": {
+          "titulo": "How rooms work",
+          "tipo": {
+            "titulo": "Each room has a type",
+            "texto": "Exam room, operating room, grooming, inpatient or diagnostics: the type says what happens in it."
+          },
+          "colunas": {
+            "titulo": "They become schedule columns",
+            "texto": "Each active room is a column in the schedule, in the order of this list."
+          },
+          "atendimentos": {
+            "titulo": "Appointments use the rooms",
+            "texto": "Each appointment type says which rooms it happens in. The inpatient room also holds the beds."
+          }
         }
       },
       "tipo": {
@@ -10404,6 +10539,22 @@
           "CIRURGIA": "Surgery",
           "BANHO": "Grooming",
           "EMERGENCIA": "Emergency"
+        },
+        "vazioTexto": "Types say what the clinic offers and how much time each appointment takes in the schedule.",
+        "guia": {
+          "titulo": "How types work",
+          "nome": {
+            "titulo": "Name and category",
+            "texto": "The name is the clinic's, like Feline check-up. The category says what it is: consultation, vaccine, surgery."
+          },
+          "duracao": {
+            "titulo": "Duration and rooms",
+            "texto": "In 5-minute steps, in the compatible rooms. With no room selected, any room works."
+          },
+          "marcar": {
+            "titulo": "The front desk books",
+            "texto": "When booking, the type already brings its duration. If marked online, it can also be requested on the clinic's page."
+          }
         }
       },
       "politica": {
@@ -10529,7 +10680,8 @@
         "tirarDiaTexto": "Remove the block on {dia}? The other days stay.",
         "tirarEsteDia": "Remove this day",
         "diaTirado": "This day was removed from the block",
-        "apagarSerieTexto": "Delete this weekly block? It leaves every day."
+        "apagarSerieTexto": "Delete this weekly block? It leaves every day.",
+        "vazioTexto": "Blocks for the coming weeks show here, by day. A weekly block shows once, with its days."
       },
       "expediente": {
         "titulo": "Working hours: {nome}",
@@ -10821,7 +10973,6 @@
     "semCanalCurto": "no app channel: call",
     "semCanalLigue": "No app channel: call the owner and record the yes or no on the list.",
     "semNaoResponderam": "No unanswered offers in the last 7 days",
-    "semVagas": "No freed slots that fit someone on the list in the next 14 days.",
     "servico": "Service",
     "situacaoRotulo": "Which entries to show",
     "situacoes": {
@@ -10854,7 +11005,9 @@
         "texto": "The owner confirms within the deadline and the time goes into the schedule. With no answer, the slot goes back to the clinic."
       }
     },
-    "semNaoResponderamTexto": "Offers that expired unanswered in the last 7 days stay here, for the front desk to call."
+    "semNaoResponderamTexto": "Offers that expired unanswered in the last 7 days stay here, for the front desk to call.",
+    "semVagasTitulo": "No slots to offer",
+    "semVagasTexto": "When a time in the next 14 days frees up and someone on the list fits it, the slot shows up here."
   },
   "importacao": {
     "erroAoCarregar": "The import could not be loaded.",
@@ -11311,6 +11464,24 @@
       "fotoIndisponivel": "Photo unavailable right now",
       "recorte": "The rest is for whoever reads the medical record.",
       "observacao": "Anything else, in the owner's words"
+    },
+    "guia": {
+      "titulo": "How the schedule is built",
+      "vazioTitulo": "No one is on the schedule yet",
+      "vazioTexto": "The schedule opens a column for each professional who works on it. With no one set up, every day stays empty.",
+      "equipe": {
+        "titulo": "Add who sees patients",
+        "texto": "In Team, on the Professionals tab, with On the schedule turned on in each person's file."
+      },
+      "expediente": {
+        "titulo": "Each one on their own hours",
+        "texto": "The column follows the clinic hours or each person's own working hours, also in Professionals."
+      },
+      "marcar": {
+        "titulo": "The front desk books",
+        "texto": "Click a free time in the column or use Book appointment, at the top of the schedule."
+      },
+      "abrirProfissionais": "Open Professionals"
     }
   },
   "faltas": {
@@ -11433,6 +11604,26 @@
       "voltou": "Came back on {dia}",
       "registros": "{n} record | {n} records",
       "voltar": "Back to the no-shows"
+    },
+    "guia": {
+      "titulo": "How no-shows work",
+      "marcar": {
+        "titulo": "The no-show comes from the schedule",
+        "texto": "On the time of whoever didn't come, or with Close the shift, which marks everyone who didn't arrive at once."
+      },
+      "reincidir": {
+        "titulo": "Repeats get flagged",
+        "texto": "Whoever missed {n} times or more in the last 12 months shows up in Repeat no-shows."
+      },
+      "contato": {
+        "titulo": "The front desk records the contact",
+        "texto": "Open the row to note the talk with the owner and rebook, if they want to come back."
+      },
+      "abrirAgenda": "Open the schedule"
+    },
+    "vazioTexto": {
+      "pendentes": "A no-show with no contact recorded stays here until the front desk notes the talk with the owner.",
+      "todas": "No-shows from the last 12 months stay here, by owner and patient."
     }
   },
   "catalogo": {
@@ -11444,25 +11635,29 @@
         "titulo": "Clinic medicines",
         "descricao": "They show in the formulary and the prescription marked as from the clinic.",
         "novo": "New medicine",
-        "vazio": "The clinic has not added medicines yet."
+        "vazio": "The clinic has not added medicines yet.",
+        "vazioTexto": "Compounded and imported medicines, and what the formulary lacks, go here, with the dose for each species."
       },
       "vacinas": {
         "titulo": "Clinic vaccines",
         "descricao": "With the series protocol: the API works out the vaccination plan.",
         "novo": "New vaccine",
-        "vazio": "The clinic has not added vaccines yet."
+        "vazio": "The clinic has not added vaccines yet.",
+        "vazioTexto": "An imported vaccine, or one missing from the catalogue, goes here, with the species and the series protocol."
       },
       "exames": {
         "titulo": "Clinic tests",
         "descricao": "The partner lab's tests and the clinic's own.",
         "novo": "New test",
-        "vazio": "The clinic has not added tests yet."
+        "vazio": "The clinic has not added tests yet.",
+        "vazioTexto": "The partner lab's tests and the ones the clinic runs go here, by group."
       },
       "diagnosticos": {
         "titulo": "Clinic diagnoses",
         "descricao": "Own codes, next to PetJourney's.",
         "novo": "New diagnosis",
-        "vazio": "The clinic has not added diagnoses yet."
+        "vazio": "The clinic has not added diagnoses yet.",
+        "vazioTexto": "The clinic's own codes go here and show next to PetJourney's."
       }
     },
     "erro": {
@@ -11612,7 +11807,8 @@
       "aplicar": "Give",
       "vazio": "No vaccines in this patient's plan.",
       "eMais": "and {n} more vaccines up to date",
-      "opcionais": "Optional, not started ({n})"
+      "opcionais": "Optional, not started ({n})",
+      "vazioTexto": "The plan is built from the catalogue vaccines for the patient's species, with the dose due and the next one."
     },
     "historico": {
       "titulo": "History ({n})",
@@ -11743,7 +11939,8 @@
       "externa": "elsewhere",
       "anulada": "voided",
       "vazio": "No applications in this period.",
-      "resumo": "What the clinic gave, with the batch and who gave it."
+      "resumo": "What the clinic gave, with the batch and who gave it.",
+      "vazioTexto": "Every dose the clinic records shows here, with the batch and who gave it. Voided ones are struck through."
     },
     "lembrete": {
       "ativar": "Turn on reminder",
@@ -11850,7 +12047,25 @@
       "resumoFiltro": "Most recent first.",
       "vazioTitulo": "No consultations here",
       "vazioDica": "A consultation starts with Start in the schedule or, outside it, from the patient file.",
-      "verMais": "Show more"
+      "verMais": "Show more",
+      "vazioStatus": {
+        "RASCUNHO": {
+          "titulo": "No open drafts",
+          "texto": "A consultation started and not yet finalized stays here, oldest first."
+        },
+        "FINALIZADO": {
+          "titulo": "No finalized consultations",
+          "texto": "Finalized consultations stay here, most recent first, by consultation day."
+        },
+        "ANULADO": {
+          "titulo": "No voided consultations",
+          "texto": "A consultation finalized and then voided stays here, for reference."
+        }
+      },
+      "vazioMeus": {
+        "titulo": "None of your consultations yet",
+        "texto": "Only consultations where you are the vet show up here. Turn off Only mine to see the whole clinic."
+      }
     },
     "linha": {
       "titulo": "Clinical history",
@@ -11908,7 +12123,24 @@
       "tipoDoVet": "Chosen by the vet.",
       "comQuem": "With",
       "horarios": "Free times",
-      "semSugestao": "No free time in this period."
+      "semSugestao": "No free time in this period.",
+      "guia": {
+        "titulo": "How a follow-up gets here",
+        "texto": "A follow-up the vet asked for that has no time on the schedule yet shows up here.",
+        "indicar": {
+          "titulo": "The vet asks for it",
+          "texto": "In the consultation plan, with the days until the visit and, if they want, the type."
+        },
+        "esperar": {
+          "titulo": "No time, it waits here",
+          "texto": "With the due date counted from the consultation. It comes back if the time is cancelled or becomes a no-show."
+        },
+        "marcar": {
+          "titulo": "The front desk books",
+          "texto": "Book puts it in the first free time of whoever saw the patient. With no slot, add it to the waitlist."
+        },
+        "vencidosTexto": "A follow-up past its due date with no time shows up here, for the front desk to book."
+      }
     },
     "anamnese": {
       "descricao": "In the order of the conversation. The complaint is what finalizing requires.",
@@ -12390,6 +12622,20 @@
       "adendoTitulo": "Forgot something?",
       "adendoAcao": "Write an addendum",
       "ficar": "Stay on the visit"
+    },
+    "guia": {
+      "titulo": "How a consultation works",
+      "texto": "The clinic's records live here: drafts to finalize and records already closed.",
+      "iniciar": "It starts in the schedule",
+      "registrar": {
+        "titulo": "The vet records",
+        "texto": "History, physical exam, diagnosis, plan and prescription, each part saved on its own while they write."
+      },
+      "finalizar": {
+        "titulo": "Finalizing closes the record",
+        "texto": "The draft becomes a record. The summary reaches the owner only after it is released."
+      },
+      "abrirAgenda": "Open the schedule"
     }
   },
   "adesao": {
@@ -12438,6 +12684,22 @@
     },
     "resumo": {
       "indisponivel": "Unavailable right now."
+    },
+    "guia": {
+      "titulo": "How home treatment works",
+      "texto": "Critical medications with skipped doses or falling records in the app stay here.",
+      "doses": {
+        "titulo": "Home records the doses",
+        "texto": "The owner sets up the prescription reminders in the app and marks each dose given or skipped."
+      },
+      "critico": {
+        "titulo": "The clinic marks it critical",
+        "texto": "In the patient file, turn on Critical for the medication that cannot be missed."
+      },
+      "alerta": {
+        "titulo": "The drop shows up here",
+        "texto": "Doses skipped within 3 days or falling records on a critical one enter this list, for the team to talk to the family."
+      }
     }
   },
   "documentos": {
@@ -12733,6 +12995,23 @@
       "erro": "Could not record the request.",
       "feito": "Request recorded.",
       "jaExistia": "There was already an open request for this patient and period: it is the same one."
+    },
+    "guia": {
+      "titulo": "How a copy works",
+      "texto": "When someone asks for a copy of a patient's record, the request stays here until it is handed over.",
+      "pedir": {
+        "titulo": "The request arrives",
+        "texto": "In the app, when the owner asks, or at the front desk, with Record request. The deadline is 5 business days."
+      },
+      "gerar": {
+        "titulo": "The clinic generates the copy",
+        "texto": "Generate builds the PDF of the record in a few seconds, and it is kept for 7 days."
+      },
+      "entregar": {
+        "titulo": "Hand over and close",
+        "texto": "Download and hand it over at the front desk. If the owner downloads it in the app, the handover is recorded automatically."
+      },
+      "encerradosTexto": "Requests handed over, declined or closed stay here, with nothing left to do."
     }
   },
   "internacao": {
@@ -12842,7 +13121,22 @@
       "semVaga": "No free beds right now.",
       "ocupados": "{n} taken | {n} taken",
       "inativos": "{n} out of service | {n} out of service",
-      "semLeitos": "The clinic has not added beds yet."
+      "semLeitos": "The clinic has not added beds yet.",
+      "guia": {
+        "titulo": "How vacancies work",
+        "leitos": {
+          "titulo": "The clinic adds the beds",
+          "texto": "In Settings, each bed with its type: general, feline, isolation or ICU."
+        },
+        "internar": {
+          "titulo": "Admitting takes the bed",
+          "texto": "While the patient is admitted, the bed leaves the vacancies. A bed out of service leaves too."
+        },
+        "aparece": {
+          "titulo": "The vacancy shows here",
+          "texto": "Each bed type with how many are free, to answer the phone when someone asks if there is room."
+        }
+      }
     },
     "leitos": {
       "titulo": "Beds",
@@ -12876,6 +13170,21 @@
         "REFORMA": "Renovation",
         "EQUIPAMENTO": "Equipment",
         "OUTRO": "Other reason"
+      },
+      "guia": {
+        "titulo": "How beds work",
+        "sala": {
+          "titulo": "A ward room",
+          "texto": "A bed lives in a room of type Inpatient, created in the Rooms tab of this screen."
+        },
+        "leito": {
+          "titulo": "Add the bed",
+          "texto": "With the name the team uses on the ward and its type: general, feline, isolation or ICU."
+        },
+        "mapa": {
+          "titulo": "It goes on the map",
+          "texto": "Each bed becomes a spot on the ward map. A bed out of service leaves the vacancy count."
+        }
       }
     },
     "internar": {
@@ -12993,7 +13302,8 @@
       "vazioPlantao": "No doses in this shift.",
       "truncado": "There are more doses than fit here: open the hospitalization for a shorter window.",
       "foraDaLista": "{n} older overdue dose is not on the list: open the hospitalization. | {n} older overdue doses are not on the list: open the hospitalization.",
-      "erro": "Could not load the checklist."
+      "erro": "Could not load the checklist.",
+      "vazioTexto": "Doses show up here when the patient has medication prescribed for a time within this window."
     },
     "dose": {
       "item": "Item",
@@ -13106,7 +13416,8 @@
         "ALIMENTACAO": "E.g. wet food, 1/3 of the can",
         "MONITORAMENTO": "E.g. temperature and heart rate",
         "PROCEDIMENTO": "E.g. clean the IV line"
-      }
+      },
+      "vazioTexto": "Each prescribed medication shows here with its dose and frequency, and becomes timed doses in the checklist."
     },
     "evolucao": {
       "titulo": "Progress notes",
@@ -13131,7 +13442,8 @@
       "versao": "Written by {quem} on {quando}, replaced by {por}",
       "desatualizada": "The hospitalization changed while you were writing. Open it again to see the current version.",
       "erro": "Could not save the progress note.",
-      "erroAoCarregar": "Could not load the progress notes."
+      "erroAoCarregar": "Could not load the progress notes.",
+      "vazioTexto": "Each shift's progress note shows here, newest first. The open shift's note can be rewritten; a handed-over one is frozen."
     },
     "plantao": {
       "titulo": "Shift",
@@ -13281,6 +13593,38 @@
         "SUPERADO": "Superseded before going out.",
         "FORA_DO_PRAZO": "Out of time: it did not go out.",
         "FALHOU": "Sending failed."
+      },
+      "guiaFila": {
+        "titulo": "How the queue works",
+        "piora": {
+          "titulo": "Worsening needs a call",
+          "texto": "When an inpatient worsens or arrives critical, the update waits until someone at the clinic calls."
+        },
+        "ligar": {
+          "titulo": "The front desk calls and records",
+          "texto": "Using the phone on record. Record here who called: with no app, the call already closes it."
+        },
+        "enviar": {
+          "titulo": "The update goes to the app",
+          "texto": "Once the call is made, the ready update shows here to send to the owner."
+        }
+      },
+      "filaVaziaTexto": "Inpatients with a call to make or an update to send show here, in order of admission and with no clinical text.",
+      "vazioTexto": "Updates to the owner show here, newest first: the ones the team writes and the automatic ones."
+    },
+    "guia": {
+      "titulo": "How the ward works",
+      "leitos": {
+        "titulo": "Add the beds",
+        "texto": "In Settings, each bed in a ward room, with its type and the name the team uses."
+      },
+      "internar": {
+        "titulo": "Admit into a free bed",
+        "texto": "On the map, a free bed opens the admission, with the patient, the reason, the severity and the admission weight."
+      },
+      "acompanhar": {
+        "titulo": "The map shows who needs you",
+        "texto": "Overdue doses, updates waiting for a call and overdue discharges show at the top, most urgent first."
       }
     }
   },
@@ -13406,7 +13750,8 @@
       "vazio": "No movements in this period.",
       "verMais": "Show more",
       "erro": "Could not load the movements.",
-      "erroEstorno": "Could not reverse."
+      "erroEstorno": "Could not reverse.",
+      "vazioTexto": "Every lot received and every write-off shows here, with who recorded it. Vaccine applications have their own list."
     },
     "analise": {
       "periodo": "Analysis period",
@@ -13481,7 +13826,8 @@
       "historicoTruncado": "The oldest months were left out.",
       "erro": "Couldn't load the targets.",
       "salvas": "{mes} targets agreed.",
-      "limpas": "The {mes} targets were cleared."
+      "limpas": "The {mes} targets were cleared.",
+      "semPlanoAtualTexto": "Once targets are agreed, each one shows here against today's pace, until the month ends."
     },
     "pedido": {
       "titulo": "Purchase order for {mes}",
@@ -13528,6 +13874,22 @@
       "vazio": "No targets: saving clears the {mes} targets.",
       "erro": "Couldn't save the targets.",
       "erroSugestao": "The suggestion didn't load; you can still set the targets."
+    },
+    "vazioTitulo": "No vaccines in the fridge",
+    "guia": {
+      "titulo": "How the stock works",
+      "receber": {
+        "titulo": "Receive the lot",
+        "texto": "With the vial code, the expiry date and the doses. The lot goes into the fridge with its balance."
+      },
+      "aplicar": {
+        "titulo": "Giving a dose writes it off",
+        "texto": "When a vaccine is given from a stock lot, the dose leaves the balance right away."
+      },
+      "avisar": {
+        "titulo": "The minimum warns",
+        "texto": "Below the minimum, the fridge and the menu warn. An expired lot asks to be disposed of."
+      }
     }
   },
   "casaDoHotel": {
@@ -13557,7 +13919,6 @@
       "ocupada": "Taken",
       "desativar": "Take out of service",
       "reativar": "Put back in service",
-      "vazio": "The house has no aisles yet. Start with an aisle and add the accommodations inside it.",
       "semAcomodacao": "No accommodation in this aisle.",
       "foraDeOperacao": "Out of service",
       "desde": "{motivo} since {data}",
@@ -13568,7 +13929,24 @@
       "apagarDe": "Delete {nome}",
       "noLimite": "The house reached the limit of {limite} accommodations.",
       "blocosNoLimite": "The house reached the limit of {limite} aisles.",
-      "antes": "To add an accommodation, the house needs an aisle, a type and a rate."
+      "antes": "To add an accommodation, the house needs an aisle, a type and a rate.",
+      "vazioTitulo": "The house has no aisles yet",
+      "vazioTexto": "Accommodations live inside aisles. Once the house is set up, the map and bookings start working.",
+      "guia": {
+        "titulo": "How to set up the house",
+        "corredor": {
+          "titulo": "Create an aisle",
+          "texto": "The aisle groups the rooms, and the order of the aisles is the order of the house on the map."
+        },
+        "tipoTarifa": {
+          "titulo": "Have a type and a rate",
+          "texto": "Each room needs a type and a rate, which you add under Types and Rates."
+        },
+        "acomodacao": {
+          "titulo": "Add the rooms",
+          "texto": "With how many animals fit, the largest size and the species. They show up on the map and in bookings."
+        }
+      }
     },
     "bloco": {
       "novo": "New aisle",
@@ -13820,10 +14198,32 @@
       "pago": "paid {valor}",
       "semSinal": "No deposit",
       "pendenteHa": "pending for {n} hour | pending for {n} hours",
-      "vazio": "No bookings from yesterday on.",
       "vazioHistorico": "No bookings with this filter.",
       "verMais": "See more",
-      "erro": "Couldn't load the bookings."
+      "erro": "Couldn't load the bookings.",
+      "proximasVazio": {
+        "titulo": "No upcoming bookings",
+        "texto": "The list shows bookings from yesterday on. Past ones stay in History."
+      },
+      "historicoVazio": {
+        "titulo": "No bookings in the house yet",
+        "texto": "History shows every booking, including closed, cancelled and no-show ones."
+      },
+      "guia": {
+        "titulo": "How a booking moves",
+        "entra": {
+          "titulo": "The booking comes in",
+          "texto": "Through New booking at the desk, or when the hotel accepts a request from the app or the link."
+        },
+        "sinal": {
+          "titulo": "The deposit confirms it",
+          "texto": "It stays pending until the recorded payment covers the deposit. Pending bookings don't expire on their own."
+        },
+        "estadia": {
+          "titulo": "Check-in and check-out",
+          "texto": "On the day, check-in brings the pet into the house. Check-out closes the booking, which stays in History."
+        }
+      }
     },
     "grade": {
       "janela": "From {de} to {ate}",
@@ -14026,7 +14426,24 @@
       "porte": "Size",
       "especie": "Species",
       "filtroDica": "Size and species together look for a spot without a registered animal. Left blank, it shows the status of each accommodation.",
-      "ver": "See the map"
+      "ver": "See the map",
+      "vazioTexto": "The map draws the accommodations registered in the house. Without them, there is no spot to show.",
+      "montarCasa": "Set up the house",
+      "guia": {
+        "titulo": "How the map works",
+        "casa": {
+          "titulo": "The house is set up",
+          "texto": "Under Accommodation, the aisles and the rooms, with the size and species each one takes."
+        },
+        "situacao": {
+          "titulo": "Each one shows its status",
+          "texto": "Free, taken, booked, being cleaned or out of service, in the chosen period."
+        },
+        "vaga": {
+          "titulo": "Look for a spot",
+          "texto": "Size and species together show where an animal fits, even before it is registered."
+        }
+      }
     },
     "status": {
       "CANCELADA": "Cancelled",
@@ -14160,6 +14577,28 @@
       "EXIGENCIAS": "Vaccine or paperwork",
       "PERFIL": "Not the right fit for us",
       "OUTRO": "Other"
+    },
+    "guia": {
+      "titulo": "How requests arrive",
+      "pedir": {
+        "titulo": "The pet parent asks",
+        "texto": "In the app or through the hotel link, they give the dates and pick a room type or let the hotel choose."
+      },
+      "chegar": {
+        "titulo": "The request lands here",
+        "texto": "With a reply deadline that only runs while the desk is open. The request doesn't hold a room yet."
+      },
+      "responder": {
+        "titulo": "The desk replies",
+        "texto": "Book a free room or decline with a message. The reply goes to the pet parent."
+      },
+      "ligar": "Turn on online booking"
+    },
+    "vazioTexto": {
+      "PENDENTES": "Stay requests that come in through the app and the hotel link wait here for the desk to reply.",
+      "ACEITOS": "Accepted requests stay here, each with the booking it became.",
+      "RECUSADOS": "Declined requests stay here, with the reason the pet parent received.",
+      "ENCERRADOS": "Requests that missed the deadline and those the pet parent withdrew stay here."
     }
   },
   "estadiaDoHotel": {
@@ -14196,7 +14635,23 @@
       "saida": "leaves {quando}",
       "tarefasAtrasadas": "{n} task overdue | {n} tasks overdue",
       "vazio": "No one staying right now.",
-      "erro": "Couldn't load the guests."
+      "erro": "Couldn't load the guests.",
+      "vazioTexto": "The list only shows who is in the house right now, from check-in to check-out.",
+      "guia": {
+        "titulo": "How a guest gets here",
+        "reserva": {
+          "titulo": "The booking is confirmed",
+          "texto": "With the deposit covered, it waits for the arrival day in the Bookings list."
+        },
+        "checkin": {
+          "titulo": "The desk checks the pet in",
+          "texto": "From the booking, starting on the arrival day: weight, feeding, medicines, permissions and belongings."
+        },
+        "estadia": {
+          "titulo": "The stay begins",
+          "texto": "The pet shows up here with the room, the expected departure and the alerts. The row opens the stay."
+        }
+      }
     },
     "alerta": {
       "ATRASADO": "Past check-out",
@@ -14779,7 +15234,8 @@
       "vazio": "Nothing in the diary yet.",
       "erro": "Could not write in the diary.",
       "erroAoCarregar": "Could not load the diary.",
-      "erroFoto": "Could not open the photo."
+      "erroFoto": "Could not open the photo.",
+      "vazioTexto": "Meals, walks, sleep and the minor and moderate incidents of the stay show up here, newest first."
     },
     "ocorrencia": {
       "titulo": "Incidents",
@@ -14823,7 +15279,8 @@
       "registradaGrave": "Serious incident recorded. Call the owner and record the call.",
       "vazio": "No incidents in this stay.",
       "erro": "Could not record the incident.",
-      "erroAoCarregar": "Could not load the incidents."
+      "erroAoCarregar": "Could not load the incidents.",
+      "vazioTexto": "Anything off routine, like vomiting, a fight or refused food, is recorded here with its severity."
     },
     "ligacao": {
       "titulo": "Record the call",
@@ -14954,6 +15411,7 @@
       "h48": "At 07:00, every other day."
     },
     "fotoSempre": "Photo when available",
-    "fotoSempreDica": "The owner's wish, never an obligation of the house."
+    "fotoSempreDica": "The owner's wish, never an obligation of the house.",
+    "vazioTexto": "Updates to the owner stay here, the ones written by the team and the automatic ones, with the delivery of each."
   }
 }

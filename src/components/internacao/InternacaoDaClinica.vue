@@ -20,6 +20,7 @@ import { useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import type { LinhaDaTabela } from '@/components/home/pauta-tabela'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiPauta from '@/components/ui/UiPauta.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -185,6 +186,24 @@ function vagasDo(setor: Setor) {
 
 const vazio = computed(() => Boolean(mapa.value) && !mapa.value!.leitos.length)
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem leito nenhum, como a internação
+ * trabalha, em três etapas (o cadastro dos leitos, internar no livre, o mapa que aponta quem
+ * precisa), e o "Cadastrar leitos" para quem cadastra.
+ */
+const passosDaInternacao = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'leitos', icone: 'ph ph-bed' },
+    { id: 'internar', icone: 'ph ph-first-aid-kit' },
+    { id: 'acompanhar', icone: 'ph ph-bell-ringing' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`internacao.guia.${id}.titulo`),
+    texto: t(`internacao.guia.${id}.texto`),
+  })),
+)
+
 /* ----------------------------------------------------------------------- internar */
 
 const internarAberta = ref(false)
@@ -227,6 +246,8 @@ function abrir(id: string) {
     :vazio-descricao="veLeitos ? t('internacao.vazioDescricao') : t('internacao.vazioSemCadastro')"
     :vazio-acao="veLeitos ? t('internacao.irParaLeitos') : ''"
     vazio-icone="ph ph-bed"
+    :vazio-guia-titulo="t('internacao.guia.titulo')"
+    :vazio-passos="passosDaInternacao"
     @tentar-de-novo="carregar"
     @acao-do-vazio="router.push({ path: '/clinica/configuracao', query: { aba: 'leitos' } })"
   >

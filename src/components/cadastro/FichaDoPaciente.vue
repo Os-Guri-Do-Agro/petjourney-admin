@@ -43,6 +43,7 @@ import DocumentosDoPaciente from '@/components/documentos/DocumentosDoPaciente.v
 import VacinasDaFicha from '@/components/vacinas/VacinasDaFicha.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { ApiError } from '@/service/api'
@@ -557,17 +558,23 @@ watch(excluindo, (aberta) => {
       />
     </template>
 
-    <div v-if="semAcesso" class="ui-vazio fp__sem-acesso">
-      <i class="ph ph-lock" aria-hidden="true" />
-      <strong>{{ t('cadastro.ficha.semAcesso') }}</strong>
-      <span>{{ t('cadastro.ficha.semAcessoDica') }}</span>
-      <RouterLink
-        class="p-button p-component p-button-secondary p-button-outlined"
-        to="/clinica/pacientes"
-      >
-        {{ t('cadastro.ficha.voltarParaLista') }}
-      </RouterLink>
-    </div>
+    <UiVazioIlustrado
+      v-if="semAcesso"
+      icone="ph ph-lock"
+      :titulo="t('cadastro.ficha.semAcesso')"
+      :texto="t('cadastro.ficha.semAcessoDica')"
+    >
+      <template #acao>
+        <Button
+          :as="RouterLink"
+          to="/clinica/pacientes"
+          severity="secondary"
+          outlined
+          icon="ph ph-arrow-left"
+          :label="t('cadastro.ficha.voltarParaLista')"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <div v-else-if="paciente" class="fp">
       <p v-if="paciente.mescladoEmId" class="fp__faixa" role="status">
@@ -1121,17 +1128,6 @@ watch(excluindo, (aberta) => {
   background: var(--superficie-2);
   color: var(--tinta);
   font-size: 14px;
-}
-
-.fp__sem-acesso {
-  justify-items: center;
-  padding: 48px 16px;
-  text-align: center;
-}
-
-.fp__sem-acesso > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .fp__entrada {

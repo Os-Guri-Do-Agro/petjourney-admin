@@ -23,6 +23,7 @@ import { useI18n } from 'vue-i18n'
 import { lerErroDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { hojeNoFuso } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import ClinicToggleGroup from '@/features/clinico/components/base/ClinicToggleGroup.vue'
 import ClinicChartColumns from '@/features/clinico/components/resumo/ClinicChartColumns.vue'
@@ -394,9 +395,13 @@ const diagnosticos = computed(() => {
       </p>
 
       <template v-if="indicadores">
-        <p v-if="semMovimento" class="ui-folha ui-vazio relatorio__vazio">
-          <strong>{{ t('clinico.resumo.semMovimento') }}</strong>
-        </p>
+        <!-- O período sem movimento não ensina nada: o vazio é do recorte, não da clínica. -->
+        <UiVazioIlustrado
+          v-if="semMovimento"
+          icone="ph ph-chart-bar"
+          :titulo="t('clinico.resumo.semMovimento')"
+          :texto="t('clinico.resumo.semMovimentoTexto')"
+        />
 
         <template v-else>
           <ul class="ui-indicadores numeros" :aria-label="t('clinico.resumo.fatos.aria')">
@@ -660,10 +665,6 @@ const diagnosticos = computed(() => {
 
 .relatorio__selects :deep(.p-select) {
   min-width: 13rem;
-}
-
-.relatorio__vazio {
-  padding: 32px 24px;
 }
 
 /* Os quatro indicadores numa fileira; o número com o ícone de atenção, quando há. */

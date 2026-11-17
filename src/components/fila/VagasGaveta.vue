@@ -19,6 +19,7 @@ import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { quandoCurto, textoDaFaixa } from '@/components/fila/leitura-da-fila'
 import { chaveDoConflito, conflitosQueAvisam } from '@/components/pedidos/leitura-do-pedido'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { TipoDeAtendimento } from '@/service/parceiro/agenda-config-service'
@@ -237,7 +238,13 @@ const avisosDoHorario = computed(() => conflitosQueAvisam(feita.value?.conflitos
       <div v-else-if="carregando && !vagas.length" class="vg__esqueleto" aria-busy="true">
         <Skeleton v-for="n in 3" :key="n" height="4rem" />
       </div>
-      <p v-else-if="!vagas.length" class="vg__vazio">{{ t('fila.semVagas') }}</p>
+      <UiVazioIlustrado
+        v-else-if="!vagas.length"
+        aninhado
+        icone="ph ph-calendar-check"
+        :titulo="t('fila.semVagasTitulo')"
+        :texto="t('fila.semVagasTexto')"
+      />
       <ol v-else class="vg__vagas">
         <li v-for="vaga in vagas" :key="vaga.id" class="vg__vaga">
           <header class="vg__cabeca">
@@ -328,12 +335,6 @@ const avisosDoHorario = computed(() => conflitosQueAvisam(feita.value?.conflitos
 .vg__esqueleto {
   display: grid;
   gap: 10px;
-}
-
-.vg__vazio {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
 }
 
 .vg__vagas {

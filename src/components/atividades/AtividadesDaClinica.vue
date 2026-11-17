@@ -17,6 +17,7 @@ import { lerErroDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { iniciaisDe } from '@/components/meu-dia/useMeuDiaDaClinica'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
@@ -366,6 +367,23 @@ const vazio = computed(
   () => !carregando.value && !erro.value && Boolean(resposta.value) && pilhas.value.length === 0,
 )
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): nada pendente é boa notícia, e o vazio
+ * conta como a lista se enche e se esvazia, em três etapas. Não tem ação: nada aqui faz pendência.
+ */
+const passosDasAtividades = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'prazo', icone: 'ph ph-clock-countdown' },
+    { id: 'papel', icone: 'ph ph-stack' },
+    { id: 'resolver', icone: 'ph ph-check-circle' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`clinico.atividades.api.guia.${id}.titulo`),
+    texto: t(`clinico.atividades.api.guia.${id}.texto`),
+  })),
+)
+
 /** "2 pedidos com o prazo vencido e 3 faltas sem justificativa." */
 const fraseDoResumo = computed(() => {
   if (!resposta.value) return ''
@@ -417,6 +435,8 @@ onMounted(() => {
     :vazio-titulo="t('clinico.atividades.vazioTitulo')"
     :vazio-descricao="t('clinico.atividades.api.vazioDescricao')"
     vazio-icone="ph ph-check-circle"
+    :vazio-guia-titulo="t('clinico.atividades.api.guia.titulo')"
+    :vazio-passos="passosDasAtividades"
     bloquear-se-suspenso
     @tentar-de-novo="carregar"
   >

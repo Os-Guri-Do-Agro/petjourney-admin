@@ -21,6 +21,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
@@ -184,6 +186,37 @@ const vazio = computed(
   () => lido.value && !rascunhosEmOrdem.value.length && !listaDeRegistros.value.length,
 )
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem atendimento nenhum, como ele nasce,
+ * em três etapas (começa na agenda, o veterinário registra, finalizar fecha), e o caminho para a
+ * agenda. Com um filtro ligado, só o que vai aparecer ali.
+ */
+const passosDoAtendimento = computed<PassoDoGuia[]>(() => [
+  {
+    id: 'iniciar',
+    icone: 'ph ph-play',
+    titulo: t('atendimento.guia.iniciar'),
+    texto: t('atendimento.lista.vazioDica'),
+  },
+  ...[
+    { id: 'registrar', icone: 'ph ph-note-pencil' },
+    { id: 'finalizar', icone: 'ph ph-seal-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`atendimento.guia.${id}.titulo`),
+    texto: t(`atendimento.guia.${id}.texto`),
+  })),
+])
+
+const ICONE_DO_VAZIO: Record<StatusDoAtendimento, string> = {
+  RASCUNHO: 'ph ph-note-pencil',
+  FINALIZADO: 'ph ph-seal-check',
+  ANULADO: 'ph ph-prohibit',
+}
+
+const podeVerAgenda = computed(() => store.temPermissao('agenda.ler'))
+
 function rotuloDoDia(dia: string) {
   return rotulos.dia(dia)
 }
@@ -225,10 +258,37 @@ function rotuloDoDia(dia: string) {
 
       <p v-if="erro && lido" class="at__erro" role="alert">{{ erro }}</p>
 
-      <p v-if="vazio" class="ui-folha ui-vazio">
-        <strong>{{ t('atendimento.lista.vazioTitulo') }}</strong>
-        <span>{{ t('atendimento.lista.vazioDica') }}</span>
-      </p>
+      <UiVazioIlustrado
+        v-if="vazio && !status && !soMeus"
+        icone="ph ph-stethoscope"
+        :titulo="t('atendimento.lista.vazioTitulo')"
+        :texto="t('atendimento.guia.texto')"
+        :guia-titulo="t('atendimento.guia.titulo')"
+        :passos="passosDoAtendimento"
+      >
+        <template v-if="podeVerAgenda" #acao>
+          <Button
+            :as="RouterLink"
+            to="/clinica/agenda"
+            icon="ph ph-calendar-blank"
+            :label="t('atendimento.guia.abrirAgenda')"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="vazio && status"
+        :icone="ICONE_DO_VAZIO[status]"
+        :titulo="t(`atendimento.lista.vazioStatus.${status}.titulo`)"
+        :texto="t(`atendimento.lista.vazioStatus.${status}.texto`)"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="vazio"
+        icone="ph ph-user"
+        :titulo="t('atendimento.lista.vazioMeus.titulo')"
+        :texto="t('atendimento.lista.vazioMeus.texto')"
+      />
 
       <!-- O que falta assinar: a única coisa desta tela que pede ação. -->
       <section

@@ -10,6 +10,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
 import NovaCampanhaGaveta from '@/features/saude-publica/components/NovaCampanhaGaveta.vue'
@@ -92,6 +93,9 @@ watch(
             titulo: 'Agendadas',
             icone: 'ph ph-calendar-dots',
             descricao: 'O aviso já saiu; o atendimento conta depois do dia.',
+            vazioTitulo: 'Nenhuma campanha agendada',
+            vazioTexto:
+              'Ao agendar uma campanha, o aviso sai pelo app só para os tutores com o cuidado pendente nas regiões escolhidas.',
             itens: agendadas,
           },
           {
@@ -99,6 +103,9 @@ watch(
             titulo: 'Encerradas',
             icone: 'ph ph-check-circle',
             descricao: 'Quantos foram avisados, abriram o aviso e foram atendidos.',
+            vazioTitulo: 'Nenhuma campanha encerrada',
+            vazioTexto:
+              'Passado o dia da campanha, ela vem para cá com quantos tutores foram avisados, abriram o aviso e foram atendidos.',
             itens: encerradas,
           },
         ]"
@@ -157,7 +164,13 @@ watch(
             </dl>
           </li>
         </ul>
-        <p v-else class="ui-vazio cp-vazio">Nenhuma campanha.</p>
+        <UiVazioIlustrado
+          v-else
+          aninhado
+          :icone="grupo.icone"
+          :titulo="grupo.vazioTitulo"
+          :texto="grupo.vazioTexto"
+        />
       </section>
     </div>
 
@@ -289,10 +302,5 @@ watch(
   .cp-linha__numeros {
     grid-column: 2;
   }
-}
-
-.cp-vazio {
-  margin: 0;
-  color: var(--tinta-2);
 }
 </style>

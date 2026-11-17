@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import {
   listarDuvidas,
   responderDuvidas,
@@ -460,18 +461,22 @@ async function responder(item: Resposta) {
       </template>
     </Dialog>
 
-    <div v-if="!carregando && !erro && !atual" class="ui-vazio duv__vazio">
-      <i class="ph ph-check-circle" aria-hidden="true" />
-      <strong>{{ t('clinico.migracao.duvidas.nenhumaTitulo') }}</strong>
-      <span>{{ t('clinico.migracao.duvidas.nenhumaTexto') }}</span>
-      <Button
-        v-if="props.revisao"
-        type="button"
-        icon="ph ph-list-checks"
-        :label="t('clinico.migracao.duvidas.verResumo')"
-        @click="emit('voltar')"
-      />
-    </div>
+    <UiVazioIlustrado
+      v-if="!carregando && !erro && !atual"
+      aninhado
+      icone="ph ph-check-circle"
+      :titulo="t('clinico.migracao.duvidas.nenhumaTitulo')"
+      :texto="t('clinico.migracao.duvidas.nenhumaTexto')"
+    >
+      <template v-if="props.revisao" #acao>
+        <Button
+          type="button"
+          icon="ph ph-list-checks"
+          :label="t('clinico.migracao.duvidas.verResumo')"
+          @click="emit('voltar')"
+        />
+      </template>
+    </UiVazioIlustrado>
   </section>
 </template>
 
@@ -548,16 +553,5 @@ async function responder(item: Resposta) {
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.5;
-}
-
-.duv__vazio {
-  justify-items: center;
-  padding: 32px 16px;
-  text-align: center;
-}
-
-.duv__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 </style>

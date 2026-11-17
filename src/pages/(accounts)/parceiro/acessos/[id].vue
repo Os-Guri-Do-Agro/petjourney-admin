@@ -40,6 +40,7 @@ import AnotacaoEstruturadaView from '@/components/parceiro/AnotacaoEstruturadaVi
 import LerReceitaComIA from '@/components/parceiro/LerReceitaComIA.vue'
 import PorAcessoGaveta from '@/components/cadastro/PorAcessoGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useLeituraReceitaParceiro } from '@/composables/useLeituraReceitaParceiro'
 import { useRevalidarAoVoltar } from '@/composables/useRevalidarAoVoltar'
@@ -1579,23 +1580,24 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
 
             <!-- Responsável pode liberar o acesso sem marcar nenhuma categoria: a ficha existe
                  e não tem o que mostrar. Explica o porquê e empurra para a ação útil. -->
-            <section v-if="resumoVazio" class="vazio-ficha ui-folha">
-              <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
-                <i class="ph ph-lock-simple-open" />
-              </span>
-              <strong>{{ t('acessos.snapshot.emptyTitle') }}</strong>
-              <p>{{ t('acessos.snapshot.emptyBody', { pet: detalhe.petNome }) }}</p>
-              <Button
-                v-if="podeAnotar"
-                type="button"
-                :label="t('acessos.snapshot.emptyCta')"
-                icon="ph ph-pencil-simple"
-                size="small"
-                severity="secondary"
-                outlined
-                @click="irParaFolha"
-              />
-            </section>
+            <UiVazioIlustrado
+              v-if="resumoVazio"
+              icone="ph ph-lock-simple-open"
+              :titulo="t('acessos.snapshot.emptyTitle')"
+              :texto="t('acessos.snapshot.emptyBody', { pet: detalhe.petNome })"
+            >
+              <!-- "Registrar anotação" segue a única ação cheia: esta só leva até a folha. -->
+              <template v-if="podeAnotar" #acao>
+                <Button
+                  type="button"
+                  :label="t('acessos.snapshot.emptyCta')"
+                  icon="ph ph-pencil-simple"
+                  severity="secondary"
+                  outlined
+                  @click="irParaFolha"
+                />
+              </template>
+            </UiVazioIlustrado>
 
             <p v-else-if="semDadosClinicos" class="sem-dados ui-poco">
               <i class="ph ph-lock-simple" aria-hidden="true" />
@@ -1783,7 +1785,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 v-else
                 ref="documentosLista"
                 class="docs"
-                :class="{ 'docs--acima': documentosMaisAcima, 'docs--abaixo': documentosMaisAbaixo }"
+                :class="{
+                  'docs--acima': documentosMaisAcima,
+                  'docs--abaixo': documentosMaisAbaixo,
+                }"
                 :tabindex="documentos.length > DOCUMENTOS_SEM_ROLAGEM ? 0 : undefined"
                 :aria-labelledby="
                   documentos.length > DOCUMENTOS_SEM_ROLAGEM ? 'atd-docs-titulo' : undefined
@@ -1989,7 +1994,10 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 :tipo-servico="detalhe.tipoServico"
                 :disabled="submittingAnotacao"
               />
-              <p v-if="temCamposDiario && temCamposEstruturados" class="folha__nota diario-escrever">
+              <p
+                v-if="temCamposDiario && temCamposEstruturados"
+                class="folha__nota diario-escrever"
+              >
                 <i class="ph ph-pencil-simple" aria-hidden="true" />
                 {{ t('acessos.diarioAnotacao.prefereEscrever') }}
               </p>
@@ -2190,19 +2198,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
                 </span>
               </header>
 
-              <div v-if="anotacoesOrdenadas.length === 0" class="historico__vazio">
-                <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--neutro" aria-hidden="true">
-                  <i class="ph ph-note-blank" />
-                </span>
-                <strong>{{ t('acessos.anotacoes.empty') }}</strong>
-                <span>
-                  {{
-                    podeAnotar
-                      ? t('acessos.anotacoes.emptyHint')
-                      : t('acessos.anotacoes.emptyHintClosed')
-                  }}
-                </span>
-              </div>
+              <UiVazioIlustrado
+                v-if="anotacoesOrdenadas.length === 0"
+                aninhado
+                icone="ph ph-note-blank"
+                :titulo="t('acessos.anotacoes.empty')"
+                :texto="
+                  podeAnotar
+                    ? t('acessos.anotacoes.emptyHint')
+                    : t('acessos.anotacoes.emptyHintClosed')
+                "
+              />
 
               <ol v-else class="notas">
                 <li v-for="anotacao in anotacoesOrdenadas" :key="anotacao.id">
@@ -2811,29 +2817,7 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   line-height: 1.55;
 }
 
-/* -------- nada compartilhado */
-
-.vazio-ficha {
-  display: grid;
-  justify-items: center;
-  gap: 8px;
-  padding: 32px 24px;
-  text-align: center;
-}
-
-.vazio-ficha strong {
-  margin-top: 6px;
-  font-size: 16px;
-  font-weight: 650;
-}
-
-.vazio-ficha p {
-  max-width: 40ch;
-  margin: 0 0 6px;
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.55;
-}
+/* -------- só a mensagem, sem dado clínico */
 
 .sem-dados {
   display: flex;
@@ -3644,24 +3628,6 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
  * Uma linha do tempo das anotações da empresa: o ladrilho de cada uma pendurado num fio, o
  * serviço como título, quem atendeu e quando, e o que foi registrado.
  */
-
-.historico__vazio {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 32px 24px 34px;
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.5;
-  text-align: center;
-}
-
-.historico__vazio strong {
-  margin-top: 6px;
-  color: var(--tinta);
-  font-size: 15px;
-  font-weight: 650;
-}
 
 .notas {
   display: grid;

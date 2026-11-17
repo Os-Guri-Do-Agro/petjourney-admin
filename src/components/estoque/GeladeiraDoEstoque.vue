@@ -14,6 +14,8 @@ import { useI18n } from 'vue-i18n'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiLinhasCarregando from '@/components/ui/UiLinhasCarregando.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
@@ -131,6 +133,24 @@ function metaDaVacina(vacina: VacinaNaGeladeira) {
     .filter(Boolean)
     .join(' · ')
 }
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: com a geladeira vazia,
+ * como o estoque anda (receber o lote, a aplicação que dá baixa, o mínimo que avisa), e o
+ * "Receber lote" embaixo para quem movimenta.
+ */
+const passosDoEstoque = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'receber', icone: 'ph ph-package' },
+    { id: 'aplicar', icone: 'ph ph-syringe' },
+    { id: 'avisar', icone: 'ph ph-bell-ringing' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`estoque.guia.${id}.titulo`),
+    texto: t(`estoque.guia.${id}.texto`),
+  })),
+)
 
 /* ------------------------------------------------------------------------------- lotes */
 
@@ -280,7 +300,24 @@ function mudou(texto: string) {
           </span>
         </li>
       </ul>
-      <p v-else-if="geladeira" class="gl__nota">{{ t('estoque.vazio') }}</p>
+      <UiVazioIlustrado
+        v-else-if="geladeira"
+        aninhado
+        icone="ph ph-snowflake"
+        :titulo="t('estoque.vazioTitulo')"
+        :texto="t('estoque.vazio')"
+        :guia-titulo="t('estoque.guia.titulo')"
+        :passos="passosDoEstoque"
+      >
+        <template v-if="movimenta" #acao>
+          <Button
+            type="button"
+            icon="ph ph-plus"
+            :label="t('estoque.receber.acao')"
+            @click="receber(null)"
+          />
+        </template>
+      </UiVazioIlustrado>
       <!-- A primeira leitura: as linhas esperando, ou o erro com o tentar de novo. -->
       <p v-else-if="erro && !carregando" class="eg__erro gl__falha" role="alert">
         <i class="ph ph-warning-circle" aria-hidden="true" />

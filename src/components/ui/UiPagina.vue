@@ -23,7 +23,9 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import { molduraPedida } from '@/components/layout/moldura'
 import UiAbas from '@/components/ui/UiAbas.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
@@ -45,6 +47,12 @@ const props = withDefaults(
     vazioAcao?: string
     vazioAcaoIcone?: string
     vazioIcone?: string
+    /**
+     * O vazio que ensina (o de Acessos, 17/11/2026): "como funciona" em etapas, entre o recado e a
+     * ação. Sem etapas, o vazio fica só com o ícone, o título, a frase e a ação.
+     */
+    vazioGuiaTitulo?: string
+    vazioPassos?: PassoDoGuia[]
     bloquearSeSuspenso?: boolean
     semAcessoDeParceiro?: boolean
     /** Botão de explicações (modo guiado) das telas do portal. */
@@ -74,6 +82,8 @@ const props = withDefaults(
     vazioAcao: '',
     vazioAcaoIcone: 'ph ph-plus',
     vazioIcone: 'ph ph-tray',
+    vazioGuiaTitulo: '',
+    vazioPassos: () => [],
     bloquearSeSuspenso: false,
     semAcessoDeParceiro: false,
     guia: false,
@@ -448,14 +458,18 @@ const avisoDeConsulta = computed(() => {
       </ul>
     </div>
 
-    <div v-else-if="vazio" class="pagina__estado">
-      <span class="pagina__estado-icone" aria-hidden="true"><i :class="vazioIcone" /></span>
-      <h2>{{ vazioTitulo || t('frame.emptyDefault') }}</h2>
-      <p v-if="vazioDescricao">{{ vazioDescricao }}</p>
-      <div v-if="vazioAcao" class="pagina__estado-acoes">
+    <UiVazioIlustrado
+      v-else-if="vazio"
+      :icone="vazioIcone"
+      :titulo="vazioTitulo || t('frame.emptyDefault')"
+      :texto="vazioDescricao"
+      :guia-titulo="vazioGuiaTitulo"
+      :passos="vazioPassos"
+    >
+      <template v-if="vazioAcao" #acao>
         <Button :icon="vazioAcaoIcone" :label="vazioAcao" @click="emit('acaoDoVazio')" />
-      </div>
-    </div>
+      </template>
+    </UiVazioIlustrado>
 
     <div v-else class="pagina__corpo">
       <slot />

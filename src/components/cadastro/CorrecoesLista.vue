@@ -19,6 +19,8 @@ import { useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { listarPacientes } from '@/service/parceiro/pacientes-service'
 import {
@@ -43,6 +45,25 @@ const podeResolver = computed(
   () =>
     store.temPermissao('paciente.escrever') &&
     Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
+)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem pedido aberto, como a correção chega
+ * e sai daqui, em três etapas (o responsável pede pelo app, a recepção corrige na ficha, marca como
+ * resolvido). Não tem ação: quem faz o pedido nascer é o responsável. Resolvidos só diz o que vai
+ * aparecer ali.
+ */
+const passosDaCorrecao = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'pedir', icone: 'ph ph-device-mobile' },
+    { id: 'corrigir', icone: 'ph ph-user' },
+    { id: 'resolver', icone: 'ph ph-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`cadastro.correcoes.guia.${id}.titulo`),
+    texto: t(`cadastro.correcoes.guia.${id}.texto`),
+  })),
 )
 
 const opcoes = computed(() => [
@@ -151,16 +172,23 @@ async function resolver(pedido: PedidoDeCorrecao) {
         </li>
       </ul>
 
-      <div v-else-if="!pedidos.length" class="ui-vazio cr__vazio">
-        <i class="ph ph-check-circle" aria-hidden="true" />
-        <strong>
-          {{
-            situacao === 'abertos'
-              ? t('cadastro.correcoes.vazio')
-              : t('cadastro.correcoes.vazioResolvidos')
-          }}
-        </strong>
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!pedidos.length && situacao === 'abertos'"
+        aninhado
+        icone="ph ph-pencil-line"
+        :titulo="t('cadastro.correcoes.vazio')"
+        :texto="t('cadastro.correcoes.guia.texto')"
+        :guia-titulo="t('cadastro.correcoes.guia.titulo')"
+        :passos="passosDaCorrecao"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="!pedidos.length"
+        aninhado
+        icone="ph ph-check-circle"
+        :titulo="t('cadastro.correcoes.vazioResolvidos')"
+        :texto="t('cadastro.correcoes.guia.resolvidosTexto')"
+      />
 
       <ul v-else class="ui-lista">
         <li v-for="pedido in pedidos" :key="pedido.id" class="ui-linha">
@@ -242,16 +270,5 @@ async function resolver(pedido: PedidoDeCorrecao) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.cr__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.cr__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 </style>

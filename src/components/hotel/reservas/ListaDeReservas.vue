@@ -12,6 +12,8 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
 import {
@@ -21,6 +23,12 @@ import {
 } from '@/service/parceiro/hotel-reservas-service'
 
 import { TOM_DO_STATUS, useRotulosDasReservas } from './useRotulosDasReservas'
+
+const props = defineProps<{
+  /** "Nova reserva" no vazio: a mesma condição do botão do alto (`hotel.reserva` e a casa lida). */
+  podeReservar?: boolean
+}>()
+const emit = defineEmits<{ nova: [] }>()
 
 const { t } = useI18n()
 const rotulos = useRotulosDasReservas()
@@ -107,6 +115,26 @@ const semSinal = (item: ItemDaLista) =>
   typeof item.sinalCentavos === 'number' &&
   item.pagoCentavos < item.sinalCentavos
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem reserva pela frente, como uma reserva
+ * anda, em três etapas, e "Nova reserva" embaixo. O Histórico vazio só diz o que aparece nele; com
+ * uma situação escolhida, o vazio é do filtro, e fica a linha.
+ */
+const semFiltro = computed(() => filtro.value === 'TODAS')
+
+const passosDaReserva = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'entra', icone: 'ph ph-calendar-plus' },
+    { id: 'sinal', icone: 'ph ph-coins' },
+    { id: 'estadia', icone: 'ph ph-door-open' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`reservasDoHotel.lista.guia.${id}.titulo`),
+    texto: t(`reservasDoHotel.lista.guia.${id}.texto`),
+  })),
+)
+
 defineExpose({ carregar })
 </script>
 
@@ -133,7 +161,11 @@ defineExpose({ carregar })
 
     <p v-if="erro" class="lr__erro" role="alert">{{ erro }}</p>
 
-    <section class="ui-folha ui-lista" :aria-busy="carregando">
+    <section
+      v-if="itens.length || carregando || !semFiltro"
+      class="ui-folha ui-lista"
+      :aria-busy="carregando"
+    >
       <ul v-if="itens.length" class="ui-lista">
         <li v-for="item in itens" :key="item.id">
           <RouterLink :to="`/hotel/reserva/${item.id}`" class="ui-linha lr__linha">
@@ -169,13 +201,34 @@ defineExpose({ carregar })
         </li>
       </ul>
       <p v-else-if="!carregando" class="ui-vazio">
-        {{
-          quando === 'PROXIMAS'
-            ? t('reservasDoHotel.lista.vazio')
-            : t('reservasDoHotel.lista.vazioHistorico')
-        }}
+        {{ t('reservasDoHotel.lista.vazioHistorico') }}
       </p>
     </section>
+
+    <UiVazioIlustrado
+      v-else-if="!erro && quando === 'PROXIMAS'"
+      icone="ph ph-calendar-blank"
+      :titulo="t('reservasDoHotel.lista.proximasVazio.titulo')"
+      :texto="t('reservasDoHotel.lista.proximasVazio.texto')"
+      :guia-titulo="t('reservasDoHotel.lista.guia.titulo')"
+      :passos="passosDaReserva"
+    >
+      <template v-if="props.podeReservar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('reservasDoHotel.nova.titulo')"
+          @click="emit('nova')"
+        />
+      </template>
+    </UiVazioIlustrado>
+
+    <UiVazioIlustrado
+      v-else-if="!erro"
+      icone="ph ph-clock-counter-clockwise"
+      :titulo="t('reservasDoHotel.lista.historicoVazio.titulo')"
+      :texto="t('reservasDoHotel.lista.historicoVazio.texto')"
+    />
 
     <Button
       v-if="cursor"

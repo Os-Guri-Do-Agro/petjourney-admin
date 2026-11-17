@@ -14,6 +14,8 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
@@ -55,6 +57,24 @@ onMounted(() => void carregar())
 
 const ativas = computed(() => salas.value.filter((sala) => sala.ativa))
 const inativas = computed(() => salas.value.filter((sala) => !sala.ativa))
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem sala nenhuma, para
+ * que as salas servem (o tipo, as colunas da agenda, os tipos de atendimento que as usam), e o
+ * "Nova sala" embaixo para quem configura.
+ */
+const passosDasSalas = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'tipo', icone: 'ph ph-door' },
+    { id: 'colunas', icone: 'ph ph-columns' },
+    { id: 'atendimentos', icone: 'ph ph-stethoscope' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`agenda.config.sala.guia.${id}.titulo`),
+    texto: t(`agenda.config.sala.guia.${id}.texto`),
+  })),
+)
 
 function avisarErro(err: unknown) {
   toast.add({
@@ -209,9 +229,26 @@ const ICONE_DA_SALA: Record<TipoDeSala, string> = {
       </li>
     </ul>
 
-    <p v-else-if="!salas.length" class="cfa__vazio">{{ t('agenda.config.sala.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="!salas.length && !erro"
+      aninhado
+      icone="ph ph-door"
+      :titulo="t('agenda.config.sala.vazio')"
+      :texto="t('agenda.config.sala.vazioTexto')"
+      :guia-titulo="t('agenda.config.sala.guia.titulo')"
+      :passos="passosDasSalas"
+    >
+      <template v-if="props.podeEditar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('agenda.config.sala.nova')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
-    <template v-else>
+    <template v-else-if="salas.length">
       <ul class="ui-lista">
         <li v-for="(sala, indice) in ativas" :key="sala.id" class="ui-linha">
           <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
@@ -356,12 +393,6 @@ const ICONE_DA_SALA: Record<TipoDeSala, string> = {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.cfa__vazio {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .cfa__subtitulo {

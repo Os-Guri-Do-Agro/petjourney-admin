@@ -740,7 +740,8 @@
       "expandir": "Proširi {modulo}",
       "tratamentos": "Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total} | Kritične terapije sa opadanjem redovnosti: {total}",
       "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor",
-      "pedidosDeReserva": "{total} zahtev za rezervaciju čeka odgovor | {total} zahteva za rezervaciju čekaju odgovor | {total} zahteva za rezervaciju čeka odgovor"
+      "pedidosDeReserva": "{total} zahtev za rezervaciju čeka odgovor | {total} zahteva za rezervaciju čekaju odgovor | {total} zahteva za rezervaciju čeka odgovor",
+      "calmaTexto": "Kada nešto zastane u ovom prostoru, pojavljuje se ovde, od najozbiljnijeg ka manje ozbiljnom."
     },
     "resumo": {
       "portal": "Pratite zaradu i podelite svoj kod.",
@@ -905,7 +906,8 @@
       "posicao": "{atual} od {total}",
       "compromissoAnterior": "Prethodna obaveza",
       "proximoCompromisso": "Sledeća obaveza",
-      "tituloSemana": "Raspored za nedelju"
+      "tituloSemana": "Raspored za nedelju",
+      "vazioTexto": "Obaveze zakazane za ovaj dan pojavljuju se ovde, po satu."
     },
     "saudacao": {
       "manha": "Dobro jutro",
@@ -1910,7 +1912,8 @@
       "lede": "Popusti za staratelje ljubimaca. Ne donose udeo.",
       "empty": "Trenutno nema kupona.",
       "usos": "{n} korišćenje | {n} korišćenja | {n} korišćenja",
-      "loadMore": "Još kupona"
+      "loadMore": "Još kupona",
+      "vazioTexto": "Kuponi za popust za staratelje pojavljuju se ovde, sa kodom, popustom i brojem korišćenja."
     },
     "resgates": {
       "title": "Iskorišćeni kuponi",
@@ -1918,7 +1921,8 @@
       "empty": "Još nema iskorišćenih kupona.",
       "canalQr": "Preko QR koda",
       "canalManual": "Ručno unet kod",
-      "loadMore": "Još iskorišćenja"
+      "loadMore": "Još iskorišćenja",
+      "vazioTexto": "Svaki kupon potvrđen na pultu, preko QR koda ili upisanog koda, pojavljuje se ovde sa popustom i datumom."
     },
     "terms": {
       "title": "Pravila udela",
@@ -2565,6 +2569,21 @@
       "indisponivel": {
         "titulo": "Lista još nije dostupna",
         "corpo": "Ova lista uskoro stiže. Pokušajte ponovo za nekoliko dana."
+      },
+      "guia": {
+        "titulo": "Kako se lista popunjava",
+        "codigo": {
+          "titulo": "Osoba koristi vaš kod",
+          "texto": "Pri registraciji u PetJourney upisuje vaš kod ili skenira vaš QR kod."
+        },
+        "lista": {
+          "titulo": "Ime se pojavljuje ovde",
+          "texto": "Sa danom kada se pridružila i podatkom da li se već pretplatila na plan."
+        },
+        "situacao": {
+          "titulo": "Lista se sama ažurira",
+          "texto": "Ako se osoba pretplati, otkaže ili izbriše nalog, lista to prati bez vašeg truda."
+        }
       }
     },
     "estabelecimento": {
@@ -2679,7 +2698,6 @@
         "umDia": "Jedan praznik",
         "feriadosDe": "Državni praznici za {ano}.",
         "adicionar": "Dodaj praznik",
-        "vazio": "Nema praznika. Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme.",
         "remover": "Ukloni {nome}",
         "data": "Datum",
         "faltaData": "Izaberite datum u kalendaru.",
@@ -2697,7 +2715,9 @@
         "apagarVarios": "Obriši više",
         "marcados": "Označen {total} | Označena {total} | Označeno {total}",
         "marcarPassados": "Označi prošle dane",
-        "apagarMarcados": "Obriši | Obriši {total} | Obriši {total} | Obriši {total}"
+        "apagarMarcados": "Obriši | Obriši {total} | Obriši {total} | Obriši {total}",
+        "vazioTitulo": "Nema upisanih praznika",
+        "vazioTexto": "Praznici i dani sa drugačijim radnim vremenom idu ovde i zamenjuju nedeljno radno vreme."
       },
       "mensagens": {
         "titulo": "Poruke staratelju"
@@ -2933,6 +2953,21 @@
         "diario_do_app": "dnevnik iz aplikacije",
         "trilha_clinica": "reviziju",
         "outro": "zapis ({tipo})"
+      },
+      "guia": {
+        "titulo": "Kako revizija funkcioniše",
+        "acao": {
+          "titulo": "Tim koristi karton",
+          "texto": "Otvaranje kartona, upis pregleda, štampanje, izvoz ili objava u aplikaciji: svaka radnja postaje događaj."
+        },
+        "anota": {
+          "titulo": "Portal sam beleži",
+          "texto": "Ko je to uradio, kada i u kom zapisu. Klinički sadržaj nikad ne ulazi, samo nazivi polja."
+        },
+        "consulta": {
+          "titulo": "Ovde proveravate",
+          "texto": "Filtrirajte po radnji, osobi i periodu da saznate ko je dirao neki zapis."
+        }
       }
     }
   },
@@ -4088,7 +4123,8 @@
         "avulsos": "Nema pregleda bez termina | {n} od njih bez termina u rasporedu | {n} od njih bez termina u rasporedu | {n} od njih bez termina u rasporedu",
         "diagnosticosSemPermissao": "Dijagnoze vidi onaj ko čita karton.",
         "semDesfecho": "Nema termina bez ishoda | {n} termin je ostao bez ishoda (ni dolazak ni izostanak) i ne ulazi u odziv. | {n} termina su ostala bez ishoda (ni dolazak ni izostanak) i ne ulaze u odziv. | {n} termina je ostalo bez ishoda (ni dolazak ni izostanak) i ne ulazi u odziv."
-      }
+      },
+      "semMovimentoTexto": "Brojevi i grafikoni se pojavljuju kada u izabranom periodu bude pregleda."
     },
     "bulario": {
       "titulo": "Vodič za lekove",
@@ -4254,6 +4290,22 @@
           "HEPATICO": "jetra",
           "CARDIACO": "srce",
           "GASTRICO": "želudac"
+        },
+        "vazioTitulo": "Još nema lekova klinike",
+        "guia": {
+          "titulo": "Kako registar lekova funkcioniše",
+          "acrescentar": {
+            "titulo": "Klinika dodaje",
+            "texto": "U katalogu u Podešavanjima, sa aktivnom supstancom, oblikom i dozom za svaku vrstu."
+          },
+          "buscar": {
+            "titulo": "Tražite kako se setite",
+            "texto": "Po nazivu, aktivnoj supstanci ili indikaciji, čak i sa greškom u kucanju."
+          },
+          "ficha": {
+            "titulo": "Detalji pored",
+            "texto": "Doza za svaku vrstu, načini primene, kontraindikacije i interakcije, na jednom mestu."
+          }
         }
       }
     },
@@ -5365,7 +5417,22 @@
           "OBITO": "Rezime ostaje samo u kartonu klinike."
         },
         "atendimentosDoPaciente": "{n} pregled čeka | {n} pregleda čekaju | {n} pregleda čeka",
-        "ultimoEm": "Poslednji {quando}"
+        "ultimoEm": "Poslednji {quando}",
+        "guia": {
+          "titulo": "Kako aktivnosti funkcionišu",
+          "prazo": {
+            "titulo": "Prošao rok, ulazi",
+            "texto": "Zahtev bez odgovora, nedolazak bez kontakta, istekla kontrola ili vakcina postaju red na kartici te teme."
+          },
+          "papel": {
+            "titulo": "Svako vidi svoje",
+            "texto": "Kartice prate ulogu onoga ko se prijavi: svaka kaže zašto, a svaki red nosi radnju."
+          },
+          "resolver": {
+            "titulo": "Rešeno, izlazi",
+            "texto": "Kada se zahtev odgovori, kontrola zakaže ili kontakt zabeleži, red nestaje sa kartice."
+          }
+        }
       }
     },
     "atalhos": {
@@ -7853,6 +7920,21 @@
       },
       "erros": {
         "carregar": "Podeljenu istoriju nije moguće učitati."
+      },
+      "guia": {
+        "titulo": "Kako istorija stiže",
+        "escolher": {
+          "titulo": "Vlasnik bira",
+          "texto": "U aplikaciji odlučuje šta klinika vidi, poput vakcina, alergija i težine, i do kada važi."
+        },
+        "codigo": {
+          "titulo": "Kod važi jednom",
+          "texto": "Za prvu kliniku koja ga primi. Ljubimac koji još nije pacijent dobija karton sa istorijom."
+        },
+        "valer": {
+          "titulo": "Ostaje u Važeće",
+          "texto": "Dok rok ne istekne ili ga vlasnik ne završi u aplikaciji. Posle prelazi u Završene."
+        }
       }
     }
   },
@@ -8638,7 +8720,11 @@
         "estadia": "Boravak",
         "reserva": "Rezervacija"
       },
-      "movimentoDoDia": "Kretanje tokom dana"
+      "movimentoDoDia": "Kretanje tokom dana",
+      "guiaTitulo": "Put gosta kroz kuću",
+      "semChegadasTexto": "Rezervacije sa dolaskom najavljenim za danas pojavljuju se ovde, sa dokumentacijom i prijavom.",
+      "naCasaVaziaTexto": "Posle prijave, svaki gost se pojavljuje ovde sa onim što sada traži pažnju.",
+      "semSaidasTexto": "Ko danas treba da ode pojavljuje se ovde, sa onim što još fali za odjavu."
     },
     "planoDaEstadia": {
       "desde": "od {data}",
@@ -9990,7 +10076,23 @@
       "erro": "Pacijenti nisu mogli da se učitaju.",
       "importar": "Uvezi tabelu",
       "importacaoParada": "{n} uvoz je pauziran ili je stao na pola. | {n} uvoza su pauzirana ili su stala na pola. | {n} uvoza je pauzirano ili je stalo na pola.",
-      "verImportacao": "Pogledaj uvoz"
+      "verImportacao": "Pogledaj uvoz",
+      "guia": {
+        "titulo": "Kako upis funkcioniše",
+        "passos": {
+          "titulo": "Korak po korak",
+          "texto": "Ko je odgovoran za ljubimca, zatim ljubimac i, na kraju, detalji, koji nisu obavezni."
+        },
+        "importar": {
+          "titulo": "Ili donesite staru bazu",
+          "texto": "Vlasnik naloga ili menadžer uvozi tabelu iz prethodnog sistema, u .csv ili .xlsx."
+        },
+        "buscar": {
+          "titulo": "Nađite pretragom",
+          "texto": "Po imenu ljubimca ili vlasnika, telefonu, CPF-u ili mikročipu. Svaki red otvara karton."
+        },
+        "inativosTexto": "Pacijent koji je deaktiviran ili kome je zabeležena smrt izlazi iz aktivnih i stoji ovde, sa kartonom."
+      }
     },
     "campos": {
       "nome": "Ime ljubimca",
@@ -10309,7 +10411,24 @@
       "abrir": "Otvori upis",
       "resolver": "Označi kao rešeno",
       "resolvido": "Zahtev je rešen",
-      "semPaciente": "Nismo našli pacijenta ovog vlasnika. Potražite u Pacijentima."
+      "semPaciente": "Nismo našli pacijenta ovog vlasnika. Potražite u Pacijentima.",
+      "guia": {
+        "titulo": "Kako ispravka stiže",
+        "texto": "Zahtevi koje staratelji šalju preko aplikacije čekaju ovde dok ih recepcija ne ispravi.",
+        "pedir": {
+          "titulo": "Staratelj traži preko aplikacije",
+          "texto": "Svojim rečima piše šta nije tačno u upisu koji klinika ima."
+        },
+        "corrigir": {
+          "titulo": "Recepcija ispravlja",
+          "texto": "Otvori upis vodi do kartona jednog od njegovih pacijenata, gde se menjaju podaci staratelja."
+        },
+        "resolver": {
+          "titulo": "Označi kao rešeno",
+          "texto": "Zahtev izlazi iz otvorenih i ostaje u Rešeni, sa datumom, kao istorija."
+        },
+        "resolvidosTexto": "Zahtevi označeni kao rešeni stoje ovde, sa datumom, kao istorija."
+      }
     },
     "porAcesso": {
       "botao": "Poveži sa upisom",
@@ -10369,6 +10488,22 @@
           "BANHO": "Kupanje i šišanje",
           "INTERNACAO": "Stacionar",
           "EXAME": "Dijagnostika"
+        },
+        "vazioTexto": "Unesite gde klinika radi: sale uređuju raspored i primaju vrste pregleda.",
+        "guia": {
+          "titulo": "Kako sale funkcionišu",
+          "tipo": {
+            "titulo": "Svaka sala ima vrstu",
+            "texto": "Ordinacija, operaciona sala, kupanje i šišanje, stacionar ili dijagnostika: vrsta govori šta se u njoj radi."
+          },
+          "colunas": {
+            "titulo": "Postaju kolone rasporeda",
+            "texto": "Svaka aktivna sala je kolona u rasporedu, redosledom ove liste."
+          },
+          "atendimentos": {
+            "titulo": "Pregledi koriste sale",
+            "texto": "Svaka vrsta pregleda kaže u kojim salama se obavlja. Stacionar čuva i krevete."
+          }
         }
       },
       "tipo": {
@@ -10404,6 +10539,22 @@
           "CIRURGIA": "Operacija",
           "BANHO": "Kupanje i šišanje",
           "EMERGENCIA": "Hitan slučaj"
+        },
+        "vazioTexto": "Vrste govore šta klinika radi i koliko vremena svaki pregled zauzima u rasporedu.",
+        "guia": {
+          "titulo": "Kako vrste funkcionišu",
+          "nome": {
+            "titulo": "Naziv i kategorija",
+            "texto": "Naziv daje klinika, na primer Pregled mačke. Kategorija govori šta je: pregled, vakcina, operacija."
+          },
+          "duracao": {
+            "titulo": "Trajanje i sale",
+            "texto": "Po 5 minuta, u odgovarajućim salama. Bez označene sale, važi bilo koja."
+          },
+          "marcar": {
+            "titulo": "Prijem zakazuje",
+            "texto": "Pri zakazivanju, vrsta već donosi trajanje. Ako je označena za online, može se tražiti i preko stranice klinike."
+          }
         }
       },
       "politica": {
@@ -10529,7 +10680,8 @@
         "tirarDiaTexto": "Ukloniti blokadu za {dia}? Ostali dani ostaju.",
         "tirarEsteDia": "Ukloni ovaj dan",
         "diaTirado": "Ovaj dan je uklonjen iz blokade",
-        "apagarSerieTexto": "Obrisati ovu nedeljnu blokadu? Nestaje iz svih dana."
+        "apagarSerieTexto": "Obrisati ovu nedeljnu blokadu? Nestaje iz svih dana.",
+        "vazioTexto": "Blokade za naredne nedelje pojavljuju se ovde, po danima. Nedeljna blokada se prikazuje jednom, sa danima."
       },
       "expediente": {
         "titulo": "Radno vreme: {nome}",
@@ -10821,7 +10973,6 @@
     "semCanalCurto": "bez kanala u aplikaciji: pozovite",
     "semCanalLigue": "Bez kanala u aplikaciji: pozovite vlasnika i zabeležite da ili ne na listi.",
     "semNaoResponderam": "Niko nije propustio da odgovori u poslednjih 7 dana",
-    "semVagas": "Nema oslobođenih termina koji odgovaraju nekome sa liste u narednih 14 dana.",
     "servico": "Usluga",
     "situacaoRotulo": "Koje unose prikazati",
     "situacoes": {
@@ -10854,7 +11005,9 @@
         "texto": "Staratelj potvrđuje u roku i termin ulazi u raspored. Bez odgovora, termin se vraća klinici."
       }
     },
-    "semNaoResponderamTexto": "Ponude koje su istekle bez odgovora u poslednjih 7 dana ostaju ovde, da ih recepcija pozove."
+    "semNaoResponderamTexto": "Ponude koje su istekle bez odgovora u poslednjih 7 dana ostaju ovde, da ih recepcija pozove.",
+    "semVagasTitulo": "Nema termina za ponudu",
+    "semVagasTexto": "Kada se oslobodi termin u narednih 14 dana i odgovara nekome sa liste, pojavljuje se ovde."
   },
   "importacao": {
     "erroAoCarregar": "Uvoz nije mogao da se učita.",
@@ -11311,6 +11464,24 @@
       "fotoIndisponivel": "Fotografija trenutno nije dostupna",
       "recorte": "Ostalo vidi samo onaj ko čita karton.",
       "observacao": "Još nešto, rečima odgovorne osobe"
+    },
+    "guia": {
+      "titulo": "Kako se raspored slaže",
+      "vazioTitulo": "Još niko ne radi po rasporedu",
+      "vazioTexto": "Raspored otvara kolonu za svakog stručnjaka koji radi po njemu. Bez takvih, svaki dan ostaje prazan.",
+      "equipe": {
+        "titulo": "Upišite ko prima pacijente",
+        "texto": "U Timu, na kartici Stručnjaci, sa uključenim Radi po rasporedu u profilu svakog od njih."
+      },
+      "expediente": {
+        "titulo": "Svako u svoje vreme",
+        "texto": "Kolona prati radno vreme klinike ili lično radno vreme svakog, takođe u Stručnjacima."
+      },
+      "marcar": {
+        "titulo": "Recepcija zakazuje",
+        "texto": "Kliknite slobodan termin u koloni ili koristite Zakaži termin, na vrhu rasporeda."
+      },
+      "abrirProfissionais": "Otvori Stručnjake"
     }
   },
   "faltas": {
@@ -11433,6 +11604,26 @@
       "voltou": "Vratio se {dia}",
       "registros": "{n} zapis | {n} zapisa | {n} zapisa",
       "voltar": "Nazad na nedolaske"
+    },
+    "guia": {
+      "titulo": "Kako nedolasci funkcionišu",
+      "marcar": {
+        "titulo": "Nedolazak se beleži u rasporedu",
+        "texto": "Na terminu onoga ko nije došao ili preko Zatvori smenu, koje odjednom označi sve koji nisu stigli."
+      },
+      "reincidir": {
+        "titulo": "Ponavljanje se pamti",
+        "texto": "Ko nije došao {n} puta ili više u poslednjih 12 meseci, pojavljuje se u Ponovljeni."
+      },
+      "contato": {
+        "titulo": "Recepcija beleži kontakt",
+        "texto": "Otvorite red da zabeležite razgovor sa starateljem i ponovo zakažete, ako želi da dođe."
+      },
+      "abrirAgenda": "Otvori raspored"
+    },
+    "vazioTexto": {
+      "pendentes": "Nedolazak bez zabeleženog kontakta stoji ovde dok recepcija ne zabeleži razgovor sa starateljem.",
+      "todas": "Nedolasci iz poslednjih 12 meseci stoje ovde, po staratelju i pacijentu."
     }
   },
   "catalogo": {
@@ -11444,25 +11635,29 @@
         "titulo": "Lekovi klinike",
         "descricao": "Pojavljuju se u registru i na receptu označeni kao lekovi klinike.",
         "novo": "Novi lek",
-        "vazio": "Klinika još nije dodala lekove."
+        "vazio": "Klinika još nije dodala lekove.",
+        "vazioTexto": "Magistralni lek, uvezeni i ono što nedostaje u registru ulaze ovde, sa dozom za svaku vrstu."
       },
       "vacinas": {
         "titulo": "Vakcine klinike",
         "descricao": "Sa protokolom serije: API računa plan vakcinacije.",
         "novo": "Nova vakcina",
-        "vazio": "Klinika još nije dodala vakcine."
+        "vazio": "Klinika još nije dodala vakcine.",
+        "vazioTexto": "Uvezena vakcina ili ona koje nema u katalogu ulazi ovde, sa vrstama i protokolom serije."
       },
       "exames": {
         "titulo": "Analize klinike",
         "descricao": "Analize partnerske laboratorije i sopstvene.",
         "novo": "Nova analiza",
-        "vazio": "Klinika još nije dodala analize."
+        "vazio": "Klinika još nije dodala analize.",
+        "vazioTexto": "Analize partnerske laboratorije i one koje klinika radi ulaze ovde, po grupama."
       },
       "diagnosticos": {
         "titulo": "Dijagnoze klinike",
         "descricao": "Sopstvene šifre, pored šifara PetJourney.",
         "novo": "Nova dijagnoza",
-        "vazio": "Klinika još nije dodala dijagnoze."
+        "vazio": "Klinika još nije dodala dijagnoze.",
+        "vazioTexto": "Sopstvene šifre klinike ulaze ovde i prikazuju se pored šifara PetJourney."
       }
     },
     "erro": {
@@ -11612,7 +11807,8 @@
       "aplicar": "Daj",
       "vazio": "Nema vakcina u planu ovog pacijenta.",
       "eMais": "i još {n} ažurnih vakcina",
-      "opcionais": "Opcione, nezapočete ({n})"
+      "opcionais": "Opcione, nezapočete ({n})",
+      "vazioTexto": "Plan se pravi od vakcina iz kataloga za vrstu pacijenta, sa dozom na redu i sledećom."
     },
     "historico": {
       "titulo": "Istorija ({n})",
@@ -11743,7 +11939,8 @@
       "externa": "drugde",
       "anulada": "poništena",
       "vazio": "Nema primena u ovom periodu.",
-      "resumo": "Šta je klinika dala, sa serijom i ko je dao."
+      "resumo": "Šta je klinika dala, sa serijom i ko je dao.",
+      "vazioTexto": "Svaka doza koju klinika upiše pojavljuje se ovde, sa serijom i ko je dao. Poništene su precrtane."
     },
     "lembrete": {
       "ativar": "Uključi podsetnik",
@@ -11850,7 +12047,25 @@
       "resumoFiltro": "Od najnovijeg ka starijima.",
       "vazioTitulo": "Ovde nema pregleda",
       "vazioDica": "Pregled počinje dugmetom Započni u rasporedu ili, van njega, iz kartona pacijenta.",
-      "verMais": "Prikaži još"
+      "verMais": "Prikaži još",
+      "vazioStatus": {
+        "RASCUNHO": {
+          "titulo": "Nema otvorenih nacrta",
+          "texto": "Započet a još nezavršen pregled stoji ovde, od najstarijeg ka najnovijem."
+        },
+        "FINALIZADO": {
+          "titulo": "Nema završenih pregleda",
+          "texto": "Završeni pregledi stoje ovde, od najnovijeg unazad, po danu pregleda."
+        },
+        "ANULADO": {
+          "titulo": "Nema poništenih pregleda",
+          "texto": "Pregled koji je završen pa poništen stoji ovde, radi uvida."
+        }
+      },
+      "vazioMeus": {
+        "titulo": "Još nema vaših pregleda",
+        "texto": "Ovde ulaze samo pregledi u kojima ste vi veterinar. Isključite Samo moji da vidite preglede cele klinike."
+      }
     },
     "linha": {
       "titulo": "Klinička istorija",
@@ -11908,7 +12123,24 @@
       "tipoDoVet": "Izabrao veterinar.",
       "comQuem": "Kod koga",
       "horarios": "Slobodni termini",
-      "semSugestao": "Nema slobodnog termina u tom periodu."
+      "semSugestao": "Nema slobodnog termina u tom periodu.",
+      "guia": {
+        "titulo": "Kako kontrola stiže ovde",
+        "texto": "Kontrola koju je veterinar preporučio, a koja još nema termin u rasporedu, pojavljuje se ovde.",
+        "indicar": {
+          "titulo": "Veterinar je preporučuje",
+          "texto": "U terapiji i planu pregleda, sa danima do dolaska i, po želji, vrstom."
+        },
+        "esperar": {
+          "titulo": "Bez termina, čeka ovde",
+          "texto": "Sa rokom računatim od pregleda. Vraća se ovde ako se termin otkaže ili postane nedolazak."
+        },
+        "marcar": {
+          "titulo": "Recepcija zakazuje",
+          "texto": "Zakaži je stavlja u prvi slobodan termin onoga ko je pregledao. Bez termina, može na listu čekanja."
+        },
+        "vencidosTexto": "Kontrola kojoj je istekao rok bez termina pojavljuje se ovde, da je recepcija zakaže."
+      }
     },
     "anamnese": {
       "descricao": "Redosledom razgovora. Glavna tegoba je ono što završavanje traži.",
@@ -12390,6 +12622,20 @@
       "adendoTitulo": "Zaboravili ste nešto?",
       "adendoAcao": "Napiši dodatak",
       "ficar": "Ostani na pregledu"
+    },
+    "guia": {
+      "titulo": "Kako pregled funkcioniše",
+      "texto": "Ovde su kartoni klinike: nacrti za završavanje i već zatvoreni zapisi.",
+      "iniciar": "Počinje u rasporedu",
+      "registrar": {
+        "titulo": "Veterinar beleži",
+        "texto": "Anamneza, klinički pregled, dijagnoza, terapija i recept, svaki deo se čuva sam dok piše."
+      },
+      "finalizar": {
+        "titulo": "Završavanje zatvara zapis",
+        "texto": "Nacrt postaje zapis. Sažetak stiže staratelju tek kada se objavi."
+      },
+      "abrirAgenda": "Otvori raspored"
     }
   },
   "adesao": {
@@ -12438,6 +12684,22 @@
     },
     "resumo": {
       "indisponivel": "Trenutno nedostupno."
+    },
+    "guia": {
+      "titulo": "Kako terapija kod kuće funkcioniše",
+      "texto": "Ovde su kritični lekovi sa preskočenim dozama ili sa sve ređim beleženjem u aplikaciji.",
+      "doses": {
+        "titulo": "Kuća beleži doze",
+        "texto": "Staratelj u aplikaciji pravi podsetnike za recept i označava svaku datu ili preskočenu dozu."
+      },
+      "critico": {
+        "titulo": "Klinika označava kritično",
+        "texto": "U kartonu pacijenta uključite Kritično za lek koji ne sme da izostane."
+      },
+      "alerta": {
+        "titulo": "Pad se pojavljuje ovde",
+        "texto": "Preskočene doze u 3 dana ili sve ređe beleženje kod kritičnog leka ulaze na ovu listu, da tim razgovara sa porodicom."
+      }
     }
   },
   "documentos": {
@@ -12733,6 +12995,23 @@
       "erro": "Zahtev nije zabeležen.",
       "feito": "Zahtev je zabeležen.",
       "jaExistia": "Već postoji otvoren zahtev za ovog pacijenta i period: to je isti zahtev."
+    },
+    "guia": {
+      "titulo": "Kako kopija funkcioniše",
+      "texto": "Kada neko zatraži kopiju kartona pacijenta, zahtev stoji ovde do predaje.",
+      "pedir": {
+        "titulo": "Zahtev stiže",
+        "texto": "Preko aplikacije, kada vlasnik zatraži, ili na pultu, preko Zabeleži zahtev. Rok je 5 radnih dana."
+      },
+      "gerar": {
+        "titulo": "Klinika pravi kopiju",
+        "texto": "Napravi kopiju sklapa PDF kartona za nekoliko sekundi, i on se čuva 7 dana."
+      },
+      "entregar": {
+        "titulo": "Predaj i zatvori",
+        "texto": "Preuzmite i predajte na pultu. Ako vlasnik preuzme u aplikaciji, predaja se beleži sama."
+      },
+      "encerradosTexto": "Predati, odbijeni ili zatvoreni zahtevi stoje ovde, bez daljih radnji."
     }
   },
   "internacao": {
@@ -12842,7 +13121,22 @@
       "semVaga": "Trenutno nema slobodnih kreveta.",
       "ocupados": "{n} zauzet | {n} zauzeta | {n} zauzetih",
       "inativos": "{n} van upotrebe | {n} van upotrebe | {n} van upotrebe",
-      "semLeitos": "Klinika još nije unela krevete."
+      "semLeitos": "Klinika još nije unela krevete.",
+      "guia": {
+        "titulo": "Kako slobodna mesta funkcionišu",
+        "leitos": {
+          "titulo": "Klinika unosi krevete",
+          "texto": "U Podešavanjima, svaki krevet sa vrstom: opšti, za mačke, izolacija ili JIN."
+        },
+        "internar": {
+          "titulo": "Prijem zauzima krevet",
+          "texto": "Dok je pacijent hospitalizovan, krevet izlazi iz slobodnih mesta. Krevet van upotrebe takođe."
+        },
+        "aparece": {
+          "titulo": "Slobodno mesto je ovde",
+          "texto": "Svaka vrsta kreveta sa brojem slobodnih, da odgovorite telefonom da li ima mesta."
+        }
+      }
     },
     "leitos": {
       "titulo": "Kreveti",
@@ -12876,6 +13170,21 @@
         "REFORMA": "Renoviranje",
         "EQUIPAMENTO": "Oprema",
         "OUTRO": "Drugi razlog"
+      },
+      "guia": {
+        "titulo": "Kako kreveti funkcionišu",
+        "sala": {
+          "titulo": "Soba za hospitalizaciju",
+          "texto": "Krevet je u sali vrste Stacionar, napravljenoj na kartici Sale ovog ekrana."
+        },
+        "leito": {
+          "titulo": "Unesite krevet",
+          "texto": "Sa nazivom koji tim koristi na odeljenju i vrstom: opšti, za mačke, izolacija ili JIN."
+        },
+        "mapa": {
+          "titulo": "Ulazi u mapu",
+          "texto": "Svaki krevet postaje mesto na mapi hospitalizacije. Krevet van upotrebe ne ulazi u broj slobodnih."
+        }
       }
     },
     "internar": {
@@ -12993,7 +13302,8 @@
       "vazioPlantao": "Nema doza u ovoj smeni.",
       "truncado": "Ima više doza nego što ovde staje: otvorite hospitalizaciju za kraći period.",
       "foraDaLista": "{n} doza koja kasni duže nije na listi: otvorite hospitalizaciju. | {n} doze koje kasne duže nisu na listi: otvorite hospitalizaciju. | {n} doza koje kasne duže nije na listi: otvorite hospitalizaciju.",
-      "erro": "Kontrolna lista nije učitana."
+      "erro": "Kontrolna lista nije učitana.",
+      "vazioTexto": "Doze se pojavljuju ovde kada pacijent ima propisan lek sa terminom u ovom periodu."
     },
     "dose": {
       "item": "Stavka",
@@ -13106,7 +13416,8 @@
         "ALIMENTACAO": "Npr. vlažna hrana, 1/3 konzerve",
         "MONITORAMENTO": "Npr. temperatura i srčana frekvencija",
         "PROCEDIMENTO": "Npr. čišćenje venskog pristupa"
-      }
+      },
+      "vazioTexto": "Svaki propisani lek se pojavljuje ovde sa dozom i učestalošću, i postaje doze sa vremenom na kontrolnoj listi."
     },
     "evolucao": {
       "titulo": "Tok bolesti",
@@ -13131,7 +13442,8 @@
       "versao": "Napisao {quem} {quando}, zamenio {por}",
       "desatualizada": "Hospitalizacija se promenila dok ste pisali. Otvorite ponovo da vidite trenutnu verziju.",
       "erro": "Zapis nije sačuvan.",
-      "erroAoCarregar": "Zapisi nisu učitani."
+      "erroAoCarregar": "Zapisi nisu učitani.",
+      "vazioTexto": "Zapis o toku svake smene pojavljuje se ovde, od najnovijeg. Zapis otvorene smene se prepisuje; predat ostaje zaključan."
     },
     "plantao": {
       "titulo": "Smena",
@@ -13281,6 +13593,38 @@
         "SUPERADO": "Prevaziđen pre slanja.",
         "FORA_DO_PRAZO": "Van roka: nije otišlo.",
         "FALHOU": "Slanje nije uspelo."
+      },
+      "guiaFila": {
+        "titulo": "Kako red funkcioniše",
+        "piora": {
+          "titulo": "Pogoršanje traži poziv",
+          "texto": "Kada se stanje pacijenta pogorša ili stigne kritičan, izveštaj čeka dok neko iz klinike ne pozove."
+        },
+        "ligar": {
+          "titulo": "Recepcija zove i beleži",
+          "texto": "Na telefon iz kartona. Zabeležite ovde ko je zvao: bez aplikacije, poziv već zatvara obavezu."
+        },
+        "enviar": {
+          "titulo": "Izveštaj ide u aplikaciju",
+          "texto": "Posle poziva, spreman izveštaj se pojavljuje ovde da ga pošaljete vlasniku."
+        }
+      },
+      "filaVaziaTexto": "Ovde se pojavljuje hospitalizovani pacijent sa pozivom ili izveštajem na čekanju, redom prijema i bez kliničkog teksta.",
+      "vazioTexto": "Izveštaji vlasniku se pojavljuju ovde, od najnovijeg: oni koje tim piše i automatski."
+    },
+    "guia": {
+      "titulo": "Kako hospitalizacija funkcioniše",
+      "leitos": {
+        "titulo": "Unesite krevete",
+        "texto": "U Podešavanjima, svaki krevet u sobi za hospitalizaciju, sa vrstom i nazivom koji tim koristi."
+      },
+      "internar": {
+        "titulo": "Primite na slobodan krevet",
+        "texto": "Na mapi, slobodan krevet otvara hospitalizaciju, sa pacijentom, razlogom, težinom stanja i telesnom masom na prijemu."
+      },
+      "acompanhar": {
+        "titulo": "Mapa pokazuje kome treba pomoć",
+        "texto": "Zakasnela doza, izveštaj koji čeka poziv i istekao otpust idu na vrh, od najhitnijeg."
       }
     }
   },
@@ -13406,7 +13750,8 @@
       "vazio": "Nema prometa u ovom periodu.",
       "verMais": "Prikaži još",
       "erro": "Promet nije učitan.",
-      "erroEstorno": "Poništavanje nije uspelo."
+      "erroEstorno": "Poništavanje nije uspelo.",
+      "vazioTexto": "Svaka primljena serija i svaki otpis pojavljuju se ovde, sa imenom ko je upisao. Primene vakcina imaju svoju listu."
     },
     "analise": {
       "periodo": "Period analize",
@@ -13481,7 +13826,8 @@
       "historicoTruncado": "Najstariji meseci su izostavljeni.",
       "erro": "Nije moguće učitati ciljeve.",
       "salvas": "Ciljevi za {mes} su dogovoreni.",
-      "limpas": "Ciljevi za {mes} su obrisani."
+      "limpas": "Ciljevi za {mes} su obrisani.",
+      "semPlanoAtualTexto": "Kada se ciljevi dogovore, svaki se pojavljuje ovde prema današnjem ritmu, do kraja meseca."
     },
     "pedido": {
       "titulo": "Porudžbina za {mes}",
@@ -13528,6 +13874,22 @@
       "vazio": "Bez ciljeva: čuvanje briše ciljeve za {mes}.",
       "erro": "Nije moguće sačuvati ciljeve.",
       "erroSugestao": "Predlog se nije učitao; ciljeve možete ipak dogovoriti."
+    },
+    "vazioTitulo": "Nema vakcina u frižideru",
+    "guia": {
+      "titulo": "Kako zalihe funkcionišu",
+      "receber": {
+        "titulo": "Primite seriju",
+        "texto": "Sa šifrom bočice, rokom trajanja i dozama. Serija ulazi u frižider sa svojim stanjem."
+      },
+      "aplicar": {
+        "titulo": "Primena otpisuje dozu",
+        "texto": "Kada se vakcina da iz serije sa zaliha, doza odmah izlazi iz stanja."
+      },
+      "avisar": {
+        "titulo": "Minimum upozorava",
+        "texto": "Ispod minimuma, frižider i meni upozoravaju. Istekla serija traži odlaganje."
+      }
     }
   },
   "casaDoHotel": {
@@ -13557,7 +13919,6 @@
       "ocupada": "Zauzeto",
       "desativar": "Izbaci iz upotrebe",
       "reativar": "Vrati u upotrebu",
-      "vazio": "Kuća još nema hodnike. Počnite od hodnika i u njemu upišite smeštaje.",
       "semAcomodacao": "Nema smeštaja u ovom hodniku.",
       "foraDeOperacao": "Van upotrebe",
       "desde": "{motivo} od {data}",
@@ -13568,7 +13929,24 @@
       "apagarDe": "Obriši {nome}",
       "noLimite": "Kuća je dostigla granicu od {limite} smeštaja.",
       "blocosNoLimite": "Kuća je dostigla granicu od {limite} hodnika.",
-      "antes": "Za upis smeštaja kući trebaju hodnik, tip i tarifa."
+      "antes": "Za upis smeštaja kući trebaju hodnik, tip i tarifa.",
+      "vazioTitulo": "Kuća još nema hodnike",
+      "vazioTexto": "Smeštaji se nalaze u hodnicima. Kada je kuća uređena, mapa i rezervacije počinju da rade.",
+      "guia": {
+        "titulo": "Kako urediti kuću",
+        "corredor": {
+          "titulo": "Napravite hodnik",
+          "texto": "Hodnik grupiše smeštaje, a redosled hodnika je redosled kuće na mapi."
+        },
+        "tipoTarifa": {
+          "titulo": "Imajte tip i tarifu",
+          "texto": "Svaki smeštaj traži tip i tarifu, koji se upisuju u Tipovima i Cenovnicima."
+        },
+        "acomodacao": {
+          "titulo": "Upišite smeštaje",
+          "texto": "Sa brojem životinja koje staju, najvećom veličinom i vrstama. Pojavljuju se na mapi i u rezervacijama."
+        }
+      }
     },
     "bloco": {
       "novo": "Novi hodnik",
@@ -13820,10 +14198,32 @@
       "pago": "plaćeno {valor}",
       "semSinal": "Bez kapare",
       "pendenteHa": "na čekanju {n} sat | na čekanju {n} sata | na čekanju {n} sati",
-      "vazio": "Nema rezervacija od juče nadalje.",
       "vazioHistorico": "Nema rezervacija sa ovim filterom.",
       "verMais": "Prikaži još",
-      "erro": "Nije moguće učitati rezervacije."
+      "erro": "Nije moguće učitati rezervacije.",
+      "proximasVazio": {
+        "titulo": "Nema predstojećih rezervacija",
+        "texto": "Lista prikazuje rezervacije od juče nadalje. Prošle ostaju u Istoriji."
+      },
+      "historicoVazio": {
+        "titulo": "Kuća još nema rezervacija",
+        "texto": "Istorija prikazuje sve rezervacije, i zatvorene, otkazane i one kada gost nije došao."
+      },
+      "guia": {
+        "titulo": "Kako rezervacija teče",
+        "entra": {
+          "titulo": "Rezervacija ulazi",
+          "texto": "Preko Nove rezervacije na pultu, ili kada hotel prihvati zahtev iz aplikacije ili sa linka."
+        },
+        "sinal": {
+          "titulo": "Kapara je potvrđuje",
+          "texto": "Ostaje na čekanju dok upisana uplata ne pokrije kaparu. Rezervacija na čekanju ne ističe sama."
+        },
+        "estadia": {
+          "titulo": "Prijava i odjava",
+          "texto": "Na dan dolaska prijava smešta ljubimca u kuću. Odjava zatvara rezervaciju, koja ostaje u Istoriji."
+        }
+      }
     },
     "grade": {
       "janela": "Od {de} do {ate}",
@@ -14026,7 +14426,24 @@
       "porte": "Veličina",
       "especie": "Vrsta",
       "filtroDica": "Veličina i vrsta zajedno traže mesto bez upisane životinje. Ako je prazno, prikazuje stanje svakog smeštaja.",
-      "ver": "Prikaži mapu"
+      "ver": "Prikaži mapu",
+      "vazioTexto": "Mapa prikazuje smeštaje upisane u kuću. Bez njih nema mesta za prikaz.",
+      "montarCasa": "Uredite kuću",
+      "guia": {
+        "titulo": "Kako mapa funkcioniše",
+        "casa": {
+          "titulo": "Kuća se uređuje",
+          "texto": "U Smeštaju se upisuju hodnici i smeštaji, sa veličinom i vrstama za svaki."
+        },
+        "situacao": {
+          "titulo": "Svaki pokazuje stanje",
+          "texto": "Slobodno, zauzeto, rezervisano, na čišćenju ili van upotrebe, u izabranom periodu."
+        },
+        "vaga": {
+          "titulo": "Tražite mesto",
+          "texto": "Veličina i vrsta zajedno pokazuju gde životinja staje, i pre nego što je upisana."
+        }
+      }
     },
     "status": {
       "CANCELADA": "Otkazana",
@@ -14160,6 +14577,28 @@
       "EXIGENCIAS": "Vakcina ili dokument",
       "PERFIL": "Nije za naš hotel",
       "OUTRO": "Drugo"
+    },
+    "guia": {
+      "titulo": "Kako zahtevi stižu",
+      "pedir": {
+        "titulo": "Staratelj šalje zahtev",
+        "texto": "Preko aplikacije ili linka hotela navodi datume i bira tip smeštaja ili prepušta izbor hotelu."
+      },
+      "chegar": {
+        "titulo": "Zahtev stiže ovde",
+        "texto": "Sa rokom za odgovor, koji teče samo dok je pult otvoren. Zahtev još ne drži smeštaj."
+      },
+      "responder": {
+        "titulo": "Pult odgovara",
+        "texto": "Rezerviše slobodan smeštaj ili odbija uz poruku. Odgovor stiže staratelju."
+      },
+      "ligar": "Uključite online rezervaciju"
+    },
+    "vazioTexto": {
+      "PENDENTES": "Zahtevi za boravak koji stižu preko aplikacije i linka hotela čekaju ovde na odgovor pulta.",
+      "ACEITOS": "Prihvaćeni zahtevi ostaju ovde, svaki sa rezervacijom koja je iz njega nastala.",
+      "RECUSADOS": "Odbijeni zahtevi ostaju ovde, sa razlogom koji je staratelj dobio.",
+      "ENCERRADOS": "Ovde ostaju zahtevi kojima je istekao rok i oni koje je staratelj povukao."
     }
   },
   "estadiaDoHotel": {
@@ -14196,7 +14635,23 @@
       "saida": "odlazi {quando}",
       "tarefasAtrasadas": "{n} zakasneli zadatak | {n} zakasnela zadatka | {n} zakasnelih zadataka",
       "vazio": "Trenutno nema gostiju.",
-      "erro": "Nije moguće učitati goste."
+      "erro": "Nije moguće učitati goste.",
+      "vazioTexto": "Lista prikazuje samo one koji su sada u kući, od prijave do odjave.",
+      "guia": {
+        "titulo": "Kako gost stiže ovde",
+        "reserva": {
+          "titulo": "Rezervacija je potvrđena",
+          "texto": "Sa pokrivenom kaparom čeka dan dolaska na listi Rezervacija."
+        },
+        "checkin": {
+          "titulo": "Pult prijavljuje gosta",
+          "texto": "U rezervaciji, od dana dolaska: težina, ishrana, lekovi, ovlašćenja i stvari."
+        },
+        "estadia": {
+          "titulo": "Boravak počinje",
+          "texto": "Ljubimac se pojavljuje ovde sa smeštajem, planiranim odlaskom i upozorenjima. Red otvara boravak."
+        }
+      }
     },
     "alerta": {
       "ATRASADO": "Prošao odlazak",
@@ -14779,7 +15234,8 @@
       "vazio": "U dnevniku još nema ničega.",
       "erro": "Upis u dnevnik nije uspeo.",
       "erroAoCarregar": "Dnevnik nije mogao da se učita.",
-      "erroFoto": "Fotografija nije mogla da se otvori."
+      "erroFoto": "Fotografija nije mogla da se otvori.",
+      "vazioTexto": "Obroci, šetnje, spavanje i laki i umereni incidenti boravka pojavljuju se ovde, od najnovijeg."
     },
     "ocorrencia": {
       "titulo": "Incidenti",
@@ -14823,7 +15279,8 @@
       "registradaGrave": "Ozbiljan incident je upisan. Pozovite vlasnika i upišite poziv.",
       "vazio": "Nema incidenata u ovom boravku.",
       "erro": "Incident nije mogao da se upiše.",
-      "erroAoCarregar": "Incidenti nisu mogli da se učitaju."
+      "erroAoCarregar": "Incidenti nisu mogli da se učitaju.",
+      "vazioTexto": "Ono što izađe iz rutine, kao povraćanje, tuča ili odbijanje hrane, beleži se ovde sa ozbiljnošću."
     },
     "ligacao": {
       "titulo": "Upiši poziv",
@@ -14954,6 +15411,7 @@
       "h48": "U 07:00, svakog drugog dana."
     },
     "fotoSempre": "Fotografija kada je ima",
-    "fotoSempreDica": "Želja vlasnika, nikad obaveza kuće."
+    "fotoSempreDica": "Želja vlasnika, nikad obaveza kuće.",
+    "vazioTexto": "Izveštaji vlasniku ostaju ovde, oni koje piše tim i automatski, sa isporukom svakog."
   }
 }

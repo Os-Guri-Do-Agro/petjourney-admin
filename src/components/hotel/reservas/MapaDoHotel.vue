@@ -18,6 +18,8 @@ import { RouterLink } from 'vue-router'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   ESPECIES,
@@ -39,7 +41,30 @@ import '@/components/hotel/casa/casa.css'
 
 const { t } = useI18n()
 const rotulos = useRotulosDasReservas()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
+
+/** "Montar a casa" no vazio: quem edita a casa (a mesma conta de `CasaDoHotel`). */
+const editaCasa = computed(
+  () =>
+    Boolean(store.modulo('HOTEL')?.podeEscrever) && store.temPermissao('estabelecimento.editar'),
+)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): a casa sem acomodação não tem mapa.
+ * Como o mapa se forma, em três etapas, e "Montar a casa" para quem edita.
+ */
+const passosDoMapa = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'casa', icone: 'ph ph-building' },
+    { id: 'situacao', icone: 'ph ph-squares-four' },
+    { id: 'vaga', icone: 'ph ph-funnel' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`reservasDoHotel.mapa.guia.${id}.titulo`),
+    texto: t(`reservasDoHotel.mapa.guia.${id}.texto`),
+  })),
+)
 
 const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -182,9 +207,23 @@ function aplicar() {
     <div class="mh">
       <p v-if="erro" class="mh__erro" role="alert">{{ erro }}</p>
       <p v-if="mapa?.truncado" class="mh__nota">{{ t('reservasDoHotel.mapa.truncado') }}</p>
-      <p v-if="mapa && !mapa.vagas.length" class="ui-folha ui-vazio">
-        {{ t('reservasDoHotel.mapa.vazio') }}
-      </p>
+      <UiVazioIlustrado
+        v-if="mapa && !mapa.vagas.length"
+        icone="ph ph-squares-four"
+        :titulo="t('reservasDoHotel.mapa.vazio')"
+        :texto="t('reservasDoHotel.mapa.vazioTexto')"
+        :guia-titulo="t('reservasDoHotel.mapa.guia.titulo')"
+        :passos="passosDoMapa"
+      >
+        <template v-if="editaCasa" #acao>
+          <Button
+            :as="RouterLink"
+            to="/hotel/acomodacoes"
+            icon="ph ph-building"
+            :label="t('reservasDoHotel.mapa.montarCasa')"
+          />
+        </template>
+      </UiVazioIlustrado>
 
       <section
         v-for="grupo in porBloco"

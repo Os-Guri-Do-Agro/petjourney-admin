@@ -20,6 +20,8 @@ import { RouterLink } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import { listarSalas, type Sala } from '@/service/parceiro/agenda-config-service'
@@ -82,6 +84,24 @@ const leitos = computed(() => lista.value?.itens ?? [])
 const ativos = computed(() => leitos.value.filter((leito) => leito.ativo))
 const inativos = computed(() => leitos.value.filter((leito) => !leito.ativo))
 const noLimite = computed(() => Boolean(lista.value && leitos.value.length >= lista.value.limite))
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem leito nenhum, como
+ * o leito nasce (a sala de internação, o cadastro, o lugar no mapa), e o "Novo leito" embaixo
+ * quando já há sala. Sem sala, o aviso acima do vazio leva até ela.
+ */
+const passosDosLeitos = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'sala', icone: 'ph ph-door' },
+    { id: 'leito', icone: 'ph ph-bed' },
+    { id: 'mapa', icone: 'ph ph-map-trifold' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`internacao.leitos.guia.${id}.titulo`),
+    texto: t(`internacao.leitos.guia.${id}.texto`),
+  })),
+)
 
 function meta(leito: Leito) {
   const partes = [t(`internacao.kind.${leito.kind}`), leito.salaNome]
@@ -302,7 +322,26 @@ async function apagar(leito: Leito) {
         {{ t('internacao.leitos.noLimite', { limite: lista.limite }) }}
       </p>
 
-      <p v-if="!leitos.length" class="la__vazio">{{ t('internacao.leitos.vazio') }}</p>
+      <UiVazioIlustrado
+        v-if="!leitos.length"
+        aninhado
+        icone="ph ph-bed"
+        :titulo="t('internacao.leitos.vazio')"
+        :texto="
+          props.podeEditar ? t('internacao.vazioDescricao') : t('internacao.vazioSemCadastro')
+        "
+        :guia-titulo="t('internacao.leitos.guia.titulo')"
+        :passos="passosDosLeitos"
+      >
+        <template v-if="props.podeEditar && salas.length && !noLimite" #acao>
+          <Button
+            type="button"
+            icon="ph ph-plus"
+            :label="t('internacao.leitos.novo')"
+            @click="abrir(null)"
+          />
+        </template>
+      </UiVazioIlustrado>
 
       <ul v-if="ativos.length" class="ui-lista">
         <li v-for="leito in ativos" :key="leito.id" class="ui-linha">
@@ -534,13 +573,6 @@ async function apagar(leito: Leito) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.la__vazio {
-  margin: 0;
-  padding: 0 24px 8px;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .la__subtitulo {

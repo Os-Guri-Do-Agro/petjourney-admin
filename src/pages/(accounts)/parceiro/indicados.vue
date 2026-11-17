@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -102,6 +103,26 @@ const vazioDaPagina = computed(() => {
     acao: t('parceiro.indicados.vazio.acao'),
   }
 })
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), discreto: como a lista se forma, sem
+ * promessa de ganho (indicação nunca em destaque, 03/11). O bloqueio não ganha etapas: ele diz
+ * por que a lista não abre, e não há o que ensinar.
+ */
+const passosDaLista = computed<PassoDoGuia[]>(() =>
+  bloqueio.value
+    ? []
+    : [
+        { id: 'codigo', icone: 'ph ph-user-plus' },
+        { id: 'lista', icone: 'ph ph-user-list' },
+        { id: 'situacao', icone: 'ph ph-arrows-clockwise' },
+      ].map(({ id, icone }) => ({
+        id,
+        icone,
+        titulo: t(`parceiro.indicados.guia.${id}.titulo`),
+        texto: t(`parceiro.indicados.guia.${id}.texto`),
+      })),
+)
 
 async function carregar() {
   const minha = ++geracao
@@ -273,6 +294,8 @@ onMounted(async () => {
     :vazio-icone="vazioDaPagina.icone"
     :vazio-acao="vazioDaPagina.acao"
     vazio-acao-icone="ph ph-qr-code"
+    :vazio-guia-titulo="passosDaLista.length ? t('parceiro.indicados.guia.titulo') : ''"
+    :vazio-passos="passosDaLista"
     @tentar-de-novo="tentarDeNovo"
     @acao-do-vazio="verMeuCodigo"
   >

@@ -14,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { motivoDaRecusa } from '@/composables/useSeloDeAssinatura'
 import {
@@ -259,7 +260,13 @@ async function suspender() {
         </span>
       </li>
     </ul>
-    <p v-else-if="lista" class="pd__nota pd__vazio">{{ t('internacao.prescricao.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="lista"
+      aninhado
+      icone="ph ph-prescription"
+      :titulo="t('internacao.prescricao.vazio')"
+      :texto="t('internacao.prescricao.vazioTexto')"
+    />
 
     <template v-if="lista?.inativas.length">
       <Button
@@ -341,11 +348,6 @@ async function suspender() {
 .pd__nota {
   margin: 0;
   padding: 0 24px 12px;
-}
-
-.pd__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .pd__acoes {

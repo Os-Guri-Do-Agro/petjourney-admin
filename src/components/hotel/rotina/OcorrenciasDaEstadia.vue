@@ -14,6 +14,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import {
@@ -273,9 +274,13 @@ function registrada(item: Ocorrencia) {
         </span>
       </li>
     </ul>
-    <p v-else-if="carregado && !erro" class="oe__nota oe__vazio">
-      {{ t('rotinaDoHotel.ocorrencia.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-else-if="carregado && !erro"
+      aninhado
+      icone="ph ph-warning-diamond"
+      :titulo="t('rotinaDoHotel.ocorrencia.vazio')"
+      :texto="t('rotinaDoHotel.ocorrencia.vazioTexto')"
+    />
 
     <OcorrenciaGaveta
       v-model:visible="novaAberta"
@@ -308,11 +313,6 @@ function registrada(item: Ocorrencia) {
 .oe__nota {
   margin: 0;
   padding: 0 10px 12px;
-}
-
-.oe__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .oe__nome {

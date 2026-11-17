@@ -10,6 +10,7 @@
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
+import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
@@ -17,6 +18,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { ApiError } from '@/service/api'
@@ -29,11 +32,13 @@ import {
   type PedidoDoHotel,
   type ReservaOnline,
 } from '@/service/parceiro/hotel-pedidos-service'
+import { SITE_PUBLICO } from '@/utils/parceiro/pagina-publica'
 
 import PedidoDoHotelGaveta from './PedidoDoHotelGaveta.vue'
 import ReservaOnlineGaveta from './ReservaOnlineGaveta.vue'
 
 const { t } = useI18n()
+const toast = useToast()
 const rotulos = useRotulosDasReservas()
 const route = useRoute()
 const router = useRouter()
@@ -143,6 +148,53 @@ function respondido(texto: string, reservaId: string | null) {
   void carregar()
 }
 
+/* ---------------------------------------------------------------------------- o vazio */
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), como na caixa da Clínica: em "Esperando
+ * resposta", como o pedido chega até aqui, em três etapas, e a ação que faz pedido chegar: o link
+ * do hotel, quando ele recebe pedidos, ou ligar a reserva online, quando está pausada. As outras
+ * situações só dizem o que vai aparecer nelas.
+ */
+const ICONE_DO_VAZIO: Record<AbaDaCaixaDoHotel, string> = {
+  PENDENTES: 'ph ph-calendar-plus',
+  ACEITOS: 'ph ph-calendar-check',
+  RECUSADOS: 'ph ph-calendar-x',
+  ENCERRADOS: 'ph ph-archive',
+}
+
+const passosDoPedido = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'pedir', icone: 'ph ph-device-mobile' },
+    { id: 'chegar', icone: 'ph ph-tray-arrow-down' },
+    { id: 'responder', icone: 'ph ph-calendar-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`pedidosDoHotel.guia.${id}.titulo`),
+    texto: t(`pedidosDoHotel.guia.${id}.texto`),
+  })),
+)
+
+/** O link de pedidos, só quando ele recebe: reserva online ligada e pedido pelo link aceito. */
+const linkDePedidos = computed(() => {
+  const config = configuracao.value
+  return config?.ativo && config.aceitaPeloLink && config.slug
+    ? `${SITE_PUBLICO}/reservar/${encodeURIComponent(config.slug)}`
+    : null
+})
+
+async function copiarLinkDePedidos() {
+  if (!linkDePedidos.value) return
+
+  try {
+    await navigator.clipboard.writeText(linkDePedidos.value)
+    toast.add({ severity: 'success', summary: t('clinico.pedidos.link.copiado'), life: 2500 })
+  } catch {
+    toast.add({ severity: 'warn', summary: linkDePedidos.value, life: 8000 })
+  }
+}
+
 const resumo = computed(() => {
   if (aba.value !== 'PENDENTES' || carregando.value) return ''
   const atrasados = itens.value.filter((p) => p.prazo === 'ATRASADO').length
@@ -193,7 +245,7 @@ const resumo = computed(() => {
 
       <p v-if="erro" class="cx__erro" role="alert">{{ erro }}</p>
 
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
+      <section v-if="itens.length || carregando" class="ui-folha ui-lista" :aria-busy="carregando">
         <ul v-if="itens.length" class="ui-lista">
           <li v-for="p in itens" :key="p.id" class="ui-linha">
             <span class="ui-linha__texto">
@@ -223,8 +275,54 @@ const resumo = computed(() => {
             </span>
           </li>
         </ul>
-        <p v-else-if="!carregando" class="ui-vazio">{{ t(`pedidosDoHotel.vazio.${aba}`) }}</p>
       </section>
+
+      <UiVazioIlustrado
+        v-else-if="!erro && aba === 'PENDENTES'"
+        :icone="ICONE_DO_VAZIO.PENDENTES"
+        :titulo="t('pedidosDoHotel.vazio.PENDENTES')"
+        :texto="t('pedidosDoHotel.vazioTexto.PENDENTES')"
+        :guia-titulo="t('pedidosDoHotel.guia.titulo')"
+        :passos="passosDoPedido"
+      >
+        <template
+          v-if="linkDePedidos || (configuracao && !configuracao.ativo && podeConfigurar)"
+          #acao
+        >
+          <template v-if="linkDePedidos">
+            <Button
+              type="button"
+              icon="ph ph-copy"
+              :label="t('clinico.pedidos.link.copiar')"
+              @click="copiarLinkDePedidos"
+            />
+            <Button
+              as="a"
+              :href="linkDePedidos"
+              target="_blank"
+              rel="noopener noreferrer"
+              severity="secondary"
+              outlined
+              icon="ph ph-arrow-square-out"
+              :label="t('clinico.pedidos.link.abrir')"
+            />
+          </template>
+          <Button
+            v-else
+            type="button"
+            icon="ph ph-power"
+            :label="t('pedidosDoHotel.guia.ligar')"
+            @click="configAberta = true"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="!erro"
+        :icone="ICONE_DO_VAZIO[aba]"
+        :titulo="t(`pedidosDoHotel.vazio.${aba}`)"
+        :texto="t(`pedidosDoHotel.vazioTexto.${aba}`)"
+      />
 
       <Button
         v-if="cursor"

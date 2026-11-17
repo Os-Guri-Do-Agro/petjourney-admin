@@ -20,6 +20,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -408,15 +409,25 @@ const rotaDaAgenda = computed<RouteLocationRaw>(() =>
         {{ t('inicio.agenda.falhou') }}
       </p>
 
-      <p v-else-if="estado.fechada && compromissos.length === 0" class="ui-vazio">
-        {{
+      <!-- Dentro do cartão: o vazio sem caixa própria e sem etapas (o Início só avisa). -->
+      <UiVazioIlustrado
+        v-else-if="estado.fechada && compromissos.length === 0"
+        aninhado
+        :icone="estado.feriado ? 'ph ph-calendar-star' : 'ph ph-moon'"
+        :titulo="
           estado.feriado
             ? t('inicio.dia.feriado', { nome: estado.feriado })
             : t('inicio.agenda.fechada')
-        }}
-      </p>
+        "
+      />
 
-      <p v-else-if="vazio" class="ui-vazio">{{ t('inicio.agenda.vazio') }}</p>
+      <UiVazioIlustrado
+        v-else-if="vazio"
+        aninhado
+        icone="ph ph-calendar-blank"
+        :titulo="t('inicio.agenda.vazio')"
+        :texto="t('inicio.agenda.vazioTexto')"
+      />
 
       <ul v-else class="ui-lista agenda__lista" :aria-label="t('inicio.agenda.compromissos')">
         <li v-for="item in visiveis" :key="item.id" :class="`pj-lugar--${item.lugar}`">

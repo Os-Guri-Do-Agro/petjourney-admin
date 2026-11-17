@@ -16,6 +16,7 @@ import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiLinhasCarregando from '@/components/ui/UiLinhasCarregando.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -43,7 +44,8 @@ const filtro = ref<Filtro>(TODOS)
 const itens = ref<Movimento[]>([])
 const cursor = ref<string | null>(null)
 const periodo = ref<{ de: string; ate: string } | null>(null)
-const carregando = ref(false)
+/* Nasce carregando: a primeira leitura sai no mount, e o vazio não pisca antes dela. */
+const carregando = ref(true)
 const erro = ref('')
 
 async function carregar(mais = false) {
@@ -172,7 +174,7 @@ async function estornar() {
 
     <p v-if="erro" class="mv__erro" role="alert">{{ erro }}</p>
 
-    <section class="ui-folha ui-lista" :aria-busy="carregando">
+    <section v-if="itens.length || carregando" class="ui-folha ui-lista" :aria-busy="carregando">
       <ul v-if="itens.length" class="ui-lista">
         <li
           v-for="item in itens"
@@ -206,9 +208,15 @@ async function estornar() {
           </span>
         </li>
       </ul>
-      <UiLinhasCarregando v-else-if="carregando" :linhas="5" />
-      <p v-else class="ui-vazio">{{ t('estoque.movimentos.vazio') }}</p>
+      <UiLinhasCarregando v-else :linhas="5" />
     </section>
+    <!-- Sem movimento: o que vai aparecer aqui. Com erro, só o erro acima. -->
+    <UiVazioIlustrado
+      v-else-if="!erro"
+      icone="ph ph-arrows-down-up"
+      :titulo="t('estoque.movimentos.vazio')"
+      :texto="t('estoque.movimentos.vazioTexto')"
+    />
 
     <Button
       v-if="cursor"

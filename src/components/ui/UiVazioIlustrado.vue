@@ -10,9 +10,11 @@
  * `aninhado`: dentro de um cartão que já tem caixa, o vazio fica sem caixa própria (caixa dentro de
  * caixa não organiza nada).
  */
+import { computed } from 'vue'
+
 import UiPassos, { type PassoDoGuia } from '@/components/ui/UiPassos.vue'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     icone: string
     titulo: string
@@ -23,6 +25,9 @@ withDefaults(
   }>(),
   { texto: '', guiaTitulo: '', passos: () => [], aninhado: false },
 )
+
+/* Título de vazio é um recado, não uma frase: sem o ponto final que alguns textos antigos trazem. */
+const tituloSemPonto = computed(() => props.titulo.replace(/\.\s*$/, ''))
 </script>
 
 <template>
@@ -34,7 +39,7 @@ withDefaults(
       <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
         <i :class="icone" />
       </span>
-      <h2 class="ui-vazio-ilustrado__titulo">{{ titulo }}</h2>
+      <h2 class="ui-vazio-ilustrado__titulo">{{ tituloSemPonto }}</h2>
       <p v-if="texto" class="ui-vazio-ilustrado__texto">{{ texto }}</p>
     </div>
 

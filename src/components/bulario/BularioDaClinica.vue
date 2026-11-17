@@ -10,6 +10,7 @@
  * Hoje o bulário da PetJourney inteiro está em revisão pelo responsável técnico, e a busca traz só
  * o que a clínica acrescentou (D2): a tela diz isso, em vez de parecer quebrada.
  */
+import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
@@ -21,6 +22,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import DoseDoPaciente from '@/components/bulario/DoseDoPaciente.vue'
 import { lerErroDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { ApiError } from '@/service/api'
 import {
@@ -80,6 +83,25 @@ const visiveis = computed(() =>
 
 const selecionado = computed(
   () => lista.value.find((item) => item.id === selecionadoId.value) ?? visiveis.value[0] ?? null,
+)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão da lista: sem busca e sem
+ * nada achado, o porquê (D2, o bulário da PetJourney em revisão) e como o bulário anda (a clínica
+ * acrescenta, a busca, a ficha), com o "Acrescentar" embaixo para quem gere o catálogo. Com
+ * busca, é filtro: fica a frase curta.
+ */
+const passosDoBulario = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'acrescentar', icone: 'ph ph-plus-circle' },
+    { id: 'buscar', icone: 'ph ph-magnifying-glass' },
+    { id: 'ficha', icone: 'ph ph-book-open' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`clinico.bulario.api.guia.${id}.titulo`),
+    texto: t(`clinico.bulario.api.guia.${id}.texto`),
+  })),
 )
 
 let espera: ReturnType<typeof setTimeout> | undefined
@@ -281,17 +303,28 @@ const resumo = computed(() =>
             </li>
           </ul>
 
-          <!-- Nada achado: com busca, a frase de sempre; sem busca, o porquê (D2). -->
-          <div v-else-if="lido && !carregando" class="bul__vazio">
-            <p v-if="busca.trim()">{{ t('clinico.bulario.semResultado') }}</p>
-            <template v-else>
-              <p>{{ t('clinico.bulario.api.emRevisao') }}</p>
-              <RouterLink v-if="podeAcrescentar" to="/clinica/configuracao?aba=catalogo">
-                {{ t('clinico.bulario.api.acrescentar') }}
-                <i class="ph ph-arrow-right" aria-hidden="true" />
-              </RouterLink>
+          <!-- Nada achado: com busca, a frase de sempre; sem busca, o porquê (D2) e o guia. -->
+          <p v-else-if="lido && !carregando && busca.trim()" class="bul__vazio">
+            {{ t('clinico.bulario.semResultado') }}
+          </p>
+          <UiVazioIlustrado
+            v-else-if="lido && !carregando && !erro"
+            aninhado
+            icone="ph ph-pill"
+            :titulo="t('clinico.bulario.api.vazioTitulo')"
+            :texto="t('clinico.bulario.api.emRevisao')"
+            :guia-titulo="t('clinico.bulario.api.guia.titulo')"
+            :passos="passosDoBulario"
+          >
+            <template v-if="podeAcrescentar" #acao>
+              <Button
+                :as="RouterLink"
+                to="/clinica/configuracao?aba=catalogo"
+                icon="ph ph-plus"
+                :label="t('clinico.bulario.api.acrescentar')"
+              />
             </template>
-          </div>
+          </UiVazioIlustrado>
         </section>
 
         <section class="ui-folha ui-cartao bul__ficha" aria-live="polite">
@@ -494,25 +527,6 @@ const resumo = computed(() =>
 
 .bul__erro {
   color: var(--risco-tinta);
-}
-
-.bul__vazio {
-  display: grid;
-  gap: 8px;
-}
-
-.bul__vazio p {
-  margin: 0;
-}
-
-.bul__vazio a {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--tinta);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .bul__ficha {

@@ -17,6 +17,8 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { novaChaveDeIdempotencia } from '@/service/idempotencia'
@@ -95,6 +97,24 @@ const resumo = computed(() => {
   return n ? t('internacao.boletim.filaResumo', { n }, n) : ''
 })
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): com a fila em dia, como um internado
+ * chega até ela, em três etapas (a piora que pede ligação, a ligação registrada, o boletim que
+ * vai ao app). Sem ação: nada aqui faz pendência aparecer.
+ */
+const passosDaFila = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'piora', icone: 'ph ph-heartbeat' },
+    { id: 'ligar', icone: 'ph ph-phone' },
+    { id: 'enviar', icone: 'ph ph-paper-plane-tilt' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`internacao.boletim.guiaFila.${id}.titulo`),
+    texto: t(`internacao.boletim.guiaFila.${id}.texto`),
+  })),
+)
+
 /* ----------------------------------------------------------------------------- as ações */
 
 const ligacaoAberta = ref(false)
@@ -147,8 +167,8 @@ function registrada() {
   >
     <div v-if="fila" class="bp">
       <p v-if="recado" class="bp__recado" role="status">{{ recado }}</p>
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
-        <ul v-if="fila.itens.length" class="ui-lista">
+      <section v-if="fila.itens.length" class="ui-folha ui-lista" :aria-busy="carregando">
+        <ul class="ui-lista">
           <li v-for="item in fila.itens" :key="item.internacaoId" class="ui-linha">
             <span class="ui-linha__texto">
               <strong class="ui-linha__titulo bp__nome">
@@ -185,8 +205,15 @@ function registrada() {
             </span>
           </li>
         </ul>
-        <p v-else class="ui-vazio">{{ t('internacao.boletim.filaVazia') }}</p>
       </section>
+      <UiVazioIlustrado
+        v-else
+        icone="ph ph-phone"
+        :titulo="t('internacao.boletim.filaVazia')"
+        :texto="t('internacao.boletim.filaVaziaTexto')"
+        :guia-titulo="t('internacao.boletim.guiaFila.titulo')"
+        :passos="passosDaFila"
+      />
       <p v-if="fila.truncado" class="bp__recado">{{ t('internacao.boletim.filaTruncada') }}</p>
     </div>
 

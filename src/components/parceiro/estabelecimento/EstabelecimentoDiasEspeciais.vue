@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { DiaEspecial } from '@/service/parceiro/estabelecimento-service'
 
@@ -77,12 +78,10 @@ function horarioDoDia(dia: DiaEspecial) {
 
 const menuDeAdicionar = ref<InstanceType<typeof Menu> | null>(null)
 
-/** O catálogo da API tem o ano corrente e o próximo; outro ano ela recusa. */
-const anosDeFeriado = computed(() => {
-  const ano = Number(props.hoje.slice(0, 4))
+const anoDeHoje = computed(() => Number(props.hoje.slice(0, 4)))
 
-  return [ano, ano + 1]
-})
+/** O catálogo da API tem o ano corrente e o próximo; outro ano ela recusa. */
+const anosDeFeriado = computed(() => [anoDeHoje.value, anoDeHoje.value + 1])
 
 /**
  * Um botão "Adicionar" só, com o dia avulso e os feriados nacionais dentro: os dois botões lado a
@@ -261,12 +260,30 @@ const grupos = computed(() => [
         </span>
       </div>
 
-      <p v-if="proximos.length === 0" class="especiais__vazio">
-        {{
-          passados.length
-            ? t('parceiro.estabelecimento.dia.nenhumProximo')
-            : t('parceiro.estabelecimento.dia.vazio')
-        }}
+      <!--
+        Nenhum dia: o que entra aqui e, para quem edita, os feriados nacionais do ano num toque.
+        Só os que já passaram: a lista não está vazia, eles estão recolhidos embaixo.
+      -->
+      <UiVazioIlustrado
+        v-if="dias.length === 0"
+        aninhado
+        icone="ph ph-calendar-star"
+        :titulo="t('parceiro.estabelecimento.dia.vazioTitulo')"
+        :texto="t('parceiro.estabelecimento.dia.vazioTexto')"
+      >
+        <template v-if="podeEditar" #acao>
+          <Button
+            type="button"
+            icon="ph ph-flag"
+            :label="t('parceiro.estabelecimento.dia.feriadosDe', { ano: anoDeHoje })"
+            :loading="copiandoFeriados"
+            @click="emit('feriados', anoDeHoje)"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <p v-else-if="proximos.length === 0" class="especiais__vazio">
+        {{ t('parceiro.estabelecimento.dia.nenhumProximo') }}
       </p>
 
       <template v-for="grupo in grupos" :key="grupo.id">
