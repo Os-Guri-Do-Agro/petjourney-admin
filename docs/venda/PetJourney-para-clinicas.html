@@ -456,7 +456,7 @@
         align-items: center;
         gap: 6mm;
         margin-top: auto;
-        padding: 4.2mm 15mm 4.8mm;
+        padding: 3.8mm 15mm 4.4mm;
         background: var(--app-fundo);
         color: var(--app-tinta);
       }
@@ -522,6 +522,18 @@
         padding: 3mm 4.4mm 3mm 3mm;
         border-radius: 3mm;
         background: var(--papel);
+      }
+
+      .passos a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .contato__dica {
+        margin-top: 0.8mm;
+        color: var(--suave);
+        font-size: 7.6pt;
+        line-height: 1.3;
       }
 
       .contato__qr {
@@ -755,7 +767,10 @@
           <ol class="passos">
             <li>
               <span class="passos__n">1</span>
-              <span><b>Cadastre a clínica</b> pelo QR code ao lado ou no site.</span>
+              <span
+                ><b>Cadastre a clínica</b> em
+                <a href="https://petjourney.health/parcerias">petjourney.health/parcerias</a>.</span
+              >
             </li>
             <li>
               <span class="passos__n">2</span>
@@ -776,12 +791,13 @@
           />
           <div>
             <p class="contato__titulo">Fale conosco</p>
-            <a href="https://petjourney.health/parcerias"
+            <a href="https://petjourney.health"
               ><i class="ph ph-globe-simple"></i>petjourney.health</a
             >
             <a href="mailto:atendimento@petjourney.health"
               ><i class="ph ph-envelope-simple"></i>atendimento@petjourney.health</a
             >
+            <p class="contato__dica">Aponte a câmera para baixar o app e saber mais.</p>
           </div>
         </div>
       </footer>

@@ -11,10 +11,10 @@ pelo pet. A oferta é gratuita para a clínica.
 | `imagens/app-inicio.webp` | O app no celular, a mesma imagem do site (`petjourney-web/src/assets/app-telas/pt/aparelho-home.webp`) |
 | `phosphor/` | Só os ícones Phosphor que a folha usa (gerados de `@phosphor-icons/web`) |
 | `fontes/` | Readex Pro em pesos **fixos** (400 e 600), de `@fontsource/readex-pro` (OFL) |
-| `imagens/qr-petjourney.png` | QR code do rodapé, o da marca (azul, com a pata no meio), passado pelo Luís em 17/11/2026 |
+| `imagens/qr-petjourney.png` | QR code do rodapé, o da marca (azul, com a pata no meio): baixar o app e saber mais. Passado pelo Luís em 17/11/2026 |
 
-O passo 1 do rodapé diz "Cadastre a clínica pelo QR code ao lado": se o QR mudar de destino,
-revise esse texto.
+O QR é para baixar o app e saber mais (o cartão diz isso); o cadastro da clínica vai pelo site
+(passo 1). Se o QR mudar de destino, revise a frase do cartão.
 
 Logo, faixa e a tela da Clínica vêm de `../apresentacao/` (a captura `telas/10-clinica-hoje.png`,
 recortada pelo CSS para não mostrar o Hotel, que está pausado).
