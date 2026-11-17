@@ -447,12 +447,16 @@ html:has(.shell--moldura-app) {
   font-size: 19px;
 }
 
-/* O número do sino é o selo neutro do menu: aviso é informação, não urgência. */
+/*
+ * O número do sino: aviso é informação, não urgência, então nada de vermelho; mas é o único
+ * contador sobre um ícone, e o véu do menu (15%) sumia atrás do sino nos dois temas (17/11/2026,
+ * "badge fica muito apagado"). Fica a sálvia pastel cheia do avatar ao lado, com a tinta dele.
+ */
 .shell.shell--moldura-app .sino__selo {
   min-width: 22px;
   height: 22px;
-  background: var(--app-veu-forte);
-  color: var(--app-salvia-texto);
+  background: var(--pets-claro);
+  color: var(--rail);
   font-family: var(--font-texto);
   font-weight: 700;
 }
@@ -465,7 +469,7 @@ html:has(.shell--moldura-app) {
   height: 18px;
   padding: 0 5px;
   box-shadow: 0 0 0 2px var(--app-fundo);
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .shell.shell--moldura-app .barra .conta__botao {
