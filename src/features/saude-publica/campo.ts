@@ -13,6 +13,11 @@
  *   que o protótipo já tem (412 atendimentos do piloto e os atendidos de cada campanha encerrada),
  *   com um CEP real do bairro de cada um. Os da sessão entram por cima, e o resultado anotado depois
  *   (o "anotar resultado") vale para os dois.
+ * - **Equipe** (17/11/2026, "relatório da equipe"): cada atendimento tem quem atendeu (`equipeId`) e
+ *   quem fez o cadastro e a acolhida (`cadastroId`), da `EQUIPE` de exemplo. Nos dos 90 dias, o
+ *   sorteio é próprio (pelo id do atendimento), para não mudar os números que já existiam:
+ *   castração, consulta e exame com quem é veterinário; vacina, coleira e microchip com auxiliar ou
+ *   agente; sempre de quem trabalha naquela frente (Consultório Móvel ou campanhas).
  */
 import { computed, ref } from 'vue'
 
@@ -30,12 +35,20 @@ import {
   PROCEDIMENTOS,
   REGIOES,
   motivosDo,
+  EQUIPE,
+  frenteDaOrigem,
+  funcao,
+  quemAtendeNa,
+  quemCadastraNa,
   situacaoDoAtendimento,
   somarDias,
   type AtendimentoDoPiloto,
   type Campanha,
   type IdDaRegiao,
+  type FrenteDaEquipe,
+  type FuncaoNaEquipe,
   type MotivoDeNaoFeito,
+  type PessoaDaEquipe,
   type Procedimento,
   type ResultadoDoProcedimento,
   type SituacaoDoAtendimento,
@@ -299,6 +312,10 @@ export type RegistroDeCampo = {
   resultados: ResultadoDoProcedimento[]
   responsavelId?: string
   petId?: string
+  /** Quem da equipe atendeu (fez ou tentou os procedimentos). */
+  equipeId?: string
+  /** Quem da equipe fez o cadastro e a acolhida. */
+  cadastroId?: string
 }
 
 /* ------------------------------------------------------------------- gerador de exemplos */
@@ -514,6 +531,52 @@ function registrosDoPilotoGerados(quantos: number): RegistroDeCampo[] {
   })
 }
 
+/* ------------------------------------------------------------------------- a equipe */
+
+/**
+ * Os procedimentos que pedem quem é veterinário; o resto, auxiliar ou agente. O exame de
+ * leishmaniose (a coleta para o teste rápido) é do agente de zoonoses.
+ */
+const DO_VETERINARIO: Procedimento[] = ['castracao', 'consulta']
+
+/**
+ * Quem atendeu e quem cadastrou, sorteado pelo id do atendimento (sempre igual, e sem mexer no
+ * sorteio dos outros campos): da frente certa, e da função que o procedimento pede.
+ */
+function equipeSorteada(
+  registro: Pick<RegistroDeCampo, 'id' | 'origem' | 'resultados'>,
+): Pick<RegistroDeCampo, 'equipeId' | 'cadastroId'> {
+  const frente = frenteDaOrigem(registro.origem)
+  const sortear = sorteador(sementeDe(`${registro.id}:equipe`))
+  const quem = quemAtendeNa(frente)
+  const pedeVeterinario = registro.resultados.some((item) =>
+    DO_VETERINARIO.includes(item.procedimento),
+  )
+  const certos = quem.filter((pessoa) =>
+    pedeVeterinario ? pessoa.funcao === 'veterinario' : pessoa.funcao !== 'veterinario',
+  )
+  const lista = certos.length ? certos : quem
+  const cadastro = quemCadastraNa(frente)
+  return {
+    equipeId: lista[Math.floor(sortear() * lista.length)]?.id,
+    cadastroId: cadastro[Math.floor(sortear() * cadastro.length)]?.id,
+  }
+}
+
+/** O registro com quem atendeu e quem cadastrou: o que veio gravado vale; o que falta, sorteado. */
+function comEquipe(registro: RegistroDeCampo): RegistroDeCampo {
+  if (registro.equipeId && registro.cadastroId) return registro
+  const sorteada = equipeSorteada(registro)
+  return {
+    ...registro,
+    equipeId: registro.equipeId ?? sorteada.equipeId,
+    cadastroId: registro.cadastroId ?? sorteada.cadastroId,
+  }
+}
+
+/** A última pessoa escolhida em "Quem atendeu", por frente: o registro seguinte já vem com ela. */
+const ultimoQueAtendeu = ref<Partial<Record<FrenteDaEquipe, string>>>({})
+
 const {
   atendimentos: atendimentosDoPiloto,
   cadastros,
@@ -525,7 +588,7 @@ const GERADOS: RegistroDeCampo[] = [
     registrosDaCampanhaEncerrada,
   ),
   ...registrosDoPilotoGerados(PILOTO.atendimentos - atendimentosDoPiloto.value.length),
-]
+].map(comEquipe)
 
 /* --------------------------------------------------------------------------- a sessão */
 
@@ -537,7 +600,7 @@ const anotados = ref<Record<string, ResultadoDoProcedimento[]>>({})
 /** O atendimento da lista do piloto como registro de campo: o lugar vem do cadastro, se houver. */
 function doPiloto(atendimento: AtendimentoDoPiloto): RegistroDeCampo {
   const cadastro = cadastros.value[atendimento.id] as
-    | { responsavelId?: string; petId?: string }
+    | { responsavelId?: string; petId?: string; equipeId?: string }
     | undefined
   const responsavel = responsaveis.value.find((item) => item.id === cadastro?.responsavelId)
   const sortear = sorteador(sementeDe(atendimento.id))
@@ -562,12 +625,17 @@ function doPiloto(atendimento: AtendimentoDoPiloto): RegistroDeCampo {
       atendimento.procedimentos.map((procedimento) => ({ procedimento, feito: true })),
     responsavelId: cadastro?.responsavelId,
     petId: cadastro?.petId,
+    equipeId: cadastro?.equipeId,
   }
 }
 
 /** Todos os atendimentos em campo: os dos 90 dias, os da lista do piloto e os da sessão. */
 const registros = computed<RegistroDeCampo[]>(() =>
-  [...GERADOS, ...atendimentosDoPiloto.value.map(doPiloto), ...daSessao.value].map((registro) =>
+  [
+    ...GERADOS,
+    ...atendimentosDoPiloto.value.map((item) => comEquipe(doPiloto(item))),
+    ...daSessao.value.map(comEquipe),
+  ].map((registro) =>
     anotados.value[registro.id]
       ? { ...registro, resultados: anotados.value[registro.id]! }
       : registro,
@@ -596,6 +664,8 @@ export type FiltroDoRelatorio = {
   ceps: string[]
   especie: Especie
   situacao: SituacaoDoAtendimento | null
+  /** Pessoas da equipe: o atendimento entra se uma delas atendeu ou cadastrou. Vazia, todos. */
+  equipe?: string[]
 }
 
 /** O CEP confere com algum da lista: igual, ou começando pelo prefixo. Lista vazia, todos. */
@@ -625,6 +695,12 @@ export function registrosDoRelatorio(filtro: FiltroDoRelatorio): RegistroDeCampo
     if (filtro.especie === 'caes' && registro.especie !== 'CACHORRO') return false
     if (filtro.especie === 'gatos' && registro.especie !== 'GATO') return false
     if (filtro.situacao && situacaoDoRegistro(registro) !== filtro.situacao) return false
+    if (
+      filtro.equipe?.length &&
+      !filtro.equipe.some((id) => id === registro.equipeId || id === registro.cadastroId)
+    ) {
+      return false
+    }
     return true
   })
 }
@@ -725,6 +801,96 @@ export function agruparRegistros(
     .sort((um, outro) => outro.total - um.total || um.rotulo.localeCompare(outro.rotulo, 'pt'))
 }
 
+/* ================================================================ o relatório da equipe */
+
+/** A pessoa entrou no atendimento: atendeu, ou fez o cadastro e a acolhida. */
+export function participou(pessoa: Pick<PessoaDaEquipe, 'id'>, registro: RegistroDeCampo) {
+  return registro.equipeId === pessoa.id || registro.cadastroId === pessoa.id
+}
+
+export type LinhaDaEquipe = ResumoDosRegistros & {
+  pessoa: PessoaDaEquipe
+  /** Onde a pessoa trabalhou no recorte. */
+  frentes: FrenteDaEquipe[]
+  /** Quantos dias diferentes ela teve atendimento no recorte. */
+  dias: number
+  /** Atendimentos por dia em campo, com uma casa. */
+  mediaPorDia: number
+  porOrigem: { origem: string; total: number; realizados: number; taxa: number }[]
+  porDia: { data: string; total: number; realizados: number }[]
+}
+
+/** Uma linha por pessoa que entrou em algum atendimento do recorte. */
+export function resumirEquipe(lista: readonly RegistroDeCampo[]): LinhaDaEquipe[] {
+  const porPessoa = new Map<string, RegistroDeCampo[]>()
+  for (const registro of lista) {
+    for (const id of new Set([registro.equipeId, registro.cadastroId])) {
+      if (id) porPessoa.set(id, [...(porPessoa.get(id) ?? []), registro])
+    }
+  }
+
+  return EQUIPE.filter((pessoa) => porPessoa.has(pessoa.id)).map((pessoa) => {
+    const itens = porPessoa.get(pessoa.id)!
+    const datas = new Map<string, { total: number; realizados: number }>()
+    const origens = new Map<string, { total: number; realizados: number }>()
+    for (const registro of itens) {
+      const feito = situacaoDoRegistro(registro) === 'realizado'
+      const dia = datas.get(registro.data) ?? { total: 0, realizados: 0 }
+      dia.total += 1
+      dia.realizados += Number(feito)
+      datas.set(registro.data, dia)
+      const origem = origens.get(registro.origem) ?? { total: 0, realizados: 0 }
+      origem.total += 1
+      origem.realizados += Number(feito)
+      origens.set(registro.origem, origem)
+    }
+    const frentes = [...new Set(itens.map((registro) => frenteDaOrigem(registro.origem)))]
+    return {
+      pessoa,
+      ...resumirRegistros(itens),
+      frentes: (['piloto', 'campanhas'] as const).filter((frente) => frentes.includes(frente)),
+      dias: datas.size,
+      mediaPorDia: Math.round((itens.length / Math.max(1, datas.size)) * 10) / 10,
+      porOrigem: [...origens.entries()]
+        .map(([origem, conta]) => ({
+          origem,
+          ...conta,
+          taxa: Math.round((conta.realizados / conta.total) * 100),
+        }))
+        .sort((uma, outra) => outra.total - uma.total),
+      porDia: [...datas.entries()]
+        .map(([data, conta]) => ({ data, ...conta }))
+        .sort((um, outro) => outro.data.localeCompare(um.data)),
+    }
+  })
+}
+
+export type LinhaDaFuncao = {
+  funcao: FuncaoNaEquipe
+  pessoas: number
+  atendimentos: number
+  realizados: number
+  taxa: number
+}
+
+/** Os totais por função, na ordem das funções. */
+export function resumirFuncoes(linhas: readonly LinhaDaEquipe[]): LinhaDaFuncao[] {
+  return (['veterinario', 'auxiliar', 'agente', 'cadastro'] as const)
+    .map((id) => {
+      const daFuncao = linhas.filter((linha) => linha.pessoa.funcao === id)
+      const atendimentos = daFuncao.reduce((soma, linha) => soma + linha.total, 0)
+      const realizados = daFuncao.reduce((soma, linha) => soma + linha.realizados, 0)
+      return {
+        funcao: funcao(id).id,
+        pessoas: daFuncao.length,
+        atendimentos,
+        realizados,
+        taxa: atendimentos ? Math.round((realizados / atendimentos) * 100) : 0,
+      }
+    })
+    .filter((linha) => linha.pessoas)
+}
+
 /* ============================================================================== as ações */
 
 export function useCampo() {
@@ -771,6 +937,8 @@ export function useCampo() {
       petId: string
       resultados: ResultadoDoProcedimento[]
       hora?: string
+      /** Quem da equipe atendeu; sem ele, sai do sorteio da frente. */
+      equipeId?: string
     },
   ) {
     const dono = responsavel(dados.responsavelId)
@@ -795,10 +963,17 @@ export function useCampo() {
         resultados: dados.resultados,
         responsavelId: dados.responsavelId,
         petId: dados.petId,
+        equipeId: dados.equipeId,
+        cadastroId: quemCadastraNa('campanhas')[0]?.id,
       },
       ...daSessao.value,
     ]
     return id
+  }
+
+  /** Guarda quem atendeu, para o próximo registro da mesma frente já vir com a pessoa. */
+  function lembrarQuemAtendeu(frente: FrenteDaEquipe, equipeId: string) {
+    ultimoQueAtendeu.value = { ...ultimoQueAtendeu.value, [frente]: equipeId }
   }
 
   /**
@@ -832,6 +1007,8 @@ export function useCampo() {
     registrarNaCampanha,
     anotarResultado,
     registrosDaCampanha,
+    ultimoQueAtendeu,
+    lembrarQuemAtendeu,
   }
 }
 

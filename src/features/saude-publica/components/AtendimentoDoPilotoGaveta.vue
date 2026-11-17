@@ -20,6 +20,7 @@ import { useCampo } from '@/features/saude-publica/campo'
 import {
   dataCurta,
   META_DO_PROCEDIMENTO,
+  pessoaDaEquipe,
   procedimento,
   proximosCuidados,
   type MetaDoPiloto,
@@ -42,7 +43,7 @@ const aberta = defineModel<boolean>('visible', { default: false })
 const toast = useToast()
 const { atendimentos, atualizarAtendimento } = useEstadoDoPrototipo()
 const metas = useMetasDoPiloto()
-const { anotarResultado } = useCampo()
+const { anotarResultado, registros } = useCampo()
 
 const atendimento = computed(
   () => atendimentos.value.find((item) => item.id === props.atendimentoId) ?? null,
@@ -58,9 +59,20 @@ const cuidado = computed(() =>
   atendimento.value ? proximosCuidados(atendimento.value.data, feitos.value)[0] : undefined,
 )
 
+/** Quem da equipe atendeu, pelo registro de campo (o do cadastro ou o sorteado do período). */
+const atendeu = computed(() =>
+  pessoaDaEquipe(registros.value.find((item) => item.id === atendimento.value?.id)?.equipeId),
+)
+
 const sobre = computed(() =>
   atendimento.value
-    ? `${resultados.value.map((item) => procedimento(item.procedimento).rotulo).join(' · ')} · ${responsavelPeloAtendimento(atendimento.value)}`
+    ? [
+        resultados.value.map((item) => procedimento(item.procedimento).rotulo).join(' · '),
+        responsavelPeloAtendimento(atendimento.value),
+        atendeu.value ? `atendido por ${atendeu.value.nome}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ')
     : '',
 )
 

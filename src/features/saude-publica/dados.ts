@@ -1119,3 +1119,132 @@ export const ATENDIMENTOS_DO_PILOTO: AtendimentoDoPiloto[] = [
     sinpatinhas: true,
   },
 ]
+
+/* ------------------------------------------------------------------------ a equipe de campo */
+
+/**
+ * Quem atende em campo (17/11/2026, "relatório da equipe"). **Equipe de exemplo**: nomes comuns,
+ * sem documento nem CRMV. No Consultório Móvel, a equipe atende em pessoa; nas campanhas, cada
+ * pessoa responde por um posto de atendimento, com os voluntários dele, e por isso os números do
+ * dia são grandes.
+ */
+export type FuncaoNaEquipe = 'veterinario' | 'auxiliar' | 'agente' | 'cadastro'
+
+export type DefinicaoDaFuncao = {
+  id: FuncaoNaEquipe
+  /** O nome da função para uma pessoa: o de quem é veterinária ou veterinário muda. */
+  feminino: string
+  masculino: string
+  /** O nome do grupo, nos totais por função. */
+  grupo: string
+  icone: string
+  /** Quem desta função atende (faz o procedimento); o cadastro acolhe e registra. */
+  atende: boolean
+}
+
+export const FUNCOES: DefinicaoDaFuncao[] = [
+  {
+    id: 'veterinario',
+    feminino: 'Médica-veterinária',
+    masculino: 'Médico-veterinário',
+    grupo: 'Médicos-veterinários',
+    icone: 'ph ph-stethoscope',
+    atende: true,
+  },
+  {
+    id: 'auxiliar',
+    feminino: 'Auxiliar de veterinária',
+    masculino: 'Auxiliar de veterinária',
+    grupo: 'Auxiliares de veterinária',
+    icone: 'ph ph-first-aid-kit',
+    atende: true,
+  },
+  {
+    id: 'agente',
+    feminino: 'Agente de zoonoses',
+    masculino: 'Agente de zoonoses',
+    grupo: 'Agentes de zoonoses',
+    icone: 'ph ph-identification-badge',
+    atende: true,
+  },
+  {
+    id: 'cadastro',
+    feminino: 'Cadastro e acolhida',
+    masculino: 'Cadastro e acolhida',
+    grupo: 'Cadastro e acolhida',
+    icone: 'ph ph-clipboard-text',
+    atende: false,
+  },
+]
+
+export function funcao(id: FuncaoNaEquipe) {
+  return FUNCOES.find((item) => item.id === id)!
+}
+
+/** Onde a pessoa trabalha: o Consultório Móvel do piloto, as campanhas, ou os dois. */
+export type FrenteDaEquipe = 'piloto' | 'campanhas'
+
+export type PessoaDaEquipe = {
+  id: string
+  nome: string
+  funcao: FuncaoNaEquipe
+  /** Para o nome da função ("Médica-veterinária" ou "Médico-veterinário"). */
+  feminino: boolean
+  atua: FrenteDaEquipe[]
+}
+
+export const EQUIPE: PessoaDaEquipe[] = [
+  {
+    id: 'e1',
+    nome: 'Camila Rocha',
+    funcao: 'veterinario',
+    feminino: true,
+    atua: ['piloto', 'campanhas'],
+  },
+  { id: 'e2', nome: 'Rafael Nunes', funcao: 'auxiliar', feminino: false, atua: ['piloto'] },
+  { id: 'e3', nome: 'Juliana Costa', funcao: 'cadastro', feminino: true, atua: ['piloto'] },
+  { id: 'e4', nome: 'Marcos Almeida', funcao: 'veterinario', feminino: false, atua: ['campanhas'] },
+  { id: 'e5', nome: 'Diego Souza', funcao: 'agente', feminino: false, atua: ['campanhas'] },
+  { id: 'e6', nome: 'Fernanda Alves', funcao: 'agente', feminino: true, atua: ['campanhas'] },
+  { id: 'e7', nome: 'Lucas Martins', funcao: 'agente', feminino: false, atua: ['campanhas'] },
+  { id: 'e8', nome: 'Beatriz Lima', funcao: 'cadastro', feminino: true, atua: ['campanhas'] },
+  /*
+   * O resto da equipe das campanhas: um mutirão de milhares de animais num dia roda em vários postos,
+   * e com poucas pessoas cada uma virava um posto inteiro (mais de mil cadastros por dia).
+   */
+  { id: 'e9', nome: 'Patrícia Gomes', funcao: 'veterinario', feminino: true, atua: ['campanhas'] },
+  { id: 'e10', nome: 'André Ferreira', funcao: 'agente', feminino: false, atua: ['campanhas'] },
+  { id: 'e11', nome: 'Larissa Pinto', funcao: 'agente', feminino: true, atua: ['campanhas'] },
+  { id: 'e12', nome: 'Thiago Ramos', funcao: 'agente', feminino: false, atua: ['campanhas'] },
+  { id: 'e13', nome: 'Vanessa Duarte', funcao: 'agente', feminino: true, atua: ['campanhas'] },
+  { id: 'e14', nome: 'Gustavo Moreira', funcao: 'agente', feminino: false, atua: ['campanhas'] },
+  { id: 'e15', nome: 'Paula Mendes', funcao: 'cadastro', feminino: true, atua: ['campanhas'] },
+  { id: 'e16', nome: 'Ricardo Teixeira', funcao: 'cadastro', feminino: false, atua: ['campanhas'] },
+  { id: 'e17', nome: 'Aline Barros', funcao: 'cadastro', feminino: true, atua: ['campanhas'] },
+  { id: 'e18', nome: 'Sérgio Campos', funcao: 'cadastro', feminino: false, atua: ['campanhas'] },
+]
+
+export function pessoaDaEquipe(id: string | null | undefined) {
+  return EQUIPE.find((pessoa) => pessoa.id === id) ?? null
+}
+
+/** "Médica-veterinária", "Agente de zoonoses": a função no nome certo para a pessoa. */
+export function funcaoDaPessoa(pessoa: Pick<PessoaDaEquipe, 'funcao' | 'feminino'>) {
+  const definicao = funcao(pessoa.funcao)
+  return pessoa.feminino ? definicao.feminino : definicao.masculino
+}
+
+/** A frente de um atendimento: o piloto, ou uma campanha. */
+export function frenteDaOrigem(origem: string): FrenteDaEquipe {
+  return origem === 'piloto' ? 'piloto' : 'campanhas'
+}
+
+/** Quem pode aparecer em "Quem atendeu" numa frente: quem atende e trabalha nela. */
+export function quemAtendeNa(frente: FrenteDaEquipe) {
+  return EQUIPE.filter((pessoa) => funcao(pessoa.funcao).atende && pessoa.atua.includes(frente))
+}
+
+/** Quem faz o cadastro e a acolhida numa frente. */
+export function quemCadastraNa(frente: FrenteDaEquipe) {
+  return EQUIPE.filter((pessoa) => pessoa.funcao === 'cadastro' && pessoa.atua.includes(frente))
+}

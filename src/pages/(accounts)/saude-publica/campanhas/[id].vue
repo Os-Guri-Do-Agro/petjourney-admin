@@ -21,6 +21,7 @@ import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   cepNaTela,
+  resumirEquipe,
   resumirRegistros,
   situacaoDoRegistro,
   useCampo,
@@ -30,6 +31,8 @@ import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototi
 import RegistrarAtendimentoGaveta from '@/features/saude-publica/components/RegistrarAtendimentoGaveta.vue'
 import {
   dataPorExtenso,
+  funcao,
+  funcaoDaPessoa,
   motivo,
   numero,
   PROCEDIMENTO_DA_CAMPANHA,
@@ -67,6 +70,11 @@ const todos = computed(() => {
 })
 const resumo = computed(() => resumirRegistros(todos.value))
 const motivoMaisComum = computed(() => resumo.value.motivos[0] ?? null)
+
+/** A equipe do dia: quem atendeu e quem acolheu, com quantos cada um, de quem fez mais. */
+const equipeDoDia = computed(() =>
+  resumirEquipe(todos.value).sort((uma, outra) => outra.total - uma.total),
+)
 
 type Filtro = SituacaoDoAtendimento | 'todas'
 const filtro = ref<Filtro>('todas')
@@ -231,6 +239,41 @@ const ESPECIE: Record<string, string> = {
               <template v-if="motivoMaisComum">
                 ({{ numero(motivoMaisComum.vezes) }} vezes)
               </template>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- A equipe do dia: quem atendeu e quem acolheu, com quantos cada um. -->
+      <section
+        v-if="equipeDoDia.length"
+        class="ui-folha ui-cartao dc__caixa"
+        aria-labelledby="dc-equipe"
+      >
+        <header class="ui-cartao__cabeca dc__cabeca">
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-users-three" /></span>
+          <span class="ui-cartao__titulos">
+            <h2 id="dc-equipe" class="ui-cartao__titulo">
+              Equipe do dia
+              <span class="ui-contagem">{{ numero(equipeDoDia.length) }}</span>
+            </h2>
+            <p class="ui-cartao__descricao">
+              Equipe de exemplo: cada pessoa responde por um posto, com os voluntários dele.
+            </p>
+          </span>
+        </header>
+        <ul class="dc__equipe">
+          <li v-for="linha in equipeDoDia" :key="linha.pessoa.id" class="dc__pessoa">
+            <span class="ui-ladrilho dc__pessoa-icone" aria-hidden="true">
+              <i :class="funcao(linha.pessoa.funcao).icone" />
+            </span>
+            <span class="dc__pessoa-texto">
+              <strong>{{ linha.pessoa.nome }}</strong>
+              <small>{{ funcaoDaPessoa(linha.pessoa) }}</small>
+            </span>
+            <span class="dc__pessoa-numero">
+              <strong class="ui-num">{{ numero(linha.total) }}</strong>
+              <small>{{ linha.pessoa.funcao === 'cadastro' ? 'acolhidos' : 'atendidos' }}</small>
             </span>
           </li>
         </ul>
@@ -433,6 +476,60 @@ const ESPECIE: Record<string, string> = {
 
 .dc__nada {
   margin: 0;
+}
+
+/* A equipe do dia: uma linha de pessoas, cada uma com o número dela. */
+.dc__equipe {
+  display: grid;
+  gap: 10px 18px;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  list-style: none;
+}
+
+.dc__pessoa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dc__pessoa-icone {
+  flex: none;
+}
+
+.dc__pessoa-texto {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+
+.dc__pessoa-texto strong {
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 13.5px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dc__pessoa-texto small,
+.dc__pessoa-numero small {
+  color: var(--tinta-2);
+  font-size: 12px;
+}
+
+.dc__pessoa-numero {
+  display: grid;
+  justify-items: end;
+  gap: 1px;
+}
+
+.dc__pessoa-numero strong {
+  color: var(--tinta);
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .dc__lista {

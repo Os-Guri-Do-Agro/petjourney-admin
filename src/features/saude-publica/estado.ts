@@ -51,6 +51,8 @@ export type CadastroDoAtendimento = {
   /** O responsável e o pet no cadastro de campo (`campo.ts`), com endereço e lugar. */
   responsavelId?: string
   petId?: string
+  /** Quem da equipe atendeu (`EQUIPE`, em `dados.ts`). */
+  equipeId?: string
 }
 
 const cadastros = ref<Record<string, CadastroDoAtendimento>>({})

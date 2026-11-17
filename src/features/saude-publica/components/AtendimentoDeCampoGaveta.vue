@@ -14,6 +14,8 @@ import { cepNaTela, useCampo } from '@/features/saude-publica/campo'
 import ResultadoDoAtendimento from '@/features/saude-publica/components/ResultadoDoAtendimento.vue'
 import {
   dataCurta,
+  funcaoDaPessoa,
+  pessoaDaEquipe,
   procedimento,
   regiao as regiaoDe,
   type ResultadoDoProcedimento,
@@ -31,6 +33,9 @@ const registro = computed(
 )
 const dono = computed(() => responsavel(registro.value?.responsavelId))
 const animal = computed(() => pet(registro.value?.petId))
+/** Quem da equipe atendeu e quem fez o cadastro e a acolhida. */
+const atendeu = computed(() => pessoaDaEquipe(registro.value?.equipeId))
+const cadastrou = computed(() => pessoaDaEquipe(registro.value?.cadastroId))
 
 const ESPECIE: Record<string, string> = {
   CACHORRO: 'Cachorro',
@@ -123,6 +128,19 @@ function salvarResultado(novos: ResultadoDoProcedimento[]) {
           <span>
             <strong>{{ lugar.bairro }}</strong>
             {{ lugar.regiao }} · <span class="ui-num">{{ lugar.cep }}</span>
+          </span>
+        </p>
+      </section>
+
+      <section v-if="atendeu" class="adc__bloco" aria-labelledby="adc-equipe">
+        <h3 id="adc-equipe" class="eg__rotulo">Equipe</h3>
+        <p class="adc__onde">
+          <i class="ph ph-user-circle" aria-hidden="true" />
+          <span>
+            <strong>{{ atendeu.nome }}</strong>
+            {{ funcaoDaPessoa(atendeu) }}, atendeu<template v-if="cadastrou">
+              · cadastro e acolhida com {{ cadastrou.nome }}</template
+            >
           </span>
         </p>
       </section>

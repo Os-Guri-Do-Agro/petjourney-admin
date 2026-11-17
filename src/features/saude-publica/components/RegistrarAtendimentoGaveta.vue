@@ -57,7 +57,9 @@ import FichaNoCelular from '@/features/saude-publica/components/FichaNoCelular.v
 import ResultadoDosProcedimentos from '@/features/saude-publica/components/ResultadoDosProcedimentos.vue'
 import {
   dataCurta,
+  funcaoDaPessoa,
   PERIODO,
+  quemAtendeNa,
   PROCEDIMENTO_DA_CAMPANHA,
   PROCEDIMENTOS,
   procedimento,
@@ -65,6 +67,7 @@ import {
   regiao as regiaoDe,
   tipoDeCampanha,
   type Campanha,
+  type FrenteDaEquipe,
   type Procedimento,
   type ResultadoDoProcedimento,
 } from '@/features/saude-publica/dados'
@@ -333,6 +336,21 @@ const procedimentoDaCampanha = computed(() =>
   props.campanha ? PROCEDIMENTO_DA_CAMPANHA[props.campanha.tipo] : null,
 )
 
+/*
+ * Quem atendeu (17/11/2026, "relatório da equipe"): a equipe da frente (Consultório Móvel ou
+ * campanhas), obrigatório, já vindo com a última pessoa escolhida na sessão, porque no balcão é quase
+ * sempre a mesma.
+ */
+const frente = computed<FrenteDaEquipe>(() => (props.campanha ? 'campanhas' : 'piloto'))
+const quemAtendeu = ref<string | null>(null)
+const opcoesDeQuemAtende = computed(() =>
+  quemAtendeNa(frente.value).map((pessoa) => ({
+    valor: pessoa.id,
+    rotulo: pessoa.nome,
+    funcao: funcaoDaPessoa(pessoa),
+  })),
+)
+
 /* ------------------------------------------------------------------------- os passos */
 
 watch(aberta, (agora) => {
@@ -348,6 +366,7 @@ watch(aberta, (agora) => {
   resultados.value = procedimentoDaCampanha.value
     ? [{ procedimento: procedimentoDaCampanha.value, feito: true }]
     : []
+  quemAtendeu.value = campo.ultimoQueAtendeu.value[frente.value] ?? null
   abertaEm.value = Date.now()
 })
 
@@ -386,7 +405,10 @@ const faltasNoPe = computed(() => {
     return escolhaDoPet.value ? [] : ['Escolha o animal, ou cadastre outro.']
   }
   if (passo.value === 2) {
-    return resultados.value.length ? [] : ['Marque o que a equipe fez ou tentou fazer.']
+    return [
+      quemAtendeu.value ? '' : 'Diga quem da equipe atendeu.',
+      resultados.value.length ? '' : 'Marque o que a equipe fez ou tentou fazer.',
+    ].filter(Boolean)
   }
   return []
 })
@@ -407,7 +429,11 @@ function passoPronto() {
     return !Object.keys(errosDoPaciente.value).length
   }
   if (passo.value === 2) {
-    return resultados.value.length > 0 && !faltasDoResultado(resultados.value).length
+    return (
+      Boolean(quemAtendeu.value) &&
+      resultados.value.length > 0 &&
+      !faltasDoResultado(resultados.value).length
+    )
   }
   return true
 }
@@ -478,12 +504,15 @@ function registrar() {
     campos: copiaDe(paciente.value),
   })
   const nome = paciente.value.nome.trim()
+  const equipeId = quemAtendeu.value ?? undefined
+  if (equipeId) campo.lembrarQuemAtendeu(frente.value, equipeId)
 
   const id = props.campanha
     ? campo.registrarNaCampanha(props.campanha, {
         responsavelId,
         petId,
         resultados: resultados.value,
+        equipeId,
       })
     : registrarAtendimento(
         {
@@ -503,6 +532,7 @@ function registrar() {
           cnpj: deOng.value ? stripCnpj(cnpj.value) || undefined : undefined,
           responsavelId,
           petId,
+          equipeId,
         },
       )
 
@@ -941,6 +971,39 @@ function prazoEmTexto(dias: number) {
               : 'Marque o que a equipe fez ou tentou, e diga se deu certo. Cada cuidado feito com data vira um aviso.'
           }}
         </p>
+
+        <!-- Quem atendeu: vem com a última pessoa escolhida; troca quando muda o turno. -->
+        <section class="eg__secao rat__quem-atendeu">
+          <label class="eg__rotulo" for="rat-quem-atendeu">Quem atendeu</label>
+          <Select
+            v-model="quemAtendeu"
+            input-id="rat-quem-atendeu"
+            :options="opcoesDeQuemAtende"
+            option-label="rotulo"
+            option-value="valor"
+            placeholder="Escolha quem da equipe atendeu"
+            :invalid="tentou && !quemAtendeu"
+          >
+            <template #value="{ value, placeholder }">
+              <span v-if="value" class="rat__pessoa">
+                <strong>{{
+                  opcoesDeQuemAtende.find((item) => item.valor === value)?.rotulo
+                }}</strong>
+                <small>{{ opcoesDeQuemAtende.find((item) => item.valor === value)?.funcao }}</small>
+              </span>
+              <span v-else>{{ placeholder }}</span>
+            </template>
+            <template #option="{ option }">
+              <span class="rat__pessoa">
+                <strong>{{ option.rotulo }}</strong>
+                <small>{{ option.funcao }}</small>
+              </span>
+            </template>
+          </Select>
+          <small v-if="tentou && !quemAtendeu" class="eg__invalido">
+            Diga quem da equipe atendeu: é o que entra no relatório da equipe.
+          </small>
+        </section>
 
         <!-- O resultado do que está marcado vem primeiro: na campanha, é a ação do minuto. -->
         <ResultadoDosProcedimentos
@@ -1553,6 +1616,23 @@ function prazoEmTexto(dias: number) {
 
 .rat__parcial {
   margin: 0;
+}
+
+/* Quem atendeu: o nome em cima, a função embaixo, no campo e na lista. */
+.rat__quem-atendeu {
+  margin-bottom: 4px;
+}
+
+.rat__pessoa {
+  display: grid;
+  gap: 1px;
+  line-height: 1.2;
+}
+
+.rat__pessoa small {
+  color: var(--tinta-2);
+  font-size: 11.5px;
+  font-weight: 400;
 }
 
 .rat__faltas {
