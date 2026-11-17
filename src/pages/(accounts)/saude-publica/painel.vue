@@ -6,7 +6,8 @@
  * Na anatomia das telas do portal: a abertura no verde dos pets com os números do programa numa
  * fileira; embaixo, uma caixa por assunto. O problema (os casos humanos de leishmaniose, da Sesau)
  * ao lado da prevenção na cidade, cujos quatro números também escolhem o que o mapa pinta; depois o
- * mapa das 7 regiões e os bairros que pedem atenção. Clicar numa região abre o detalhe dela numa
+ * mapa de Campo Grande, com os 74 bairros pintados e as 7 regiões urbanas, e os bairros que pedem
+ * atenção. Clicar numa região (no rótulo ou num bairro dela) abre o detalhe dela numa
  * gaveta, com o atalho para criar uma campanha.
  */
 import { computed, ref } from 'vue'
@@ -14,7 +15,7 @@ import { computed, ref } from 'vue'
 import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
-import MapaDasRegioes from '@/features/saude-publica/components/MapaDasRegioes.vue'
+import MapaDaCidade from '@/features/saude-publica/components/MapaDaCidade.vue'
 import RegiaoGaveta from '@/features/saude-publica/components/RegiaoGaveta.vue'
 import {
   BAIRROS,
@@ -184,15 +185,14 @@ function aoFecharGaveta(aberta: boolean) {
           <header class="ui-cartao__cabeca sp-cabeca">
             <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-trifold" /></span>
             <span class="ui-cartao__titulos">
-              <h2 id="sp-mapa" class="ui-cartao__titulo">Por região urbana</h2>
+              <h2 id="sp-mapa" class="ui-cartao__titulo">Mapa da cidade</h2>
               <p class="ui-cartao__descricao">
-                {{ definicao.rotulo }}: percentual de {{ definicao.frase }}. Mapa esquemático: cada
-                hexágono é uma região, na posição dela em volta do Centro. Clique para ver o
-                detalhe.
+                {{ definicao.rotulo }} em cada bairro: percentual de {{ definicao.frase }}. As
+                linhas fortes separam as 7 regiões urbanas; clique numa para ver o detalhe.
               </p>
             </span>
           </header>
-          <MapaDasRegioes
+          <MapaDaCidade
             :indicador="indicador"
             :selecionada="regiaoEscolhida"
             @update:selecionada="escolherRegiao"

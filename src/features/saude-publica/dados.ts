@@ -4,9 +4,9 @@
  * relatório ficam. Nenhum número daqui é medido, a não ser os casos humanos de leishmaniose, que
  * são os da Sesau citados no ofício (`CONTEXTO_LEISHMANIOSE`).
  *
- * A geografia é a oficial até onde ela é certa: as 7 regiões urbanas e a posição de cada uma em
- * volta do Centro, e nomes de bairros da lista oficial. O protótipo não diz em que região fica cada
- * bairro (as fontes públicas se contradizem); o ranking de bairros é uma lista à parte.
+ * A geografia é a oficial, do IBGE (Censo 2022): os 74 bairros de Campo Grande e as 7 regiões
+ * urbanas, que o IBGE cadastra como subdistritos, com a região de cada bairro. O contorno mora em
+ * `mapa/campo-grande.json`; os números de cada bairro são ilustrativos, como o resto.
  *
  * Tudo sem identificar ninguém: o painel só mostra contagens e percentuais, e bairro com menos de
  * `MINIMO_POR_BAIRRO` animais não aparece (LGPD, Lei nº 13.709/2018).
@@ -211,50 +211,115 @@ export const TOTAIS = {
 
 export type Bairro = {
   nome: string
+  regiao: IdDaRegiao
   caes: number
   gatos: number
   cobertura: Cobertura
 }
 
-/* Nomes da lista oficial de bairros; os números são ilustrativos. */
-const BAIRROS_CRUS: [string, number, number, number, number, number, number][] = [
-  // nome, cães, gatos, antirrábica, leishmaniose, coleira, castração
-  ['Aero Rancho', 1460, 470, 61, 24, 31, 38],
-  ['Nova Lima', 1390, 420, 64, 27, 35, 41],
-  ['Los Angeles', 980, 310, 60, 22, 28, 37],
-  ['Centro Oeste', 870, 290, 65, 29, 34, 42],
-  ['Moreninha', 940, 330, 67, 31, 37, 44],
-  ['Tiradentes', 720, 280, 71, 38, 45, 51],
-  ['Coronel Antonino', 810, 300, 70, 35, 43, 47],
-  ['Santo Amaro', 640, 210, 66, 30, 39, 45],
-  ['Caiobá', 760, 260, 64, 28, 36, 43],
-  ['Tijuca', 690, 250, 68, 33, 41, 46],
-  ['Nova Campo Grande', 820, 280, 63, 26, 33, 40],
-  ['Lageado', 610, 190, 59, 21, 27, 36],
-  ['Jacy', 430, 150, 68, 34, 40, 45],
-  ['Pioneiros', 700, 230, 65, 29, 36, 42],
-  ['Universitário', 790, 310, 74, 42, 50, 54],
-  ['Mata do Jacinto', 650, 260, 78, 47, 55, 60],
-  ['Coophavila II', 560, 190, 66, 31, 38, 44],
-  ['Guanandi', 620, 220, 67, 32, 39, 45],
-  ['Centenário', 590, 200, 64, 27, 34, 41],
-  ['São Conrado', 480, 170, 66, 30, 37, 43],
-  ['Panamá', 520, 180, 69, 33, 42, 47],
-  ['Batistão', 450, 160, 70, 35, 44, 48],
-  ['Piratininga', 510, 170, 65, 28, 35, 42],
-  ['Carandá', 380, 240, 86, 60, 66, 74],
-  ['Jardim dos Estados', 260, 210, 88, 63, 69, 78],
-  ['Chácara Cachoeira', 310, 220, 87, 61, 67, 76],
+/*
+ * Os 74 bairros oficiais, com a região de cada um (IBGE, Censo 2022); os números são ilustrativos,
+ * em volta do número da região, e os animais de cada região somam perto do total dela.
+ */
+const BAIRROS_CRUS: [string, IdDaRegiao, number, number, number, number, number, number][] = [
+  // nome, região, cães, gatos, antirrábica, leishmaniose, coleira, castração
+  // centro
+  ['Amambaí', 'centro', 190, 120, 88, 60, 67, 75],
+  ['Bela Vista', 'centro', 140, 80, 82, 55, 61, 70],
+  ['Cabreúva', 'centro', 100, 60, 84, 57, 63, 72],
+  ['Carvalho', 'centro', 100, 60, 90, 63, 69, 78],
+  ['Centro', 'centro', 210, 120, 80, 53, 59, 68],
+  ['Cruzeiro', 'centro', 200, 120, 81, 54, 60, 69],
+  ['Glória', 'centro', 130, 80, 80, 53, 59, 68],
+  ['Itanhangá', 'centro', 100, 60, 83, 56, 62, 71],
+  ['Jardim dos Estados', 'centro', 260, 210, 88, 63, 69, 78],
+  ['Monte Líbano', 'centro', 80, 50, 86, 59, 65, 74],
+  ['Planalto', 'centro', 160, 100, 81, 54, 60, 69],
+  ['São Bento', 'centro', 100, 60, 82, 55, 61, 70],
+  ['São Francisco', 'centro', 200, 120, 85, 58, 64, 73],
+  // segredo
+  ['Coronel Antonino', 'segredo', 810, 300, 70, 35, 43, 47],
+  ['José Abrão', 'segredo', 310, 130, 71, 40, 48, 49],
+  ['Mata do Segredo', 'segredo', 720, 290, 73, 42, 50, 51],
+  ['Monte Castelo', 'segredo', 380, 150, 71, 41, 49, 50],
+  ['Nasser', 'segredo', 670, 270, 74, 43, 51, 52],
+  ['Nova Lima', 'segredo', 1390, 420, 64, 27, 35, 41],
+  ['Seminário', 'segredo', 390, 160, 67, 36, 44, 45],
+  // prosa
+  ['Autonomista', 'prosa', 140, 80, 82, 55, 61, 67],
+  ['Carandá', 'prosa', 380, 240, 86, 60, 66, 74],
+  ['Chácara Cachoeira', 'prosa', 310, 220, 87, 61, 67, 76],
+  ['Chácara dos Poderes', 'prosa', 160, 90, 85, 58, 64, 70],
+  ['Estrela Dalva', 'prosa', 100, 60, 85, 58, 64, 70],
+  ['Margarida', 'prosa', 100, 50, 85, 58, 64, 70],
+  ['Mata do Jacinto', 'prosa', 650, 260, 78, 47, 55, 60],
+  ['Noroeste', 'prosa', 270, 150, 83, 56, 62, 68],
+  ['Novos Estados', 'prosa', 270, 150, 80, 53, 59, 65],
+  ['Santa Fé', 'prosa', 120, 70, 83, 56, 62, 68],
+  ['Veraneio', 'prosa', 300, 160, 81, 54, 60, 66],
+  // bandeira
+  ['Carlota', 'bandeira', 230, 100, 81, 50, 57, 61],
+  ['Dr. Albuquerque', 'bandeira', 200, 90, 78, 51, 54, 62],
+  ['Jardim Paulista', 'bandeira', 210, 90, 78, 47, 54, 58],
+  ['Maria Aparecida Pedrossian', 'bandeira', 670, 300, 77, 46, 53, 57],
+  ['Moreninha', 'bandeira', 940, 330, 67, 31, 37, 44],
+  ['Rita Vieira', 'bandeira', 510, 230, 74, 43, 50, 54],
+  ['São Lourenço', 'bandeira', 160, 70, 81, 50, 57, 61],
+  ['Tiradentes', 'bandeira', 720, 280, 71, 38, 45, 51],
+  ['TV Morena', 'bandeira', 170, 80, 72, 41, 48, 52],
+  ['Universitário', 'bandeira', 790, 310, 74, 42, 50, 54],
+  ['Vilas Boas', 'bandeira', 320, 140, 72, 41, 48, 52],
+  // anhanduizinho
+  ['Aero Rancho', 'anhanduizinho', 1460, 470, 61, 24, 31, 38],
+  ['Alves Pereira', 'anhanduizinho', 400, 190, 71, 38, 44, 48],
+  ['América', 'anhanduizinho', 230, 110, 64, 31, 37, 41],
+  ['Centenário', 'anhanduizinho', 590, 200, 64, 27, 34, 41],
+  ['Centro-Oeste', 'anhanduizinho', 870, 290, 65, 29, 34, 42],
+  ['Guanandi', 'anhanduizinho', 620, 220, 67, 32, 39, 45],
+  ['Jacy', 'anhanduizinho', 430, 150, 68, 34, 40, 45],
+  ['Jóckey Club', 'anhanduizinho', 270, 120, 67, 34, 40, 44],
+  ['Lageado', 'anhanduizinho', 610, 190, 59, 21, 27, 36],
+  ['Los Angeles', 'anhanduizinho', 980, 310, 60, 22, 28, 37],
+  ['Parati', 'anhanduizinho', 340, 160, 69, 40, 42, 50],
+  ['Pioneiros', 'anhanduizinho', 700, 230, 65, 29, 36, 42],
+  ['Piratininga', 'anhanduizinho', 510, 170, 65, 28, 35, 42],
+  ['Taquarussu', 'anhanduizinho', 220, 100, 62, 29, 35, 39],
+  // lagoa
+  ['Bandeirantes', 'lagoa', 250, 100, 66, 33, 41, 43],
+  ['Batistão', 'lagoa', 450, 160, 70, 35, 44, 48],
+  ['Caiçara', 'lagoa', 240, 90, 68, 35, 43, 45],
+  ['Caiobá', 'lagoa', 760, 260, 64, 28, 36, 43],
+  ['Coophavila II', 'lagoa', 560, 190, 66, 31, 38, 44],
+  ['Leblon', 'lagoa', 340, 130, 73, 40, 48, 50],
+  ['São Conrado', 'lagoa', 480, 170, 66, 30, 37, 43],
+  ['Tarumã', 'lagoa', 320, 130, 69, 36, 44, 46],
+  ['Taveirópolis', 'lagoa', 690, 270, 68, 35, 43, 45],
+  ['Tijuca', 'lagoa', 690, 250, 68, 33, 41, 46],
+  ['União', 'lagoa', 340, 130, 67, 35, 42, 44],
+  // imbirussu
+  ['Nova Campo Grande', 'imbirussu', 820, 280, 63, 26, 33, 40],
+  ['Núcleo Industrial', 'imbirussu', 240, 90, 67, 34, 42, 45],
+  ['Panamá', 'imbirussu', 520, 180, 69, 33, 42, 47],
+  ['Popular', 'imbirussu', 420, 150, 73, 40, 48, 51],
+  ['Santo Amaro', 'imbirussu', 640, 210, 66, 30, 39, 45],
+  ['Santo Antônio', 'imbirussu', 340, 120, 68, 35, 43, 46],
+  ['Sobrinho', 'imbirussu', 470, 170, 67, 34, 42, 45],
 ]
 
 export const BAIRROS: Bairro[] = BAIRROS_CRUS.map(
-  ([nome, caes, gatos, antirrabica, leishmaniose, coleira, castracao]) => ({
+  ([nome, regiao, caes, gatos, antirrabica, leishmaniose, coleira, castracao]) => ({
     nome,
+    regiao,
     caes,
     gatos,
     cobertura: { antirrabica, leishmaniose, coleira, castracao },
   }),
 ).filter((bairro) => bairro.caes + bairro.gatos >= MINIMO_POR_BAIRRO)
+
+/** Quantos animais contam para o indicador num bairro (cães, ou cães e gatos). */
+export function publicoDoBairro(bairro: Pick<Bairro, 'caes' | 'gatos'>, id: Indicador) {
+  return indicador(id).publico === 'caes' ? bairro.caes : bairro.caes + bairro.gatos
+}
 
 /* ------------------------------------------------------------------- o contexto da doença */
 
