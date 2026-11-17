@@ -27,6 +27,7 @@ import { RouterLink } from 'vue-router'
 import { ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { diaCurto } from '@/components/pedidos/leitura-do-pedido'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -139,9 +140,12 @@ watch(visible, (aberta) => {
 
 /* ---------------------------------------------------------------------------- opções */
 
+/** Clicar no campo já mostra a lista dos pacientes, sem esperar a digitação. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+
 async function buscarPaciente(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoesDePaciente.value = pagina.itens
       .filter((item) => item.ativo)
       .map((item) => ({ id: item.id, nome: item.nome, responsavel: item.cliente.nome }))
@@ -384,6 +388,7 @@ const nomeDoProfissional = (id: string) =>
           t('agendamentos.marcar.paciente')
         }}</label>
         <AutoComplete
+          ref="campoDoPaciente"
           v-model="paciente"
           input-id="marcar-paciente"
           :suggestions="sugestoesDePaciente"
@@ -393,6 +398,8 @@ const nomeDoProfissional = (id: string) =>
           :disabled="salvando"
           force-selection
           @complete="buscarPaciente"
+          @click="abrirLista"
+          @keydown.down="abrirLista"
         />
       </section>
 

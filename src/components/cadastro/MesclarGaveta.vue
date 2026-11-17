@@ -58,35 +58,50 @@ watch(visible, (aberta) => {
   escolhido.value = null
   outroCliente.value = null
   erro.value = ''
+  listaAberta.value = false
 })
 
 let espera: ReturnType<typeof setTimeout> | undefined
 let pedido = 0
+
+/**
+ * Clicou no campo: a lista dos pacientes aparece já, sem esperar a digitação (pedido do Luís,
+ * 17/11/2026). Sem termo, vêm os primeiros da clínica; apagar o termo volta a eles.
+ */
+const listaAberta = ref(false)
+
+function abrirLista() {
+  if (listaAberta.value) return
+  listaAberta.value = true
+  if (!termoDaBusca(termo.value)) void procurar('')
+}
 
 watch(termo, (valor) => {
   clearTimeout(espera)
   escolhido.value = null
   outroCliente.value = null
 
-  if (!termoDaBusca(valor)) {
+  if (!termoDaBusca(valor) && !listaAberta.value) {
     resultados.value = []
     return
   }
 
-  espera = setTimeout(async () => {
-    const atual = ++pedido
-    buscando.value = true
-
-    try {
-      const pagina = await listarPacientes({ q: valor, limit: 20 }, parceiroQuery())
-      if (atual === pedido) resultados.value = pagina.itens
-    } catch (err) {
-      if (atual === pedido) erro.value = lerErroDoCadastro(err, t('cadastro.lista.erro')).mensagem
-    } finally {
-      if (atual === pedido) buscando.value = false
-    }
-  }, 300)
+  espera = setTimeout(() => void procurar(valor), 300)
 })
+
+async function procurar(valor: string) {
+  const atual = ++pedido
+  buscando.value = true
+
+  try {
+    const pagina = await listarPacientes({ q: valor, limit: 20 }, parceiroQuery())
+    if (atual === pedido) resultados.value = pagina.itens
+  } catch (err) {
+    if (atual === pedido) erro.value = lerErroDoCadastro(err, t('cadastro.lista.erro')).mensagem
+  } finally {
+    if (atual === pedido) buscando.value = false
+  }
+}
 
 onUnmounted(() => clearTimeout(espera))
 
@@ -208,6 +223,7 @@ async function mesclar() {
           autocomplete="off"
           :placeholder="t('cadastro.lista.buscar')"
           :disabled="mesclando"
+          @focus="abrirLista"
         />
       </IconField>
     </section>

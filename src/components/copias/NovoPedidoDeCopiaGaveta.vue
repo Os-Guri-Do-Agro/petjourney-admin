@@ -15,6 +15,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { registrarPedidoDeCopia, type PedidoDeCopia } from '@/service/parceiro/copias-service'
@@ -59,9 +60,12 @@ const opcoesDeAlcance = computed(() => [
   { valor: 'PERIODO', rotulo: t('copias.novo.umPeriodo') },
 ])
 
+/** Clicar no campo já mostra a lista dos pacientes, sem esperar a digitação. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+
 async function buscar(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoes.value = pagina.itens
   } catch {
     sugestoes.value = []
@@ -129,6 +133,7 @@ async function registrar() {
       <section class="eg__secao">
         <label class="eg__rotulo" for="np-paciente">{{ t('copias.novo.paciente') }}</label>
         <AutoComplete
+          ref="campoDoPaciente"
           v-model="paciente"
           input-id="np-paciente"
           :suggestions="sugestoes"
@@ -138,6 +143,8 @@ async function registrar() {
           :disabled="salvando"
           force-selection
           @complete="buscar"
+          @click="abrirLista"
+          @keydown.down="abrirLista"
         />
         <small v-if="tentou && !pacienteValido" class="eg__invalido">{{
           t('fila.pacienteObrigatorio')
