@@ -9,6 +9,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiCartaoCarregando from '@/components/ui/UiCartaoCarregando.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import EstoqueChartConsumo from '@/features/clinico/components/estoque/EstoqueChartConsumo.vue'
 import EstoqueChartSaldo from '@/features/clinico/components/estoque/EstoqueChartSaldo.vue'
@@ -270,6 +271,11 @@ const resumoDasPerdas = computed(() => {
           </li>
         </ul>
       </section>
+    </template>
+    <!-- A primeira leitura: os cartões esperando, no lugar da tela em branco. -->
+    <template v-else-if="!erro">
+      <UiCartaoCarregando :linhas="4" />
+      <UiCartaoCarregando :linhas="3" />
     </template>
   </div>
 </template>

@@ -15,6 +15,7 @@ import { useI18n } from 'vue-i18n'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiLinhasCarregando from '@/components/ui/UiLinhasCarregando.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -205,7 +206,8 @@ async function estornar() {
           </span>
         </li>
       </ul>
-      <p v-else-if="!carregando" class="ui-vazio">{{ t('estoque.movimentos.vazio') }}</p>
+      <UiLinhasCarregando v-else-if="carregando" :linhas="5" />
+      <p v-else class="ui-vazio">{{ t('estoque.movimentos.vazio') }}</p>
     </section>
 
     <Button

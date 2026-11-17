@@ -13,6 +13,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiLinhasCarregando from '@/components/ui/UiLinhasCarregando.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
@@ -280,6 +281,20 @@ function mudou(texto: string) {
         </li>
       </ul>
       <p v-else-if="geladeira" class="gl__nota">{{ t('estoque.vazio') }}</p>
+      <!-- A primeira leitura: as linhas esperando, ou o erro com o tentar de novo. -->
+      <p v-else-if="erro && !carregando" class="eg__erro gl__falha" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>{{ erro }}</span>
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          outlined
+          :label="t('cadastro.tentarDeNovo')"
+          @click="carregar"
+        />
+      </p>
+      <UiLinhasCarregando v-else :linhas="4" :com-acao="movimenta || planeja" />
     </section>
 
     <section v-if="geladeira?.lotes.length" class="ui-folha ui-cartao" aria-labelledby="gl-lotes">
@@ -447,6 +462,14 @@ function mudou(texto: string) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
+}
+
+.gl__falha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 14px 0 0;
 }
 
 .gl__nota {
