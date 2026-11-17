@@ -10147,7 +10147,16 @@
       "cpfDeOutro": "This CPF already belongs to a client of this clinic.",
       "usarEsteCliente": "Use this client",
       "cadastrar": "Register patient",
-      "criado": "{nome} registered"
+      "criado": "{nome} registered",
+      "passos": {
+        "rotulo": "Registration steps",
+        "responsavel": "Owner",
+        "pet": "Pet",
+        "detalhes": "Details"
+      },
+      "detalhesDica": "Everything here is optional: you can complete it later in the patient's file.",
+      "continuar": "Continue",
+      "voltar": "Back"
     },
     "vinculo": {
       "titulo": "In the guardian's app",

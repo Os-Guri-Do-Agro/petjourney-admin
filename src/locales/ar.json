@@ -10147,7 +10147,16 @@
       "cpfDeOutro": "رقم CPF هذا لعميل في هذه العيادة بالفعل.",
       "usarEsteCliente": "استخدام هذا العميل",
       "cadastrar": "تسجيل مريض",
-      "criado": "تم تسجيل {nome}"
+      "criado": "تم تسجيل {nome}",
+      "passos": {
+        "rotulo": "خطوات التسجيل",
+        "responsavel": "المسؤول",
+        "pet": "الحيوان",
+        "detalhes": "التفاصيل"
+      },
+      "detalhesDica": "كل ما هنا اختياري: يمكن إكماله لاحقًا في ملف المريض.",
+      "continuar": "متابعة",
+      "voltar": "رجوع"
     },
     "vinculo": {
       "titulo": "في تطبيق المسؤول",

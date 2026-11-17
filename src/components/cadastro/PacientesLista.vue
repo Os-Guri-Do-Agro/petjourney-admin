@@ -21,8 +21,9 @@ import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import NovoPacienteGaveta from '@/components/cadastro/NovoPacienteGaveta.vue'
 import {
   alertasPorGravidade,
   ICONE_DO_ALERTA,
@@ -46,6 +47,7 @@ import { listarPendencias } from '@/service/parceiro/pendencias-service'
 import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const { store, parceiroQuery } = useParceiroPortal()
 const rotulos = useRotulosDoCadastro()
@@ -207,9 +209,30 @@ const fraseDoResumo = computed(() => {
       )
 })
 
+/*
+ * Cadastrar abre a gaveta em passos aqui mesmo, sem sair da lista (pedido do Luís, 17/11/2026).
+ * Quem chega de fora (Ações rápidas do Início, o endereço antigo `/clinica/paciente/novo`) vem com
+ * `?novo=1`: a gaveta abre e o pedido sai da URL, para recarregar não abrir de novo.
+ */
+const novoAberto = ref(false)
+
 function cadastrar() {
-  void router.push('/clinica/paciente/novo')
+  novoAberto.value = true
 }
+
+watch(
+  () => [route.query.novo, podeCadastrar.value] as const,
+  ([pedido, pode]) => {
+    /* Sem a permissão ainda (o contexto chegando), espera; o pedido fica na URL até lá. */
+    if (pedido !== '1' || !pode) return
+
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+    novoAberto.value = true
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -409,6 +432,8 @@ function cadastrar() {
         />
       </div>
     </section>
+
+    <NovoPacienteGaveta v-if="podeCadastrar" v-model:visible="novoAberto" />
   </UiPagina>
 </template>
 

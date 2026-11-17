@@ -5,6 +5,10 @@
  * Nome e espécie são obrigatórios; "Outra" pede qual. A data de nascimento pode vir de uma idade
  * dita no balcão ("uns 3 anos"): aí ela é marcada como estimada. O porte é escolhido, não sai do
  * peso. Castrado tem o "não informado", que é diferente de "não".
+ *
+ * `parte` divide os campos nos passos do cadastro novo: o essencial (nome, espécie, raça, sexo,
+ * castrado) e os detalhes, todos opcionais (nascimento, porte, peso, microchip, pelagem). A gaveta
+ * de editar mostra tudo.
  */
 import Checkbox from 'primevue/checkbox'
 import DatePicker from 'primevue/datepicker'
@@ -21,12 +25,19 @@ import { ESPECIES, PORTES } from '@/service/parceiro/pacientes-service'
 
 const campos = defineModel<CamposDoPaciente>({ required: true })
 
-defineProps<{
-  erros?: ErrosDoPaciente
-  desabilitado?: boolean
-  /** Prefixo dos ids, para duas instâncias na mesma página não repetirem. */
-  id: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    erros?: ErrosDoPaciente
+    desabilitado?: boolean
+    /** Prefixo dos ids, para duas instâncias na mesma página não repetirem. */
+    id: string
+    parte?: 'tudo' | 'essencial' | 'detalhes'
+  }>(),
+  { erros: undefined, parte: 'tudo' },
+)
+
+const essencial = computed(() => props.parte !== 'detalhes')
+const detalhes = computed(() => props.parte !== 'essencial')
 
 const { t, locale } = useI18n()
 
@@ -92,7 +103,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 </script>
 
 <template>
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <label class="eg__rotulo" :for="`${id}-nome`">{{ t('cadastro.campos.nome') }}</label>
     <InputText
       :id="`${id}-nome`"
@@ -105,7 +116,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     <small v-if="erros?.nome" class="eg__invalido">{{ erros.nome }}</small>
   </section>
 
-  <div class="eg__linha">
+  <div v-if="essencial" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-especie`">{{ t('cadastro.campos.especie') }}</label>
       <Select
@@ -145,7 +156,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </section>
   </div>
 
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <span :id="`${id}-sexo`" class="eg__rotulo">{{ t('cadastro.campos.sexo') }}</span>
     <SelectButton
       v-model="sexo"
@@ -158,7 +169,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     />
   </section>
 
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <span :id="`${id}-castrado`" class="eg__rotulo">{{ t('cadastro.campos.castrado') }}</span>
     <SelectButton
       v-model="castrado"
@@ -171,7 +182,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     />
   </section>
 
-  <section class="eg__secao">
+  <section v-if="detalhes" class="eg__secao">
     <span :id="`${id}-nascimento`" class="eg__rotulo">
       {{ t('cadastro.campos.nascimento') }}
       <span class="eg__opcional">{{ t('cadastro.opcional') }}</span>
@@ -195,7 +206,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </label>
   </section>
 
-  <div class="eg__linha">
+  <div v-if="detalhes" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-porte`">{{ t('cadastro.campos.porte') }}</label>
       <Select
@@ -228,7 +239,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </section>
   </div>
 
-  <div class="eg__linha">
+  <div v-if="detalhes" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-microchip`">
         {{ t('cadastro.campos.microchip') }}
@@ -259,6 +270,11 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 </template>
 
 <style scoped>
+/* Lado a lado, cada campo fica do tamanho dele: o erro de um não estica o vizinho. */
+.eg__linha > .eg__secao {
+  align-content: start;
+}
+
 .pc__calendario {
   justify-self: start;
 }

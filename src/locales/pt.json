@@ -10147,7 +10147,16 @@
       "cpfDeOutro": "Este CPF já é de um cliente desta clínica.",
       "usarEsteCliente": "Usar este cliente",
       "cadastrar": "Cadastrar paciente",
-      "criado": "{nome} cadastrado"
+      "criado": "{nome} cadastrado",
+      "passos": {
+        "rotulo": "Passos do cadastro",
+        "responsavel": "Responsável",
+        "pet": "Pet",
+        "detalhes": "Detalhes"
+      },
+      "detalhesDica": "Tudo aqui é opcional: dá para completar depois, na ficha do paciente.",
+      "continuar": "Continuar",
+      "voltar": "Voltar"
     },
     "vinculo": {
       "titulo": "No app do responsável",

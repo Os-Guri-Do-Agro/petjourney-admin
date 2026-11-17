@@ -10147,7 +10147,16 @@
       "cpfDeOutro": "Ovaj CPF već pripada klijentu ove klinike.",
       "usarEsteCliente": "Koristi ovog klijenta",
       "cadastrar": "Upiši pacijenta",
-      "criado": "{nome} je upisan"
+      "criado": "{nome} je upisan",
+      "passos": {
+        "rotulo": "Koraci upisa",
+        "responsavel": "Vlasnik",
+        "pet": "Ljubimac",
+        "detalhes": "Detalji"
+      },
+      "detalhesDica": "Sve ovde je neobavezno: može kasnije da se dopuni u kartonu pacijenta.",
+      "continuar": "Nastavi",
+      "voltar": "Nazad"
     },
     "vinculo": {
       "titulo": "U aplikaciji vlasnika",
