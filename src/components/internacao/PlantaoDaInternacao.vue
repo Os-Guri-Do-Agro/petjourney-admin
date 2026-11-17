@@ -254,20 +254,23 @@ const pendentesDaRecebida = computed(
   text-decoration: none;
 }
 
+/* Embaixo do fio do cabeçalho, com respiro, e alinhado ao conteúdo do cartão (o recuo de 24 px era
+ * do cartão antigo, que não tinha respiro próprio). */
 .pl__nota {
-  margin: 0;
-  padding: 0 24px 12px;
+  margin: 14px 0 0;
+  padding: 0;
 }
 
 .pl__mais {
   justify-self: start;
-  margin: 0 24px 14px;
+  margin: 12px 0 0;
 }
 
 .pl__recebida {
   display: grid;
   gap: 8px;
-  padding: 0 24px 14px;
+  margin-top: 14px;
+  padding: 0;
 }
 
 .pl__nota-da-passagem {

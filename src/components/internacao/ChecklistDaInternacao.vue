@@ -190,9 +190,11 @@ const resumo = computed(() => {
 </template>
 
 <style scoped>
+/* Embaixo do fio do cabeçalho, com respiro, e alinhado ao conteúdo do cartão (o recuo de 24 px era
+ * do cartão antigo, que não tinha respiro próprio). */
 .ck__nota {
-  margin: 0;
-  padding: 0 24px 12px;
+  margin: 14px 0 0;
+  padding: 0;
 }
 
 .ck__vazio {

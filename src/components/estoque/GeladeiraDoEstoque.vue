@@ -450,8 +450,8 @@ function mudou(texto: string) {
 }
 
 .gl__nota {
-  margin: 0;
-  padding: 0 24px 14px;
+  margin: 14px 0 0;
+  padding: 0;
   color: var(--tinta-2);
   font-size: 14px;
 }
