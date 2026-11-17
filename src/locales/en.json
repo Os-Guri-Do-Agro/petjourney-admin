@@ -13048,7 +13048,28 @@
       "pendentesDaRecebida": "All {total} handover doses are resolved. | {n} of {total} handover doses still pending. | {n} of {total} handover doses still pending.",
       "erro": "Could not load the shift.",
       "erroAssumir": "Could not take the shift.",
-      "erroEntregar": "Could not hand over the shift."
+      "erroEntregar": "Could not hand over the shift.",
+      "doses": {
+        "titulo": "Shift doses",
+        "descricao": "Each dose scheduled in this shift: record what was given and what was not."
+      },
+      "guia": {
+        "titulo": "How the shift works",
+        "vazio": "Doses show up here when an inpatient has medication prescribed for a time within this shift.",
+        "mapa": "See the ward map",
+        "prescricao": {
+          "titulo": "The prescription sets the doses",
+          "texto": "In the ward, each prescribed medication becomes doses with a set time."
+        },
+        "registro": {
+          "titulo": "The team records on time",
+          "texto": "Here, dose by dose: given, not given or late, with who did it."
+        },
+        "passagem": {
+          "titulo": "The shift is handed over",
+          "texto": "At the end of the shift, whoever is on duty hands over to the next, with what is pending."
+        }
+      }
     },
     "boletim": {
       "titulo": "Update to the owner",

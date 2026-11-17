@@ -13048,7 +13048,28 @@
       "pendentesDaRecebida": "Todas as {total} doses da passagem estão resolvidas. | {n} de {total} doses da passagem ainda pendente. | {n} de {total} doses da passagem ainda pendentes.",
       "erro": "Não deu para carregar o plantão.",
       "erroAssumir": "Não deu para assumir o plantão.",
-      "erroEntregar": "Não deu para entregar o plantão."
+      "erroEntregar": "Não deu para entregar o plantão.",
+      "doses": {
+        "titulo": "Doses do plantão",
+        "descricao": "Cada dose com hora marcada neste plantão: registre o que foi dado e o que não foi."
+      },
+      "guia": {
+        "titulo": "Como funciona o plantão",
+        "vazio": "As doses aparecem aqui quando um paciente internado tem medicamento prescrito com horário dentro deste plantão.",
+        "mapa": "Ver o mapa de leitos",
+        "prescricao": {
+          "titulo": "A prescrição marca as doses",
+          "texto": "Na internação, cada medicamento prescrito vira doses com hora marcada."
+        },
+        "registro": {
+          "titulo": "A equipe registra no horário",
+          "texto": "Aqui, dose por dose: dei, não dei ou atrasou, com o nome de quem fez."
+        },
+        "passagem": {
+          "titulo": "O plantão passa adiante",
+          "texto": "No fim do turno, quem está de plantão entrega ao próximo, com o que ficou pendente."
+        }
+      }
     },
     "boletim": {
       "titulo": "Boletim ao responsável",

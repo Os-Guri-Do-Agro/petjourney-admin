@@ -13048,7 +13048,28 @@
       "pendentesDaRecebida": "Las {total} dosis de la entrega están resueltas. | {n} de {total} dosis de la entrega sigue pendiente. | {n} de {total} dosis de la entrega siguen pendientes.",
       "erro": "No se pudo cargar la guardia.",
       "erroAssumir": "No se pudo asumir la guardia.",
-      "erroEntregar": "No se pudo entregar la guardia."
+      "erroEntregar": "No se pudo entregar la guardia.",
+      "doses": {
+        "titulo": "Dosis del turno",
+        "descricao": "Cada dosis con hora fijada en este turno: registre lo que se dio y lo que no."
+      },
+      "guia": {
+        "titulo": "Cómo funciona el turno",
+        "vazio": "Las dosis aparecen aquí cuando un paciente internado tiene un medicamento recetado con horario dentro de este turno.",
+        "mapa": "Ver el mapa de camas",
+        "prescricao": {
+          "titulo": "La receta fija las dosis",
+          "texto": "En la internación, cada medicamento recetado se convierte en dosis con hora fijada."
+        },
+        "registro": {
+          "titulo": "El equipo registra a tiempo",
+          "texto": "Aquí, dosis por dosis: dada, no dada o atrasada, con quién la hizo."
+        },
+        "passagem": {
+          "titulo": "El turno pasa al siguiente",
+          "texto": "Al final del turno, quien está de guardia lo entrega al siguiente, con lo pendiente."
+        }
+      }
     },
     "boletim": {
       "titulo": "Boletín al responsable",

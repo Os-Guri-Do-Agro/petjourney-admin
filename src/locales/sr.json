@@ -13048,7 +13048,28 @@
       "pendentesDaRecebida": "Svih {total} doza iz predaje je rešeno. | {n} od {total} doza iz predaje je još na čekanju. | {n} od {total} doza iz predaje su još na čekanju. | {n} od {total} doza iz predaje je još na čekanju.",
       "erro": "Smena nije učitana.",
       "erroAssumir": "Preuzimanje smene nije uspelo.",
-      "erroEntregar": "Predaja smene nije uspela."
+      "erroEntregar": "Predaja smene nije uspela.",
+      "doses": {
+        "titulo": "Doze u smeni",
+        "descricao": "Svaka doza zakazana u ovoj smeni: upišite šta je dato, a šta nije."
+      },
+      "guia": {
+        "titulo": "Kako smena funkcioniše",
+        "vazio": "Doze se pojavljuju ovde kada hospitalizovani pacijent ima propisan lek sa terminom u ovoj smeni.",
+        "mapa": "Pogledaj mapu ležajeva",
+        "prescricao": {
+          "titulo": "Recept određuje doze",
+          "texto": "U hospitalizaciji svaki propisani lek postaje doze sa zakazanim vremenom."
+        },
+        "registro": {
+          "titulo": "Tim upisuje na vreme",
+          "texto": "Ovde, doza po doza: dato, nije dato ili kasni, sa imenom ko je uradio."
+        },
+        "passagem": {
+          "titulo": "Smena se predaje dalje",
+          "texto": "Na kraju smene, dežurni predaje sledećem, sa onim što je ostalo."
+        }
+      }
     },
     "boletim": {
       "titulo": "Izveštaj vlasniku",
