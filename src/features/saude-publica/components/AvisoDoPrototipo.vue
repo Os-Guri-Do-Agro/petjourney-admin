@@ -12,6 +12,9 @@ import { useRouter } from 'vue-router'
 import { dataCurta, PERIODO } from '@/features/saude-publica/dados'
 import { usePrototipoSaudePublica } from '@/features/saude-publica/prototipo'
 
+/** A frase do aviso, quando a tela simula outro período (o piloto com a Subea). */
+defineProps<{ texto?: string }>()
+
 const router = useRouter()
 const { ligar, desligar } = usePrototipoSaudePublica()
 
@@ -29,7 +32,8 @@ function sair() {
       <i class="ph ph-flask" aria-hidden="true" />
       Protótipo
     </span>
-    <span class="aviso-prototipo__texto">
+    <span v-if="texto" class="aviso-prototipo__texto">{{ texto }}</span>
+    <span v-else class="aviso-prototipo__texto">
       Dados ilustrativos: simulação dos 90 primeiros dias em Campo Grande ({{
         dataCurta(PERIODO.inicio)
       }}

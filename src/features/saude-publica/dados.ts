@@ -641,3 +641,283 @@ export function dataPorExtenso(valor: string) {
     timeZone: 'UTC',
   }).format(Date.UTC(ano!, mes! - 1, dia!))
 }
+
+/* ------------------------------------------------- o piloto com a Subea (Ofício 002/2026) */
+
+/**
+ * O piloto de 60 dias com a Subea (Ofício 002/2026, 17/11/2026): num bairro atendido pelo
+ * Consultório Móvel, a equipe entrega ao tutor um QR Code que abre a ficha do animal no celular,
+ * sem app nem senha; o tutor recebe os avisos e confirma com um toque; a Subea acompanha o painel.
+ *
+ * As metas são as do anexo do ofício (sugestão inicial, a ajustar com a Subea). O andamento, os
+ * números e os atendimentos são ilustrativos, e o bairro é um exemplo: quem escolhe é a Subea, na
+ * reunião técnica. O piloto começa depois do programa, e o "hoje" é o mesmo da simulação.
+ */
+export const PILOTO = {
+  bairro: 'Aero Rancho',
+  inicio: '2027-01-13',
+  fim: '2027-03-13',
+  dias: 60,
+  atendimentos: 412,
+}
+
+const UM_DIA = 24 * 60 * 60 * 1000
+
+function emDias(valor: string) {
+  const [ano, mes, dia] = valor.split('-').map(Number)
+  return Date.UTC(ano!, mes! - 1, dia!) / UM_DIA
+}
+
+/** `AAAA-MM-DD` mais tantos dias, sem passar pelo fuso. */
+export function somarDias(valor: string, dias: number) {
+  return new Date((emDias(valor) + dias) * UM_DIA).toISOString().slice(0, 10)
+}
+
+/** O dia do piloto no "hoje" da simulação: de 1 a 60. */
+export function diaDoPiloto() {
+  return Math.min(PILOTO.dias, emDias(PERIODO.hoje) - emDias(PILOTO.inicio) + 1)
+}
+
+export type MetaDoPiloto = {
+  id: 'ficha' | 'castracao' | 'vacina' | 'coleira' | 'sinpatinhas'
+  rotulo: string
+  /** Quem conta: só quem já chegou na data entra na conta do "no prazo". */
+  regra: string
+  icone: string
+  meta: number
+  feitos: number
+  base: number
+  /** Quem falta, numa frase que segue o número ("36 coleiras venceram sem troca"). */
+  faltam: string
+  /** O lembrete que a Subea reenvia a quem falta: o botão e o aviso no celular. */
+  lembrete: { acao: string; titulo: string; texto: string }
+}
+
+export const METAS_DO_PILOTO: MetaDoPiloto[] = [
+  {
+    id: 'ficha',
+    rotulo: 'Tutores que abrem a ficha',
+    regra: 'tutores atendidos abriram a ficha pelo QR Code',
+    icone: 'ph ph-qr-code',
+    meta: 40,
+    feitos: 260,
+    base: 412,
+    faltam: 'tutores ainda não abriram a ficha',
+    lembrete: {
+      acao: 'Reenviar o link da ficha',
+      titulo: 'A ficha do seu animal',
+      texto:
+        'O que a Subea fez no atendimento e as datas dos próximos cuidados estão aqui. Toque para abrir.',
+    },
+  },
+  {
+    id: 'castracao',
+    rotulo: 'Retorno pós-castração no prazo',
+    regra: 'castrações com o retorno já vencido voltaram até a data',
+    icone: 'ph ph-gender-neuter',
+    meta: 60,
+    feitos: 121,
+    base: 171,
+    faltam: 'castrações passaram da data do retorno sem voltar',
+    lembrete: {
+      acao: 'Lembrar do retorno',
+      titulo: 'Retorno da castração',
+      texto:
+        'O retorno do seu animal passou da data. O Consultório Móvel atende no bairro; leve o comprovante.',
+    },
+  },
+  {
+    id: 'vacina',
+    rotulo: 'Reforço de vacina no prazo',
+    regra: 'reforços marcados até hoje foram feitos até a data',
+    icone: 'ph ph-syringe',
+    meta: 50,
+    feitos: 30,
+    base: 64,
+    faltam: 'reforços passaram da data sem ser feitos',
+    lembrete: {
+      acao: 'Lembrar do reforço',
+      titulo: 'Reforço da vacina',
+      texto:
+        'O reforço da vacina do seu animal passou da data. Procure o Consultório Móvel do bairro.',
+    },
+  },
+  {
+    id: 'coleira',
+    rotulo: 'Coleira trocada no prazo',
+    regra: 'coleiras que venceram no período foram trocadas até a data',
+    icone: 'ph ph-shield-check',
+    meta: 50,
+    feitos: 22,
+    base: 58,
+    faltam: 'coleiras venceram sem troca',
+    lembrete: {
+      acao: 'Lembrar da coleira',
+      titulo: 'Troca da coleira',
+      texto:
+        'A coleira contra a leishmaniose do seu cão venceu. Trocar no prazo protege o animal e a família.',
+    },
+  },
+  {
+    id: 'sinpatinhas',
+    rotulo: 'Cadastro no SinPatinhas informado',
+    regra: 'tutores atendidos disseram que cadastraram o animal',
+    icone: 'ph ph-identification-card',
+    meta: 30,
+    feitos: 140,
+    base: 412,
+    faltam: 'tutores ainda não informaram o cadastro',
+    lembrete: {
+      acao: 'Lembrar do SinPatinhas',
+      titulo: 'Cadastro no SinPatinhas',
+      texto:
+        'Cadastre seu animal no SinPatinhas, o cadastro nacional de cães e gatos. Leva poucos minutos.',
+    },
+  },
+]
+
+export function percentual(meta: Pick<MetaDoPiloto, 'feitos' | 'base'>) {
+  return Math.round((meta.feitos / meta.base) * 100)
+}
+
+export type Procedimento = 'castracao' | 'antirrabica' | 'coleira' | 'consulta' | 'microchip'
+
+/** A meta que anda quando o tutor confirma o cuidado marcado pelo procedimento. */
+export const META_DO_PROCEDIMENTO: Partial<Record<Procedimento, MetaDoPiloto['id']>> = {
+  castracao: 'castracao',
+  antirrabica: 'vacina',
+  coleira: 'coleira',
+}
+
+export type DefinicaoDoProcedimento = {
+  id: Procedimento
+  rotulo: string
+  icone: string
+  /** O cuidado que ele marca, e em quantos dias. Microchip não marca nada. */
+  proximo?: { rotulo: string; dias: number }
+}
+
+export const PROCEDIMENTOS: DefinicaoDoProcedimento[] = [
+  {
+    id: 'castracao',
+    rotulo: 'Castração',
+    icone: 'ph ph-gender-neuter',
+    proximo: { rotulo: 'Retorno pós-castração', dias: 10 },
+  },
+  {
+    id: 'antirrabica',
+    rotulo: 'Vacina antirrábica',
+    icone: 'ph ph-syringe',
+    proximo: { rotulo: 'Reforço da antirrábica', dias: 365 },
+  },
+  {
+    id: 'coleira',
+    rotulo: 'Coleira repelente',
+    icone: 'ph ph-shield-check',
+    proximo: { rotulo: 'Troca da coleira', dias: 180 },
+  },
+  {
+    id: 'consulta',
+    rotulo: 'Consulta',
+    icone: 'ph ph-stethoscope',
+    proximo: { rotulo: 'Retorno da consulta', dias: 15 },
+  },
+  { id: 'microchip', rotulo: 'Microchip', icone: 'ph ph-cpu' },
+]
+
+export function procedimento(id: Procedimento) {
+  return PROCEDIMENTOS.find((item) => item.id === id)!
+}
+
+/** Os cuidados que o atendimento marca, do mais perto ao mais longe. */
+export function proximosCuidados(data: string, procedimentos: readonly Procedimento[]) {
+  return procedimentos
+    .flatMap((id) => {
+      const proximo = procedimento(id).proximo
+      return proximo
+        ? [{ procedimento: id, rotulo: proximo.rotulo, data: somarDias(data, proximo.dias) }]
+        : []
+    })
+    .sort((a, b) => a.data.localeCompare(b.data))
+}
+
+/**
+ * Depois do atendimento: não abriu a ficha, abriu (e o cuidado ainda não venceu), cumpriu no prazo,
+ * ou deixou o cuidado passar da data.
+ */
+export type SituacaoNoPiloto = 'nao-abriu' | 'abriu' | 'cumpriu' | 'atrasado'
+
+export type AtendimentoDoPiloto = {
+  id: string
+  animal: string
+  especie: 'CACHORRO' | 'GATO'
+  /** Só as iniciais: o painel não identifica tutor. */
+  tutor: string
+  data: string
+  procedimentos: Procedimento[]
+  situacao: SituacaoNoPiloto
+  sinpatinhas: boolean
+}
+
+export const ATENDIMENTOS_DO_PILOTO: AtendimentoDoPiloto[] = [
+  {
+    id: 'a1',
+    animal: 'Luna',
+    especie: 'CACHORRO',
+    tutor: 'M. A.',
+    data: '2027-02-27',
+    procedimentos: ['castracao', 'antirrabica'],
+    situacao: 'abriu',
+    sinpatinhas: false,
+  },
+  {
+    id: 'a2',
+    animal: 'Faísca',
+    especie: 'CACHORRO',
+    tutor: 'J. P.',
+    data: '2027-02-27',
+    procedimentos: ['coleira', 'antirrabica'],
+    situacao: 'nao-abriu',
+    sinpatinhas: false,
+  },
+  {
+    id: 'a3',
+    animal: 'Mia',
+    especie: 'GATO',
+    tutor: 'R. S.',
+    data: '2027-02-24',
+    procedimentos: ['castracao'],
+    situacao: 'abriu',
+    sinpatinhas: true,
+  },
+  {
+    id: 'a4',
+    animal: 'Pretinha',
+    especie: 'CACHORRO',
+    tutor: 'A. L.',
+    data: '2027-02-17',
+    procedimentos: ['castracao', 'microchip'],
+    situacao: 'cumpriu',
+    sinpatinhas: true,
+  },
+  {
+    id: 'a5',
+    animal: 'Bolinha',
+    especie: 'CACHORRO',
+    tutor: 'C. M.',
+    data: '2027-02-13',
+    procedimentos: ['castracao'],
+    situacao: 'atrasado',
+    sinpatinhas: false,
+  },
+  {
+    id: 'a6',
+    animal: 'Simba',
+    especie: 'GATO',
+    tutor: 'F. R.',
+    data: '2027-02-10',
+    procedimentos: ['consulta', 'antirrabica'],
+    situacao: 'cumpriu',
+    sinpatinhas: true,
+  },
+]

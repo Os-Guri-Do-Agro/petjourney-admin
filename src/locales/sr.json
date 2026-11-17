@@ -9894,9 +9894,10 @@
     "saude": {
       "rotulo": "Javno zdravlje",
       "painel": "Pregled",
+      "piloto": "Pilot Subea",
       "campanhas": "Kampanje",
       "ongs": "Udruženja i udomljavanje",
-      "relatorio": "Izveštaj za 90 dana"
+      "relatorio": "Izveštaj"
     }
   },
   "pendencias": {

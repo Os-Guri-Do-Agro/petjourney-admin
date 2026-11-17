@@ -9894,9 +9894,10 @@
     "saude": {
       "rotulo": "Public health",
       "painel": "Dashboard",
+      "piloto": "Subea pilot",
       "campanhas": "Campaigns",
       "ongs": "Shelters and adoption",
-      "relatorio": "90-day report"
+      "relatorio": "Report"
     }
   },
   "pendencias": {

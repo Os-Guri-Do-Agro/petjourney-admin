@@ -449,10 +449,10 @@ function espacoDe(
 }
 
 /**
- * Saúde pública: o protótipo para a apresentação à Câmara de Campo Grande
- * (`features/saude-publica`). Destinos fixos, sem permissão nem módulo: o protótipo não toca dado
- * de ninguém. O painel mora em `/saude-publica/painel`, e não no prefixo puro, para a aba dele não
- * acender nas outras telas do espaço.
+ * Saúde pública: o protótipo para a apresentação à Câmara de Campo Grande e à Subea
+ * (`features/saude-publica`, Ofícios 001 e 002/2026). Destinos fixos, sem permissão nem módulo:
+ * o protótipo não toca dado de ninguém. O painel mora em `/saude-publica/painel`, e não no prefixo
+ * puro, para a aba dele não acender nas outras telas do espaço.
  */
 function destinosDaSaudePublica(t: (chave: string) => string): Destino[] {
   const destino = (id: string, icone: string, secao: IdDaSecao): Destino => {
@@ -464,6 +464,7 @@ function destinosDaSaudePublica(t: (chave: string) => string): Destino[] {
 
   return [
     destino('painel', 'ph ph-map-trifold', 'acompanhamento'),
+    destino('piloto', 'ph ph-van', 'acao'),
     destino('campanhas', 'ph ph-megaphone', 'acao'),
     destino('ongs', 'ph ph-hand-heart', 'acao'),
     destino('relatorio', 'ph ph-file-text', 'acompanhamento'),

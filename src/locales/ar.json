@@ -9894,9 +9894,10 @@
     "saude": {
       "rotulo": "الصحة العامة",
       "painel": "لوحة المتابعة",
+      "piloto": "تجربة Subea",
       "campanhas": "الحملات",
       "ongs": "الجمعيات والتبني",
-      "relatorio": "تقرير 90 يومًا"
+      "relatorio": "التقرير"
     }
   },
   "pendencias": {

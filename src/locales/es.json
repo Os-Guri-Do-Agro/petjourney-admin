@@ -9894,9 +9894,10 @@
     "saude": {
       "rotulo": "Salud pública",
       "painel": "Panel",
+      "piloto": "Piloto Subea",
       "campanhas": "Campañas",
       "ongs": "ONG y adopción",
-      "relatorio": "Informe de 90 días"
+      "relatorio": "Informe"
     }
   },
   "pendencias": {
