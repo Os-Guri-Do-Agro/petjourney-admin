@@ -10321,6 +10321,14 @@
       "novoDica": "La clínica crea el cliente y el paciente con los datos del acceso, con el nombre provisional \"Responsable de {pet}\".",
       "escolha": "Elija el paciente o cree el registro.",
       "feito": "Pedido enviado. El responsable recibe el pedido en la app para aceptar."
+    },
+    "porteReferencia": {
+      "MINI": "hasta 5 kg",
+      "PEQUENO": "5 a 10 kg",
+      "MEDIO": "10 a 25 kg",
+      "GRANDE": "25 a 45 kg",
+      "GIGANTE": "más de 45 kg",
+      "dica": "Peso de referencia de un perro adulto."
     }
   },
   "agenda": {

@@ -51,8 +51,19 @@ const opcoesDeEspecie = computed(() =>
  */
 const NAO_INFORMADO = 'NI'
 
+/*
+ * O peso de referência de cada porte, ao lado do nome (pedido do Luís, 17/11/2026), para quem
+ * escolhe ter uma ideia. É a faixa de um cão adulto: só aparece para cachorro, ou enquanto a
+ * espécie não foi escolhida; em gato e nos outros, o porte fica só com o nome.
+ */
+const mostraPeso = computed(() => !campos.value.especie || campos.value.especie === 'CACHORRO')
+
 const opcoesDePorte = computed(() =>
-  PORTES.map((valor) => ({ valor, rotulo: t(`cadastro.porte.${valor}`) })),
+  PORTES.map((valor) => ({
+    valor,
+    rotulo: t(`cadastro.porte.${valor}`),
+    peso: mostraPeso.value ? t(`cadastro.porteReferencia.${valor}`) : '',
+  })),
 )
 
 const opcoesDeSexo = computed(() => [
@@ -218,7 +229,15 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
         :placeholder="t('cadastro.naoInformado')"
         show-clear
         :disabled="desabilitado"
-      />
+      >
+        <template #option="{ option }">
+          <span class="pc__porte">
+            <span>{{ option.rotulo }}</span>
+            <span v-if="option.peso" class="pc__peso ui-num">{{ option.peso }}</span>
+          </span>
+        </template>
+      </Select>
+      <small v-if="mostraPeso" class="eg__dica">{{ t('cadastro.porteReferencia.dica') }}</small>
     </section>
 
     <section class="eg__secao">
@@ -273,6 +292,21 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 /* Lado a lado, cada campo fica do tamanho dele: o erro de um não estica o vizinho. */
 .eg__linha > .eg__secao {
   align-content: start;
+}
+
+/* O nome do porte à esquerda e o peso de referência à direita, mais apagado. */
+.pc__porte {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pc__peso {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  white-space: nowrap;
 }
 
 .pc__calendario {

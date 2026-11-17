@@ -10321,6 +10321,14 @@
       "novoDica": "The clinic creates the client and the patient from the access data, with the temporary name \"Guardian of {pet}\".",
       "escolha": "Choose the patient or create the record.",
       "feito": "Request sent. The guardian gets the request in the app to accept."
+    },
+    "porteReferencia": {
+      "MINI": "up to 5 kg",
+      "PEQUENO": "5 to 10 kg",
+      "MEDIO": "10 to 25 kg",
+      "GRANDE": "25 to 45 kg",
+      "GIGANTE": "over 45 kg",
+      "dica": "Reference weight of an adult dog."
     }
   },
   "agenda": {

@@ -10321,6 +10321,14 @@
       "novoDica": "A clínica cria o cliente e o paciente com os dados do acesso, com o nome provisório \"Responsável de {pet}\".",
       "escolha": "Escolha o paciente ou crie o cadastro.",
       "feito": "Pedido enviado. O responsável recebe o pedido no app para aceitar."
+    },
+    "porteReferencia": {
+      "MINI": "até 5 kg",
+      "PEQUENO": "5 a 10 kg",
+      "MEDIO": "10 a 25 kg",
+      "GRANDE": "25 a 45 kg",
+      "GIGANTE": "acima de 45 kg",
+      "dica": "Peso de referência de um cão adulto."
     }
   },
   "agenda": {
