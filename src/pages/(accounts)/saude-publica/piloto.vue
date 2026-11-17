@@ -12,6 +12,9 @@
  * Tudo responde (17/11, "a interação está simples demais"): o atendimento abre a ficha no celular,
  * onde quem apresenta faz o papel do tutor; a meta abre quem falta e o lembrete para eles. O que o
  * tutor faz muda as metas na hora: a barra anda e a linha brilha.
+ *
+ * Filtros (`FiltrosDoPiloto`): o período do piloto (inteiro, 30 ou 7 dias) e a espécie mudam as
+ * metas e a lista; o procedimento e a situação, só a lista.
  */
 import Button from 'primevue/button'
 import { computed, nextTick, ref, watch } from 'vue'
@@ -21,25 +24,33 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import UiPassos, { type PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import AtendimentoDoPilotoGaveta from '@/features/saude-publica/components/AtendimentoDoPilotoGaveta.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
+import FiltrosDoPiloto from '@/features/saude-publica/components/FiltrosDoPiloto.vue'
 import MetaDoPilotoGaveta from '@/features/saude-publica/components/MetaDoPilotoGaveta.vue'
 import RegistrarAtendimentoGaveta from '@/features/saude-publica/components/RegistrarAtendimentoGaveta.vue'
 import {
   ATENDIMENTOS_DO_PILOTO,
   dataCurta,
   diaDoPiloto,
+  METAS_DO_PILOTO,
   numero,
+  PERIODO,
   PILOTO,
   procedimento,
   proximosCuidados,
+  somarDias,
   type AtendimentoDoPiloto,
   type MetaDoPiloto,
+  type Procedimento,
+  type SituacaoNoPiloto,
 } from '@/features/saude-publica/dados'
 import {
   responsavelPeloAtendimento,
   useEstadoDoPrototipo,
   useMetasDoPiloto,
 } from '@/features/saude-publica/estado'
+import { metaNoRecorte, type Especie, type JanelaDoPiloto } from '@/features/saude-publica/serie'
 
 const { atendimentos } = useEstadoDoPrototipo()
 
@@ -86,7 +97,43 @@ const PASSOS: PassoDoGuia[] = [
 ]
 
 const metas = useMetasDoPiloto()
-const atingidas = computed(() => metas.value.filter((meta) => meta.atingida).length)
+
+/* ------------------------------------------------------------------------------ os filtros */
+
+const janela = ref<JanelaDoPiloto>('inteiro')
+const especie = ref<Especie>('todos')
+const procedimentoEscolhido = ref<Procedimento | null>(null)
+const situacao = ref<SituacaoNoPiloto | null>(null)
+
+const ORIGINAIS = new Map(METAS_DO_PILOTO.map((meta) => [meta.id, meta]))
+
+/** As metas no pedaço escolhido; a coleira, com "Gatos", não se aplica. */
+const metasNoRecorte = computed(() =>
+  metas.value.map((meta) => ({
+    ...meta,
+    ...metaNoRecorte(meta, ORIGINAIS.get(meta.id)!, janela.value, especie.value, dia),
+  })),
+)
+const atingidas = computed(() => metasNoRecorte.value.filter((meta) => meta.atingida).length)
+const aplicaveis = computed(() => metasNoRecorte.value.filter((meta) => meta.aplica).length)
+
+/** "nos 47 dias do piloto", "nos últimos 30 dias": o "de quando" das metas. */
+const janelaNaFrase = computed(() =>
+  janela.value === 'inteiro' ? `nos ${dia} dias do piloto` : `nos últimos ${janela.value} dias`,
+)
+
+/** Os atendimentos do recorte: a data na janela, a espécie, o procedimento e a situação. */
+const atendimentosNoRecorte = computed(() => {
+  const desde =
+    janela.value === 'inteiro' ? PILOTO.inicio : somarDias(PERIODO.hoje, 1 - Number(janela.value))
+  return atendimentos.value.filter(
+    (item) =>
+      item.data >= desde &&
+      (especie.value === 'todos' || (especie.value === 'gatos') === (item.especie === 'GATO')) &&
+      (!procedimentoEscolhido.value || item.procedimentos.includes(procedimentoEscolhido.value)) &&
+      (!situacao.value || item.situacao === situacao.value),
+  )
+})
 
 /* A meta que acabou de mudar brilha por um instante: o olho vai para onde o toque teve efeito. */
 const mudou = ref<string[]>([])
@@ -179,6 +226,13 @@ function aoRegistrar(id: string) {
     <div class="pl">
       <AvisoDoPrototipo :texto="aviso" />
 
+      <FiltrosDoPiloto
+        v-model:janela="janela"
+        v-model:especie="especie"
+        v-model:procedimento="procedimentoEscolhido"
+        v-model:situacao="situacao"
+      />
+
       <section class="ui-folha ui-cartao pl-caixa" aria-labelledby="pl-como">
         <header class="ui-cartao__cabeca pl-cabeca">
           <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-path" /></span>
@@ -199,11 +253,11 @@ function aoRegistrar(id: string) {
           <span class="ui-cartao__titulos">
             <h2 id="pl-metas" class="ui-cartao__titulo">
               Metas do piloto
-              <span class="ui-contagem">{{ atingidas }} de {{ metas.length }}</span>
+              <span class="ui-contagem">{{ atingidas }} de {{ aplicaveis }}</span>
             </h2>
             <p class="ui-cartao__descricao">
-              As do ofício, uma sugestão inicial a ajustar com a Subea. No prazo, só conta quem já
-              chegou na data.
+              As do ofício, uma sugestão inicial a ajustar com a Subea, {{ janelaNaFrase }}. No
+              prazo, só conta quem já chegou na data.
             </p>
           </span>
           <!-- O andamento dos 60 dias, no canto da caixa das metas: é contra ele que elas se leem. -->
@@ -219,12 +273,16 @@ function aoRegistrar(id: string) {
         </header>
 
         <ul class="pl-metas">
-          <li v-for="meta in metas" :key="meta.id">
+          <li v-for="meta in metasNoRecorte" :key="meta.id">
             <button
               type="button"
               class="pl-meta"
               :class="{ 'pl-meta--mudou': mudou.includes(meta.id) }"
-              :aria-label="`${meta.rotulo}: ${meta.valor}%. Ver quem falta`"
+              :aria-label="
+                meta.aplica
+                  ? `${meta.rotulo}: ${meta.valor}%. Ver quem falta`
+                  : `${meta.rotulo}: só cães. Ver quem falta`
+              "
               @click="abrirMeta(meta.id)"
             >
               <span class="pl-meta__rotulo">
@@ -232,7 +290,7 @@ function aoRegistrar(id: string) {
                 {{ meta.rotulo }}
               </span>
               <span class="pl-meta__valor">
-                <span class="ui-num">{{ meta.valor }}%</span>
+                <span class="ui-num">{{ meta.aplica ? `${meta.valor}%` : '—' }}</span>
                 <i class="ph ph-caret-right pl-seta" aria-hidden="true" />
               </span>
               <!-- O feito (barra) e a meta (traço) na mesma régua de 0 a 100%. -->
@@ -240,15 +298,27 @@ function aoRegistrar(id: string) {
                 <span
                   class="pl-meta__barra"
                   :class="{ 'pl-meta__barra--abaixo': !meta.atingida }"
-                  :style="{ width: `${meta.valor}%` }"
+                  :style="{ width: `${meta.aplica ? Math.min(100, meta.valor) : 0}%` }"
                 />
-                <span class="pl-meta__alvo" :style="{ insetInlineStart: `${meta.meta}%` }" />
+                <span
+                  v-if="meta.aplica"
+                  class="pl-meta__alvo"
+                  :style="{ insetInlineStart: `${meta.meta}%` }"
+                />
               </span>
-              <span class="pl-meta__frase">
+              <span v-if="meta.aplica" class="pl-meta__frase">
                 {{ numero(meta.feitos) }} de {{ numero(meta.base) }} {{ meta.regra }}. Meta:
                 {{ meta.meta }}%.
               </span>
+              <span v-else class="pl-meta__frase">
+                A coleira repelente é só de cães: escolha "Cães" ou "Cães e gatos".
+              </span>
+              <span v-if="!meta.aplica" class="ui-selo pl-meta__selo">
+                <i class="ph ph-dog" aria-hidden="true" />
+                Só cães
+              </span>
               <span
+                v-else
                 class="ui-selo pl-meta__selo"
                 :class="meta.atingida ? 'ui-selo--ok' : 'ui-selo--atencao'"
               >
@@ -272,7 +342,7 @@ function aoRegistrar(id: string) {
           <span class="ui-cartao__titulos">
             <h2 id="pl-atendimentos" class="ui-cartao__titulo">
               Atendimentos recentes
-              <span class="ui-contagem">{{ atendimentos.length }}</span>
+              <span class="ui-contagem">{{ atendimentosNoRecorte.length }}</span>
             </h2>
             <p class="ui-cartao__descricao">
               Cada um saiu com o QR Code da ficha. Aqui, o que aconteceu depois.
@@ -280,8 +350,15 @@ function aoRegistrar(id: string) {
           </span>
         </header>
 
-        <ul class="pl-lista">
-          <li v-for="atendimento in atendimentos" :key="atendimento.id">
+        <UiVazioIlustrado
+          v-if="!atendimentosNoRecorte.length"
+          aninhado
+          icone="ph ph-list-checks"
+          titulo="Nenhum atendimento neste recorte"
+          texto="Mude o período, a espécie, o procedimento ou a situação nos filtros."
+        />
+        <ul v-else class="pl-lista">
+          <li v-for="atendimento in atendimentosNoRecorte" :key="atendimento.id">
             <button
               type="button"
               class="pl-linha"

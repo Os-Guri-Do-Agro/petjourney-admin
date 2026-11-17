@@ -4,6 +4,9 @@
  * vacinação antirrábica, castração, encoleiramento e exame, avisadas pelo app só a quem está com o
  * cuidado pendente. As agendadas em cima, as encerradas embaixo, com o que cada aviso rendeu.
  * "Nova campanha" abre a gaveta em passos; do mapa, `?nova=1&regiao=` abre com a região marcada.
+ *
+ * Os filtros do espaço (`FiltrosDoPrototipo`): as regiões valem para as duas listas; o período, só
+ * para as encerradas (as agendadas são de depois dos 90 dias).
  */
 import Button from 'primevue/button'
 import { computed, ref, watch } from 'vue'
@@ -13,6 +16,7 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
+import FiltrosDoPrototipo from '@/features/saude-publica/components/FiltrosDoPrototipo.vue'
 import NovaCampanhaGaveta from '@/features/saude-publica/components/NovaCampanhaGaveta.vue'
 import {
   dataPorExtenso,
@@ -24,18 +28,40 @@ import {
   type IdDaRegiao,
 } from '@/features/saude-publica/dados'
 import { useEstadoDoPrototipo } from '@/features/saude-publica/estado'
+import { useFiltrosDoPrototipo } from '@/features/saude-publica/filtros'
 
 const route = useRoute()
 const router = useRouter()
 const { campanhas } = useEstadoDoPrototipo()
+const filtros = useFiltrosDoPrototipo()
 
-const agendadas = computed(() => campanhas.value.filter((item) => item.situacao === 'agendada'))
-const encerradas = computed(() => campanhas.value.filter((item) => item.situacao === 'encerrada'))
+/** A campanha passa por alguma das regiões escolhidas (nenhuma escolhida = a cidade toda). */
+function naRegiao(campanha: Campanha) {
+  const escolhidas = filtros.regioes.value
+  return !escolhidas.length || campanha.regioes.some((id) => escolhidas.includes(id))
+}
+
+const agendadas = computed(() =>
+  campanhas.value.filter((item) => item.situacao === 'agendada' && naRegiao(item)),
+)
+const encerradas = computed(() =>
+  campanhas.value.filter(
+    (item) =>
+      item.situacao === 'encerrada' &&
+      naRegiao(item) &&
+      item.data >= filtros.de.value &&
+      item.data <= filtros.ate.value,
+  ),
+)
+const visiveis = computed(() => [...agendadas.value, ...encerradas.value])
 
 const totais = computed(() => ({
-  avisados: campanhas.value.reduce((soma, item) => soma + item.avisados, 0),
+  avisados: visiveis.value.reduce((soma, item) => soma + item.avisados, 0),
   atendidos: encerradas.value.reduce((soma, item) => soma + (item.atendidos ?? 0), 0),
 }))
+
+/** Com filtro, o vazio fala do recorte, não da falta de campanha. */
+const filtrado = computed(() => filtros.ativos.value > 0)
 
 function percentual(parte: number, todo: number) {
   return todo ? Math.round((parte / todo) * 100) : 0
@@ -76,7 +102,7 @@ watch(
   <UiPagina
     titulo="Campanhas"
     icone="ph ph-megaphone"
-    :resumo="`${campanhas.length} campanhas no período · ${numero(totais.avisados)} tutores avisados · ${numero(totais.atendidos)} animais atendidos`"
+    :resumo="`${visiveis.length} campanhas ${filtros.lugarNaFrase.value} · ${numero(totais.avisados)} tutores avisados · ${numero(totais.atendidos)} animais atendidos`"
   >
     <template #acoes>
       <Button type="button" icon="ph ph-plus" label="Nova campanha" @click="novaCampanha" />
@@ -84,6 +110,8 @@ watch(
 
     <div class="cp">
       <AvisoDoPrototipo />
+
+      <FiltrosDoPrototipo :campos="['periodo', 'regiao']" />
 
       <!-- Uma caixa por grupo, uma linha por campanha: o que é, quando, onde e o que o aviso rendeu. -->
       <section
@@ -93,7 +121,9 @@ watch(
             titulo: 'Agendadas',
             icone: 'ph ph-calendar-dots',
             descricao: 'O aviso já saiu; o atendimento conta depois do dia.',
-            vazioTitulo: 'Nenhuma campanha agendada',
+            vazioTitulo: filtrado
+              ? 'Nenhuma campanha agendada neste recorte'
+              : 'Nenhuma campanha agendada',
             vazioTexto:
               'Ao agendar uma campanha, o aviso sai pelo app só para os tutores com o cuidado pendente nas regiões escolhidas.',
             itens: agendadas,
@@ -103,7 +133,9 @@ watch(
             titulo: 'Encerradas',
             icone: 'ph ph-check-circle',
             descricao: 'Quantos foram avisados, abriram o aviso e foram atendidos.',
-            vazioTitulo: 'Nenhuma campanha encerrada',
+            vazioTitulo: filtrado
+              ? 'Nenhuma campanha encerrada neste recorte'
+              : 'Nenhuma campanha encerrada',
             vazioTexto:
               'Passado o dia da campanha, ela vem para cá com quantos tutores foram avisados, abriram o aviso e foram atendidos.',
             itens: encerradas,

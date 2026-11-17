@@ -23,6 +23,7 @@ import {
   type Campanha,
   type IdDaRegiao,
   type Indicador,
+  type MetaDoPiloto,
   type Regiao,
 } from '@/features/saude-publica/dados'
 
@@ -219,4 +220,60 @@ export function efeitoDaCampanha(campanha: Campanha) {
   const antes = Math.round(coberturaDoRecorte(id, recorte, dia))
   const agora = Math.round(coberturaDoRecorte(id, recorte, depois))
   return { indicador: id, antes, depois: agora, delta: agora - antes, ate: dataDoDia(depois - 1) }
+}
+
+/* ------------------------------------------------------------------------------- o piloto */
+
+/** O pedaço do piloto que se olha: ele inteiro (até hoje) ou os últimos 30 ou 7 dias. */
+export type JanelaDoPiloto = 'inteiro' | '30' | '7'
+
+/** Quem chegou mais tarde já encontrou o aviso afinado: as semanas recentes rendem um pouco mais. */
+const AJUSTE_DA_JANELA: Record<JanelaDoPiloto, number> = { inteiro: 0, '30': 2, '7': 5 }
+
+/** A parte de cada espécie nos atendimentos do Consultório Móvel (ilustrativa). */
+const PARTE_NO_PILOTO: Record<Especie, number> = { todos: 1, caes: 0.68, gatos: 0.32 }
+
+/** O gato volta menos para o reforço e mais para o retorno da castração. */
+const DIFERENCA_DO_GATO_NO_PILOTO: Partial<Record<MetaDoPiloto['id'], number>> = {
+  vacina: -6,
+  castracao: 4,
+  ficha: -2,
+}
+
+/** A coleira repelente é só de cães. */
+export function metaSeAplica(id: MetaDoPiloto['id'], especie: Especie) {
+  return !(id === 'coleira' && especie === 'gatos')
+}
+
+/**
+ * A meta no pedaço escolhido: a base cai na proporção dos dias e da espécie, a taxa anda com a
+ * janela e a espécie, e o que a apresentação mudou (o tutor que tocou em "Já fiz") entra inteiro,
+ * para a barra continuar andando na hora.
+ */
+export function metaNoRecorte(
+  meta: Pick<MetaDoPiloto, 'id' | 'feitos' | 'base' | 'meta'>,
+  original: Pick<MetaDoPiloto, 'feitos' | 'base'>,
+  janela: JanelaDoPiloto,
+  especie: Especie,
+  diaAtual: number,
+) {
+  const aplica = metaSeAplica(meta.id, especie)
+  const dias = janela === 'inteiro' ? diaAtual : Math.min(diaAtual, Number(janela))
+  const parte = PARTE_NO_PILOTO[especie]
+  const diferenca = DIFERENCA_DO_GATO_NO_PILOTO[meta.id] ?? 0
+  const daEspecie =
+    especie === 'gatos'
+      ? diferenca * PARTE_NO_PILOTO.caes
+      : especie === 'caes'
+        ? -diferenca * PARTE_NO_PILOTO.gatos
+        : 0
+  const taxa = limitar(
+    (original.feitos / original.base) * 100 + AJUSTE_DA_JANELA[janela] + daEspecie,
+  )
+
+  const base = Math.max(1, Math.round((original.base * dias * parte) / diaAtual))
+  const feitos = Math.round((base * taxa) / 100) + (meta.feitos - original.feitos)
+  const baseFinal = base + (meta.base - original.base)
+  const valor = Math.round((feitos / baseFinal) * 100)
+  return { aplica, feitos, base: baseFinal, valor, atingida: aplica && valor >= meta.meta }
 }
