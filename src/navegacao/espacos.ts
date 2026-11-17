@@ -7,6 +7,7 @@ import {
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
+import { usePrototipoSaudePublica } from '@/features/saude-publica/prototipo'
 import type { LugarDoTrilha } from '@/theme/trilha/rotas'
 
 /**
@@ -24,7 +25,7 @@ import type { LugarDoTrilha } from '@/theme/trilha/rotas'
  * pendência —, e este arquivo só reorganiza.
  */
 
-export type IdDoEspaco = 'inicio' | 'clinica' | 'hotel' | 'portal' | 'conta'
+export type IdDoEspaco = 'inicio' | 'clinica' | 'hotel' | 'portal' | 'saude' | 'conta'
 
 export type TomDoSelo = 'neutro' | 'atencao' | 'risco'
 
@@ -34,8 +35,18 @@ export type TomDoSelo = 'neutro' | 'atencao' | 'risco'
  * Clínica e Hotel: o **dia a dia** (o que se abre toda hora), o **atendimento** (o paciente e o
  * cuidado) e a **gestão** (números e ajustes). Portal: a **parceria** (programas e indicação), os
  * **clientes** (os pets compartilhados) e a **empresa** (carteira, equipe, estabelecimento).
+ * Saúde pública (protótipo): o **acompanhamento** (painel e relatório) e a **ação** (campanhas,
+ * ONGs).
  */
-export type IdDaSecao = 'dia' | 'atendimento' | 'gestao' | 'parceria' | 'clientes' | 'empresa'
+export type IdDaSecao =
+  | 'dia'
+  | 'atendimento'
+  | 'gestao'
+  | 'parceria'
+  | 'clientes'
+  | 'empresa'
+  | 'acompanhamento'
+  | 'acao'
 
 export type SecaoDoEspaco = {
   id: IdDaSecao
@@ -360,6 +371,8 @@ function destinoDe(
 const ORDEM_DAS_SECOES: IdDaSecao[] = [
   'dia',
   'atendimento',
+  'acompanhamento',
+  'acao',
   'parceria',
   'clientes',
   'gestao',
@@ -435,9 +448,32 @@ function espacoDe(
   }
 }
 
+/**
+ * Saúde pública: o protótipo para a apresentação à Câmara de Campo Grande
+ * (`features/saude-publica`). Destinos fixos, sem permissão nem módulo: o protótipo não toca dado
+ * de ninguém. O painel mora em `/saude-publica/painel`, e não no prefixo puro, para a aba dele não
+ * acender nas outras telas do espaço.
+ */
+function destinosDaSaudePublica(t: (chave: string) => string): Destino[] {
+  const destino = (id: string, icone: string, secao: IdDaSecao): Destino => {
+    const rotulo = t(`espacos.saude.${id}`)
+    const to = `/saude-publica/${id}`
+
+    return destinoDe(id, rotulo, icone, [{ rotulo, to, icone }], [], secao)
+  }
+
+  return [
+    destino('painel', 'ph ph-map-trifold', 'acompanhamento'),
+    destino('campanhas', 'ph ph-megaphone', 'acao'),
+    destino('ongs', 'ph ph-hand-heart', 'acao'),
+    destino('relatorio', 'ph ph-file-text', 'acompanhamento'),
+  ]
+}
+
 export function montarEspacos(
   secoes: AppNavigationSection[],
   t: (chave: string) => string,
+  opcoes: { saudePublica?: boolean } = {},
 ): Espaco[] {
   const secao = (id: string) => secoes.find((item) => item.id === id)
   const espacos: Espaco[] = []
@@ -484,6 +520,19 @@ export function montarEspacos(
         'ph ph-storefront',
         'portal',
         destinosDoPortal(portal.items, t),
+        t,
+      ),
+    )
+  }
+
+  if (opcoes.saudePublica) {
+    espacos.push(
+      espacoDe(
+        'saude',
+        t('espacos.saude.rotulo'),
+        'ph ph-city',
+        'pets',
+        destinosDaSaudePublica(t),
         t,
       ),
     )
@@ -548,6 +597,10 @@ export function lugarDaRota(caminho: string): LugarDoTrilha {
     return 'portal'
   }
 
+  if (caminho.startsWith('/saude-publica')) {
+    return 'pets'
+  }
+
   if (caminho.startsWith('/settings') || caminho.startsWith('/perfil')) {
     return 'conta'
   }
@@ -559,11 +612,14 @@ function criarEspacos() {
   const { t, locale } = useI18n()
   const route = useRoute()
   const navegacao = useAppNavigation()
+  const { visivel: saudePublica } = usePrototipoSaudePublica()
 
   const espacos = computed(() => {
     void locale.value
 
-    return montarEspacos(navegacao.navigationSections.value, t)
+    return montarEspacos(navegacao.navigationSections.value, t, {
+      saudePublica: saudePublica.value,
+    })
   })
 
   const aqui = computed(() => localizar(espacos.value, route.path))

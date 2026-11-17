@@ -9868,7 +9868,16 @@
       "gestao": "Gestión",
       "parceria": "Alianza",
       "clientes": "Clientes",
-      "empresa": "Empresa"
+      "empresa": "Empresa",
+      "acompanhamento": "Seguimiento",
+      "acao": "Acción"
+    },
+    "saude": {
+      "rotulo": "Salud pública",
+      "painel": "Panel",
+      "campanhas": "Campañas",
+      "ongs": "ONG y adopción",
+      "relatorio": "Informe de 90 días"
     }
   },
   "pendencias": {

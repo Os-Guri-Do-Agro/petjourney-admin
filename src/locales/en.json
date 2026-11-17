@@ -9868,7 +9868,16 @@
       "gestao": "Management",
       "parceria": "Partnership",
       "clientes": "Clients",
-      "empresa": "Company"
+      "empresa": "Company",
+      "acompanhamento": "Monitoring",
+      "acao": "Action"
+    },
+    "saude": {
+      "rotulo": "Public health",
+      "painel": "Dashboard",
+      "campanhas": "Campaigns",
+      "ongs": "Shelters and adoption",
+      "relatorio": "90-day report"
     }
   },
   "pendencias": {

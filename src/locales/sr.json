@@ -9868,7 +9868,16 @@
       "gestao": "Upravljanje",
       "parceria": "Partnerstvo",
       "clientes": "Klijenti",
-      "empresa": "Firma"
+      "empresa": "Firma",
+      "acompanhamento": "Praćenje",
+      "acao": "Akcija"
+    },
+    "saude": {
+      "rotulo": "Javno zdravlje",
+      "painel": "Pregled",
+      "campanhas": "Kampanje",
+      "ongs": "Udruženja i udomljavanje",
+      "relatorio": "Izveštaj za 90 dana"
     }
   },
   "pendencias": {

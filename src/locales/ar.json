@@ -9868,7 +9868,16 @@
       "gestao": "الإدارة",
       "parceria": "الشراكة",
       "clientes": "العملاء",
-      "empresa": "الشركة"
+      "empresa": "الشركة",
+      "acompanhamento": "المتابعة",
+      "acao": "العمل"
+    },
+    "saude": {
+      "rotulo": "الصحة العامة",
+      "painel": "لوحة المتابعة",
+      "campanhas": "الحملات",
+      "ongs": "الجمعيات والتبني",
+      "relatorio": "تقرير 90 يومًا"
     }
   },
   "pendencias": {
