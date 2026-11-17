@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>PetJourney para clínicas</title>
+    <link rel="stylesheet" href="phosphor/phosphor.css" />
+    <style>
+      /*
+       * Folha de venda da PetJourney, uma página A4, para clínicas veterinárias e profissionais.
+       * Quem lê é o dono ou o veterinário da clínica, que nunca viu a plataforma.
+       *
+       * Veste o design do portal, como o roteiro de apresentação (../apresentacao): a faixa sálvia
+       * com os desenhos de traço tirada do portal, tinta marinho, véu sálvia, cor só em pastel com
+       * a tinta da família por cima. A tela da Clínica é captura do sistema (dados de exemplo) e o
+       * celular é a imagem do app que o site usa (petjourney-web/src/assets/app-telas/pt).
+       *
+       * O PDF é gerado daqui pelo Edge (ver README.md), nunca editado à mão.
+       */
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('../apresentacao/fontes/readex-pro-latin-wght-normal.woff2') format('woff2');
+        font-weight: 160 700;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('../apresentacao/fontes/readex-pro-latin-ext-wght-normal.woff2') format('woff2');
+        font-weight: 160 700;
+        unicode-range: U+0100-024F, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F,
+          U+A720-A7FF;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      :root {
+        --tinta: #1d3557;
+        --texto: #2a3446;
+        --suave: #5f6670;
+        --papel: #ffffff;
+        --destaque: #76938d;
+        --salvia-texto: #4f6862;
+        --veu: #f3f7f6;
+        --veu-forte: #e9f0ee;
+        --regua: #dfe8e5;
+
+        /* Família: o pastel de fundo e a tinta que lê por cima (trilha-tokens.css). */
+        --clinica-fundo: #c9e7fc;
+        --clinica-tinta: #005982;
+        --app-fundo: #c3eadc;
+        --app-tinta: #285e4e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--papel);
+      }
+
+      body {
+        color: var(--texto);
+        font-family: 'Readex Pro', system-ui, sans-serif;
+        font-size: 8.6pt;
+        font-weight: 330;
+        line-height: 1.45;
+      }
+
+      b,
+      strong {
+        color: var(--tinta);
+        font-weight: 560;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .folha {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+      }
+
+      /* ------------------------------------------------------------ faixa */
+
+      .faixa {
+        position: relative;
+        flex: none;
+        height: 92mm;
+        border-radius: 0 0 9mm 9mm;
+        background: var(--destaque) url('../apresentacao/faixa-capa.png') center bottom / cover
+          no-repeat;
+      }
+
+      .abertura {
+        position: absolute;
+        top: 11mm;
+        left: 15mm;
+        width: 90mm;
+        color: #fff;
+      }
+
+      .abertura__logo {
+        display: block;
+        width: 34mm;
+        margin-bottom: 6mm;
+      }
+
+      .abertura__etiqueta {
+        display: inline-block;
+        padding: 1.3mm 3.2mm;
+        border-radius: 99px;
+        background: rgb(0 0 0 / 14%);
+        font-size: 7pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 4mm 0 3.2mm;
+        color: #fff;
+        font-size: 21pt;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .abertura__sub {
+        font-size: 10pt;
+        font-weight: 400;
+        line-height: 1.45;
+      }
+
+      .abertura__selo {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.8mm;
+        margin-top: 3.6mm;
+        padding: 1.6mm 4mm 1.6mm 3mm;
+        border-radius: 99px;
+        background: var(--papel);
+        color: var(--tinta);
+        font-size: 9.4pt;
+        font-weight: 600;
+      }
+
+      .abertura__selo .ph {
+        color: var(--app-tinta);
+        font-size: 12pt;
+      }
+
+      /* A tela da Clínica sai pela borda direita da folha, como uma janela entreaberta. */
+      .vitrine {
+        position: absolute;
+        top: 16mm;
+        left: 110mm;
+        width: 100mm;
+        height: 61mm;
+        overflow: hidden;
+        border-radius: 3.2mm 0 0 3.2mm;
+        background: #fff;
+        box-shadow: 0 2.5mm 7mm rgb(16 48 42 / 28%);
+      }
+
+      .vitrine img {
+        display: block;
+        width: 152mm;
+      }
+
+      .celular {
+        position: absolute;
+        top: 21mm;
+        left: 171mm;
+        width: 32mm;
+        filter: drop-shadow(0 2mm 3mm rgb(16 48 42 / 35%));
+      }
+
+      .legenda {
+        position: absolute;
+        top: 80mm;
+        left: 110mm;
+        width: 58mm;
+        color: #fff;
+        font-size: 7pt;
+        line-height: 1.35;
+      }
+
+      /* ----------------------------------------------------------- miolo */
+
+      .miolo {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 7.5mm;
+        padding: 9mm 15mm 7mm;
+      }
+
+      .rotulo {
+        margin: 0 0 2mm;
+        color: var(--salvia-texto);
+        font-size: 7.2pt;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .quem p {
+        color: var(--texto);
+        font-size: 9.4pt;
+        line-height: 1.5;
+      }
+
+      /* As duas pontas e o que passa entre elas. */
+      .pontas {
+        display: grid;
+        grid-template-columns: 50mm 1fr 50mm;
+        align-items: center;
+        gap: 3mm;
+        margin-top: 3.2mm;
+      }
+
+      .ponta {
+        display: flex;
+        align-items: center;
+        gap: 2.6mm;
+        padding: 2.6mm 3mm;
+        border-radius: 3mm;
+      }
+
+      .ponta .ph {
+        font-size: 17pt;
+      }
+
+      .ponta strong {
+        display: block;
+        font-size: 9.6pt;
+        line-height: 1.2;
+      }
+
+      .ponta span {
+        font-size: 7.4pt;
+        line-height: 1.3;
+      }
+
+      .ponta--clinica {
+        background: var(--clinica-fundo);
+      }
+
+      .ponta--clinica,
+      .ponta--clinica strong {
+        color: var(--clinica-tinta);
+      }
+
+      .ponta--app {
+        background: var(--app-fundo);
+      }
+
+      .ponta--app,
+      .ponta--app strong {
+        color: var(--app-tinta);
+      }
+
+      .trocas {
+        display: flex;
+        flex-direction: column;
+        gap: 1.6mm;
+      }
+
+      .troca {
+        display: flex;
+        align-items: center;
+        gap: 1.6mm;
+        padding-bottom: 1.2mm;
+        border-bottom: 0.3mm dashed var(--regua);
+        color: var(--texto);
+        font-size: 7.8pt;
+        line-height: 1.3;
+      }
+
+      .troca:last-child {
+        padding-bottom: 0;
+        border-bottom: 0;
+        justify-content: flex-end;
+        text-align: right;
+      }
+
+      .troca .ph {
+        flex: none;
+        color: var(--salvia-texto);
+        font-size: 10pt;
+      }
+
+      /* O que já funciona: oito recursos, quatro por linha. */
+      .recursos {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3.6mm 4mm;
+      }
+
+      .recurso__cabeca {
+        display: flex;
+        align-items: center;
+        gap: 2mm;
+        margin-bottom: 1.2mm;
+      }
+
+      .recurso__icone {
+        display: grid;
+        flex: none;
+        width: 6.4mm;
+        height: 6.4mm;
+        place-items: center;
+        border-radius: 1.8mm;
+        background: var(--veu-forte);
+        color: var(--salvia-texto);
+        font-size: 10.5pt;
+      }
+
+      .recurso strong {
+        font-size: 8.8pt;
+        line-height: 1.2;
+      }
+
+      .recurso p {
+        color: var(--suave);
+        font-size: 7.6pt;
+        line-height: 1.38;
+      }
+
+      /* Como ajuda: um painel para cada lado. */
+      .ajuda {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4mm;
+      }
+
+      .lado {
+        padding: 3.6mm 4mm 3.4mm;
+        border-radius: 3mm;
+        background: var(--veu);
+      }
+
+      .lado h3 {
+        display: flex;
+        align-items: center;
+        gap: 2mm;
+        margin: 0 0 2.4mm;
+        color: var(--tinta);
+        font-size: 10.4pt;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .lado h3 .ph {
+        display: grid;
+        width: 6.4mm;
+        height: 6.4mm;
+        place-items: center;
+        border-radius: 1.8mm;
+        font-size: 10.5pt;
+      }
+
+      .lado--clinica h3 .ph {
+        background: var(--clinica-fundo);
+        color: var(--clinica-tinta);
+      }
+
+      .lado--app h3 .ph {
+        background: var(--app-fundo);
+        color: var(--app-tinta);
+      }
+
+      .lado ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .lado li {
+        display: grid;
+        grid-template-columns: 4mm 1fr;
+        column-gap: 1.4mm;
+        margin-bottom: 1.7mm;
+        font-size: 8.2pt;
+        line-height: 1.4;
+      }
+
+      .lado li:last-child {
+        margin-bottom: 0;
+      }
+
+      .lado li .ph {
+        margin-top: 0.5mm;
+        color: var(--salvia-texto);
+        font-size: 9.6pt;
+      }
+
+      /* ------------------------------------------------------------ rodapé */
+
+      .rodape {
+        display: grid;
+        flex: none;
+        grid-template-columns: 1fr 52mm;
+        align-items: center;
+        gap: 6mm;
+        margin-top: auto;
+        padding: 4.6mm 15mm 5.4mm;
+        background: var(--app-fundo);
+        color: var(--app-tinta);
+      }
+
+      .rodape strong {
+        color: var(--app-tinta);
+      }
+
+      .rodape__titulo {
+        margin-bottom: 1.6mm;
+        font-size: 11.5pt;
+        font-weight: 600;
+      }
+
+      .passos {
+        display: flex;
+        gap: 4mm;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        font-size: 7.8pt;
+        line-height: 1.35;
+      }
+
+      .passos li {
+        display: grid;
+        flex: 1;
+        grid-template-columns: 4.6mm 1fr;
+        column-gap: 1.6mm;
+      }
+
+      .passos__n {
+        display: grid;
+        width: 4.6mm;
+        height: 4.6mm;
+        place-items: center;
+        border-radius: 99px;
+        background: var(--app-tinta);
+        color: #fff;
+        font-size: 7pt;
+        font-weight: 600;
+      }
+
+      .contato {
+        padding-left: 5mm;
+        border-left: 0.3mm solid rgb(40 94 78 / 35%);
+        font-size: 8pt;
+        line-height: 1.55;
+      }
+
+      .contato .ph {
+        margin-right: 1.2mm;
+        font-size: 9pt;
+        vertical-align: -0.4mm;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="folha">
+      <!-- ============================================================ FAIXA -->
+      <header class="faixa">
+        <div class="abertura">
+          <img class="abertura__logo" src="../apresentacao/logo-branca.png" alt="PetJourney" />
+          <span class="abertura__etiqueta">Para clínicas veterinárias e profissionais</span>
+          <h1>Sua clínica organizada, seus clientes com o pet em dia.</h1>
+          <p class="abertura__sub">
+            Agenda, prontuário, receitas e vacinas num portal só. E o que você registra no
+            atendimento chega ao celular do responsável pelo pet.
+          </p>
+          <span class="abertura__selo"
+            ><i class="ph ph-check-circle"></i>Gratuito para a clínica</span
+          >
+        </div>
+
+        <div class="vitrine">
+          <img src="../apresentacao/telas/10-clinica-hoje.png" alt="Tela Hoje da Clínica no portal" />
+        </div>
+        <img class="celular" src="imagens/app-inicio.webp" alt="Início do app do responsável" />
+        <p class="legenda">O dia da clínica no portal e o app do responsável. Dados de exemplo.</p>
+      </header>
+
+      <div class="miolo">
+        <!-- ===================================================== QUEM SOMOS -->
+        <section class="quem">
+          <h2 class="rotulo">Quem é a PetJourney</h2>
+          <p>
+            Uma plataforma de saúde para animais de estimação de <b>qualquer espécie</b>, com duas
+            pontas ligadas: o <b>portal</b>, onde a clínica trabalha, e o <b>aplicativo</b>, onde o
+            responsável acompanha o pet. O histórico pertence ao pet e à família, e a clínica
+            autorizada lê e escreve nele. Nada fica perdido entre papel, planilha e mensagem.
+          </p>
+
+          <div class="pontas">
+            <div class="ponta ponta--clinica">
+              <i class="ph ph-monitor"></i>
+              <div>
+                <strong>Portal da clínica</strong>
+                <span>No computador e no tablet</span>
+              </div>
+            </div>
+            <div class="trocas">
+              <div class="troca">
+                Consulta, receita, vacina, boletim e documentos
+                <i class="ph ph-arrow-right"></i>
+              </div>
+              <div class="troca">
+                <i class="ph ph-arrow-left"></i>
+                Pedido de horário, pré-consulta e diário do pet
+              </div>
+            </div>
+            <div class="ponta ponta--app">
+              <i class="ph ph-device-mobile"></i>
+              <div>
+                <strong>App do responsável</strong>
+                <span>App Store e Google Play</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================= O QUE TEM HOJE -->
+        <section>
+          <h2 class="rotulo">O que a clínica já tem hoje</h2>
+          <div class="recursos">
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-sun-horizon"></i><strong>Hoje</strong>
+              </div>
+              <p>Quem está em sala, quem chega e o que pede ação, numa tela.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-calendar-check"></i><strong>Agenda</strong>
+              </div>
+              <p>Link de agendamento da clínica, fila de espera, faltas e retornos.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-stethoscope"></i><strong>Prontuário</strong>
+              </div>
+              <p>Atendimento por seções, com a pré-consulta que veio do app.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-prescription"></i><strong>Receitas e atestados</strong>
+              </div>
+              <p>Assinados no portal, com bulário à mão e laudos anexados.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-syringe"></i><strong>Vacinas</strong>
+              </div>
+              <p>Lista de chamada de quem tem dose para vencer, mês a mês.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-bed"></i><strong>Internação</strong>
+              </div>
+              <p>Mapa de vagas, doses na hora certa e boletim enviado ao app.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-chart-line-up"></i><strong>Gestão</strong>
+              </div>
+              <p>Estoque de remédios e materiais, e relatórios do mês.</p>
+            </div>
+            <div class="recurso">
+              <div class="recurso__cabeca">
+                <i class="recurso__icone ph ph-users-three"></i><strong>Equipe</strong>
+              </div>
+              <p>Acesso por pessoa, e pacientes importados de planilha.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===================================================== COMO AJUDA -->
+        <section>
+          <h2 class="rotulo">Como a PetJourney ajuda</h2>
+          <div class="ajuda">
+            <div class="lado lado--clinica">
+              <h3><i class="ph ph-stethoscope"></i>Para a clínica</h3>
+              <ul>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Menos telefone.</b> O responsável pede o horário pelo link ou pelo app, e
+                    na véspera o app lembra a consulta.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Menos retorno perdido.</b> Retornos, faltas e vacinas a vencer aparecem
+                    em lista para a recepção agir.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Consulta mais rápida.</b> O pet chega com histórico, alergias, peso e a
+                    pré-consulta respondida.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Começa sem redigitar.</b> Os pacientes entram por planilha, e tudo roda no
+                    navegador.</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <div class="lado lado--app">
+              <h3><i class="ph ph-paw-print"></i>Para o responsável pelo pet</h3>
+              <ul>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Tudo do pet num lugar.</b> Vacinas, consultas, exames, remédios, peso e
+                    documentos, de quantos pets tiver.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Lembrete antes de vencer.</b> Vacina, remédio e retorno avisam no
+                    celular, na hora certa.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Sem papel perdido.</b> A receita da clínica chega ao app, e dela saem os
+                    lembretes de cada dose.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-circle"></i>
+                  <span
+                    ><b>Leva o histórico junto.</b> Carteirinha digital e histórico liberado a
+                    outro veterinário por código.</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================ RODAPÉ -->
+      <footer class="rodape">
+        <div>
+          <p class="rodape__titulo">Gratuito para a clínica. Comece em três passos:</p>
+          <ol class="passos">
+            <li>
+              <span class="passos__n">1</span>
+              <span>Cadastre a clínica em <b>petjourney.health/parcerias</b>.</span>
+            </li>
+            <li>
+              <span class="passos__n">2</span>
+              <span>Importe os pacientes e convide a equipe.</span>
+            </li>
+            <li>
+              <span class="passos__n">3</span>
+              <span>Ligue cada paciente ao app do responsável.</span>
+            </li>
+          </ol>
+        </div>
+        <div class="contato">
+          <b>Fale com a gente</b><br />
+          <i class="ph ph-globe-simple"></i>petjourney.health<br />
+          <i class="ph ph-envelope-simple"></i>atendimento@petjourney.health
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

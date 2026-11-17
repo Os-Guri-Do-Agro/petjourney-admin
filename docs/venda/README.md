@@ -1,0 +1,37 @@
+# Folha de venda para clínicas
+
+Uma página A4 para entregar ou mandar a clínicas veterinárias e profissionais: quem é a
+PetJourney, o que ela faz, o que a clínica já tem hoje e como ajuda a clínica e o responsável
+pelo pet. A oferta é gratuita para a clínica.
+
+| Arquivo | Para quê |
+|---|---|
+| `PetJourney-para-clinicas.pdf` | A folha pronta para enviar |
+| `PetJourney-para-clinicas.html` | **A fonte.** O PDF é gerado dela, nunca editado |
+| `imagens/app-inicio.webp` | O app no celular, a mesma imagem do site (`petjourney-web/src/assets/app-telas/pt/aparelho-home.webp`) |
+| `phosphor/` | Só os ícones Phosphor que a folha usa (gerados de `@phosphor-icons/web`) |
+
+Fontes, logo, faixa e a tela da Clínica vêm de `../apresentacao/` (a captura `telas/10-clinica-hoje.png`,
+recortada pelo CSS para não mostrar o Hotel, que está pausado).
+
+## O que a folha promete
+
+Cada linha foi conferida no portal e no site em 17/11/2026: telas da Clínica ligadas à API
+(`src/navegacao/rotas-dos-modulos.ts`), textos do portal (`src/locales/pt.json`) e do site
+(`petjourney-web/messages/pt.json`). Ficou de fora o que ainda não funciona de ponta a ponta, como o
+lembrete de vacina disparado pela clínica (a rota da API ainda não existe). Antes de acrescentar
+uma promessa, confira que ela já funciona.
+
+## Regenerar o PDF
+
+```powershell
+$edge = "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+$dir  = "<caminho>\docs\venda"
+
+& $edge --headless=new --disable-gpu --no-pdf-header-footer --virtual-time-budget=5000 `
+  --print-to-pdf="$dir\PetJourney-para-clinicas.pdf" `
+  "file:///$($dir -replace '\\','/')/PetJourney-para-clinicas.html"
+```
+
+Precisa sair **uma página só**. Uma linha a mais em qualquer bloco empurra o rodapé para a
+segunda; olhe o PDF antes de mandar.
