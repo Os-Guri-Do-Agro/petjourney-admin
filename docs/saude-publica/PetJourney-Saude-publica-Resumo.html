@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PetJourney - Saúde pública - Resumo</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body {
+    color: #111;
+    font-family: "Times New Roman", "Liberation Serif", Times, serif;
+    font-size: 11.2pt;
+    line-height: 1.4;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .folha {
+    position: relative;
+    width: 210mm;
+    height: 297mm;
+    padding: 16mm 24mm 20mm;
+    overflow: hidden;
+  }
+
+  /* Timbre: o mesmo do Ofício&nbsp;nº&nbsp;001/2026. */
+  .timbre {
+    padding-bottom: 3mm;
+    border-bottom: 0.6pt solid #000;
+    font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+    text-align: center;
+  }
+  .timbre strong { display: block; font-size: 12.5pt; letter-spacing: 0.04em; }
+  .timbre span { display: block; font-size: 8.8pt; line-height: 1.35; }
+
+  h1 {
+    margin: 5.5mm 0 0.8mm;
+    font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+    font-size: 15pt;
+    line-height: 1.2;
+  }
+  .linha-fina { margin: 0 0 1mm; }
+
+  h2 {
+    margin: 4.2mm 0 1.2mm;
+    font-family: Arial, "Liberation Sans", Helvetica, sans-serif;
+    font-size: 11.2pt;
+  }
+
+  p { margin: 0 0 1.6mm; text-align: justify; hyphens: auto; }
+
+  ol.alineas { margin: 0 0 1.6mm; padding: 0 0 0 6mm; list-style: none; counter-reset: alinea; }
+  ol.alineas li { position: relative; margin: 0 0 1mm; text-align: justify; hyphens: auto; }
+  ol.alineas li::before {
+    position: absolute;
+    left: -6mm;
+    content: counter(alinea, lower-alpha) ")";
+    counter-increment: alinea;
+  }
+
+
+  .rodape {
+    position: absolute;
+    right: 24mm;
+    bottom: 13mm;
+    left: 24mm;
+    padding-top: 2mm;
+    border-top: 0.6pt solid #000;
+    font-size: 9pt;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<section class="folha">
+  <header class="timbre">
+    <strong>PET JOURNEY SAÚDE E TECNOLOGIA LTDA.</strong>
+    <span>CNPJ 61.622.096/0001-14 · Rua Primeiro de Maio, 442, Centro, Pinhais/PR</span>
+    <span>atendimento@petjourney.health · petjourney.health</span>
+  </header>
+
+  <h1>PetJourney e a saúde pública</h1>
+  <p class="linha-fina">Resumo da empresa e do módulo de saúde pública em protótipo. Novembro de 2026.</p>
+
+  <h2>A empresa</h2>
+  <p>A PetJourney é uma plataforma que reúne o histórico de saúde de animais de estimação de qualquer espécie. O tutor usa o aplicativo, que guarda vacinas, consultas, exames e remédios e lembra a vacina, o retorno e a troca da coleira. As clínicas usam o portal, com agenda, prontuário, receitas e vacinas, e o que registram vai para o aplicativo do tutor. Os dois já funcionam, a partir de Campo Grande (MS).</p>
+
+  <h2>O problema</h2>
+  <p>Campo Grande teve 39 casos humanos de leishmaniose visceral e 4 óbitos em 2025, e 30 casos até outubro de 2026, segundo a Secretaria Municipal de Saúde. O cão é o principal reservatório da doença na cidade, e a prevenção depende de exame periódico e de coleira repelente trocada no prazo. Hoje o município não sabe, por bairro, quantos cães estão com esses cuidados em dia, nem consegue avisar de uma campanha somente quem está atrasado.</p>
+
+  <h2>O módulo de saúde pública, em protótipo</h2>
+  <p>Montamos no portal um espaço para a Superintendência de Bem-Estar Animal (Subea) e o Centro de Controle de Zoonoses (CCZ), com quatro telas:</p>
+  <ol class="alineas">
+    <li><b>Painel:</b> exame de leishmaniose, coleira, antirrábica e castração em dia por região urbana e por bairro, apenas com contagens e percentuais;</li>
+    <li><b>Campanhas:</b> o aviso sai pelo aplicativo só para os tutores com o cuidado pendente nas regiões escolhidas, e a campanha mostra depois quantos foram avisados e quantos foram atendidos;</li>
+    <li><b>ONGs e adoção:</b> as ONGs usam o sistema sem custo, e o animal adotado leva o histórico de saúde para o aplicativo de quem adota;</li>
+    <li><b>Relatório de 90 dias:</b> adesão, prevenção e campanhas por região, pronto para impressão.</li>
+  </ol>
+
+  <p>As telas funcionam, mas os números que aparecem nelas são uma simulação dos 90 primeiros dias do programa. Só os casos humanos de leishmaniose são reais.</p>
+
+  <h2>Dados e custo</h2>
+  <p>O poder público recebe apenas números somados por região e por bairro, sem identificar tutores; bairro com menos de 20 animais não aparece. Dados pessoais não são vendidos nem cedidos a terceiros (Lei&nbsp;nº&nbsp;13.709/2018). O programa não tem custo para o município: a empresa se mantém com planos opcionais pagos pelos tutores, serviços a clínicas e estudos com dados anonimizados.</p>
+
+  <h2>Situação</h2>
+  <p>Em 17 de novembro de 2026, a proposta foi apresentada à Câmara Municipal de Campo Grande pelo Ofício nº 001/2026. O módulo pode ser adaptado a outros municípios e pode ser demonstrado ao vivo.</p>
+
+  <footer class="rodape">Nicolas Brizol Castela, cofundador · (67) 99133-6868 &nbsp;|&nbsp; Emilio Ernesto Machado Junior, cofundador · +1 (585) 955-3754</footer>
+</section>
+</body>
+</html>
