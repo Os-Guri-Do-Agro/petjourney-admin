@@ -2979,35 +2979,15 @@
       },
       "naHora": "Your choices apply right away and are kept in this browser.",
       "navegacao": {
-        "titulo": "Navigation",
-        "descricao": "The sidebar your way. The preview shows the result straight away.",
-        "previa": "Preview with your choices.",
-        "previaAutoLarga": "Preview on this screen: the sidebar stays wide.",
-        "previaAutoIcones": "Preview on this screen: the sidebar shows icons only.",
-        "largura": {
-          "titulo": "Sidebar width",
-          "larga": {
-            "label": "Wide",
-            "hint": "Icon and name for every screen."
-          },
-          "icones": {
-            "label": "Icons only",
-            "hint": "More room for the screen. The name shows on hover."
-          },
-          "auto": {
-            "label": "Automatic",
-            "hint": "Wide on screens of {largura} px or more, icons only on smaller ones."
-          }
-        },
         "espacos": {
           "titulo": "Spaces in the sidebar",
           "lista": {
-            "label": "All open",
-            "hint": "Clinic, Hotel and Portal with their screens in view. Collapse a space by its name."
+            "label": "Your choice",
+            "hint": "Open or collapse each space by its name, as many at once as you like; the bar remembers how you left it."
           },
           "secoes": {
-            "label": "Current one only",
-            "hint": "Opens the space you're in; the others stay on one line, with their pending total."
+            "label": "One at a time",
+            "hint": "The space of the screen you're on stays open; opening another by its name collapses the previous one."
           }
         },
         "densidade": {
@@ -3020,6 +3000,39 @@
           "numeroDica": "How many pending items each space and screen has.",
           "pontoDica": "A calmer sidebar: a dot in the status colour shows where something is pending."
         }
+      },
+      "formato": {
+        "titulo": "Menu layout",
+        "descricao": "Choose how the screens are organised. Everyone can have their own: the choice stays in this browser.",
+        "secoes": {
+          "label": "Sections",
+          "hint": "Side bar with the screens grouped by subject."
+        },
+        "ladrilhos": {
+          "label": "Tiles",
+          "hint": "Side bar with large icons, easier to tap."
+        },
+        "icones": {
+          "label": "Icons only",
+          "hint": "Narrow bar, more room for the screen. The name shows when you hover."
+        },
+        "topo": {
+          "label": "Top menu",
+          "hint": "No side bar: each space becomes a menu at the top, with its screens by section."
+        },
+        "curto": {
+          "secoes": "Sections",
+          "ladrilhos": "Tiles",
+          "icones": "Icons",
+          "topo": "Top"
+        },
+        "padrao": "Default",
+        "ajustes": "Adjustments",
+        "recolher": {
+          "label": "Collapse on smaller screens",
+          "hint": "Below {largura} px the bar shows only the icons."
+        },
+        "menuDoEspaco": "{espaco} screens"
       }
     },
     "perfil": {
@@ -9772,7 +9785,9 @@
       "internacao": "Inpatients",
       "pendencias": "Follow-ups",
       "relatorios": "Reports",
-      "configuracao": "Settings"
+      "configuracao": "Settings",
+      "prontuarios": "Medical records",
+      "vacinas": "Vaccines"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9796,7 +9811,7 @@
       "retornos": "Follow-ups",
       "vacinas": "Vaccines",
       "tratamentos": "Home treatments",
-      "estoque": "Vaccine stock",
+      "estoque": "Stock",
       "painel": "Day board",
       "rotina": "Routine",
       "hospedes": "Guests",
@@ -9807,9 +9822,24 @@
       "rotinaPadrao": "Standard routine",
       "correcoes": "Corrections",
       "copias": "Copies",
-      "historicoLiberado": "Shared history"
+      "historicoLiberado": "Shared history",
+      "calendario": "Calendar",
+      "cadastros": "Patient list",
+      "visaoGeral": "Overview",
+      "reforcos": "Boosters",
+      "plantao": "Shift",
+      "boletins": "Updates",
+      "vagas": "Vacancies"
     },
-    "abasAria": "{destino} screens"
+    "abasAria": "{destino} screens",
+    "secoes": {
+      "dia": "Day to day",
+      "atendimento": "Patient care",
+      "gestao": "Management",
+      "parceria": "Partnership",
+      "clientes": "Clients",
+      "empresa": "Company"
+    }
   },
   "pendencias": {
     "contador": {

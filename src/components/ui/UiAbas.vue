@@ -15,9 +15,17 @@ import { RouterLink } from 'vue-router'
 import type { Aba } from '@/navegacao/espacos'
 
 const props = withDefaults(
-  defineProps<{ abas: Aba[]; atual: string | null; rotulo: string; vidro?: boolean }>(),
+  defineProps<{
+    abas: Aba[]
+    atual: string | null
+    rotulo: string
+    vidro?: boolean
+    /** Só os nomes: quando a fileira divide a linha com o título e as ações e o espaço aperta. */
+    semIcone?: boolean
+  }>(),
   {
     vidro: false,
+    semIcone: false,
   },
 )
 
@@ -74,6 +82,7 @@ watch(
     class="abas"
     :class="{
       'abas--vidro': vidro,
+      'abas--sem-icone': semIcone,
       'abas--corta-inicio': cortaInicio,
       'abas--corta-fim': cortaFim,
     }"
@@ -175,6 +184,10 @@ watch(
   color: var(--tinta-3);
   font-size: 17px;
   transition: color var(--pj-tempo-curto) var(--pj-curva-chega);
+}
+
+.abas--sem-icone .abas__icone {
+  display: none;
 }
 
 .abas__aba:hover {

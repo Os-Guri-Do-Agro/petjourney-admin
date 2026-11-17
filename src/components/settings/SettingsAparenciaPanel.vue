@@ -6,10 +6,11 @@
  * por isso não tem "Salvar": o rodapé diz isso no lugar do botão.
  *
  * - **Tema** claro ou escuro (também no menu da pessoa, no pé da barra).
- * - **Navegação**, a barra lateral em quatro escolhas, com uma prévia só que muda junto com elas:
- *   a largura (larga, só ícones, ou automática pela largura da tela), os espaços (todos abertos ou
- *   só o da tela), a altura das linhas e o aviso de pendência (número ou ponto). Antes eram duas
- *   escolhas soltas com uma miniatura cada — e a da barra nem valia mais na moldura do app.
+ * - **Formato do menu** (16/11/2026): quatro formatos inteiros, cada um com a miniatura dele —
+ *   Seções (o padrão), Ladrilhos, Só ícones e Menu no alto —, porque gente diferente prefere coisas
+ *   diferentes. Embaixo, os ajustes que valem para o formato escolhido: os espaços (todos abertos
+ *   ou só o da tela), recolher em telas menores, a altura das linhas (só nos ladrilhos) e o aviso de
+ *   pendência (número ou ponto). A mesma troca de formato está no menu da conta.
  * - **Explicações**: o texto de apoio das telas do Portal, o mesmo do botão "Mostrar explicações".
  * - **Idioma** da interface (também no menu da pessoa).
  *
@@ -32,22 +33,24 @@ import flagUS from 'country-flag-icons/string/3x2/US'
 import SettingsLayoutMockup from '@/components/settings/SettingsLayoutMockup.vue'
 import {
   isGuidanceVisible,
+  LAYOUT_FORMATS,
+  layoutFormat,
   NAVIGATOR_AUTO_MIN_WIDTH,
   navigatorBadges,
   navigatorDensity,
   navigatorMode,
   navigatorWidth,
+  setLayoutFormat,
   setNavigatorBadges,
   setNavigatorDensity,
   setNavigatorMode,
   setNavigatorWidth,
   toggleGuidance,
+  type LayoutFormat,
   type NavigatorBadges,
   type NavigatorDensity,
   type NavigatorMode,
-  type NavigatorWidth,
 } from '@/composables/useLayoutPreferences'
-import { useTelaLarga } from '@/composables/useTelaLarga'
 import { changeLocale } from '@/i18n'
 import { LOCALES, type Locale } from '@/i18n/locales'
 import { colorMode } from '@/theme/color-mode'
@@ -81,39 +84,34 @@ const temas = computed<Opcao<ThemeMode>[]>(() => [
   },
 ])
 
-/** Uma escolha da navegação em linha: o ícone diz o que muda, o texto diz como. */
-type Escolha<T extends string> = { valor: T; label: string; hint: string; icone: string }
-
-const larguras = computed<Escolha<NavigatorWidth>[]>(() =>
-  (
-    [
-      ['larga', 'ph ph-sidebar'],
-      ['icones', 'ph ph-sidebar-simple'],
-      ['auto', 'ph ph-arrows-horizontal'],
-    ] as const
-  ).map(([valor, icone]) => ({
+/** Os quatro formatos do menu, cada um com a miniatura dele. */
+const formatos = computed(() =>
+  LAYOUT_FORMATS.map((valor: LayoutFormat) => ({
     valor,
-    icone,
-    label: t(`settings.aparencia.navegacao.largura.${valor}.label`),
-    hint: t(`settings.aparencia.navegacao.largura.${valor}.hint`, {
-      largura: NAVIGATOR_AUTO_MIN_WIDTH,
-    }),
+    label: t(`settings.aparencia.formato.${valor}.label`),
+    hint: t(`settings.aparencia.formato.${valor}.hint`),
   })),
 )
 
-const modos = computed<Escolha<NavigatorMode>[]>(() =>
-  (
-    [
-      ['lista', 'ph ph-rows'],
-      ['secoes', 'ph ph-crosshair-simple'],
-    ] as const
-  ).map(([valor, icone]) => ({
+const modos = computed<Array<{ valor: NavigatorMode; label: string }>>(() =>
+  (['lista', 'secoes'] as const).map((valor) => ({
     valor,
-    icone,
     label: t(`settings.aparencia.navegacao.espacos.${valor}.label`),
-    hint: t(`settings.aparencia.navegacao.espacos.${valor}.hint`),
   })),
 )
+
+const dicaDosEspacos = computed(() =>
+  t(`settings.aparencia.navegacao.espacos.${navigatorMode.value}.hint`),
+)
+
+/** Com barra lateral larga: recolher sozinha abaixo de 1280 px é a largura automática. */
+const comBarraLarga = computed(
+  () => layoutFormat.value === 'secoes' || layoutFormat.value === 'ladrilhos',
+)
+
+function alternarRecolher(ligado: boolean) {
+  setNavigatorWidth(ligado ? 'auto' : 'larga')
+}
 
 const densidades = computed<Array<{ valor: NavigatorDensity; label: string }>>(() => [
   { valor: 'confortavel', label: t('settings.aparencia.densidade.confortavel.label') },
@@ -133,26 +131,6 @@ const dicaDaDensidade = computed(() =>
 
 const dicaDosAvisos = computed(() =>
   t(`settings.aparencia.navegacao.avisos.${navigatorBadges.value}Dica`),
-)
-
-/** A automática, na prévia, aparece como fica nesta tela agora. */
-const telaParaBarraLarga = useTelaLarga(NAVIGATOR_AUTO_MIN_WIDTH)
-
-const larguraNaPrevia = computed(() =>
-  navigatorWidth.value === 'icones' ||
-  (navigatorWidth.value === 'auto' && !telaParaBarraLarga.value)
-    ? 'icones'
-    : 'larga',
-)
-
-const legendaDaPrevia = computed(() =>
-  navigatorWidth.value === 'auto'
-    ? t(
-        larguraNaPrevia.value === 'icones'
-          ? 'settings.aparencia.navegacao.previaAutoIcones'
-          : 'settings.aparencia.navegacao.previaAutoLarga',
-      )
-    : t('settings.aparencia.navegacao.previa'),
 )
 
 /** A bandeira só ilumina; o nome de cada idioma vai escrito nele mesmo. */
@@ -204,7 +182,11 @@ function alternarExplicacoes(ligado: boolean) {
         <p class="cfg-secao__descricao">{{ t('settings.aparencia.tema.ondeMais') }}</p>
       </header>
 
-      <div class="cfg-secao__corpo opcoes" role="radiogroup" aria-labelledby="aparencia-tema-titulo">
+      <div
+        class="cfg-secao__corpo opcoes"
+        role="radiogroup"
+        aria-labelledby="aparencia-tema-titulo"
+      >
         <label
           v-for="opcao in temas"
           :key="opcao.valor"
@@ -213,7 +195,7 @@ function alternarExplicacoes(ligado: boolean) {
         >
           <SettingsLayoutMockup
             v-bind="opcao.maquete"
-            :largura="larguraNaPrevia"
+            :formato="layoutFormat"
             :todos="navigatorMode === 'lista'"
             :densa="navigatorDensity === 'compacta'"
             :selo="navigatorBadges"
@@ -237,103 +219,73 @@ function alternarExplicacoes(ligado: boolean) {
     <section class="cfg-secao" aria-labelledby="aparencia-navegacao-titulo">
       <header class="cfg-secao__cabeca">
         <span class="ui-ladrilho cfg-secao__ladrilho" aria-hidden="true">
-          <i class="ph ph-sidebar" />
+          <i class="ph ph-layout" />
         </span>
         <h3 id="aparencia-navegacao-titulo" class="cfg-secao__titulo">
-          {{ t('settings.aparencia.navegacao.titulo') }}
+          {{ t('settings.aparencia.formato.titulo') }}
         </h3>
-        <p class="cfg-secao__descricao">{{ t('settings.aparencia.navegacao.descricao') }}</p>
+        <p class="cfg-secao__descricao">{{ t('settings.aparencia.formato.descricao') }}</p>
       </header>
 
       <div class="cfg-secao__corpo navegacao">
-        <!-- A prévia junta as quatro escolhas: muda junto, antes de a pessoa sair daqui. -->
-        <figure class="navegacao__previa">
-          <SettingsLayoutMockup
-            :largura="larguraNaPrevia"
-            :todos="navigatorMode === 'lista'"
-            :densa="navigatorDensity === 'compacta'"
-            :selo="navigatorBadges"
-          />
-          <figcaption class="navegacao__legenda">
-            <i class="ph ph-eye" aria-hidden="true" />
-            {{ legendaDaPrevia }}
-          </figcaption>
-        </figure>
+        <!-- Cada formato é a miniatura do portal inteiro com ele: ninguém escolhe às cegas. -->
+        <div class="opcoes formatos" role="radiogroup" aria-labelledby="aparencia-navegacao-titulo">
+          <label
+            v-for="opcao in formatos"
+            :key="opcao.valor"
+            class="opcao"
+            :class="{ 'opcao--ativa': layoutFormat === opcao.valor }"
+          >
+            <SettingsLayoutMockup
+              :formato="opcao.valor"
+              :todos="navigatorMode === 'lista'"
+              :densa="navigatorDensity === 'compacta'"
+              :selo="navigatorBadges"
+            />
+            <span class="opcao__pe">
+              <RadioButton
+                :input-id="`aparencia-formato-${opcao.valor}`"
+                name="aparencia-formato"
+                :value="opcao.valor"
+                :model-value="layoutFormat"
+                @update:model-value="setLayoutFormat(opcao.valor)"
+              />
+              <span class="opcao__texto">
+                <strong>
+                  {{ opcao.label }}
+                  <span v-if="opcao.valor === 'secoes'" class="ui-selo formatos__padrao">
+                    {{ t('settings.aparencia.formato.padrao') }}
+                  </span>
+                </strong>
+                <small>{{ opcao.hint }}</small>
+              </span>
+            </span>
+          </label>
+        </div>
 
-        <div class="navegacao__grupos">
-          <fieldset class="grupo">
-            <legend class="grupo__titulo">
-              {{ t('settings.aparencia.navegacao.largura.titulo') }}
-            </legend>
-            <div class="escolhas">
-              <label
-                v-for="opcao in larguras"
-                :key="opcao.valor"
-                class="escolha"
-                :class="{ 'escolha--ativa': navigatorWidth === opcao.valor }"
-              >
-                <RadioButton
-                  :input-id="`aparencia-largura-${opcao.valor}`"
-                  name="aparencia-largura"
-                  :value="opcao.valor"
-                  :model-value="navigatorWidth"
-                  @update:model-value="setNavigatorWidth(opcao.valor)"
-                />
-                <i class="escolha__icone" :class="opcao.icone" aria-hidden="true" />
-                <span class="escolha__texto">
-                  <strong>{{ opcao.label }}</strong>
-                  <small>{{ opcao.hint }}</small>
-                </span>
-              </label>
-            </div>
-          </fieldset>
-
-          <fieldset class="grupo">
-            <legend class="grupo__titulo">
-              {{ t('settings.aparencia.navegacao.espacos.titulo') }}
-            </legend>
-            <div class="escolhas">
-              <label
-                v-for="opcao in modos"
-                :key="opcao.valor"
-                class="escolha"
-                :class="{ 'escolha--ativa': navigatorMode === opcao.valor }"
-              >
-                <RadioButton
-                  :input-id="`aparencia-menu-${opcao.valor}`"
-                  name="aparencia-menu"
-                  :value="opcao.valor"
-                  :model-value="navigatorMode"
-                  @update:model-value="setNavigatorMode(opcao.valor)"
-                />
-                <i class="escolha__icone" :class="opcao.icone" aria-hidden="true" />
-                <span class="escolha__texto">
-                  <strong>{{ opcao.label }}</strong>
-                  <small>{{ opcao.hint }}</small>
-                </span>
-              </label>
-            </div>
-          </fieldset>
+        <!-- Os ajustes que valem para o formato escolhido; o que não vale nele não aparece. -->
+        <div class="ajustes">
+          <h4 class="grupo__titulo">{{ t('settings.aparencia.formato.ajustes') }}</h4>
 
           <div class="grupo-par">
-            <fieldset class="grupo">
-              <legend id="aparencia-densidade-titulo" class="grupo__titulo">
-                {{ t('settings.aparencia.navegacao.densidade.titulo') }}
+            <fieldset v-if="layoutFormat !== 'topo'" class="grupo">
+              <legend id="aparencia-espacos-titulo" class="grupo__titulo grupo__titulo--fino">
+                {{ t('settings.aparencia.navegacao.espacos.titulo') }}
               </legend>
               <SelectButton
-                :model-value="navigatorDensity"
-                :options="densidades"
+                :model-value="navigatorMode"
+                :options="modos"
                 option-label="label"
                 option-value="valor"
                 :allow-empty="false"
-                aria-labelledby="aparencia-densidade-titulo"
-                @update:model-value="setNavigatorDensity"
+                aria-labelledby="aparencia-espacos-titulo"
+                @update:model-value="setNavigatorMode"
               />
-              <small class="grupo__ajuda">{{ dicaDaDensidade }}</small>
+              <small class="grupo__ajuda">{{ dicaDosEspacos }}</small>
             </fieldset>
 
             <fieldset class="grupo">
-              <legend id="aparencia-avisos-titulo" class="grupo__titulo">
+              <legend id="aparencia-avisos-titulo" class="grupo__titulo grupo__titulo--fino">
                 {{ t('settings.aparencia.navegacao.avisos.titulo') }}
               </legend>
               <SelectButton
@@ -347,7 +299,37 @@ function alternarExplicacoes(ligado: boolean) {
               />
               <small class="grupo__ajuda">{{ dicaDosAvisos }}</small>
             </fieldset>
+
+            <fieldset v-if="layoutFormat === 'ladrilhos'" class="grupo">
+              <legend id="aparencia-densidade-titulo" class="grupo__titulo grupo__titulo--fino">
+                {{ t('settings.aparencia.navegacao.densidade.titulo') }}
+              </legend>
+              <SelectButton
+                :model-value="navigatorDensity"
+                :options="densidades"
+                option-label="label"
+                option-value="valor"
+                :allow-empty="false"
+                aria-labelledby="aparencia-densidade-titulo"
+                @update:model-value="setNavigatorDensity"
+              />
+              <small class="grupo__ajuda">{{ dicaDaDensidade }}</small>
+            </fieldset>
           </div>
+
+          <label v-if="comBarraLarga" class="interruptor" for="aparencia-recolher">
+            <span class="interruptor__texto">
+              <strong>{{ t('settings.aparencia.formato.recolher.label') }}</strong>
+              <small>{{
+                t('settings.aparencia.formato.recolher.hint', { largura: NAVIGATOR_AUTO_MIN_WIDTH })
+              }}</small>
+            </span>
+            <ToggleSwitch
+              input-id="aparencia-recolher"
+              :model-value="navigatorWidth === 'auto'"
+              @update:model-value="alternarRecolher"
+            />
+          </label>
         </div>
       </div>
     </section>
@@ -518,54 +500,36 @@ function alternarExplicacoes(ligado: boolean) {
 /* ------------------------------------------------------------------ navegação */
 
 /*
- * Em folha larga, a prévia à esquerda, presa no alto enquanto as escolhas rolam ao lado; mais
- * estreita, ela fica em cima delas.
+ * Os quatro formatos lado a lado (dois em dois quando a folha estreita), e os ajustes embaixo,
+ * separados por um fio: primeiro o formato inteiro, depois o acabamento.
  */
 .navegacao {
-  align-items: start;
-  gap: 24px;
-}
-
-.navegacao__previa {
   display: grid;
-  gap: 10px;
-  max-width: 34rem;
-  margin: 0;
-}
-
-/* Mais alta que as do tema: cabe a barra com os três espaços abertos. */
-.navegacao__previa :deep(.maquete) {
-  aspect-ratio: 5 / 4;
-}
-
-@container cfg-folha (min-width: 980px) {
-  .navegacao {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  }
-
-  .navegacao__previa {
-    position: sticky;
-    top: 16px;
-  }
-}
-
-.navegacao__legenda {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 13px;
-}
-
-.navegacao__grupos {
-  display: grid;
-  min-width: 0;
   gap: 22px;
 }
 
+/* Dois a dois na folha de sempre (miniatura grande o bastante para ler), quatro na folha larga. */
+.formatos {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+
+.formatos__padrao {
+  margin-inline-start: 6px;
+  vertical-align: 1px;
+}
+
+.ajustes {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid var(--linha-suave);
+}
+
+/* Sem esticar: o vizinho de dica mais longa deixava o segmentado do outro mais alto. */
 .grupo {
   display: grid;
   min-width: 0;
+  align-content: start;
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -578,6 +542,16 @@ function alternarExplicacoes(ligado: boolean) {
   color: var(--tinta);
   font-size: 14px;
   font-weight: 700;
+}
+
+.ajustes > .grupo__titulo {
+  margin: 0;
+}
+
+/* O nome de cada ajuste fica um degrau abaixo do título "Ajustes". */
+.grupo__titulo--fino {
+  font-size: 13px;
+  font-weight: 650;
 }
 
 .grupo__ajuda {
@@ -599,83 +573,6 @@ function alternarExplicacoes(ligado: boolean) {
 
 .grupo :deep(.p-togglebutton) {
   flex: 1;
-}
-
-/*
- * Cada escolha numa linha: o rádio, o ícone do que muda e o texto. A linha inteira é o `<label>`,
- * e a marcada ganha o véu e a borda da sálvia.
- */
-.escolhas {
-  display: grid;
-  gap: 6px;
-}
-
-.escolha {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  border: 1px solid var(--linha);
-  border-radius: 14px;
-  cursor: pointer;
-  transition:
-    border-color var(--pj-tempo-curto) var(--pj-curva-chega),
-    background-color var(--pj-tempo-curto) var(--pj-curva-chega);
-}
-
-.escolha:hover {
-  border-color: var(--linha-forte);
-}
-
-/* Marcada: o véu da sálvia e a borda dela, em tom pastel. */
-.escolha--ativa,
-.escolha--ativa:hover {
-  border-color: var(--app-salvia, var(--musgo));
-  background: var(--app-veu-forte, var(--musgo-fundo));
-}
-
-.escolha:has(.p-radiobutton-input:focus-visible) {
-  outline: 2px solid var(--musgo);
-  outline-offset: 2px;
-}
-
-.escolha :deep(.p-radiobutton) {
-  flex: none;
-}
-
-.escolha__icone {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  flex: none;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--superficie-2);
-  color: var(--tinta-2);
-  font-size: 18px;
-}
-
-.escolha--ativa .escolha__icone {
-  background: var(--superficie);
-  color: var(--app-salvia-texto, var(--musgo));
-}
-
-.escolha__texto {
-  display: grid;
-  min-width: 0;
-  gap: 1px;
-}
-
-.escolha__texto strong {
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 650;
-}
-
-.escolha__texto small {
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  line-height: 1.4;
 }
 
 /* ------------------------------------------------------------------ interruptor */
@@ -783,7 +680,6 @@ function alternarExplicacoes(ligado: boolean) {
 
 @media (prefers-reduced-motion: reduce) {
   .opcao,
-  .escolha,
   .idioma {
     transition: none;
   }

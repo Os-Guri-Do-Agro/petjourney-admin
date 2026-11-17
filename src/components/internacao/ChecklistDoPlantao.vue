@@ -9,7 +9,6 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -130,13 +129,7 @@ const resumo = computed(() => {
     :erro="checklist ? '' : erro"
     @tentar-de-novo="carregar"
   >
-    <template #voltar>
-      <RouterLink to="/clinica/internacao" class="cp__voltar">
-        <i class="ph ph-arrow-left" aria-hidden="true" />
-        {{ t('internacao.titulo') }}
-      </RouterLink>
-    </template>
-
+    <!-- Sem "voltar": o plantão é aba do destino Internação, ao lado do mapa. -->
     <section v-if="checklist" class="ui-folha ui-lista cp" :aria-busy="carregando">
       <p v-if="checklist.plantao?.vencido" class="eg__aviso cp__nota">
         <i class="ph ph-clock-countdown" aria-hidden="true" />
@@ -201,19 +194,6 @@ const resumo = computed(() => {
 </template>
 
 <style scoped>
-.cp__voltar {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  text-decoration: none;
-}
-
-.cp__voltar:hover {
-  color: var(--tinta);
-}
-
 .cp__nota {
   margin: 0;
   padding: 12px 24px 0;

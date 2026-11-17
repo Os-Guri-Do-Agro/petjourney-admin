@@ -17,7 +17,7 @@
  * por cima dela. Quem desenha a própria faixa (o Hoje, com dois cartões) usa o slot `destaque`.
  */
 import Button from 'primevue/button'
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, onUpdated, ref, useSlots } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
@@ -93,7 +93,25 @@ const { aqui } = useEspacos()
 const parceiroStore = useParceiroStore()
 const { logout } = useLogout()
 
-const tituloDaTela = computed(() => props.titulo || aqui.value.destino?.rotulo || '')
+/**
+ * Numa aba de um destino com várias telas, o título é sempre o do destino: o mesmo nome aceso na
+ * barra, com a aba dizendo qual tela dele está aberta. Antes cada tela decidia (Agenda › Pedidos
+ * virava "Pedidos de horário", Pacientes › Correções continuava "Pacientes"), e quem trocava de aba
+ * via o título mudar de regra (análise de usabilidade de 16/11/2026).
+ */
+const emAbaDeDestino = computed(
+  () =>
+    !props.semAbas &&
+    props.abasDaTela.length <= 1 &&
+    Boolean(aqui.value.aba) &&
+    (aqui.value.destino?.abas.length ?? 0) > 1,
+)
+
+const tituloDaTela = computed(() =>
+  emAbaDeDestino.value
+    ? (aqui.value.destino?.rotulo ?? '')
+    : props.titulo || aqui.value.destino?.rotulo || '',
+)
 
 /** O ladrilho do título, na cor do espaço: o mesmo ícone do destino aceso na barra. */
 const iconeDaTela = computed(() => props.icone || aqui.value.destino?.icone || '')
@@ -174,6 +192,92 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 /** O cabeçalho do app: a faixa sálvia com o cartão do título. Na moldura do portal, o de antes. */
 const comFaixa = computed(() => molduraPedida.value === 'app')
 
+/*
+ * Título, abas e ações numa linha só quando cabem: a faixa cai de 174 para ~100 px, e esse espaço
+ * volta para o trabalho (na Agenda em 1024x768 metade da tela passava antes da primeira linha útil).
+ * Quando não cabem, fica como sempre foi: título e ações em cima, abas embaixo. A conta usa a
+ * largura natural de cada peça, que não depende do modo, então não há vai e volta.
+ */
+const slots = useSlots()
+const cabeca = ref<HTMLElement | null>(null)
+/** `cheia`: cabe com tudo. `sem-icone`: cabe se as abas ficarem só com o nome. `nao`: empilha. */
+const comoCabe = ref<'nao' | 'cheia' | 'sem-icone'>('nao')
+
+const podeIrNumaLinha = computed(
+  () => abas.value.length > 0 && !slots.cabecalho && !slots.voltar && !slots.destaque,
+)
+
+const emUmaLinha = computed(() => podeIrNumaLinha.value && comoCabe.value !== 'nao')
+const abasSemIcone = computed(() => emUmaLinha.value && comoCabe.value === 'sem-icone')
+
+const VAO_DA_LINHA = 22
+/** O ícone de uma aba (17 px) mais o vão até o nome (8 px). */
+const ICONE_DA_ABA = 25
+
+function larguraDoTexto(elemento: Element) {
+  const faixa = document.createRange()
+  faixa.selectNodeContents(elemento)
+
+  return faixa.getBoundingClientRect().width
+}
+
+function medirALinha() {
+  const el = cabeca.value
+
+  if (!el || !podeIrNumaLinha.value) {
+    comoCabe.value = 'nao'
+    return
+  }
+
+  const titulo = el.querySelector('.faixa__titulo')
+  const fileira = el.querySelector('.faixa__abas')
+  const acoes = el.querySelector<HTMLElement>('.pagina__acoes')
+
+  if (!titulo || !fileira) {
+    comoCabe.value = 'nao'
+    return
+  }
+
+  const botoes = acoes ? Array.from(acoes.children) : []
+  const larguraDasAcoes =
+    botoes.reduce((soma, botao) => soma + botao.getBoundingClientRect().width, 0) +
+    Math.max(0, botoes.length - 1) * 8
+  /* A largura das abas com os ícones, estejam eles à vista ou não: a conta não depende do modo. */
+  const icones = fileira.querySelectorAll('.abas__aba').length * ICONE_DA_ABA
+  const fileiraCheia =
+    fileira.scrollWidth + (fileira.classList.contains('abas--sem-icone') ? icones : 0)
+  /* 4 px de folga: largura fracionada de texto arredonda para cima. */
+  const semAsAbas =
+    larguraDoTexto(titulo) + larguraDasAcoes + VAO_DA_LINHA * (botoes.length ? 2 : 1) + 4
+  const largura = el.clientWidth
+
+  if (semAsAbas + fileiraCheia <= largura) {
+    comoCabe.value = 'cheia'
+  } else if (semAsAbas + fileiraCheia - icones <= largura) {
+    comoCabe.value = 'sem-icone'
+  } else {
+    comoCabe.value = 'nao'
+  }
+}
+
+let observadorDaLinha: ResizeObserver | null = null
+
+onMounted(() => {
+  medirALinha()
+
+  if (cabeca.value && typeof ResizeObserver !== 'undefined') {
+    observadorDaLinha = new ResizeObserver(medirALinha)
+    observadorDaLinha.observe(cabeca.value)
+  }
+
+  /* A fonte chega depois da primeira medida e muda a largura do título e das abas. */
+  void document.fonts?.ready.then(medirALinha)
+})
+
+onUpdated(medirALinha)
+
+onBeforeUnmount(() => observadorDaLinha?.disconnect())
+
 const rotaAtual = useRoute()
 const { ativo: demonstracao } = useModoDemonstracao()
 
@@ -208,12 +312,16 @@ const avisoDeConsulta = computed(() => {
 
 <template>
   <div class="pagina" :class="[`pagina--${largura}`, { 'pagina--faixa': comFaixa }]">
-    <section v-if="comFaixa" class="faixa">
+    <section v-if="comFaixa" class="faixa" :class="{ 'faixa--linha': emUmaLinha }">
       <UiRabiscos />
       <div class="faixa__miolo">
         <slot name="destaque">
           <!-- O cabeçalho do app: texto branco direto na cor, ações em vidro, abas em pílula. -->
-          <header class="faixa__cabeca">
+          <header
+            ref="cabeca"
+            class="faixa__cabeca"
+            :class="{ 'faixa__cabeca--linha': emUmaLinha }"
+          >
             <div v-if="$slots.voltar" class="pagina__voltar faixa__voltar">
               <slot name="voltar" />
             </div>
@@ -256,6 +364,7 @@ const avisoDeConsulta = computed(() => {
             <UiAbas
               v-if="abas.length"
               vidro
+              :sem-icone="abasSemIcone"
               class="faixa__abas"
               :abas="abas"
               :atual="abaAtual"
@@ -560,6 +669,49 @@ const avisoDeConsulta = computed(() => {
   --p-button-primary-color: var(--app-tinta);
   --p-button-primary-hover-color: var(--app-tinta);
   --p-button-primary-active-color: var(--app-tinta);
+}
+
+/*
+ * Numa linha: título, abas e ações lado a lado, e a frase de estado embaixo, de ponta a ponta. A
+ * linha do título e o bloco dos títulos somem como caixa (`contents`) para as peças deles entrarem
+ * na mesma grade que as abas.
+ */
+.faixa--linha .faixa__miolo {
+  padding-block: 18px 16px;
+}
+
+.faixa__cabeca--linha {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 22px;
+}
+
+.faixa__cabeca--linha .pagina__linha,
+.faixa__cabeca--linha .pagina__titulos {
+  display: contents;
+}
+
+.faixa__cabeca--linha .faixa__titulo {
+  grid-row: 1;
+  grid-column: 1;
+  white-space: nowrap;
+}
+
+.faixa__cabeca--linha .faixa__abas {
+  grid-row: 1;
+  grid-column: 2;
+  justify-self: start;
+}
+
+.faixa__cabeca--linha .pagina__acoes {
+  grid-row: 1;
+  grid-column: 3;
+  flex-wrap: nowrap;
+}
+
+.faixa__cabeca--linha .faixa__resumo {
+  grid-row: 2;
+  grid-column: 1 / -1;
 }
 
 .faixa__voltar :deep(a),

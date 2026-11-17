@@ -7,6 +7,10 @@
  * Não há cabeçalho: o título da tela é o primeiro texto da tela, e o "onde estou" mora no mapa,
  * aceso na cor do espaço, e nas abas do destino.
  *
+ * O formato do menu é de cada pessoa (Configurações → Aparência e o menu da conta, 16/11/2026):
+ * Seções, Ladrilhos e Só ícones são a barra lateral; "Menu no alto" tira a barra e põe no alto a
+ * faixa do `ShellTopo`, com um menu por espaço.
+ *
  * Na Clínica, a fita do dia fica presa no alto: o expediente inteiro, com a agulha em agora.
  *
  * Até 900 px a barra vira gaveta, e um topo fino com o menu e o nome da tela toma o lugar dela.
@@ -24,16 +28,19 @@ import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
 import ShellPendencia from '@/components/layout/ShellPendencia.vue'
+import ShellTopo from '@/components/layout/ShellTopo.vue'
 import FeedbackSaqueDialog from '@/components/parceiro/FeedbackSaqueDialog.vue'
 import ValidarCupomDialog from '@/components/parceiro/ValidarCupomDialog.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
 import {
-  isCompactDensity,
+  isCompactNavigator,
   isListNavigator,
+  isTopNavigator,
   NAVIGATOR_AUTO_MIN_WIDTH,
   navigatorBadges,
+  navigatorStyle,
   navigatorWidth,
   setNavigatorWidth,
 } from '@/composables/useLayoutPreferences'
@@ -105,6 +112,12 @@ const barraRecolhida = computed(() => {
     (navigatorWidth.value === 'auto' && !larguraParaBarraLarga.value)
   )
 })
+
+/**
+ * O formato "Menu no alto": a barra lateral sai e a faixa do alto entra. Até 900 px vale a gaveta
+ * de sempre, nos dois formatos.
+ */
+const menuNoAlto = computed(() => isTopNavigator.value && !compacto.value)
 
 /** O botão do alto da barra fixa a escolha: deixa de ser automática. */
 function alternarBarra() {
@@ -315,7 +328,9 @@ onUnmounted(() => {
         'shell--recolhida': barraRecolhida,
         'shell--compacto': compacto,
         'shell--gaveta': compacto && gavetaAberta,
-        'shell--densa': isCompactDensity,
+        'shell--densa': isCompactNavigator,
+        'shell--estilo-secoes': navigatorStyle === 'secoes',
+        'shell--topo': menuNoAlto,
         'shell--selo-ponto': navigatorBadges === 'ponto',
       },
     ]"
@@ -332,6 +347,7 @@ onUnmounted(() => {
     </Transition>
 
     <aside
+      v-if="!menuNoAlto"
       id="barra-do-portal"
       class="barra"
       :aria-hidden="compacto && !gavetaAberta ? 'true' : undefined"
@@ -416,7 +432,7 @@ onUnmounted(() => {
           :espacos="espacos"
           :aqui="aqui"
           :recolhida="barraRecolhida"
-          :todos-abertos="isListNavigator"
+          :voce-escolhe="isListNavigator"
           @navegou="fecharGaveta"
         />
 
@@ -445,6 +461,15 @@ onUnmounted(() => {
     </aside>
 
     <div class="palco">
+      <ShellTopo
+        v-if="menuNoAlto"
+        :espacos="espacos"
+        :aqui="aqui"
+        :clinica="clinicaNaDemonstracao"
+        :atalho-da-busca="atalhoDaBusca"
+        @buscar="buscaAberta = true"
+      />
+
       <header v-if="compacto" class="topo">
         <button
           type="button"
@@ -517,6 +542,11 @@ onUnmounted(() => {
 /* 72 px: 12 de margem de cada lado e uma coluna de 48 onde cada ícone fica no centro (x = 36). */
 .shell--recolhida {
   --barra-largura: 72px;
+}
+
+/* Menu no alto: sem coluna da barra, a tela vai de ponta a ponta. */
+.shell.shell--topo {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .shell__pular {

@@ -2979,35 +2979,15 @@
       },
       "naHora": "Izbori važe odmah i čuvaju se u ovom pregledaču.",
       "navegacao": {
-        "titulo": "Navigacija",
-        "descricao": "Bočna traka po vašoj meri. Pregled odmah prikazuje rezultat.",
-        "previa": "Pregled sa vašim izborima.",
-        "previaAutoLarga": "Pregled na ovom ekranu: traka ostaje široka.",
-        "previaAutoIcones": "Pregled na ovom ekranu: traka prikazuje samo ikone.",
-        "largura": {
-          "titulo": "Širina trake",
-          "larga": {
-            "label": "Široka",
-            "hint": "Ikona i naziv svakog ekrana."
-          },
-          "icones": {
-            "label": "Samo ikone",
-            "hint": "Više prostora za ekran. Naziv se pojavljuje kad zadržite miš."
-          },
-          "auto": {
-            "label": "Automatski",
-            "hint": "Široka na ekranima od {largura} px i većim, samo ikone na manjim."
-          }
-        },
         "espacos": {
           "titulo": "Prostori u traci",
           "lista": {
-            "label": "Svi otvoreni",
-            "hint": "Klinika, Hotel i Portal sa ekranima na vidiku. Prostor skupljate klikom na naziv."
+            "label": "Vi birate",
+            "hint": "Otvorite ili skupite svaki prostor klikom na naziv, koliko god želite odjednom; traka pamti kako ste ostavili."
           },
           "secoes": {
-            "label": "Samo trenutni",
-            "hint": "Otvara prostor u kom ste; ostali su u jednom redu, sa ukupnim brojem obaveza."
+            "label": "Jedan po jedan",
+            "hint": "Otvoren ostaje prostor ekrana na kom ste; otvaranje drugog klikom na naziv skuplja prethodni."
           }
         },
         "densidade": {
@@ -3020,6 +3000,39 @@
           "numeroDica": "Koliko obaveza ima u svakom prostoru i na svakom ekranu.",
           "pontoDica": "Mirnija traka: tačka u boji stanja pokazuje gde ima obaveza."
         }
+      },
+      "formato": {
+        "titulo": "Izgled menija",
+        "descricao": "Izaberite kako su ekrani organizovani. Svako može imati svoj: izbor ostaje u ovom pregledaču.",
+        "secoes": {
+          "label": "Odeljci",
+          "hint": "Bočna traka sa ekranima grupisanim po temi."
+        },
+        "ladrilhos": {
+          "label": "Pločice",
+          "hint": "Bočna traka sa velikim ikonama, lakša za dodir."
+        },
+        "icones": {
+          "label": "Samo ikone",
+          "hint": "Uska traka, više prostora za ekran. Naziv se vidi kad zadržite miš."
+        },
+        "topo": {
+          "label": "Meni gore",
+          "hint": "Bez bočne trake: svaki prostor je meni gore, sa ekranima po odeljcima."
+        },
+        "curto": {
+          "secoes": "Odeljci",
+          "ladrilhos": "Pločice",
+          "icones": "Ikone",
+          "topo": "Gore"
+        },
+        "padrao": "Podrazumevano",
+        "ajustes": "Podešavanja",
+        "recolher": {
+          "label": "Skupi na manjim ekranima",
+          "hint": "Ispod {largura} px traka prikazuje samo ikone."
+        },
+        "menuDoEspaco": "Ekrani: {espaco}"
       }
     },
     "perfil": {
@@ -9772,7 +9785,9 @@
       "internacao": "Hospitalizacija",
       "pendencias": "Zaostali poslovi",
       "relatorios": "Izveštaji",
-      "configuracao": "Podešavanja"
+      "configuracao": "Podešavanja",
+      "prontuarios": "Kartoni",
+      "vacinas": "Vakcine"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9796,7 +9811,7 @@
       "retornos": "Kontrole",
       "vacinas": "Vakcine",
       "tratamentos": "Kućna terapija",
-      "estoque": "Zalihe vakcina",
+      "estoque": "Zalihe",
       "painel": "Pregled dana",
       "rotina": "Rutina",
       "hospedes": "Gosti",
@@ -9807,9 +9822,24 @@
       "rotinaPadrao": "Standardna rutina",
       "correcoes": "Ispravke",
       "copias": "Kopije",
-      "historicoLiberado": "Podeljena istorija"
+      "historicoLiberado": "Podeljena istorija",
+      "calendario": "Kalendar",
+      "cadastros": "Kartoteka",
+      "visaoGeral": "Pregled",
+      "reforcos": "Revakcinacije",
+      "plantao": "Smena",
+      "boletins": "Izveštaji",
+      "vagas": "Slobodna mesta"
     },
-    "abasAria": "Ekrani: {destino}"
+    "abasAria": "Ekrani: {destino}",
+    "secoes": {
+      "dia": "Svakodnevno",
+      "atendimento": "Nega",
+      "gestao": "Upravljanje",
+      "parceria": "Partnerstvo",
+      "clientes": "Klijenti",
+      "empresa": "Firma"
+    }
   },
   "pendencias": {
     "contador": {

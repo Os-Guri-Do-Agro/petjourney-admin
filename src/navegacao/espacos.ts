@@ -28,6 +28,21 @@ export type IdDoEspaco = 'inicio' | 'clinica' | 'hotel' | 'portal' | 'conta'
 
 export type TomDoSelo = 'neutro' | 'atencao' | 'risco'
 
+/**
+ * As seções de um espaço: o título diz o que mora embaixo dele antes de a pessoa ler a lista
+ * (pedido do Luís, 16/11/2026: "seções onde o usuário olhe e já saiba o que vai ter dentro").
+ * Clínica e Hotel: o **dia a dia** (o que se abre toda hora), o **atendimento** (o paciente e o
+ * cuidado) e a **gestão** (números e ajustes). Portal: a **parceria** (programas e indicação), os
+ * **clientes** (os pets compartilhados) e a **empresa** (carteira, equipe, estabelecimento).
+ */
+export type IdDaSecao = 'dia' | 'atendimento' | 'gestao' | 'parceria' | 'clientes' | 'empresa'
+
+export type SecaoDoEspaco = {
+  id: IdDaSecao
+  rotulo: string
+  destinos: Destino[]
+}
+
 export type Aba = {
   rotulo: string
   to: string
@@ -36,6 +51,8 @@ export type Aba = {
   tom?: TomDoSelo
   tituloDoSelo?: string
   bloqueado?: boolean
+  /** Só o caminho exato acende a aba: o que vem depois dele é tela de detalhe do destino. */
+  exata?: boolean
 }
 
 export type Destino = {
@@ -51,6 +68,8 @@ export type Destino = {
   tom?: TomDoSelo
   tituloDoSelo?: string
   bloqueado?: boolean
+  /** A seção do espaço em que o destino mora (o título que o agrupa na barra e no menu do alto). */
+  secao?: IdDaSecao
 }
 
 export type Espaco = {
@@ -60,6 +79,8 @@ export type Espaco = {
   lugar: LugarDoTrilha
   to: string
   destinos: Destino[]
+  /** Os mesmos destinos, na ordem deles, agrupados pelas seções. */
+  secoes: SecaoDoEspaco[]
   selo?: number
   tom?: TomDoSelo
 }
@@ -69,57 +90,100 @@ type ReceitaDeDestino = {
   id: string
   chave: string
   icone: string
-  abas: { rota: string; chave: string }[]
+  secao: IdDaSecao
+  abas: { rota: string; chave: string; exata?: boolean }[]
   prefixos?: string[]
 }
 
+/*
+ * A Clínica por trabalho, não por tipo de lista (análise de usabilidade de 16/11/2026,
+ * `docs/clinico/usabilidade/ANALISE.md`). Antes, prontuários, bulário e cópias eram abas de
+ * "Pacientes" (três de cinco não eram da recepção), vacinas e estoque eram abas de "Pendências", e
+ * o plantão, os boletins e as vagas da internação não tinham porta. Agora cada destino responde uma
+ * pergunta de quem trabalha, e nenhum passa de quatro abas: a fileira cabe no tablet sem rolar.
+ */
 const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
   {
     id: 'hoje',
     chave: 'espacos.clinica.hoje',
     icone: 'ph ph-sun-horizon',
+    secao: 'dia',
     abas: [{ rota: '/clinica/meu-dia', chave: 'espacos.clinica.hoje' }],
   },
   {
     id: 'agenda',
     chave: 'espacos.clinica.agenda',
     icone: 'ph ph-calendar-dots',
+    secao: 'dia',
     abas: [
-      { rota: '/clinica/agenda', chave: 'espacos.abas.agenda' },
+      { rota: '/clinica/agenda', chave: 'espacos.abas.calendario' },
       { rota: '/clinica/pedidos', chave: 'espacos.abas.pedidos' },
       { rota: '/clinica/fila', chave: 'espacos.abas.fila' },
+    ],
+  },
+  {
+    /* O que ficou para trás é trabalho do dia: mora ao lado do Hoje e da Agenda. */
+    id: 'pendencias',
+    chave: 'espacos.clinica.pendencias',
+    icone: 'ph ph-list-checks',
+    secao: 'dia',
+    abas: [
+      { rota: '/clinica/atividades', chave: 'espacos.abas.visaoGeral' },
+      { rota: '/clinica/faltas', chave: 'espacos.abas.faltas' },
+      { rota: '/clinica/retornos-pendentes', chave: 'espacos.abas.retornos' },
+      { rota: '/clinica/tratamentos', chave: 'espacos.abas.tratamentos' },
     ],
   },
   {
     id: 'pacientes',
     chave: 'espacos.clinica.pacientes',
     icone: 'ph ph-paw-print',
+    secao: 'atendimento',
     abas: [
-      { rota: '/clinica/pacientes', chave: 'espacos.abas.pacientes' },
+      { rota: '/clinica/pacientes', chave: 'espacos.abas.cadastros' },
       { rota: '/clinica/correcoes', chave: 'espacos.abas.correcoes' },
-      { rota: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
-      { rota: '/clinica/bulario', chave: 'espacos.abas.bulario' },
       { rota: '/clinica/historico-liberado', chave: 'espacos.abas.historicoLiberado' },
-      { rota: '/clinica/copias-do-prontuario', chave: 'espacos.abas.copias' },
     ],
-    prefixos: ['/clinica/paciente/', '/clinica/ficha/', '/clinica/atendimento/'],
+    prefixos: ['/clinica/paciente/', '/clinica/ficha/'],
   },
   {
+    /* O prontuário é a consulta, não o cadastro: quem não lê prontuário nem vê este destino. */
+    id: 'prontuarios',
+    chave: 'espacos.clinica.prontuarios',
+    icone: 'ph ph-clipboard-text',
+    secao: 'atendimento',
+    abas: [
+      { rota: '/clinica/atendimentos', chave: 'espacos.abas.atendimentos' },
+      { rota: '/clinica/copias-do-prontuario', chave: 'espacos.abas.copias' },
+      { rota: '/clinica/bulario', chave: 'espacos.abas.bulario' },
+    ],
+    prefixos: ['/clinica/atendimento/'],
+  },
+  {
+    /*
+     * As quatro perguntas da ala: quem está onde, o que dar agora, a quem avisar e se tem vaga.
+     * `exata` no mapa: `/clinica/internacao/<id>` é o detalhe de um internado, não uma aba.
+     */
     id: 'internacao',
     chave: 'espacos.clinica.internacao',
     icone: 'ph ph-bed',
-    abas: [{ rota: '/clinica/internacao', chave: 'espacos.clinica.internacao' }],
+    secao: 'atendimento',
+    abas: [
+      { rota: '/clinica/internacao', chave: 'espacos.abas.mapa', exata: true },
+      { rota: '/clinica/internacao/plantao', chave: 'espacos.abas.plantao' },
+      { rota: '/clinica/internacao/boletins-pendentes', chave: 'espacos.abas.boletins' },
+      { rota: '/clinica/internacao/vagas', chave: 'espacos.abas.vagas' },
+    ],
+    prefixos: ['/clinica/internacao/'],
   },
   {
-    id: 'pendencias',
-    chave: 'espacos.clinica.pendencias',
-    icone: 'ph ph-list-checks',
+    /* Quem vacinar e o que há na geladeira: estoque e aplicadas não são pendência. */
+    id: 'vacinas',
+    chave: 'espacos.clinica.vacinas',
+    icone: 'ph ph-syringe',
+    secao: 'atendimento',
     abas: [
-      { rota: '/clinica/atividades', chave: 'espacos.abas.atividades' },
-      { rota: '/clinica/faltas', chave: 'espacos.abas.faltas' },
-      { rota: '/clinica/retornos-pendentes', chave: 'espacos.abas.retornos' },
-      { rota: '/clinica/vacinas', chave: 'espacos.abas.vacinas' },
-      { rota: '/clinica/tratamentos', chave: 'espacos.abas.tratamentos' },
+      { rota: '/clinica/vacinas', chave: 'espacos.abas.reforcos' },
       { rota: '/clinica/estoque', chave: 'espacos.abas.estoque' },
     ],
   },
@@ -127,12 +191,14 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     id: 'relatorios',
     chave: 'espacos.clinica.relatorios',
     icone: 'ph ph-chart-line-up',
+    secao: 'gestao',
     abas: [{ rota: '/clinica/resumo', chave: 'espacos.clinica.relatorios' }],
   },
   {
     id: 'configuracao',
     chave: 'espacos.clinica.configuracao',
     icone: 'ph ph-sliders-horizontal',
+    secao: 'gestao',
     abas: [{ rota: '/clinica/configuracao', chave: 'espacos.clinica.configuracao' }],
   },
 ]
@@ -142,6 +208,7 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
     id: 'hoje',
     chave: 'espacos.hotel.hoje',
     icone: 'ph ph-sun-horizon',
+    secao: 'dia',
     abas: [
       { rota: '/hotel/painel', chave: 'espacos.abas.painel' },
       { rota: '/hotel/rotina', chave: 'espacos.abas.rotina' },
@@ -153,6 +220,7 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
     id: 'reservas',
     chave: 'espacos.hotel.reservas',
     icone: 'ph ph-calendar-dots',
+    secao: 'dia',
     abas: [
       { rota: '/hotel/mapa', chave: 'espacos.abas.mapa' },
       { rota: '/hotel/reservas', chave: 'espacos.abas.reservas' },
@@ -164,6 +232,7 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
     id: 'casa',
     chave: 'espacos.hotel.casa',
     icone: 'ph ph-house-line',
+    secao: 'gestao',
     abas: [
       { rota: '/hotel/acomodacoes', chave: 'espacos.abas.acomodacoes' },
       { rota: '/hotel/rotina-padrao', chave: 'espacos.abas.rotinaPadrao' },
@@ -173,6 +242,7 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
     id: 'relatorios',
     chave: 'espacos.hotel.relatorios',
     icone: 'ph ph-chart-line-up',
+    secao: 'gestao',
     abas: [{ rota: '/hotel/resumo', chave: 'espacos.hotel.relatorios' }],
   },
 ]
@@ -187,6 +257,14 @@ const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/profissionais': 'ph ph-stethoscope',
   '/parceiro/estabelecimento': 'ph ph-buildings',
   '/parceiro/auditoria': 'ph ph-list-magnifying-glass',
+}
+
+/** A seção de cada destino do portal; o que não estiver aqui cai em "Empresa". */
+const SECAO_DO_PORTAL: Record<string, IdDaSecao> = {
+  '/parceiro/programas': 'parceria',
+  '/parceiro/divulgacao': 'parceria',
+  '/parceiro/indicados': 'parceria',
+  '/parceiro/acessos': 'clientes',
 }
 
 /**
@@ -216,6 +294,7 @@ function destinosDoPortal(itens: AppNavigationItem[], t: (chave: string) => stri
         ICONE_DO_PORTAL[item.to] ?? item.icon,
         abas,
         abas.map((aba) => `${aba.to}/`),
+        SECAO_DO_PORTAL[item.to] ?? 'empresa',
       )
     })
 }
@@ -257,6 +336,7 @@ function destinoDe(
   icone: string,
   abas: Aba[],
   prefixos: string[] = [],
+  secao?: IdDaSecao,
 ) {
   const selo = somaDosSelos(abas)
   const comSelo = abas.filter((aba) => aba.selo)
@@ -273,7 +353,32 @@ function destinoDe(
     /* Com uma aba só de selo, a frase dela explica o total inteiro; com mais de uma, não. */
     tituloDoSelo: comSelo.length === 1 ? comSelo[0]?.tituloDoSelo : undefined,
     bloqueado: abas.every((aba) => aba.bloqueado) || undefined,
+    secao,
   } satisfies Destino
+}
+
+const ORDEM_DAS_SECOES: IdDaSecao[] = [
+  'dia',
+  'atendimento',
+  'parceria',
+  'clientes',
+  'gestao',
+  'empresa',
+]
+
+/**
+ * Os destinos agrupados pelas seções, na ordem fixa delas; dentro de cada uma, a ordem da receita.
+ * Seção sem destino (permissão, módulo desligado) some.
+ */
+export function agruparEmSecoes(
+  destinos: Destino[],
+  t: (chave: string) => string,
+): SecaoDoEspaco[] {
+  return ORDEM_DAS_SECOES.flatMap((id) => {
+    const daSecao = destinos.filter((destino) => (destino.secao ?? 'gestao') === id)
+
+    return daSecao.length ? [{ id, rotulo: t(`espacos.secoes.${id}`), destinos: daSecao }] : []
+  })
 }
 
 /**
@@ -290,14 +395,14 @@ function montarPelaReceita(
   const porRota = new Map(itens.map((item) => [item.to, item]))
 
   return receita.flatMap((passo) => {
-    const abas = passo.abas.flatMap(({ rota, chave }) => {
+    const abas = passo.abas.flatMap(({ rota, chave, exata }) => {
       const item = porRota.get(rota)
 
-      return item ? [abaDoItem(item, t(chave))] : []
+      return item ? [{ ...abaDoItem(item, t(chave)), ...(exata ? { exata } : {}) }] : []
     })
 
     return abas.length > 0
-      ? [destinoDe(passo.id, t(passo.chave), passo.icone, abas, passo.prefixos)]
+      ? [destinoDe(passo.id, t(passo.chave), passo.icone, abas, passo.prefixos, passo.secao)]
       : []
   })
 }
@@ -307,8 +412,12 @@ function espacoDe(
   rotulo: string,
   icone: string,
   lugar: LugarDoTrilha,
-  destinos: Destino[],
+  destinosDaReceita: Destino[],
+  t: (chave: string) => string,
 ): Espaco {
+  /* A lista plana segue a ordem das seções: a barra, o menu do alto e a busca leem igual. */
+  const secoes = agruparEmSecoes(destinosDaReceita, t)
+  const destinos = secoes.flatMap((secao) => secao.destinos)
   const selo = somaDosSelos(destinos)
 
   return {
@@ -318,6 +427,7 @@ function espacoDe(
     lugar,
     to: destinos[0]?.to ?? '/inicio',
     destinos,
+    secoes,
     selo,
     tom: selo
       ? tomMaisGrave(destinos.map((destino) => (destino.selo ? destino.tom : undefined)))
@@ -344,6 +454,7 @@ export function montarEspacos(
         'ph ph-stethoscope',
         'clinica',
         montarPelaReceita(RECEITA_DA_CLINICA, itens, t),
+        t,
       ),
     )
   }
@@ -358,6 +469,7 @@ export function montarEspacos(
         'ph ph-bed',
         'hotel',
         montarPelaReceita(RECEITA_DO_HOTEL, hotel.items, t),
+        t,
       ),
     )
   }
@@ -372,6 +484,7 @@ export function montarEspacos(
         'ph ph-storefront',
         'portal',
         destinosDoPortal(portal.items, t),
+        t,
       ),
     )
   }
@@ -396,16 +509,24 @@ export type Localizacao = {
   aba: Aba | null
 }
 
+/**
+ * A aba acesa: entre as que casam com a rota, a de caminho mais longo. Sem isso,
+ * `/clinica/internacao/plantao` acenderia o mapa (`/clinica/internacao`), que vem antes na fileira.
+ */
+function abaDaRota(destino: Destino, caminho: string): Aba | null {
+  return (
+    destino.abas
+      .filter((aba) => (aba.exata ? caminho === aba.to : casaComRota(caminho, aba.to)))
+      .sort((uma, outra) => outra.to.length - uma.to.length)[0] ?? null
+  )
+}
+
 /** Onde a rota aberta mora no mapa — espaço, destino e aba. */
 export function localizar(espacos: Espaco[], caminho: string): Localizacao {
   for (const espaco of espacos) {
     for (const destino of espaco.destinos) {
       if (destinoContemRota(destino, caminho)) {
-        return {
-          espaco,
-          destino,
-          aba: destino.abas.find((aba) => casaComRota(caminho, aba.to)) ?? null,
-        }
+        return { espaco, destino, aba: abaDaRota(destino, caminho) }
       }
     }
   }

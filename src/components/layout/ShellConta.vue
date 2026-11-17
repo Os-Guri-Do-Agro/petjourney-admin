@@ -1,7 +1,10 @@
 <script setup lang="ts">
 /**
  * Quem está usando, no pé da barra — e o menu da conta: perfil, configurações, trocar de empresa,
- * idioma, tema e sair.
+ * idioma, tema, formato do menu e sair.
+ *
+ * O formato do menu (Seções, Ladrilhos, Só ícones, Menu no alto) também mora aqui, e não só em
+ * Configurações → Aparência: cada pessoa prefere o seu, e trocar não pode custar três telas.
  *
  * O menu abre num Popover no `body` (fecha no clique fora e no Esc). Sair pede confirmação: o
  * botão mora ao lado do tema, e um clique errado ali derruba a sessão de quem está no balcão.
@@ -14,6 +17,12 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
+import {
+  LAYOUT_FORMATS,
+  layoutFormat,
+  setLayoutFormat,
+  type LayoutFormat,
+} from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { changeLocale } from '@/i18n'
@@ -79,6 +88,28 @@ function alternarDemonstracao(valor: boolean) {
   demonstracao.definir(valor)
   fechar()
   void router.replace(valor ? router.currentRoute.value.fullPath : '/inicio')
+}
+
+const ICONE_DO_FORMATO: Record<LayoutFormat, string> = {
+  secoes: 'ph ph-list-dashes',
+  ladrilhos: 'ph ph-squares-four',
+  icones: 'ph ph-sidebar-simple',
+  topo: 'ph ph-app-window',
+}
+
+const formatos = computed(() =>
+  LAYOUT_FORMATS.map((valor) => ({
+    valor,
+    icone: ICONE_DO_FORMATO[valor],
+    curto: t(`settings.aparencia.formato.curto.${valor}`),
+    dica: `${t(`settings.aparencia.formato.${valor}.label`)}: ${t(`settings.aparencia.formato.${valor}.hint`)}`,
+  })),
+)
+
+/* O menu fecha antes: no "Menu no alto" a conta muda de lugar e o painel ficaria solto. */
+function escolherFormato(formato: LayoutFormat) {
+  fechar()
+  setLayoutFormat(formato)
 }
 
 function pedirSaida() {
@@ -229,6 +260,29 @@ async function sair() {
             :model-value="isDarkMode"
             @update:model-value="alternarTema"
           />
+        </div>
+
+        <div class="conta__formato" role="none">
+          <span id="conta-formato" class="conta__linha conta__formato-rotulo">
+            <i class="ph ph-layout" aria-hidden="true" />
+            {{ t('settings.aparencia.formato.titulo') }}
+          </span>
+          <div class="conta__formatos" role="radiogroup" aria-labelledby="conta-formato">
+            <button
+              v-for="formato in formatos"
+              :key="formato.valor"
+              type="button"
+              role="radio"
+              class="conta__formato-opcao"
+              :class="{ 'conta__formato-opcao--atual': layoutFormat === formato.valor }"
+              :aria-checked="layoutFormat === formato.valor"
+              :title="formato.dica"
+              @click="escolherFormato(formato.valor)"
+            >
+              <i :class="formato.icone" aria-hidden="true" />
+              <span>{{ formato.curto }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Só no build de desenvolvimento: Clínica e Hotel sobre os dados locais. -->
@@ -433,6 +487,69 @@ button.conta__item {
 
 .conta__linha-rotulo {
   flex: 1;
+}
+
+/* ---------------------------------------------------------------------- formato do menu */
+
+.conta__formato {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 4px;
+}
+
+.conta__formatos {
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--superficie-2);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.conta__formato-opcao {
+  display: grid;
+  min-height: 52px;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 6px 2px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--tinta-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 550;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.conta__formato-opcao i {
+  font-size: 19px;
+}
+
+.conta__formato-opcao:hover {
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+.conta__formato-opcao:focus-visible {
+  outline: 2px solid var(--musgo);
+  outline-offset: -2px;
+}
+
+/* O formato em uso: o papel branco dentro do trilho, como a pílula escolhida do app. */
+.conta__formato-opcao--atual,
+.conta__formato-opcao--atual:hover {
+  background: var(--superficie);
+  box-shadow: var(--sombra-xs);
+  color: var(--tinta);
+  font-weight: 650;
+}
+
+.conta__formato-opcao--atual i {
+  color: var(--app-salvia-texto, var(--musgo));
 }
 
 .conta__divisa {

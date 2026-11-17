@@ -2979,35 +2979,15 @@
       },
       "naHora": "Las elecciones se aplican al momento y quedan guardadas en este navegador.",
       "navegacao": {
-        "titulo": "Navegación",
-        "descricao": "La barra lateral a su manera. La vista previa muestra el resultado al instante.",
-        "previa": "Vista previa con sus opciones.",
-        "previaAutoLarga": "Vista previa en esta pantalla: la barra queda ancha.",
-        "previaAutoIcones": "Vista previa en esta pantalla: la barra queda solo con íconos.",
-        "largura": {
-          "titulo": "Ancho de la barra",
-          "larga": {
-            "label": "Ancha",
-            "hint": "Ícono y nombre de cada pantalla."
-          },
-          "icones": {
-            "label": "Solo íconos",
-            "hint": "Más espacio para la pantalla. El nombre aparece al pasar el mouse."
-          },
-          "auto": {
-            "label": "Automática",
-            "hint": "Ancha en pantallas de {largura} px o más, solo íconos en las menores."
-          }
-        },
         "espacos": {
           "titulo": "Espacios en la barra",
           "lista": {
-            "label": "Todos abiertos",
-            "hint": "Clínica, Hotel y Portal con sus pantallas a la vista. Contraiga un espacio por su nombre."
+            "label": "Usted elige",
+            "hint": "Abra o contraiga cada espacio por su nombre, cuantos quiera a la vez; la barra recuerda cómo lo dejó."
           },
           "secoes": {
-            "label": "Solo el actual",
-            "hint": "Abre el espacio en el que está; los demás quedan en una línea, con el total de pendientes."
+            "label": "Uno a la vez",
+            "hint": "Queda abierto el espacio de la pantalla en la que está; abrir otro por su nombre contrae el anterior."
           }
         },
         "densidade": {
@@ -3020,6 +3000,39 @@
           "numeroDica": "Cuántos pendientes hay en cada espacio y en cada pantalla.",
           "pontoDica": "Barra más tranquila: el punto en el color del estado muestra dónde hay pendientes."
         }
+      },
+      "formato": {
+        "titulo": "Formato del menú",
+        "descricao": "Elige cómo se organizan las pantallas. Cada persona puede tener el suyo: la elección queda en este navegador.",
+        "secoes": {
+          "label": "Secciones",
+          "hint": "Barra lateral con las pantallas agrupadas por tema."
+        },
+        "ladrilhos": {
+          "label": "Mosaicos",
+          "hint": "Barra lateral con íconos grandes, más fácil de tocar."
+        },
+        "icones": {
+          "label": "Solo íconos",
+          "hint": "Barra estrecha, más espacio para la pantalla. El nombre aparece al pasar el mouse."
+        },
+        "topo": {
+          "label": "Menú arriba",
+          "hint": "Sin barra lateral: cada espacio es un menú arriba, con sus pantallas por sección."
+        },
+        "curto": {
+          "secoes": "Secciones",
+          "ladrilhos": "Mosaicos",
+          "icones": "Íconos",
+          "topo": "Arriba"
+        },
+        "padrao": "Predeterminado",
+        "ajustes": "Ajustes",
+        "recolher": {
+          "label": "Contraer en pantallas pequeñas",
+          "hint": "Por debajo de {largura} px la barra muestra solo los íconos."
+        },
+        "menuDoEspaco": "Pantallas de {espaco}"
       }
     },
     "perfil": {
@@ -9772,7 +9785,9 @@
       "internacao": "Internación",
       "pendencias": "Pendientes",
       "relatorios": "Informes",
-      "configuracao": "Configuración"
+      "configuracao": "Configuración",
+      "prontuarios": "Historias clínicas",
+      "vacinas": "Vacunas"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -9796,7 +9811,7 @@
       "retornos": "Controles",
       "vacinas": "Vacunas",
       "tratamentos": "Tratamientos en casa",
-      "estoque": "Stock de vacunas",
+      "estoque": "Stock",
       "painel": "Panel del día",
       "rotina": "Rutina",
       "hospedes": "Huéspedes",
@@ -9807,9 +9822,24 @@
       "rotinaPadrao": "Rutina estándar",
       "correcoes": "Correcciones",
       "copias": "Copias",
-      "historicoLiberado": "Historial compartido"
+      "historicoLiberado": "Historial compartido",
+      "calendario": "Calendario",
+      "cadastros": "Fichas",
+      "visaoGeral": "Resumen",
+      "reforcos": "Refuerzos",
+      "plantao": "Guardia",
+      "boletins": "Boletines",
+      "vagas": "Lugares"
     },
-    "abasAria": "Pantallas de {destino}"
+    "abasAria": "Pantallas de {destino}",
+    "secoes": {
+      "dia": "Día a día",
+      "atendimento": "Atención",
+      "gestao": "Gestión",
+      "parceria": "Alianza",
+      "clientes": "Clientes",
+      "empresa": "Empresa"
+    }
   },
   "pendencias": {
     "contador": {

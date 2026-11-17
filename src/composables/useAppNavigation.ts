@@ -200,6 +200,16 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         icon: 'ph ph-note-pencil',
       },
       { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
+      /*
+       * O checklist do plantão (E5-02): o que dar agora, de todos os internados. Só se chegava a ele
+       * por um link pequeno dentro do mapa; agora é aba do destino Internação (`espacos.ts`).
+       */
+      {
+        key: 'espacos.abas.plantao',
+        to: '/clinica/internacao/plantao',
+        icon: 'ph ph-list-checks',
+        soComApi: true,
+      },
       /* O boletim a ligar ou a enviar (E5-03): a recepção liga e envia; o selo é o contador. */
       {
         key: 'internacao.boletim.fila',
