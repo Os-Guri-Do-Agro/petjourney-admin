@@ -506,10 +506,15 @@ watch(
   text-decoration: none;
 }
 
+/*
+ * Colunas de largura fixa (o responsável e os alertas): o nome do responsável começa no mesmo ponto
+ * em todas as linhas, com ou sem selo de alerta (antes, a linha sem selo empurrava o responsável
+ * para a direita).
+ */
 .cl__responsavel {
   display: grid;
   gap: 2px;
-  flex: 0 1 14rem;
+  flex: 0 0 14rem;
   min-width: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
@@ -532,6 +537,7 @@ watch(
 
 .cl__fim {
   display: flex;
+  flex: 0 0 15rem;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
@@ -567,6 +573,10 @@ watch(
 @container (max-width: 640px) {
   .cl__responsavel {
     display: none;
+  }
+
+  .cl__fim {
+    flex-basis: auto;
   }
 }
 
