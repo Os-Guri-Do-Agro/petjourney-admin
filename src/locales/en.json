@@ -10652,7 +10652,28 @@
         "pedido-pendente": "There is another request for this time.",
         "outro": "There is a notice for this time."
       },
-      "marcaComoEncaixe": "Books {quando}, but the time was taken after the request: it becomes a fit-in, with confirmation."
+      "marcaComoEncaixe": "Books {quando}, but the time was taken after the request: it becomes a fit-in, with confirmation.",
+      "guia": {
+        "titulo": "How requests arrive",
+        "pedir": {
+          "titulo": "The owner asks",
+          "texto": "In the app or through the clinic link, they pick the service and the time, no phone call needed."
+        },
+        "chegar": {
+          "titulo": "The request lands here",
+          "texto": "With a deadline to answer that only runs during clinic hours."
+        },
+        "responder": {
+          "titulo": "The front desk answers",
+          "texto": "Accept at the requested time or another one, or decline with a reason. The answer goes to the owner."
+        },
+        "ligar": "Turn on online booking"
+      },
+      "vazioTexto": {
+        "ACEITOS": "Accepted requests stay here, with the time that went into the schedule.",
+        "RECUSADOS": "Declined requests stay here, with the reason the owner received.",
+        "ENCERRADOS": "Requests that ran out of time and those the owner withdrew stay here."
+      }
     },
     "config": {
       "ativo": "Receive requests through the app and the website",

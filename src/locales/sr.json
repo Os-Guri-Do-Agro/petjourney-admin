@@ -10652,7 +10652,28 @@
         "pedido-pendente": "Postoji drugi zahtev za ovaj termin.",
         "outro": "Postoji upozorenje za ovaj termin."
       },
-      "marcaComoEncaixe": "Zakazuje {quando}, ali je termin zauzet posle zahteva: postaje ubacivanje, uz potvrdu."
+      "marcaComoEncaixe": "Zakazuje {quando}, ali je termin zauzet posle zahteva: postaje ubacivanje, uz potvrdu.",
+      "guia": {
+        "titulo": "Kako zahtevi stižu",
+        "pedir": {
+          "titulo": "Staratelj šalje zahtev",
+          "texto": "Preko aplikacije ili linka klinike bira uslugu i termin, bez poziva."
+        },
+        "chegar": {
+          "titulo": "Zahtev stiže ovde",
+          "texto": "Sa rokom za odgovor, koji teče samo u radnom vremenu klinike."
+        },
+        "responder": {
+          "titulo": "Recepcija odgovara",
+          "texto": "Prihvata u traženom ili drugom terminu, ili odbija uz razlog. Odgovor stiže staratelju."
+        },
+        "ligar": "Uključite onlajn zakazivanje"
+      },
+      "vazioTexto": {
+        "ACEITOS": "Prihvaćeni zahtevi ostaju ovde, sa terminom koji je ušao u raspored.",
+        "RECUSADOS": "Odbijeni zahtevi ostaju ovde, sa razlogom koji je staratelj dobio.",
+        "ENCERRADOS": "Ovde ostaju zahtevi kojima je istekao rok i oni koje je staratelj povukao."
+      }
     },
     "config": {
       "ativo": "Primaj zahteve preko aplikacije i sajta",

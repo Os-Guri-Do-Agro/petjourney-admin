@@ -10652,7 +10652,28 @@
         "pedido-pendente": "Hay otra solicitud para este horario.",
         "outro": "Hay un aviso en este horario."
       },
-      "marcaComoEncaixe": "Reserva {quando}, pero el horario se ocupó después de la solicitud: queda como sobreturno, con confirmación."
+      "marcaComoEncaixe": "Reserva {quando}, pero el horario se ocupó después de la solicitud: queda como sobreturno, con confirmación.",
+      "guia": {
+        "titulo": "Cómo llegan las solicitudes",
+        "pedir": {
+          "titulo": "El tutor solicita",
+          "texto": "Por la app o por el enlace de la clínica, elige el servicio y el horario, sin tener que llamar."
+        },
+        "chegar": {
+          "titulo": "La solicitud llega aquí",
+          "texto": "Con el plazo para responder, que solo corre en el horario de la clínica."
+        },
+        "responder": {
+          "titulo": "Recepción responde",
+          "texto": "Acepta en el horario pedido o en otro, o rechaza con el motivo. La respuesta le llega al tutor."
+        },
+        "ligar": "Activar la agenda online"
+      },
+      "vazioTexto": {
+        "ACEITOS": "Las solicitudes aceptadas quedan aquí, con el horario que entró en la agenda.",
+        "RECUSADOS": "Las solicitudes rechazadas quedan aquí, con el motivo que recibió el tutor.",
+        "ENCERRADOS": "Aquí quedan las solicitudes que vencieron y las que el tutor retiró."
+      }
     },
     "config": {
       "ativo": "Recibir solicitudes por la app y el sitio",

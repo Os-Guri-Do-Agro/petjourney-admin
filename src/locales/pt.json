@@ -10652,7 +10652,28 @@
         "pedido-pendente": "Há outro pedido para este horário.",
         "outro": "Há um aviso neste horário."
       },
-      "marcaComoEncaixe": "Marca {quando}, mas o horário foi ocupado depois do pedido: vira encaixe, com confirmação."
+      "marcaComoEncaixe": "Marca {quando}, mas o horário foi ocupado depois do pedido: vira encaixe, com confirmação.",
+      "guia": {
+        "titulo": "Como os pedidos chegam",
+        "pedir": {
+          "titulo": "O responsável pede",
+          "texto": "Pelo app ou pelo link da clínica, escolhe o serviço e o horário, sem precisar ligar."
+        },
+        "chegar": {
+          "titulo": "O pedido chega aqui",
+          "texto": "Com o prazo para responder, que só corre no expediente da clínica."
+        },
+        "responder": {
+          "titulo": "A recepção responde",
+          "texto": "Aceita no horário pedido ou em outro, ou recusa com o motivo. A resposta vai para o responsável."
+        },
+        "ligar": "Ligar o agendamento online"
+      },
+      "vazioTexto": {
+        "ACEITOS": "Os pedidos aceitos ficam aqui, com o horário que entrou na agenda.",
+        "RECUSADOS": "Os pedidos recusados ficam aqui, com o motivo que o responsável recebeu.",
+        "ENCERRADOS": "Ficam aqui os pedidos que perderam o prazo e os que o responsável desistiu de fazer."
+      }
     },
     "config": {
       "ativo": "Receber pedidos pelo app e pelo site",
