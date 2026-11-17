@@ -961,6 +961,36 @@
     "guia": {
       "pauta": "Tudo o que está parado, em todos os espaços, do mais grave para o menos. Cada linha leva à tela onde o assunto se resolve.",
       "agenda": "Os compromissos da clínica e as chegadas do hotel. Escolha um dia para ver o que está marcado; as setas andam de semana em semana."
+    },
+    "rapidas": {
+      "titulo": "Ações rápidas",
+      "campoPaciente": "Paciente",
+      "paciente": {
+        "rotulo": "Novo paciente",
+        "dica": "Cadastrar um pet e o responsável."
+      },
+      "consulta": {
+        "rotulo": "Marcar consulta",
+        "dica": "Marcar um horário na agenda."
+      },
+      "atender": {
+        "rotulo": "Atender agora",
+        "dica": "Abrir um atendimento sem horário marcado.",
+        "confirmar": "Abrir atendimento"
+      },
+      "vacina": {
+        "rotulo": "Aplicar vacina",
+        "dica": "Registrar uma dose na ficha do paciente.",
+        "confirmar": "Ir para as vacinas"
+      },
+      "espera": {
+        "rotulo": "Lista de espera",
+        "dica": "Pôr alguém na lista de espera por uma vaga."
+      },
+      "codigo": {
+        "rotulo": "Novo acesso temporário",
+        "dica": "Abrir o acesso que o responsável liberou no app, pelo código de 6 dígitos."
+      }
     }
   },
   "programas": {

@@ -961,6 +961,36 @@
     "guia": {
       "pauta": "Todo lo que está pendiente, en todos los espacios, del más grave al menos. Cada fila abre la pantalla donde se resuelve.",
       "agenda": "Las citas de la clínica y las llegadas del hotel. Elija un día para ver lo que está agendado; las flechas avanzan de semana en semana."
+    },
+    "rapidas": {
+      "titulo": "Acciones rápidas",
+      "campoPaciente": "Paciente",
+      "paciente": {
+        "rotulo": "Nuevo paciente",
+        "dica": "Registrar una mascota y su responsable."
+      },
+      "consulta": {
+        "rotulo": "Agendar consulta",
+        "dica": "Reservar un horario en la agenda."
+      },
+      "atender": {
+        "rotulo": "Atender ahora",
+        "dica": "Abrir una atención sin horario reservado.",
+        "confirmar": "Abrir atención"
+      },
+      "vacina": {
+        "rotulo": "Aplicar vacuna",
+        "dica": "Registrar una dosis en la ficha del paciente.",
+        "confirmar": "Ir a las vacunas"
+      },
+      "espera": {
+        "rotulo": "Lista de espera",
+        "dica": "Poner a alguien en la lista de espera por un turno."
+      },
+      "codigo": {
+        "rotulo": "Nuevo acceso temporal",
+        "dica": "Abrir el acceso que el responsable liberó en la app, con el código de 6 dígitos."
+      }
     }
   },
   "programas": {

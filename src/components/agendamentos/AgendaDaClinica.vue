@@ -626,6 +626,23 @@ watch(
   { immediate: true },
 )
 
+/**
+ * Veio das "Ações rápidas" do Início com `?novo=1` (ou `?novo=1&paciente=<id>`): abre a marcação
+ * vazia, no próximo horário de hoje, quando os tipos chegarem, e tira o pedido da URL (recarregar
+ * não reabre a gaveta).
+ */
+watch(
+  () => [tipos.value.length, route.query.novo] as const,
+  ([quantosTipos, novo]) => {
+    if (!quantosTipos || novo !== '1' || !podeEscrever.value) return
+    abrirMarcacao()
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+  },
+  { immediate: true },
+)
+
 function marcado(mutacao: Mutacao) {
   depoisDeMudar(mutacao, t('agendamentos.feito.criar'), true)
   const novo = mutacao.agendamentos.find((item) => item.id === mutacao.id)

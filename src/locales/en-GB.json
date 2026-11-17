@@ -961,6 +961,36 @@
     "guia": {
       "pauta": "Everything that is waiting, across all spaces, from most to least serious. Each row opens the screen where it gets resolved.",
       "agenda": "Clinic appointments and hotel arrivals. Pick a day to see what is booked; the arrows move a week at a time."
+    },
+    "rapidas": {
+      "titulo": "Quick actions",
+      "campoPaciente": "Patient",
+      "paciente": {
+        "rotulo": "New patient",
+        "dica": "Register a pet and its owner."
+      },
+      "consulta": {
+        "rotulo": "Book appointment",
+        "dica": "Book a time slot in the diary."
+      },
+      "atender": {
+        "rotulo": "See now",
+        "dica": "Open a visit without a booked time.",
+        "confirmar": "Open visit"
+      },
+      "vacina": {
+        "rotulo": "Give vaccine",
+        "dica": "Record a dose in the patient's file.",
+        "confirmar": "Go to vaccines"
+      },
+      "espera": {
+        "rotulo": "Waiting list",
+        "dica": "Add someone to the waiting list for an opening."
+      },
+      "codigo": {
+        "rotulo": "New temporary access",
+        "dica": "Open the access the owner shared in the app, with the 6-digit code."
+      }
     }
   },
   "programas": {

@@ -14,6 +14,7 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
@@ -46,6 +47,8 @@ import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
+const route = useRoute()
+const router = useRouter()
 
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
@@ -133,8 +136,18 @@ async function carregarApoio() {
 
 onMounted(() => {
   void carregar()
-  void carregarApoio()
   void carregarVagas()
+  /*
+   * Veio das "Ações rápidas" do Início com `?adicionar=1`: a gaveta de pôr na fila abre quando os
+   * serviços e os profissionais chegarem, e o pedido sai da URL (recarregar não reabre).
+   */
+  void carregarApoio().then(() => {
+    if (route.query.adicionar !== '1') return
+    const query = { ...route.query }
+    delete query.adicionar
+    void router.replace({ query })
+    if (podeGerir.value) entrarAberta.value = true
+  })
 })
 
 watch(situacao, () => {

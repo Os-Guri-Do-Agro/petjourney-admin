@@ -10,7 +10,7 @@
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
@@ -41,6 +41,9 @@ const props = defineProps<{
 const { t, te } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const { store, parceiroQuery } = useParceiroPortal()
+const route = useRoute()
+const router = useRouter()
+const raiz = ref<HTMLElement | null>(null)
 
 const plano = ref<PlanoVacinal | null>(null)
 const historico = ref<HistoricoDeVacinas | null>(null)
@@ -144,7 +147,20 @@ function mudou() {
 }
 
 watch(() => props.pacienteId, mudou)
-onMounted(carregar)
+
+/*
+ * Veio do "Aplicar vacina" das Ações rápidas do Início (`?aplicar=vacina`): a ficha rola até as
+ * vacinas e a gaveta de aplicar abre. O pedido sai da URL na hora: recarregar não reabre.
+ */
+onMounted(() => {
+  void carregar()
+  if (route.query.aplicar !== 'vacina') return
+  const query = { ...route.query }
+  delete query.aplicar
+  void router.replace({ query })
+  raiz.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  if (podeAplicar.value) void abrirAplicar()
+})
 
 /* --------------------------------------------------------------------------- leitura */
 
@@ -191,7 +207,12 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
 </script>
 
 <template>
-  <section class="ui-folha ui-cartao vf" aria-labelledby="vf-titulo" :aria-busy="carregando">
+  <section
+    ref="raiz"
+    class="ui-folha ui-cartao vf"
+    aria-labelledby="vf-titulo"
+    :aria-busy="carregando"
+  >
     <header class="ui-cartao__cabeca">
       <span
         class="ui-ladrilho"
