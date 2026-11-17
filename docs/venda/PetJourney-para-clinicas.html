@@ -22,6 +22,9 @@
        * Fonte em pesos FIXOS (400 e 600, de @fontsource/readex-pro), nunca a variável: o Edge
        * embute fonte variável como Type 3, e o leitor de PDF do iPhone e do Mac a desenha mal.
        * Por isso só existem os pesos 400 e 600 aqui; outro peso cairia em negrito sintético.
+       *
+       * Nada de sombra desfocada (box-shadow com blur, filter: drop-shadow, blur): o Edge a vira
+       * camada semitransparente, e o iPhone pinta essa camada como uma caixa escura por cima.
        */
 
       @font-face {
@@ -155,7 +158,7 @@
         display: inline-block;
         padding: 1.3mm 3.2mm;
         border-radius: 99px;
-        background: rgb(0 0 0 / 14%);
+        background: #657e79;
         font-size: 7.5pt;
         font-weight: 600;
         letter-spacing: 0.12em;
@@ -205,7 +208,8 @@
         overflow: hidden;
         border-radius: 3.2mm 0 0 3.2mm;
         background: #fff;
-        box-shadow: 0 2.5mm 7mm rgb(16 48 42 / 28%);
+        /* Contorno sólido, sem desfoque: sombra desfocada vira caixa escura no PDF do iPhone. */
+        box-shadow: 0 0 0 1.2mm #8ba59f;
       }
 
       .vitrine img {
@@ -218,7 +222,6 @@
         top: 21mm;
         left: 171mm;
         width: 32mm;
-        filter: drop-shadow(0 2mm 3mm rgb(16 48 42 / 35%));
       }
 
       .legenda {

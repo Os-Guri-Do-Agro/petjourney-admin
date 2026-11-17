@@ -25,6 +25,10 @@ node -e "const b=require('fs').readFileSync('PetJourney-para-clinicas.pdf','lati
 
 Precisa dar 0.
 
+**Nada de sombra desfocada** (`box-shadow` com desfoque, `filter: drop-shadow`, `blur`) nem fundo
+semitransparente: o Edge transforma isso em camada transparente, e o iPhone pinta a camada como
+uma caixa escura por cima do que está atrás. Contorno e fundo, sempre em cor sólida.
+
 ## O que a folha promete
 
 Cada linha foi conferida no portal e no site em 17/11/2026: telas da Clínica ligadas à API
