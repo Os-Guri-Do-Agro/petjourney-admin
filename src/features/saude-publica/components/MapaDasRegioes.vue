@@ -5,25 +5,37 @@
  * Anhanduizinho ao sul, Lagoa a sudoeste, Imbirussu a noroeste). Não é o contorno de verdade: é a
  * vizinhança, que é o que o gestor precisa para ver onde agir.
  *
- * A cor é a magnitude do indicador escolhido, numa escala de um verde só, do claro (pouco em dia)
- * ao escuro (muito em dia); no tema escuro a escala inverte a âncora (pouco = perto do fundo). O
- * número vai escrito no hexágono, então a cor nunca fala sozinha. Passar o mouse (ou o foco) mostra
- * o detalhe; clicar escolhe a região. Para leitor de tela, a mesma informação vai numa tabela.
+ * A cor é a escala de perigo (`escala-de-perigo.css`, 17/11/2026): vermelho com menos de 40% em
+ * dia, verde com 70% ou mais. O número vai escrito no hexágono, então a cor nunca fala sozinha.
+ * Passar o mouse (ou o foco) mostra o detalhe; clicar escolhe a região. Para leitor de tela, a mesma
+ * informação vai numa tabela.
+ *
+ * Segue o recorte dos filtros, como o mapa da cidade: o número do fim do período, na espécie; as
+ * regiões fora das escolhidas recuam.
  */
 import { computed, ref } from 'vue'
 
 import {
   indicador as definicaoDo,
   numero,
-  publicoDaRegiao,
   REGIOES,
   type IdDaRegiao,
   type Indicador,
   type Posicao,
-  type Regiao,
 } from '@/features/saude-publica/dados'
+import '@/features/saude-publica/escala-de-perigo.css'
+import {
+  coberturaDaRegiao,
+  pontos as pontosNoPeriodo,
+  publicoNoRecorte,
+  RECORTE_INTEIRO,
+  seAplica,
+  type Recorte,
+} from '@/features/saude-publica/serie'
 
-const props = defineProps<{ indicador: Indicador }>()
+const props = withDefaults(defineProps<{ indicador: Indicador; recorte?: Recorte }>(), {
+  recorte: () => RECORTE_INTEIRO,
+})
 const selecionada = defineModel<IdDaRegiao | null>('selecionada', { default: null })
 
 /* ------------------------------------------------------------------------------ geometria */
@@ -57,24 +69,35 @@ function pontos(cx: number, cy: number, raio: number) {
 /** Cinco faixas fixas, iguais para todos os indicadores: dá para comparar um mapa com o outro. */
 const FAIXAS = [40, 50, 60, 70]
 
-function faixaDe(valor: number) {
+/** A faixa da cor; sem número (gato num indicador só de cães), a faixa "sem". */
+function faixaDe(valor: number | null) {
+  if (valor === null) return 'sem'
   const indice = FAIXAS.findIndex((limite) => valor < limite)
   return indice === -1 ? FAIXAS.length : indice
 }
 
 const LEGENDA = ['menos de 40%', '40 a 49%', '50 a 59%', '60 a 69%', '70% ou mais']
 
+const aplica = computed(() => seAplica(props.indicador, props.recorte.especie))
+
 const hexagonos = computed(() =>
   REGIOES.map((regiao) => {
     const [cx, cy] = CENTRO_DA_POSICAO[regiao.posicao]
-    const valor = regiao.cobertura[props.indicador]
+    const { de, ate, especie, regioes } = props.recorte
+    const valor = aplica.value
+      ? Math.round(coberturaDaRegiao(regiao, props.indicador, ate, especie))
+      : null
+    const comeco = aplica.value
+      ? Math.round(coberturaDaRegiao(regiao, props.indicador, de, especie))
+      : null
     return {
       regiao,
       cx,
       cy,
       valor,
       faixa: faixaDe(valor),
-      delta: valor - regiao.inicio[props.indicador],
+      delta: valor !== null && comeco !== null ? valor - comeco : null,
+      fora: regioes.length > 0 && !regioes.includes(regiao.id),
     }
   }),
 )
@@ -95,21 +118,28 @@ const dica = computed(() => {
   }
 })
 
-function publico(regiao: Regiao) {
-  return publicoDaRegiao(regiao, props.indicador)
+function publico(regiao: (typeof REGIOES)[number]) {
+  return publicoNoRecorte(regiao, props.indicador, props.recorte.especie)
 }
+
+/** Quem conta no número: "cães", "gatos" ou "cães e gatos". */
+const quemConta = computed(() => {
+  if (definicao.value.publico === 'caes' || props.recorte.especie === 'caes') return 'cães'
+  return props.recorte.especie === 'gatos' ? 'gatos' : 'cães e gatos'
+})
 
 function escolher(id: IdDaRegiao) {
   selecionada.value = selecionada.value === id ? null : id
 }
 
 function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
-  return `${item.regiao.nome}: ${item.valor}% (${item.delta >= 0 ? '+' : ''}${item.delta} pontos desde o início)`
+  if (item.valor === null) return `${item.regiao.nome}: não se aplica a gatos`
+  return `${item.regiao.nome}: ${item.valor}% (${pontosNoPeriodo(item.delta ?? 0)} no período)`
 }
 </script>
 
 <template>
-  <figure class="mapa-regioes">
+  <figure class="mapa-regioes sp-escala">
     <div class="mapa-regioes__palco" @mouseleave="apontada = null">
       <svg
         class="mapa-regioes__svg"
@@ -123,7 +153,10 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
           class="hexagono"
           :class="[
             `hexagono--faixa-${item.faixa}`,
-            { 'hexagono--escolhida': selecionada === item.regiao.id },
+            {
+              'hexagono--escolhida': selecionada === item.regiao.id,
+              'hexagono--fora': item.fora,
+            },
           ]"
           tabindex="0"
           role="button"
@@ -142,7 +175,7 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
             {{ item.regiao.nome }}
           </text>
           <text class="hexagono__valor" :x="item.cx" :y="item.cy + 17" text-anchor="middle">
-            {{ item.valor }}%
+            {{ item.valor === null ? '—' : `${item.valor}%` }}
           </text>
         </g>
       </svg>
@@ -155,14 +188,17 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
         aria-hidden="true"
       >
         <strong>{{ dica.regiao.nome }}</strong>
-        <span>
-          <b class="ui-num">{{ dica.valor }}%</b> dos {{ numero(publico(dica.regiao)) }}
-          {{ definicao.publico === 'caes' ? 'cães' : 'cães e gatos' }}
-        </span>
-        <span class="mapa-regioes__delta">
-          <i class="ph ph-arrow-up-right" aria-hidden="true" />
-          +{{ dica.delta }} pontos desde o início
-        </span>
+        <template v-if="dica.valor !== null">
+          <span>
+            <b class="ui-num">{{ dica.valor }}%</b> dos {{ numero(publico(dica.regiao)) }}
+            {{ quemConta }}
+          </span>
+          <span class="mapa-regioes__delta">
+            <i class="ph ph-arrow-up-right" aria-hidden="true" />
+            {{ pontosNoPeriodo(dica.delta ?? 0) }} no período
+          </span>
+        </template>
+        <span v-else>Não se aplica a gatos</span>
       </div>
     </div>
 
@@ -190,15 +226,15 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
       <thead>
         <tr>
           <th scope="col">Região</th>
-          <th scope="col">Em dia hoje</th>
-          <th scope="col">No início</th>
+          <th scope="col">Em dia no fim do período</th>
+          <th scope="col">Pontos no período</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in hexagonos" :key="item.regiao.id">
+        <tr v-for="item in hexagonos.filter((hexagono) => !hexagono.fora)" :key="item.regiao.id">
           <th scope="row">{{ item.regiao.nome }}</th>
-          <td>{{ item.valor }}%</td>
-          <td>{{ item.regiao.inicio[indicador] }}%</td>
+          <td>{{ item.valor === null ? 'não se aplica' : `${item.valor}%` }}</td>
+          <td>{{ item.delta === null ? '—' : pontosNoPeriodo(item.delta) }}</td>
         </tr>
       </tbody>
     </table>
@@ -206,39 +242,11 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
 </template>
 
 <style scoped>
-/*
- * A escala de um verde só. Claro: do quase branco ao verde-floresta, com a tinta escura nas três
- * primeiras faixas e a clara nas duas últimas (contraste de leitura em todas). Escuro: a âncora
- * inverte, do verde perto do fundo ao verde-água claro.
- */
+/* A escala de perigo vem de `escala-de-perigo.css` (`sp-escala`), com a tinta escura por cima. */
 .mapa-regioes {
-  --faixa-0: #cdeadf;
-  --faixa-1: #a4d8c4;
-  --faixa-2: #6fb89d;
-  --faixa-3: #357d66;
-  --faixa-4: #24604f;
-  --tinta-0: #142721;
-  --tinta-1: #142721;
-  --tinta-2: #142721;
-  --tinta-3: #ffffff;
-  --tinta-4: #ffffff;
-
   display: grid;
   gap: 14px;
   margin: 0;
-}
-
-.app-dark .mapa-regioes {
-  --faixa-0: #1f332c;
-  --faixa-1: #26493e;
-  --faixa-2: #2f6655;
-  --faixa-3: #4d9a80;
-  --faixa-4: #8fd1b8;
-  --tinta-0: #e8f2ee;
-  --tinta-1: #e8f2ee;
-  --tinta-2: #ffffff;
-  --tinta-3: #0f1f1a;
-  --tinta-4: #0f1f1a;
 }
 
 .mapa-regioes__palco {
@@ -308,28 +316,47 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
 }
 
 .hexagono--faixa-0 {
-  --tinta-hex: var(--tinta-0);
+  --tinta-hex: var(--tinta-faixa);
   fill: var(--faixa-0);
 }
 
 .hexagono--faixa-1 {
-  --tinta-hex: var(--tinta-1);
+  --tinta-hex: var(--tinta-faixa);
   fill: var(--faixa-1);
 }
 
 .hexagono--faixa-2 {
-  --tinta-hex: var(--tinta-2);
+  --tinta-hex: var(--tinta-faixa);
   fill: var(--faixa-2);
 }
 
 .hexagono--faixa-3 {
-  --tinta-hex: var(--tinta-3);
+  --tinta-hex: var(--tinta-faixa);
   fill: var(--faixa-3);
 }
 
 .hexagono--faixa-4 {
-  --tinta-hex: var(--tinta-4);
+  --tinta-hex: var(--tinta-faixa);
   fill: var(--faixa-4);
+}
+
+/* Sem número (gato num indicador só de cães): a região fica em papel, com a tinta da casa. */
+.hexagono--faixa-sem {
+  --tinta-hex: var(--tinta-2);
+  fill: var(--superficie-2, #e9eeec);
+}
+
+/*
+ * Fora das regiões escolhidas: em cinza com a tinta da casa (transparência deixava o número escuro
+ * sobre o fundo escuro), como os bairros de fora no mapa da cidade. Continua clicável.
+ */
+.hexagono.hexagono--fora {
+  --tinta-hex: var(--tinta-2);
+  fill: #dfe4e2;
+}
+
+.app-dark .hexagono.hexagono--fora {
+  fill: #2a3330;
 }
 
 /* O detalhe: um cartão pequeno acima do hexágono, sem cobrir o número dele. O mapa não espelha

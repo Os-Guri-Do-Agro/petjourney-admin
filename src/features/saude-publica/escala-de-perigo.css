@@ -1,0 +1,17 @@
+/*
+ * A escala de perigo dos mapas e das barras de Saúde pública (17/11/2026, "cores que indiquem
+ * perigo nos mapas: verde, amarelo, laranja, vermelho"). Cinco faixas fixas, iguais para todos os
+ * indicadores: menos de 40% em dia é vermelho, 70% ou mais é verde.
+ *
+ * As mesmas cores nos dois temas: o semáforo não inverte. O texto por cima é sempre a tinta escura
+ * (`--tinta-faixa`), de 5:1 no vermelho a 10:1 no amarelo; e o número vai escrito, então a cor nunca
+ * fala sozinha. Quem usa põe a classe `sp-escala` no bloco e lê `--faixa-0` a `--faixa-4`.
+ */
+.sp-escala {
+  --faixa-0: #e5625d;
+  --faixa-1: #ef8a4c;
+  --faixa-2: #f2c54d;
+  --faixa-3: #a8d06e;
+  --faixa-4: #55ab76;
+  --tinta-faixa: #1d1a17;
+}

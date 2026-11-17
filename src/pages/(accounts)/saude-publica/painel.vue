@@ -14,13 +14,15 @@
  * número aqui, menos os casos humanos da Sesau, que são da cidade e do ano. A campanha escolhida
  * ganha uma linha com o que rendeu.
  */
-import { computed, ref } from 'vue'
+import SelectButton from 'primevue/selectbutton'
+import { computed, ref, watch } from 'vue'
 
 import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
 import FiltrosDoPrototipo from '@/features/saude-publica/components/FiltrosDoPrototipo.vue'
 import MapaDaCidade from '@/features/saude-publica/components/MapaDaCidade.vue'
+import MapaDasRegioes from '@/features/saude-publica/components/MapaDasRegioes.vue'
 import RegiaoGaveta from '@/features/saude-publica/components/RegiaoGaveta.vue'
 import {
   CONTEXTO_LEISHMANIOSE,
@@ -36,6 +38,7 @@ import {
   type IdDaRegiao,
   type Indicador,
 } from '@/features/saude-publica/dados'
+import '@/features/saude-publica/escala-de-perigo.css'
 import { useFiltrosDoPrototipo } from '@/features/saude-publica/filtros'
 import {
   animaisNoRecorte,
@@ -171,6 +174,38 @@ const bairros = computed(() =>
     : [],
 )
 
+/*
+ * As duas vistas do mapa (17/11/2026, "o mapa antigo deveria ser uma segunda opção"): a cidade de
+ * verdade, bairro a bairro, e o esquema em hexágonos, uma região por hexágono, que se lê de longe
+ * numa apresentação. A escolha fica no navegador de quem olha.
+ */
+type VistaDoMapa = 'cidade' | 'esquema'
+
+const CHAVE_DA_VISTA = 'pj.saude-publica.vista-do-mapa'
+
+function lerVista(): VistaDoMapa {
+  try {
+    return localStorage.getItem(CHAVE_DA_VISTA) === 'esquema' ? 'esquema' : 'cidade'
+  } catch {
+    return 'cidade'
+  }
+}
+
+const vista = ref<VistaDoMapa>(lerVista())
+
+watch(vista, (valor) => {
+  try {
+    localStorage.setItem(CHAVE_DA_VISTA, valor)
+  } catch {
+    /* Armazenamento bloqueado: a escolha vale até a recarga. */
+  }
+})
+
+const VISTAS: { valor: VistaDoMapa; rotulo: string; icone: string }[] = [
+  { valor: 'cidade', rotulo: 'Cidade', icone: 'ph ph-map-trifold' },
+  { valor: 'esquema', rotulo: 'Esquema', icone: 'ph ph-hexagon' },
+]
+
 const regiaoEscolhida = ref<IdDaRegiao | null>(null)
 const gavetaAberta = ref(false)
 
@@ -290,14 +325,43 @@ function aoFecharGaveta(aberta: boolean) {
           <header class="ui-cartao__cabeca sp-cabeca">
             <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-trifold" /></span>
             <span class="ui-cartao__titulos">
-              <h2 id="sp-mapa" class="ui-cartao__titulo">Mapa da cidade</h2>
-              <p class="ui-cartao__descricao">
+              <h2 id="sp-mapa" class="ui-cartao__titulo">
+                {{ vista === 'cidade' ? 'Mapa da cidade' : 'Mapa por região' }}
+              </h2>
+              <p v-if="vista === 'cidade'" class="ui-cartao__descricao">
                 {{ definicao.rotulo }} em cada bairro: percentual de {{ definicao.frase }}. As
                 linhas fortes separam as 7 regiões urbanas; clique numa para ver o detalhe.
               </p>
+              <p v-else class="ui-cartao__descricao">
+                {{ definicao.rotulo }} em cada região urbana. Cada hexágono é uma região, na posição
+                dela em volta do Centro; clique para ver o detalhe.
+              </p>
             </span>
           </header>
+          <!-- A escolha da vista numa linha própria: no canto do cabeçalho, apertava a descrição. -->
+          <SelectButton
+            v-model="vista"
+            class="sp-vista"
+            :options="VISTAS"
+            option-label="rotulo"
+            option-value="valor"
+            :allow-empty="false"
+            aria-label="Como ver o mapa"
+          >
+            <template #option="{ option }">
+              <i :class="option.icone" aria-hidden="true" />
+              <span>{{ option.rotulo }}</span>
+            </template>
+          </SelectButton>
           <MapaDaCidade
+            v-if="vista === 'cidade'"
+            :indicador="indicador"
+            :recorte="recorte"
+            :selecionada="regiaoEscolhida"
+            @update:selecionada="escolherRegiao"
+          />
+          <MapaDasRegioes
+            v-else
             :indicador="indicador"
             :recorte="recorte"
             :selecionada="regiaoEscolhida"
@@ -320,7 +384,7 @@ function aoFecharGaveta(aberta: boolean) {
           <p v-if="!aplica" class="sp-fonte">
             {{ definicao.rotulo }} é só de cães: escolha "Cães" ou "Cães e gatos" nos filtros.
           </p>
-          <ol v-else class="sp-bairros">
+          <ol v-else class="sp-bairros sp-escala">
             <li v-for="bairro in bairros" :key="bairro.nome" class="sp-bairro">
               <span class="sp-bairro__nome">{{ bairro.nome }}</span>
               <span class="sp-bairro__valor ui-num">{{ bairro.valor }}%</span>
@@ -567,45 +631,34 @@ function aoFecharGaveta(aberta: boolean) {
   grid-column: 1 / -1;
 }
 
-/* As mesmas cinco faixas do mapa: a barra do bairro tem a cor que o hexágono teria. */
+/* A escala de perigo dos mapas: a barra do bairro tem a cor que ele tem no mapa. */
 .sp-faixa-0 {
-  background: #a4d8c4;
+  background: var(--faixa-0);
 }
 
 .sp-faixa-1 {
-  background: #6fb89d;
+  background: var(--faixa-1);
 }
 
 .sp-faixa-2 {
-  background: #4f9f85;
+  background: var(--faixa-2);
 }
 
 .sp-faixa-3 {
-  background: #357d66;
+  background: var(--faixa-3);
 }
 
 .sp-faixa-4 {
-  background: #24604f;
+  background: var(--faixa-4);
 }
 
-.app-dark .sp-faixa-0 {
-  background: #2f6655;
+/* A escolha da vista, entre o cabeçalho e o mapa. */
+.sp-vista {
+  justify-self: start;
 }
 
-.app-dark .sp-faixa-1 {
-  background: #3d8069;
-}
-
-.app-dark .sp-faixa-2 {
-  background: #4d9a80;
-}
-
-.app-dark .sp-faixa-3 {
-  background: #6fb89d;
-}
-
-.app-dark .sp-faixa-4 {
-  background: #8fd1b8;
+.sp-vista :deep(.p-togglebutton-content) {
+  gap: 6px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -49,6 +49,7 @@ import {
   seAplica,
   type Recorte,
 } from '@/features/saude-publica/serie'
+import '@/features/saude-publica/escala-de-perigo.css'
 import { isDarkMode } from '@/theme/color-mode'
 
 const props = withDefaults(defineProps<{ indicador: Indicador; recorte?: Recorte }>(), {
@@ -507,10 +508,11 @@ onBeforeUnmount(desmontar)
 </script>
 
 <template>
-  <figure ref="figura" class="mapa-cidade">
+  <figure ref="figura" class="mapa-cidade sp-escala">
     <MapaDasRegioes
       v-if="semMapa"
       :indicador="indicador"
+      :recorte="recorte"
       :selecionada="selecionada"
       @update:selecionada="selecionada = $event"
     />
@@ -614,21 +616,16 @@ onBeforeUnmount(desmontar)
 
 <style scoped>
 /*
- * A escala de um verde só (a mesma do esquema). Claro: do quase branco ao verde-floresta. Escuro: a
- * âncora inverte, do verde perto do fundo ao verde-água claro. As divisas: a tinta da casa no claro,
- * um fio claro no escuro.
+ * A cor dos bairros é a escala de perigo (`escala-de-perigo.css`, a mesma do esquema e das
+ * barras), um pouco transparente para as ruas aparecerem. As divisas: a tinta da casa no claro, um fio claro
+ * no escuro.
  */
 .mapa-cidade {
-  --faixa-0: #cdeadf;
-  --faixa-1: #a4d8c4;
-  --faixa-2: #6fb89d;
-  --faixa-3: #357d66;
-  --faixa-4: #24604f;
   --mapa-divisa: #1d3557;
   --mapa-fio: rgb(255 255 255 / 85%);
   --mapa-escolhida: #10302a;
   --mapa-fundo: #eef2f0;
-  --mapa-opacidade: 0.74;
+  --mapa-opacidade: 0.78;
   /* O bairro fora das regiões escolhidas: cinza, para o recorte saltar. */
   --mapa-fora: #d9dedc;
 
@@ -638,16 +635,11 @@ onBeforeUnmount(desmontar)
 }
 
 .app-dark .mapa-cidade {
-  --faixa-0: #1f332c;
-  --faixa-1: #26493e;
-  --faixa-2: #2f6655;
-  --faixa-3: #4d9a80;
-  --faixa-4: #8fd1b8;
   --mapa-divisa: #dfe9e5;
   --mapa-fio: rgb(18 25 23 / 80%);
   --mapa-escolhida: #ffffff;
   --mapa-fundo: #18211e;
-  --mapa-opacidade: 0.8;
+  --mapa-opacidade: 0.82;
   --mapa-fora: #232b28;
 }
 
