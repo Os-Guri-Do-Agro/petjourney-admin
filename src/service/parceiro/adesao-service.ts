@@ -23,6 +23,7 @@ import type {
   ResumoDeAdesaoDto,
   TratamentoNaListaDto,
 } from '../contrato/openapi'
+import { parceiroPeloToken } from './parceiro-do-token'
 
 export type AdesaoDoPaciente = AdesaoDoPacienteDto
 export type Tratamento = AdesaoParaClinicaDto
