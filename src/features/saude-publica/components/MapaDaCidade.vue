@@ -12,6 +12,9 @@
  *   vai escrito no rótulo, então a cor nunca fala sozinha.
  * - **Gestos**: rolar a página não mexe no mapa (Ctrl + rolagem aproxima; no tablet, dois dedos).
  *
+ * - **Recorte** (`serie.ts`): os números são os do fim do período escolhido, na espécie escolhida;
+ *   com regiões escolhidas, o mapa se aproxima delas e os bairros de fora ficam em cinza.
+ *
  * Passar o mouse num bairro mostra o detalhe dele; clicar num bairro ou no rótulo escolhe a região.
  * O rótulo é botão, então o teclado também escolhe. Sem WebGL, volta o esquema em hexágonos.
  */
@@ -32,19 +35,38 @@ import {
   BAIRROS,
   indicador as definicaoDo,
   numero,
-  publicoDaRegiao,
-  publicoDoBairro,
   regiao as regiaoDe,
   REGIOES,
   type IdDaRegiao,
   type Indicador,
 } from '@/features/saude-publica/dados'
+import {
+  coberturaDaRegiao,
+  coberturaDoBairro,
+  pontos,
+  publicoNoRecorte,
+  RECORTE_INTEIRO,
+  seAplica,
+  type Recorte,
+} from '@/features/saude-publica/serie'
 import { isDarkMode } from '@/theme/color-mode'
 
-const props = defineProps<{ indicador: Indicador }>()
+const props = withDefaults(defineProps<{ indicador: Indicador; recorte?: Recorte }>(), {
+  recorte: () => RECORTE_INTEIRO,
+})
 const selecionada = defineModel<IdDaRegiao | null>('selecionada', { default: null })
 
 const definicao = computed(() => definicaoDo(props.indicador))
+const aplica = computed(() => seAplica(props.indicador, props.recorte.especie))
+
+/** Quem conta no número: "cães", "gatos" ou "cães e gatos". */
+const quemConta = computed(() => {
+  if (definicao.value.publico === 'caes' || props.recorte.especie === 'caes') return 'cães'
+  return props.recorte.especie === 'gatos' ? 'gatos' : 'cães e gatos'
+})
+
+const dentro = (id: IdDaRegiao) =>
+  !props.recorte.regioes.length || props.recorte.regioes.includes(id)
 
 /* ------------------------------------------------------------------------------- a cidade */
 
@@ -82,30 +104,37 @@ type BairroApontado = {
   nome: string
   regiao: IdDaRegiao
   valor: number | null
+  delta: number | null
   publico: number
   x: number
   y: number
 }
 const apontado = ref<BairroApontado | null>(null)
 
+/** O número da região no fim do período e quanto andou nele (nulo quando não se aplica). */
+function daRegiao(id: IdDaRegiao) {
+  const regiao = regiaoDe(id)
+  if (!aplica.value) return { regiao, valor: null, delta: null }
+  const { de, ate, especie } = props.recorte
+  const valor = Math.round(coberturaDaRegiao(regiao, props.indicador, ate, especie))
+  const comeco = Math.round(coberturaDaRegiao(regiao, props.indicador, de, especie))
+  return { regiao, valor, delta: valor - comeco }
+}
+
 const rotulos = computed(() =>
-  alvosDosRotulos.value.map(({ id, elemento }) => {
-    const regiao = regiaoDe(id)
-    const valor = regiao.cobertura[props.indicador]
-    return {
-      id,
-      elemento,
-      regiao,
-      valor,
-      delta: valor - regiao.inicio[props.indicador],
-    }
-  }),
+  alvosDosRotulos.value.map(({ id, elemento }) => ({
+    id,
+    elemento,
+    fora: !dentro(id),
+    ...daRegiao(id),
+  })),
 )
 
 /* ---------------------------------------------------------------------------------- cores */
 
 type Paleta = {
   faixas: string[]
+  fora: string
   opacidade: number
   divisa: string
   fio: string
@@ -118,6 +147,7 @@ function lerPaleta(): Paleta {
   const ler = (nome: string) => estilo.getPropertyValue(nome).trim()
   return {
     faixas: [0, 1, 2, 3, 4].map((indice) => ler(`--faixa-${indice}`)),
+    fora: ler('--mapa-fora'),
     opacidade: Number(ler('--mapa-opacidade')) || 0.74,
     divisa: ler('--mapa-divisa'),
     fio: ler('--mapa-fio'),
@@ -131,9 +161,69 @@ function corDoIndicador(paleta: Paleta): ExpressionSpecification {
   const [l0, l1, l2, l3] = FAIXAS as [number, number, number, number]
   return [
     'case',
-    ['has', props.indicador],
-    ['step', ['get', props.indicador], f0, l0, f1, l1, f2, l2, f3, l3, f4],
+    ['==', ['get', 'fora'], true],
+    paleta.fora,
+    ['has', 'valor'],
+    ['step', ['get', 'valor'], f0, l0, f1, l1, f2, l2, f3, l3, f4],
     'rgba(0, 0, 0, 0)',
+  ]
+}
+
+/* --------------------------------------------------------------------------- os números */
+
+type Geo = typeof import('@/features/saude-publica/mapa/campo-grande.json')
+let geoCarregado: Geo | null = null
+
+/** Os contornos com o número de cada bairro no recorte: `valor` (se aplica), `delta` e `fora`. */
+function bairrosNoRecorte(geo: Geo): FeatureCollection {
+  const porNome = new Map(BAIRROS.map((bairro) => [bairro.nome, bairro]))
+  const { de, ate, especie } = props.recorte
+  return {
+    ...geo.bairros,
+    features: geo.bairros.features.map((feature) => {
+      const bairro = porNome.get(feature.properties.nome)
+      const regiao = feature.properties.regiao as IdDaRegiao
+      let numeros = {}
+      if (bairro && aplica.value) {
+        const valor = Math.round(coberturaDoBairro(bairro, props.indicador, ate, especie))
+        const comeco = Math.round(coberturaDoBairro(bairro, props.indicador, de, especie))
+        numeros = {
+          valor,
+          delta: valor - comeco,
+          publico: publicoNoRecorte(bairro, props.indicador, especie),
+        }
+      }
+      return {
+        ...feature,
+        properties: { ...feature.properties, ...numeros, fora: !dentro(regiao) },
+      }
+    }),
+  } as FeatureCollection
+}
+
+/** O retângulo das regiões escolhidas (ou da cidade), para o mapa se aproximar delas. */
+function limitesDoRecorte(geo: Geo): [[number, number], [number, number]] {
+  if (!props.recorte.regioes.length) return LIMITES
+  let [oeste, sul, leste, norte] = [180, 90, -180, -90]
+  const visitar = (coordenadas: unknown): void => {
+    if (typeof (coordenadas as number[])[0] === 'number') {
+      const [x, y] = coordenadas as [number, number]
+      oeste = Math.min(oeste, x)
+      leste = Math.max(leste, x)
+      sul = Math.min(sul, y)
+      norte = Math.max(norte, y)
+      return
+    }
+    for (const filho of coordenadas as unknown[]) visitar(filho)
+  }
+  for (const feature of geo.regioes.features) {
+    if (props.recorte.regioes.includes(feature.properties.regiao as IdDaRegiao)) {
+      visitar(feature.geometry.coordinates)
+    }
+  }
+  return [
+    [oeste, sul],
+    [leste, norte],
   ]
 }
 
@@ -168,7 +258,7 @@ async function montar() {
   apontado.value = null
 
   try {
-    const [maplibregl, { default: geo }, { default: urlDoWorker }] = await Promise.all([
+    const [maplibregl, modulo, { default: urlDoWorker }] = await Promise.all([
       import('maplibre-gl'),
       import('@/features/saude-publica/mapa/campo-grande.json'),
       /* O worker vem separado: o pré-empacotamento do Vite não leva o arquivo vizinho junto. */
@@ -176,6 +266,8 @@ async function montar() {
       import('maplibre-gl/dist/maplibre-gl.css'),
     ])
     maplibregl.setWorkerUrl(urlDoWorker)
+    const geo = modulo.default as Geo
+    geoCarregado = geo
     await nextTick()
     if (!palco.value) return
 
@@ -186,7 +278,7 @@ async function montar() {
     const instancia = new maplibregl.Map({
       container: palco.value,
       style: estilo,
-      bounds: LIMITES,
+      bounds: limitesDoRecorte(geo),
       fitBoundsOptions: { padding: 18 },
       maxBounds: [
         [LIMITES[0][0] - FOLGA, LIMITES[0][1] - FOLGA],
@@ -211,6 +303,12 @@ async function montar() {
       },
     })
     instancia.touchZoomRotate.disableRotation()
+    /* O estilo escuro pede texturas que ele não traz: uma imagem vazia no lugar, sem aviso. */
+    instancia.setMissingStyleImageResolver((id) => {
+      if (!instancia.hasImage(id)) {
+        instancia.addImage(id, { width: 1, height: 1, data: new Uint8Array(4) })
+      }
+    })
     instancia.addControl(
       new maplibregl.NavigationControl({ showCompass: false, visualizePitch: false }),
       'top-right',
@@ -218,28 +316,20 @@ async function montar() {
     mapa.value = instancia
 
     instancia.on('load', () => {
-      /* Os números ilustrativos de cada bairro entram nas propriedades do contorno. */
-      const porNome = new Map(BAIRROS.map((bairro) => [bairro.nome, bairro]))
-      const bairros = {
-        ...geo.bairros,
-        features: geo.bairros.features.map((feature) => {
-          const dados = porNome.get(feature.properties.nome)
-          return {
-            ...feature,
-            properties: {
-              ...feature.properties,
-              ...(dados ? { ...dados.cobertura, caes: dados.caes, gatos: dados.gatos } : {}),
-            },
-          }
-        }),
-      } as FeatureCollection
+      /*
+       * Os bairros e as divisas ficam por cima das ruas e embaixo dos nomes. O estilo escuro tem
+       * rótulos no meio das camadas de rua: a cor entra antes do primeiro nome depois da última rua.
+       */
+      const camadas = instancia.getStyle().layers
+      const ultimaRua = camadas.reduce(
+        (ultima, camada, indice) => (camada.type === 'symbol' ? ultima : indice),
+        -1,
+      )
+      const antesDosNomes = camadas
+        .slice(ultimaRua + 1)
+        .find((camada) => camada.type === 'symbol')?.id
 
-      /* Os bairros e as divisas ficam embaixo dos nomes das ruas. */
-      const antesDosNomes = instancia
-        .getStyle()
-        .layers.find((camada) => camada.type === 'symbol')?.id
-
-      instancia.addSource('bairros', { type: 'geojson', data: bairros })
+      instancia.addSource('bairros', { type: 'geojson', data: bairrosNoRecorte(geo) })
       instancia.addSource('regioes', {
         type: 'geojson',
         data: geo.regioes as FeatureCollection,
@@ -347,23 +437,16 @@ function apontar(evento: MapLayerMouseEvent) {
   if (!feature || !instancia) return
   const propriedades = feature.properties as Record<string, unknown>
   const nome = String(propriedades.nome)
-  const valor =
-    typeof propriedades[props.indicador] === 'number' ? propriedades[props.indicador] : null
-  const publico =
-    typeof propriedades.caes === 'number'
-      ? publicoDoBairro(
-          { caes: propriedades.caes, gatos: Number(propriedades.gatos ?? 0) },
-          props.indicador,
-        )
-      : 0
+  const numeroOuNulo = (valor: unknown) => (typeof valor === 'number' ? valor : null)
 
   instancia.getCanvas().style.cursor = 'pointer'
   instancia.setFilter('bairro-apontado', filtroDoBairro(nome))
   apontado.value = {
     nome,
     regiao: propriedades.regiao as IdDaRegiao,
-    valor: valor as number | null,
-    publico,
+    valor: numeroOuNulo(propriedades.valor),
+    delta: numeroOuNulo(propriedades.delta),
+    publico: numeroOuNulo(propriedades.publico) ?? 0,
     x: evento.point.x,
     y: evento.point.y,
   }
@@ -373,15 +456,35 @@ function escolher(id: IdDaRegiao) {
   selecionada.value = selecionada.value === id ? null : id
 }
 
+/** A mesma informação do mapa, para leitor de tela: só as regiões do recorte. */
+const tabela = computed(() =>
+  REGIOES.filter((regiao) => dentro(regiao.id)).map((regiao) => daRegiao(regiao.id)),
+)
+
 function rotuloAcessivel(item: (typeof rotulos.value)[number]) {
-  return `Região ${item.regiao.nome}: ${item.valor}% (${item.delta >= 0 ? '+' : ''}${item.delta} pontos desde o início). Abrir o detalhe.`
+  const numero =
+    item.valor === null
+      ? 'não se aplica a gatos'
+      : `${item.valor}% (${pontos(item.delta ?? 0)} no período)`
+  return `Região ${item.regiao.nome}: ${numero}. Abrir o detalhe.`
 }
 
+/* O indicador, o período, as regiões ou a espécie mudaram: os números e a cor se refazem. */
 watch(
-  () => props.indicador,
-  () => {
-    if (!mapa.value?.getLayer('bairros-cor')) return
-    mapa.value.setPaintProperty('bairros-cor', 'fill-color', corDoIndicador(lerPaleta()))
+  () => [props.indicador, props.recorte] as const,
+  ([, recorte], [, antes]) => {
+    const instancia = mapa.value
+    if (!instancia?.getLayer('bairros-cor') || !geoCarregado) return
+    const fonte = instancia.getSource('bairros') as { setData?: (dados: FeatureCollection) => void }
+    fonte.setData?.(bairrosNoRecorte(geoCarregado))
+    instancia.setPaintProperty('bairros-cor', 'fill-color', corDoIndicador(lerPaleta()))
+    if (recorte.regioes.join() !== antes.regioes.join()) {
+      const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      instancia.fitBounds(limitesDoRecorte(geoCarregado), {
+        padding: 28,
+        duration: reduzido ? 0 : 600,
+      })
+    }
   },
 )
 
@@ -430,10 +533,16 @@ onBeforeUnmount(desmontar)
       >
         <strong>{{ apontado.nome }}</strong>
         <span class="mapa-cidade__regiao">Região {{ regiaoDe(apontado.regiao).nome }}</span>
-        <span v-if="apontado.valor !== null">
-          <b class="ui-num">{{ apontado.valor }}%</b> dos {{ numero(apontado.publico) }}
-          {{ definicao.publico === 'caes' ? 'cães' : 'cães e gatos' }}
-        </span>
+        <template v-if="apontado.valor !== null">
+          <span>
+            <b class="ui-num">{{ apontado.valor }}%</b> dos {{ numero(apontado.publico) }}
+            {{ quemConta }}
+          </span>
+          <span v-if="apontado.delta !== null" class="mapa-cidade__delta">
+            {{ pontos(apontado.delta) }} no período
+          </span>
+        </template>
+        <span v-else>Não se aplica a gatos</span>
       </div>
     </div>
 
@@ -442,18 +551,26 @@ onBeforeUnmount(desmontar)
       <button
         type="button"
         class="mapa-cidade__rotulo"
-        :class="{ 'mapa-cidade__rotulo--escolhido': selecionada === item.id }"
+        :class="{
+          'mapa-cidade__rotulo--escolhido': selecionada === item.id,
+          'mapa-cidade__rotulo--fora': item.fora,
+        }"
         :aria-pressed="selecionada === item.id"
         :aria-label="rotuloAcessivel(item)"
         @click="escolher(item.id)"
       >
         <span class="mapa-cidade__rotulo-nome">{{ item.regiao.nome }}</span>
-        <span class="mapa-cidade__rotulo-valor ui-num">{{ item.valor }}%</span>
+        <span class="mapa-cidade__rotulo-valor ui-num">
+          {{ item.valor === null ? '—' : `${item.valor}%` }}
+        </span>
       </button>
     </Teleport>
 
     <figcaption v-if="!semMapa" class="mapa-cidade__legenda">
-      <span class="mapa-cidade__titulo-legenda">{{ definicao.rotulo }}, em dia</span>
+      <span class="mapa-cidade__titulo-legenda">
+        {{ definicao.rotulo }}, em dia
+        <template v-if="!aplica"> (só cães: escolha "Cães" ou "Cães e gatos")</template>
+      </span>
       <ol class="mapa-cidade__faixas">
         <li v-for="(rotulo, indice) in LEGENDA" :key="rotulo">
           <span class="mapa-cidade__amostra" :style="{ background: `var(--faixa-${indice})` }" />
@@ -473,22 +590,22 @@ onBeforeUnmount(desmontar)
         {{
           definicao.rotulo
         }}
-        por região urbana
+        por região urbana, no período escolhido
       </caption>
       <thead>
         <tr>
           <th scope="col">Região</th>
-          <th scope="col">Em dia hoje</th>
-          <th scope="col">No início</th>
+          <th scope="col">Em dia no fim do período</th>
+          <th scope="col">Pontos no período</th>
           <th scope="col">Animais</th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="regiao in REGIOES" :key="regiao.id">
-          <th scope="row">{{ regiao.nome }}</th>
-          <td>{{ regiao.cobertura[indicador] }}%</td>
-          <td>{{ regiao.inicio[indicador] }}%</td>
-          <td>{{ numero(publicoDaRegiao(regiao, indicador)) }}</td>
+        <tr v-for="linha in tabela" :key="linha.regiao.id">
+          <th scope="row">{{ linha.regiao.nome }}</th>
+          <td>{{ linha.valor === null ? 'não se aplica' : `${linha.valor}%` }}</td>
+          <td>{{ linha.delta === null ? '—' : pontos(linha.delta) }}</td>
+          <td>{{ numero(publicoNoRecorte(linha.regiao, indicador, recorte.especie)) }}</td>
         </tr>
       </tbody>
     </table>
@@ -512,6 +629,8 @@ onBeforeUnmount(desmontar)
   --mapa-escolhida: #10302a;
   --mapa-fundo: #eef2f0;
   --mapa-opacidade: 0.74;
+  /* O bairro fora das regiões escolhidas: cinza, para o recorte saltar. */
+  --mapa-fora: #d9dedc;
 
   display: grid;
   gap: 14px;
@@ -528,7 +647,8 @@ onBeforeUnmount(desmontar)
   --mapa-fio: rgb(18 25 23 / 80%);
   --mapa-escolhida: #ffffff;
   --mapa-fundo: #18211e;
-  --mapa-opacidade: 0.88;
+  --mapa-opacidade: 0.8;
+  --mapa-fora: #232b28;
 }
 
 .mapa-cidade__moldura {
@@ -582,6 +702,16 @@ onBeforeUnmount(desmontar)
   box-shadow: 0 0 0 1px var(--mapa-escolhida);
 }
 
+/* Região fora do recorte: o rótulo recua, mas continua clicável. */
+.mapa-cidade__rotulo--fora {
+  opacity: 0.55;
+}
+
+.mapa-cidade__rotulo--fora:hover,
+.mapa-cidade__rotulo--fora:focus-visible {
+  opacity: 1;
+}
+
 .mapa-cidade__rotulo-nome {
   font-size: 11.5px;
   font-weight: 650;
@@ -623,6 +753,11 @@ onBeforeUnmount(desmontar)
 
 .mapa-cidade__regiao {
   font-size: 12px;
+}
+
+.mapa-cidade__delta {
+  color: var(--ok-tinta);
+  font-weight: 650;
 }
 
 .mapa-cidade__legenda {

@@ -3,6 +3,9 @@
  * A região escolhida no mapa, numa gaveta à direita: quantos animais e tutores, os quatro
  * indicadores com o começo e o hoje, as campanhas que passaram por ela, e o atalho para criar uma
  * campanha já com a região marcada. É a pergunta do gestor: "e no Anhanduizinho, o que eu faço?".
+ *
+ * Os números seguem o período e a espécie dos filtros (`recorte`): o do fim do período, o do começo
+ * e quanto andou entre os dois.
  */
 import Button from 'primevue/button'
 import { computed } from 'vue'
@@ -13,14 +16,24 @@ import {
   dataCurta,
   INDICADORES,
   numero,
-  publicoDaRegiao,
   regiao as regiaoDe,
   tipoDeCampanha,
   type IdDaRegiao,
 } from '@/features/saude-publica/dados'
 import { useEstadoDoPrototipo } from '@/features/saude-publica/estado'
+import {
+  coberturaDaRegiao,
+  dataDoDia,
+  pontos,
+  publicoNoRecorte,
+  RECORTE_INTEIRO,
+  seAplica,
+  type Recorte,
+} from '@/features/saude-publica/serie'
 
-const props = defineProps<{ regiaoId: IdDaRegiao | null }>()
+const props = withDefaults(defineProps<{ regiaoId: IdDaRegiao | null; recorte?: Recorte }>(), {
+  recorte: () => RECORTE_INTEIRO,
+})
 const aberta = defineModel<boolean>('visible', { default: false })
 
 const router = useRouter()
@@ -28,16 +41,26 @@ const { campanhas } = useEstadoDoPrototipo()
 
 const regiao = computed(() => (props.regiaoId ? regiaoDe(props.regiaoId) : null))
 
-const linhas = computed(() =>
-  regiao.value
-    ? INDICADORES.map((definicao) => ({
-        definicao,
-        hoje: regiao.value!.cobertura[definicao.id],
-        inicio: regiao.value!.inicio[definicao.id],
-        publico: publicoDaRegiao(regiao.value!, definicao.id),
-      }))
-    : [],
-)
+/** A data em que o período começa, para a frase "era X% em 01/12/2026". */
+const comecoDoPeriodo = computed(() => dataCurta(dataDoDia(props.recorte.de)))
+
+const linhas = computed(() => {
+  const alvo = regiao.value
+  if (!alvo) return []
+  const { de, ate, especie } = props.recorte
+  return INDICADORES.filter((definicao) => seAplica(definicao.id, especie)).map((definicao) => ({
+    definicao,
+    hoje: Math.round(coberturaDaRegiao(alvo, definicao.id, ate, especie)),
+    inicio: Math.round(coberturaDaRegiao(alvo, definicao.id, de, especie)),
+    publico: publicoNoRecorte(alvo, definicao.id, especie),
+    quem:
+      definicao.publico === 'caes' || especie === 'caes'
+        ? 'cães'
+        : especie === 'gatos'
+          ? 'gatos'
+          : 'cães e gatos',
+  }))
+})
 
 const daRegiao = computed(() =>
   regiao.value ? campanhas.value.filter((item) => item.regioes.includes(regiao.value!.id)) : [],
@@ -91,9 +114,9 @@ function criarCampanha() {
               <span class="rg__inicio" :style="{ insetInlineStart: `${linha.inicio}%` }" />
             </span>
             <span class="rg__frase">
-              Era {{ linha.inicio }}% no início: +{{ linha.hoje - linha.inicio }} pontos, de
-              {{ numero(linha.publico) }}
-              {{ linha.definicao.publico === 'caes' ? 'cães' : 'cães e gatos' }}.
+              Era {{ linha.inicio }}% em {{ comecoDoPeriodo }}:
+              {{ pontos(linha.hoje - linha.inicio) }}, de {{ numero(linha.publico) }}
+              {{ linha.quem }}.
             </span>
           </li>
         </ul>
