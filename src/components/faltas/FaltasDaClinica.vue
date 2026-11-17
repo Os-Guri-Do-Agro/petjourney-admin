@@ -13,7 +13,7 @@ import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
@@ -184,8 +184,8 @@ function abrir(item: ResumoDeFaltas) {
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem reincidente, como as faltas andam,
  * em três etapas (a falta sai da agenda, quem repete vira reincidente, a recepção registra o
- * contato), e o caminho para a agenda, onde a falta se marca. "A justificar" e "Todas" só dizem o
- * que vai aparecer nelas.
+ * contato), com o caminho para a agenda, onde a falta se marca, na primeira. "A justificar" e
+ * "Todas" só dizem o que vai aparecer nelas.
  */
 const passosDasFaltas = computed<PassoDoGuia[]>(() =>
   [
@@ -197,6 +197,18 @@ const passosDasFaltas = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`faltas.guia.${id}.titulo`),
     texto: t(`faltas.guia.${id}.texto`, { n: limite.value }),
+    /*
+     * O botão da etapa (17/11/2026): a falta se marca na agenda. Reincidir é sozinho, e o contato
+     * se registra na linha do reincidente, que ainda não existe.
+     */
+    acao:
+      id === 'marcar' && podeEscrever.value
+        ? {
+            rotulo: t('faltas.guia.abrirAgenda'),
+            icone: 'ph ph-calendar-blank',
+            to: '/clinica/agenda',
+          }
+        : undefined,
   })),
 )
 
@@ -253,16 +265,7 @@ function mudou() {
         :texto="t('faltas.vazio.descricao')"
         :guia-titulo="t('faltas.guia.titulo')"
         :passos="passosDasFaltas"
-      >
-        <template v-if="podeEscrever" #acao>
-          <Button
-            :as="RouterLink"
-            to="/clinica/agenda"
-            icon="ph ph-calendar-blank"
-            :label="t('faltas.guia.abrirAgenda')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <UiVazioIlustrado
         v-else-if="!itens.length"

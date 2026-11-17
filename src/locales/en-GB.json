@@ -1723,7 +1723,8 @@
       "passo3": {
         "titulo": "Your note goes back to the app",
         "texto": "What you record reaches the pet's record. When the time is up, the clinical data goes away and your notes stay."
-      }
+      },
+      "anotar": "Write a note"
     },
     "lista": {
       "buscaPlaceholder": "Search by pet name",
@@ -2023,6 +2024,15 @@
     },
     "tela": {
       "resumo": "{n} QR scan so far | {n} QR scans so far"
+    },
+    "espera": {
+      "guia": {
+        "titulo": "How the code is unlocked",
+        "codigo": {
+          "titulo": "The code shows up here",
+          "texto": "With the programme active, this screen shows the code, the link and the QR to invite people."
+        }
+      }
     }
   },
   "carteira": {
@@ -2048,7 +2058,22 @@
       "body": "Wallet, statement, and payouts are only available with an active affiliate programme. Request participation on the programmes screen.",
       "cta": "Request affiliate programme",
       "emAnaliseTitle": "Affiliate Programme under review",
-      "emAnaliseBody": "Wallet, statement, and payouts open as soon as the PetJourney team approves the programme. The result arrives by email."
+      "emAnaliseBody": "Wallet, statement, and payouts open as soon as the PetJourney team approves the programme. The result arrives by email.",
+      "guia": {
+        "titulo": "How the wallet opens",
+        "pedir": {
+          "titulo": "Request the affiliate programme",
+          "texto": "In Programmes, the account owner requests to join. The code and the wallet come with it."
+        },
+        "analise": {
+          "titulo": "PetJourney approves",
+          "texto": "The PetJourney team checks the registration and enables the programme. The result arrives by email."
+        },
+        "pix": {
+          "titulo": "Add the PIX key",
+          "texto": "Once the wallet is open, the PIX key is where payouts go."
+        }
+      }
     },
     "visao": {
       "loadingAria": "Loading wallet",
@@ -2335,7 +2360,23 @@
         "validoAte": "Valid until {data}",
         "aceitar": "Accept",
         "recusar": "Decline",
-        "erroCarregar": "Could not load your invitations."
+        "erroCarregar": "Could not load your invitations.",
+        "vazioTexto": "When a company invites your email to its team, the invitation shows up here.",
+        "guia": {
+          "titulo": "How an invitation arrives",
+          "convida": {
+            "titulo": "The company invites you",
+            "texto": "An owner of the company invites your email on the Team screen, with the role you will have."
+          },
+          "email": {
+            "titulo": "The link arrives by email",
+            "texto": "With the company name, who invited you and until when the invitation is valid."
+          },
+          "aceita": {
+            "titulo": "You accept through the link",
+            "texto": "Open the link with this account: the company joins your portal, and you switch between them in the account menu."
+          }
+        }
       }
     },
     "equipe": {
@@ -2454,6 +2495,23 @@
         "fichaCadastrar": "Also create the professional profile",
         "fichaReativar": "Also reactivate the professional profile",
         "fichaDica": "Whoever looks after the guests needs an active professional profile to tick off the hotel routine tasks."
+      },
+      "guia": {
+        "vazioTitulo": "Just you on the team",
+        "vazioTexto": "Invite the people who work with you. Each person signs in with their own login and sees what their role needs.",
+        "titulo": "How the team comes together",
+        "convidar": {
+          "titulo": "Invite by email",
+          "texto": "Pick the role: an owner does everything; an operator runs the day to day, without touching the team or the wallet."
+        },
+        "aceitar": {
+          "titulo": "They accept",
+          "texto": "They receive the link by email and join through it, even without a PetJourney account. The link is valid for 14 days."
+        },
+        "funcoes": {
+          "titulo": "Set the roles",
+          "texto": "Reception, vet, carer: the role decides what each person sees in the menu."
+        }
       }
     },
     "profissionais": {
@@ -2534,7 +2592,9 @@
         "agenda": {
           "titulo": "Joins the diary",
           "texto": "With On the diary turned on, the profile becomes a diary column, in its own hours."
-        }
+        },
+        "abrirAgenda": "Open the diary",
+        "cadastrarVeterinario": "Add a vet"
       }
     },
     "indicados": {
@@ -2993,7 +3053,8 @@
         "consulta": {
           "titulo": "You check it here",
           "texto": "Filter by action, person and period to find out who touched a record."
-        }
+        },
+        "abrirPacientes": "Open patients"
       }
     }
   },
@@ -4076,7 +4137,8 @@
           },
           "chegada": {
             "titulo": "Check them in",
-            "texto": "In the diary, Check in puts the patient at reception, on this list."
+            "texto": "In the diary, Check in puts the patient at reception, on this list.",
+            "acao": "Check in"
           },
           "sala": {
             "titulo": "Start the consult",
@@ -4379,7 +4441,9 @@
           "ficha": {
             "titulo": "The details alongside",
             "texto": "The dose for each species, the routes, the contraindications and the interactions, in one place."
-          }
+          },
+          "acrescentarMedicamento": "Add medicine",
+          "buscarMedicamento": "Search medicine"
         }
       }
     },
@@ -10577,7 +10641,8 @@
           "atendimentos": {
             "titulo": "Appointments use the rooms",
             "texto": "Each appointment type says which rooms it happens in. The inpatient room also holds the beds."
-          }
+          },
+          "configurarTipos": "Set up types"
         }
       },
       "tipo": {
@@ -10628,7 +10693,8 @@
           "marcar": {
             "titulo": "The front desk books",
             "texto": "When booking, the type already brings its duration. If marked online, it can also be requested on the clinic's page."
-          }
+          },
+          "configurarSalas": "Set up rooms"
         }
       },
       "politica": {
@@ -11321,7 +11387,8 @@
     "vazio": {
       "titulo": "No one is working this day",
       "descricao": "No professional has working hours or a booked appointment on this day.",
-      "semana": "See the week"
+      "semana": "See the week",
+      "expedientes": "Adjust working hours"
     },
     "voltar": "Back",
     "horario": "{inicio} to {fim} · {duracao}",
@@ -11511,7 +11578,9 @@
       "semTipo": "Choose the appointment type.",
       "semProfissional": "Choose the professional.",
       "horaInvalida": "Invalid time. Use the format 09:30.",
-      "abrirOQueFicou": "Open the remaining record"
+      "abrirOQueFicou": "Open the remaining record",
+      "semTipos": "To book, the clinic needs an active appointment type.",
+      "criarTipo": "Create appointment type"
     },
     "preConsulta": {
       "titulo": "Pre-visit form",
@@ -11908,7 +11977,8 @@
       "vazio": "No vaccines in this patient's plan.",
       "eMais": "and {n} more vaccines up to date",
       "opcionais": "Optional, not started ({n})",
-      "vazioTexto": "The plan is built from the catalogue vaccines for the patient's species, with the dose due and the next one."
+      "vazioTexto": "The plan is built from the catalogue vaccines for the patient's species, with the dose due and the next one.",
+      "acrescentarVacina": "Add vaccine"
     },
     "historico": {
       "titulo": "History ({n})",
@@ -12030,6 +12100,22 @@
         "detalhes": "View details",
         "editar": "Edit record",
         "apagar": "Delete record"
+      },
+      "guia": {
+        "titulo": "How the call list is built",
+        "registrar": {
+          "titulo": "Record the dose in the patient's record",
+          "texto": "In the patient's record: the dose given here, with the batch, and one taken elsewhere, by the date on the card."
+        },
+        "serie": {
+          "titulo": "The next dose is worked out",
+          "texto": "From the vaccine's protocol in the catalogue: the series, the booster and the patient's age."
+        },
+        "chamar": {
+          "titulo": "Who's due shows up here",
+          "texto": "Most overdue first, with the owner's phone and the reminder to switch on."
+        },
+        "escolherPaciente": "Choose patient"
       }
     },
     "aplicadas": {
@@ -12799,7 +12885,8 @@
       "alerta": {
         "titulo": "The drop shows up here",
         "texto": "Doses skipped within 3 days or falling records on a critical one enter this list, for the team to talk to the family."
-      }
+      },
+      "verTodos": "See treatments"
     }
   },
   "documentos": {
@@ -13594,7 +13681,8 @@
         "passagem": {
           "titulo": "The shift is handed over",
           "texto": "At the end of the shift, whoever is on duty hands over to the next, with what is pending."
-        }
+        },
+        "registrar": "Record dose"
       }
     },
     "boletim": {
@@ -13991,7 +14079,8 @@
       "avisar": {
         "titulo": "The minimum warns",
         "texto": "Below the minimum, the fridge and the menu warn. An expired lot asks to be disposed of."
-      }
+      },
+      "definirMinimo": "Set minimum"
     }
   },
   "casaDoHotel": {
@@ -14072,7 +14161,9 @@
       "rotulo": "Type",
       "titulo": "Accommodation types",
       "vazio": "No type yet. Create the types before the accommodations.",
-      "noLimite": "The house reached the limit of {limite} types."
+      "noLimite": "The house reached the limit of {limite} types.",
+      "vazioTitulo": "No type yet",
+      "vazioTexto": "Create the types before the accommodations: each accommodation has a type."
     },
     "acomodacao": {
       "nova": "New room",

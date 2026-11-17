@@ -122,18 +122,37 @@ const semSinal = (item: ItemDaLista) =>
  */
 const semFiltro = computed(() => filtro.value === 'TODAS')
 
-const passosDaReserva = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'entra', icone: 'ph ph-calendar-plus' },
-    { id: 'sinal', icone: 'ph ph-coins' },
-    { id: 'estadia', icone: 'ph ph-door-open' },
-  ].map(({ id, icone }) => ({
+/*
+ * Cada etapa com o botão dela para o balcão (17/11/2026): a Nova reserva abre a gaveta; registrar
+ * o sinal e fazer o check-in moram na reserva, e ficam apagados até haver uma.
+ */
+const passosDaReserva = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`reservasDoHotel.lista.guia.${id}.titulo`),
     texto: t(`reservasDoHotel.lista.guia.${id}.texto`),
-  })),
-)
+    acao: props.podeReservar ? acao : undefined,
+  })
+
+  return [
+    passo('entra', 'ph ph-calendar-plus', {
+      rotulo: t('reservasDoHotel.nova.titulo'),
+      icone: 'ph ph-plus',
+      aoClicar: () => emit('nova'),
+    }),
+    passo('sinal', 'ph ph-coins', {
+      rotulo: t('reservasDoHotel.pagamento.titulo'),
+      icone: 'ph ph-coins',
+      bloqueada: true,
+    }),
+    passo('estadia', 'ph ph-door-open', {
+      rotulo: t('estadiaDoHotel.checkin.titulo'),
+      icone: 'ph ph-sign-in',
+      bloqueada: true,
+    }),
+  ]
+})
 
 defineExpose({ carregar })
 </script>
@@ -212,16 +231,7 @@ defineExpose({ carregar })
       :texto="t('reservasDoHotel.lista.proximasVazio.texto')"
       :guia-titulo="t('reservasDoHotel.lista.guia.titulo')"
       :passos="passosDaReserva"
-    >
-      <template v-if="props.podeReservar" #acao>
-        <Button
-          type="button"
-          icon="ph ph-plus"
-          :label="t('reservasDoHotel.nova.titulo')"
-          @click="emit('nova')"
-        />
-      </template>
-    </UiVazioIlustrado>
+    />
 
     <UiVazioIlustrado
       v-else-if="!erro"

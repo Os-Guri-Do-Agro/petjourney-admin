@@ -70,6 +70,14 @@ const podeAplicar = computed(
     store.temPermissao('vacina.aplicar'),
 )
 
+/*
+ * O plano vazio quer dizer que o catálogo não tem vacina para a espécie: quem gere o catálogo
+ * (DONO, GESTOR) ganha o botão que abre a vacina nova na Configuração.
+ */
+const acrescentaVacina = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('catalogo.gerir'),
+)
+
 async function carregar() {
   carregando.value = true
   erro.value = ''
@@ -293,7 +301,18 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
       icone="ph ph-syringe"
       :titulo="t('vacinas.plano.vazio')"
       :texto="t('vacinas.plano.vazioTexto')"
-    />
+    >
+      <template v-if="acrescentaVacina" #acao>
+        <Button
+          :as="RouterLink"
+          :to="{ path: '/clinica/configuracao', query: { aba: 'catalogo', novo: 'vacinas' } }"
+          severity="secondary"
+          outlined
+          icon="ph ph-plus"
+          :label="t('vacinas.plano.acrescentarVacina')"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <p v-if="plano?.truncado && plano.vacinasOmitidas" class="vf__nota">
       {{ t('vacinas.plano.eMais', { n: plano.vacinasOmitidas }) }}

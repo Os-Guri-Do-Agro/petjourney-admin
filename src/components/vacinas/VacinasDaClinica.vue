@@ -26,6 +26,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
@@ -268,6 +269,38 @@ function paraAplicar(cartao: Cartao) {
   if (cartao.itens.length === 1) query.vacina = cartao.itens[0]!.vacina.id
   return { path: `/clinica/ficha/${cartao.paciente.id}`, query }
 }
+
+/*
+ * O vazio que ensina (17/11/2026, "o sistema deve ensinar e chamar o usuário"): sem ninguém para
+ * chamar e sem filtro, de onde a lista vem. Só registrar a dose se faz (na ficha do paciente, por
+ * isso o botão leva aos pacientes); a próxima dose e a entrada na lista são automáticas. Com
+ * filtro, é resultado de filtro: fica a frase curta.
+ */
+const passosDaChamada = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`vacinas.chamada.guia.${id}.titulo`),
+    texto: t(`vacinas.chamada.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'registrar',
+      'ph ph-syringe',
+      podeAplicar.value
+        ? {
+            rotulo: t('vacinas.chamada.guia.escolherPaciente'),
+            icone: 'ph ph-paw-print',
+            to: '/clinica/pacientes',
+          }
+        : undefined,
+    ),
+    passo('serie', 'ph ph-calendar-dots'),
+    passo('chamar', 'ph ph-phone'),
+  ]
+})
 
 /* ------------------------------------------------------------- menu "…" e as gavetas */
 
@@ -648,6 +681,8 @@ const resumo = computed(() =>
           icone="ph ph-syringe"
           :titulo="t('vacinas.chamada.vazio')"
           :texto="t('vacinas.chamada.vazioTexto')"
+          :guia-titulo="situacao === TODAS ? t('vacinas.chamada.guia.titulo') : ''"
+          :passos="situacao === TODAS ? passosDaChamada : []"
         />
       </section>
 

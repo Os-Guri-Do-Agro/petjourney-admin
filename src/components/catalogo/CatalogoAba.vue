@@ -11,6 +11,7 @@ import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import ItemSimplesGaveta from '@/components/catalogo/ItemSimplesGaveta.vue'
@@ -70,8 +71,6 @@ async function carregar() {
     carregando.value = false
   }
 }
-
-onMounted(carregar)
 
 type Linha = { id: string; titulo: string; meta: string; ativo: boolean }
 
@@ -167,6 +166,32 @@ function abrir(tipo: TipoDeAcrescimo, id: string | null) {
     gavetaSimples.value = true
   }
 }
+
+const route = useRoute()
+const router = useRouter()
+
+const TIPOS_DA_URL: readonly TipoDeAcrescimo[] = [
+  'medicamentos',
+  'vacinas',
+  'exames',
+  'diagnosticos',
+]
+
+/*
+ * Veio de um "Acrescentar" de outra tela (o vazio do Bulário, o plano vacinal vazio da ficha) com
+ * `?novo=<tipo>`: a gaveta daquele tipo abre já aqui, e o pedido sai da URL (recarregar não
+ * reabre). O medicamento no teto não abre: o aviso do teto já está na caixa.
+ */
+onMounted(async () => {
+  await carregar()
+  const pedido = route.query.novo
+  if (typeof pedido !== 'string') return
+  const tipo = TIPOS_DA_URL.find((item) => item === pedido)
+  if (props.podeEditar && tipo && !(tipo === 'medicamentos' && noLimite.value)) abrir(tipo, null)
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
+})
 
 async function alternar(tipo: TipoDeAcrescimo, linha: Linha) {
   mexendo.value = linha.id

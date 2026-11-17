@@ -17,6 +17,7 @@ import { RouterLink } from 'vue-router'
 
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 // Volta junto com o teaser de cupom (ver o comentário no fim do template).
 // import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
@@ -45,7 +46,7 @@ const PROGRAMAS_ROUTE = { path: '/parceiro/programas', hash: '#programas' } as c
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
-const { lastSuccessAt } = useCupomResgateModal()
+const { lastSuccessAt, canOpen: podeValidarCupom, open: abrirValidarCupom } = useCupomResgateModal()
 // const { open: openCupomComingSoon } = useCupomComingSoon()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 
@@ -71,15 +72,41 @@ const TERM_ICONS: Record<(typeof TERM_IDS)[number], string> = {
 
 const termsOpen = ref(false)
 
+/** Pedido já feito, ou o cadastro em análise: a primeira etapa da espera está feita. */
+const esperaEmAnalise = computed(
+  () => store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO',
+)
+
 /**
  * O título da espera. Com o pedido já feito (ou o cadastro em análise), "Programa afiliado
  * necessário" mandava pedir de novo o que estava em análise.
  */
 const tituloDaEspera = computed(() =>
-  store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO'
-    ? t('carteira.gate.emAnaliseTitle')
-    : t('carteira.gate.title'),
+  esperaEmAnalise.value ? t('carteira.gate.emAnaliseTitle') : t('carteira.gate.title'),
 )
+
+/** Como o código é liberado: o pedido (feito, se já foi), a aprovação e o código nesta tela. */
+const passosDaEspera = computed<PassoDoGuia[]>(() => [
+  {
+    id: 'pedir',
+    icone: 'ph ph-paper-plane-tilt',
+    titulo: t('carteira.gate.guia.pedir.titulo'),
+    texto: t('carteira.gate.guia.pedir.texto'),
+    feito: esperaEmAnalise.value,
+  },
+  {
+    id: 'analise',
+    icone: 'ph ph-hourglass',
+    titulo: t('carteira.gate.guia.analise.titulo'),
+    texto: t('carteira.gate.guia.analise.texto'),
+  },
+  {
+    id: 'codigo',
+    icone: 'ph ph-qr-code',
+    titulo: t('divulgacao.espera.guia.codigo.titulo'),
+    texto: t('divulgacao.espera.guia.codigo.texto'),
+  },
+])
 
 const indicacaoTerms = computed(() =>
   TERM_IDS.map((id) => ({
@@ -422,23 +449,32 @@ watch(lastSuccessAt, (at) => {
           {{ t('divulgacao.indicacao.lede') }}
         </p>
 
-        <!-- Sem afiliado ativo não há código: a folha diz o que falta e leva aos programas. -->
-        <div v-if="!indicacao.podeIndicar" class="estado ui-folha">
-          <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
-            <i class="ph ph-hourglass" />
-          </span>
-          <h2>{{ tituloDaEspera }}</h2>
-          <!--
-            O `aviso` da API diz o que falta em cada estado (cadastro em análise, recusado,
-            programa não pedido...) e vem no idioma da tela desde o PJ-4BI7TE. A frase fixa só
-            entra quando ele não vem.
-          -->
-          <p>{{ indicacao.aviso || t('divulgacao.shareKit.esperaHint') }}</p>
-          <RouterLink class="p-button p-component estado__acao" :to="PROGRAMAS_ROUTE">
-            <i class="ph ph-squares-four" aria-hidden="true" />
-            {{ t('divulgacao.shareKit.esperaCta') }}
-          </RouterLink>
-        </div>
+        <!--
+          Sem afiliado ativo não há código: o que falta, como o código é liberado e o caminho dos
+          programas. O `aviso` da API diz o que falta em cada estado (cadastro em análise,
+          recusado, programa não pedido...) e vem no idioma da tela desde o PJ-4BI7TE; a frase
+          fixa só entra quando ele não vem. Indicação nunca no botão cheio (03/11): as etapas não
+          têm botão (o de pedir seria o cheio) e "Ver programas" vai embaixo, contornado.
+        -->
+        <UiVazioIlustrado
+          v-if="!indicacao.podeIndicar"
+          icone="ph ph-hourglass"
+          :titulo="tituloDaEspera"
+          :texto="indicacao.aviso || t('divulgacao.shareKit.esperaHint')"
+          :guia-titulo="t('divulgacao.espera.guia.titulo')"
+          :passos="passosDaEspera"
+        >
+          <template #acao>
+            <Button
+              :as="RouterLink"
+              :to="PROGRAMAS_ROUTE"
+              icon="ph ph-squares-four"
+              :label="t('divulgacao.shareKit.esperaCta')"
+              severity="secondary"
+              outlined
+            />
+          </template>
+        </UiVazioIlustrado>
 
         <!--
           O convite numa folha só. Em cima, para que serve: quem ainda não usa o app e cria a conta
@@ -705,13 +741,25 @@ watch(lastSuccessAt, (at) => {
                 </div>
               </header>
 
+              <!-- O resgate nasce no balcão: o vazio leva ao "Validar cupom", contornado (Divulgação). -->
               <UiVazioIlustrado
                 v-if="resgates.length === 0"
                 aninhado
                 icone="ph ph-receipt"
                 :titulo="t('divulgacao.resgates.empty')"
                 :texto="t('divulgacao.resgates.vazioTexto')"
-              />
+              >
+                <template v-if="podeValidarCupom" #acao>
+                  <Button
+                    type="button"
+                    icon="ph ph-ticket"
+                    :label="t('shell.cupom.cta')"
+                    severity="secondary"
+                    outlined
+                    @click="abrirValidarCupom"
+                  />
+                </template>
+              </UiVazioIlustrado>
 
               <ul v-else class="ui-lista">
                 <li v-for="resgate in resgates" :key="resgate.resgateId" class="ui-linha">
@@ -812,12 +860,6 @@ watch(lastSuccessAt, (at) => {
   color: var(--tinta-2);
   font-size: 14px;
   line-height: 1.5;
-}
-
-.estado__acao {
-  gap: 8px;
-  margin-top: 10px;
-  text-decoration: none;
 }
 
 /* ------------------------------------------------------------------ o kit

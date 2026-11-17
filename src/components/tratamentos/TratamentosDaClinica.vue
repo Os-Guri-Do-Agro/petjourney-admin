@@ -28,7 +28,7 @@ const route = useRoute()
 const router = useRouter()
 const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAdesao()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 
 type Recorte = 'PEDEM_ATENCAO' | 'TODOS'
 
@@ -87,10 +87,18 @@ function meta(item: TratamentoNaLista) {
     .join(' · ')
 }
 
+/** Quem liga o "Crítico" na ficha: a mesma conta da ficha (`TratamentosDaFicha`). */
+const podeMarcarCritico = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('prontuario.escrever'),
+)
+
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem crítico pedindo atenção, como o
  * tratamento em casa chega até aqui, em três etapas (a casa registra as doses, a clínica marca o
  * crítico, a queda aparece nesta lista). Em "Todos", só o que vai aparecer ali.
+ *
+ * Cada etapa com o botão dela (17/11/2026): as doses são da casa, no app, e a queda chega sozinha;
+ * só marcar o crítico é da clínica, e o botão abre "Todos", onde cada linha leva à ficha.
  */
 const passosDoTratamento = computed<PassoDoGuia[]>(() =>
   [
@@ -102,6 +110,14 @@ const passosDoTratamento = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`adesao.guia.${id}.titulo`),
     texto: t(`adesao.guia.${id}.texto`),
+    acao:
+      id === 'critico' && podeMarcarCritico.value
+        ? {
+            rotulo: t('adesao.guia.verTodos'),
+            icone: 'ph ph-list-bullets',
+            aoClicar: () => trocarRecorte('TODOS'),
+          }
+        : undefined,
   })),
 )
 

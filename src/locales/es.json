@@ -1723,7 +1723,8 @@
       "passo3": {
         "titulo": "Su nota vuelve a la app",
         "texto": "Lo que registre llega a la historia de la mascota. Cuando vence el plazo, los datos clínicos salen y sus notas quedan."
-      }
+      },
+      "anotar": "Escribir nota"
     },
     "lista": {
       "buscaPlaceholder": "Buscar por el nombre de la mascota",
@@ -2023,6 +2024,15 @@
     },
     "tela": {
       "resumo": "{n} lectura del QR hasta ahora | {n} lecturas del QR hasta ahora"
+    },
+    "espera": {
+      "guia": {
+        "titulo": "Cómo se libera el código",
+        "codigo": {
+          "titulo": "El código aparece aquí",
+          "texto": "Con el programa activo, esta pantalla muestra el código, el enlace y el QR para invitar."
+        }
+      }
     }
   },
   "carteira": {
@@ -2048,7 +2058,22 @@
       "body": "La billetera, el extracto y los retiros solo están disponibles con el programa afiliado activo. Solicite la participación en la pantalla de programas.",
       "cta": "Solicitar programa afiliado",
       "emAnaliseTitle": "Programa de Afiliados en análisis",
-      "emAnaliseBody": "La billetera, el extracto y los retiros se habilitan en cuanto el equipo de PetJourney apruebe el programa. El resultado llega por correo."
+      "emAnaliseBody": "La billetera, el extracto y los retiros se habilitan en cuanto el equipo de PetJourney apruebe el programa. El resultado llega por correo.",
+      "guia": {
+        "titulo": "Cómo se abre la cartera",
+        "pedir": {
+          "titulo": "Solicite el programa de afiliados",
+          "texto": "En Programas, el dueño de la cuenta solicita participar. El código y la cartera vienen con él."
+        },
+        "analise": {
+          "titulo": "PetJourney aprueba",
+          "texto": "El equipo de PetJourney revisa el registro y habilita el programa. El resultado llega por correo."
+        },
+        "pix": {
+          "titulo": "Registre la clave PIX",
+          "texto": "Con la cartera abierta, la clave PIX es adonde van los retiros."
+        }
+      }
     },
     "visao": {
       "loadingAria": "Cargando billetera",
@@ -2335,7 +2360,23 @@
         "validoAte": "Válida hasta el {data}",
         "aceitar": "Aceptar",
         "recusar": "Rechazar",
-        "erroCarregar": "No fue posible cargar sus invitaciones."
+        "erroCarregar": "No fue posible cargar sus invitaciones.",
+        "vazioTexto": "Cuando una empresa invite su correo a su equipo, la invitación aparece aquí.",
+        "guia": {
+          "titulo": "Cómo llega la invitación",
+          "convida": {
+            "titulo": "La empresa invita",
+            "texto": "Un dueño de la empresa invita su correo en la pantalla Equipo, con el rol que usted tendrá."
+          },
+          "email": {
+            "titulo": "El enlace llega por correo",
+            "texto": "Con el nombre de la empresa, quién lo invitó y hasta cuándo vale la invitación."
+          },
+          "aceita": {
+            "titulo": "Usted acepta por el enlace",
+            "texto": "Abra el enlace con esta cuenta: la empresa entra en el portal, y usted cambia de una a otra en el menú de la cuenta."
+          }
+        }
       }
     },
     "equipe": {
@@ -2454,6 +2495,23 @@
         "fichaCadastrar": "Registrar también la ficha de profesional",
         "fichaReativar": "Reactivar también la ficha de profesional",
         "fichaDica": "Quien cuida a los huéspedes necesita una ficha de profesional activa para marcar las tareas de la rutina del hotel."
+      },
+      "guia": {
+        "vazioTitulo": "Solo usted en el equipo",
+        "vazioTexto": "Invite a quienes trabajan con usted. Cada persona entra con su propio usuario y ve lo que pide su función.",
+        "titulo": "Cómo se forma el equipo",
+        "convidar": {
+          "titulo": "Invite por correo",
+          "texto": "Elija el rol: el dueño hace todo; el operador lleva el día a día, sin tocar el equipo ni la cartera."
+        },
+        "aceitar": {
+          "titulo": "La persona acepta",
+          "texto": "Recibe el enlace por correo y entra desde él, aunque no tenga cuenta en PetJourney. El enlace vale por 14 días."
+        },
+        "funcoes": {
+          "titulo": "Defina las funciones",
+          "texto": "Recepción, veterinario, cuidador: la función decide lo que cada persona ve en el menú."
+        }
       }
     },
     "profissionais": {
@@ -2534,7 +2592,9 @@
         "agenda": {
           "titulo": "Entra en la agenda",
           "texto": "Con Atiende en la agenda activado, la ficha se vuelve una columna de la agenda, en su horario."
-        }
+        },
+        "abrirAgenda": "Abrir la agenda",
+        "cadastrarVeterinario": "Registrar veterinario"
       }
     },
     "indicados": {
@@ -2993,7 +3053,8 @@
         "consulta": {
           "titulo": "Usted lo revisa aquí",
           "texto": "Filtre por acción, persona y período para saber quién tocó un registro."
-        }
+        },
+        "abrirPacientes": "Abrir los pacientes"
       }
     }
   },
@@ -4076,7 +4137,8 @@
           },
           "chegada": {
             "titulo": "Registre la llegada",
-            "texto": "En la agenda, Registrar llegada pone al paciente en recepción, en esta lista."
+            "texto": "En la agenda, Registrar llegada pone al paciente en recepción, en esta lista.",
+            "acao": "Registrar llegada"
           },
           "sala": {
             "titulo": "Inicie la consulta",
@@ -4379,7 +4441,9 @@
           "ficha": {
             "titulo": "La ficha al lado",
             "texto": "La dosis de cada especie, las vías, las contraindicaciones y las interacciones, en un solo lugar."
-          }
+          },
+          "acrescentarMedicamento": "Agregar medicamento",
+          "buscarMedicamento": "Buscar medicamento"
         }
       }
     },
@@ -10577,7 +10641,8 @@
           "atendimentos": {
             "titulo": "Las atenciones usan las salas",
             "texto": "Cada tipo de atención dice en qué salas ocurre. La de internación también guarda las camas."
-          }
+          },
+          "configurarTipos": "Configurar tipos"
         }
       },
       "tipo": {
@@ -10628,7 +10693,8 @@
           "marcar": {
             "titulo": "Recepción agenda",
             "texto": "Al agendar, el tipo ya trae la duración. Marcado como online, también se puede pedir por la página de la clínica."
-          }
+          },
+          "configurarSalas": "Configurar salas"
         }
       },
       "politica": {
@@ -11321,7 +11387,8 @@
     "vazio": {
       "titulo": "Nadie atiende este día",
       "descricao": "Ningún profesional tiene horario de trabajo ni turno agendado este día.",
-      "semana": "Ver la semana"
+      "semana": "Ver la semana",
+      "expedientes": "Ajustar los horarios"
     },
     "voltar": "Volver",
     "horario": "{inicio} a {fim} · {duracao}",
@@ -11511,7 +11578,9 @@
       "semTipo": "Elige la atención.",
       "semProfissional": "Elige el profesional.",
       "horaInvalida": "Hora inválida. Usa el formato 09:30.",
-      "abrirOQueFicou": "Abrir el registro que quedó"
+      "abrirOQueFicou": "Abrir el registro que quedó",
+      "semTipos": "Para agendar, la clínica necesita un tipo de atención activo.",
+      "criarTipo": "Crear tipo de atención"
     },
     "preConsulta": {
       "titulo": "Preconsulta",
@@ -11908,7 +11977,8 @@
       "vazio": "Ninguna vacuna en el plan de este paciente.",
       "eMais": "y {n} vacunas más al día",
       "opcionais": "Opcionales no iniciadas ({n})",
-      "vazioTexto": "El plan se arma con las vacunas del catálogo para la especie del paciente, con la dosis que toca y la siguiente."
+      "vazioTexto": "El plan se arma con las vacunas del catálogo para la especie del paciente, con la dosis que toca y la siguiente.",
+      "acrescentarVacina": "Agregar vacuna"
     },
     "historico": {
       "titulo": "Historial ({n})",
@@ -12030,6 +12100,22 @@
         "detalhes": "Ver detalles",
         "editar": "Editar registro",
         "apagar": "Borrar registro"
+      },
+      "guia": {
+        "titulo": "Cómo se arma la lista de llamadas",
+        "registrar": {
+          "titulo": "Registre la dosis en la ficha",
+          "texto": "En la ficha del paciente: la dosis dada aquí, con el lote, y la recibida fuera, con la fecha del carné."
+        },
+        "serie": {
+          "titulo": "La próxima dosis se calcula",
+          "texto": "Por el protocolo de la vacuna en el catálogo: la serie, el refuerzo y la edad del paciente."
+        },
+        "chamar": {
+          "titulo": "Quien vence entra aquí",
+          "texto": "Del más atrasado al menos, con el teléfono del tutor y el recordatorio para activar."
+        },
+        "escolherPaciente": "Elegir paciente"
       }
     },
     "aplicadas": {
@@ -12799,7 +12885,8 @@
       "alerta": {
         "titulo": "La caída aparece aquí",
         "texto": "Dosis saltadas en 3 días o registros en caída en un crítico entran en esta lista, para que el equipo hable con la familia."
-      }
+      },
+      "verTodos": "Ver los tratamientos"
     }
   },
   "documentos": {
@@ -13594,7 +13681,8 @@
         "passagem": {
           "titulo": "El turno pasa al siguiente",
           "texto": "Al final del turno, quien está de guardia lo entrega al siguiente, con lo pendiente."
-        }
+        },
+        "registrar": "Registrar dosis"
       }
     },
     "boletim": {
@@ -13991,7 +14079,8 @@
       "avisar": {
         "titulo": "El mínimo avisa",
         "texto": "Por debajo del mínimo, la heladera y el menú avisan. El lote vencido pide descarte."
-      }
+      },
+      "definirMinimo": "Definir mínimo"
     }
   },
   "casaDoHotel": {
@@ -14072,7 +14161,9 @@
       "rotulo": "Tipo",
       "titulo": "Tipos de alojamiento",
       "vazio": "Ningún tipo registrado. Cree los tipos antes de los alojamientos.",
-      "noLimite": "La casa llegó al límite de {limite} tipos."
+      "noLimite": "La casa llegó al límite de {limite} tipos.",
+      "vazioTitulo": "Ningún tipo registrado",
+      "vazioTexto": "Cree los tipos antes de los alojamientos: cada alojamiento es de un tipo."
     },
     "acomodacao": {
       "nova": "Nuevo alojamiento",

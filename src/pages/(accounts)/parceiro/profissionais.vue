@@ -47,19 +47,6 @@ const desativadasAbertas = ref(false)
 const meuId = computed(() => getAuthUser()?.userId ?? null)
 const geroEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
 
-/* O vazio que ensina (17/11/2026, "tela vazia e nada é explicado"): o que é a ficha, o CRMV e a agenda. */
-const passosDasFichas = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'ficha', icone: 'ph ph-identification-card' },
-    { id: 'crmv', icone: 'ph ph-seal-check' },
-    { id: 'agenda', icone: 'ph ph-calendar-dots' },
-  ].map(({ id, icone }) => ({
-    id,
-    icone,
-    titulo: t(`parceiro.profissionais.guia.${id}.titulo`),
-    texto: t(`parceiro.profissionais.guia.${id}.texto`),
-  })),
-)
 const minhaFicha = computed(() => store.eu?.profissional ?? null)
 const aguardandoCrmv = computed(() => store.eu?.aguardandoCrmv ?? [])
 
@@ -266,6 +253,73 @@ function abrirExpediente(profissional: Profissional) {
   expedienteAberto.value = true
 }
 
+/*
+ * O vazio que ensina (17/11/2026, "tela vazia e nada é explicado"): o que é a ficha, o CRMV e a
+ * agenda, cada etapa com o botão dela ("tem sempre que ter os botões call to action"): cadastrar
+ * a ficha, a ficha com o CRMV e, apagado até haver ficha, abrir a agenda.
+ */
+/**
+ * O botão da etapa do CRMV: quem está logado e precisa do CRMV (`aguardandoCrmv`) cadastra a
+ * própria ficha, como no aviso do alto; quem gere a equipe e não precisa dele cadastra a ficha de
+ * um veterinário, já com o CRMV escolhido.
+ */
+const acaoDoCrmv = computed<PassoDoGuia['acao']>(() => {
+  if (aguardandoCrmv.value.length && (geroEquipe.value || minhaFicha.value)) {
+    return {
+      rotulo: minhaFicha.value
+        ? t('parceiro.profissionais.crmv.completar')
+        : t('parceiro.profissionais.crmv.cadastrar'),
+      icone: 'ph ph-identification-card',
+      aoClicar: cadastrarMinhaFicha,
+    }
+  }
+
+  return geroEquipe.value
+    ? {
+        rotulo: t('parceiro.profissionais.guia.cadastrarVeterinario'),
+        icone: 'ph ph-seal-check',
+        aoClicar: () => abrirNova({ conselho: 'CRMV' }),
+      }
+    : undefined
+})
+
+const passosDasFichas = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`parceiro.profissionais.guia.${id}.titulo`),
+    texto: t(`parceiro.profissionais.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'ficha',
+      'ph ph-identification-card',
+      geroEquipe.value
+        ? {
+            rotulo: t('parceiro.profissionais.cadastrar'),
+            icone: 'ph ph-plus',
+            aoClicar: () => abrirNova(),
+          }
+        : undefined,
+    ),
+    passo('crmv', 'ph ph-seal-check', acaoDoCrmv.value),
+    passo(
+      'agenda',
+      'ph ph-calendar-dots',
+      veExpediente.value
+        ? {
+            rotulo: t('parceiro.profissionais.guia.abrirAgenda'),
+            icone: 'ph ph-calendar-dots',
+            to: '/clinica/agenda',
+            bloqueada: !ativos.value.length,
+          }
+        : undefined,
+    ),
+  ]
+})
+
 function itemDoExpediente(profissional: Profissional): MenuItem[] {
   return veExpediente.value
     ? [
@@ -424,16 +478,7 @@ onMounted(async () => {
         :texto="t('parceiro.profissionais.vazioDica')"
         :guia-titulo="t('parceiro.profissionais.guia.titulo')"
         :passos="passosDasFichas"
-      >
-        <template v-if="geroEquipe" #acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            :label="t('parceiro.profissionais.cadastrar')"
-            @click="abrirNova()"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <ul v-else class="ui-lista ui-folha">
         <li v-for="profissional in ativos" :key="profissional.id" class="ui-linha ficha">

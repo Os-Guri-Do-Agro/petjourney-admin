@@ -74,20 +74,59 @@ const blocosNoLimite = computed(() => props.casa.blocos.length >= props.casa.lim
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): a casa sem corredor, como ela se monta,
- * em três etapas (corredor, tipo e tarifa, acomodação), e "Novo corredor" para quem edita.
+ * em três etapas, cada uma com o botão dela para quem edita ("tem sempre que ter os botões call to
+ * action"): o corredor abre a gaveta aqui; o tipo e a tarifa levam à vista que falta, já com a
+ * gaveta aberta (`?novo=1`), e ficam feitos quando os dois existem; a acomodação fica apagada até
+ * haver corredor, tipo e tarifa.
  */
-const passosDaCasa = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'corredor', icone: 'ph ph-door' },
-    { id: 'tipoTarifa', icone: 'ph ph-shapes' },
-    { id: 'acomodacao', icone: 'ph ph-house-line' },
-  ].map(({ id, icone }) => ({
+const passosDaCasa = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, extra: Partial<PassoDoGuia> = {}): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`casaDoHotel.planta.guia.${id}.titulo`),
     texto: t(`casaDoHotel.planta.guia.${id}.texto`),
-  })),
-)
+    ...extra,
+  })
+  const temTipo = props.casa.tipos.length > 0
+  const temTarifa = (props.casa.tarifas?.length ?? 0) > 0
+
+  return [
+    passo('corredor', 'ph ph-door', {
+      feito: props.casa.blocos.length > 0,
+      acao: props.podeEditar
+        ? {
+            rotulo: t('casaDoHotel.planta.novoBloco'),
+            icone: 'ph ph-plus',
+            aoClicar: () => abrirBloco(null),
+            bloqueada: blocosNoLimite.value,
+          }
+        : undefined,
+    }),
+    passo('tipoTarifa', 'ph ph-shapes', {
+      feito: temTipo && temTarifa,
+      acao: props.podeEditar
+        ? {
+            rotulo: temTipo ? t('casaDoHotel.tarifa.nova') : t('casaDoHotel.tipo.novo'),
+            icone: 'ph ph-plus',
+            to: {
+              path: '/hotel/acomodacoes',
+              query: { vista: temTipo ? 'tarifas' : 'tipos', novo: '1' },
+            },
+          }
+        : undefined,
+    }),
+    passo('acomodacao', 'ph ph-house-line', {
+      acao: props.podeEditar
+        ? {
+            rotulo: t('casaDoHotel.planta.novaAcomodacao'),
+            icone: 'ph ph-plus',
+            aoClicar: () => abrirAcomodacao(null),
+            bloqueada: !podeCriarAcomodacao.value,
+          }
+        : undefined,
+    }),
+  ]
+})
 
 function meta(a: AcomodacaoDaCasa) {
   return [
@@ -214,17 +253,7 @@ function abrirDesativar(a: AcomodacaoDaCasa) {
       :texto="t('casaDoHotel.planta.vazioTexto')"
       :guia-titulo="t('casaDoHotel.planta.guia.titulo')"
       :passos="passosDaCasa"
-    >
-      <template v-if="podeEditar" #acao>
-        <Button
-          type="button"
-          icon="ph ph-plus"
-          :label="t('casaDoHotel.planta.novoBloco')"
-          :disabled="blocosNoLimite"
-          @click="abrirBloco(null)"
-        />
-      </template>
-    </UiVazioIlustrado>
+    />
 
     <section
       v-for="(grupo, indice) in porBloco"

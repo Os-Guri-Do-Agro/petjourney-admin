@@ -16,6 +16,7 @@ import { RouterLink, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
@@ -221,9 +222,13 @@ async function abrir() {
         </component>
       </li>
     </ul>
-    <p v-else-if="lida && !carregando && !erro" class="lt__nota">
-      {{ t('atendimento.linha.vazio') }}
-    </p>
+    <!-- O "Atendimento avulso" já está no alto do cartão: o vazio só diz o que falta. -->
+    <UiVazioIlustrado
+      v-else-if="lida && !carregando && !erro"
+      aninhado
+      icone="ph ph-clock-counter-clockwise"
+      :titulo="t('atendimento.linha.vazio')"
+    />
 
     <Button
       v-if="cursor"

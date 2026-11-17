@@ -146,7 +146,16 @@ async function verFoto(registroId: string) {
       icone="ph ph-notebook"
       :titulo="t('rotinaDoHotel.diario.vazio')"
       :texto="t('rotinaDoHotel.diario.vazioTexto')"
-    />
+    >
+      <template v-if="podeEscrever" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('rotinaDoHotel.diario.escrever')"
+          @click="escreverAberta = true"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <Button
       v-if="pagina?.proximoCursor"

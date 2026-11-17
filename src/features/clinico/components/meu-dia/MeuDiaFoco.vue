@@ -49,18 +49,47 @@ const pendenciasAbertas = ref(false)
  */
 const { podeMarcar, atalhos } = useAtalhosDoDia()
 
-const passosDaFila = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'agenda', icone: 'ph ph-calendar-check' },
-    { id: 'chegada', icone: 'ph ph-door-open' },
-    { id: 'sala', icone: 'ph ph-stethoscope' },
-  ].map(({ id, icone }) => ({
+/*
+ * Cada etapa com o botão dela (17/11/2026): marcar leva à agenda com a marcação aberta; a chegada
+ * se registra na agenda, apagada enquanto não há ninguém marcado hoje (a fila está vazia). Iniciar
+ * a consulta é o botão da linha do paciente, que ainda não existe: sem botão aqui.
+ */
+const passosDaFila = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`clinico.meuDia.vazio.passos.${id}.titulo`),
     texto: t(`clinico.meuDia.vazio.passos.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'agenda',
+      'ph ph-calendar-check',
+      podeMarcar.value
+        ? {
+            rotulo: t('clinico.meuDia.vazio.marcar'),
+            icone: 'ph ph-calendar-plus',
+            to: { path: '/clinica/agenda', query: { novo: '1' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'chegada',
+      'ph ph-door-open',
+      podeMarcar.value
+        ? {
+            rotulo: t('clinico.meuDia.vazio.passos.chegada.acao'),
+            icone: 'ph ph-door-open',
+            to: '/clinica/agenda',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo('sala', 'ph ph-stethoscope'),
+  ]
+})
 
 /**
  * Os pacientes do cartão do destaque, um por vez num carrossel: todos os que estão em sala. Sem

@@ -10,6 +10,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import FaixaDoAno from '@/features/hotel/components/acomodacoes/FaixaDoAno.vue'
 import {
@@ -107,9 +108,24 @@ function abrir(tp: TemporadaDaCasa | null) {
     >
       {{ t('casaDoHotel.temporada.noLimite', { limite: props.casa.limites.temporadas }) }}
     </p>
-    <p v-if="!props.casa.temporadas?.length" class="ca__nota">
-      {{ t('casaDoHotel.temporada.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-if="!props.casa.temporadas?.length"
+      aninhado
+      icone="ph ph-calendar-star"
+      :titulo="t('casaDoHotel.temporada.vazio')"
+    >
+      <template
+        v-if="podeEditar && (props.casa.temporadas?.length ?? 0) < props.casa.limites.temporadas"
+        #acao
+      >
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('casaDoHotel.temporada.nova')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="tp in props.casa.temporadas" :key="tp.id" class="ui-linha">

@@ -5,10 +5,12 @@
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   apagarAgrupamento,
@@ -57,6 +59,23 @@ function abrir(tipo: TipoDaCasa | null) {
   emEdicao.value = tipo
   aberta.value = true
 }
+
+const noLimite = () => props.casa.tipos.length >= props.casa.limites.tipos
+
+/*
+ * Veio do guia da Planta ("Novo tipo", 17/11/2026) com `?novo=1`: a gaveta abre já aqui, para quem
+ * edita, e o pedido sai da URL (recarregar não reabre).
+ */
+const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  if (route.query.novo !== '1') return
+  if (props.podeEditar && !noLimite()) abrir(null)
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
+})
 </script>
 
 <template>
@@ -82,7 +101,22 @@ function abrir(tipo: TipoDaCasa | null) {
     <p v-if="props.casa.tipos.length >= props.casa.limites.tipos" class="ca__nota">
       {{ t('casaDoHotel.tipo.noLimite', { limite: props.casa.limites.tipos }) }}
     </p>
-    <p v-if="!props.casa.tipos.length" class="ca__nota">{{ t('casaDoHotel.tipo.vazio') }}</p>
+    <UiVazioIlustrado
+      v-if="!props.casa.tipos.length"
+      aninhado
+      icone="ph ph-shapes"
+      :titulo="t('casaDoHotel.tipo.vazioTitulo')"
+      :texto="t('casaDoHotel.tipo.vazioTexto')"
+    >
+      <template v-if="podeEditar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('casaDoHotel.tipo.novo')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="(tipo, indice) in props.casa.tipos" :key="tipo.id" class="ui-linha">

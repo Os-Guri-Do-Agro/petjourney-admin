@@ -10,7 +10,6 @@
  * Hoje o bulário da PetJourney inteiro está em revisão pelo responsável técnico, e a busca traz só
  * o que a clínica acrescentou (D2): a tela diz isso, em vez de parecer quebrada.
  */
-import Button from 'primevue/button'
 import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
@@ -56,7 +55,10 @@ const pacienteDaRota = computed(() => {
 })
 
 const podeCalcular = computed(() => store.temPermissao('prontuario.escrever'))
-const podeAcrescentar = computed(() => store.temPermissao('catalogo.gerir'))
+/* Acrescentar ao catálogo: quem gere o catálogo, com a Clínica para escrever (como na Configuração). */
+const podeAcrescentar = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('catalogo.gerir'),
+)
 
 function rotuloDaClasse(codigo: string) {
   const chave = `clinico.bulario.classe.${codigo.toLowerCase().replace(/_/g, '-')}`
@@ -88,21 +90,39 @@ const selecionado = computed(
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão da lista: sem busca e sem
  * nada achado, o porquê (D2, o bulário da PetJourney em revisão) e como o bulário anda (a clínica
- * acrescenta, a busca, a ficha), com o "Acrescentar" embaixo para quem gere o catálogo. Com
- * busca, é filtro: fica a frase curta.
+ * acrescenta, a busca, a ficha). Cada etapa que se faz tem o botão dela: "Acrescentar
+ * medicamento" para quem gere o catálogo (abre a gaveta na Configuração) e o "Buscar", apagado até
+ * haver o que achar. A ficha só se lê: sem botão. Com busca, é filtro: fica a frase curta.
  */
-const passosDoBulario = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'acrescentar', icone: 'ph ph-plus-circle' },
-    { id: 'buscar', icone: 'ph ph-magnifying-glass' },
-    { id: 'ficha', icone: 'ph ph-book-open' },
-  ].map(({ id, icone }) => ({
+const passosDoBulario = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`clinico.bulario.api.guia.${id}.titulo`),
     texto: t(`clinico.bulario.api.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'acrescentar',
+      'ph ph-plus-circle',
+      podeAcrescentar.value
+        ? {
+            rotulo: t('clinico.bulario.api.guia.acrescentarMedicamento'),
+            icone: 'ph ph-plus',
+            to: { path: '/clinica/configuracao', query: { aba: 'catalogo', novo: 'medicamentos' } },
+          }
+        : undefined,
+    ),
+    passo('buscar', 'ph ph-magnifying-glass', {
+      rotulo: t('clinico.bulario.api.guia.buscarMedicamento'),
+      icone: 'ph ph-magnifying-glass',
+      bloqueada: true,
+    }),
+    passo('ficha', 'ph ph-book-open'),
+  ]
+})
 
 let espera: ReturnType<typeof setTimeout> | undefined
 let pedido = 0
@@ -315,16 +335,7 @@ const resumo = computed(() =>
             :texto="t('clinico.bulario.api.emRevisao')"
             :guia-titulo="t('clinico.bulario.api.guia.titulo')"
             :passos="passosDoBulario"
-          >
-            <template v-if="podeAcrescentar" #acao>
-              <Button
-                :as="RouterLink"
-                to="/clinica/configuracao?aba=catalogo"
-                icon="ph ph-plus"
-                :label="t('clinico.bulario.api.acrescentar')"
-              />
-            </template>
-          </UiVazioIlustrado>
+          />
         </section>
 
         <section class="ui-folha ui-cartao bul__ficha" aria-live="polite">

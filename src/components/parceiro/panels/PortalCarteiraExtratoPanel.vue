@@ -13,6 +13,7 @@ import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -221,7 +222,6 @@ onMounted(() => {
 })
 </script>
 
-
 <template>
   <div id="partner-panel-extrato" class="extrato">
     <div
@@ -258,13 +258,14 @@ onMounted(() => {
       />
     </div>
 
-    <div v-else-if="items.length === 0" class="extrato__estado">
-      <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
-        <i class="ph ph-list-bullets" />
-      </span>
-      <strong>{{ t('carteira.extrato.emptyTitle') }}</strong>
-      <p>{{ t('carteira.extrato.emptyBody') }}</p>
-    </div>
+    <!-- Dentro do cartão das listas: o vazio sem caixa própria e sem botão (os créditos chegam sozinhos). -->
+    <UiVazioIlustrado
+      v-else-if="items.length === 0"
+      aninhado
+      icone="ph ph-list-bullets"
+      :titulo="t('carteira.extrato.emptyTitle')"
+      :texto="t('carteira.extrato.emptyBody')"
+    />
 
     <template v-else>
       <section
@@ -278,10 +279,7 @@ onMounted(() => {
             <i class="ph ph-calendar-blank" aria-hidden="true" />
             <time :datetime="day.dayKey">{{ day.label }}</time>
           </h3>
-          <span
-            class="extrato__dia-total ui-num"
-            :class="{ 'is-positivo': day.totalCentavos > 0 }"
-          >
+          <span class="extrato__dia-total ui-num" :class="{ 'is-positivo': day.totalCentavos > 0 }">
             {{ valorComSinal(day.totalCentavos) }}
           </span>
         </header>
@@ -302,7 +300,9 @@ onMounted(() => {
             </span>
 
             <span class="lancamento__texto">
-              <strong class="lancamento__titulo">{{ t(`carteira.extrato.tipo.${item.tipo}`) }}</strong>
+              <strong class="lancamento__titulo">{{
+                t(`carteira.extrato.tipo.${item.tipo}`)
+              }}</strong>
               <span class="lancamento__meta ui-num">{{ detalheDo(item) }}</span>
             </span>
 
@@ -313,7 +313,10 @@ onMounted(() => {
 
             <strong
               class="lancamento__valor ui-num"
-              :class="{ 'is-negative': item.valorCentavos < 0, 'is-positivo': item.valorCentavos > 0 }"
+              :class="{
+                'is-negative': item.valorCentavos < 0,
+                'is-positivo': item.valorCentavos > 0,
+              }"
             >
               {{ valorComSinal(item.valorCentavos) }}
             </strong>

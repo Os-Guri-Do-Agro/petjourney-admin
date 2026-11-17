@@ -6,10 +6,12 @@
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   apagarTarifa,
@@ -67,6 +69,23 @@ function abrir(tarifa: TarifaDaCasa | null) {
   emEdicao.value = tarifa
   aberta.value = true
 }
+
+const noLimite = () => (props.casa.tarifas?.length ?? 0) >= props.casa.limites.tarifas
+
+/*
+ * Veio do guia da Planta ("Nova tabela", 17/11/2026) com `?novo=1`: a gaveta abre já aqui, para
+ * quem edita, e o pedido sai da URL (recarregar não reabre).
+ */
+const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  if (route.query.novo !== '1') return
+  if (props.podeEditar && !noLimite()) abrir(null)
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
+})
 </script>
 
 <template>
@@ -92,7 +111,21 @@ function abrir(tarifa: TarifaDaCasa | null) {
     <p v-if="(props.casa.tarifas?.length ?? 0) >= props.casa.limites.tarifas" class="ca__nota">
       {{ t('casaDoHotel.tarifa.noLimite', { limite: props.casa.limites.tarifas }) }}
     </p>
-    <p v-if="!props.casa.tarifas?.length" class="ca__nota">{{ t('casaDoHotel.tarifa.vazio') }}</p>
+    <UiVazioIlustrado
+      v-if="!props.casa.tarifas?.length"
+      aninhado
+      icone="ph ph-currency-circle-dollar"
+      :titulo="t('casaDoHotel.tarifa.vazio')"
+    >
+      <template v-if="podeEditar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('casaDoHotel.tarifa.nova')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="tarifa in props.casa.tarifas" :key="tarifa.id" class="ui-linha">

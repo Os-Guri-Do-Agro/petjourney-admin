@@ -1224,8 +1224,9 @@ useRevalidarAoVoltar(() => {
 
       <!--
         Nenhum acesso ativo: é aqui que se aprende como um acesso chega. Três andares: o recado
-        (ladrilho, título e a frase inteira), a trilha das etapas num poço (só quando o guia do
-        topo está desligado, para não repetir) e a ação, sozinha embaixo.
+        (ladrilho, título e a frase inteira), a trilha das etapas num poço, com o botão de cada
+        etapa (só quando o guia do topo está desligado, para não repetir) e, com o guia no topo,
+        a ação sozinha embaixo.
       -->
       <section
         v-else-if="items.length === 0 && activeTab === 'ativos'"
@@ -1240,12 +1241,15 @@ useRevalidarAoVoltar(() => {
           <p>{{ t('acessos.list.emptyAtivosBody') }}</p>
         </div>
 
+        <!-- Com a trilha aqui, o "Novo acesso temporário" é o botão da etapa de vincular. -->
         <div v-if="!isGuidanceVisible" class="vazio-ativos__guia ui-poco">
           <h3 class="vazio-ativos__guia-titulo">{{ t('acessos.guia.titulo') }}</h3>
-          <AcessosPassos />
+          <AcessosPassos
+            :vincular="{ aoClicar: () => (vincularVisible = true), bloqueada: !podeAbrirVinculo }"
+          />
         </div>
 
-        <div class="vazio-ativos__acao">
+        <div v-else class="vazio-ativos__acao">
           <Button
             type="button"
             icon="ph ph-link"

@@ -214,21 +214,44 @@ const fraseDoResumo = computed(() => {
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem paciente ativo, como o cadastro
  * enche, em três etapas (a gaveta em passos, a planilha antiga, a busca do balcão), com Cadastrar e
- * Importar embaixo para quem pode. Inativos só diz o que vai aparecer ali; a busca sem resultado
+ * Importar nas etapas para quem pode. Inativos só diz o que vai aparecer ali; a busca sem resultado
  * fica só com o recado.
  */
-const passosDoCadastro = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'passos', icone: 'ph ph-list-numbers' },
-    { id: 'importar', icone: 'ph ph-file-arrow-up' },
-    { id: 'buscar', icone: 'ph ph-magnifying-glass' },
-  ].map(({ id, icone }) => ({
+const passosDoCadastro = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`cadastro.lista.guia.${id}.titulo`),
     texto: t(`cadastro.lista.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  /*
+   * Cada etapa com o botão dela (17/11/2026): cadastrar abre a gaveta aqui, importar leva ao
+   * migrador; a busca é o campo logo acima, sem botão.
+   */
+  return [
+    passo(
+      'passos',
+      'ph ph-list-numbers',
+      podeCadastrar.value
+        ? { rotulo: t('cadastro.lista.cadastrar'), icone: 'ph ph-plus', aoClicar: cadastrar }
+        : undefined,
+    ),
+    passo(
+      'importar',
+      'ph ph-file-arrow-up',
+      podeImportar.value
+        ? {
+            rotulo: t('cadastro.lista.importar'),
+            icone: 'ph ph-file-arrow-up',
+            to: '/clinica/paciente/importar',
+          }
+        : undefined,
+    ),
+    passo('buscar', 'ph ph-magnifying-glass'),
+  ]
+})
 
 /*
  * Cadastrar abre a gaveta em passos aqui mesmo, sem sair da lista (pedido do Luís, 17/11/2026).
@@ -371,26 +394,7 @@ watch(
         :texto="t('cadastro.lista.vazioDica')"
         :guia-titulo="t('cadastro.lista.guia.titulo')"
         :passos="passosDoCadastro"
-      >
-        <template v-if="podeCadastrar || podeImportar" #acao>
-          <Button
-            v-if="podeCadastrar"
-            type="button"
-            icon="ph ph-plus"
-            :label="t('cadastro.lista.cadastrar')"
-            @click="cadastrar"
-          />
-          <Button
-            v-if="podeImportar"
-            type="button"
-            severity="secondary"
-            outlined
-            icon="ph ph-file-arrow-up"
-            :label="t('cadastro.lista.importar')"
-            @click="router.push('/clinica/paciente/importar')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <UiVazioIlustrado
         v-else-if="!itens.length"

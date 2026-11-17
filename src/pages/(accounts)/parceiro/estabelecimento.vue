@@ -52,6 +52,7 @@ import {
 } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import type { Aba } from '@/navegacao/espacos'
@@ -113,8 +114,19 @@ async function carregar() {
   }
 }
 
-onMounted(() => {
-  void carregar()
+/*
+ * Veio de um atalho que quer a gaveta aberta ("Configurar o horário" do guia da Agenda, 17/11/2026)
+ * com `?editar=1`: nos Horários abre a semana, no Perfil abre o perfil, só para quem edita. O
+ * pedido sai da URL (recarregar não reabre); a aba fica.
+ */
+onMounted(async () => {
+  await carregar()
+  if (route.query.editar !== '1') return
+  if (podeEditar.value && aba.value === 'horarios') abrirHorarios()
+  if (podeEditar.value && aba.value === 'perfil') abrirPerfil('perfil')
+  const query = { ...route.query }
+  delete query.editar
+  void router.replace({ query })
 })
 
 /** Erros em que a tela na frente ficou velha: o papel ou o cadastro mudou. */
@@ -799,18 +811,21 @@ async function salvarSlug(slug: string) {
             />
           </template>
 
-          <div v-if="!perfil" class="comeco">
-            <p class="comeco__texto">
-              <strong>{{ t('parceiro.estabelecimento.perfil.comecoTitulo') }}</strong>
-              {{ t('parceiro.estabelecimento.perfil.comeco') }}
-            </p>
-            <Button
-              v-if="podeEditar"
-              icon="ph ph-pencil-simple"
-              :label="t('parceiro.estabelecimento.perfil.preencher')"
-              @click="abrirPerfil('perfil')"
-            />
-          </div>
+          <UiVazioIlustrado
+            v-if="!perfil"
+            aninhado
+            icone="ph ph-storefront"
+            :titulo="t('parceiro.estabelecimento.perfil.comecoTitulo')"
+            :texto="t('parceiro.estabelecimento.perfil.comeco')"
+          >
+            <template v-if="podeEditar" #acao>
+              <Button
+                icon="ph ph-pencil-simple"
+                :label="t('parceiro.estabelecimento.perfil.preencher')"
+                @click="abrirPerfil('perfil')"
+              />
+            </template>
+          </UiVazioIlustrado>
 
           <template v-else>
             <p v-if="perfil.descricao" class="descricao">{{ perfil.descricao }}</p>
@@ -917,20 +932,21 @@ async function salvarSlug(slug: string) {
               :hoje="hoje"
             />
 
-            <div v-else class="comeco">
-              <p class="comeco__texto">
-                <strong>{{ t('parceiro.estabelecimento.horario.vazioTitulo') }}</strong>
-                {{ t('parceiro.estabelecimento.horario.vazio') }}
-              </p>
-              <Button
-                v-if="podeEditar"
-                icon="ph ph-clock"
-                :label="t('parceiro.estabelecimento.horario.cadastrar')"
-                severity="secondary"
-                outlined
-                @click="abrirHorarios"
-              />
-            </div>
+            <UiVazioIlustrado
+              v-else
+              aninhado
+              icone="ph ph-clock"
+              :titulo="t('parceiro.estabelecimento.horario.vazioTitulo')"
+              :texto="t('parceiro.estabelecimento.horario.vazio')"
+            >
+              <template v-if="podeEditar" #acao>
+                <Button
+                  icon="ph ph-clock"
+                  :label="t('parceiro.estabelecimento.horario.cadastrar')"
+                  @click="abrirHorarios"
+                />
+              </template>
+            </UiVazioIlustrado>
           </div>
         </UiSecao>
 
@@ -1089,33 +1105,6 @@ async function salvarSlug(slug: string) {
   font-size: 14px;
   line-height: 1.55;
   white-space: pre-line;
-}
-
-.comeco {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 20px;
-  padding: 18px 20px;
-}
-
-.horarios .comeco {
-  padding: 0;
-}
-
-.comeco__texto {
-  display: grid;
-  gap: 4px;
-  max-width: 52ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.comeco__texto strong {
-  color: var(--tinta);
 }
 
 /* ---------------------------------------------------------------------- a página pública */

@@ -51,20 +51,40 @@ const editaCasa = computed(
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): a casa sem acomodação não tem mapa.
- * Como o mapa se forma, em três etapas, e "Montar a casa" para quem edita.
+ * Como o mapa se forma, em três etapas, com o botão de cada uma (17/11/2026): "Montar a casa" para
+ * quem edita; a situação de cada acomodação o mapa mostra sozinho, sem botão; procurar vaga fica
+ * apagado até haver acomodação.
  */
-const passosDoMapa = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'casa', icone: 'ph ph-building' },
-    { id: 'situacao', icone: 'ph ph-squares-four' },
-    { id: 'vaga', icone: 'ph ph-funnel' },
-  ].map(({ id, icone }) => ({
+const passosDoMapa = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`reservasDoHotel.mapa.guia.${id}.titulo`),
     texto: t(`reservasDoHotel.mapa.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'casa',
+      'ph ph-building',
+      editaCasa.value
+        ? {
+            rotulo: t('reservasDoHotel.mapa.montarCasa'),
+            icone: 'ph ph-building',
+            to: '/hotel/acomodacoes',
+          }
+        : undefined,
+    ),
+    passo('situacao', 'ph ph-squares-four'),
+    passo('vaga', 'ph ph-funnel', {
+      rotulo: t('reservasDoHotel.mapa.procurar'),
+      icone: 'ph ph-funnel',
+      aoClicar: abrirFiltro,
+      bloqueada: true,
+    }),
+  ]
+})
 
 const iso = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -214,16 +234,7 @@ function aplicar() {
         :texto="t('reservasDoHotel.mapa.vazioTexto')"
         :guia-titulo="t('reservasDoHotel.mapa.guia.titulo')"
         :passos="passosDoMapa"
-      >
-        <template v-if="editaCasa" #acao>
-          <Button
-            :as="RouterLink"
-            to="/hotel/acomodacoes"
-            icon="ph ph-building"
-            :label="t('reservasDoHotel.mapa.montarCasa')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <section
         v-for="grupo in porBloco"

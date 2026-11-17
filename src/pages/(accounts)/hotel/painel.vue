@@ -606,6 +606,10 @@ const vazio = computed(
  * hóspede pela casa (chega, fica, sai), com as frases do tutorial desta tela, e as reservas
  * embaixo, de onde vem quem chega.
  */
+/*
+ * O "Ver reservas" é o botão da etapa de quem chega (17/11/2026): o check-in sai da reserva. Quem
+ * está na casa e quem sai só aparecem aqui depois dele: sem botão.
+ */
 const passosDoDia = computed<PassoDoGuia[]>(() =>
   [
     { id: 'chegam', titulo: 'chegam', icone: 'ph ph-sign-in' },
@@ -616,6 +620,14 @@ const passosDoDia = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`hotel.hoje.painel.${titulo}`),
     texto: t(`hotel.hoje.painel.tour.${id}.texto`),
+    acao:
+      id === 'chegam'
+        ? {
+            rotulo: t('hotel.mapa.verReservas'),
+            icone: 'ph ph-calendar-blank',
+            to: '/hotel/reservas',
+          }
+        : undefined,
   })),
 )
 
@@ -688,9 +700,6 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     vazio-icone="ph ph-sun-horizon"
     :vazio-guia-titulo="t('hotel.painel.guiaTitulo')"
     :vazio-passos="passosDoDia"
-    :vazio-acao="t('hotel.mapa.verReservas')"
-    vazio-acao-icone="ph ph-calendar-blank"
-    @acao-do-vazio="router.push('/hotel/reservas')"
     @tentar-de-novo="carregar"
   >
     <!--

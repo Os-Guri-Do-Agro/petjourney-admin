@@ -304,21 +304,52 @@ const vagasAbertas = ref(false)
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): com ninguém na fila, como ela trabalha,
- * em três etapas (entra quem ficou sem horário, a vaga que abre, a oferta com prazo), e o
- * "Adicionar à fila" embaixo. Sem ofertas vencidas, a outra aba diz o que vai aparecer nela.
+ * em três etapas (entra quem ficou sem horário, a vaga que abre, a oferta com prazo). Sem ofertas
+ * vencidas, a outra aba diz o que vai aparecer nela.
+ *
+ * Cada etapa com o botão dela (17/11/2026): pôr na fila abre a gaveta aqui; a vaga abre sozinha,
+ * sem botão; oferecer mora nas Vagas, apagado enquanto não há ninguém na fila para receber.
  */
-const passosDaFila = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'entrar', icone: 'ph ph-user-plus' },
-    { id: 'vaga', icone: 'ph ph-calendar-check' },
-    { id: 'oferta', icone: 'ph ph-paper-plane-tilt' },
-  ].map(({ id, icone }) => ({
+const passosDaFila = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`fila.guia.${id}.titulo`),
     texto: t(`fila.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'entrar',
+      'ph ph-user-plus',
+      podeGerir.value
+        ? {
+            rotulo: t('clinico.fila.adicionar'),
+            icone: 'ph ph-plus',
+            aoClicar: () => {
+              entrarAberta.value = true
+            },
+          }
+        : undefined,
+    ),
+    passo('vaga', 'ph ph-calendar-check'),
+    passo(
+      'oferta',
+      'ph ph-paper-plane-tilt',
+      podeGerir.value
+        ? {
+            rotulo: t('clinico.fila.ofertarVaga'),
+            icone: 'ph ph-paper-plane-tilt',
+            aoClicar: () => {
+              vagasAbertas.value = true
+            },
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+  ]
+})
 </script>
 
 <template>
@@ -383,16 +414,7 @@ const passosDaFila = computed<PassoDoGuia[]>(() =>
         :texto="t('clinico.fila.vazioDescricao')"
         :guia-titulo="t('fila.guia.titulo')"
         :passos="passosDaFila"
-      >
-        <template v-if="podeGerir" #acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            :label="t('clinico.fila.adicionar')"
-            @click="entrarAberta = true"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <UiVazioIlustrado
         v-else-if="!itens.length"

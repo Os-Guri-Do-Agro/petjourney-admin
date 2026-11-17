@@ -102,8 +102,9 @@ function acaoDe(item: PedidoDeCopia) {
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem pedido aberto, como a cópia anda, em
- * três etapas (o pedido chega, a clínica gera, entrega e fecha), com "Registrar pedido" embaixo
- * para quem escreve. Encerrados só diz o que vai aparecer ali.
+ * três etapas (o pedido chega, a clínica gera, entrega e fecha), com "Registrar pedido" na
+ * primeira para quem escreve (17/11/2026: cada etapa com o botão dela); gerar e entregar são o
+ * botão da linha do pedido, que ainda não existe. Encerrados só diz o que vai aparecer ali.
  */
 const passosDaCopia = computed<PassoDoGuia[]>(() =>
   [
@@ -115,6 +116,16 @@ const passosDaCopia = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`copias.guia.${id}.titulo`),
     texto: t(`copias.guia.${id}.texto`),
+    acao:
+      id === 'pedir' && podeEscrever.value
+        ? {
+            rotulo: t('copias.novo.acao'),
+            icone: 'ph ph-plus',
+            aoClicar: () => {
+              novoAberto.value = true
+            },
+          }
+        : undefined,
   })),
 )
 
@@ -202,16 +213,7 @@ function registrado(pedido: PedidoDeCopia, jaExistia: boolean) {
         :texto="t('copias.guia.texto')"
         :guia-titulo="t('copias.guia.titulo')"
         :passos="passosDaCopia"
-      >
-        <template v-if="podeEscrever" #acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            :label="t('copias.novo.acao')"
-            @click="novoAberto = true"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <UiVazioIlustrado
         v-else-if="lido && !carregando && !itens.length"

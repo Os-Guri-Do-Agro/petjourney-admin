@@ -53,6 +53,10 @@ const executa = computed(() => clinicaEscreve.value && store.temPermissao('inter
 const veLeitos = computed(
   () => store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar'),
 )
+/* Cadastrar leitos é de quem configura a clínica (DONO, GESTOR), como na aba Leitos. */
+const cadastraLeitos = computed(
+  () => clinicaEscreve.value && store.temPermissao('estabelecimento.editar'),
+)
 
 const mapa = ref<Mapa | null>(null)
 const carregando = ref(false)
@@ -189,20 +193,40 @@ const vazio = computed(() => Boolean(mapa.value) && !mapa.value!.leitos.length)
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem leito nenhum, como a internação
  * trabalha, em três etapas (o cadastro dos leitos, internar no livre, o mapa que aponta quem
- * precisa), e o "Cadastrar leitos" para quem cadastra.
+ * precisa). Cada etapa que se faz tem o botão dela: "Cadastrar leitos" para quem configura e o
+ * "Internar", apagado até haver leito. O mapa que aponta é automático: sem botão.
  */
-const passosDaInternacao = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'leitos', icone: 'ph ph-bed' },
-    { id: 'internar', icone: 'ph ph-first-aid-kit' },
-    { id: 'acompanhar', icone: 'ph ph-bell-ringing' },
-  ].map(({ id, icone }) => ({
+const passosDaInternacao = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`internacao.guia.${id}.titulo`),
     texto: t(`internacao.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'leitos',
+      'ph ph-bed',
+      cadastraLeitos.value
+        ? {
+            rotulo: t('internacao.irParaLeitos'),
+            icone: 'ph ph-bed',
+            to: { path: '/clinica/configuracao', query: { aba: 'leitos' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'internar',
+      'ph ph-first-aid-kit',
+      podeInternar.value
+        ? { rotulo: t('internacao.internar.acao'), icone: 'ph ph-first-aid-kit', bloqueada: true }
+        : undefined,
+    ),
+    passo('acompanhar', 'ph ph-bell-ringing'),
+  ]
+})
 
 /* ----------------------------------------------------------------------- internar */
 
@@ -243,13 +267,13 @@ function abrir(id: string) {
     :erro="mapa ? '' : erro"
     :vazio="vazio"
     :vazio-titulo="t('internacao.vazioTitulo')"
-    :vazio-descricao="veLeitos ? t('internacao.vazioDescricao') : t('internacao.vazioSemCadastro')"
-    :vazio-acao="veLeitos ? t('internacao.irParaLeitos') : ''"
+    :vazio-descricao="
+      cadastraLeitos ? t('internacao.vazioDescricao') : t('internacao.vazioSemCadastro')
+    "
     vazio-icone="ph ph-bed"
     :vazio-guia-titulo="t('internacao.guia.titulo')"
     :vazio-passos="passosDaInternacao"
     @tentar-de-novo="carregar"
-    @acao-do-vazio="router.push({ path: '/clinica/configuracao', query: { aba: 'leitos' } })"
   >
     <template #acoes>
       <Button

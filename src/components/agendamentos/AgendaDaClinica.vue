@@ -816,8 +816,9 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem ninguém que atenda na agenda, todo
  * dia fica sem coluna; aí o vazio mostra como a agenda se monta, em três etapas, e leva a
- * Profissionais quem gere a equipe. Com equipe, o dia sem coluna é folga de todos: só o recado e
- * o "Ver a semana".
+ * Profissionais quem gere a equipe. Com equipe, o dia sem coluna é folga de todos: o recado, o
+ * "Ver a semana" e, com a clínica aberta nesse dia, o "Ajustar os expedientes" para quem gere a
+ * equipe (17/11/2026: o vazio chama para o que resolve).
  */
 const semEquipeNaAgenda = computed(() => equipeLida.value && equipe.value.length === 0)
 const podeGerirEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
@@ -859,7 +860,7 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
         ? {
             rotulo: t('agendamentos.guia.configurarHorario'),
             icone: 'ph ph-clock',
-            to: { path: '/parceiro/estabelecimento', query: { aba: 'horarios' } },
+            to: { path: '/parceiro/estabelecimento', query: { aba: 'horarios', editar: '1' } },
           }
         : undefined,
     ),
@@ -1074,6 +1075,14 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
           :texto="t('agendamentos.vazio.descricao')"
         >
           <template #acao>
+            <!-- A clínica abre e ninguém tem expediente: quem gere a equipe acerta o de cada um. -->
+            <Button
+              v-if="podeGerirEquipe && !diaNaTela.clinicaFechada"
+              :as="RouterLink"
+              to="/parceiro/profissionais"
+              icon="ph ph-clock-user"
+              :label="t('agendamentos.vazio.expedientes')"
+            />
             <Button
               type="button"
               severity="secondary"

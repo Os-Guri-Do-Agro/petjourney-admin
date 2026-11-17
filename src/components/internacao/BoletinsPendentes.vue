@@ -100,20 +100,45 @@ const resumo = computed(() => {
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): com a fila em dia, como um internado
  * chega até ela, em três etapas (a piora que pede ligação, a ligação registrada, o boletim que
- * vai ao app). Sem ação: nada aqui faz pendência aparecer.
+ * vai ao app). A piora é automática: sem botão. Registrar a ligação e enviar o boletim se fazem
+ * aqui, na linha do internado: os botões aparecem apagados, mostrando onde vão estar, até a fila
+ * ter alguém.
  */
-const passosDaFila = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'piora', icone: 'ph ph-heartbeat' },
-    { id: 'ligar', icone: 'ph ph-phone' },
-    { id: 'enviar', icone: 'ph ph-paper-plane-tilt' },
-  ].map(({ id, icone }) => ({
+const passosDaFila = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`internacao.boletim.guiaFila.${id}.titulo`),
     texto: t(`internacao.boletim.guiaFila.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo('piora', 'ph ph-heartbeat'),
+    passo(
+      'ligar',
+      'ph ph-phone',
+      pode.value
+        ? {
+            rotulo: t('internacao.boletim.registrarLigacao'),
+            icone: 'ph ph-phone',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo(
+      'enviar',
+      'ph ph-paper-plane-tilt',
+      pode.value
+        ? {
+            rotulo: t('internacao.boletim.enviar'),
+            icone: 'ph ph-paper-plane-tilt',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+  ]
+})
 
 /* ----------------------------------------------------------------------------- as ações */
 

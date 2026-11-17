@@ -164,13 +164,18 @@ watch(
             </dl>
           </li>
         </ul>
+        <!-- Sem agendada, o vazio chama para agendar; a encerrada chega sozinha, sem botão. -->
         <UiVazioIlustrado
           v-else
           aninhado
           :icone="grupo.icone"
           :titulo="grupo.vazioTitulo"
           :texto="grupo.vazioTexto"
-        />
+        >
+          <template v-if="grupo.id === 'agendadas'" #acao>
+            <Button type="button" icon="ph ph-plus" label="Nova campanha" @click="novaCampanha" />
+          </template>
+        </UiVazioIlustrado>
       </section>
     </div>
 

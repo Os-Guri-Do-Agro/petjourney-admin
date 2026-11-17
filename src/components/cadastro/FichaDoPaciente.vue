@@ -696,7 +696,13 @@ watch(excluindo, (aberta) => {
                 </span>
               </li>
             </ul>
-            <p v-else class="fp__nada">{{ t('cadastro.alerta.nenhum') }}</p>
+            <!-- O "Novo alerta" já está no alto do cartão: o vazio só diz o que falta. -->
+            <UiVazioIlustrado
+              v-else
+              aninhado
+              icone="ph ph-shield-check"
+              :titulo="t('cadastro.alerta.nenhum')"
+            />
 
             <template v-if="encerrados.length">
               <Button
@@ -926,7 +932,12 @@ watch(excluindo, (aberta) => {
                 </span>
               </li>
             </ul>
-            <p v-else class="fp__nada">{{ t('cadastro.autorizados.nenhum') }}</p>
+            <UiVazioIlustrado
+              v-else
+              aninhado
+              icone="ph ph-identification-badge"
+              :titulo="t('cadastro.autorizados.nenhum')"
+            />
           </section>
         </div>
       </div>
@@ -1101,12 +1112,6 @@ watch(excluindo, (aberta) => {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.fp__nada {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
 }
 
 .fp__recolher {

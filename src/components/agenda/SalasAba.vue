@@ -78,21 +78,41 @@ const inativas = computed(() => salas.value.filter((sala) => !sala.ativa))
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem sala nenhuma, para
- * que as salas servem (o tipo, as colunas da agenda, os tipos de atendimento que as usam), e o
- * "Nova sala" embaixo para quem configura.
+ * que as salas servem (o tipo, as colunas da agenda, os tipos de atendimento que as usam). Cada
+ * etapa que se faz com o botão dela: "Nova sala" abre a gaveta aqui e "Configurar tipos" leva à aba
+ * Tipos de atendimento. As colunas da agenda são automáticas: sem botão.
  */
-const passosDasSalas = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'tipo', icone: 'ph ph-door' },
-    { id: 'colunas', icone: 'ph ph-columns' },
-    { id: 'atendimentos', icone: 'ph ph-stethoscope' },
-  ].map(({ id, icone }) => ({
+const passosDasSalas = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`agenda.config.sala.guia.${id}.titulo`),
     texto: t(`agenda.config.sala.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'tipo',
+      'ph ph-door',
+      props.podeEditar
+        ? { rotulo: t('agenda.config.sala.nova'), icone: 'ph ph-plus', aoClicar: () => abrir(null) }
+        : undefined,
+    ),
+    passo('colunas', 'ph ph-columns'),
+    passo(
+      'atendimentos',
+      'ph ph-stethoscope',
+      props.podeEditar
+        ? {
+            rotulo: t('agenda.config.sala.guia.configurarTipos'),
+            icone: 'ph ph-stethoscope',
+            to: { path: '/clinica/configuracao', query: { aba: 'tipos' } },
+          }
+        : undefined,
+    ),
+  ]
+})
 
 function avisarErro(err: unknown) {
   toast.add({
@@ -255,16 +275,7 @@ const ICONE_DA_SALA: Record<TipoDeSala, string> = {
       :texto="t('agenda.config.sala.vazioTexto')"
       :guia-titulo="t('agenda.config.sala.guia.titulo')"
       :passos="passosDasSalas"
-    >
-      <template v-if="props.podeEditar" #acao>
-        <Button
-          type="button"
-          icon="ph ph-plus"
-          :label="t('agenda.config.sala.nova')"
-          @click="abrir(null)"
-        />
-      </template>
-    </UiVazioIlustrado>
+    />
 
     <template v-else-if="salas.length">
       <ul class="ui-lista">

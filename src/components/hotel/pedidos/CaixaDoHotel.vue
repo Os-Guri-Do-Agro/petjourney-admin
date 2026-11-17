@@ -163,6 +163,10 @@ const ICONE_DO_VAZIO: Record<AbaDaCaixaDoHotel, string> = {
   ENCERRADOS: 'ph ph-archive',
 }
 
+/*
+ * Pedir é do responsável e chegar é sozinho: sem botão. Responder é do balcão, e o botão dele fica
+ * apagado até chegar um pedido (17/11/2026, "tem sempre que ter os botões call to action").
+ */
 const passosDoPedido = computed<PassoDoGuia[]>(() =>
   [
     { id: 'pedir', icone: 'ph ph-device-mobile' },
@@ -173,6 +177,10 @@ const passosDoPedido = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`pedidosDoHotel.guia.${id}.titulo`),
     texto: t(`pedidosDoHotel.guia.${id}.texto`),
+    acao:
+      id === 'responder' && podeResponder.value
+        ? { rotulo: t('pedidosDoHotel.responder'), icone: 'ph ph-chat-text', bloqueada: true }
+        : undefined,
   })),
 )
 

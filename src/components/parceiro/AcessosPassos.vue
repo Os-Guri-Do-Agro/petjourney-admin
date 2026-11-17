@@ -11,15 +11,23 @@
  *
  * O número de cada etapa é só visual (a `ol` já conta para o leitor de tela). O desenho mora em
  * `UiPassos` desde 17/11/2026, para os vazios das outras telas usarem o mesmo.
+ *
+ * Na lista vazia (`vincular`), as etapas da empresa ganham o botão delas (17/11/2026, "tem sempre
+ * que ter os botões call to action"): vincular o código abre o pedido dele ali mesmo; escrever a
+ * anotação fica apagado até haver um acesso. Compartilhar é do responsável, no app: sem botão.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import UiPassos from '@/components/ui/UiPassos.vue'
+import UiPassos, { type PassoDoGuia } from '@/components/ui/UiPassos.vue'
+
+const props = defineProps<{
+  vincular?: { aoClicar: () => void; bloqueada?: boolean }
+}>()
 
 const { t } = useI18n()
 
-const passos = computed(() => [
+const passos = computed<PassoDoGuia[]>(() => [
   {
     id: 'compartilha',
     icone: 'ph ph-device-mobile',
@@ -31,12 +39,23 @@ const passos = computed(() => [
     icone: 'ph ph-key',
     titulo: t('acessos.guia.passo2.titulo'),
     texto: t('acessos.guia.passo2.texto'),
+    acao: props.vincular
+      ? {
+          rotulo: t('acessos.vincular.cta'),
+          icone: 'ph ph-link',
+          aoClicar: props.vincular.aoClicar,
+          bloqueada: props.vincular.bloqueada,
+        }
+      : undefined,
   },
   {
     id: 'anota',
     icone: 'ph ph-note-pencil',
     titulo: t('acessos.guia.passo3.titulo'),
     texto: t('acessos.guia.passo3.texto'),
+    acao: props.vincular
+      ? { rotulo: t('acessos.guia.anotar'), icone: 'ph ph-note-pencil', bloqueada: true }
+      : undefined,
   },
 ])
 </script>

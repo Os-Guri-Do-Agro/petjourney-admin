@@ -16,6 +16,7 @@ import { useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -86,42 +87,34 @@ const ninguemAinda = computed(
   () => !carregando.value && filtro.value === 'TODOS' && total.value === 0,
 )
 
-const vazioDaPagina = computed(() => {
-  if (bloqueio.value) {
-    return {
-      titulo: t(`parceiro.indicados.${bloqueio.value}.titulo`),
-      descricao: t(`parceiro.indicados.${bloqueio.value}.corpo`),
-      icone: ICONE_DO_BLOQUEIO[bloqueio.value],
-      acao: '',
-    }
-  }
-
-  return {
-    titulo: t('parceiro.indicados.vazio.titulo'),
-    descricao: t('parceiro.indicados.vazio.corpo'),
-    icone: 'ph ph-user-list',
-    acao: t('parceiro.indicados.vazio.acao'),
-  }
-})
+/** O bloqueio toma a página inteira: diz por que a lista não abre, e não há o que ensinar. */
+const vazioDoBloqueio = computed(() =>
+  bloqueio.value
+    ? {
+        titulo: t(`parceiro.indicados.${bloqueio.value}.titulo`),
+        descricao: t(`parceiro.indicados.${bloqueio.value}.corpo`),
+        icone: ICONE_DO_BLOQUEIO[bloqueio.value],
+      }
+    : null,
+)
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026), discreto: como a lista se forma, sem
- * promessa de ganho (indicação nunca em destaque, 03/11). O bloqueio não ganha etapas: ele diz
- * por que a lista não abre, e não há o que ensinar.
+ * promessa de ganho (indicação nunca em destaque, 03/11). Nenhuma etapa ganha botão: usar o código
+ * é do lado de quem se cadastra, e o resto a lista faz sozinha. O "Ver meu código e QR" fica
+ * embaixo, contornado (17/11/2026): código e QR nunca no botão cheio, que o vazio da `UiPagina` usa.
  */
 const passosDaLista = computed<PassoDoGuia[]>(() =>
-  bloqueio.value
-    ? []
-    : [
-        { id: 'codigo', icone: 'ph ph-user-plus' },
-        { id: 'lista', icone: 'ph ph-user-list' },
-        { id: 'situacao', icone: 'ph ph-arrows-clockwise' },
-      ].map(({ id, icone }) => ({
-        id,
-        icone,
-        titulo: t(`parceiro.indicados.guia.${id}.titulo`),
-        texto: t(`parceiro.indicados.guia.${id}.texto`),
-      })),
+  [
+    { id: 'codigo', icone: 'ph ph-user-plus' },
+    { id: 'lista', icone: 'ph ph-user-list' },
+    { id: 'situacao', icone: 'ph ph-arrows-clockwise' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`parceiro.indicados.guia.${id}.titulo`),
+    texto: t(`parceiro.indicados.guia.${id}.texto`),
+  })),
 )
 
 async function carregar() {
@@ -288,18 +281,33 @@ onMounted(async () => {
     :erro="erroDaPagina"
     :sem-acesso-de-parceiro="store.semAcessoParceiro"
     bloquear-se-suspenso
-    :vazio="Boolean(bloqueio) || ninguemAinda"
-    :vazio-titulo="vazioDaPagina.titulo"
-    :vazio-descricao="vazioDaPagina.descricao"
-    :vazio-icone="vazioDaPagina.icone"
-    :vazio-acao="vazioDaPagina.acao"
-    vazio-acao-icone="ph ph-qr-code"
-    :vazio-guia-titulo="passosDaLista.length ? t('parceiro.indicados.guia.titulo') : ''"
-    :vazio-passos="passosDaLista"
+    :vazio="Boolean(vazioDoBloqueio)"
+    :vazio-titulo="vazioDoBloqueio?.titulo"
+    :vazio-descricao="vazioDoBloqueio?.descricao"
+    :vazio-icone="vazioDoBloqueio?.icone"
     @tentar-de-novo="tentarDeNovo"
-    @acao-do-vazio="verMeuCodigo"
   >
-    <div class="indicados">
+    <UiVazioIlustrado
+      v-if="ninguemAinda"
+      icone="ph ph-user-list"
+      :titulo="t('parceiro.indicados.vazio.titulo')"
+      :texto="t('parceiro.indicados.vazio.corpo')"
+      :guia-titulo="t('parceiro.indicados.guia.titulo')"
+      :passos="passosDaLista"
+    >
+      <template #acao>
+        <Button
+          type="button"
+          icon="ph ph-qr-code"
+          :label="t('parceiro.indicados.vazio.acao')"
+          severity="secondary"
+          outlined
+          @click="verMeuCodigo"
+        />
+      </template>
+    </UiVazioIlustrado>
+
+    <div v-else class="indicados">
       <div class="indicados__barra">
         <SelectButton
           class="indicados__filtros"

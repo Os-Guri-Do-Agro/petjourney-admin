@@ -55,12 +55,8 @@ export function useAtalhosDoDia() {
       dica: t(`clinico.meuDia.vazio.adiantar.${id}.dica`),
     })
 
+    /* Marcar horário já está no cartão do alto e no guia da fila: aqui, o que mais dá para adiantar. */
     const lista: AtalhoDoDia[] = []
-    if (podeMarcar.value) {
-      lista.push(
-        atalho('marcar', 'ph ph-calendar-plus', { path: '/clinica/agenda', query: { novo: '1' } }),
-      )
-    }
     if (temTela('/clinica/vacinas')) {
       lista.push(atalho('chamada', 'ph ph-syringe', '/clinica/vacinas'))
     }

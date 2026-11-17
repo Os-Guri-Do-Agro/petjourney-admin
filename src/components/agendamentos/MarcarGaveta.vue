@@ -82,7 +82,7 @@ const visible = defineModel<boolean>('visible', { default: false })
 const { t } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAgenda()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
 
 const paciente = ref<PacienteEscolhido | null>(null)
@@ -159,6 +159,15 @@ function rotuloDoPaciente(item: PacienteEscolhido) {
 }
 
 const tiposAtivos = computed(() => props.tipos.filter((tipo) => tipo.ativo))
+
+/*
+ * Sem tipo de atendimento ativo não dá para marcar (17/11/2026, "o sistema deve ensinar"): o campo
+ * diz isso e leva quem configura a agenda até a aba Tipos.
+ */
+const podeCriarTipo = computed(
+  () =>
+    Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('estabelecimento.editar'),
+)
 const tipo = computed(() => props.tipos.find((item) => item.id === tipoId.value) ?? null)
 
 const opcoesDeSala = computed(() =>
@@ -417,6 +426,20 @@ const nomeDoProfissional = (id: string) =>
             :disabled="salvando"
             @update:model-value="trocarTipo"
           />
+          <template v-if="!tiposAtivos.length">
+            <small class="eg__dica">{{ t('agendamentos.marcar.semTipos') }}</small>
+            <Button
+              v-if="podeCriarTipo"
+              :as="RouterLink"
+              :to="{ path: '/clinica/configuracao', query: { aba: 'tipos', novo: '1' } }"
+              class="mg__criar-tipo"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-stethoscope"
+              :label="t('agendamentos.marcar.criarTipo')"
+            />
+          </template>
         </section>
         <section class="eg__secao">
           <label class="eg__rotulo" for="marcar-profissional">{{
@@ -843,6 +866,11 @@ const nomeDoProfissional = (id: string) =>
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Sem tipo ativo: o botão que leva aos Tipos, do tamanho dele, embaixo do campo. */
+.mg__criar-tipo {
+  justify-self: start;
 }
 
 .mg__chave {

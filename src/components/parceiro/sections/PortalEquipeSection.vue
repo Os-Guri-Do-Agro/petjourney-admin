@@ -21,6 +21,8 @@ import { useRouter } from 'vue-router'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EquipeConviteGaveta from '@/components/parceiro/EquipeConviteGaveta.vue'
 import EquipeFuncoesGaveta from '@/components/parceiro/EquipeFuncoesGaveta.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -496,6 +498,47 @@ function acoesDe(membro: MembroEquipeDto): MenuItem[] {
 
 const itensDoMenu = computed(() => (membroDoMenu.value ? acoesDe(membroDoMenu.value) : []))
 
+/* ------------------------------------------------------------------------- só você na equipe */
+
+/**
+ * A equipe nunca fica vazia (quem está logado está nela), mas a de uma pessoa só é o vazio desta
+ * tela: o dono vê como a equipe se forma, com o botão de cada etapa (17/11/2026, "o sistema deve
+ * ensinar e chamar o usuário"). Convidar é a dele; aceitar é do lado de quem recebe, sem botão;
+ * as funções esperam alguém entrar. Convite enviado conta como a primeira etapa feita.
+ */
+const soVoceNaEquipe = computed(() => Boolean(souDono.value && equipe.value?.membros.length === 1))
+
+const passosDaEquipe = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, extra: Partial<PassoDoGuia> = {}): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`parceiro.equipe.guia.${id}.titulo`),
+    texto: t(`parceiro.equipe.guia.${id}.texto`),
+    ...extra,
+  })
+
+  return [
+    passo('convidar', 'ph ph-envelope-simple', {
+      feito: Boolean(equipe.value?.convites.length),
+      acao: {
+        rotulo: t('parceiro.equipe.convidar'),
+        icone: 'ph ph-user-plus',
+        aoClicar: () => {
+          gavetaAberta.value = true
+        },
+      },
+    }),
+    passo('aceitar', 'ph ph-link-simple'),
+    passo('funcoes', 'ph ph-identification-badge', {
+      acao: {
+        rotulo: t('parceiro.equipe.definirFuncoes'),
+        icone: 'ph ph-identification-badge',
+        bloqueada: true,
+      },
+    }),
+  ]
+})
+
 function abrirMenu(evento: Event, membro: MembroEquipeDto) {
   membroDoMenu.value = membro
   menu.value?.toggle(evento)
@@ -647,6 +690,15 @@ onMounted(async () => {
         </li>
       </ul>
     </section>
+
+    <UiVazioIlustrado
+      v-if="soVoceNaEquipe && !erroAoCarregar"
+      icone="ph ph-users-three"
+      :titulo="t('parceiro.equipe.guia.vazioTitulo')"
+      :texto="t('parceiro.equipe.guia.vazioTexto')"
+      :guia-titulo="t('parceiro.equipe.guia.titulo')"
+      :passos="passosDaEquipe"
+    />
 
     <p v-if="equipe && !store.isDono" class="equipe__nota">
       <i class="ph ph-lock-simple" aria-hidden="true" />

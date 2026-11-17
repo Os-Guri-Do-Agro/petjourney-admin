@@ -340,7 +340,16 @@ function jaAberto(texto: string) {
       icone="ph ph-chat-text"
       :titulo="t('boletimDoHotel.vazio')"
       :texto="t('boletimDoHotel.vazioTexto')"
-    />
+    >
+      <template v-if="podeEscrever && !aberto && !conversa.semCanalNoApp" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('boletimDoHotel.escrever')"
+          @click="escreverAberta = true"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <Button
       v-if="conversa?.proximoCursor"

@@ -18,6 +18,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import LegendaDaFaixa from '@/features/clinico/components/tratamento/LegendaDaFaixa.vue'
@@ -173,9 +174,14 @@ function contatoRegistrado() {
     </header>
 
     <p v-if="erro" class="td__nota td__erro" role="alert">{{ erro }}</p>
-    <p v-else-if="lido && !itens.length" class="td__nota">
-      {{ t('clinico.adesao.ficha.vazioDescricao') }}
-    </p>
+    <!-- Quem cria os lembretes é o responsável, no app: o vazio não tem ação na clínica. -->
+    <UiVazioIlustrado
+      v-else-if="lido && !itens.length"
+      aninhado
+      icone="ph ph-house-line"
+      :titulo="t('clinico.adesao.lista.vazioTitulo')"
+      :texto="t('clinico.adesao.ficha.vazioDescricao')"
+    />
 
     <ul v-if="emCurso.length" class="ui-lista">
       <li v-for="item in emCurso" :key="item.tratamentoId" class="td__item">

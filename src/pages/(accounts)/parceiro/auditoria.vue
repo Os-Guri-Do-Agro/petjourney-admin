@@ -19,6 +19,7 @@ import { useI18n } from 'vue-i18n'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
+import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -314,9 +315,13 @@ const loadError = computed(() =>
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem nenhum evento, como a trilha se enche,
- * em três etapas. Não há ação: a trilha se escreve sozinha quando a equipe usa o prontuário. Com
- * filtro, o vazio é do filtro, e a saída é limpar.
+ * em três etapas. A trilha se escreve sozinha quando a equipe usa o prontuário: a primeira etapa
+ * leva aos Pacientes, para quem abre a Clínica (17/11/2026, "o sistema deve chamar o usuário"); o
+ * portal anota sozinho e a consulta é nesta tela, sem botão. Com filtro, o vazio é do filtro, e a
+ * saída é limpar.
  */
+const { podeAbrir } = useAcessoAosModulos()
+
 const passosDaAuditoria = computed<PassoDoGuia[]>(() =>
   [
     { id: 'acao', icone: 'ph ph-clipboard-text' },
@@ -327,6 +332,14 @@ const passosDaAuditoria = computed<PassoDoGuia[]>(() =>
     icone,
     titulo: t(`parceiro.auditoria.guia.${id}.titulo`),
     texto: t(`parceiro.auditoria.guia.${id}.texto`),
+    acao:
+      id === 'acao' && podeAbrir('/clinica/pacientes')
+        ? {
+            rotulo: t('parceiro.auditoria.guia.abrirPacientes'),
+            icone: 'ph ph-users',
+            to: '/clinica/pacientes',
+          }
+        : undefined,
   })),
 )
 </script>

@@ -10,9 +10,6 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import Button from 'primevue/button'
-import { RouterLink } from 'vue-router'
-
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
@@ -109,14 +106,50 @@ function hora(valor: string) {
  * O plantão sem dose não é uma linha cinza: ensina de onde as doses vêm (pedido do Luís, 17/11/2026,
  * "design simples demais"; o modelo é o vazio de Acessos).
  */
-const passosDoPlantao = computed<PassoDoGuia[]>(() =>
-  (['prescricao', 'registro', 'passagem'] as const).map((id, indice) => ({
+const passosDoPlantao = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
-    icone: ['ph ph-prescription', 'ph ph-check-square-offset', 'ph ph-arrows-left-right'][indice]!,
+    icone,
     titulo: t(`internacao.plantao.guia.${id}.titulo`),
     texto: t(`internacao.plantao.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  /*
+   * Cada etapa com o botão dela (17/11/2026): a prescrição se faz na internação (o mapa leva até
+   * ela), o registro se faz aqui (apagado até haver dose) e a passagem, no cartão do plantão do
+   * mapa.
+   */
+  return [
+    passo('prescricao', 'ph ph-prescription', {
+      rotulo: t('internacao.plantao.guia.mapa'),
+      icone: 'ph ph-bed',
+      to: '/clinica/internacao',
+    }),
+    passo(
+      'registro',
+      'ph ph-check-square-offset',
+      podeRegistrar.value
+        ? {
+            rotulo: t('internacao.plantao.guia.registrar'),
+            icone: 'ph ph-check-square-offset',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo(
+      'passagem',
+      'ph ph-arrows-left-right',
+      podeRegistrar.value
+        ? {
+            rotulo: t('internacao.plantao.passar'),
+            icone: 'ph ph-arrows-left-right',
+            to: '/clinica/internacao',
+          }
+        : undefined,
+    ),
+  ]
+})
 
 const resumo = computed(() => {
   const c = checklist.value
@@ -193,18 +226,7 @@ const resumo = computed(() => {
         :texto="t('internacao.plantao.guia.vazio')"
         :guia-titulo="t('internacao.plantao.guia.titulo')"
         :passos="passosDoPlantao"
-      >
-        <template #acao>
-          <Button
-            :as="RouterLink"
-            to="/clinica/internacao"
-            severity="secondary"
-            outlined
-            icon="ph ph-bed"
-            :label="t('internacao.plantao.guia.mapa')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
       <div v-for="grupo in checklist.grupos" :key="grupo.hora" class="cp__grupo">
         <!-- A hora já está em cada linha: o grupo só marca onde o "agora" passa. -->
         <p v-if="grupo.hora === checklist.linhaDoAgora" class="cp__agora-linha">

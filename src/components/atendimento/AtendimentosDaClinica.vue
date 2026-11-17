@@ -188,15 +188,25 @@ const vazio = computed(
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem atendimento nenhum, como ele nasce,
- * em três etapas (começa na agenda, o veterinário registra, finalizar fecha), e o caminho para a
- * agenda. Com um filtro ligado, só o que vai aparecer ali.
+ * em três etapas (começa na agenda, o veterinário registra, finalizar fecha), com o caminho para
+ * a agenda no botão da primeira. Com um filtro ligado, só o que vai aparecer ali.
  */
+const podeVerAgenda = computed(() => store.temPermissao('agenda.ler'))
+
 const passosDoAtendimento = computed<PassoDoGuia[]>(() => [
   {
     id: 'iniciar',
     icone: 'ph ph-play',
     titulo: t('atendimento.guia.iniciar'),
     texto: t('atendimento.lista.vazioDica'),
+    /* O botão da etapa (17/11/2026): registrar e finalizar acontecem dentro do atendimento. */
+    acao: podeVerAgenda.value
+      ? {
+          rotulo: t('atendimento.guia.abrirAgenda'),
+          icone: 'ph ph-calendar-blank',
+          to: '/clinica/agenda',
+        }
+      : undefined,
   },
   ...[
     { id: 'registrar', icone: 'ph ph-note-pencil' },
@@ -214,8 +224,6 @@ const ICONE_DO_VAZIO: Record<StatusDoAtendimento, string> = {
   FINALIZADO: 'ph ph-seal-check',
   ANULADO: 'ph ph-prohibit',
 }
-
-const podeVerAgenda = computed(() => store.temPermissao('agenda.ler'))
 
 function rotuloDoDia(dia: string) {
   return rotulos.dia(dia)
@@ -265,16 +273,7 @@ function rotuloDoDia(dia: string) {
         :texto="t('atendimento.guia.texto')"
         :guia-titulo="t('atendimento.guia.titulo')"
         :passos="passosDoAtendimento"
-      >
-        <template v-if="podeVerAgenda" #acao>
-          <Button
-            :as="RouterLink"
-            to="/clinica/agenda"
-            icon="ph ph-calendar-blank"
-            :label="t('atendimento.guia.abrirAgenda')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
 
       <UiVazioIlustrado
         v-else-if="vazio && status"

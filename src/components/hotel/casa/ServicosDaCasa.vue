@@ -9,6 +9,7 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   editarServico,
@@ -86,7 +87,21 @@ function abrir(s: ServicoDaCasa | null) {
     </header>
 
     <p v-if="erro" class="ca__erro" role="alert">{{ erro }}</p>
-    <p v-if="!props.casa.servicos.length" class="ca__nota">{{ t('casaDoHotel.servico.vazio') }}</p>
+    <UiVazioIlustrado
+      v-if="!props.casa.servicos.length"
+      aninhado
+      icone="ph ph-sparkle"
+      :titulo="t('casaDoHotel.servico.vazio')"
+    >
+      <template v-if="podeEditar && faltam" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('casaDoHotel.servico.novo')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="s in props.casa.servicos" :key="s.id" class="ui-linha">

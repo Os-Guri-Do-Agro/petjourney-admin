@@ -229,9 +229,19 @@ async function salvar() {
   }
 }
 
+/* Já na aba do horário, que abre a gaveta da semana para quem pode editar. */
 function irAoEstabelecimento() {
   visible.value = false
-  void router.push('/parceiro/estabelecimento')
+  void router.push({ path: '/parceiro/estabelecimento', query: { aba: 'horarios' } })
+}
+
+/*
+ * Sem sala ativa, a dica não fica sem saída (17/11/2026, "o sistema deve ensinar e chamar"): quem
+ * configura vai à Configuração com a gaveta da sala nova já aberta, no tipo Consultório.
+ */
+function irParaSalas() {
+  visible.value = false
+  void router.push({ path: '/clinica/configuracao', query: { nova: 'CONSULTORIO' } })
 }
 
 const bloqueado = computed(() => !props.podeEditar || salvando.value)
@@ -295,9 +305,19 @@ const bloqueado = computed(() => !props.podeEditar || salvando.value)
           :disabled="bloqueado"
         />
         <small v-if="erroDaSala" class="eg__invalido">{{ erroDaSala }}</small>
-        <small v-else-if="!salas.length" class="eg__dica">{{
-          t('agenda.config.expediente.semSalas')
-        }}</small>
+        <p v-else-if="!salas.length" class="ex__aviso">
+          <span>{{ t('agenda.config.expediente.semSalas') }}</span>
+          <Button
+            v-if="props.podeEditar"
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            icon="ph ph-door"
+            :label="t('agenda.config.sala.nova')"
+            @click="irParaSalas"
+          />
+        </p>
         <small v-else class="eg__dica">{{ t('agenda.config.expediente.salaDica') }}</small>
       </section>
 

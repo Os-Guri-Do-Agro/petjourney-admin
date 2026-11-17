@@ -19,7 +19,12 @@ import { listarHospedes, type Hospede } from '@/service/parceiro/hotel-estadia-s
 
 const { t } = useI18n()
 const rotulos = useRotulosDasReservas()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
+
+/* Reservar e fazer o check-in: o balcão do hotel (`hotel.reserva`), com o Hotel para escrever. */
+const reserva = computed(
+  () => Boolean(store.modulo('HOTEL')?.podeEscrever) && store.temPermissao('hotel.reserva'),
+)
 
 const hospedes = ref<Hospede[]>([])
 const cursor = ref<string | null>(null)
@@ -73,21 +78,39 @@ const TOM = { RISCO: 'ui-selo--risco', ATENCAO: 'ui-selo--atencao', OK: '' } as 
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026): ninguém na casa, como um hóspede chega
- * aqui, em três etapas (a reserva confirmada, o check-in na reserva, a estadia), e as reservas
- * embaixo, de onde sai o check-in.
+ * aqui, em três etapas, com o botão de cada uma para o balcão (17/11/2026): a reserva abre a
+ * gaveta de Nova reserva (`?novo=1`), o check-in leva às Reservas, de onde ele sai, e a estadia
+ * começa sozinha, sem botão.
  */
-const passosDoHospede = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'reserva', icone: 'ph ph-calendar-check' },
-    { id: 'checkin', icone: 'ph ph-sign-in' },
-    { id: 'estadia', icone: 'ph ph-heart' },
-  ].map(({ id, icone }) => ({
+const passosDoHospede = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`estadiaDoHotel.hospedes.guia.${id}.titulo`),
     texto: t(`estadiaDoHotel.hospedes.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'reserva',
+      'ph ph-calendar-check',
+      reserva.value
+        ? {
+            rotulo: t('reservasDoHotel.nova.titulo'),
+            icone: 'ph ph-plus',
+            to: { path: '/hotel/reservas', query: { novo: '1' } },
+          }
+        : undefined,
+    ),
+    passo('checkin', 'ph ph-sign-in', {
+      rotulo: t('hotel.mapa.verReservas'),
+      icone: 'ph ph-calendar-blank',
+      to: '/hotel/reservas',
+    }),
+    passo('estadia', 'ph ph-heart'),
+  ]
+})
 </script>
 
 <template>
@@ -124,16 +147,7 @@ const passosDoHospede = computed<PassoDoGuia[]>(() =>
         :texto="t('estadiaDoHotel.hospedes.vazioTexto')"
         :guia-titulo="t('estadiaDoHotel.hospedes.guia.titulo')"
         :passos="passosDoHospede"
-      >
-        <template #acao>
-          <Button
-            :as="RouterLink"
-            to="/hotel/reservas"
-            icon="ph ph-calendar-blank"
-            :label="t('hotel.mapa.verReservas')"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
       <Button
         v-if="cursor"
         type="button"

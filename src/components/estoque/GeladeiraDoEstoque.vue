@@ -136,21 +136,50 @@ function metaDaVacina(vacina: VacinaNaGeladeira) {
 
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: com a geladeira vazia,
- * como o estoque anda (receber o lote, a aplicação que dá baixa, o mínimo que avisa), e o
- * "Receber lote" embaixo para quem movimenta.
+ * como o estoque anda (receber o lote, a aplicação que dá baixa, o mínimo que avisa). Cada etapa
+ * com o botão dela: "Receber lote" abre a gaveta aqui; "Aplicar vacina" (na lista de chamada) e
+ * "Definir mínimo" (na linha da vacina) ficam apagados até o primeiro lote.
  */
-const passosDoEstoque = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'receber', icone: 'ph ph-package' },
-    { id: 'aplicar', icone: 'ph ph-syringe' },
-    { id: 'avisar', icone: 'ph ph-bell-ringing' },
-  ].map(({ id, icone }) => ({
+const aplica = computed(() => escreve.value && store.temPermissao('vacina.aplicar'))
+
+const passosDoEstoque = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`estoque.guia.${id}.titulo`),
     texto: t(`estoque.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'receber',
+      'ph ph-package',
+      movimenta.value
+        ? { rotulo: t('estoque.receber.acao'), icone: 'ph ph-plus', aoClicar: () => receber(null) }
+        : undefined,
+    ),
+    passo(
+      'aplicar',
+      'ph ph-syringe',
+      aplica.value
+        ? {
+            rotulo: t('vacinas.aplicar.titulo'),
+            icone: 'ph ph-syringe',
+            to: '/clinica/vacinas',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo(
+      'avisar',
+      'ph ph-bell-ringing',
+      planeja.value
+        ? { rotulo: t('estoque.guia.definirMinimo'), icone: 'ph ph-bell-ringing', bloqueada: true }
+        : undefined,
+    ),
+  ]
+})
 
 /* ------------------------------------------------------------------------------- lotes */
 
@@ -308,16 +337,7 @@ function mudou(texto: string) {
         :texto="t('estoque.vazio')"
         :guia-titulo="t('estoque.guia.titulo')"
         :passos="passosDoEstoque"
-      >
-        <template v-if="movimenta" #acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            :label="t('estoque.receber.acao')"
-            @click="receber(null)"
-          />
-        </template>
-      </UiVazioIlustrado>
+      />
       <!-- A primeira leitura: as linhas esperando, ou o erro com o tentar de novo. -->
       <p v-else-if="erro && !carregando" class="eg__erro gl__falha" role="alert">
         <i class="ph ph-warning-circle" aria-hidden="true" />

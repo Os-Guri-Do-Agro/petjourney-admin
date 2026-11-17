@@ -16,6 +16,7 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
@@ -43,8 +44,13 @@ const props = defineProps<{ podeEditar: boolean }>()
 
 const { t } = useI18n()
 const toast = useToast()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
+
+/* Marcar na agenda: a recepção, o veterinário e quem gere, com a Clínica para escrever. */
+const marca = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('agenda.escrever'),
+)
 
 const tipos = ref<TipoDeAtendimento[]>([])
 const carregando = ref(true)
@@ -63,7 +69,21 @@ async function carregar() {
   }
 }
 
-onMounted(() => void carregar())
+const route = useRoute()
+const router = useRouter()
+
+/*
+ * Veio da marcação sem tipo ("Criar tipo de atendimento") com `?novo=1`: a gaveta abre já aqui, e o
+ * pedido sai da URL (recarregar não reabre).
+ */
+onMounted(async () => {
+  await carregar()
+  if (route.query.novo !== '1') return
+  if (props.podeEditar) abrir(null)
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
+})
 
 const ativos = computed(() => tipos.value.filter((tipo) => tipo.ativo))
 const inativos = computed(() => tipos.value.filter((tipo) => !tipo.ativo))
@@ -71,20 +91,51 @@ const inativos = computed(() => tipos.value.filter((tipo) => !tipo.ativo))
 /*
  * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem tipo nenhum, o que
  * um tipo leva (nome e categoria, duração e salas) e onde ele aparece (ao marcar e no pedido
- * online), e o "Novo tipo" embaixo para quem configura.
+ * online). Cada etapa com o botão dela: "Novo tipo" abre a gaveta aqui, "Configurar salas" leva à
+ * aba Salas e o "Marcar horário" fica apagado até haver tipo.
  */
-const passosDosTipos = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'nome', icone: 'ph ph-tag' },
-    { id: 'duracao', icone: 'ph ph-clock' },
-    { id: 'marcar', icone: 'ph ph-calendar-plus' },
-  ].map(({ id, icone }) => ({
+const passosDosTipos = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`agenda.config.tipo.guia.${id}.titulo`),
     texto: t(`agenda.config.tipo.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'nome',
+      'ph ph-tag',
+      props.podeEditar
+        ? { rotulo: t('agenda.config.tipo.novo'), icone: 'ph ph-plus', aoClicar: () => abrir(null) }
+        : undefined,
+    ),
+    passo(
+      'duracao',
+      'ph ph-clock',
+      props.podeEditar
+        ? {
+            rotulo: t('agenda.config.tipo.guia.configurarSalas'),
+            icone: 'ph ph-door',
+            to: '/clinica/configuracao',
+          }
+        : undefined,
+    ),
+    passo(
+      'marcar',
+      'ph ph-calendar-plus',
+      marca.value
+        ? {
+            rotulo: t('agendamentos.marcar.titulo'),
+            icone: 'ph ph-calendar-plus',
+            to: { path: '/clinica/agenda', query: { novo: '1' } },
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+  ]
+})
 
 function resumo(tipo: TipoDeAtendimento) {
   const salas = tipo.salasCompativeis.length
@@ -273,16 +324,7 @@ async function mover(indice: number, passo: -1 | 1) {
       :texto="t('agenda.config.tipo.vazioTexto')"
       :guia-titulo="t('agenda.config.tipo.guia.titulo')"
       :passos="passosDosTipos"
-    >
-      <template v-if="props.podeEditar" #acao>
-        <Button
-          type="button"
-          icon="ph ph-plus"
-          :label="t('agenda.config.tipo.novo')"
-          @click="abrir(null)"
-        />
-      </template>
-    </UiVazioIlustrado>
+    />
 
     <template v-else-if="tipos.length">
       <ul class="ui-lista">

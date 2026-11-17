@@ -1723,7 +1723,8 @@
       "passo3": {
         "titulo": "Vaša beleška se vraća u aplikaciju",
         "texto": "Ono što zabeležite stiže u karton ljubimca. Kada rok istekne, klinički podaci nestaju, a vaše beleške ostaju."
-      }
+      },
+      "anotar": "Napišite belešku"
     },
     "lista": {
       "buscaPlaceholder": "Pretražite po imenu ljubimca",
@@ -2023,6 +2024,15 @@
     },
     "tela": {
       "resumo": "{n} skeniranje QR koda do sada | {n} skeniranja QR koda do sada | {n} skeniranja QR koda do sada"
+    },
+    "espera": {
+      "guia": {
+        "titulo": "Kako se kod otključava",
+        "codigo": {
+          "titulo": "Kod se pojavljuje ovde",
+          "texto": "Kada je program aktivan, ovaj ekran prikazuje kod, link i QR kod za pozivanje."
+        }
+      }
     }
   },
   "carteira": {
@@ -2048,7 +2058,22 @@
       "body": "Novčanik, izvod i isplate dostupni su samo uz aktivan afilijejt program. Zatražite ga na ekranu „Programi“.",
       "cta": "Zatražite afilijejt program",
       "emAnaliseTitle": "Afilijejt program je na proveri",
-      "emAnaliseBody": "Novčanik, izvod i isplate otvaraju se čim tim PetJourney odobri program. Rezultat stiže imejlom."
+      "emAnaliseBody": "Novčanik, izvod i isplate otvaraju se čim tim PetJourney odobri program. Rezultat stiže imejlom.",
+      "guia": {
+        "titulo": "Kako se otvara novčanik",
+        "pedir": {
+          "titulo": "Zatražite afilijejt program",
+          "texto": "U Programima vlasnik naloga traži učešće. Kod i novčanik dolaze sa njim."
+        },
+        "analise": {
+          "titulo": "PetJourney odobrava",
+          "texto": "Tim PetJourney proverava registraciju i odobrava program. Rezultat stiže imejlom."
+        },
+        "pix": {
+          "titulo": "Dodajte PIX ključ",
+          "texto": "Kada se novčanik otvori, PIX ključ je mesto na koje idu isplate."
+        }
+      }
     },
     "visao": {
       "loadingAria": "Učitavanje novčanika",
@@ -2335,7 +2360,23 @@
         "validoAte": "Važi do {data}",
         "aceitar": "Prihvatite",
         "recusar": "Odbijte",
-        "erroCarregar": "Vaše pozive nije moguće učitati."
+        "erroCarregar": "Vaše pozive nije moguće učitati.",
+        "vazioTexto": "Kada vas neka firma pozove e-poštom u svoj tim, poziv se pojavljuje ovde.",
+        "guia": {
+          "titulo": "Kako poziv stiže",
+          "convida": {
+            "titulo": "Firma vas poziva",
+            "texto": "Vlasnik firme poziva vašu e-poštu na ekranu Tim, sa ulogom koju ćete imati."
+          },
+          "email": {
+            "titulo": "Link stiže e-poštom",
+            "texto": "Sa imenom firme, ko vas je pozvao i do kada poziv važi."
+          },
+          "aceita": {
+            "titulo": "Prihvatate preko linka",
+            "texto": "Otvorite link sa ovim nalogom: firma ulazi u portal, a između firmi prelazite u meniju naloga."
+          }
+        }
       }
     },
     "equipe": {
@@ -2454,6 +2495,23 @@
         "fichaCadastrar": "Napravi i profil profesionalca",
         "fichaReativar": "Ponovo aktiviraj i profil profesionalca",
         "fichaDica": "Ko brine o gostima mora imati aktivan profil profesionalca da bi označavao zadatke rutine hotela."
+      },
+      "guia": {
+        "vazioTitulo": "Samo vi ste u timu",
+        "vazioTexto": "Pozovite one koji rade sa vama. Svaka osoba ulazi sa svojim nalogom i vidi ono što njena uloga traži.",
+        "titulo": "Kako se tim formira",
+        "convidar": {
+          "titulo": "Pozovite e-poštom",
+          "texto": "Izaberite ulogu: vlasnik radi sve; operater vodi svakodnevni rad, bez diranja tima i novčanika."
+        },
+        "aceitar": {
+          "titulo": "Osoba prihvata",
+          "texto": "Dobija link e-poštom i ulazi preko njega, čak i bez PetJourney naloga. Link važi 14 dana."
+        },
+        "funcoes": {
+          "titulo": "Odredite uloge",
+          "texto": "Recepcija, veterinar, negovatelj: uloga određuje šta svaka osoba vidi u meniju."
+        }
       }
     },
     "profissionais": {
@@ -2534,7 +2592,9 @@
         "agenda": {
           "titulo": "Ulazi u raspored",
           "texto": "Kada je uključeno Radi u rasporedu, karton postaje kolona rasporeda, u svom radnom vremenu."
-        }
+        },
+        "abrirAgenda": "Otvorite raspored",
+        "cadastrarVeterinario": "Dodajte veterinara"
       }
     },
     "indicados": {
@@ -2993,7 +3053,8 @@
         "consulta": {
           "titulo": "Ovde proveravate",
           "texto": "Filtrirajte po radnji, osobi i periodu da saznate ko je dirao neki zapis."
-        }
+        },
+        "abrirPacientes": "Otvorite pacijente"
       }
     }
   },
@@ -4076,7 +4137,8 @@
           },
           "chegada": {
             "titulo": "Zabeležite dolazak",
-            "texto": "U rasporedu, Zabeležite dolazak stavlja pacijenta na recepciju, na ovu listu."
+            "texto": "U rasporedu, Zabeležite dolazak stavlja pacijenta na recepciju, na ovu listu.",
+            "acao": "Zabeleži dolazak"
           },
           "sala": {
             "titulo": "Započnite pregled",
@@ -4379,7 +4441,9 @@
           "ficha": {
             "titulo": "Detalji pored",
             "texto": "Doza za svaku vrstu, načini primene, kontraindikacije i interakcije, na jednom mestu."
-          }
+          },
+          "acrescentarMedicamento": "Dodajte lek",
+          "buscarMedicamento": "Potražite lek"
         }
       }
     },
@@ -10577,7 +10641,8 @@
           "atendimentos": {
             "titulo": "Pregledi koriste sale",
             "texto": "Svaka vrsta pregleda kaže u kojim salama se obavlja. Stacionar čuva i krevete."
-          }
+          },
+          "configurarTipos": "Podesite vrste"
         }
       },
       "tipo": {
@@ -10628,7 +10693,8 @@
           "marcar": {
             "titulo": "Prijem zakazuje",
             "texto": "Pri zakazivanju, vrsta već donosi trajanje. Ako je označena za online, može se tražiti i preko stranice klinike."
-          }
+          },
+          "configurarSalas": "Podesite sale"
         }
       },
       "politica": {
@@ -11321,7 +11387,8 @@
     "vazio": {
       "titulo": "Niko ne radi ovog dana",
       "descricao": "Nijedan stručnjak nema radno vreme ni zakazan termin ovog dana.",
-      "semana": "Pogledaj nedelju"
+      "semana": "Pogledaj nedelju",
+      "expedientes": "Podesi radno vreme"
     },
     "voltar": "Nazad",
     "horario": "{inicio} do {fim} · {duracao}",
@@ -11511,7 +11578,9 @@
       "semTipo": "Izaberi vrstu pregleda.",
       "semProfissional": "Izaberi stručnjaka.",
       "horaInvalida": "Neispravno vreme. Koristi format 09:30.",
-      "abrirOQueFicou": "Otvori karton koji je ostao"
+      "abrirOQueFicou": "Otvori karton koji je ostao",
+      "semTipos": "Za zakazivanje klinici treba aktivna vrsta pregleda.",
+      "criarTipo": "Napravi vrstu pregleda"
     },
     "preConsulta": {
       "titulo": "Upitnik pre pregleda",
@@ -11908,7 +11977,8 @@
       "vazio": "Nema vakcina u planu ovog pacijenta.",
       "eMais": "i još {n} ažurnih vakcina",
       "opcionais": "Opcione, nezapočete ({n})",
-      "vazioTexto": "Plan se pravi od vakcina iz kataloga za vrstu pacijenta, sa dozom na redu i sledećom."
+      "vazioTexto": "Plan se pravi od vakcina iz kataloga za vrstu pacijenta, sa dozom na redu i sledećom.",
+      "acrescentarVacina": "Dodajte vakcinu"
     },
     "historico": {
       "titulo": "Istorija ({n})",
@@ -12030,6 +12100,22 @@
         "detalhes": "Pogledaj detalje",
         "editar": "Izmeni zapis",
         "apagar": "Obriši zapis"
+      },
+      "guia": {
+        "titulo": "Kako nastaje lista za pozivanje",
+        "registrar": {
+          "titulo": "Upišite dozu u karton",
+          "texto": "U kartonu pacijenta: doza data ovde, sa serijom, i ona primljena negde drugde, po datumu iz knjižice."
+        },
+        "serie": {
+          "titulo": "Sledeća doza se računa",
+          "texto": "Po protokolu vakcine u katalogu: serija, revakcinacija i uzrast pacijenta."
+        },
+        "chamar": {
+          "titulo": "Kome ističe, ulazi ovde",
+          "texto": "Od najzakasnelijeg ka ostalima, sa telefonom staratelja i podsetnikom koji se uključuje."
+        },
+        "escolherPaciente": "Izaberite pacijenta"
       }
     },
     "aplicadas": {
@@ -12799,7 +12885,8 @@
       "alerta": {
         "titulo": "Pad se pojavljuje ovde",
         "texto": "Preskočene doze u 3 dana ili sve ređe beleženje kod kritičnog leka ulaze na ovu listu, da tim razgovara sa porodicom."
-      }
+      },
+      "verTodos": "Pogledaj terapije"
     }
   },
   "documentos": {
@@ -13594,7 +13681,8 @@
         "passagem": {
           "titulo": "Smena se predaje dalje",
           "texto": "Na kraju smene, dežurni predaje sledećem, sa onim što je ostalo."
-        }
+        },
+        "registrar": "Upišite dozu"
       }
     },
     "boletim": {
@@ -13991,7 +14079,8 @@
       "avisar": {
         "titulo": "Minimum upozorava",
         "texto": "Ispod minimuma, frižider i meni upozoravaju. Istekla serija traži odlaganje."
-      }
+      },
+      "definirMinimo": "Podesite minimum"
     }
   },
   "casaDoHotel": {
@@ -14072,7 +14161,9 @@
       "rotulo": "Tip",
       "titulo": "Tipovi smeštaja",
       "vazio": "Nema upisanih tipova. Napravite tipove pre smeštaja.",
-      "noLimite": "Kuća je dostigla granicu od {limite} tipova."
+      "noLimite": "Kuća je dostigla granicu od {limite} tipova.",
+      "vazioTitulo": "Nema upisanih tipova",
+      "vazioTexto": "Napravite tipove pre smeštaja: svaki smeštaj je jednog tipa."
     },
     "acomodacao": {
       "nova": "Novi smeštaj",
