@@ -925,7 +925,16 @@
         "pedidos": "Solicitud esperando respuesta | Solicitudes esperando respuesta",
         "aSeguir": "Por venir hoy",
         "proximo": "El próximo a las {hora}",
-        "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy"
+        "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy",
+        "areas": {
+          "rotulo": "Las áreas de la clínica",
+          "emDia": "Al día",
+          "hojeVazio": "Nada agendado hoy",
+          "hoje": "{total} hoy, el próximo a las {hora}",
+          "hojeComecou": "{total} hoy, todos ya empezaron",
+          "esperam": "{total} esperando",
+          "naAba": "{total} en {aba}"
+        }
       },
       "hotel": {
         "naCasa": "En la casa",
@@ -958,7 +967,8 @@
       "rotina": "Ver {total} tarea atrasada | Ver {total} tareas atrasadas",
       "documento": "Resolver la documentación de {pet}",
       "checkin": "Hacer el check-in de {pet}",
-      "checkout": "Hacer el check-out de {pet}"
+      "checkout": "Hacer el check-out de {pet}",
+      "calmaMarcar": "Nada pendiente ahora: agende un horario"
     },
     "guia": {
       "pauta": "Todo lo que está pendiente, en todos los espacios, del más grave al menos. Cada fila abre la pantalla donde se resuelve.",
@@ -2509,7 +2519,22 @@
         "perdeSeloSemLogin": "Desvincular el usuario de esta ficha quita el sello de verificado: el CRMV vuelve a la verificación de PetJourney.",
         "salvar": "Guardar ficha"
       },
-      "expediente": "Horario"
+      "expediente": "Horario",
+      "guia": {
+        "titulo": "Cómo funcionan las fichas",
+        "ficha": {
+          "titulo": "Una ficha por persona",
+          "texto": "Quien atiende, aplica, receta o cuida, con o sin acceso al portal."
+        },
+        "crmv": {
+          "titulo": "CRMV para el veterinario",
+          "texto": "Con CRMV, número y estado, la ficha escribe historias clínicas, libera el resumen y emite recetas."
+        },
+        "agenda": {
+          "titulo": "Entra en la agenda",
+          "texto": "Con Atiende en la agenda activado, la ficha se vuelve una columna de la agenda, en su horario."
+        }
+      }
     },
     "indicados": {
       "titulo": "Referidos",

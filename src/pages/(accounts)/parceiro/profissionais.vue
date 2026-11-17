@@ -20,6 +20,8 @@ import ExpedienteGaveta from '@/components/agenda/ExpedienteGaveta.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import ProfissionalGaveta from '@/components/parceiro/ProfissionalGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { listarEquipe } from '@/service/parceiro/equipe-service'
@@ -43,6 +45,20 @@ const desativadasAbertas = ref(false)
 
 const meuId = computed(() => getAuthUser()?.userId ?? null)
 const geroEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
+
+/* O vazio que ensina (17/11/2026, "tela vazia e nada é explicado"): o que é a ficha, o CRMV e a agenda. */
+const passosDasFichas = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'ficha', icone: 'ph ph-identification-card' },
+    { id: 'crmv', icone: 'ph ph-seal-check' },
+    { id: 'agenda', icone: 'ph ph-calendar-dots' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`parceiro.profissionais.guia.${id}.titulo`),
+    texto: t(`parceiro.profissionais.guia.${id}.texto`),
+  })),
+)
 const minhaFicha = computed(() => store.eu?.profissional ?? null)
 const aguardandoCrmv = computed(() => store.eu?.aguardandoCrmv ?? [])
 
@@ -387,10 +403,23 @@ onMounted(async () => {
         />
       </div>
 
-      <div v-else-if="!ativos.length" class="profissionais__vazio ui-folha">
-        <strong>{{ t('parceiro.profissionais.vazio') }}</strong>
-        <span>{{ t('parceiro.profissionais.vazioDica') }}</span>
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!ativos.length"
+        icone="ph ph-users-three"
+        :titulo="t('parceiro.profissionais.vazio')"
+        :texto="t('parceiro.profissionais.vazioDica')"
+        :guia-titulo="t('parceiro.profissionais.guia.titulo')"
+        :passos="passosDasFichas"
+      >
+        <template v-if="geroEquipe" #acao>
+          <Button
+            type="button"
+            icon="ph ph-plus"
+            :label="t('parceiro.profissionais.cadastrar')"
+            @click="abrirNova()"
+          />
+        </template>
+      </UiVazioIlustrado>
 
       <ul v-else class="ui-lista ui-folha">
         <li v-for="profissional in ativos" :key="profissional.id" class="ui-linha ficha">
@@ -576,20 +605,6 @@ onMounted(async () => {
 .profissionais__erro > i {
   color: var(--risco-tinta);
   font-size: 18px;
-}
-
-.profissionais__vazio {
-  display: grid;
-  gap: 4px;
-  padding: 22px 24px;
-  color: var(--tinta-2);
-  font-size: 14px;
-}
-
-.profissionais__vazio strong {
-  color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .profissionais__desativados {

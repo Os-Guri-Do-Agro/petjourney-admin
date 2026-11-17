@@ -925,7 +925,16 @@
         "pedidos": "Zahtev čeka odgovor | Zahteva čekaju odgovor | Zahteva čeka odgovor",
         "aSeguir": "Još danas",
         "proximo": "Sledeći u {hora}",
-        "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda"
+        "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda",
+        "areas": {
+          "rotulo": "Delovi klinike",
+          "emDia": "Sve je ažurno",
+          "hojeVazio": "Danas ništa nije zakazano",
+          "hoje": "Danas: {total}, sledeći u {hora}",
+          "hojeComecou": "Danas: {total}, svi su već počeli",
+          "esperam": "Čeka: {total}",
+          "naAba": "{aba}: {total}"
+        }
       },
       "hotel": {
         "naCasa": "U objektu",
@@ -958,7 +967,8 @@
       "rotina": "Pogledaj {total} zadatak koji kasni | Pogledaj {total} zadatka koja kasne | Pogledaj {total} zadataka koji kasne",
       "documento": "Sredi dokumentaciju: {pet}",
       "checkin": "Prijavi dolazak: {pet}",
-      "checkout": "Prijavi odlazak: {pet}"
+      "checkout": "Prijavi odlazak: {pet}",
+      "calmaMarcar": "Trenutno ništa ne čeka: zakažite termin"
     },
     "guia": {
       "pauta": "Sve što čeka, u svim prostorima, od najozbiljnijeg ka manje ozbiljnom. Svaki red otvara ekran na kom se predmet rešava.",
@@ -2509,7 +2519,22 @@
         "perdeSeloSemLogin": "Odvajanje naloga od ove kartice uklanja pečat provere: CRMV se vraća na proveru u PetJourney.",
         "salvar": "Sačuvajte karticu"
       },
-      "expediente": "Radno vreme"
+      "expediente": "Radno vreme",
+      "guia": {
+        "titulo": "Kako kartoni funkcionišu",
+        "ficha": {
+          "titulo": "Jedan karton po osobi",
+          "texto": "Ko prima, vakciniše, propisuje ili neguje, sa nalogom na portalu ili bez njega."
+        },
+        "crmv": {
+          "titulo": "Licenca za veterinara",
+          "texto": "Sa brojem licence i državom, karton piše karton pacijenta, objavljuje rezime i izdaje recepte."
+        },
+        "agenda": {
+          "titulo": "Ulazi u raspored",
+          "texto": "Kada je uključeno Radi u rasporedu, karton postaje kolona rasporeda, u svom radnom vremenu."
+        }
+      }
     },
     "indicados": {
       "titulo": "Preporučeni",

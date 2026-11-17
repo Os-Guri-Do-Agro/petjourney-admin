@@ -254,7 +254,11 @@ onUnmounted(() => {
       <section v-if="blocos.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
         <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
           <template v-for="espaco in blocos" :key="espaco.id">
-            <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
+            <HomeEspacoClinica
+              v-if="espaco.id === 'clinica'"
+              :espaco="espaco"
+              :numeros-no-alto="blocos.length === 1"
+            />
             <HomeEspacoHotel v-else :espaco="espaco" />
           </template>
         </div>

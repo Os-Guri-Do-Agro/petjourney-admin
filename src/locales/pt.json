@@ -925,7 +925,16 @@
         "pedidos": "Pedido esperando resposta | Pedidos esperando resposta",
         "aSeguir": "Por vir hoje",
         "proximo": "O próximo às {hora}",
-        "andamento": "{feitos} de {total} atendimento feito hoje | {feitos} de {total} atendimentos feitos hoje"
+        "andamento": "{feitos} de {total} atendimento feito hoje | {feitos} de {total} atendimentos feitos hoje",
+        "areas": {
+          "rotulo": "As áreas da Clínica",
+          "emDia": "Em dia",
+          "hojeVazio": "Nada marcado hoje",
+          "hoje": "{total} hoje, o próximo às {hora}",
+          "hojeComecou": "{total} hoje, todos já começaram",
+          "esperam": "{total} esperando",
+          "naAba": "{total} em {aba}"
+        }
       },
       "hotel": {
         "naCasa": "Na casa",
@@ -958,7 +967,8 @@
       "rotina": "Ver {total} tarefa atrasada | Ver {total} tarefas atrasadas",
       "documento": "Resolver a documentação de {pet}",
       "checkin": "Fazer o check-in de {pet}",
-      "checkout": "Fazer o check-out de {pet}"
+      "checkout": "Fazer o check-out de {pet}",
+      "calmaMarcar": "Nada parado agora: marque um horário"
     },
     "guia": {
       "pauta": "Tudo o que está parado, em todos os espaços, do mais grave para o menos. Cada linha leva à tela onde o assunto se resolve.",
@@ -2509,7 +2519,22 @@
         "perdeSeloSemLogin": "Desligar o login desta ficha tira o selo de conferido: o CRMV volta para a conferência da PetJourney.",
         "salvar": "Salvar ficha"
       },
-      "expediente": "Expediente"
+      "expediente": "Expediente",
+      "guia": {
+        "titulo": "Como as fichas funcionam",
+        "ficha": {
+          "titulo": "Uma ficha por pessoa",
+          "texto": "Quem atende, aplica, prescreve ou cuida, com ou sem login no portal."
+        },
+        "crmv": {
+          "titulo": "CRMV para o veterinário",
+          "texto": "Com CRMV, número e UF, a ficha escreve prontuário, libera o resumo e emite receita."
+        },
+        "agenda": {
+          "titulo": "Entra na agenda",
+          "texto": "Com Atende na agenda ligado, a ficha vira uma coluna da agenda, no horário dela."
+        }
+      }
     },
     "indicados": {
       "titulo": "Indicados",

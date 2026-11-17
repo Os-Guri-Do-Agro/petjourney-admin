@@ -925,7 +925,16 @@
         "pedidos": "Request awaiting a reply | Requests awaiting a reply",
         "aSeguir": "Still to come today",
         "proximo": "Next at {hora}",
-        "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today"
+        "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today",
+        "areas": {
+          "rotulo": "The clinic areas",
+          "emDia": "All up to date",
+          "hojeVazio": "Nothing booked today",
+          "hoje": "{total} today, next at {hora}",
+          "hojeComecou": "{total} today, all already started",
+          "esperam": "{total} waiting",
+          "naAba": "{total} in {aba}"
+        }
       },
       "hotel": {
         "naCasa": "In the house",
@@ -958,7 +967,8 @@
       "rotina": "See {total} overdue task | See {total} overdue tasks",
       "documento": "Sort out {pet}'s documents",
       "checkin": "Check in {pet}",
-      "checkout": "Check out {pet}"
+      "checkout": "Check out {pet}",
+      "calmaMarcar": "Nothing waiting right now: book a slot"
     },
     "guia": {
       "pauta": "Everything that is waiting, across all spaces, from most to least serious. Each row opens the screen where it gets resolved.",
@@ -2509,7 +2519,22 @@
         "perdeSeloSemLogin": "Unlinking the login from this record removes the verified seal: the CRMV goes back to PetJourney for verification.",
         "salvar": "Save record"
       },
-      "expediente": "Working hours"
+      "expediente": "Working hours",
+      "guia": {
+        "titulo": "How the profiles work",
+        "ficha": {
+          "titulo": "One profile per person",
+          "texto": "Whoever sees patients, vaccinates, prescribes or cares, with or without a portal login."
+        },
+        "crmv": {
+          "titulo": "Licence for the vet",
+          "texto": "With the licence number and state, the profile writes records, releases the summary and issues prescriptions."
+        },
+        "agenda": {
+          "titulo": "Joins the schedule",
+          "texto": "With On the schedule turned on, the profile becomes a schedule column, in its own hours."
+        }
+      }
     },
     "indicados": {
       "titulo": "Referrals",
