@@ -10838,7 +10838,23 @@
       "comPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite u roku od {minutos} minuta. Ako ne možete, ostajete na listi, na istom mestu.",
       "semPrazo": "Zdravo! Oslobodio se termin za {paciente}, {data} u {hora}. Ako možete da dođete, odgovorite što pre. Ako ne možete, ostajete na listi, na istom mestu."
     },
-    "trocado": "Termin za {paciente} je pomeren sa {de} na {para}."
+    "trocado": "Termin za {paciente} je pomeren sa {de} na {para}.",
+    "guia": {
+      "titulo": "Kako lista funkcioniše",
+      "entrar": {
+        "titulo": "Nema termina? Na listu",
+        "texto": "Sa danima i satima kada pacijent može da dođe i prioritetom. Hitni idu prvi."
+      },
+      "vaga": {
+        "titulo": "Otvara se termin",
+        "texto": "Kada neko otkaže, termin se pojavljuje u Terminima za listu, sa onima kojima odgovara."
+      },
+      "oferta": {
+        "titulo": "Recepcija nudi termin",
+        "texto": "Staratelj potvrđuje u roku i termin ulazi u raspored. Bez odgovora, termin se vraća klinici."
+      }
+    },
+    "semNaoResponderamTexto": "Ponude koje su istekle bez odgovora u poslednjih 7 dana ostaju ovde, da ih recepcija pozove."
   },
   "importacao": {
     "erroAoCarregar": "Uvoz nije mogao da se učita.",

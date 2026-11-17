@@ -22,6 +22,8 @@ import EntrarNaFilaGaveta from '@/components/fila/EntrarNaFilaGaveta.vue'
 import { quandoCurto, textoDaFaixa } from '@/components/fila/leitura-da-fila'
 import VagasGaveta from '@/components/fila/VagasGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -299,6 +301,24 @@ async function remover() {
 
 const entrarAberta = ref(false)
 const vagasAbertas = ref(false)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): com ninguém na fila, como ela trabalha,
+ * em três etapas (entra quem ficou sem horário, a vaga que abre, a oferta com prazo), e o
+ * "Adicionar à fila" embaixo. Sem ofertas vencidas, a outra aba diz o que vai aparecer nela.
+ */
+const passosDaFila = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'entrar', icone: 'ph ph-user-plus' },
+    { id: 'vaga', icone: 'ph ph-calendar-check' },
+    { id: 'oferta', icone: 'ph ph-paper-plane-tilt' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`fila.guia.${id}.titulo`),
+    texto: t(`fila.guia.${id}.texto`),
+  })),
+)
 </script>
 
 <template>
@@ -356,22 +376,30 @@ const vagasAbertas = ref(false)
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-folha ui-vazio fl__vazio">
-        <i class="ph ph-hourglass-medium" aria-hidden="true" />
-        <strong>{{
-          situacao === 'ATIVAS' ? t('clinico.fila.vazioTitulo') : t('fila.semNaoResponderam')
-        }}</strong>
-        <span v-if="situacao === 'ATIVAS'">{{ t('clinico.fila.vazioDescricao') }}</span>
-        <Button
-          v-if="situacao === 'ATIVAS' && podeGerir"
-          type="button"
-          icon="ph ph-plus"
-          severity="secondary"
-          outlined
-          :label="t('clinico.fila.adicionar')"
-          @click="entrarAberta = true"
-        />
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!itens.length && situacao === 'ATIVAS'"
+        icone="ph ph-hourglass-medium"
+        :titulo="t('clinico.fila.vazioTitulo')"
+        :texto="t('clinico.fila.vazioDescricao')"
+        :guia-titulo="t('fila.guia.titulo')"
+        :passos="passosDaFila"
+      >
+        <template v-if="podeGerir" #acao>
+          <Button
+            type="button"
+            icon="ph ph-plus"
+            :label="t('clinico.fila.adicionar')"
+            @click="entrarAberta = true"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        icone="ph ph-phone-x"
+        :titulo="t('fila.semNaoResponderam')"
+        :texto="t('fila.semNaoResponderamTexto')"
+      />
 
       <ul v-else class="ui-lista ui-folha">
         <li v-for="entrada in itens" :key="entrada.id" class="ui-linha fl__linha">
@@ -514,18 +542,6 @@ const vagasAbertas = ref(false)
 
 .fl__abas {
   justify-self: start;
-}
-
-/* O vazio da casa (o mesmo da lista de Pacientes), centrado. */
-.fl__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.fl__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .fl__linha {

@@ -10838,7 +10838,23 @@
       "comPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply within {minutos} minutes. If not, you stay on the list, in the same place.",
       "semPrazo": "Hello! A time opened up for {paciente} on {data} at {hora}. If you can come, reply as soon as you can. If not, you stay on the list, in the same place."
     },
-    "trocado": "{paciente}'s appointment moved from {de} to {para}."
+    "trocado": "{paciente}'s appointment moved from {de} to {para}.",
+    "guia": {
+      "titulo": "How the list works",
+      "entrar": {
+        "titulo": "No slot? Add to the list",
+        "texto": "With the days and times the patient can come and the priority. Urgent ones go first."
+      },
+      "vaga": {
+        "titulo": "A slot opens",
+        "texto": "When someone cancels, the slot shows up in Slots for the list, with who fits it."
+      },
+      "oferta": {
+        "titulo": "The front desk offers it",
+        "texto": "The owner confirms within the deadline and the time goes into the diary. With no answer, the slot goes back to the clinic."
+      }
+    },
+    "semNaoResponderamTexto": "Offers that expired unanswered in the last 7 days stay here, for the front desk to call."
   },
   "importacao": {
     "erroAoCarregar": "The import could not be loaded.",

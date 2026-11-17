@@ -10838,7 +10838,23 @@
       "comPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde en hasta {minutos} minutos. Si no puedes, sigues en la lista, en el mismo lugar.",
       "semPrazo": "¡Hola! Se abrió un horario para {paciente} el {data} a las {hora}. Si puedes venir, responde lo antes posible. Si no puedes, sigues en la lista, en el mismo lugar."
     },
-    "trocado": "Horario de {paciente} cambiado de {de} a {para}."
+    "trocado": "Horario de {paciente} cambiado de {de} a {para}.",
+    "guia": {
+      "titulo": "Cómo funciona la lista",
+      "entrar": {
+        "titulo": "¿Sin horario? A la lista",
+        "texto": "Con los días y horarios en que el paciente puede venir y la prioridad. Los urgentes van primero."
+      },
+      "vaga": {
+        "titulo": "Se abre un hueco",
+        "texto": "Cuando alguien cancela, el hueco aparece en Huecos para la lista, con quién cabe en él."
+      },
+      "oferta": {
+        "titulo": "Recepción lo ofrece",
+        "texto": "El tutor confirma dentro del plazo y el horario entra en la agenda. Sin respuesta, el hueco vuelve a la clínica."
+      }
+    },
+    "semNaoResponderamTexto": "Las ofertas que vencieron sin respuesta en los últimos 7 días quedan aquí, para que recepción llame."
   },
   "importacao": {
     "erroAoCarregar": "No se pudo cargar la importación.",

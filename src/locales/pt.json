@@ -10838,7 +10838,23 @@
       "comPrazo": "Olá! Abriu um horário para {paciente} em {data} às {hora}. Se puder vir, responda em até {minutos} minutos. Se não puder, você continua na fila, no mesmo lugar.",
       "semPrazo": "Olá! Abriu um horário para {paciente} em {data} às {hora}. Se puder vir, responda o quanto antes. Se não puder, você continua na fila, no mesmo lugar."
     },
-    "trocado": "Horário de {paciente} trocado de {de} para {para}."
+    "trocado": "Horário de {paciente} trocado de {de} para {para}.",
+    "guia": {
+      "titulo": "Como a fila funciona",
+      "entrar": {
+        "titulo": "Sem horário, entra na fila",
+        "texto": "Com os dias e horários em que o paciente pode vir e a prioridade. Urgentes vão na frente."
+      },
+      "vaga": {
+        "titulo": "Abre uma vaga",
+        "texto": "Quando alguém desmarca, a vaga aparece em Vagas para a fila, já com quem cabe nela."
+      },
+      "oferta": {
+        "titulo": "A recepção oferece",
+        "texto": "O responsável confirma dentro do prazo e o horário entra na agenda. Sem resposta, a vaga volta para a clínica."
+      }
+    },
+    "semNaoResponderamTexto": "Ofertas que venceram sem resposta nos últimos 7 dias ficam aqui, para a recepção ligar."
   },
   "importacao": {
     "erroAoCarregar": "Não foi possível carregar a importação.",
