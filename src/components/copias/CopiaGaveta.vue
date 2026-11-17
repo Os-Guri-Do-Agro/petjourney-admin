@@ -105,7 +105,8 @@ function relerDepois() {
   }, RELER_GERACAO_MS)
 }
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.escolhido?.id] as const, ([agora]) => {
   if (!agora) {
     pararDeReler()
     return
@@ -487,10 +488,10 @@ const tituloDoModo = computed(() => {
         <section v-if="(podeProrrogar || podeRecusar) && modo === 'detalhe'" class="eg__secao">
           <span class="eg__rotulo">{{ t('copias.doResponsavel') }}</span>
           <div class="cg__botoes">
+            <!-- Tamanho normal, como os do pé: no pequeno, dentro da gaveta, liam como etiqueta. -->
             <Button
               v-if="podeProrrogar"
               type="button"
-              size="small"
               severity="secondary"
               outlined
               icon="ph ph-calendar-plus"
@@ -501,7 +502,6 @@ const tituloDoModo = computed(() => {
             <Button
               v-if="podeRecusar"
               type="button"
-              size="small"
               severity="secondary"
               outlined
               icon="ph ph-x-circle"
