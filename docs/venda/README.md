@@ -10,9 +10,20 @@ pelo pet. A oferta é gratuita para a clínica.
 | `PetJourney-para-clinicas.html` | **A fonte.** O PDF é gerado dela, nunca editado |
 | `imagens/app-inicio.webp` | O app no celular, a mesma imagem do site (`petjourney-web/src/assets/app-telas/pt/aparelho-home.webp`) |
 | `phosphor/` | Só os ícones Phosphor que a folha usa (gerados de `@phosphor-icons/web`) |
+| `fontes/` | Readex Pro em pesos **fixos** (400 e 600), de `@fontsource/readex-pro` (OFL) |
 
-Fontes, logo, faixa e a tela da Clínica vêm de `../apresentacao/` (a captura `telas/10-clinica-hoje.png`,
+Logo, faixa e a tela da Clínica vêm de `../apresentacao/` (a captura `telas/10-clinica-hoje.png`,
 recortada pelo CSS para não mostrar o Hotel, que está pausado).
+
+**Nunca use a fonte variável** (a `readex-pro-*-wght-normal.woff2` da apresentação): o Edge a
+embute como fonte Type 3, e o leitor de PDF do iPhone e do Mac a desenha quebrada. Depois de gerar,
+confira que o PDF não tem `/Type3`:
+
+```bash
+node -e "const b=require('fs').readFileSync('PetJourney-para-clinicas.pdf','latin1');console.log((b.match(/\/Subtype\s*\/Type3/g)||[]).length)"
+```
+
+Precisa dar 0.
 
 ## O que a folha promete
 

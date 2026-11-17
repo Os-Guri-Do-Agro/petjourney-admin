@@ -18,22 +18,46 @@
        * Nunca dizer que os dados das imagens são de teste ou de exemplo.
        *
        * O PDF é gerado daqui pelo Edge (ver README.md), nunca editado à mão.
+       *
+       * Fonte em pesos FIXOS (400 e 600, de @fontsource/readex-pro), nunca a variável: o Edge
+       * embute fonte variável como Type 3, e o leitor de PDF do iPhone e do Mac a desenha mal.
+       * Por isso só existem os pesos 400 e 600 aqui; outro peso cairia em negrito sintético.
        */
 
       @font-face {
         font-family: 'Readex Pro';
-        src: url('../apresentacao/fontes/readex-pro-latin-wght-normal.woff2') format('woff2');
-        font-weight: 160 700;
+        src: url('fontes/readex-pro-latin-400-normal.woff2') format('woff2');
+        font-weight: 400;
         unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-          U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215;
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
       }
 
       @font-face {
         font-family: 'Readex Pro';
-        src: url('../apresentacao/fontes/readex-pro-latin-ext-wght-normal.woff2') format('woff2');
-        font-weight: 160 700;
-        unicode-range: U+0100-024F, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F,
-          U+A720-A7FF;
+        src: url('fontes/readex-pro-latin-ext-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-ext-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
       }
 
       @page {
@@ -78,15 +102,15 @@
       body {
         color: var(--texto);
         font-family: 'Readex Pro', system-ui, sans-serif;
-        font-size: 8.6pt;
-        font-weight: 330;
+        font-size: 9.3pt;
+        font-weight: 400;
         line-height: 1.45;
       }
 
       b,
       strong {
         color: var(--tinta);
-        font-weight: 560;
+        font-weight: 600;
       }
 
       p {
@@ -132,23 +156,23 @@
         padding: 1.3mm 3.2mm;
         border-radius: 99px;
         background: rgb(0 0 0 / 14%);
-        font-size: 7pt;
+        font-size: 7.5pt;
         font-weight: 600;
         letter-spacing: 0.12em;
         text-transform: uppercase;
       }
 
       h1 {
-        margin: 4mm 0 3.2mm;
+        margin: 3.6mm 0 3mm;
         color: #fff;
-        font-size: 21pt;
+        font-size: 22pt;
         font-weight: 600;
         line-height: 1.1;
         letter-spacing: -0.02em;
       }
 
       .abertura__sub {
-        font-size: 10pt;
+        font-size: 10.6pt;
         font-weight: 400;
         line-height: 1.45;
       }
@@ -162,7 +186,7 @@
         border-radius: 99px;
         background: var(--papel);
         color: var(--tinta);
-        font-size: 9.4pt;
+        font-size: 10pt;
         font-weight: 600;
       }
 
@@ -203,7 +227,7 @@
         left: 110mm;
         width: 58mm;
         color: #fff;
-        font-size: 7pt;
+        font-size: 7.8pt;
         line-height: 1.35;
       }
 
@@ -214,14 +238,14 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        gap: 7.5mm;
-        padding: 9mm 15mm 7mm;
+        gap: 5mm;
+        padding: 8mm 15mm 6mm;
       }
 
       .rotulo {
         margin: 0 0 2mm;
         color: var(--salvia-texto);
-        font-size: 7.2pt;
+        font-size: 7.8pt;
         font-weight: 600;
         letter-spacing: 0.13em;
         text-transform: uppercase;
@@ -229,14 +253,14 @@
 
       .quem p {
         color: var(--texto);
-        font-size: 9.4pt;
+        font-size: 10pt;
         line-height: 1.5;
       }
 
       /* As duas pontas e o que passa entre elas. */
       .pontas {
         display: grid;
-        grid-template-columns: 50mm 1fr 50mm;
+        grid-template-columns: 57mm 1fr 57mm;
         align-items: center;
         gap: 3mm;
         margin-top: 3.2mm;
@@ -256,12 +280,12 @@
 
       .ponta strong {
         display: block;
-        font-size: 9.6pt;
+        font-size: 10.4pt;
         line-height: 1.2;
       }
 
       .ponta span {
-        font-size: 7.4pt;
+        font-size: 8.4pt;
         line-height: 1.3;
       }
 
@@ -296,15 +320,13 @@
         padding-bottom: 1.2mm;
         border-bottom: 0.3mm dashed var(--regua);
         color: var(--texto);
-        font-size: 7.8pt;
+        font-size: 8.6pt;
         line-height: 1.3;
       }
 
       .troca:last-child {
         padding-bottom: 0;
         border-bottom: 0;
-        justify-content: flex-end;
-        text-align: right;
       }
 
       .troca .ph {
@@ -340,13 +362,13 @@
       }
 
       .recurso strong {
-        font-size: 8.8pt;
+        font-size: 9.6pt;
         line-height: 1.2;
       }
 
       .recurso p {
         color: var(--suave);
-        font-size: 7.6pt;
+        font-size: 8.4pt;
         line-height: 1.38;
       }
 
@@ -369,7 +391,7 @@
         gap: 2mm;
         margin: 0 0 2.4mm;
         color: var(--tinta);
-        font-size: 10.4pt;
+        font-size: 11.2pt;
         font-weight: 600;
         line-height: 1.2;
       }
@@ -404,7 +426,7 @@
         grid-template-columns: 4mm 1fr;
         column-gap: 1.4mm;
         margin-bottom: 1.7mm;
-        font-size: 8.2pt;
+        font-size: 9pt;
         line-height: 1.4;
       }
 
@@ -421,24 +443,29 @@
       /* ------------------------------------------------------------ rodapé */
 
       .rodape {
-        display: grid;
         flex: none;
-        grid-template-columns: 1fr 52mm;
-        align-items: center;
-        gap: 6mm;
         margin-top: auto;
         padding: 4.6mm 15mm 5.4mm;
         background: var(--app-fundo);
         color: var(--app-tinta);
       }
 
-      .rodape strong {
+      .rodape strong,
+      .rodape b {
         color: var(--app-tinta);
       }
 
+      /* Título à esquerda e contato à direita; os passos ocupam a largura toda embaixo. */
+      .rodape__topo {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6mm;
+        margin-bottom: 2.6mm;
+      }
+
       .rodape__titulo {
-        margin-bottom: 1.6mm;
-        font-size: 11.5pt;
+        font-size: 12.2pt;
         font-weight: 600;
       }
 
@@ -448,34 +475,36 @@
         margin: 0;
         padding: 0;
         list-style: none;
-        font-size: 7.8pt;
+        font-size: 8.6pt;
         line-height: 1.35;
       }
 
       .passos li {
         display: grid;
         flex: 1;
-        grid-template-columns: 4.6mm 1fr;
+        grid-template-columns: 5mm 1fr;
         column-gap: 1.6mm;
       }
 
       .passos__n {
         display: grid;
-        width: 4.6mm;
-        height: 4.6mm;
+        width: 5mm;
+        height: 5mm;
         place-items: center;
         border-radius: 99px;
         background: var(--app-tinta);
         color: #fff;
-        font-size: 7pt;
+        font-size: 7.6pt;
         font-weight: 600;
       }
 
       .contato {
-        padding-left: 5mm;
-        border-left: 0.3mm solid rgb(40 94 78 / 35%);
-        font-size: 8pt;
-        line-height: 1.55;
+        display: flex;
+        flex: none;
+        flex-direction: column;
+        align-items: flex-end;
+        font-size: 8.8pt;
+        line-height: 1.5;
       }
 
       .contato .ph {
@@ -517,7 +546,7 @@
             Uma plataforma de saúde para animais de estimação de <b>qualquer espécie</b>, com duas
             pontas ligadas: o <b>portal</b>, onde a clínica trabalha, e o <b>aplicativo</b>, onde o
             responsável acompanha o pet. O histórico pertence ao pet e à família, e a clínica
-            autorizada lê e escreve nele. Nada fica perdido entre papel, planilha e mensagem.
+            autorizada lê e escreve nele.
           </p>
 
           <div class="pontas">
@@ -525,7 +554,7 @@
               <i class="ph ph-monitor"></i>
               <div>
                 <strong>Portal da clínica</strong>
-                <span>No computador e no tablet</span>
+                <span>Computador e tablet</span>
               </div>
             </div>
             <div class="trocas">
@@ -562,43 +591,43 @@
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-calendar-check"></i><strong>Agenda</strong>
               </div>
-              <p>Link de agendamento da clínica, fila de espera, faltas e retornos.</p>
+              <p>Link de agendamento, fila de espera, faltas e retornos.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-stethoscope"></i><strong>Prontuário</strong>
               </div>
-              <p>Atendimento por seções, com a pré-consulta que veio do app.</p>
+              <p>Atendimento por seções, com a pré-consulta do app.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
-                <i class="recurso__icone ph ph-prescription"></i><strong>Receitas e atestados</strong>
+                <i class="recurso__icone ph ph-prescription"></i><strong>Receitas</strong>
               </div>
-              <p>Assinados no portal, com bulário à mão e laudos anexados.</p>
+              <p>Receitas e atestados assinados, com bulário.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-syringe"></i><strong>Vacinas</strong>
               </div>
-              <p>Lista de chamada de quem tem dose para vencer, mês a mês.</p>
+              <p>Quem tem dose para vencer, mês a mês.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-bed"></i><strong>Internação</strong>
               </div>
-              <p>Mapa de vagas, doses na hora certa e boletim enviado ao app.</p>
+              <p>Mapa de vagas, doses e boletim enviado ao app.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-chart-line-up"></i><strong>Gestão</strong>
               </div>
-              <p>Estoque de remédios e materiais, e relatórios do mês.</p>
+              <p>Estoque de remédios e relatórios do mês.</p>
             </div>
             <div class="recurso">
               <div class="recurso__cabeca">
                 <i class="recurso__icone ph ph-users-three"></i><strong>Equipe</strong>
               </div>
-              <p>Acesso por pessoa, e pacientes importados de planilha.</p>
+              <p>Acesso por pessoa e pacientes vindos de planilha.</p>
             </div>
           </div>
         </section>
@@ -613,29 +642,29 @@
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Menos telefone.</b> O responsável pede o horário pelo link ou pelo app, e
-                    na véspera o app lembra a consulta.</span
+                    ><b>Menos telefone.</b> O horário é pedido pelo link ou pelo app, com
+                    lembrete na véspera.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Menos retorno perdido.</b> Retornos, faltas e vacinas a vencer aparecem
-                    em lista para a recepção agir.</span
+                    ><b>Menos retorno perdido.</b> Retornos, faltas e vacinas a vencer em uma só
+                    lista.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Consulta mais rápida.</b> O pet chega com histórico, alergias, peso e a
-                    pré-consulta respondida.</span
+                    ><b>Consulta mais rápida.</b> O pet chega com histórico, alergias, peso e
+                    pré-consulta.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Começa sem redigitar.</b> Os pacientes entram por planilha, e tudo funciona
-                    no navegador.</span
+                    ><b>Começa sem redigitar.</b> Os pacientes entram por planilha, e tudo
+                    funciona no navegador.</span
                   >
                 </li>
               </ul>
@@ -648,28 +677,28 @@
                   <i class="ph ph-check-circle"></i>
                   <span
                     ><b>Tudo do pet em um só lugar.</b> Vacinas, consultas, exames, remédios, peso e
-                    documentos, de quantos pets tiver.</span
+                    documentos.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
                     ><b>Lembrete antes de vencer.</b> Vacina, remédio e retorno avisam no
-                    celular, na hora certa.</span
+                    celular.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Sem papel perdido.</b> A receita da clínica chega ao app, e dela saem os
-                    lembretes de cada dose.</span
+                    ><b>Sem papel perdido.</b> A receita da clínica chega ao app e vira
+                    lembrete de dose.</span
                   >
                 </li>
                 <li>
                   <i class="ph ph-check-circle"></i>
                   <span
-                    ><b>Leva o histórico junto.</b> Carteirinha digital e histórico liberado a
-                    outro veterinário por código.</span
+                    ><b>Leva o histórico junto.</b> Carteirinha digital e acesso para outro
+                    veterinário por código.</span
                   >
                 </li>
               </ul>
@@ -680,9 +709,14 @@
 
       <!-- ============================================================ RODAPÉ -->
       <footer class="rodape">
-        <div>
+        <div class="rodape__topo">
           <p class="rodape__titulo">Gratuito para a clínica. Comece em três passos:</p>
-          <ol class="passos">
+          <p class="contato">
+            <span><i class="ph ph-globe-simple"></i>petjourney.health</span>
+            <span><i class="ph ph-envelope-simple"></i>atendimento@petjourney.health</span>
+          </p>
+        </div>
+        <ol class="passos">
             <li>
               <span class="passos__n">1</span>
               <span>Cadastre a clínica em <b>petjourney.health/parcerias</b>.</span>
@@ -696,12 +730,6 @@
               <span>Ligue cada paciente ao app do responsável.</span>
             </li>
           </ol>
-        </div>
-        <div class="contato">
-          <b>Fale conosco</b><br />
-          <i class="ph ph-globe-simple"></i>petjourney.health<br />
-          <i class="ph ph-envelope-simple"></i>atendimento@petjourney.health
-        </div>
       </footer>
     </main>
   </body>
