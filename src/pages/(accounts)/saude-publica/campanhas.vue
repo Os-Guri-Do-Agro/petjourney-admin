@@ -7,10 +7,13 @@
  *
  * Os filtros do espaço (`FiltrosDoPrototipo`): as regiões valem para as duas listas; o período, só
  * para as encerradas (as agendadas são de depois dos 90 dias).
+ *
+ * Cada campanha leva à página do dia dela (`campanhas/[id]`), onde a equipe registra os
+ * atendimentos e anota o resultado: "Atendimentos" nas encerradas, "Registrar no dia" nas agendadas.
  */
 import Button from 'primevue/button'
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
@@ -194,6 +197,16 @@ watch(
                 </dd>
               </div>
             </dl>
+            <Button
+              :as="RouterLink"
+              :to="`/saude-publica/campanhas/${campanha.id}`"
+              size="small"
+              class="cp-linha__abrir"
+              :severity="campanha.situacao === 'agendada' ? undefined : 'secondary'"
+              :outlined="campanha.situacao !== 'agendada'"
+              :icon="campanha.situacao === 'agendada' ? 'ph ph-qr-code' : 'ph ph-list-checks'"
+              :label="campanha.situacao === 'agendada' ? 'Registrar no dia' : 'Atendimentos'"
+            />
           </li>
         </ul>
         <!-- Sem agendada, o vazio chama para agendar; a encerrada chega sozinha, sem botão. -->
@@ -248,7 +261,13 @@ watch(
   align-items: center;
   gap: 10px 16px;
   padding: 14px 0;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+/* O botão do dia da campanha: visível, do tamanho do toque no tablet. */
+.cp-linha__abrir.p-button {
+  min-height: 40px;
+  white-space: nowrap;
 }
 
 .cp-linha + .cp-linha {
@@ -338,6 +357,11 @@ watch(
 
   .cp-linha__numeros {
     grid-column: 2;
+  }
+
+  .cp-linha__abrir.p-button {
+    grid-column: 2;
+    justify-self: start;
   }
 }
 </style>

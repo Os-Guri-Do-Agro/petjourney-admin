@@ -5,6 +5,9 @@
  * aconteceu desde o atendimento. Cada toque muda o atendimento, o aviso do canto diz em quanto a meta
  * foi, e o painel da tela anda junto: é o circuito do Ofício 002/2026 inteiro, na frente de quem
  * decide. Cuidado que passou da data não se confirma no prazo; dá para reenviar o aviso.
+ *
+ * Embaixo, o resultado do atendimento (17/11/2026): o que foi feito e o que não deu, com o motivo, e
+ * o "Anotar resultado" para a equipe corrigir depois. A ficha mostra só o que foi feito.
  */
 import Button from 'primevue/button'
 import { useToast } from 'primevue/usetoast'
@@ -12,18 +15,26 @@ import { computed } from 'vue'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import FichaNoCelular from '@/features/saude-publica/components/FichaNoCelular.vue'
+import ResultadoDoAtendimento from '@/features/saude-publica/components/ResultadoDoAtendimento.vue'
+import { useCampo } from '@/features/saude-publica/campo'
 import {
   dataCurta,
   META_DO_PROCEDIMENTO,
   procedimento,
   proximosCuidados,
   type MetaDoPiloto,
+  type ResultadoDoProcedimento,
 } from '@/features/saude-publica/dados'
 import {
   responsavelPeloAtendimento,
   useEstadoDoPrototipo,
   useMetasDoPiloto,
 } from '@/features/saude-publica/estado'
+import {
+  feitosDoAtendimento,
+  fraseDoResultado,
+  resultadosDoAtendimento,
+} from '@/features/saude-publica/resultado'
 
 const props = defineProps<{ atendimentoId: string | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -31,20 +42,25 @@ const aberta = defineModel<boolean>('visible', { default: false })
 const toast = useToast()
 const { atendimentos, atualizarAtendimento } = useEstadoDoPrototipo()
 const metas = useMetasDoPiloto()
+const { anotarResultado } = useCampo()
 
 const atendimento = computed(
   () => atendimentos.value.find((item) => item.id === props.atendimentoId) ?? null,
 )
 
+/** O que de fato foi feito: a ficha e os cuidados não mostram o que não deu. */
+const feitos = computed(() => (atendimento.value ? feitosDoAtendimento(atendimento.value) : []))
+const resultados = computed(() =>
+  atendimento.value ? resultadosDoAtendimento(atendimento.value) : [],
+)
+
 const cuidado = computed(() =>
-  atendimento.value
-    ? proximosCuidados(atendimento.value.data, atendimento.value.procedimentos)[0]
-    : undefined,
+  atendimento.value ? proximosCuidados(atendimento.value.data, feitos.value)[0] : undefined,
 )
 
 const sobre = computed(() =>
   atendimento.value
-    ? `${atendimento.value.procedimentos.map((id) => procedimento(id).rotulo).join(' · ')} · ${responsavelPeloAtendimento(atendimento.value)}`
+    ? `${resultados.value.map((item) => procedimento(item.procedimento).rotulo).join(' · ')} · ${responsavelPeloAtendimento(atendimento.value)}`
     : '',
 )
 
@@ -148,6 +164,19 @@ function sinpatinhas() {
   })
 }
 
+/** O resultado anotado depois: grava no atendimento, e o relatório passa a contar o novo. */
+function salvarResultado(novos: ResultadoDoProcedimento[]) {
+  const item = atendimento.value
+  if (!item) return
+  anotarResultado(item.id, novos)
+  toast.add({
+    severity: 'success',
+    summary: `Resultado de ${item.animal} anotado`,
+    detail: novos.map(fraseDoResultado).join('; '),
+    life: 4500,
+  })
+}
+
 function reenviar() {
   const item = atendimento.value
   if (!item || !cuidado.value) return
@@ -176,7 +205,7 @@ function reenviar() {
           :animal="atendimento.animal"
           :especie="atendimento.especie"
           :data="atendimento.data"
-          :procedimentos="atendimento.procedimentos"
+          :procedimentos="feitos"
           :situacao="atendimento.situacao"
           :sinpatinhas="atendimento.sinpatinhas"
           @abrir="abrir"
@@ -200,6 +229,13 @@ function reenviar() {
               </span>
             </li>
           </ol>
+
+          <ResultadoDoAtendimento
+            :id="`ap-resultado-${atendimento.id}`"
+            :resultados="resultados"
+            class="ap__resultado"
+            @salvar="salvarResultado"
+          />
 
           <Button
             v-if="atendimento.situacao === 'atrasado'"
@@ -316,6 +352,11 @@ function reenviar() {
 
 .ap__reenviar {
   justify-self: start;
+}
+
+.ap__resultado {
+  padding-top: 14px;
+  border-top: 1px solid var(--linha);
 }
 
 @container atendimento (max-width: 520px) {

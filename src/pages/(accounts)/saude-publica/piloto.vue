@@ -50,6 +50,11 @@ import {
   useEstadoDoPrototipo,
   useMetasDoPiloto,
 } from '@/features/saude-publica/estado'
+import {
+  feitosDoAtendimento,
+  resultadosDoAtendimento,
+  seloDoResultado,
+} from '@/features/saude-publica/resultado'
 import { metaNoRecorte, type Especie, type JanelaDoPiloto } from '@/features/saude-publica/serie'
 
 const { atendimentos } = useEstadoDoPrototipo()
@@ -160,9 +165,18 @@ watch(metas, (lista) => {
   }, 2600)
 })
 
-/** O que aconteceu depois do atendimento, com o cuidado mais perto. */
+/**
+ * O resultado do atendimento na linha: "Parcial: motivo" ou "Não realizado: motivo" quando algo não
+ * deu (17/11/2026); tudo feito não ganha selo, que é o caso comum.
+ */
+function resultadoNaLinha(atendimento: AtendimentoDoPiloto) {
+  const selo = seloDoResultado(resultadosDoAtendimento(atendimento))
+  return selo.situacao === 'realizado' ? null : selo
+}
+
+/** O que aconteceu depois do atendimento, com o cuidado mais perto do que foi feito. */
 function depois(atendimento: AtendimentoDoPiloto) {
-  const cuidado = proximosCuidados(atendimento.data, atendimento.procedimentos)[0]
+  const cuidado = proximosCuidados(atendimento.data, feitosDoAtendimento(atendimento))[0]
   const quando = cuidado ? `${cuidado.rotulo} em ${dataCurta(cuidado.data)}` : ''
 
   switch (atendimento.situacao) {
@@ -376,7 +390,11 @@ function aoRegistrar(id: string) {
               <span class="pl-linha__texto">
                 <strong>{{ atendimento.animal }}</strong>
                 <span>
-                  {{ atendimento.procedimentos.map((id) => procedimento(id).rotulo).join(' · ') }}
+                  {{
+                    resultadosDoAtendimento(atendimento)
+                      .map((item) => procedimento(item.procedimento).rotulo)
+                      .join(' · ')
+                  }}
                 </span>
                 <small>
                   {{ responsavelPeloAtendimento(atendimento) }} ·
@@ -393,12 +411,32 @@ function aoRegistrar(id: string) {
                     <i class="ph ph-identification-card" aria-hidden="true" />
                     SinPatinhas
                   </span>
-                  <span class="ui-selo" :class="depois(atendimento).classe">
+                  <span
+                    v-if="resultadoNaLinha(atendimento)"
+                    class="ui-selo"
+                    :class="resultadoNaLinha(atendimento)!.classe"
+                  >
+                    <i :class="resultadoNaLinha(atendimento)!.icone" aria-hidden="true" />
+                    {{ resultadoNaLinha(atendimento)!.texto }}
+                  </span>
+                  <!-- Nada feito não teve QR: a ficha não entra na conta. -->
+                  <span
+                    v-if="resultadoNaLinha(atendimento)?.situacao !== 'nao-realizado'"
+                    class="ui-selo"
+                    :class="depois(atendimento).classe"
+                  >
                     <i :class="depois(atendimento).icone" aria-hidden="true" />
                     {{ depois(atendimento).selo }}
                   </span>
                 </span>
-                <small v-if="depois(atendimento).frase">{{ depois(atendimento).frase }}</small>
+                <small
+                  v-if="
+                    resultadoNaLinha(atendimento)?.situacao !== 'nao-realizado' &&
+                    depois(atendimento).frase
+                  "
+                >
+                  {{ depois(atendimento).frase }}
+                </small>
               </span>
               <i class="ph ph-caret-right pl-seta" aria-hidden="true" />
             </button>
