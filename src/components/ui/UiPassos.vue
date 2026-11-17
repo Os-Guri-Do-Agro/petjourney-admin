@@ -252,7 +252,18 @@ const proxima = computed(
     padding-top: 0;
   }
 
+  /* Os botões das etapas na mesma linha, por mais que as frases tenham tamanhos diferentes. */
+  .ui-passos__etapa {
+    grid-template-rows: auto 1fr;
+  }
+
+  .ui-passos__texto {
+    align-self: stretch;
+    grid-template-rows: auto auto 1fr;
+  }
+
   .ui-passos__acao {
+    align-self: end;
     justify-content: center;
   }
 
