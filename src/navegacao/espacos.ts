@@ -7,7 +7,7 @@ import {
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
-import { usePrototipoSaudePublica } from '@/features/saude-publica/prototipo'
+import { noPrototipoDeSaudePublica } from '@/features/saude-publica/prototipo'
 import type { LugarDoTrilha } from '@/theme/trilha/rotas'
 
 /**
@@ -613,13 +613,13 @@ function criarEspacos() {
   const { t, locale } = useI18n()
   const route = useRoute()
   const navegacao = useAppNavigation()
-  const { visivel: saudePublica } = usePrototipoSaudePublica()
 
   const espacos = computed(() => {
     void locale.value
 
     return montarEspacos(navegacao.navigationSections.value, t, {
-      saudePublica: saudePublica.value,
+      /* Escondido: o espaço só aparece enquanto se está numa tela do protótipo. */
+      saudePublica: noPrototipoDeSaudePublica(route.path),
     })
   })
 

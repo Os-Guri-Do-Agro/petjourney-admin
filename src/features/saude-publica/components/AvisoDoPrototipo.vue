@@ -2,26 +2,20 @@
 /**
  * A linha de todas as telas do protótipo: diz, antes de qualquer número, que eles são ilustrativos
  * (uma simulação dos 90 primeiros dias), para ninguém sair da apresentação achando que são medidos.
- * Discreta (o selo e uma frase, sem caixa): é aviso, não assunto. Abrir uma tela daqui liga o
- * espaço no menu; "Sair do protótipo" desliga e volta ao Início.
+ * Discreta (o selo e uma frase, sem caixa): é aviso, não assunto. O espaço só aparece no menu
+ * enquanto se está numa tela dele (`prototipo.ts`); "Sair do protótipo" volta ao Início, e ele some.
  */
 import Button from 'primevue/button'
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { dataCurta, PERIODO } from '@/features/saude-publica/dados'
-import { usePrototipoSaudePublica } from '@/features/saude-publica/prototipo'
 
 /** A frase do aviso, quando a tela simula outro período (o piloto com a Subea). */
 defineProps<{ texto?: string }>()
 
 const router = useRouter()
-const { ligar, desligar } = usePrototipoSaudePublica()
-
-onMounted(ligar)
 
 function sair() {
-  desligar()
   void router.push('/inicio')
 }
 </script>
