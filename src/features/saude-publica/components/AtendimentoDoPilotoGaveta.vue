@@ -19,7 +19,11 @@ import {
   proximosCuidados,
   type MetaDoPiloto,
 } from '@/features/saude-publica/dados'
-import { useEstadoDoPrototipo, useMetasDoPiloto } from '@/features/saude-publica/estado'
+import {
+  responsavelPeloAtendimento,
+  useEstadoDoPrototipo,
+  useMetasDoPiloto,
+} from '@/features/saude-publica/estado'
 
 const props = defineProps<{ atendimentoId: string | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -40,7 +44,7 @@ const cuidado = computed(() =>
 
 const sobre = computed(() =>
   atendimento.value
-    ? `${atendimento.value.procedimentos.map((id) => procedimento(id).rotulo).join(' · ')} · Tutor ${atendimento.value.tutor}`
+    ? `${atendimento.value.procedimentos.map((id) => procedimento(id).rotulo).join(' · ')} · ${responsavelPeloAtendimento(atendimento.value)}`
     : '',
 )
 

@@ -35,7 +35,11 @@ import {
   type AtendimentoDoPiloto,
   type MetaDoPiloto,
 } from '@/features/saude-publica/dados'
-import { useEstadoDoPrototipo, useMetasDoPiloto } from '@/features/saude-publica/estado'
+import {
+  responsavelPeloAtendimento,
+  useEstadoDoPrototipo,
+  useMetasDoPiloto,
+} from '@/features/saude-publica/estado'
 
 const { atendimentos } = useEstadoDoPrototipo()
 
@@ -297,7 +301,10 @@ function aoRegistrar(id: string) {
                 <span>
                   {{ atendimento.procedimentos.map((id) => procedimento(id).rotulo).join(' · ') }}
                 </span>
-                <small>Tutor {{ atendimento.tutor }} · {{ dataCurta(atendimento.data) }}</small>
+                <small>
+                  {{ responsavelPeloAtendimento(atendimento) }} ·
+                  {{ dataCurta(atendimento.data) }}
+                </small>
               </span>
               <span class="pl-linha__depois">
                 <span class="pl-linha__selos">

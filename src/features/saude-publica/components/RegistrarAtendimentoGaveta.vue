@@ -2,10 +2,13 @@
 /**
  * Registrar atendimento do piloto com a Subea (Ofício 002/2026): o que a equipe do Consultório
  * Móvel faz "em cerca de 1 minuto", numa gaveta em três passos.
- * 1. **O animal**: nome, espécie, quem é o tutor e o celular, com o aceite dos avisos (LGPD).
+ * 1. **O animal**: nome, espécie, quem leva (o tutor ou uma ONG), o celular e o documento, com o
+ *    aceite dos avisos (LGPD). O documento é o CPF do tutor ou o CNPJ da ONG, os dois opcionais:
+ *    em branco passa; preenchido, tem de conferir.
  * 2. **O que foi feito**: castração, antirrábica, coleira, consulta, microchip. Cada um marca o
  *    próximo cuidado, que vira aviso.
- * 3. **QR Code**: o QR que o tutor leva e a ficha que ele abre no celular.
+ * 3. **QR Code**: o QR que o tutor leva, o botão de imprimir a etiqueta e a ficha que ele abre no
+ *    celular.
  *
  * O relógio corre desde que a gaveta abre, e o aviso do fim diz quanto levou: é a prova do "1
  * minuto" na frente de quem decide. Nada é enviado: é protótipo, e o QR abre o site da PetJourney.
@@ -14,11 +17,12 @@ import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import { imagemDoQr } from '@/components/parceiro/estabelecimento/qr-da-pagina'
+import EtiquetaDoAtendimento from '@/features/saude-publica/components/EtiquetaDoAtendimento.vue'
 import FichaNoCelular from '@/features/saude-publica/components/FichaNoCelular.vue'
 import {
   PERIODO,
@@ -27,8 +31,10 @@ import {
   type AtendimentoDoPiloto,
   type Procedimento,
 } from '@/features/saude-publica/dados'
-import { useEstadoDoPrototipo } from '@/features/saude-publica/estado'
+import { useEstadoDoPrototipo, type QuemLeva } from '@/features/saude-publica/estado'
 import { SITE_PUBLICO } from '@/utils/parceiro/pagina-publica'
+import { formatCnpj, isValidCnpj, stripCnpj } from '@/utils/validation/cnpj'
+import { formatCpf, isValidCpf, stripCpf } from '@/utils/validation/cpf'
 
 const aberta = defineModel<boolean>('visible', { default: false })
 /** O atendimento entrou na lista: a tela abre ele, para o tutor ler o QR na frente de todos. */
@@ -42,15 +48,25 @@ const ESPECIES: { id: AtendimentoDoPiloto['especie']; rotulo: string; icone: str
   { id: 'CACHORRO', rotulo: 'Cachorro', icone: 'ph ph-dog' },
   { id: 'GATO', rotulo: 'Gato', icone: 'ph ph-cat' },
 ]
+const QUEM_LEVA: { id: QuemLeva; rotulo: string; icone: string }[] = [
+  { id: 'tutor', rotulo: 'Tutor', icone: 'ph ph-user' },
+  { id: 'ong', rotulo: 'ONG', icone: 'ph ph-hand-heart' },
+]
 
 const passo = ref(0)
 const animal = ref('')
 const especie = ref<AtendimentoDoPiloto['especie']>('CACHORRO')
+const quem = ref<QuemLeva>('tutor')
+/** O nome do tutor ou, quando o animal é de ONG, o nome dela. */
 const tutor = ref('')
 const celular = ref('')
+const cpf = ref('')
+const cnpj = ref('')
 const aceite = ref(false)
 const feitos = ref<Procedimento[]>([])
 const tentou = ref(false)
+/** Saiu do campo do documento: o aviso de "não confere" aparece já, sem esperar o Continuar. */
+const conferirDocumento = ref(false)
 const qr = ref('')
 const abertaEm = ref(0)
 const levou = ref('')
@@ -60,24 +76,66 @@ watch(aberta, (agora) => {
   passo.value = 0
   animal.value = ''
   especie.value = 'CACHORRO'
+  quem.value = 'tutor'
   tutor.value = ''
   celular.value = ''
+  cpf.value = ''
+  cnpj.value = ''
   aceite.value = false
   feitos.value = []
   tentou.value = false
+  conferirDocumento.value = false
   levou.value = ''
   abertaEm.value = Date.now()
 })
 
+const deOng = computed(() => quem.value === 'ong')
+
+/* O documento é opcional: vazio passa; preenchido, tem de conferir (dígitos verificadores). */
+const erroNoCpf = computed(() =>
+  !deOng.value && stripCpf(cpf.value) && !isValidCpf(cpf.value)
+    ? 'Este CPF não confere. Corrija ou deixe em branco.'
+    : '',
+)
+const erroNoCnpj = computed(() =>
+  deOng.value && stripCnpj(cnpj.value) && !isValidCnpj(cnpj.value)
+    ? 'Este CNPJ não confere. Corrija ou deixe em branco.'
+    : '',
+)
+const mostrarErroDoDocumento = computed(() => tentou.value || conferirDocumento.value)
+
+function escreverCpf(valor: string | undefined) {
+  cpf.value = formatCpf(valor ?? '')
+}
+
+function escreverCnpj(valor: string | undefined) {
+  cnpj.value = formatCnpj(valor ?? '')
+}
+
+function escolherQuem(id: QuemLeva) {
+  quem.value = id
+  conferirDocumento.value = false
+}
+
 const ultimo = computed(() => passo.value === PASSOS.length - 1)
+
+/** O documento que não confere já fala embaixo do campo: no pé, só o resto. */
+const faltasNoPe = computed(() =>
+  faltas.value.filter((falta) => falta !== erroNoCpf.value && falta !== erroNoCnpj.value),
+)
 
 const faltas = computed(() => {
   if (passo.value === 0) {
     return [
       animal.value.trim() ? '' : 'Diga o nome do animal.',
-      tutor.value.trim() ? '' : 'Diga o nome do tutor.',
+      tutor.value.trim() ? '' : deOng.value ? 'Diga o nome da ONG.' : 'Diga o nome do tutor.',
       celular.value.replace(/\D/g, '').length >= 10 ? '' : 'Diga o celular com DDD.',
-      aceite.value ? '' : 'Confirme que o tutor aceita receber os avisos.',
+      deOng.value ? erroNoCnpj.value : erroNoCpf.value,
+      aceite.value
+        ? ''
+        : deOng.value
+          ? 'Confirme que a ONG aceita receber os avisos.'
+          : 'Confirme que o tutor aceita receber os avisos.',
     ].filter(Boolean)
   }
   if (passo.value === 1) return feitos.value.length ? [] : ['Marque o que foi feito.']
@@ -119,32 +177,77 @@ async function avancar() {
   registrar()
 }
 
+/** Quem sai com o QR: o primeiro nome do tutor, ou a ONG pelo nome. */
+const quemSai = computed(() =>
+  deOng.value ? `A ONG ${tutor.value.trim()}` : tutor.value.trim().split(' ')[0],
+)
+
 function registrar() {
   const nome = animal.value.trim()
-  const id = registrarAtendimento({
-    animal: nome,
-    especie: especie.value,
-    tutor: iniciais(tutor.value.trim())
-      .split('')
-      .map((letra) => `${letra}.`)
-      .join(' '),
-    data: PERIODO.hoje,
-    procedimentos: feitosNaOrdem.value,
-    situacao: 'nao-abriu',
-    sinpatinhas: false,
-  })
+  const id = registrarAtendimento(
+    {
+      animal: nome,
+      especie: especie.value,
+      tutor: iniciais(tutor.value.trim())
+        .split('')
+        .map((letra) => `${letra}.`)
+        .join(' '),
+      data: PERIODO.hoje,
+      procedimentos: feitosNaOrdem.value,
+      situacao: 'nao-abriu',
+      sinpatinhas: false,
+    },
+    deOng.value
+      ? { quem: 'ong', ong: tutor.value.trim(), cnpj: stripCnpj(cnpj.value) || undefined }
+      : { quem: 'tutor', cpf: stripCpf(cpf.value) || undefined },
+  )
 
   const proximo = cuidados.value[0]
   toast.add({
     severity: 'success',
     summary: `Atendimento de ${nome} registrado em ${levou.value}`,
     detail: proximo
-      ? `${tutor.value.trim().split(' ')[0]} sai com o QR Code e recebe o aviso de ${proximo.rotulo.toLowerCase()} no celular. No protótipo, nada é enviado.`
-      : `${tutor.value.trim().split(' ')[0]} sai com o QR Code da ficha. No protótipo, nada é enviado.`,
+      ? `${quemSai.value} sai com o QR Code e recebe o aviso de ${proximo.rotulo.toLowerCase()} no celular. No protótipo, nada é enviado.`
+      : `${quemSai.value} sai com o QR Code da ficha. No protótipo, nada é enviado.`,
     life: 6000,
   })
   aberta.value = false
   emit('registrado', id)
+}
+
+/* ------------------------------------------------------------------ a etiqueta impressa */
+
+const imprimindo = ref(false)
+/** O QR da etiqueta, maior que o da tela: no papel, 46 mm sem borrar. */
+const qrDoPapel = ref('')
+
+/**
+ * Imprime a etiqueta (QR, animal, quem leva, próximos cuidados) pela regra de impressão do portal:
+ * a etiqueta entra no `body` como `clinic-print-root` só agora e sai depois do `afterprint`. O
+ * título da aba vira o nome do PDF salvo.
+ */
+async function imprimir() {
+  if (imprimindo.value) return
+  imprimindo.value = true
+  qrDoPapel.value = await imagemDoQr(SITE_PUBLICO, 720).catch(() => qr.value)
+  await nextTick()
+  await Promise.all(
+    [...document.querySelectorAll<HTMLImageElement>('.clinic-print-root img')].map((img) =>
+      img.complete ? Promise.resolve() : img.decode().catch(() => undefined),
+    ),
+  )
+
+  const tituloAntes = document.title
+  document.title = `${animal.value.trim()} - QR Code`
+  window.addEventListener(
+    'afterprint',
+    () => {
+      document.title = tituloAntes
+      imprimindo.value = false
+    },
+    { once: true },
+  )
+  window.print()
 }
 </script>
 
@@ -210,11 +313,35 @@ function registrar() {
           </div>
         </section>
 
+        <!-- Quem leva: o tutor (com CPF) ou uma ONG (com CNPJ). O documento nunca é obrigatório. -->
+        <section class="eg__secao">
+          <span id="rat-quem" class="eg__rotulo">Quem leva o animal</span>
+          <div class="rat__especies" role="radiogroup" aria-labelledby="rat-quem">
+            <button
+              v-for="item in QUEM_LEVA"
+              :key="item.id"
+              type="button"
+              role="radio"
+              class="rat__escolha"
+              :class="{ 'rat__escolha--marcada': quem === item.id }"
+              :aria-checked="quem === item.id"
+              :data-quem="item.id"
+              @click="escolherQuem(item.id)"
+            >
+              <i :class="item.icone" aria-hidden="true" />
+              {{ item.rotulo }}
+            </button>
+          </div>
+        </section>
+
+        <section class="eg__secao">
+          <label class="eg__rotulo" for="rat-tutor">
+            {{ deOng ? 'Nome da ONG' : 'Nome do tutor' }}
+          </label>
+          <InputText id="rat-tutor" v-model="tutor" autocomplete="off" maxlength="80" />
+        </section>
+
         <div class="rat__dupla">
-          <section class="eg__secao">
-            <label class="eg__rotulo" for="rat-tutor">Nome do tutor</label>
-            <InputText id="rat-tutor" v-model="tutor" autocomplete="off" maxlength="80" />
-          </section>
           <section class="eg__secao">
             <label class="eg__rotulo" for="rat-celular">Celular</label>
             <InputText
@@ -226,13 +353,63 @@ function registrar() {
               maxlength="16"
             />
           </section>
+
+          <section v-if="deOng" class="eg__secao">
+            <label class="eg__rotulo" for="rat-cnpj">
+              CNPJ da ONG <span class="eg__opcional">(opcional)</span>
+            </label>
+            <InputText
+              id="rat-cnpj"
+              :model-value="cnpj"
+              autocomplete="off"
+              autocapitalize="characters"
+              placeholder="00.000.000/0000-00"
+              maxlength="18"
+              :invalid="mostrarErroDoDocumento && Boolean(erroNoCnpj)"
+              :aria-describedby="mostrarErroDoDocumento && erroNoCnpj ? 'rat-cnpj-erro' : undefined"
+              @update:model-value="escreverCnpj"
+              @blur="conferirDocumento = true"
+            />
+            <small
+              v-if="mostrarErroDoDocumento && erroNoCnpj"
+              id="rat-cnpj-erro"
+              class="eg__invalido"
+            >
+              {{ erroNoCnpj }}
+            </small>
+          </section>
+
+          <section v-else class="eg__secao">
+            <label class="eg__rotulo" for="rat-cpf">
+              CPF do tutor <span class="eg__opcional">(opcional)</span>
+            </label>
+            <InputText
+              id="rat-cpf"
+              :model-value="cpf"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              :invalid="mostrarErroDoDocumento && Boolean(erroNoCpf)"
+              :aria-describedby="mostrarErroDoDocumento && erroNoCpf ? 'rat-cpf-erro' : undefined"
+              @update:model-value="escreverCpf"
+              @blur="conferirDocumento = true"
+            />
+            <small
+              v-if="mostrarErroDoDocumento && erroNoCpf"
+              id="rat-cpf-erro"
+              class="eg__invalido"
+            >
+              {{ erroNoCpf }}
+            </small>
+          </section>
         </div>
 
         <label class="rat__aceite">
           <Checkbox v-model="aceite" binary input-id="rat-aceite" />
           <span>
-            O tutor aceita receber no celular os avisos dos próximos cuidados. Os dados seguem a Lei
-            nº 13.709/2018 e não são cedidos a ninguém.
+            {{ deOng ? 'A ONG aceita' : 'O tutor aceita' }} receber no celular os avisos dos
+            próximos cuidados. Os dados seguem a Lei nº 13.709/2018 e não são cedidos a ninguém.
           </span>
         </label>
       </template>
@@ -287,14 +464,34 @@ function registrar() {
             alt="QR Code da ficha (exemplo)"
           />
           <span class="rat__qr-texto">
-            <strong id="rat-qr">Entregue o QR Code a {{ tutor.trim().split(' ')[0] }}</strong>
+            <strong id="rat-qr">
+              {{
+                deOng
+                  ? `Entregue o QR Code à ONG ${tutor.trim()}`
+                  : `Entregue o QR Code a ${tutor.trim().split(' ')[0]}`
+              }}
+            </strong>
             <span>
-              Impresso, junto com o comprovante. Ele abre a ficha de {{ animal.trim() }} no celular.
+              Impresso na etiqueta, com os próximos cuidados. Ele abre a ficha de
+              {{ animal.trim() }} no celular.
             </span>
             <small>No protótipo, o QR abre o site da PetJourney.</small>
-            <span class="ui-selo ui-selo--ok rat__tempo">
-              <i class="ph ph-timer" aria-hidden="true" />
-              Registrado em {{ levou }}
+            <span class="rat__qr-acoes">
+              <Button
+                type="button"
+                size="small"
+                severity="secondary"
+                outlined
+                class="rat__imprimir"
+                icon="ph ph-printer"
+                label="Imprimir QR Code"
+                :loading="imprimindo"
+                @click="imprimir"
+              />
+              <span class="ui-selo ui-selo--ok rat__tempo">
+                <i class="ph ph-timer" aria-hidden="true" />
+                Registrado em {{ levou }}
+              </span>
             </span>
           </span>
         </section>
@@ -307,8 +504,8 @@ function registrar() {
         />
       </template>
 
-      <ul v-if="tentou && faltas.length" class="eg__erro rat__faltas" role="alert">
-        <li v-for="falta in faltas" :key="falta">{{ falta }}</li>
+      <ul v-if="tentou && faltasNoPe.length" class="eg__erro rat__faltas" role="alert">
+        <li v-for="falta in faltasNoPe" :key="falta">{{ falta }}</li>
       </ul>
     </form>
 
@@ -339,6 +536,20 @@ function registrar() {
       />
     </template>
   </CadastroGaveta>
+
+  <!-- Só existe durante a impressão: no papel, só ela (`clinic-print-root`). -->
+  <EtiquetaDoAtendimento
+    v-if="imprimindo && qrDoPapel"
+    :animal="animal.trim()"
+    :especie="especie"
+    :data="PERIODO.hoje"
+    :procedimentos="feitosNaOrdem"
+    :quem="quem"
+    :responsavel="tutor.trim()"
+    :cpf="stripCpf(cpf)"
+    :cnpj="stripCnpj(cnpj)"
+    :imagem="qrDoPapel"
+  />
 </template>
 
 <style scoped>
@@ -435,8 +646,10 @@ function registrar() {
   font-size: 16px;
 }
 
+/* Alinhada no alto: o aviso embaixo do documento não estica o campo do lado. */
 .rat__dupla {
   display: grid;
+  align-items: start;
   gap: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -579,11 +792,24 @@ function registrar() {
   font-size: 12px;
 }
 
+/* Imprimir e o tempo, lado a lado embaixo do texto. O botão leva o papel por baixo: sobre o
+ * cartão tingido, o contorno sozinho ficava transparente. */
+.rat__qr-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 6px;
+}
+
+.rat__imprimir.p-button {
+  background: var(--superficie);
+}
+
 .rat__tempo {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-top: 4px;
 }
 
 .rat__faltas {

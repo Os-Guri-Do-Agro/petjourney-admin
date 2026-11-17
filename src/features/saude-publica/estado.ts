@@ -32,6 +32,34 @@ const lembretes = ref<Partial<Record<MetaDoPiloto['id'], { hora: string; para: n
 
 const NO_COMECO = new Map(ATENDIMENTOS_DO_PILOTO.map((item) => [item.id, item]))
 
+/** Quem leva o animal ao Consultório Móvel: o tutor ou uma ONG. */
+export type QuemLeva = 'tutor' | 'ong'
+
+/**
+ * O que o balcão anota além do que o painel vê: se o animal é de ONG (e o nome dela) e o
+ * documento, se informado (CPF do tutor ou CNPJ da ONG, os dois opcionais). Fica só no registro da
+ * sessão e na etiqueta impressa: não entra no painel, nas metas nem no relatório.
+ */
+export type CadastroDoAtendimento = {
+  quem: QuemLeva
+  /** O nome da ONG, quando é ela quem leva. */
+  ong?: string
+  /** Só os dígitos. */
+  cpf?: string
+  /** Letras e números, sem máscara (o CNPJ alfanumérico também vale). */
+  cnpj?: string
+}
+
+const cadastros = ref<Record<string, CadastroDoAtendimento>>({})
+
+/** "Tutor M. A." ou "ONG Amigos de Patas": a linha da lista e o resumo do atendimento. */
+export function responsavelPeloAtendimento(atendimento: AtendimentoDoPiloto) {
+  const cadastro = cadastros.value[atendimento.id]
+  return cadastro?.quem === 'ong' && cadastro.ong
+    ? `ONG ${cadastro.ong}`
+    : `Tutor ${atendimento.tutor}`
+}
+
 export function useEstadoDoPrototipo() {
   function criarCampanha(campanha: Omit<Campanha, 'id'>) {
     campanhas.value = [{ ...campanha, id: `n${campanhas.value.length + 1}` }, ...campanhas.value]
@@ -42,9 +70,13 @@ export function useEstadoDoPrototipo() {
     adotados.value = [...adotados.value, animalId]
   }
 
-  function registrarAtendimento(atendimento: Omit<AtendimentoDoPiloto, 'id'>) {
+  function registrarAtendimento(
+    atendimento: Omit<AtendimentoDoPiloto, 'id'>,
+    cadastro?: CadastroDoAtendimento,
+  ) {
     const id = `n${atendimentos.value.length + 1}`
     atendimentos.value = [{ ...atendimento, id }, ...atendimentos.value]
+    if (cadastro) cadastros.value = { ...cadastros.value, [id]: cadastro }
     return id
   }
 
@@ -67,6 +99,7 @@ export function useEstadoDoPrototipo() {
     adocoes,
     adotados,
     atendimentos,
+    cadastros,
     lembretes,
     criarCampanha,
     registrarAdocao,
