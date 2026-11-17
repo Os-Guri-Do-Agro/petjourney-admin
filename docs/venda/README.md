@@ -11,6 +11,13 @@ pelo pet. A oferta é gratuita para a clínica.
 | `imagens/app-inicio.webp` | O app no celular, a mesma imagem do site (`petjourney-web/src/assets/app-telas/pt/aparelho-home.webp`) |
 | `phosphor/` | Só os ícones Phosphor que a folha usa (gerados de `@phosphor-icons/web`) |
 | `fontes/` | Readex Pro em pesos **fixos** (400 e 600), de `@fontsource/readex-pro` (OFL) |
+| `imagens/qr-cadastro.svg` | QR code do rodapé, para `https://petjourney.health/parcerias` (vetor, sem transparência) |
+
+O QR sai da biblioteca `qrcode`, que o portal já usa. Para gerar de novo (da raiz do repositório):
+
+```bash
+node -e "require('qrcode').toString('https://petjourney.health/parcerias',{type:'svg',margin:0,errorCorrectionLevel:'M',color:{dark:'#285e4eff',light:'#ffffffff'}},(e,s)=>require('fs').writeFileSync('docs/venda/imagens/qr-cadastro.svg',s))"
+```
 
 Logo, faixa e a tela da Clínica vêm de `../apresentacao/` (a captura `telas/10-clinica-hoje.png`,
 recortada pelo CSS para não mostrar o Hotel, que está pausado).

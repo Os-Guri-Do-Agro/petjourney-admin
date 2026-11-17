@@ -241,7 +241,7 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        gap: 5mm;
+        gap: 4.6mm;
         padding: 8mm 15mm 6mm;
       }
 
@@ -445,76 +445,114 @@
 
       /* ------------------------------------------------------------ rodapé */
 
+      /*
+       * Dois blocos lado a lado: à esquerda, como começar (três passos ligados por um fio); à
+       * direita, o cartão de contato com o QR code do cadastro. Tudo em cor sólida (ver o alto).
+       */
       .rodape {
+        display: grid;
         flex: none;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 6mm;
         margin-top: auto;
-        padding: 4.6mm 15mm 5.4mm;
+        padding: 4.2mm 15mm 4.8mm;
         background: var(--app-fundo);
         color: var(--app-tinta);
       }
 
-      .rodape strong,
       .rodape b {
         color: var(--app-tinta);
       }
 
-      /* Título à esquerda e contato à direita; os passos ocupam a largura toda embaixo. */
-      .rodape__topo {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 6mm;
-        margin-bottom: 2.6mm;
-      }
-
       .rodape__titulo {
-        font-size: 12.2pt;
+        margin-bottom: 2.4mm;
+        font-size: 11.6pt;
         font-weight: 600;
+        line-height: 1.2;
       }
 
       .passos {
-        display: flex;
-        gap: 4mm;
         margin: 0;
         padding: 0;
         list-style: none;
-        font-size: 8.6pt;
-        line-height: 1.35;
+        font-size: 8.8pt;
+        line-height: 1.3;
       }
 
       .passos li {
-        display: grid;
-        flex: 1;
-        grid-template-columns: 5mm 1fr;
-        column-gap: 1.6mm;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 2.4mm;
+      }
+
+      .passos li + li {
+        margin-top: 1.3mm;
+      }
+
+      /* O fio entre um número e o próximo. */
+      .passos li:not(:last-child)::before {
+        position: absolute;
+        top: 4.8mm;
+        left: 2.25mm;
+        width: 0.4mm;
+        height: 1.3mm;
+        background: #8db9aa;
+        content: '';
       }
 
       .passos__n {
         display: grid;
-        width: 5mm;
-        height: 5mm;
+        flex: none;
+        width: 4.8mm;
+        height: 4.8mm;
         place-items: center;
         border-radius: 99px;
         background: var(--app-tinta);
         color: #fff;
-        font-size: 7.6pt;
+        font-size: 7.4pt;
         font-weight: 600;
       }
 
       .contato {
         display: flex;
-        flex: none;
-        flex-direction: column;
-        align-items: flex-end;
-        font-size: 8.8pt;
-        line-height: 1.5;
+        align-items: center;
+        gap: 3.4mm;
+        padding: 3mm 4.4mm 3mm 3mm;
+        border-radius: 3mm;
+        background: var(--papel);
       }
 
-      .contato .ph {
-        margin-right: 1.2mm;
-        font-size: 9pt;
-        vertical-align: -0.4mm;
+      .contato__qr {
+        display: block;
+        width: 18mm;
+        height: 18mm;
       }
+
+      .contato__titulo {
+        margin-bottom: 1.4mm;
+        color: var(--tinta);
+        font-size: 10.4pt;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .contato a {
+        display: flex;
+        align-items: center;
+        gap: 1.4mm;
+        color: var(--texto);
+        font-size: 8.4pt;
+        line-height: 1.55;
+        text-decoration: none;
+      }
+
+      .contato a .ph {
+        color: var(--app-tinta);
+        font-size: 9.2pt;
+      }
+
     </style>
   </head>
   <body>
@@ -712,27 +750,40 @@
 
       <!-- ============================================================ RODAPÉ -->
       <footer class="rodape">
-        <div class="rodape__topo">
-          <p class="rodape__titulo">Gratuito para a clínica. Comece em três passos:</p>
-          <p class="contato">
-            <span><i class="ph ph-globe-simple"></i>petjourney.health</span>
-            <span><i class="ph ph-envelope-simple"></i>atendimento@petjourney.health</span>
-          </p>
-        </div>
-        <ol class="passos">
+        <div>
+          <p class="rodape__titulo">Comece hoje, sem custo para a clínica:</p>
+          <ol class="passos">
             <li>
               <span class="passos__n">1</span>
-              <span>Cadastre a clínica em <b>petjourney.health/parcerias</b>.</span>
+              <span><b>Cadastre a clínica</b> pelo QR code ao lado ou no site.</span>
             </li>
             <li>
               <span class="passos__n">2</span>
-              <span>Importe os pacientes e convide a equipe.</span>
+              <span><b>Importe os pacientes</b> e convide a equipe.</span>
             </li>
             <li>
               <span class="passos__n">3</span>
-              <span>Ligue cada paciente ao app do responsável.</span>
+              <span><b>Ligue cada paciente</b> ao app do responsável.</span>
             </li>
           </ol>
+        </div>
+
+        <div class="contato">
+          <img
+            class="contato__qr"
+            src="imagens/qr-cadastro.svg"
+            alt="QR code para petjourney.health/parcerias"
+          />
+          <div>
+            <p class="contato__titulo">Fale conosco</p>
+            <a href="https://petjourney.health/parcerias"
+              ><i class="ph ph-globe-simple"></i>petjourney.health</a
+            >
+            <a href="mailto:atendimento@petjourney.health"
+              ><i class="ph ph-envelope-simple"></i>atendimento@petjourney.health</a
+            >
+          </div>
+        </div>
       </footer>
     </main>
   </body>
