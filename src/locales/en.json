@@ -282,7 +282,8 @@
     "signOut": "Sign out",
     "yes": "Yes",
     "no": "No",
-    "selectAll": "All"
+    "selectAll": "All",
+    "feito": "Done"
   },
   "nav": {
     "sections": {
@@ -11554,7 +11555,9 @@
         "titulo": "The front desk books",
         "texto": "Click a free time in the column or use Book appointment, at the top of the schedule."
       },
-      "abrirProfissionais": "Open Professionals"
+      "abrirProfissionais": "Open Professionals",
+      "cadastrarProfissional": "Add a professional",
+      "configurarHorario": "Set the hours"
     },
     "livre": {
       "titulo": "No bookings on this day",
@@ -13281,7 +13284,9 @@
         "mapa": {
           "titulo": "It goes on the map",
           "texto": "Each bed becomes a spot on the ward map. A bed out of service leaves the vacancy count."
-        }
+        },
+        "criarSala": "Create a ward room",
+        "verMapa": "See the map"
       }
     },
     "internar": {

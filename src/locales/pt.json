@@ -282,7 +282,8 @@
     "signOut": "Sair",
     "yes": "Sim",
     "no": "Não",
-    "selectAll": "Todos"
+    "selectAll": "Todos",
+    "feito": "Feito"
   },
   "nav": {
     "sections": {
@@ -11554,7 +11555,9 @@
         "titulo": "A recepção marca",
         "texto": "Clique num horário livre da coluna ou use Marcar horário, no alto da agenda."
       },
-      "abrirProfissionais": "Abrir Profissionais"
+      "abrirProfissionais": "Abrir Profissionais",
+      "cadastrarProfissional": "Cadastrar profissional",
+      "configurarHorario": "Configurar o horário"
     },
     "livre": {
       "titulo": "Nenhum horário neste dia",
@@ -13281,7 +13284,9 @@
         "mapa": {
           "titulo": "Ele entra no mapa",
           "texto": "Cada leito vira um lugar no mapa da Internação. O parado sai da conta de vagas."
-        }
+        },
+        "criarSala": "Criar sala de internação",
+        "verMapa": "Ver o mapa"
       }
     },
     "internar": {

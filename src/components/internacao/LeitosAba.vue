@@ -90,18 +90,48 @@ const noLimite = computed(() => Boolean(lista.value && leitos.value.length >= li
  * o leito nasce (a sala de internação, o cadastro, o lugar no mapa), e o "Novo leito" embaixo
  * quando já há sala. Sem sala, o aviso acima do vazio leva até ela.
  */
-const passosDosLeitos = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'sala', icone: 'ph ph-door' },
-    { id: 'leito', icone: 'ph ph-bed' },
-    { id: 'mapa', icone: 'ph ph-map-trifold' },
-  ].map(({ id, icone }) => ({
+const passosDosLeitos = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, extra: Partial<PassoDoGuia> = {}): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`internacao.leitos.guia.${id}.titulo`),
     texto: t(`internacao.leitos.guia.${id}.texto`),
-  })),
-)
+    ...extra,
+  })
+  const temSala = salas.value.length > 0
+
+  /* Cada etapa com o botão dela (17/11/2026): criar a sala, o leito e ver o mapa. */
+  return [
+    passo('sala', 'ph ph-door', {
+      feito: temSala,
+      acao: props.podeEditar
+        ? {
+            rotulo: t('internacao.leitos.guia.criarSala'),
+            icone: 'ph ph-door',
+            to: { path: '/clinica/configuracao', query: { nova: 'INTERNACAO' } },
+          }
+        : undefined,
+    }),
+    passo('leito', 'ph ph-bed', {
+      acao: props.podeEditar
+        ? {
+            rotulo: t('internacao.leitos.novo'),
+            icone: 'ph ph-plus',
+            aoClicar: () => abrir(null),
+            bloqueada: !temSala || noLimite.value,
+          }
+        : undefined,
+    }),
+    passo('mapa', 'ph ph-map-trifold', {
+      acao: {
+        rotulo: t('internacao.leitos.guia.verMapa'),
+        icone: 'ph ph-map-trifold',
+        to: '/clinica/internacao',
+        bloqueada: true,
+      },
+    }),
+  ]
+})
 
 function meta(leito: Leito) {
   const partes = [t(`internacao.kind.${leito.kind}`), leito.salaNome]
@@ -309,7 +339,7 @@ async function apagar(leito: Leito) {
     </ul>
 
     <template v-else-if="lista">
-      <p v-if="!salas.length && props.podeEditar" class="eg__aviso la__nota">
+      <p v-if="!salas.length && props.podeEditar && leitos.length" class="eg__aviso la__nota">
         <i class="ph ph-info" aria-hidden="true" />
         <span>
           {{ t('internacao.leitos.semSala') }}
@@ -333,14 +363,6 @@ async function apagar(leito: Leito) {
         :guia-titulo="t('internacao.leitos.guia.titulo')"
         :passos="passosDosLeitos"
       >
-        <template v-if="props.podeEditar && salas.length && !noLimite" #acao>
-          <Button
-            type="button"
-            icon="ph ph-plus"
-            :label="t('internacao.leitos.novo')"
-            @click="abrir(null)"
-          />
-        </template>
       </UiVazioIlustrado>
 
       <ul v-if="ativos.length" class="ui-lista">

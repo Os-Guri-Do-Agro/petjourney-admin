@@ -822,18 +822,56 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
 const semEquipeNaAgenda = computed(() => equipeLida.value && equipe.value.length === 0)
 const podeGerirEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
 
-const passosDaAgenda = computed<PassoDoGuia[]>(() =>
-  [
-    { id: 'equipe', icone: 'ph ph-user-plus' },
-    { id: 'expediente', icone: 'ph ph-clock' },
-    { id: 'marcar', icone: 'ph ph-calendar-plus' },
-  ].map(({ id, icone }) => ({
+const podeEditarHorario = computed(
+  () => store.temPermissao('estabelecimento.editar') && store.podeOperar,
+)
+
+/*
+ * Cada etapa com o botão dela (17/11/2026, "a clínica deve cadastrar profissional e configurar
+ * horário"): cadastrar quem atende, configurar o horário da clínica e, apagado até haver alguém na
+ * agenda, marcar. Só aparece o botão de quem pode fazer aquilo.
+ */
+const passosDaAgenda = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
     id,
     icone,
     titulo: t(`agendamentos.guia.${id}.titulo`),
     texto: t(`agendamentos.guia.${id}.texto`),
-  })),
-)
+    acao,
+  })
+
+  return [
+    passo(
+      'equipe',
+      'ph ph-user-plus',
+      podeGerirEquipe.value
+        ? {
+            rotulo: t('agendamentos.guia.cadastrarProfissional'),
+            icone: 'ph ph-user-plus',
+            to: { path: '/parceiro/profissionais', query: { novo: '1' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'expediente',
+      'ph ph-clock',
+      podeEditarHorario.value
+        ? {
+            rotulo: t('agendamentos.guia.configurarHorario'),
+            icone: 'ph ph-clock',
+            to: { path: '/parceiro/estabelecimento', query: { aba: 'horarios' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'marcar',
+      'ph ph-calendar-plus',
+      podeEscrever.value
+        ? { rotulo: t('agendamentos.marcar.titulo'), icone: 'ph ph-calendar-plus', bloqueada: true }
+        : undefined,
+    ),
+  ]
+})
 </script>
 
 <template>
@@ -1027,14 +1065,6 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() =>
           :guia-titulo="t('agendamentos.guia.titulo')"
           :passos="passosDaAgenda"
         >
-          <template v-if="podeGerirEquipe" #acao>
-            <Button
-              :as="RouterLink"
-              to="/parceiro/profissionais"
-              icon="ph ph-user-plus"
-              :label="t('agendamentos.guia.abrirProfissionais')"
-            />
-          </template>
         </UiVazioIlustrado>
 
         <UiVazioIlustrado

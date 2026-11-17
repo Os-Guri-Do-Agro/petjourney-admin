@@ -15,6 +15,7 @@ import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import ExpedienteGaveta from '@/components/agenda/ExpedienteGaveta.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
@@ -325,9 +326,22 @@ function abrirMenu(evento: Event, profissional: Profissional) {
   menu.value?.toggle(evento)
 }
 
+const route = useRoute()
+const router = useRouter()
+
 onMounted(async () => {
   await ensureContext()
   await carregar()
+  /*
+   * Veio de um "Cadastrar profissional" de outra tela (o vazio da Agenda) com `?novo=1`: a gaveta
+   * abre já aqui, e o pedido sai da URL (recarregar não reabre).
+   */
+  if (route.query.novo === '1') {
+    if (geroEquipe.value) abrirNova()
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+  }
 })
 </script>
 

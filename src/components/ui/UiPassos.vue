@@ -9,25 +9,91 @@
  * Quem decide é a largura do bloco (container query), não a da janela.
  *
  * O número de cada etapa é só visual (a `ol` já conta para o leitor de tela).
+ *
+ * **Etapa que se faz no sistema** (17/11/2026, "tem sempre que ter os botões call to action quando
+ * precisar"): ganha o botão dela (`acao`), que leva aonde se faz (`to`) ou abre ali mesmo
+ * (`aoClicar`), e, quando já foi feita, o selo "Feito" no lugar do botão (`feito`), com o ladrilho
+ * no verde do que está em ordem. O botão da primeira etapa por fazer é o cheio; os outros,
+ * contornados: o olho vai para o próximo passo.
  */
-export type PassoDoGuia = { id: string; icone: string; titulo: string; texto: string }
+import Button from 'primevue/button'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
-defineProps<{ passos: PassoDoGuia[] }>()
+export type AcaoDoPasso = {
+  rotulo: string
+  icone?: string
+  to?: RouteLocationRaw
+  aoClicar?: () => void
+  /** Ainda não dá para fazer (falta a etapa anterior): o botão aparece, apagado. */
+  bloqueada?: boolean
+}
+
+export type PassoDoGuia = {
+  id: string
+  icone: string
+  titulo: string
+  texto: string
+  acao?: AcaoDoPasso
+  feito?: boolean
+}
+
+const props = defineProps<{ passos: PassoDoGuia[] }>()
+
+const { t } = useI18n()
+
+/** A primeira etapa por fazer que tem ação: o botão dela é o cheio. */
+const proxima = computed(
+  () => props.passos.find((passo) => !passo.feito && passo.acao && !passo.acao.bloqueada)?.id,
+)
 </script>
 
 <template>
   <div class="ui-passos" :style="{ '--etapas': passos.length }">
     <ol class="ui-passos__lista">
-      <li v-for="(passo, indice) in passos" :key="passo.id" class="ui-passos__etapa">
+      <li
+        v-for="(passo, indice) in passos"
+        :key="passo.id"
+        class="ui-passos__etapa"
+        :class="{ 'ui-passos__etapa--feita': passo.feito }"
+      >
         <span class="ui-passos__marco" aria-hidden="true">
           <span class="ui-ladrilho ui-ladrilho--g ui-passos__ladrilho">
-            <i :class="passo.icone" />
+            <i :class="passo.feito ? 'ph ph-check' : passo.icone" />
           </span>
           <span class="ui-passos__n ui-num">{{ indice + 1 }}</span>
         </span>
         <span class="ui-passos__texto">
           <strong class="ui-passos__titulo">{{ passo.titulo }}</strong>
           <span class="ui-passos__frase">{{ passo.texto }}</span>
+          <span v-if="passo.feito" class="ui-selo ui-selo--ok ui-passos__feito">
+            <i class="ph ph-check" aria-hidden="true" />
+            {{ t('common.feito') }}
+          </span>
+          <span v-else-if="passo.acao" class="ui-passos__acao">
+            <Button
+              v-if="passo.acao.to && !passo.acao.bloqueada"
+              :as="RouterLink"
+              :to="passo.acao.to"
+              size="small"
+              :icon="passo.acao.icone"
+              :label="passo.acao.rotulo"
+              :severity="passo.id === proxima ? undefined : 'secondary'"
+              :outlined="passo.id !== proxima"
+            />
+            <Button
+              v-else
+              type="button"
+              size="small"
+              :icon="passo.acao.icone"
+              :label="passo.acao.rotulo"
+              :disabled="passo.acao.bloqueada"
+              :severity="passo.id === proxima ? undefined : 'secondary'"
+              :outlined="passo.id !== proxima"
+              @click="passo.acao.aoClicar?.()"
+            />
+          </span>
         </span>
       </li>
     </ol>
@@ -138,6 +204,23 @@ defineProps<{ passos: PassoDoGuia[] }>()
   text-wrap: pretty;
 }
 
+/* O botão da etapa, embaixo da frase; e o "Feito", no lugar dele. */
+.ui-passos__acao {
+  display: flex;
+  margin-top: 6px;
+}
+
+.ui-passos__feito {
+  justify-self: start;
+  margin-top: 6px;
+}
+
+/* Etapa feita: o ladrilho no verde do que está em ordem. */
+.ui-passos__etapa--feita .ui-passos__ladrilho.ui-ladrilho {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+}
+
 /* ------------------------------------------------------------------ largo: fileira */
 
 @container ui-passos (min-width: 620px) {
@@ -167,6 +250,14 @@ defineProps<{ passos: PassoDoGuia[] }>()
   .ui-passos__texto {
     max-width: 34ch;
     padding-top: 0;
+  }
+
+  .ui-passos__acao {
+    justify-content: center;
+  }
+
+  .ui-passos__feito {
+    justify-self: center;
   }
 }
 </style>

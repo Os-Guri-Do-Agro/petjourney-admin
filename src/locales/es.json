@@ -282,7 +282,8 @@
     "signOut": "Cerrar sesión",
     "yes": "Sí",
     "no": "No",
-    "selectAll": "Todos"
+    "selectAll": "Todos",
+    "feito": "Hecho"
   },
   "nav": {
     "sections": {
@@ -11554,7 +11555,9 @@
         "titulo": "Recepción agenda",
         "texto": "Haga clic en un horario libre de la columna o use Agendar turno, arriba de la agenda."
       },
-      "abrirProfissionais": "Abrir Profesionales"
+      "abrirProfissionais": "Abrir Profesionales",
+      "cadastrarProfissional": "Registrar profesional",
+      "configurarHorario": "Configurar el horario"
     },
     "livre": {
       "titulo": "Ningún horario en este día",
@@ -13281,7 +13284,9 @@
         "mapa": {
           "titulo": "Entra en el mapa",
           "texto": "Cada cama se vuelve un lugar en el mapa de Internación. La detenida sale de la cuenta de lugares."
-        }
+        },
+        "criarSala": "Crear sala de internación",
+        "verMapa": "Ver el mapa"
       }
     },
     "internar": {

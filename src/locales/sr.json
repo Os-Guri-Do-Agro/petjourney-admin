@@ -282,7 +282,8 @@
     "signOut": "Odjavite se",
     "yes": "Da",
     "no": "Ne",
-    "selectAll": "Sve"
+    "selectAll": "Sve",
+    "feito": "Urađeno"
   },
   "nav": {
     "sections": {
@@ -11554,7 +11555,9 @@
         "titulo": "Recepcija zakazuje",
         "texto": "Kliknite slobodan termin u koloni ili koristite Zakaži termin, na vrhu rasporeda."
       },
-      "abrirProfissionais": "Otvori Stručnjake"
+      "abrirProfissionais": "Otvori Stručnjake",
+      "cadastrarProfissional": "Dodajte stručnjaka",
+      "configurarHorario": "Podesite radno vreme"
     },
     "livre": {
       "titulo": "Nema termina ovog dana",
@@ -13281,7 +13284,9 @@
         "mapa": {
           "titulo": "Ulazi u mapu",
           "texto": "Svaki krevet postaje mesto na mapi hospitalizacije. Krevet van upotrebe ne ulazi u broj slobodnih."
-        }
+        },
+        "criarSala": "Napravite salu za hospitalizaciju",
+        "verMapa": "Pogledajte mapu"
       }
     },
     "internar": {

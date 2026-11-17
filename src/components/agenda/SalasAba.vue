@@ -11,6 +11,7 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
@@ -53,7 +54,24 @@ async function carregar() {
   }
 }
 
-onMounted(() => void carregar())
+const route = useRoute()
+const router = useRouter()
+
+/*
+ * Veio do guia dos Leitos ("Criar sala de internação") com `?nova=INTERNACAO`: a gaveta abre já com
+ * o tipo escolhido, e o pedido sai da URL (recarregar não reabre).
+ */
+onMounted(async () => {
+  await carregar()
+  const pedida = route.query.nova
+  if (typeof pedida !== 'string') return
+  if (props.podeEditar && (TIPOS_DE_SALA as readonly string[]).includes(pedida)) {
+    abrir(null, pedida as TipoDeSala)
+  }
+  const query = { ...route.query }
+  delete query.nova
+  void router.replace({ query })
+})
 
 const ativas = computed(() => salas.value.filter((sala) => sala.ativa))
 const inativas = computed(() => salas.value.filter((sala) => !sala.ativa))
@@ -98,10 +116,10 @@ const opcoesDeTipo = computed(() =>
   TIPOS_DE_SALA.map((valor) => ({ valor, rotulo: t(`agenda.config.sala.tipo.${valor}`) })),
 )
 
-function abrir(sala: Sala | null) {
+function abrir(sala: Sala | null, tipoInicial?: TipoDeSala) {
   emEdicao.value = sala
   nome.value = sala?.nome ?? ''
-  tipo.value = sala?.tipo ?? 'CONSULTORIO'
+  tipo.value = sala?.tipo ?? tipoInicial ?? 'CONSULTORIO'
   tentou.value = false
   erroNoNome.value = ''
   aberta.value = true
