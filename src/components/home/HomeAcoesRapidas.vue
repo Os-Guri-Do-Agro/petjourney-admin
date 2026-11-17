@@ -2,11 +2,11 @@
 /**
  * Ações rápidas do Início (pedido do Luís, 16/11/2026): o trabalho mais comum começa daqui, sem
  * antes ir até a tela dele. Cada ação é um bloco na cor dela, lado a lado (o desenho que ele mandou
- * de referência, "Crie algo novo"), com o nome embaixo, fora do bloco. Dentro, o ícone da ação
- * aparece duas vezes: pequeno e nítido num selo no canto, e enorme no fundo, em duotone, recortado
- * pela borda e meio girado (pedido dele: "um ícone maior no background"), que se endireita quando
- * o mouse passa. O que a ação faz vai para o leitor de tela (a descrição mora na tela, não no
- * botão).
+ * de referência, "Crie algo novo"). Desde 17/11/2026 ("estão grandes demais"), o bloco é baixo: o
+ * selo com o ícone e o nome lado a lado, dentro da cor, e o mesmo ícone em duotone no fundo, no
+ * canto do fim, recortado pela borda e meio girado (o "ícone maior no background" que ele pediu
+ * antes), que se endireita quando o mouse passa. O que a ação faz vai para o leitor de tela (a
+ * descrição mora na tela, não no botão).
  *
  * Nada aqui é formulário novo: cada ação abre o formulário que já existe, na tela dona dele, por um
  * pedido na URL que a tela atende e tira (`?novo=1` na Agenda, `?adicionar=1` na Lista de espera,
@@ -143,8 +143,11 @@ const acoes = computed<Acao[]>(() => {
   return lista
 })
 
-/** Todos numa linha só, como a referência (até seis); a grade quebra pela largura do bloco. */
-const colunas = computed(() => Math.min(acoes.value.length, 6))
+/**
+ * Até quatro, todos numa linha; mais que isso, três por linha. Com o nome dentro do bloco, seis numa
+ * linha cortavam "Lista de espera" e "Novo acesso temporário".
+ */
+const colunas = computed(() => (acoes.value.length <= 4 ? acoes.value.length : 3))
 
 /* ------------------------------------------------------------------- o passo do paciente */
 
@@ -223,10 +226,8 @@ async function escolhido(paciente: PacienteNaLista) {
             "
             :aria-description="item.dica"
           >
-            <span class="bloco__cartao" aria-hidden="true">
-              <component :is="item.figura" class="bloco__fundo" weight="duotone" />
-              <span class="bloco__selo"><i :class="item.icone" /></span>
-            </span>
+            <component :is="item.figura" class="bloco__fundo" weight="duotone" aria-hidden="true" />
+            <span class="bloco__selo" aria-hidden="true"><i :class="item.icone" /></span>
             <span class="bloco__nome">{{ item.rotulo }}</span>
           </component>
         </li>
@@ -265,7 +266,7 @@ async function escolhido(paciente: PacienteNaLista) {
   list-style: none;
 }
 
-@container rapidas (max-width: 820px) {
+@container rapidas (max-width: 980px) {
   .rapidas {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -277,53 +278,47 @@ async function escolhido(paciente: PacienteNaLista) {
   }
 }
 
-/* O bloco inteiro é o botão: o cartão colorido e o nome embaixo dele. */
+/*
+ * O bloco inteiro é o botão: baixo, na cor da ação (no escuro, a mesma cor funda), com o selo e o
+ * nome lado a lado na tinta da cor. O ícone de fundo fica no canto do fim, maior que o selo.
+ */
 .bloco {
-  display: grid;
+  position: relative;
+  display: flex;
   width: 100%;
-  gap: 9px;
-  padding: 0;
+  min-height: 68px;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 12px 16px;
+  isolation: isolate;
   border: 0;
-  background: transparent;
-  color: var(--app-tinta, var(--tinta));
+  border-radius: 18px;
+  background: var(--tom-fundo);
+  color: var(--tom-tinta);
   cursor: pointer;
   font: inherit;
   text-align: start;
   text-decoration: none;
+  transition:
+    background-color var(--pj-tempo-curto) var(--pj-curva-chega),
+    translate var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
 /*
- * O cartão: o fundo pastel da cor da ação (no escuro, a mesma cor funda), na tinta da cor. O selo
- * fica no canto de cima; o ícone de fundo, no canto oposto, maior que o próprio cartão.
- */
-.bloco__cartao {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-  min-height: 92px;
-  isolation: isolate;
-  border-radius: 18px;
-  background: var(--tom-fundo);
-  color: var(--tom-tinta);
-  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
-}
-
-/*
- * O ícone de fundo: o desenho da ação em duotone, do tamanho do cartão, saindo pela borda de baixo
- * e pela do fim, girado. O traço vai a 30% da tinta e o miolo do duotone, a 20% disso: aparece como
- * marca-d'água, sem brigar com o selo nem com o nome.
+ * O ícone de fundo: o desenho da ação em duotone, saindo pela borda do fim, girado. A 30% da tinta,
+ * aparece como marca-d'água, sem brigar com o selo nem com o nome.
  */
 .bloco__fundo {
   position: absolute;
   z-index: -1;
-  inset-block-end: -30%;
-  inset-inline-end: -16%;
-  width: 92%;
-  height: auto;
-  aspect-ratio: 1;
+  inset-block-start: 50%;
+  inset-inline-end: -18px;
+  width: 84px;
+  height: 84px;
   opacity: 0.3;
   rotate: -16deg;
+  translate: 0 -50%;
   transition:
     rotate var(--pj-tempo-medio) var(--pj-curva-chega),
     scale var(--pj-tempo-medio) var(--pj-curva-chega),
@@ -339,18 +334,16 @@ async function escolhido(paciente: PacienteNaLista) {
   rotate: 16deg;
 }
 
-/* O selo: o ícone nítido, num quadrado de papel meio transparente, no canto de cima. */
+/* O selo: o ícone nítido, num quadrado de papel meio transparente. */
 .bloco__selo {
-  position: absolute;
-  inset-block-start: 12px;
-  inset-inline-start: 12px;
   display: grid;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
+  flex: none;
   place-items: center;
   border-radius: 13px;
   background: color-mix(in oklab, var(--app-cartao, #fff) 72%, transparent);
-  font-size: 23px;
+  font-size: 21px;
 }
 
 .app-dark .bloco__selo {
@@ -361,27 +354,28 @@ async function escolhido(paciente: PacienteNaLista) {
 .bloco__nome {
   display: -webkit-box;
   overflow: hidden;
-  padding-inline: 2px;
+  padding-inline-end: 44px;
   font-size: 14.5px;
   font-weight: 650;
-  line-height: 1.3;
+  line-height: 1.25;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
 
 /*
- * Passar o mouse: a cor fica um tom mais funda e o ícone de fundo se endireita e cresce um pouco,
- * dentro do cartão (o cartão não pula nem cresce).
+ * Passar o mouse: a cor fica um tom mais funda, o bloco sobe um pouco e o ícone de fundo se
+ * endireita e cresce.
  */
-.bloco:hover .bloco__cartao {
+.bloco:hover {
   background: color-mix(in oklab, var(--tom-fundo) 88%, var(--tom-tinta));
+  translate: 0 -2px;
 }
 
 .bloco:hover .bloco__fundo {
-  opacity: 0.4;
+  opacity: 0.42;
   rotate: -4deg;
-  scale: 1.08;
+  scale: 1.1;
 }
 
 :dir(rtl) .bloco:hover .bloco__fundo {
@@ -389,10 +383,6 @@ async function escolhido(paciente: PacienteNaLista) {
 }
 
 .bloco:focus-visible {
-  outline: none;
-}
-
-.bloco:focus-visible .bloco__cartao {
   outline: 2px solid var(--app-salvia-texto, var(--musgo));
   outline-offset: 3px;
 }
@@ -437,9 +427,13 @@ async function escolhido(paciente: PacienteNaLista) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bloco__cartao,
+  .bloco,
   .bloco__fundo {
     transition: none;
+  }
+
+  .bloco:hover {
+    translate: none;
   }
 
   .bloco:hover .bloco__fundo {
