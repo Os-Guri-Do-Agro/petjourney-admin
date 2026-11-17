@@ -926,16 +926,7 @@
         "pedidos": "Zahtev čeka odgovor | Zahteva čekaju odgovor | Zahteva čeka odgovor",
         "aSeguir": "Još danas",
         "proximo": "Sledeći u {hora}",
-        "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda",
-        "areas": {
-          "rotulo": "Delovi klinike",
-          "emDia": "Sve je ažurno",
-          "hojeVazio": "Danas ništa nije zakazano",
-          "hoje": "Danas: {total}, sledeći u {hora}",
-          "hojeComecou": "Danas: {total}, svi su već počeli",
-          "esperam": "Čeka: {total}",
-          "naAba": "{aba}: {total}"
-        }
+        "andamento": "Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda | Danas obavljeno {feitos} od {total} pregleda"
       },
       "hotel": {
         "naCasa": "U objektu",

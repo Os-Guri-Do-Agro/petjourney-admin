@@ -17,16 +17,9 @@
  *
  * A agenda de hoje vem do dia que a página carrega uma vez (`useDiaDaCasa`); os pedidos, da mesma
  * contagem dos selos da barra (`pendenciasClinicas`) — um número em um lugar só.
- *
- * **Com os números já no alto** (`numerosNoAlto`: a Clínica é o único espaço, e a abertura do Início
- * mostra os quatro dela), o bloco não os repete (17/11/2026, "melhorar toda essa seção": eram os
- * mesmos zeros duas vezes). No lugar entram as áreas da Clínica, as mesmas da barra, cada uma com o
- * que espera nela pelos selos do menu, ou "Em dia"; o Hoje diz quantos horários há e o próximo. E,
- * com nada parado, o pé propõe marcar um horário em vez de só dizer que está calmo.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
 
 import { useAtalhosDoDia } from '@/components/meu-dia/atalhos-do-dia'
 import { useEspacos, type Espaco } from '@/navegacao/espacos'
@@ -36,11 +29,7 @@ import HomeEspaco from './HomeEspaco.vue'
 import { contarPorEstado, horaDaParede, type ContaDoDia } from './linha-do-dia'
 import { useDiaDaCasa } from './useLinhaDoDia'
 
-const props = defineProps<{
-  espaco: Espaco
-  /** A abertura do Início já mostra os quatro números da Clínica: o bloco mostra as áreas. */
-  numerosNoAlto?: boolean
-}>()
+defineProps<{ espaco: Espaco }>()
 
 const { t } = useI18n()
 const dia = useDiaDaCasa()
@@ -148,51 +137,6 @@ const numeros = computed<NumeroDoEspaco[]>(() => {
   ]
 })
 
-/* ------------------------------------------------------------------- as áreas da Clínica */
-
-/** O Hoje diz o dia: quantos horários e o próximo, ou que nada está marcado. */
-function frasedoHoje() {
-  if (!pronta.value) return ''
-  const total = agenda.value.contas.length
-  if (!total) return t('inicio.espacos.clinica.areas.hojeVazio')
-  const proximo = aSeguir.value[0]
-  return proximo
-    ? t('inicio.espacos.clinica.areas.hoje', { total, hora: horaDaParede(proximo.inicio) })
-    : t('inicio.espacos.clinica.areas.hojeComecou', { total })
-}
-
-const areas = computed(() =>
-  props.espaco.destinos
-    /* As de trabalho: Relatórios e Configuração (a Gestão) não têm o que esperar nelas. */
-    .filter((destino) => !destino.bloqueado && destino.secao !== 'gestao')
-    .map((destino) => {
-      const esperando = destino.selo ?? 0
-      let frase = ''
-      if (destino.id === 'hoje') frase = frasedoHoje()
-      if (!frase && esperando) {
-        /* Onde está cada coisa: "2 em Atendimentos · 2 em Cópias do prontuário". */
-        const porAba = destino.abas
-          .filter((aba) => aba.selo)
-          .map((aba) =>
-            t('inicio.espacos.clinica.areas.naAba', { total: aba.selo, aba: aba.rotulo }),
-          )
-        frase =
-          destino.tituloDoSelo ||
-          porAba.join(' · ') ||
-          t('inicio.espacos.clinica.areas.esperam', { total: esperando })
-      }
-      return {
-        id: destino.id,
-        rotulo: destino.rotulo,
-        icone: destino.icone,
-        to: destino.to,
-        selo: esperando,
-        tom: esperando ? (destino.tom ?? 'neutro') : 'ok',
-        frase: frase || t('inicio.espacos.clinica.areas.emDia'),
-      }
-    }),
-)
-
 /** Quanto da agenda de hoje já foi atendido: a barra fina do bloco. */
 const andamento = computed(() => {
   const contas = agenda.value.contas
@@ -282,6 +226,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     }
   }
 
+  /* Nada parado: em vez de só dizer que está calmo, o pé propõe marcar um horário. */
   if (podeMarcar.value) {
     return {
       rotulo: t('inicio.passo.calmaMarcar'),
@@ -300,7 +245,7 @@ const passo = computed<PassoDoEspaco | null>(() => {
     :titulo="espaco.rotulo"
     :icone="espaco.icone"
     :to="espaco.to"
-    :numeros="numerosNoAlto ? [] : numeros"
+    :numeros="numeros"
     :atalho="{
       rotulo: t('inicio.acoes.agenda'),
       icone: 'ph ph-calendar-dots',
@@ -311,106 +256,5 @@ const passo = computed<PassoDoEspaco | null>(() => {
     :aviso="aviso"
     :pode-tentar="falhou"
     @tentar="dia.tentarDeNovo()"
-  >
-    <!-- Com os números no alto, as áreas da Clínica: cada uma com o que espera nela. -->
-    <ul v-if="numerosNoAlto" class="areas" :aria-label="t('inicio.espacos.clinica.areas.rotulo')">
-      <li v-for="area in areas" :key="area.id">
-        <RouterLink class="area" :class="`area--${area.tom}`" :to="area.to">
-          <span class="area__icone" aria-hidden="true"><i :class="area.icone" /></span>
-          <span class="area__texto">
-            <strong>{{ area.rotulo }}</strong>
-            <small :title="area.frase">{{ area.frase }}</small>
-          </span>
-          <i class="ph ph-caret-right area__seta" aria-hidden="true" />
-        </RouterLink>
-      </li>
-    </ul>
-  </HomeEspaco>
+  />
 </template>
-
-<style scoped>
-/*
- * As áreas em ladrilhos baixos, quantos couberem por linha: o ícone na cor da Clínica, o nome e a
- * frase do que espera (no tom do selo) ou "Em dia".
- */
-.areas {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  list-style: none;
-}
-
-.area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  height: 100%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: var(--app-cartao, var(--superficie));
-  color: inherit;
-  text-decoration: none;
-  transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
-}
-
-.area:hover {
-  background: color-mix(in oklab, var(--pj-lugar-fundo) 45%, var(--app-cartao, var(--superficie)));
-}
-
-.area:focus-visible {
-  outline: 2px solid var(--pj-lugar-tinta);
-  outline-offset: 2px;
-}
-
-.area__icone {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  flex: none;
-  place-items: center;
-  border-radius: 11px;
-  background: var(--pj-lugar-fundo);
-  color: var(--pj-lugar-tinta);
-  font-size: 18px;
-}
-
-.area__texto {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  gap: 1px;
-}
-
-.area__texto strong {
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 650;
-}
-
-.area__texto small {
-  overflow: hidden;
-  color: var(--tinta-2);
-  font-size: 12.5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.area--ok .area__texto small {
-  color: var(--ok-tinta);
-}
-
-.area--atencao .area__texto small {
-  color: var(--atencao-tinta);
-}
-
-.area--risco .area__texto small {
-  color: var(--risco-tinta);
-}
-
-.area__seta {
-  color: var(--tinta-3);
-  font-size: 14px;
-}
-</style>

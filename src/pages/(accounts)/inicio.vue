@@ -109,6 +109,16 @@ const blocos = computed(() =>
   ),
 )
 
+/*
+ * Com a Clínica como único espaço, a abertura já mostra os quatro números dela e as Ações rápidas
+ * têm o "Marcar consulta": o bloco repetiria o que está logo acima (17/11/2026, os zeros duas vezes;
+ * as áreas no lugar deles só repetiam o menu, "ficou bem esquisito"). Ele aparece ao lado de outro
+ * espaço, quando a abertura mostra só dois números de cada.
+ */
+const blocosNaTela = computed(() =>
+  blocos.value.length === 1 && blocos.value[0]?.id === 'clinica' ? [] : blocos.value,
+)
+
 // ------------------------------------------------------------------------------ a saudação
 
 /**
@@ -251,19 +261,15 @@ onUnmounted(() => {
 
       <HomeAcoesRapidas />
 
-      <section v-if="blocos.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
-        <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
-          <template v-for="espaco in blocos" :key="espaco.id">
-            <HomeEspacoClinica
-              v-if="espaco.id === 'clinica'"
-              :espaco="espaco"
-              :numeros-no-alto="blocos.length === 1"
-            />
+      <section v-if="blocosNaTela.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
+        <div class="espacos__grade" :class="`espacos__grade--${blocosNaTela.length}`">
+          <template v-for="espaco in blocosNaTela" :key="espaco.id">
+            <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
             <HomeEspacoHotel v-else :espaco="espaco" />
           </template>
         </div>
       </section>
-      <HomePortalAreas v-else-if="portal" />
+      <HomePortalAreas v-else-if="portal && !blocos.length" />
 
       <HomeModulos />
 

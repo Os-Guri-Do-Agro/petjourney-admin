@@ -926,16 +926,7 @@
         "pedidos": "Solicitud esperando respuesta | Solicitudes esperando respuesta",
         "aSeguir": "Por venir hoy",
         "proximo": "El próximo a las {hora}",
-        "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy",
-        "areas": {
-          "rotulo": "Las áreas de la clínica",
-          "emDia": "Al día",
-          "hojeVazio": "Nada agendado hoy",
-          "hoje": "{total} hoy, el próximo a las {hora}",
-          "hojeComecou": "{total} hoy, todos ya empezaron",
-          "esperam": "{total} esperando",
-          "naAba": "{total} en {aba}"
-        }
+        "andamento": "{feitos} de {total} atención realizada hoy | {feitos} de {total} atenciones realizadas hoy"
       },
       "hotel": {
         "naCasa": "En la casa",

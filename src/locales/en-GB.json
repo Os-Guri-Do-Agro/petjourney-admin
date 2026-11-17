@@ -926,16 +926,7 @@
         "pedidos": "Request awaiting a reply | Requests awaiting a reply",
         "aSeguir": "Still to come today",
         "proximo": "Next at {hora}",
-        "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today",
-        "areas": {
-          "rotulo": "The clinic areas",
-          "emDia": "All up to date",
-          "hojeVazio": "Nothing booked today",
-          "hoje": "{total} today, next at {hora}",
-          "hojeComecou": "{total} today, all already started",
-          "esperam": "{total} waiting",
-          "naAba": "{total} in {aba}"
-        }
+        "andamento": "{feitos} of {total} appointment done today | {feitos} of {total} appointments done today"
       },
       "hotel": {
         "naCasa": "In the house",
