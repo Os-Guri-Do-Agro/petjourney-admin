@@ -22,6 +22,9 @@ Cada linha foi conferida no portal e no site em 17/11/2026: telas da Clínica li
 lembrete de vacina disparado pela clínica (a rota da API ainda não existe). Antes de acrescentar
 uma promessa, confira que ela já funciona.
 
+Ao mexer no texto: português escrito por extenso, sem contrações informais ("num", "numa", "pra",
+"pro", "tá", "a gente"), e nunca dizer que os dados das imagens são de teste ou de exemplo.
+
 ## Regenerar o PDF
 
 ```powershell
