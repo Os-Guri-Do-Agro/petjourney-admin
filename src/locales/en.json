@@ -12240,6 +12240,17 @@
         "feito": "{n} prescription repeated. | {n} prescriptions repeated.",
         "omitidos": "Not carried over: {nomes}. Prescribe them again."
       }
+    },
+    "concluido": {
+      "titulo": "Visit finished",
+      "texto": "{pet}'s record is closed. These are the next steps.",
+      "resumoTitulo": "Summary for the owner",
+      "resumoDica": "Diagnosis, instructions and follow-up go to the owner's app.",
+      "retornoTitulo": "Follow-up",
+      "retornoEm": "Follow-up in {n} day, no time booked yet. | Follow-up in {n} days, no time booked yet.",
+      "adendoTitulo": "Forgot something?",
+      "adendoAcao": "Write an addendum",
+      "ficar": "Stay on the visit"
     }
   },
   "adesao": {

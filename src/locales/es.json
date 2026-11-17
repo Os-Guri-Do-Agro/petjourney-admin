@@ -12240,6 +12240,17 @@
         "feito": "{n} prescripción repetida. | {n} prescripciones repetidas.",
         "omitidos": "No volvieron: {nomes}. Prescríbalas de nuevo."
       }
+    },
+    "concluido": {
+      "titulo": "Atención finalizada",
+      "texto": "El registro de {pet} está cerrado. Estos son los próximos pasos.",
+      "resumoTitulo": "Resumen para el responsable",
+      "resumoDica": "El diagnóstico, las indicaciones y el control van a la app del responsable.",
+      "retornoTitulo": "Control",
+      "retornoEm": "Control en {n} día, todavía sin horario. | Control en {n} días, todavía sin horario.",
+      "adendoTitulo": "¿Olvidó algo?",
+      "adendoAcao": "Escribir adenda",
+      "ficar": "Quedarse en la atención"
     }
   },
   "adesao": {

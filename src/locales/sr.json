@@ -12240,6 +12240,17 @@
         "feito": "{n} propisani lek ponovljen. | {n} propisana leka ponovljena. | {n} propisanih lekova ponovljeno.",
         "omitidos": "Nisu preneti: {nomes}. Propišite ih ponovo."
       }
+    },
+    "concluido": {
+      "titulo": "Pregled završen",
+      "texto": "Zapis za {pet} je zatvoren. Ovo su sledeći koraci.",
+      "resumoTitulo": "Rezime za vlasnika",
+      "resumoDica": "Dijagnoza, uputstva i kontrola idu u aplikaciju vlasnika.",
+      "retornoTitulo": "Kontrola",
+      "retornoEm": "Kontrola za {n} dan, još bez termina. | Kontrola za {n} dana, još bez termina. | Kontrola za {n} dana, još bez termina.",
+      "adendoTitulo": "Zaboravili ste nešto?",
+      "adendoAcao": "Napiši dodatak",
+      "ficar": "Ostani na pregledu"
     }
   },
   "adesao": {
