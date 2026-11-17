@@ -10,6 +10,8 @@
  * Hoje o bulário da PetJourney inteiro está em revisão pelo responsável técnico, e a busca traz só
  * o que a clínica acrescentou (D2): a tela diz isso, em vez de parecer quebrada.
  */
+import IconField from 'primevue/iconfield'
+import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
 import { computed, onMounted, ref, watch } from 'vue'
@@ -219,14 +221,17 @@ const resumo = computed(() =>
             </span>
           </header>
 
-          <div class="bul__filtros">
-            <InputText
-              v-model="busca"
-              type="search"
-              :maxlength="60"
-              :placeholder="t('clinico.bulario.buscaPlaceholder')"
-              :aria-label="t('clinico.bulario.buscaPlaceholder')"
-            />
+          <div class="bul__filtros" role="search">
+            <IconField>
+              <InputIcon class="ph ph-magnifying-glass" />
+              <InputText
+                v-model="busca"
+                type="search"
+                :maxlength="60"
+                :placeholder="t('clinico.bulario.buscaPlaceholder')"
+                :aria-label="t('clinico.bulario.buscaPlaceholder')"
+              />
+            </IconField>
             <div class="bul__selects">
               <Select
                 v-model="especie"
@@ -291,9 +296,27 @@ const resumo = computed(() =>
 
         <section class="ui-folha ui-cartao bul__ficha" aria-live="polite">
           <template v-if="selecionado">
+            <!-- Os selos vão na linha do nome, como na lista: a mesma leitura dos dois lados. -->
             <header class="ui-cartao__cabeca">
               <span class="ui-cartao__titulos">
-                <h2 class="ui-cartao__titulo">{{ selecionado.nome }}</h2>
+                <h2 class="ui-cartao__titulo bul__titulo">
+                  {{ selecionado.nome }}
+                  <span v-if="selecionado.origem === 'PARCEIRO'" class="ui-selo">{{
+                    t('clinico.bulario.api.daClinica')
+                  }}</span>
+                  <span v-else-if="!selecionado.revisado" class="ui-selo">{{
+                    t('clinico.bulario.api.naoRevisado')
+                  }}</span>
+                  <span v-if="selecionado.controle !== 'NENHUM'" class="ui-selo ui-selo--atencao">
+                    {{ t(`clinico.bulario.api.controle.${selecionado.controle}`) }}
+                    <template v-if="selecionado.listaControle">
+                      · {{ selecionado.listaControle }}</template
+                    >
+                  </span>
+                  <span v-if="selecionado.manipulado" class="ui-selo">{{
+                    t('clinico.bulario.api.manipulado')
+                  }}</span>
+                </h2>
                 <p class="ui-cartao__descricao">
                   {{ selecionado.principioAtivo }} · {{ apresentacao(selecionado) }} ·
                   {{ rotuloDaClasse(selecionado.classe) }}
@@ -305,24 +328,6 @@ const resumo = computed(() =>
               <p v-if="proibidoParaOPaciente" class="bul__proibido" role="alert">
                 <i class="ph ph-prohibit" aria-hidden="true" />
                 {{ t('clinico.bulario.doseProibida') }}
-              </p>
-
-              <p class="bul__selos">
-                <span v-if="selecionado.origem === 'PARCEIRO'" class="ui-selo">{{
-                  t('clinico.bulario.api.daClinica')
-                }}</span>
-                <span v-else-if="!selecionado.revisado" class="ui-selo">{{
-                  t('clinico.bulario.api.naoRevisado')
-                }}</span>
-                <span v-if="selecionado.controle !== 'NENHUM'" class="ui-selo ui-selo--atencao">
-                  {{ t(`clinico.bulario.api.controle.${selecionado.controle}`) }}
-                  <template v-if="selecionado.listaControle">
-                    · {{ selecionado.listaControle }}</template
-                  >
-                </span>
-                <span v-if="selecionado.manipulado" class="ui-selo">{{
-                  t('clinico.bulario.api.manipulado')
-                }}</span>
               </p>
 
               <dl class="bul__dados">
@@ -431,25 +436,32 @@ const resumo = computed(() =>
   text-underline-offset: 3px;
 }
 
+/* Lista e ficha na mesma largura: os dois filtros cabem lado a lado sem cortar o texto. */
 .bul__colunas {
   display: grid;
   align-items: start;
   gap: 20px;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-}
-
-.bul__filtros {
-  display: grid;
-  gap: 10px;
-  padding: 0 16px 12px;
-}
-
-.bul__selects {
-  display: grid;
-  gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/*
+ * O cartão já dá o respiro dos lados: os filtros alinham com o título, e o respiro de cima afasta
+ * a busca do fio do cabeçalho.
+ */
+.bul__filtros {
+  display: grid;
+  gap: 10px;
+  padding: 16px 0 12px;
+}
+
+/* Lado a lado quando os dois cabem inteiros ("Todas as espécies"); senão, um embaixo do outro. */
+.bul__selects {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 228px), 1fr));
+}
+
+.bul__filtros :deep(.p-iconfield),
 .bul__filtros :deep(.p-inputtext),
 .bul__filtros :deep(.p-select) {
   width: 100%;
@@ -466,13 +478,18 @@ const resumo = computed(() =>
   gap: 6px;
 }
 
+/* Na lista, o texto alinha com o das linhas (que têm 10 px por dentro). */
 .bul__erro,
 .bul__vazio,
 .bul__escolha {
   margin: 0;
-  padding: 12px 16px 16px;
+  padding: 8px 10px 0;
   color: var(--tinta-2);
   font-size: 13.5px;
+}
+
+.bul__escolha {
+  padding: 0;
 }
 
 .bul__erro {
@@ -503,10 +520,15 @@ const resumo = computed(() =>
   top: 16px;
 }
 
+.bul__titulo {
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
 .bul__miolo {
   display: grid;
-  gap: 16px;
-  padding: 0 18px 18px;
+  gap: 18px;
+  padding-top: 16px;
 }
 
 .bul__proibido {
@@ -516,13 +538,6 @@ const resumo = computed(() =>
   margin: 0;
   color: var(--risco-tinta);
   font-weight: 600;
-}
-
-.bul__selos {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
 }
 
 .bul__dados {
@@ -556,6 +571,7 @@ const resumo = computed(() =>
   font-weight: 650;
 }
 
+/* A tabela na largura da ficha: o texto e os fios alinham com o título e a régua de cima. */
 .bul__tabela table {
   width: 100%;
   border-collapse: collapse;
@@ -564,7 +580,7 @@ const resumo = computed(() =>
 
 .bul__tabela th,
 .bul__tabela td {
-  padding: 8px 6px;
+  padding: 8px 12px 8px 0;
   border-bottom: 1px solid var(--linha-suave);
   color: var(--tinta);
   text-align: start;
@@ -577,21 +593,52 @@ const resumo = computed(() =>
   font-weight: 600;
 }
 
+.bul__tabela :is(th, td):last-child {
+  padding-inline-end: 0;
+  white-space: nowrap;
+}
+
 .bul__tabela small {
   display: block;
   color: var(--tinta-2);
   font-size: 12px;
 }
 
-.bul__dose--paciente {
+/* A linha da espécie do paciente ganha fundo que passa 10 px para cada lado, sem mexer no texto. */
+.bul__dose--paciente > * {
   background: var(--superficie-2);
 }
 
+.bul__dose--paciente > :first-child {
+  box-shadow: -10px 0 0 var(--superficie-2);
+}
+
+.bul__dose--paciente > :last-child {
+  box-shadow: 10px 0 0 var(--superficie-2);
+}
+
+.bul__dose--paciente > :first-child:dir(rtl) {
+  box-shadow: 10px 0 0 var(--superficie-2);
+}
+
+.bul__dose--paciente > :last-child:dir(rtl) {
+  box-shadow: -10px 0 0 var(--superficie-2);
+}
+
+/* Marcador pendurado: a bolinha alinha com o título do bloco e o texto fica logo depois. */
 .bul__bloco ul {
+  display: grid;
+  gap: 4px;
   margin: 0;
-  padding-left: 18px;
+  padding-inline-start: 16px;
   color: var(--tinta);
   font-size: 13.5px;
+  line-height: 1.45;
+  list-style: disc;
+}
+
+.bul__bloco li::marker {
+  color: var(--tinta-3);
 }
 
 .bul__obs,
