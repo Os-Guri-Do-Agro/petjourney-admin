@@ -19,6 +19,7 @@ import type {
 import { criarSorteio } from '../aleatorio'
 import { hoje, instante, somarDias } from '../relogio'
 import { gerarFamilias } from './cadastro-gerado'
+import { proximaFoto } from './fotos'
 
 export type ClienteDaDemo = Cliente & { criadoEm: string }
 
@@ -1087,8 +1088,11 @@ function montar() {
         ativo: !pet.inativo,
         inativoMotivo: pet.inativo?.motivo ?? null,
         obitoEm: pet.inativo?.motivo === 'OBITO' ? pet.inativo.em : null,
-        temFoto: Boolean(pet.foto),
-        fotoUrl: pet.foto ? `/demo/pacientes/${pet.foto}.jpg` : null,
+        temFoto: true,
+        /* Os nove retratos de sempre ficam com os pets deles; os outros, pela raça. */
+        fotoUrl: pet.foto
+          ? `/demo/pacientes/${pet.foto}.jpg`
+          : proximaFoto(id, pet.especie, pet.raca, pet.especieOutra ?? null),
         codigoNaOrigem: null,
         castrado: pet.castrado,
         pesoKg: pet.peso,
@@ -1113,15 +1117,21 @@ function montar() {
   montarGeradas()
 }
 
-/** Quantas famílias geradas completam a base. */
-const FAMILIAS_GERADAS = 360
+/**
+ * Quantos pets a base tem ao todo: os escritos à mão e, até completar, os gerados. Todos com
+ * foto (pedido do Luís, 18/11/2026: "deixa só 100 com foto").
+ */
+export const TOTAL_DE_PETS = 100
 
 function montarGeradas() {
   const sorte = criarSorteio('cadastro-geradas')
   const usados = new Set(CLIENTES.map((c) => c.nome))
 
-  gerarFamilias(FAMILIAS_GERADAS, usados).forEach((familia, i) => {
+  for (const [i, familia] of gerarFamilias(TOTAL_DE_PETS, usados).entries()) {
+    if (PACIENTES.length >= TOTAL_DE_PETS) break
     const n = i + 1
+    /* A última família leva só os pets que cabem no total. */
+    familia.pets = familia.pets.slice(0, TOTAL_DE_PETS - PACIENTES.length)
     const clienteId = `demo-cli-g${String(n).padStart(3, '0')}`
     /* Entrou há `mesesDeCasa` meses: o cadastro do cliente e dos pets é desse dia. */
     const dia = somarDias(hoje(), -(familia.mesesDeCasa * 30 + sorte.inteiro(0, 27)))
@@ -1187,8 +1197,13 @@ function montarGeradas() {
         ativo: true,
         inativoMotivo: null,
         obitoEm: null,
-        temFoto: false,
-        fotoUrl: null,
+        temFoto: true,
+        fotoUrl: proximaFoto(
+          `demo-pac-g${String(n).padStart(3, '0')}${j ? `-${j + 1}` : ''}`,
+          pet.especie,
+          pet.raca,
+          pet.especieOutra ?? null,
+        ),
         codigoNaOrigem: null,
         castrado: pet.castrado,
         pesoKg: pet.peso,
@@ -1204,7 +1219,7 @@ function montarGeradas() {
         criadoEm,
       })
     })
-  })
+  }
 }
 
 montar()

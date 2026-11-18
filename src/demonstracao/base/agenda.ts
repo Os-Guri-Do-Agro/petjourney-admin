@@ -123,7 +123,7 @@ const INTERNADOS_AGORA = new Set([
 const PACIENTES_DE_HOJE = new Set(HOJE.map(([, , pacienteId]) => pacienteId))
 
 /**
- * Dias mínimos entre duas visitas do mesmo pet, sorteados por pet (de 3 semanas a 2 meses e meio);
+ * Dias mínimos entre duas visitas do mesmo pet, sorteados por pet (de 12 dias a 6 semanas);
  * os frequentes, que tratam alguma coisa, voltam antes.
  */
 const INTERVALO_POR_PET = new Map<string, number>()
@@ -131,7 +131,7 @@ const INTERVALO_POR_PET = new Map<string, number>()
 function intervaloDe(pacienteId: string, sorte: ReturnType<typeof criarSorteio>) {
   let dias = INTERVALO_POR_PET.get(pacienteId)
   if (dias === undefined) {
-    dias = FREQUENTES.includes(pacienteId) ? sorte.inteiro(10, 16) : sorte.inteiro(21, 75)
+    dias = FREQUENTES.includes(pacienteId) ? sorte.inteiro(7, 12) : sorte.inteiro(12, 40)
     INTERVALO_POR_PET.set(pacienteId, dias)
   }
   return dias
@@ -419,7 +419,7 @@ function gerar() {
   const dia = hoje()
   /* Cada pet já tinha vindo antes da janela, em dias diferentes: sem isso, todos chegam juntos. */
   for (const p of PACIENTES) {
-    ULTIMA_VISITA.set(p.id, somarDias(dia, -DIAS_PARA_TRAS - sorte.inteiro(0, 70)))
+    ULTIMA_VISITA.set(p.id, somarDias(dia, -DIAS_PARA_TRAS - sorte.inteiro(0, 35)))
   }
   for (let d = -DIAS_PARA_TRAS; d <= DIAS_PARA_FRENTE; d++) {
     const data = somarDias(dia, d)
