@@ -733,6 +733,13 @@ const resumo = computed(() =>
             class="ui-linha"
             :class="{ vc__anulada: item.anulada }"
           >
+            <PetAvatar
+              :nome="item.paciente.nome"
+              :iniciais="iniciais(item.paciente.nome)"
+              :especie="ESPECIE_DO_AVATAR[item.paciente.especie] ?? null"
+              :foto-url="item.paciente.fotoUrl"
+              tamanho="md"
+            />
             <span class="ui-linha__texto">
               <strong class="ui-linha__titulo">
                 <RouterLink :to="`/clinica/ficha/${item.paciente.id}`">{{
