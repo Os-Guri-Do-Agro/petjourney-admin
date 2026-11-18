@@ -50,7 +50,16 @@ const VIAS = [
 ] as const
 
 const kind = ref<NovoAto['kind']>('MEDICAMENTO')
-const medicamento = ref<Medicamento | null>(null)
+/*
+ * O `AutoComplete` escreve no v-model o texto digitado enquanto nada foi escolhido da lista ("a",
+ * "am"...), e só depois o medicamento. Quem precisa do medicamento lê `escolhido`: em 18/11/2026,
+ * `medicamento.value?.viasPermitidas.length` sobre o texto quebrou o cálculo das vias na primeira
+ * letra, e a gaveta sumia no meio da digitação, com o espaço dela preso na tela (build publicado).
+ */
+const medicamento = ref<Medicamento | string | null>(null)
+const escolhido = computed<Medicamento | null>(() =>
+  typeof medicamento.value === 'object' ? medicamento.value : null,
+)
 const sugestoes = ref<Medicamento[]>([])
 const descricao = ref('')
 const via = ref<NovoAto['via'] | null>(null)
@@ -82,9 +91,10 @@ const opcoesDeKind = computed(() => [
 ])
 
 const opcoesDeVia = computed(() =>
-  (medicamento.value?.viasPermitidas.length ? medicamento.value.viasPermitidas : VIAS).map(
-    (valor) => ({ valor, rotulo: t(`clinico.bulario.api.via.${valor}`) }),
-  ),
+  (escolhido.value?.viasPermitidas.length ? escolhido.value.viasPermitidas : VIAS).map((valor) => ({
+    valor,
+    rotulo: t(`clinico.bulario.api.via.${valor}`),
+  })),
 )
 
 const especieDoCatalogo = computed<EspecieDoCatalogo | null>(
@@ -150,7 +160,7 @@ async function registrar() {
     kind: kind.value,
     descricao: descricao.value.trim(),
     realizadoEm: comOffset(instante()),
-    ...(medicamentoDoAto && medicamento.value ? { medicamentoId: medicamento.value.id } : {}),
+    ...(medicamentoDoAto && escolhido.value ? { medicamentoId: escolhido.value.id } : {}),
     ...(medicamentoDoAto && via.value ? { via: via.value } : {}),
     ...(medicamentoDoAto && doseTexto.value.trim() ? { doseTexto: doseTexto.value.trim() } : {}),
     ...(observacao.value.trim() ? { observacao: observacao.value.trim() } : {}),

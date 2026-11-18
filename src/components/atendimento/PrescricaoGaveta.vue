@@ -67,7 +67,16 @@ type Origem = 'CATALOGO' | 'LIVRE'
 type Modo = 'PESO' | 'QUANTIDADE'
 
 const origem = ref<Origem>('CATALOGO')
-const medicamento = ref<Medicamento | null>(null)
+/*
+ * O `AutoComplete` escreve no v-model o texto digitado enquanto nada foi escolhido da lista ("a",
+ * "am"...), e só depois o medicamento. Quem precisa do medicamento lê `escolhido`: em 18/11/2026,
+ * `medicamento.value?.viasPermitidas.length` sobre o texto quebrou o cálculo das vias na primeira
+ * letra, e a gaveta sumia no meio da digitação, com o espaço dela preso na tela (build publicado).
+ */
+const medicamento = ref<Medicamento | string | null>(null)
+const escolhido = computed<Medicamento | null>(() =>
+  typeof medicamento.value === 'object' ? medicamento.value : null,
+)
 const sugestoes = ref<Medicamento[]>([])
 const nomeLivre = ref('')
 const declaraNaoControlado = ref(false)
@@ -150,8 +159,8 @@ function escolher(item: Medicamento) {
 }
 
 const viasPossiveis = computed(() => {
-  if (origem.value === 'CATALOGO' && medicamento.value?.viasPermitidas.length) {
-    return medicamento.value.viasPermitidas
+  if (origem.value === 'CATALOGO' && escolhido.value?.viasPermitidas.length) {
+    return escolhido.value.viasPermitidas
   }
   return VIAS
 })
@@ -188,7 +197,7 @@ const porPeso = computed(() => origem.value === 'CATALOGO' && modo.value === 'PE
 
 const valido = computed(() => {
   if (!via.value) return false
-  if (!editando.value && origem.value === 'CATALOGO' && !medicamento.value) return false
+  if (!editando.value && origem.value === 'CATALOGO' && !escolhido.value) return false
   if (origem.value === 'LIVRE' && (!nomeLivre.value.trim() || !declaraNaoControlado.value)) {
     return false
   }
@@ -307,7 +316,7 @@ async function gravar() {
             ...corpoDaDose(),
             ...lock,
             ...(origem.value === 'CATALOGO'
-              ? { medicamentoId: medicamento.value!.id }
+              ? { medicamentoId: escolhido.value!.id }
               : { nomeLivre: nomeLivre.value.trim(), declaraNaoControlado: true }),
           },
           parceiroQuery(),
@@ -398,7 +407,7 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
             option-label="nome"
             force-selection
             :placeholder="t('atendimento.atos.buscarMedicamento')"
-            :invalid="tentou && !medicamento"
+            :invalid="tentou && !escolhido"
             :disabled="salvando"
             @complete="buscar"
             @option-select="escolher($event.value)"
