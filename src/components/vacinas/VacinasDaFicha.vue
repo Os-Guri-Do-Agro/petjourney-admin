@@ -10,10 +10,11 @@
 import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import AnularAplicacaoGaveta from '@/components/vacinas/AnularAplicacaoGaveta.vue'
 import AplicarVacinaGaveta from '@/components/vacinas/AplicarVacinaGaveta.vue'
 import DoseExternaGaveta from '@/components/vacinas/DoseExternaGaveta.vue'
@@ -41,6 +42,9 @@ const props = defineProps<{
 const { t, te } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const { store, parceiroQuery } = useParceiroPortal()
+const route = useRoute()
+const router = useRouter()
+const raiz = ref<HTMLElement | null>(null)
 
 const plano = ref<PlanoVacinal | null>(null)
 const historico = ref<HistoricoDeVacinas | null>(null)
@@ -64,6 +68,14 @@ const podeAplicar = computed(
     props.ativo &&
     Boolean(store.modulo('CLINICA')?.podeEscrever) &&
     store.temPermissao('vacina.aplicar'),
+)
+
+/*
+ * O plano vazio quer dizer que o catálogo não tem vacina para a espécie: quem gere o catálogo
+ * (DONO, GESTOR) ganha o botão que abre a vacina nova na Configuração.
+ */
+const acrescentaVacina = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('catalogo.gerir'),
 )
 
 async function carregar() {
@@ -144,7 +156,23 @@ function mudou() {
 }
 
 watch(() => props.pacienteId, mudou)
-onMounted(carregar)
+
+/*
+ * Veio do "Aplicar vacina" das Ações rápidas do Início (`?aplicar=vacina`): a ficha rola até as
+ * vacinas e a gaveta de aplicar abre. O pedido sai da URL na hora: recarregar não reabre.
+ */
+onMounted(() => {
+  void carregar()
+  if (route.query.aplicar !== 'vacina') return
+  /* Da lista de chamada vem também a vacina (`?vacina=`): a gaveta abre nela. */
+  const vacinaId = typeof route.query.vacina === 'string' ? route.query.vacina : null
+  const query = { ...route.query }
+  delete query.aplicar
+  delete query.vacina
+  void router.replace({ query })
+  raiz.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  if (podeAplicar.value) void abrirAplicar(vacinaId)
+})
 
 /* --------------------------------------------------------------------------- leitura */
 
@@ -191,7 +219,12 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
 </script>
 
 <template>
-  <section class="ui-folha ui-cartao vf" aria-labelledby="vf-titulo" :aria-busy="carregando">
+  <section
+    ref="raiz"
+    class="ui-folha ui-cartao vf"
+    aria-labelledby="vf-titulo"
+    :aria-busy="carregando"
+  >
     <header class="ui-cartao__cabeca">
       <span
         class="ui-ladrilho"
@@ -262,7 +295,24 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
         </span>
       </li>
     </ul>
-    <p v-else-if="plano" class="vf__nota">{{ t('vacinas.plano.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="plano"
+      aninhado
+      icone="ph ph-syringe"
+      :titulo="t('vacinas.plano.vazio')"
+      :texto="t('vacinas.plano.vazioTexto')"
+    >
+      <template v-if="acrescentaVacina" #acao>
+        <Button
+          :as="RouterLink"
+          :to="{ path: '/clinica/configuracao', query: { aba: 'catalogo', novo: 'vacinas' } }"
+          severity="secondary"
+          outlined
+          icon="ph ph-plus"
+          :label="t('vacinas.plano.acrescentarVacina')"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <p v-if="plano?.truncado && plano.vacinasOmitidas" class="vf__nota">
       {{ t('vacinas.plano.eMais', { n: plano.vacinasOmitidas }) }}

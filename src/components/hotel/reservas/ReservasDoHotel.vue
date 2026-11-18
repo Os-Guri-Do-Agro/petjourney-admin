@@ -54,8 +54,17 @@ const opcoes = computed(() =>
 )
 
 const casa = ref<CasaDoHotel | null>(null)
+/*
+ * Veio de um "Nova reserva" de outra tela (o guia dos Hóspedes, 17/11/2026) com `?novo=1`: com a
+ * casa lida, a gaveta abre já aqui para o balcão, e o pedido sai da URL (recarregar não reabre).
+ */
 onMounted(async () => {
   casa.value = await lerCasa(parceiroQuery()).catch(() => null)
+  if (route.query.novo !== '1') return
+  if (reserva.value && casa.value) nova()
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
 })
 
 const novaAberta = ref(false)
@@ -100,7 +109,11 @@ function criada(r: Reserva) {
         />
       </div>
 
-      <ListaDeReservas v-if="vista === 'lista'" />
+      <ListaDeReservas
+        v-if="vista === 'lista'"
+        :pode-reservar="reserva && Boolean(casa)"
+        @nova="nova()"
+      />
       <GradeDeReservas v-else-if="vista === 'grade'" />
       <EsperaDoHotel
         v-else

@@ -1,6 +1,6 @@
 {
   "name": "petjourney-admin",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -28,6 +28,7 @@
     "@tailwindcss/vite": "^4.3.1",
     "apexcharts": "^7.0.0",
     "country-flag-icons": "^1.6.20",
+    "maplibre-gl": "^6.16.0",
     "pinia": "^3.0.4",
     "primevue": "^4.5.5",
     "qrcode": "1.5.4",

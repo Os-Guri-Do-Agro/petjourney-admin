@@ -17,6 +17,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { nomeDoDia } from '@/components/fila/leitura-da-fila'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -98,9 +100,12 @@ watch(visible, (aberta) => {
   erroDoPaciente.value = ''
 })
 
+/** Clicar no campo já mostra a lista dos pacientes, sem esperar a digitação. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+
 async function buscar(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoes.value = pagina.itens
   } catch {
     sugestoes.value = []
@@ -207,6 +212,7 @@ function rotuloDoPaciente(item: PacienteNaLista) {
         <strong v-if="paraQuem" class="fe__fixo">{{ paraQuem.nome }}</strong>
         <AutoComplete
           v-else
+          ref="campoDoPaciente"
           v-model="paciente"
           input-id="fila-paciente"
           :suggestions="sugestoes"
@@ -216,7 +222,13 @@ function rotuloDoPaciente(item: PacienteNaLista) {
           :disabled="salvando"
           force-selection
           @complete="buscar"
-        />
+          @click="abrirLista"
+          @keydown.down="abrirLista"
+        >
+          <template #option="{ option }">
+            <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+          </template>
+        </AutoComplete>
         <small v-if="erroDoPaciente" class="eg__invalido">{{ erroDoPaciente }}</small>
         <small v-else-if="tentou && !paciente && !paraQuem" class="eg__invalido">{{
           t('fila.pacienteObrigatorio')

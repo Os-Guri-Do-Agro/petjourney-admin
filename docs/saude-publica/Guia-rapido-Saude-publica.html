@@ -1,0 +1,857 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>PetJourney · Saúde pública · Guia rápido</title>
+    <style>
+      /*
+       * Guia rápido do protótipo Saúde pública, para quem vai apresentar à Câmara de Campo Grande
+       * (Ofício 001/2026). Mesmo molde do roteiro de apresentação do portal (docs/apresentacao):
+       * faixa sálvia com os desenhos de traço, véu nos painéis, as fontes do portal. As imagens são
+       * capturas do protótipo rodando (telas/). O PDF é gerado daqui, nunca editado.
+       */
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('../apresentacao/fontes/readex-pro-latin-wght-normal.woff2') format('woff2');
+        font-weight: 160 700;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+2000-206F, U+20AC, U+2122, U+2190-2199, U+2212, U+2215;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('../apresentacao/fontes/readex-pro-latin-ext-wght-normal.woff2') format('woff2');
+        font-weight: 160 700;
+        unicode-range: U+0100-024F, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F,
+          U+A720-A7FF;
+      }
+
+      @font-face {
+        font-family: 'Instrument Sans';
+        src: url('../apresentacao/fontes/instrument-sans-latin-wght-normal.woff2') format('woff2');
+        font-weight: 400 700;
+      }
+
+      @page {
+        size: A4;
+        margin: 15mm 15mm 17mm;
+
+        @bottom-left {
+          content: 'PetJourney · Saúde pública · Guia rápido do protótipo';
+          font-family: 'Readex Pro', sans-serif;
+          font-size: 7.5pt;
+          color: #6b7280;
+        }
+
+        @bottom-right {
+          content: counter(page) ' / ' counter(pages);
+          font-family: 'Instrument Sans', sans-serif;
+          font-size: 8pt;
+          color: #6b7280;
+        }
+      }
+
+      @page capa {
+        margin: 0;
+
+        @bottom-left {
+          content: none;
+        }
+
+        @bottom-right {
+          content: none;
+        }
+      }
+
+      :root {
+        --tinta: #1d3557;
+        --texto: #2a3446;
+        --suave: #5f6670;
+        --papel: #ffffff;
+        --destaque: #76938d;
+        --salvia-texto: #5c736e;
+        --veu: #f3f7f6;
+        --veu-forte: #ecf2f0;
+        --regua: #dfe8e5;
+        --pets-fundo: #aee3d1;
+        --pets-tinta: #285e4e;
+        --atencao-veu: #fee8d4;
+        --atencao-tinta: #905204;
+        --risco-veu: #fde4e0;
+        --risco-tinta: #9d2e29;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      body {
+        width: 180mm;
+        margin: 0 auto;
+        background: var(--papel);
+        color: var(--texto);
+        font-family: 'Readex Pro', system-ui, sans-serif;
+        font-size: 9.4pt;
+        font-weight: 330;
+        line-height: 1.5;
+      }
+
+      strong,
+      b {
+        font-weight: 560;
+      }
+
+      h2,
+      h3 {
+        color: var(--tinta);
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
+      }
+
+      h2 {
+        margin: 0 0 4pt;
+        font-size: 20pt;
+      }
+
+      h3 {
+        margin: 12pt 0 4pt;
+        font-size: 12.5pt;
+      }
+
+      p {
+        margin: 0 0 7pt;
+      }
+
+      ol,
+      ul {
+        margin: 0 0 8pt;
+        padding-left: 14pt;
+      }
+
+      li {
+        margin-bottom: 3pt;
+      }
+
+      .rota {
+        font-family: 'Instrument Sans', sans-serif;
+        color: var(--tinta);
+        font-weight: 560;
+      }
+
+      .quebra {
+        break-before: page;
+      }
+
+      /* ---------------------------------------------------------------------------- capa */
+
+      .capa {
+        page: capa;
+        position: relative;
+        width: 210mm;
+        height: 297mm;
+        margin-left: -15mm;
+        overflow: hidden;
+      }
+
+      .capa__faixa {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 160mm;
+        border-radius: 0 0 12mm 12mm;
+        background: var(--destaque) url('../apresentacao/faixa-capa.png') center bottom / cover
+          no-repeat;
+      }
+
+      .capa__conteudo {
+        position: absolute;
+        top: 24mm;
+        left: 22mm;
+        width: 150mm;
+        color: #fff;
+      }
+
+      .capa__logo {
+        display: block;
+        width: 44mm;
+        margin-bottom: 20mm;
+      }
+
+      .capa__etiqueta {
+        display: inline-block;
+        margin-bottom: 6mm;
+        padding: 1.6mm 3.6mm;
+        border-radius: 99px;
+        background: rgb(0 0 0 / 13%);
+        font-size: 8pt;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .capa h1 {
+        margin: 0 0 6mm;
+        color: #fff;
+        font-size: 34pt;
+        line-height: 1.06;
+        letter-spacing: -0.025em;
+      }
+
+      .capa__sub {
+        margin: 0;
+        font-size: 12pt;
+        font-weight: 400;
+        line-height: 1.45;
+      }
+
+      .capa__tela {
+        position: absolute;
+        top: 128mm;
+        right: -1px;
+        width: 162mm;
+        border: 1px solid var(--regua);
+        border-right: 0;
+        border-radius: 4mm 0 0 4mm;
+        box-shadow: 0 4mm 12mm rgb(29 53 87 / 16%);
+        overflow: hidden;
+      }
+
+      .capa__tela img {
+        display: block;
+        width: 100%;
+      }
+
+      .capa__rodape {
+        position: absolute;
+        right: 22mm;
+        bottom: 16mm;
+        left: 22mm;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6mm;
+        padding: 6mm 7mm;
+        border-radius: 5mm;
+        background: var(--veu-forte);
+        color: var(--tinta);
+        font-size: 8.5pt;
+      }
+
+      .capa__rodape b {
+        display: block;
+        margin-bottom: 1mm;
+        color: var(--salvia-texto);
+        font-size: 7pt;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      /* ------------------------------------------------------------------------ divisória */
+
+      .divisoria {
+        margin: 0 0 12pt;
+        padding: 13pt 16pt 12pt;
+        border-radius: 12pt;
+        background: var(--destaque) url('../apresentacao/faixa-secao.png') center bottom / cover
+          no-repeat;
+        color: #fff;
+      }
+
+      .divisoria__etiqueta {
+        display: inline-block;
+        margin-bottom: 6pt;
+        padding: 2pt 8pt;
+        border-radius: 99px;
+        background: var(--pets-fundo);
+        color: var(--pets-tinta);
+        font-size: 7.4pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .divisoria h2 {
+        color: #fff;
+        font-size: 21pt;
+      }
+
+      .divisoria p {
+        max-width: 160mm;
+        margin: 0;
+        font-size: 9.8pt;
+        font-weight: 400;
+      }
+
+      /* ------------------------------------------------------------------------- blocos */
+
+      .caixa {
+        margin: 9pt 0;
+        padding: 10pt 12pt;
+        border-radius: 8pt;
+        background: var(--veu);
+        break-inside: avoid;
+      }
+
+      .caixa > :last-child {
+        margin-bottom: 0;
+      }
+
+      .caixa__titulo {
+        display: block;
+        margin-bottom: 4pt;
+        color: var(--salvia-texto);
+        font-size: 7.4pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .caixa--atencao {
+        background: var(--atencao-veu);
+      }
+
+      .caixa--atencao .caixa__titulo {
+        color: var(--atencao-tinta);
+      }
+
+      .duas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9pt;
+        margin: 9pt 0;
+      }
+
+      .duas .caixa {
+        margin: 0;
+      }
+
+      .fala {
+        margin: 7pt 0;
+        padding: 7pt 12pt 8pt;
+        border-radius: 8pt;
+        background: var(--veu-forte);
+        color: var(--tinta);
+        font-size: 9.6pt;
+        font-style: italic;
+        break-inside: avoid;
+      }
+
+      .fala::before {
+        display: block;
+        margin-bottom: 2pt;
+        color: var(--salvia-texto);
+        content: 'Fale';
+        font-size: 7pt;
+        font-style: normal;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+
+      .tela {
+        margin: 6pt 0 8pt;
+        border: 1px solid var(--regua);
+        border-radius: 6pt;
+        overflow: hidden;
+        break-inside: avoid;
+      }
+
+      .tela img {
+        display: block;
+        width: 100%;
+      }
+
+      /* Menor, para o ato caber na página do roteiro. */
+      .tela--menor {
+        width: 78%;
+      }
+
+      /* Duas capturas do mesmo ato, lado a lado. */
+      .telas-lado {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6pt;
+        margin: 6pt 0 8pt;
+      }
+
+      .telas-lado .tela {
+        margin: 0;
+      }
+
+      .legenda-tela {
+        margin: -4pt 0 8pt;
+        color: var(--suave);
+        font-size: 8pt;
+      }
+
+      /* ------------------------------------------------------------------------ tabelas */
+
+      table {
+        width: 100%;
+        margin: 6pt 0 10pt;
+        border-collapse: collapse;
+        font-size: 8.8pt;
+        line-height: 1.4;
+      }
+
+      th {
+        padding: 4pt 6pt;
+        border-bottom: 1.5pt solid var(--tinta);
+        color: var(--tinta);
+        font-size: 7.4pt;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      td {
+        padding: 5pt 6pt;
+        border-bottom: 1px solid var(--regua);
+        vertical-align: top;
+      }
+
+      td:first-child {
+        color: var(--tinta);
+        font-weight: 500;
+      }
+
+      td.t {
+        font-family: 'Instrument Sans', sans-serif;
+        white-space: nowrap;
+      }
+
+      tr {
+        break-inside: avoid;
+      }
+
+      /* ---------------------------------------------------------------------------- atos */
+
+      .ato__cab {
+        display: flex;
+        align-items: baseline;
+        gap: 8pt;
+        margin: 0 0 4pt;
+      }
+
+      .ato__num {
+        padding: 2pt 7pt;
+        border-radius: 99px;
+        background: var(--pets-fundo);
+        color: var(--pets-tinta);
+        font-family: 'Instrument Sans', sans-serif;
+        font-size: 8pt;
+        font-weight: 700;
+      }
+
+      .ato__cab h2 {
+        margin: 0;
+        font-size: 17pt;
+      }
+
+      .ato__tempo {
+        margin-left: auto;
+        color: var(--suave);
+        font-family: 'Instrument Sans', sans-serif;
+        font-size: 8.5pt;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- ================================================================== capa -->
+    <section class="capa">
+      <div class="capa__faixa"></div>
+      <div class="capa__conteudo">
+        <img class="capa__logo" src="../apresentacao/logo-branca.png" alt="PetJourney" />
+        <span class="capa__etiqueta">Protótipo · Câmara de Campo Grande</span>
+        <h1>Saúde pública</h1>
+        <p class="capa__sub">
+          Guia rápido do módulo que mostra à Câmara e à Prefeitura o que o Ofício nº 001/2026
+          entrega à cidade: o painel por região e bairro, as campanhas, as ONGs e o relatório de 90
+          dias.
+        </p>
+      </div>
+      <div class="capa__tela"><img src="telas/01-painel.jpg" alt="O painel do protótipo" /></div>
+      <div class="capa__rodape">
+        <div><b>Para quem</b>Quem apresenta o programa à Câmara e à Prefeitura</div>
+        <div><b>Tempo</b>8 a 10 minutos de demonstração</div>
+        <div>
+          <b>Onde</b><span class="rota">portal-dev.petjourney.health/saude-publica</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ em um minuto -->
+    <section class="quebra">
+      <div class="divisoria">
+        <span class="divisoria__etiqueta">Antes de tudo</span>
+        <h2>O módulo em um minuto</h2>
+        <p>
+          Um espaço novo do portal da PetJourney, <b>Saúde pública</b>, feito para a apresentação do
+          ofício. Ele mostra, com dados de simulação, o que a Superintendência de Bem-Estar Animal
+          (Subea) e o Centro de Controle de Zoonoses (CCZ) passam a ter se o programa for aceito.
+        </p>
+      </div>
+
+      <h3>Cada tela responde a um item do ofício</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Tela</th>
+            <th>Item do ofício</th>
+            <th>O que mostra</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Painel</td>
+            <td>4e · relatórios por bairro</td>
+            <td>
+              Os números do programa, os casos humanos de leishmaniose, a prevenção na cidade, o mapa
+              das 7 regiões e os bairros que pedem atenção.
+            </td>
+          </tr>
+          <tr>
+            <td>Campanhas</td>
+            <td>4d · aviso das campanhas</td>
+            <td>
+              As campanhas de antirrábica, castração, coleira e exame, avisadas no celular só de quem
+              está com o cuidado pendente, na região da campanha.
+            </td>
+          </tr>
+          <tr>
+            <td>ONGs e adoção</td>
+            <td>4b e 4c · ONGs e adoção</td>
+            <td>
+              O sistema sem custo para ONGs e protetores, e o animal adotado saindo com o histórico
+              de saúde no app de quem adotou, com 3 meses do plano completo.
+            </td>
+          </tr>
+          <tr>
+            <td>Relatório de 90 dias</td>
+            <td>7 · relatório à Câmara</td>
+            <td>O relatório que a empresa promete entregar em 90 dias, pronto para PDF.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="caixa caixa--atencao">
+        <span class="caixa__titulo">O que é real e o que é simulação</span>
+        <p>
+          <b>Real:</b> os casos humanos de leishmaniose (39 casos e 4 óbitos em 2025; 30 casos até
+          outubro de 2026), da Sesau, os mesmos do ofício. Os nomes das 7 regiões urbanas e dos
+          bairros. E as telas: tudo funciona de verdade no portal.
+        </p>
+        <p>
+          <b>Simulação:</b> todos os números de animais, tutores, coberturas, campanhas e adoções.
+          Eles imaginam os 90 primeiros dias do programa (01/12/2026 a 28/02/2027). As ONGs têm nomes
+          de exemplo. O mapa é esquemático: mostra a posição de cada região em volta do Centro, não o
+          contorno real. Toda tela tem a faixa <b>Protótipo</b> dizendo isso.
+        </p>
+        <p>
+          Nada é enviado a ninguém. Campanhas e adoções criadas na apresentação somem ao recarregar
+          a página, e a demonstração pode ser repetida do zero.
+        </p>
+      </div>
+
+      <h3>Como abrir</h3>
+      <ol>
+        <li>
+          Entre em <span class="rota">portal-dev.petjourney.health</span> com a conta de
+          demonstração: <span class="rota">portal-demo@petjourney.test</span>, senha
+          <span class="rota">Teste@123</span> (conta de teste do ambiente de desenvolvimento).
+        </li>
+        <li>
+          Abra <span class="rota">portal-dev.petjourney.health/saude-publica</span>. O menu da
+          esquerda ganha o espaço <b>Saúde pública</b>, com Painel, Relatório de 90 dias, Campanhas
+          e ONGs e adoção.
+        </li>
+        <li>
+          Para esconder depois, clique em <b>Sair do protótipo</b>, na faixa do alto de qualquer
+          tela.
+        </li>
+      </ol>
+      <p>
+        Confira a versão no rodapé da tela de login: tem de ser <b>0.3.1</b> ou maior. Abra o
+        endereço uma vez antes da reunião, para não depender da primeira carga na frente de todos.
+      </p>
+    </section>
+
+    <!-- ================================================================== roteiro -->
+    <section class="quebra">
+      <div class="divisoria">
+        <span class="divisoria__etiqueta">Roteiro</span>
+        <h2>A demonstração em 8 minutos</h2>
+        <p>
+          A história segue o ofício: o problema, onde ele está, o que a Prefeitura faz com isso, as
+          ONGs, e o que a Câmara recebe de volta.
+        </p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ato</th>
+            <th>Tela</th>
+            <th>A ideia</th>
+            <th>Tempo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Painel, no alto</td>
+            <td>O problema (leishmaniose) e o que o programa já mudou</td>
+            <td class="t">1,5 min</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Painel, mapa e bairros</td>
+            <td>Onde agir: as regiões e os bairros mais atrasados</td>
+            <td class="t">2 min</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Região → Nova campanha</td>
+            <td>O aviso chega só a quem precisa, na região escolhida</td>
+            <td class="t">2 min</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>ONGs e adoção</td>
+            <td>O animal adotado sai com o histórico de saúde</td>
+            <td class="t">1,5 min</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Relatório de 90 dias</td>
+            <td>O que a Câmara recebe de volta, sem identificar ninguém</td>
+            <td class="t">1 min</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="ato__cab" style="margin-top: 12pt">
+        <span class="ato__num">1</span>
+        <h2>O problema e o programa</h2>
+        <span class="ato__tempo">1,5 min</span>
+      </div>
+      <div class="tela tela--menor"><img src="telas/01-painel.jpg" alt="O alto do Painel" /></div>
+      <ol>
+        <li>Abra o <b>Painel</b>. Leia a frase do alto e os quatro números do programa.</li>
+        <li>Mostre a caixa <b>Leishmaniose visceral</b>: os casos humanos são os da Sesau.</li>
+        <li>
+          Em <b>Prevenção na cidade</b>, mostre o exame de leishmaniose e a coleira: quanto está em
+          dia e quanto subiu desde o início.
+        </li>
+      </ol>
+      <div class="fala">
+        Campo Grande teve 39 casos humanos de leishmaniose no ano passado, com 4 mortes. A prevenção
+        depende do cão: exame em dia e coleira trocada no prazo. Hoje ninguém acompanha isso por
+        bairro. Este é o painel que a Subea e o CCZ passam a ter.
+      </div>
+    </section>
+
+    <!-- ======================================================== ato 2: onde agir -->
+    <section class="quebra">
+      <div class="ato__cab">
+        <span class="ato__num">2</span>
+        <h2>Onde agir</h2>
+        <span class="ato__tempo">2 min</span>
+      </div>
+      <div class="tela"><img src="telas/02-painel-mapa.jpg" alt="O mapa das regiões e os bairros" /></div>
+      <ol>
+        <li>
+          Desça até o mapa. Cada hexágono é uma região urbana; quanto mais escuro, mais em dia.
+        </li>
+        <li>
+          Clique nos números de <b>Prevenção na cidade</b> para trocar o que o mapa pinta: exame,
+          coleira, antirrábica, castração.
+        </li>
+        <li>
+          Ao lado, <b>Bairros que pedem atenção</b> lista os oito mais atrasados no indicador
+          escolhido.
+        </li>
+      </ol>
+      <div class="fala">
+        O Anhanduizinho e a Lagoa estão atrás no exame e na coleira. É ali que a campanha tem de ir
+        primeiro, e o painel mostra isso sem identificar nenhum tutor.
+      </div>
+      <div class="caixa caixa--atencao">
+        <span class="caixa__titulo">Se perguntarem do mapa</span>
+        É um mapa esquemático: cada região está na posição dela em volta do Centro, mas não é o
+        contorno oficial. Com o programa rodando, o painel pode usar o mapa oficial da Planurb.
+      </div>
+    </section>
+
+    <!-- ============================================== ato 3: região e campanha -->
+    <section class="quebra">
+      <div class="ato__cab">
+        <span class="ato__num">3</span>
+        <h2>Da região à campanha</h2>
+        <span class="ato__tempo">2 min</span>
+      </div>
+      <div class="telas-lado">
+        <div class="tela">
+          <img src="telas/03-painel-regiao.jpg" alt="O detalhe da região Anhanduizinho" />
+        </div>
+        <div class="tela">
+          <img src="telas/05-campanha-aviso.jpg" alt="O aviso da campanha no celular do tutor" />
+        </div>
+      </div>
+      <ol>
+        <li>
+          Clique no hexágono do <b>Anhanduizinho</b>. A gaveta mostra cães, gatos, tutores, os
+          quatro indicadores (o traço é o começo do programa) e as campanhas da região.
+        </li>
+        <li>
+          Clique em <b>Criar campanha aqui</b>. Escolha <b>Encoleiramento</b>, um dia no calendário
+          e o local, e siga até o <b>Aviso</b>.
+        </li>
+        <li>
+          Mostre quantos tutores recebem e a prévia no celular. Clique em <b>Agendar campanha</b>:
+          ela entra na lista de Campanhas.
+        </li>
+      </ol>
+      <div class="fala">
+        A Subea escolhe a região e o dia, e o aviso chega no celular só de quem está com a coleira
+        vencida naquela região. Sem carro de som e sem panfleto, e depois a gente sabe quantos
+        abriram o aviso e quantos foram atendidos.
+      </div>
+    </section>
+
+    <!-- ================================================================= ato 4 -->
+    <section class="quebra">
+      <div class="ato__cab">
+        <span class="ato__num">4</span>
+        <h2>ONGs e adoção</h2>
+        <span class="ato__tempo">1,5 min</span>
+      </div>
+      <div class="tela"><img src="telas/07-adocao.jpg" alt="Registrar adoção com o histórico" /></div>
+      <ol>
+        <li>Abra <b>ONGs e adoção</b>: as adoções recentes e as ONGs que usam o sistema.</li>
+        <li>
+          Clique em <b>Registrar adoção</b>, escolha a <b>Canela</b> e preencha um nome e um
+          celular. Mostre o quadro <b>Vai junto com Canela</b>: vacinas, exame, castração, coleira e
+          os 3 meses do plano completo.
+        </li>
+        <li>Clique em <b>Registrar adoção</b>: ela aparece no alto da lista.</li>
+      </ol>
+      <div class="fala">
+        A ONG usa o sistema de graça. Quando o animal é adotado, o histórico de saúde vai junto para
+        o app de quem adotou, que ganha 3 meses do plano completo. O animal não começa do zero na
+        casa nova.
+      </div>
+
+      <div class="ato__cab" style="margin-top: 14pt">
+        <span class="ato__num">5</span>
+        <h2>O relatório de 90 dias</h2>
+        <span class="ato__tempo">1 min</span>
+      </div>
+      <p>
+        Abra <b>Relatório de 90 dias</b>. Ele junta a adesão, a prevenção no começo e aos 90 dias,
+        as regiões, as campanhas, as ONGs, o contexto da doença e o método. O botão
+        <b>Imprimir ou salvar PDF</b> tira só o relatório, sem o resto da tela.
+      </p>
+      <div class="fala">
+        Em 90 dias a gente volta a esta Casa com este relatório, por região e sem identificar
+        ninguém, como está no ofício.
+      </div>
+    </section>
+
+    <!-- ============================================================== perguntas -->
+    <section class="quebra">
+      <div class="divisoria">
+        <span class="divisoria__etiqueta">Apoio</span>
+        <h2>Perguntas prováveis</h2>
+        <p>As respostas seguem o ofício. O que não está nele, não prometa na reunião.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 34%">Pergunta</th>
+            <th>Resposta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Quanto custa para a Prefeitura?</td>
+            <td>
+              Nada. O programa não gera despesa nem exclusividade (item 5). Contratação futura, se
+              houver interesse, segue a Lei nº 14.133/2021.
+            </td>
+          </tr>
+          <tr>
+            <td>Esses números são de verdade?</td>
+            <td>
+              Não: são uma simulação dos 90 primeiros dias, para mostrar como o painel fica. Os
+              casos humanos de leishmaniose são os da Sesau.
+            </td>
+          </tr>
+          <tr>
+            <td>E a LGPD?</td>
+            <td>
+              O painel só mostra contagens e percentuais por região e bairro; bairro com menos de 20
+              animais não aparece. Dados pessoais não são vendidos nem cedidos (Lei nº 13.709/2018).
+            </td>
+          </tr>
+          <tr>
+            <td>De onde vêm os dados?</td>
+            <td>
+              Do app, onde o tutor guarda vacinas, exames e remédios do animal, e das clínicas e ONGs
+              que usam a PetJourney.
+            </td>
+          </tr>
+          <tr>
+            <td>O que o tutor ganha?</td>
+            <td>
+              3 meses do plano completo, depois o plano básico gratuito, e os avisos de vacina,
+              retorno e troca de coleira.
+            </td>
+          </tr>
+          <tr>
+            <td>Como a empresa se paga?</td>
+            <td>
+              Planos opcionais que o próprio tutor contrata depois do período gratuito, serviços para
+              clínicas e estudos com dados estatísticos anonimizados (item 5).
+            </td>
+          </tr>
+          <tr>
+            <td>Integra com os sistemas da Prefeitura?</td>
+            <td>
+              Hoje o painel e o relatório. Integração com os sistemas da Subea e do CCZ é assunto do
+              termo de cooperação; não prometa prazo.
+            </td>
+          </tr>
+          <tr>
+            <td>O que vocês pedem à Câmara?</td>
+            <td>
+              Uma indicação ao Executivo para o termo de cooperação com a Subea e a Sesau, e espaço
+              para apresentar aos vereadores (item 6).
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="duas">
+        <div class="caixa">
+          <span class="caixa__titulo">Plano B</span>
+          Sem internet ou com o portal fora do ar, mostre as capturas deste guia. Salve o PDF do
+          relatório antes da reunião, pelo botão da própria tela.
+        </div>
+        <div class="caixa">
+          <span class="caixa__titulo">Cola</span>
+          Endereço: <span class="rota">portal-dev.petjourney.health/saude-publica</span><br />
+          Conta: <span class="rota">portal-demo@petjourney.test</span><br />
+          Senha: <span class="rota">Teste@123</span>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

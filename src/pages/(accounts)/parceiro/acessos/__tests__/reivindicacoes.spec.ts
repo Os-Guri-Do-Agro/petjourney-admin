@@ -196,14 +196,16 @@ describe('cadastro em análise', () => {
     expect(avisos()).toEqual(['O acesso de Thor aparece aqui quando o seu cadastro for aprovado.'])
   })
 
-  it('o botão "Vincular código" fica liberado', async () => {
+  it('o botão "Novo acesso temporário" fica liberado', async () => {
     cadastro('PENDENTE', false)
     lista()
     servico.getReivindicacoes.mockResolvedValue({ itens: [] })
 
     const { tela } = await abrirTela()
 
-    const vincular = tela.findAll('button').filter((b) => b.text().includes('Vincular código'))
+    const vincular = tela
+      .findAll('button')
+      .filter((b) => b.text().includes('Novo acesso temporário'))
 
     expect(vincular.length).toBeGreaterThan(0)
     expect(vincular.every((b) => b.attributes('disabled') === undefined)).toBe(true)
@@ -291,7 +293,9 @@ describe('recusado ou suspenso', () => {
 
       const { tela } = await abrirTela('/parceiro/acessos?vincular=123456')
 
-      const vincular = tela.findAll('button').filter((b) => b.text().includes('Vincular código'))
+      const vincular = tela
+        .findAll('button')
+        .filter((b) => b.text().includes('Novo acesso temporário'))
 
       expect(modal()).toBeNull()
       expect(vincular.length).toBeGreaterThan(0)

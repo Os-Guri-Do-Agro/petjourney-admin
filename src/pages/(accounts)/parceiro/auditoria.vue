@@ -17,6 +17,9 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
+import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -309,6 +312,36 @@ const dias = computed(() => {
 const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem nenhum evento, como a trilha se enche,
+ * em três etapas. A trilha se escreve sozinha quando a equipe usa o prontuário: a primeira etapa
+ * leva aos Pacientes, para quem abre a Clínica (17/11/2026, "o sistema deve chamar o usuário"); o
+ * portal anota sozinho e a consulta é nesta tela, sem botão. Com filtro, o vazio é do filtro, e a
+ * saída é limpar.
+ */
+const { podeAbrir } = useAcessoAosModulos()
+
+const passosDaAuditoria = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'acao', icone: 'ph ph-clipboard-text' },
+    { id: 'anota', icone: 'ph ph-scroll' },
+    { id: 'consulta', icone: 'ph ph-funnel' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`parceiro.auditoria.guia.${id}.titulo`),
+    texto: t(`parceiro.auditoria.guia.${id}.texto`),
+    acao:
+      id === 'acao' && podeAbrir('/clinica/pacientes')
+        ? {
+            rotulo: t('parceiro.auditoria.guia.abrirPacientes'),
+            icone: 'ph ph-users',
+            to: '/clinica/pacientes',
+          }
+        : undefined,
+  })),
+)
 </script>
 
 <template>
@@ -406,14 +439,20 @@ const loadError = computed(() =>
         <Skeleton v-for="n in 4" :key="n" height="3.5rem" border-radius="12px" />
       </div>
 
+      <UiVazioIlustrado
+        v-else-if="eventos.length === 0 && !comFiltro"
+        icone="ph ph-list-magnifying-glass"
+        :titulo="t('parceiro.auditoria.vazio.titulo')"
+        :texto="t('parceiro.auditoria.vazio.texto')"
+        :guia-titulo="t('parceiro.auditoria.guia.titulo')"
+        :passos="passosDaAuditoria"
+      />
+
+      <!-- Vazio por filtro é outro problema: a saída é limpar o filtro. -->
       <div v-else-if="eventos.length === 0" class="ui-folha ui-vazio vazio">
         <i class="ph ph-list-magnifying-glass" aria-hidden="true" />
-        <strong>{{
-          comFiltro ? t('parceiro.auditoria.vazio.filtrado') : t('parceiro.auditoria.vazio.titulo')
-        }}</strong>
-        <span v-if="!comFiltro">{{ t('parceiro.auditoria.vazio.texto') }}</span>
+        <strong>{{ t('parceiro.auditoria.vazio.filtrado') }}</strong>
         <Button
-          v-else
           :label="t('parceiro.auditoria.filtros.limpar')"
           severity="secondary"
           outlined

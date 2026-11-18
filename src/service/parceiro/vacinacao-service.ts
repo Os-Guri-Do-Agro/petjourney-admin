@@ -6,8 +6,8 @@
  * na aplicação. O lote vencido trava no servidor; a idade mínima pede confirmação; a próxima dose
  * pode ser marcada no mesmo gesto (só com `agenda.escrever`).
  *
- * Quem entra: plano e histórico, `paciente.ler`; aplicar, registrar de outro lugar, anular e
- * lotes, `vacina.aplicar`; aplicadas e lista de chamada, `agenda.ler`.
+ * Quem entra: plano e histórico, `paciente.ler`; aplicar, registrar de outro lugar, anular, editar
+ * e lotes, `vacina.aplicar`; aplicadas e lista de chamada, `agenda.ler`.
  */
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
@@ -15,6 +15,7 @@ import type {
   AplicacaoDeVacinaDto,
   AplicarVacinaDto,
   ChamadaDto,
+  EditarAplicacaoDto,
   HistoricoDeVacinasDto,
   LotesParaAplicarDto,
   PaginaDeAplicadasDto,
@@ -40,6 +41,7 @@ export type Chamada = ChamadaDto
 export type PaginaDeAplicadas = PaginaDeAplicadasDto
 export type ViaDaVacina = AplicarVacinaDto['via']
 export type SituacaoDaChamada = ChamadaDto['situacao']
+export type EdicaoDaAplicacao = EditarAplicacaoDto
 
 /** O código do lote: até 40, letras, números, espaço, ponto, barra, hífen e sublinhado. */
 export const CODIGO_DO_LOTE = /^[A-Za-z0-9 ./_-]{1,40}$/
@@ -47,6 +49,11 @@ export const CODIGO_DO_LOTE = /^[A-Za-z0-9 ./_-]{1,40}$/
 /** O motivo da anulação vai de 5 a 500 caracteres. */
 export const MOTIVO_DA_ANULACAO_MIN = 5
 export const MOTIVO_DA_ANULACAO_MAX = 500
+
+/** A edição (N42): o motivo de 5 a 500, a observação até 500 (vazia apaga). */
+export const MOTIVO_DA_EDICAO_MIN = 5
+export const MOTIVO_DA_EDICAO_MAX = 500
+export const OBSERVACAO_MAX = 500
 
 /** A aplicação vale até 30 dias para trás; as aplicadas, até 92 dias por leitura. */
 export const APLICACAO_DIAS_PARA_TRAS = 30
@@ -142,6 +149,38 @@ export function anularAplicacao(id: string, motivo: string, params?: ParceiroQue
       { method: 'POST', body: JSON.stringify({ motivo }) },
     ),
   )
+}
+
+/**
+ * Corrige o que não muda a conta, a observação e a via, com o motivo (N42, D1). Vacina, dose, data
+ * e lote continuam por anular e registrar de novo. O responsável não é avisado; a via nova acompanha
+ * a vacina do app.
+ */
+export function editarAplicacao(id: string, corpo: EdicaoDaAplicacao, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<Aplicacao>>(
+      comQuery(`/parceiro/portal/clinica/aplicacoes/${encodeURIComponent(id)}`, {
+        parceiroId: params?.parceiroId,
+      }),
+      { method: 'PATCH', body: JSON.stringify(corpo) },
+    ),
+  )
+}
+
+/**
+ * O corpo do PATCH só com o que mudou e o motivo; nulo quando nada mudou ("Salvar" desabilitado,
+ * em vez do 400 `APLICACAO_EDICAO_VAZIA`). A observação vazia apaga (`null`); a via não se apaga.
+ */
+export function corpoDaEdicao(
+  atual: Pick<Aplicacao, 'observacao' | 'via'>,
+  novo: { observacao: string; via: ViaDaVacina | null },
+  motivo: string,
+): EdicaoDaAplicacao | null {
+  const corpo: EdicaoDaAplicacao = { motivo: motivo.trim() }
+  const observacao = novo.observacao.trim() || null
+  if (observacao !== ((atual.observacao ?? '').trim() || null)) corpo.observacao = observacao
+  if (novo.via && novo.via !== atual.via) corpo.via = novo.via
+  return 'observacao' in corpo || 'via' in corpo ? corpo : null
 }
 
 /** Do mais atrasado ao menos: vencidos, série aberta e reforço em até 30 dias. */

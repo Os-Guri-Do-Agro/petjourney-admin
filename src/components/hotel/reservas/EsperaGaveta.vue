@@ -12,6 +12,8 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { TipoDaCasa } from '@/service/parceiro/hotel-casa-service'
@@ -44,9 +46,12 @@ watch(aberta, (agora) => {
   erro.value = ''
 })
 
+/** Clicar no campo já mostra a lista dos pacientes, sem esperar a digitação. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+
 async function buscar(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoes.value = pagina.itens.filter((item) => item.ativo)
   } catch {
     sugestoes.value = []
@@ -99,6 +104,7 @@ async function salvar() {
       <section class="eg__secao">
         <label class="eg__rotulo" for="es-paciente">{{ t('reservasDoHotel.nova.hospede') }}</label>
         <AutoComplete
+          ref="campoDoPaciente"
           v-model="paciente"
           input-id="es-paciente"
           :suggestions="sugestoes"
@@ -108,7 +114,13 @@ async function salvar() {
           :disabled="salvando"
           force-selection
           @complete="buscar"
-        />
+          @click="abrirLista"
+          @keydown.down="abrirLista"
+        >
+          <template #option="{ option }">
+            <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+          </template>
+        </AutoComplete>
       </section>
       <section class="eg__secao">
         <span id="es-periodo" class="eg__rotulo">{{ t('reservasDoHotel.espera.periodo') }}</span>

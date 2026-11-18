@@ -40,7 +40,8 @@ const faltando = ref<string[]>([])
 const semItemEmitivel = ref(false)
 let chave: string | null = null
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.receita?.id] as const, ([agora]) => {
   if (agora) {
     erro.value = ''
     recusa.value = null

@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import PortalParceiroCadastroForm from '@/components/parceiro/PortalParceiroCadastroForm.vue'
+import ProgramasAtivosResumo from '@/components/parceiro/ProgramasAtivosResumo.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -18,7 +19,11 @@ import type {
   ParceiroCadastro,
   ParceiroCadastroPayload,
 } from '@/service/parceiro/types'
-import { programasEmAnalise, resolveCadastroErrorView } from '@/utils/parceiro/modo-participacao'
+import {
+  programasEmAnalise,
+  resolveCadastroErrorView,
+  type CampoDoCadastro,
+} from '@/utils/parceiro/modo-participacao'
 import { SUPPORT_CONTACTS } from '@/utils/parceiro/support-contacts'
 
 const { t, locale } = useI18n()
@@ -29,7 +34,7 @@ const cadastro = ref<ParceiroCadastro | null>(null)
 const loadingCadastro = ref(false)
 const submitting = ref(false)
 const submitError = ref('')
-const errorField = ref<'nome' | 'cnpj' | null>(null)
+const errorField = ref<CampoDoCadastro | null>(null)
 
 type FunilState = 'loading' | 'sem-parceiro' | 'PENDENTE' | 'APROVADO' | 'REJEITADO' | 'SUSPENSO'
 
@@ -377,6 +382,9 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
 
       <PartnerStatusBadge status="APROVADO" />
     </article>
+
+    <!-- Os dois programas ativos: a tela Programas sai do menu e eles ficam resumidos aqui. -->
+    <ProgramasAtivosResumo v-if="state === 'APROVADO' && store.programasAtivos" />
 
     <!-- PENDENTE/APROVADO (dono): dados sempre visíveis para edição, como no Perfil -->
     <article

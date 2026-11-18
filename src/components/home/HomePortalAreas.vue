@@ -29,6 +29,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import HomeIndique from '@/components/home/HomeIndique.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useAgora } from '@/composables/useAgora'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -400,10 +401,14 @@ const valorDasLeituras = computed(() => {
           </li>
         </ul>
 
-        <p v-else-if="acessos" class="vazio">
-          <strong>{{ t('acessos.list.emptyAtivosTitle') }}</strong>
-          {{ t('acessos.list.emptyAtivosBody') }}
-        </p>
+        <!-- O "Vincular código" já está no alto da área: o vazio só diz o que falta. -->
+        <UiVazioIlustrado
+          v-else-if="acessos"
+          aninhado
+          icone="ph ph-clipboard-text"
+          :titulo="t('acessos.list.emptyAtivosTitle')"
+          :texto="t('acessos.list.emptyAtivosBody')"
+        />
       </HomeAreaDoPortal>
 
       <!-- ------------------------------------------------------------ divulgação -->
@@ -533,7 +538,7 @@ const valorDasLeituras = computed(() => {
         class="areas__indicados"
         :titulo="t('nav.items.indicados')"
         icone="ph ph-user-list"
-        to="/parceiro/indicados"
+        to="/parceiro/divulgacao?aba=indicados"
         :valor="valorDosIndicados"
         :rotulo="
           t('inicio.areas.indicados.total', { total: indicados?.total ?? 0 }, indicados?.total ?? 0)
@@ -579,6 +584,7 @@ const valorDasLeituras = computed(() => {
           </li>
         </ul>
 
+        <!-- Indicação nunca em destaque (03/11): sem ninguém, uma frase só, sem ladrilho nem chamada. -->
         <p v-else-if="indicados" class="vazio">
           {{ t('parceiro.indicados.vazio.titulo') }}
         </p>
@@ -811,18 +817,11 @@ const valorDasLeituras = computed(() => {
 }
 
 .vazio {
-  display: grid;
-  gap: 4px;
   max-width: 52ch;
   margin: 0;
   color: var(--tinta-2);
   font-size: 13px;
   line-height: 1.5;
-}
-
-.vazio strong {
-  color: var(--tinta);
-  font-weight: 600;
 }
 
 /* ------------------------------------------------------------------ o QR */

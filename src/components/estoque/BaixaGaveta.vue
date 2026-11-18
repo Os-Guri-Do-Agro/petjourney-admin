@@ -44,7 +44,8 @@ const erro = ref('')
 
 const vencido = computed(() => props.lote?.situacao === 'VENCIDO')
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.lote?.id] as const, ([agora]) => {
   if (!agora) return
   motivo.value = props.descartar || vencido.value ? 'VENCIMENTO' : 'QUEBRA'
   quantidade.value = null

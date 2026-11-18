@@ -18,14 +18,16 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
-import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   listarPacientes,
   termoDaBusca,
   type PacienteNaLista,
 } from '@/service/parceiro/pacientes-service'
 import { proporPorAcesso } from '@/service/parceiro/vinculo-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const props = defineProps<{ acessoId: string; petNome: string }>()
 const visible = defineModel<boolean>('visible', { default: false })
@@ -56,33 +58,48 @@ watch(visible, (aberta) => {
   escolhido.value = null
   erro.value = ''
   feito.value = false
+  listaAberta.value = false
 })
 
 let espera: ReturnType<typeof setTimeout> | undefined
 let pedido = 0
 
+/**
+ * Clicou no campo: a lista dos pacientes aparece já, sem esperar a digitação (pedido do Luís,
+ * 17/11/2026). Sem termo, vêm os primeiros da clínica; apagar o termo volta a eles.
+ */
+const listaAberta = ref(false)
+
+function abrirLista() {
+  if (listaAberta.value) return
+  listaAberta.value = true
+  if (!termoDaBusca(termo.value)) void procurar('')
+}
+
 watch(termo, (valor) => {
   clearTimeout(espera)
 
-  if (!termoDaBusca(valor)) {
+  if (!termoDaBusca(valor) && !listaAberta.value) {
     resultados.value = []
     return
   }
 
-  espera = setTimeout(async () => {
-    const atual = ++pedido
-    buscando.value = true
-
-    try {
-      const pagina = await listarPacientes({ q: valor, limit: 20 }, parceiroQuery())
-      if (atual === pedido) resultados.value = pagina.itens
-    } catch {
-      if (atual === pedido) resultados.value = []
-    } finally {
-      if (atual === pedido) buscando.value = false
-    }
-  }, 300)
+  espera = setTimeout(() => void procurar(valor), 300)
 })
+
+async function procurar(valor: string) {
+  const atual = ++pedido
+  buscando.value = true
+
+  try {
+    const pagina = await listarPacientes({ q: valor, limit: 20 }, parceiroQuery())
+    if (atual === pedido) resultados.value = pagina.itens
+  } catch {
+    if (atual === pedido) resultados.value = []
+  } finally {
+    if (atual === pedido) buscando.value = false
+  }
+}
 
 onUnmounted(() => clearTimeout(espera))
 
@@ -148,6 +165,7 @@ async function propor() {
               type="search"
               autocomplete="off"
               :placeholder="t('cadastro.lista.buscar')"
+              @focus="abrirLista"
             />
           </IconField>
         </section>
@@ -162,6 +180,13 @@ async function propor() {
               :aria-pressed="escolhido?.id === item.id"
               @click="escolhido = item"
             >
+              <PetAvatar
+                :nome="item.nome"
+                :iniciais="iniciais(item.nome)"
+                :especie="ESPECIE_DO_AVATAR[item.especie] ?? null"
+                :foto-url="item.fotoUrl"
+                tamanho="sm"
+              />
               <span class="ui-linha__texto">
                 <strong class="ui-linha__titulo">{{ item.nome }}</strong>
                 <span class="ui-linha__meta"

@@ -27,6 +27,7 @@ import {
 } from '@/components/agenda/bloqueios'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   apagarBloqueio,
@@ -439,11 +440,15 @@ async function confirmarApagar() {
       <Skeleton v-for="n in 3" :key="n" height="3rem" />
     </div>
 
-    <p v-else-if="!ocorrencias.length" class="blq__vazio">
-      {{ t('agenda.config.bloqueio.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-else-if="!ocorrencias.length && !erro"
+      aninhado
+      icone="ph ph-calendar-x"
+      :titulo="t('agenda.config.bloqueio.vazio')"
+      :texto="t('agenda.config.bloqueio.vazioTexto')"
+    />
 
-    <div v-else class="blq__dias">
+    <div v-else-if="ocorrencias.length" class="blq__dias">
       <section
         v-if="lista.series.length"
         class="blq__dia"
@@ -632,8 +637,7 @@ async function confirmarApagar() {
   min-width: 14rem;
 }
 
-.blq__periodo,
-.blq__vazio {
+.blq__periodo {
   margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;

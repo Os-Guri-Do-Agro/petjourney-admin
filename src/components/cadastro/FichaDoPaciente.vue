@@ -43,6 +43,7 @@ import DocumentosDoPaciente from '@/components/documentos/DocumentosDoPaciente.v
 import VacinasDaFicha from '@/components/vacinas/VacinasDaFicha.vue'
 import VinculoCartao from '@/components/cadastro/VinculoCartao.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { ApiError } from '@/service/api'
@@ -557,17 +558,23 @@ watch(excluindo, (aberta) => {
       />
     </template>
 
-    <div v-if="semAcesso" class="ui-vazio fp__sem-acesso">
-      <i class="ph ph-lock" aria-hidden="true" />
-      <strong>{{ t('cadastro.ficha.semAcesso') }}</strong>
-      <span>{{ t('cadastro.ficha.semAcessoDica') }}</span>
-      <RouterLink
-        class="p-button p-component p-button-secondary p-button-outlined"
-        to="/clinica/pacientes"
-      >
-        {{ t('cadastro.ficha.voltarParaLista') }}
-      </RouterLink>
-    </div>
+    <UiVazioIlustrado
+      v-if="semAcesso"
+      icone="ph ph-lock"
+      :titulo="t('cadastro.ficha.semAcesso')"
+      :texto="t('cadastro.ficha.semAcessoDica')"
+    >
+      <template #acao>
+        <Button
+          :as="RouterLink"
+          to="/clinica/pacientes"
+          severity="secondary"
+          outlined
+          icon="ph ph-arrow-left"
+          :label="t('cadastro.ficha.voltarParaLista')"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <div v-else-if="paciente" class="fp">
       <p v-if="paciente.mescladoEmId" class="fp__faixa" role="status">
@@ -689,7 +696,13 @@ watch(excluindo, (aberta) => {
                 </span>
               </li>
             </ul>
-            <p v-else class="fp__nada">{{ t('cadastro.alerta.nenhum') }}</p>
+            <!-- O "Novo alerta" já está no alto do cartão: o vazio só diz o que falta. -->
+            <UiVazioIlustrado
+              v-else
+              aninhado
+              icone="ph ph-shield-check"
+              :titulo="t('cadastro.alerta.nenhum')"
+            />
 
             <template v-if="encerrados.length">
               <Button
@@ -919,7 +932,12 @@ watch(excluindo, (aberta) => {
                 </span>
               </li>
             </ul>
-            <p v-else class="fp__nada">{{ t('cadastro.autorizados.nenhum') }}</p>
+            <UiVazioIlustrado
+              v-else
+              aninhado
+              icone="ph ph-identification-badge"
+              :titulo="t('cadastro.autorizados.nenhum')"
+            />
           </section>
         </div>
       </div>
@@ -1096,12 +1114,6 @@ watch(excluindo, (aberta) => {
   gap: 6px;
 }
 
-.fp__nada {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-}
-
 .fp__recolher {
   justify-self: start;
 }
@@ -1121,17 +1133,6 @@ watch(excluindo, (aberta) => {
   background: var(--superficie-2);
   color: var(--tinta);
   font-size: 14px;
-}
-
-.fp__sem-acesso {
-  justify-items: center;
-  padding: 48px 16px;
-  text-align: center;
-}
-
-.fp__sem-acesso > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .fp__entrada {

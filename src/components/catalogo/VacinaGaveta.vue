@@ -55,7 +55,8 @@ const tentou = ref(false)
 const erroNoNome = ref('')
 const erroGeral = ref('')
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.vacina?.id] as const, ([agora]) => {
   if (!agora) return
   const v = props.vacina
   tentou.value = false

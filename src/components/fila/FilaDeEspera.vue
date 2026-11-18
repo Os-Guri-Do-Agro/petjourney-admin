@@ -14,15 +14,20 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EntrarNaFilaGaveta from '@/components/fila/EntrarNaFilaGaveta.vue'
 import { quandoCurto, textoDaFaixa } from '@/components/fila/leitura-da-fila'
 import VagasGaveta from '@/components/fila/VagasGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   listarTipos,
@@ -41,11 +46,14 @@ import {
   type SituacaoDaFila,
 } from '@/service/parceiro/fila-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
+const route = useRoute()
+const router = useRouter()
 
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
@@ -133,8 +141,18 @@ async function carregarApoio() {
 
 onMounted(() => {
   void carregar()
-  void carregarApoio()
   void carregarVagas()
+  /*
+   * Veio das "Ações rápidas" do Início com `?adicionar=1`: a gaveta de pôr na fila abre quando os
+   * serviços e os profissionais chegarem, e o pedido sai da URL (recarregar não reabre).
+   */
+  void carregarApoio().then(() => {
+    if (route.query.adicionar !== '1') return
+    const query = { ...route.query }
+    delete query.adicionar
+    void router.replace({ query })
+    if (podeGerir.value) entrarAberta.value = true
+  })
 })
 
 watch(situacao, () => {
@@ -286,6 +304,55 @@ async function remover() {
 
 const entrarAberta = ref(false)
 const vagasAbertas = ref(false)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): com ninguém na fila, como ela trabalha,
+ * em três etapas (entra quem ficou sem horário, a vaga que abre, a oferta com prazo). Sem ofertas
+ * vencidas, a outra aba diz o que vai aparecer nela.
+ *
+ * Cada etapa com o botão dela (17/11/2026): pôr na fila abre a gaveta aqui; a vaga abre sozinha,
+ * sem botão; oferecer mora nas Vagas, apagado enquanto não há ninguém na fila para receber.
+ */
+const passosDaFila = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`fila.guia.${id}.titulo`),
+    texto: t(`fila.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'entrar',
+      'ph ph-user-plus',
+      podeGerir.value
+        ? {
+            rotulo: t('clinico.fila.adicionar'),
+            icone: 'ph ph-plus',
+            aoClicar: () => {
+              entrarAberta.value = true
+            },
+          }
+        : undefined,
+    ),
+    passo('vaga', 'ph ph-calendar-check'),
+    passo(
+      'oferta',
+      'ph ph-paper-plane-tilt',
+      podeGerir.value
+        ? {
+            rotulo: t('clinico.fila.ofertarVaga'),
+            icone: 'ph ph-paper-plane-tilt',
+            aoClicar: () => {
+              vagasAbertas.value = true
+            },
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+  ]
+})
 </script>
 
 <template>
@@ -343,22 +410,21 @@ const vagasAbertas = ref(false)
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-folha ui-vazio fl__vazio">
-        <i class="ph ph-hourglass-medium" aria-hidden="true" />
-        <strong>{{
-          situacao === 'ATIVAS' ? t('clinico.fila.vazioTitulo') : t('fila.semNaoResponderam')
-        }}</strong>
-        <span v-if="situacao === 'ATIVAS'">{{ t('clinico.fila.vazioDescricao') }}</span>
-        <Button
-          v-if="situacao === 'ATIVAS' && podeGerir"
-          type="button"
-          icon="ph ph-plus"
-          severity="secondary"
-          outlined
-          :label="t('clinico.fila.adicionar')"
-          @click="entrarAberta = true"
-        />
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!itens.length && situacao === 'ATIVAS'"
+        icone="ph ph-hourglass-medium"
+        :titulo="t('clinico.fila.vazioTitulo')"
+        :texto="t('clinico.fila.vazioDescricao')"
+        :guia-titulo="t('fila.guia.titulo')"
+        :passos="passosDaFila"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        icone="ph ph-phone-x"
+        :titulo="t('fila.semNaoResponderam')"
+        :texto="t('fila.semNaoResponderamTexto')"
+      />
 
       <ul v-else class="ui-lista ui-folha">
         <li v-for="entrada in itens" :key="entrada.id" class="ui-linha fl__linha">
@@ -375,6 +441,14 @@ const vagasAbertas = ref(false)
               aria-hidden="true"
             />
           </span>
+
+          <PetAvatar
+            :nome="entrada.paciente.nome"
+            :iniciais="iniciais(entrada.paciente.nome)"
+            :especie="ESPECIE_DO_AVATAR[entrada.paciente.especie] ?? null"
+            :foto-url="entrada.paciente.fotoUrl"
+            tamanho="md"
+          />
 
           <span class="ui-linha__texto">
             <strong class="ui-linha__titulo">
@@ -501,18 +575,6 @@ const vagasAbertas = ref(false)
 
 .fl__abas {
   justify-self: start;
-}
-
-/* O vazio da casa (o mesmo da lista de Pacientes), centrado. */
-.fl__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.fl__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .fl__linha {

@@ -16,6 +16,8 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiCartaoCarregando from '@/components/ui/UiCartaoCarregando.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { lerPacote } from '@/service/parceiro/catalogos-service'
 import {
@@ -235,7 +237,13 @@ const historicoAberto = ref<string | null>(null)
           </span>
         </header>
         <ProgressoDasMetas v-if="atual.progresso.length" :progresso="atual.progresso" em-curso />
-        <p v-else-if="!temPlanoAtual" class="mt__nota">{{ t('estoque.metas.semPlanoAtual') }}</p>
+        <UiVazioIlustrado
+          v-else-if="!temPlanoAtual"
+          aninhado
+          icone="ph ph-target"
+          :titulo="t('estoque.metas.semPlanoAtual')"
+          :texto="t('estoque.metas.semPlanoAtualTexto')"
+        />
       </section>
 
       <!-- O próximo mês: o plano, ou o convite para fazê-lo com os números deste. -->
@@ -398,6 +406,11 @@ const historicoAberto = ref<string | null>(null)
           </li>
         </ul>
       </section>
+    </template>
+    <!-- A primeira leitura: os dois cartões esperando, no lugar da tela em branco. -->
+    <template v-else-if="!erro">
+      <UiCartaoCarregando :linhas="3" />
+      <UiCartaoCarregando :linhas="3" com-acao />
     </template>
 
     <PlanoDoMesGaveta

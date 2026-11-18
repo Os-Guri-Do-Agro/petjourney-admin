@@ -10,6 +10,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   apagarExigencia,
@@ -107,9 +108,21 @@ function abrir(e: ExigenciaDaCasa | null) {
     </header>
 
     <p v-if="erro" class="ca__erro" role="alert">{{ erro }}</p>
-    <p v-if="!props.casa.exigencias.length" class="ca__nota">
-      {{ t('casaDoHotel.exigencia.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-if="!props.casa.exigencias.length"
+      aninhado
+      icone="ph ph-identification-card"
+      :titulo="t('casaDoHotel.exigencia.vazio')"
+    >
+      <template v-if="podeEditar && faltam" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('casaDoHotel.exigencia.nova')"
+          @click="abrir(null)"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="e in props.casa.exigencias" :key="e.id" class="ui-linha">

@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import type { CelulaDoMapa } from '@/service/parceiro/internacao-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 import { ICONE_DO_KIND, TOM_DA_GRAVIDADE, TOM_DA_URGENCIA } from './rotulos-da-internacao'
 
@@ -121,7 +122,8 @@ const cobrancas = computed(() => {
         <PetAvatar
           :nome="internado.paciente.nome"
           :iniciais="iniciais(internado.paciente.nome)"
-          :especie="null"
+          :especie="ESPECIE_DO_AVATAR[internado.paciente.especie] ?? null"
+          :foto-url="internado.paciente.fotoUrl"
           tamanho="md"
         />
         <span class="lm__identidade">

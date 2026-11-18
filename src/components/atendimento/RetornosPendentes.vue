@@ -22,6 +22,8 @@ import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import EntrarNaFilaGaveta from '@/components/fila/EntrarNaFilaGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { ApiError } from '@/service/api'
@@ -245,6 +247,24 @@ function entrouNaFila() {
   if (paraFila.value) delete recados.value[paraFila.value.atendimentoId]
 }
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem retorno esperando, como ele chega
+ * aqui, em três etapas (o veterinário indica, sem horário ele espera aqui, a recepção marca). Em
+ * "Vencidos", só o que vai aparecer ali.
+ */
+const passosDoRetorno = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'indicar', icone: 'ph ph-stethoscope' },
+    { id: 'esperar', icone: 'ph ph-hourglass-medium' },
+    { id: 'marcar', icone: 'ph ph-calendar-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`atendimento.retornos.guia.${id}.titulo`),
+    texto: t(`atendimento.retornos.guia.${id}.texto`),
+  })),
+)
+
 const resumo = computed(() => {
   if (!lido.value) return ''
   const vencidos = itens.value.filter((item) => item.diasDeAtraso >= 0).length
@@ -275,7 +295,23 @@ const resumo = computed(() => {
 
       <p v-if="erro && lido" class="rp__erro" role="alert">{{ erro }}</p>
 
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
+      <UiVazioIlustrado
+        v-if="lido && !carregando && !itens.length && !somenteVencidos"
+        icone="ph ph-clock-counter-clockwise"
+        :titulo="t('atendimento.retornos.vazio')"
+        :texto="t('atendimento.retornos.guia.texto')"
+        :guia-titulo="t('atendimento.retornos.guia.titulo')"
+        :passos="passosDoRetorno"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="lido && !carregando && !itens.length"
+        icone="ph ph-calendar-check"
+        :titulo="t('atendimento.retornos.vazioVencidos')"
+        :texto="t('atendimento.retornos.guia.vencidosTexto')"
+      />
+
+      <section v-else class="ui-folha ui-lista" :aria-busy="carregando">
         <ul v-if="itens.length" class="ui-lista">
           <li v-for="item in itens" :key="item.atendimentoId" class="rp__item">
             <div class="ui-linha">
@@ -342,13 +378,6 @@ const resumo = computed(() => {
             </p>
           </li>
         </ul>
-        <p v-else-if="lido && !carregando" class="ui-vazio rp__vazio">
-          {{
-            somenteVencidos
-              ? t('atendimento.retornos.vazioVencidos')
-              : t('atendimento.retornos.vazio')
-          }}
-        </p>
       </section>
 
       <Button
@@ -440,12 +469,6 @@ const resumo = computed(() => {
   padding: 0 24px 14px;
   color: var(--tinta-2);
   font-size: 13.5px;
-}
-
-.rp__vazio {
-  margin: 0;
-  padding: 24px 16px;
-  color: var(--tinta-2);
 }
 
 .rp__mais {

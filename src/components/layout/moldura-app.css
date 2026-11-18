@@ -447,12 +447,16 @@ html:has(.shell--moldura-app) {
   font-size: 19px;
 }
 
-/* O número do sino é o selo neutro do menu: aviso é informação, não urgência. */
+/*
+ * O número do sino: aviso é informação, não urgência, então nada de vermelho; mas é o único
+ * contador sobre um ícone, e o véu do menu (15%) sumia atrás do sino nos dois temas (17/11/2026,
+ * "badge fica muito apagado"). Fica a sálvia pastel cheia do avatar ao lado, com a tinta dele.
+ */
 .shell.shell--moldura-app .sino__selo {
   min-width: 22px;
   height: 22px;
-  background: var(--app-veu-forte);
-  color: var(--app-salvia-texto);
+  background: var(--pets-claro);
+  color: var(--rail);
   font-family: var(--font-texto);
   font-weight: 700;
 }
@@ -465,7 +469,7 @@ html:has(.shell--moldura-app) {
   height: 18px;
   padding: 0 5px;
   box-shadow: 0 0 0 2px var(--app-fundo);
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .shell.shell--moldura-app .barra .conta__botao {
@@ -503,6 +507,15 @@ html:has(.shell--moldura-app) {
 
 .shell.shell--moldura-app.shell--densa .mapa .espaco {
   margin-top: 4px;
+}
+
+/* No toque (tablet), o dedo pede 44 px mesmo na densidade compacta, que é o padrão desde 16/11. */
+@media (pointer: coarse) {
+  .shell.shell--moldura-app.shell--densa .mapa__inicio,
+  .shell.shell--moldura-app.shell--densa .destino,
+  .shell.shell--moldura-app.shell--densa .mapa .espaco__cabeca {
+    min-height: 44px;
+  }
 }
 
 .shell.shell--moldura-app.shell--densa .barra__cupom,
@@ -572,6 +585,122 @@ html:has(.shell--moldura-app) {
   height: 10px;
   padding: 0;
   font-size: 0;
+}
+
+/* -------------------------------------------------------------- as seções da barra (16/11/2026)
+ * Cada espaço agrupa as telas sob o título da seção ("Dia a dia", "Atendimento", "Gestão"): a
+ * etiqueta apagada do app, baixa e sem caixa, que diz o assunto antes de a pessoa ler a lista. Só
+ * de ícones, o título dá lugar a um fio curto entre os grupos, no eixo da coluna.
+ */
+.shell.shell--moldura-app .mapa .secao__titulo {
+  padding: 8px 10px 3px 6px;
+  color: var(--app-texto-2);
+  font-size: 11.5px;
+  font-weight: 650;
+  line-height: 16px;
+}
+
+.shell.shell--moldura-app .mapa .secao + .secao {
+  margin-top: 4px;
+}
+
+.shell.shell--moldura-app .mapa--recolhida .secao + .secao {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.shell.shell--moldura-app .mapa--recolhida .secao + .secao::before {
+  display: block;
+  width: 22px;
+  height: 1px;
+  margin: 5px auto;
+  background: var(--app-regua);
+  content: '';
+}
+
+/*
+ * O formato "Seções" (o padrão desde 16/11/2026): a barra deixa de ser uma pilha de botões. Cada
+ * tela é uma linha de 38 px com o ícone solto na sálvia, sem o quadradinho de 40 que dava a cada
+ * linha o peso de um cartão; o quadradinho colorido fica só no espaço, que é a âncora da área. Os
+ * ícones ficam todos no mesmo eixo (x = 35), aberta ou recolhida.
+ */
+.shell.shell--moldura-app.shell--estilo-secoes .mapa {
+  padding-block: 10px 12px;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio,
+.shell.shell--moldura-app.shell--estilo-secoes .destino {
+  min-height: 38px;
+  gap: 12px;
+  padding: 0 10px 0 11px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio {
+  margin-bottom: 0;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio .mapa__ladrilho,
+.shell.shell--moldura-app.shell--estilo-secoes .destino .destino__icone {
+  width: 20px;
+  height: 20px;
+  border-radius: 0;
+  background: transparent;
+  color: var(--app-salvia-texto);
+  font-size: 19px;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .destino.destino--ativo,
+.shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio.mapa__inicio--ativo {
+  font-weight: 650;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .destino--ativo .destino__icone,
+.shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio--ativo .mapa__ladrilho {
+  background: transparent;
+  color: #fff;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa .espaco {
+  margin-top: 4px;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa .espaco__cabeca {
+  min-height: 40px;
+}
+
+/* Sem o degrau e a guia: a hierarquia é o título da seção, não o recuo. */
+.shell.shell--moldura-app.shell--estilo-secoes .mapa .espaco__destinos {
+  margin: 0 0 6px;
+  padding: 0;
+  border-inline-start: 0;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa .secao__titulo {
+  padding: 8px 10px 3px 11px;
+}
+
+.shell.shell--moldura-app.shell--estilo-secoes .mapa--recolhida .destino {
+  padding-inline: 11px 10px;
+}
+
+/* O sino e o cupom do pé no mesmo desenho: ícone solto no eixo dos de cima. */
+.shell.shell--moldura-app.shell--estilo-secoes .sino__icone,
+.shell.shell--moldura-app.shell--estilo-secoes .barra__cupom-icone {
+  background: transparent;
+  font-size: 19px;
+}
+
+/* No toque (tablet), o dedo pede 44 px. */
+@media (pointer: coarse) {
+  .shell.shell--moldura-app.shell--estilo-secoes .mapa__inicio,
+  .shell.shell--moldura-app.shell--estilo-secoes .destino,
+  .shell.shell--moldura-app.shell--estilo-secoes .mapa .espaco__cabeca {
+    min-height: 44px;
+  }
 }
 
 /* ======================================================================================

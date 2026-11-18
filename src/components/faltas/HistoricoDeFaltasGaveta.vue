@@ -15,6 +15,7 @@ import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import FaltaDoHorario from '@/components/faltas/FaltaDoHorario.vue'
 import { diaCurto } from '@/components/pedidos/leitura-do-pedido'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { historicoDeFaltas, type FaltaNoHistorico } from '@/service/parceiro/faltas-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
@@ -197,7 +198,12 @@ const titulo = computed(() =>
         <span>{{ erro }}</span>
       </p>
 
-      <p v-else-if="!itens.length" class="eg__dica">{{ t('faltas.historico.vazio') }}</p>
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        aninhado
+        icone="ph ph-calendar-check"
+        :titulo="t('faltas.historico.vazio')"
+      />
 
       <ol v-else class="hf__lista">
         <li v-for="item in itens" :key="item.agendamentoId">

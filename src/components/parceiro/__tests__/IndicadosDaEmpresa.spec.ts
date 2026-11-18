@@ -1,9 +1,9 @@
 /**
- * Quem entrou pelo código do parceiro (E0-03).
+ * Quem entrou pelo código do parceiro (E0-03), na aba "Indicados" da Divulgação.
  *
  * A lista diz, por pessoa, se assinou, o plano, o dia e quanto rendeu de participação. O filtro é
  * da API: trocar recomeça do zero, "Carregar mais" segue o cursor e cursor recusado (400) volta ao
- * topo. OPERADOR (403) e parceiro fora de operação (409) viram o estado da página.
+ * topo. OPERADOR (403) e parceiro fora de operação (409) viram o estado da aba.
  */
 
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
@@ -19,7 +19,7 @@ import type { IndicadoDoParceiroDto } from '@/service/contrato/openapi'
 import type { PortalDashboard } from '@/service/parceiro/types'
 import { useParceiroStore } from '@/stores/parceiro'
 
-import IndicadosPage from '../indicados.vue'
+import IndicadosDaEmpresa from '../IndicadosDaEmpresa.vue'
 
 type Portal = typeof import('@/service/parceiro/parceiro-portal-service')
 
@@ -73,15 +73,15 @@ async function abrirTela() {
   const router: Router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: '/parceiro/indicados', component: IndicadosPage },
+      { path: '/parceiro/divulgacao', component: Vazio },
       { path: '/:resto(.*)*', component: Vazio },
     ],
   })
 
-  await router.push('/parceiro/indicados')
+  await router.push('/parceiro/divulgacao?aba=indicados')
   await router.isReady()
 
-  const tela = mount(IndicadosPage, {
+  const tela = mount(IndicadosDaEmpresa, {
     global: { plugins: [router, i18n, PrimeVue, ToastService] },
     attachTo: document.body,
   })
@@ -246,7 +246,7 @@ describe('indicados do parceiro', () => {
     expect(tela.text()).toContain('Lista indisponível no momento')
   })
 
-  it('ninguém ainda: a página diz isso e leva ao código e ao QR', async () => {
+  it('ninguém ainda: a aba diz isso e leva à aba do código e do QR', async () => {
     portal.getPortalIndicados.mockResolvedValue(pagina([], 0))
 
     const { tela, router } = await abrirTela()
@@ -257,7 +257,7 @@ describe('indicados do parceiro', () => {
     await botao(tela, 'Ver meu código e QR').trigger('click')
     await flushPromises()
 
-    expect(router.currentRoute.value.fullPath).toBe('/parceiro/divulgacao#indicacao')
+    expect(router.currentRoute.value.fullPath).toBe('/parceiro/divulgacao')
   })
 
   it('recorte vazio explica o recorte e deixa os filtros à mão', async () => {

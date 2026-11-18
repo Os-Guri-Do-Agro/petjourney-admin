@@ -35,7 +35,8 @@ const tentou = ref(false)
 const salvando = ref(false)
 const erro = ref('')
 
-watch(aberta, (agora) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([aberta, () => props.receita?.id] as const, ([agora]) => {
   if (!agora) return
   motivo.value = ''
   confirmarOutro.value = false

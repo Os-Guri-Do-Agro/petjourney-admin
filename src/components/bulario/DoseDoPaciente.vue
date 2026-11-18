@@ -371,13 +371,15 @@ function textoDoAviso(aviso: ResultadoDaDose['avisos'][number]) {
   font-size: 13px;
 }
 
+/* A conta passo a passo alinha com o resultado: o recuo sem marcador parecia texto fora do lugar. */
 .dose__passos {
   display: grid;
   gap: 4px;
   margin: 0;
-  padding-left: 18px;
+  padding: 0;
   color: var(--tinta);
   font-size: 13.5px;
+  list-style: none;
 }
 
 .dose__fracao {

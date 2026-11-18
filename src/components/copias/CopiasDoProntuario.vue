@@ -16,6 +16,8 @@ import { RouterLink } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import {
@@ -98,6 +100,35 @@ function acaoDe(item: PedidoDeCopia) {
   return t('copias.acao.ver')
 }
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem pedido aberto, como a cópia anda, em
+ * três etapas (o pedido chega, a clínica gera, entrega e fecha), com "Registrar pedido" na
+ * primeira para quem escreve (17/11/2026: cada etapa com o botão dela); gerar e entregar são o
+ * botão da linha do pedido, que ainda não existe. Encerrados só diz o que vai aparecer ali.
+ */
+const passosDaCopia = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'pedir', icone: 'ph ph-tray-arrow-down' },
+    { id: 'gerar', icone: 'ph ph-file-pdf' },
+    { id: 'entregar', icone: 'ph ph-hand-arrow-up' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`copias.guia.${id}.titulo`),
+    texto: t(`copias.guia.${id}.texto`),
+    acao:
+      id === 'pedir' && podeEscrever.value
+        ? {
+            rotulo: t('copias.novo.acao'),
+            icone: 'ph ph-plus',
+            aoClicar: () => {
+              novoAberto.value = true
+            },
+          }
+        : undefined,
+  })),
+)
+
 const resumo = computed(() => {
   if (!lido.value || situacao.value !== 'ABERTOS') return ''
   const vencidos = itens.value.filter((item) => item.vencido).length
@@ -175,7 +206,23 @@ function registrado(pedido: PedidoDeCopia, jaExistia: boolean) {
 
       <p v-if="erro && lido" class="cp__erro" role="alert">{{ erro }}</p>
 
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
+      <UiVazioIlustrado
+        v-if="lido && !carregando && !itens.length && situacao === 'ABERTOS'"
+        icone="ph ph-files"
+        :titulo="t('copias.vazio')"
+        :texto="t('copias.guia.texto')"
+        :guia-titulo="t('copias.guia.titulo')"
+        :passos="passosDaCopia"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="lido && !carregando && !itens.length"
+        icone="ph ph-archive"
+        :titulo="t('copias.vazioEncerrados')"
+        :texto="t('copias.guia.encerradosTexto')"
+      />
+
+      <section v-else class="ui-folha ui-lista" :aria-busy="carregando">
         <ul v-if="itens.length" class="ui-lista">
           <li v-for="item in itens" :key="item.id">
             <div class="ui-linha">
@@ -216,9 +263,6 @@ function registrado(pedido: PedidoDeCopia, jaExistia: boolean) {
             </div>
           </li>
         </ul>
-        <p v-else-if="lido && !carregando" class="ui-vazio cp__vazio">
-          {{ situacao === 'ABERTOS' ? t('copias.vazio') : t('copias.vazioEncerrados') }}
-        </p>
       </section>
 
       <Button

@@ -19,7 +19,9 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
+import { useAtalhosDoDia } from '@/components/meu-dia/atalhos-do-dia'
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -331,6 +333,25 @@ const rotaDaAgenda = computed<RouteLocationRaw>(() =>
     ? '/clinica/agenda'
     : { path: '/clinica/agenda', query: { data: selecionado.value } },
 )
+
+/*
+ * O dia livre da clínica, de hoje em diante (17/11/2026, "chamar o usuário"): o vazio traz o
+ * Marcar horário nesse dia, para quem marca; a agenda abre nele com a marcação aberta (`?novo=1`).
+ * Dia que passou, dia fechado e o hotel sozinho só avisam.
+ */
+const { podeMarcar } = useAtalhosDoDia()
+
+const marcarNoDia = computed<RouteLocationRaw | null>(() => {
+  const data = selecionado.value
+  if (!props.clinica || !podeMarcar.value || !data || !hoje.value || data < hoje.value) {
+    return null
+  }
+
+  return {
+    path: '/clinica/agenda',
+    query: ehHoje.value ? { novo: '1' } : { novo: '1', data },
+  }
+})
 </script>
 
 <template>
@@ -408,15 +429,35 @@ const rotaDaAgenda = computed<RouteLocationRaw>(() =>
         {{ t('inicio.agenda.falhou') }}
       </p>
 
-      <p v-else-if="estado.fechada && compromissos.length === 0" class="ui-vazio">
-        {{
+      <!-- Dentro do cartão: o vazio sem caixa própria e sem etapas; no dia livre, o Marcar. -->
+      <UiVazioIlustrado
+        v-else-if="estado.fechada && compromissos.length === 0"
+        aninhado
+        :icone="estado.feriado ? 'ph ph-calendar-star' : 'ph ph-moon'"
+        :titulo="
           estado.feriado
             ? t('inicio.dia.feriado', { nome: estado.feriado })
             : t('inicio.agenda.fechada')
-        }}
-      </p>
+        "
+      />
 
-      <p v-else-if="vazio" class="ui-vazio">{{ t('inicio.agenda.vazio') }}</p>
+      <UiVazioIlustrado
+        v-else-if="vazio"
+        aninhado
+        icone="ph ph-calendar-blank"
+        :titulo="t('inicio.agenda.vazio')"
+        :texto="t('inicio.agenda.vazioTexto')"
+      >
+        <template v-if="marcarNoDia" #acao>
+          <Button
+            :as="RouterLink"
+            :to="marcarNoDia"
+            size="small"
+            icon="ph ph-calendar-plus"
+            :label="t('agendamentos.marcar.titulo')"
+          />
+        </template>
+      </UiVazioIlustrado>
 
       <ul v-else class="ui-lista agenda__lista" :aria-label="t('inicio.agenda.compromissos')">
         <li v-for="item in visiveis" :key="item.id" :class="`pj-lugar--${item.lugar}`">

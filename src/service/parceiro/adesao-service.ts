@@ -23,6 +23,7 @@ import type {
   ResumoDeAdesaoDto,
   TratamentoNaListaDto,
 } from '../contrato/openapi'
+import { parceiroPeloToken } from './parceiro-do-token'
 
 import { parceiroPeloToken } from './parceiro-do-token'
 

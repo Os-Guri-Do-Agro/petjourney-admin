@@ -23,7 +23,9 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import { molduraPedida } from '@/components/layout/moldura'
 import UiAbas from '@/components/ui/UiAbas.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiRabiscos from '@/components/ui/UiRabiscos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
 import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
@@ -45,6 +47,12 @@ const props = withDefaults(
     vazioAcao?: string
     vazioAcaoIcone?: string
     vazioIcone?: string
+    /**
+     * O vazio que ensina (o de Acessos, 17/11/2026): "como funciona" em etapas, entre o recado e a
+     * ação. Sem etapas, o vazio fica só com o ícone, o título, a frase e a ação.
+     */
+    vazioGuiaTitulo?: string
+    vazioPassos?: PassoDoGuia[]
     bloquearSeSuspenso?: boolean
     semAcessoDeParceiro?: boolean
     /** Botão de explicações (modo guiado) das telas do portal. */
@@ -53,8 +61,8 @@ const props = withDefaults(
     tour?: boolean
     semAbas?: boolean
     /**
-     * Abas da própria tela, para quem não mora num destino da barra (as Configurações): entram na
-     * mesma trilha de vidro do cabeçalho que as abas de destino.
+     * Abas da própria tela, para quem não mora num destino da barra (as Configurações): ganham as
+     * mesmas orelhas de pasta da faixa que as abas de destino.
      */
     abasDaTela?: Aba[]
     abaAtual?: string | null
@@ -74,6 +82,8 @@ const props = withDefaults(
     vazioAcao: '',
     vazioAcaoIcone: 'ph ph-plus',
     vazioIcone: 'ph ph-tray',
+    vazioGuiaTitulo: '',
+    vazioPassos: () => [],
     bloquearSeSuspenso: false,
     semAcessoDeParceiro: false,
     guia: false,
@@ -93,7 +103,25 @@ const { aqui } = useEspacos()
 const parceiroStore = useParceiroStore()
 const { logout } = useLogout()
 
-const tituloDaTela = computed(() => props.titulo || aqui.value.destino?.rotulo || '')
+/**
+ * Numa aba de um destino com várias telas, o título é sempre o do destino: o mesmo nome aceso na
+ * barra, com a aba dizendo qual tela dele está aberta. Antes cada tela decidia (Agenda › Pedidos
+ * virava "Pedidos de horário", Pacientes › Correções continuava "Pacientes"), e quem trocava de aba
+ * via o título mudar de regra (análise de usabilidade de 16/11/2026).
+ */
+const emAbaDeDestino = computed(
+  () =>
+    !props.semAbas &&
+    props.abasDaTela.length <= 1 &&
+    Boolean(aqui.value.aba) &&
+    (aqui.value.destino?.abas.length ?? 0) > 1,
+)
+
+const tituloDaTela = computed(() =>
+  emAbaDeDestino.value
+    ? (aqui.value.destino?.rotulo ?? '')
+    : props.titulo || aqui.value.destino?.rotulo || '',
+)
 
 /** O ladrilho do título, na cor do espaço: o mesmo ícone do destino aceso na barra. */
 const iconeDaTela = computed(() => props.icone || aqui.value.destino?.icone || '')
@@ -174,6 +202,14 @@ const mostrarAcoes = computed(() => !props.semAcessoDeParceiro && !suspenso.valu
 /** O cabeçalho do app: a faixa sálvia com o cartão do título. Na moldura do portal, o de antes. */
 const comFaixa = computed(() => molduraPedida.value === 'app')
 
+/*
+ * Abas de pasta (17/11/2026): as abas ficam na borda de baixo da faixa, e a aberta tem a cor da
+ * página, como a orelha de uma pasta que abre no conteúdo. Antes eram uma pílula de vidro ao lado
+ * do título, com o mesmo desenho do "Dia / Semana" e dos filtros logo abaixo, e as telas do lugar
+ * liam como mais um filtro. Título e frase de estado dividem a linha de cima com as ações.
+ */
+const abasDePasta = computed(() => comFaixa.value && abas.value.length > 0)
+
 const rotaAtual = useRoute()
 const { ativo: demonstracao } = useModoDemonstracao()
 
@@ -208,12 +244,12 @@ const avisoDeConsulta = computed(() => {
 
 <template>
   <div class="pagina" :class="[`pagina--${largura}`, { 'pagina--faixa': comFaixa }]">
-    <section v-if="comFaixa" class="faixa">
+    <section v-if="comFaixa" class="faixa" :class="{ 'faixa--pasta': abasDePasta }">
       <UiRabiscos />
       <div class="faixa__miolo">
         <slot name="destaque">
-          <!-- O cabeçalho do app: texto branco direto na cor, ações em vidro, abas em pílula. -->
-          <header class="faixa__cabeca">
+          <!-- O cabeçalho do app: texto branco direto na cor, ações em vidro, abas de pasta. -->
+          <header class="faixa__cabeca" :class="{ 'faixa__cabeca--pasta': abasDePasta }">
             <div v-if="$slots.voltar" class="pagina__voltar faixa__voltar">
               <slot name="voltar" />
             </div>
@@ -255,7 +291,7 @@ const avisoDeConsulta = computed(() => {
 
             <UiAbas
               v-if="abas.length"
-              vidro
+              pasta
               class="faixa__abas"
               :abas="abas"
               :atual="abaAtual"
@@ -422,14 +458,18 @@ const avisoDeConsulta = computed(() => {
       </ul>
     </div>
 
-    <div v-else-if="vazio" class="pagina__estado">
-      <span class="pagina__estado-icone" aria-hidden="true"><i :class="vazioIcone" /></span>
-      <h2>{{ vazioTitulo || t('frame.emptyDefault') }}</h2>
-      <p v-if="vazioDescricao">{{ vazioDescricao }}</p>
-      <div v-if="vazioAcao" class="pagina__estado-acoes">
+    <UiVazioIlustrado
+      v-else-if="vazio"
+      :icone="vazioIcone"
+      :titulo="vazioTitulo || t('frame.emptyDefault')"
+      :texto="vazioDescricao"
+      :guia-titulo="vazioGuiaTitulo"
+      :passos="vazioPassos"
+    >
+      <template v-if="vazioAcao" #acao>
         <Button :icon="vazioAcaoIcone" :label="vazioAcao" @click="emit('acaoDoVazio')" />
-      </div>
-    </div>
+      </template>
+    </UiVazioIlustrado>
 
     <div v-else class="pagina__corpo">
       <slot />
@@ -529,9 +569,17 @@ const avisoDeConsulta = computed(() => {
   --p-button-primary-color: #2c4741;
   --p-button-primary-hover-color: #2c4741;
   --p-button-primary-active-color: #2c4741;
-  --p-button-secondary-background: var(--app-vidro);
-  --p-button-secondary-hover-background: var(--app-vidro-forte);
-  --p-button-secondary-active-background: var(--app-vidro-forte);
+  /*
+   * O botão de apoio na faixa (17/11/2026, "botão muito apagado"): fundo cheio, a sálvia
+   * escurecida, nunca vazado. O de contorno era só borda de 45% e texto branco direto na sálvia
+   * (3,3:1 no claro) e sumia ao lado do principal. Com 22% de preto por baixo, o branco lê a 5,1:1
+   * no claro e a 7:1 no escuro.
+   */
+  --faixa-botao: rgb(0 0 0 / 22%);
+  --faixa-botao-forte: rgb(0 0 0 / 30%);
+  --p-button-secondary-background: var(--faixa-botao);
+  --p-button-secondary-hover-background: var(--faixa-botao-forte);
+  --p-button-secondary-active-background: var(--faixa-botao-forte);
   --p-button-secondary-color: #fff;
   --p-button-secondary-hover-color: #fff;
   --p-button-secondary-active-color: #fff;
@@ -539,10 +587,14 @@ const avisoDeConsulta = computed(() => {
   --p-button-text-primary-color: #fff;
   --p-button-text-primary-hover-background: var(--app-vidro);
   --p-button-text-secondary-hover-background: var(--app-vidro);
-  --p-button-outlined-secondary-border-color: rgb(255 255 255 / 45%);
-  --p-button-outlined-primary-border-color: rgb(255 255 255 / 45%);
+  --p-button-outlined-secondary-border-color: rgb(255 255 255 / 55%);
+  --p-button-outlined-primary-border-color: rgb(255 255 255 / 55%);
   --p-button-outlined-secondary-color: #fff;
   --p-button-outlined-primary-color: #fff;
+  --p-button-outlined-secondary-hover-background: var(--faixa-botao-forte);
+  --p-button-outlined-primary-hover-background: var(--faixa-botao-forte);
+  --p-button-outlined-secondary-active-background: var(--faixa-botao-forte);
+  --p-button-outlined-primary-active-background: var(--faixa-botao-forte);
 
   display: grid;
   gap: 18px;
@@ -560,6 +612,25 @@ const avisoDeConsulta = computed(() => {
   --p-button-primary-color: var(--app-tinta);
   --p-button-primary-hover-color: var(--app-tinta);
   --p-button-primary-active-color: var(--app-tinta);
+}
+
+/*
+ * Abas de pasta: título e frase de estado numa linha, as ações à direita, e as abas presas na borda
+ * de baixo da faixa (sem o respiro de baixo, para a aba aberta encostar na página).
+ */
+.faixa--pasta .faixa__miolo {
+  padding-block: 18px 0;
+}
+
+.faixa__cabeca--pasta {
+  gap: 14px;
+}
+
+.faixa__cabeca--pasta .pagina__titulos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 14px;
 }
 
 .faixa__voltar :deep(a),
@@ -592,6 +663,18 @@ const avisoDeConsulta = computed(() => {
  */
 .faixa__cabeca :deep(.capa__aba--atual i) {
   color: #fff;
+}
+
+/*
+ * O de contorno na faixa ganha o fundo do de apoio. O kit (`html.trilha .p-button.p-button-outlined`)
+ * pinta ele de `--superficie`, que na faixa é transparente: daí o botão vazado.
+ */
+.faixa .faixa__cabeca :deep(.p-button.p-button-outlined) {
+  background: var(--faixa-botao);
+}
+
+.faixa .faixa__cabeca :deep(.p-button.p-button-outlined:not(:disabled):hover) {
+  background: var(--faixa-botao-forte);
 }
 
 /* Link na faixa (o telefone do responsável, "ver mais") é branco e sublinhado, nunca azul. */

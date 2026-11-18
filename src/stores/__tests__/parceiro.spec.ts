@@ -194,6 +194,8 @@ describe('store parceiro: a carga que a tela inteira pede junto', () => {
     expect(recarregada.dashboard).toBeNull()
     expect(recarregada.menuComIndicados).toBe(true)
     expect(recarregada.menuComCarteira).toBe(true)
+    /* Os dois programas ativos na sessão anterior: Programas já nasce fora do menu. */
+    expect(recarregada.menuComProgramas).toBe(false)
 
     /* Quando o contexto chega, ele manda: OPERADOR sem afiliado perde os dois. */
     getPortalDashboard.mockResolvedValue({
@@ -207,6 +209,7 @@ describe('store parceiro: a carga que a tela inteira pede junto', () => {
     await recarregada.bootstrap(true)
     expect(recarregada.menuComIndicados).toBe(false)
     expect(recarregada.menuComCarteira).toBe(false)
+    expect(recarregada.menuComProgramas).toBe(true)
 
     recarregada.reset()
     expect(window.localStorage.getItem('petjourney-parceiro-menu')).toBeNull()

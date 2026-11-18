@@ -62,7 +62,10 @@ function handleConfirm() {
         </template>
 
         <template #content>
-          <p class="confirm-dialog__message">{{ props.message }}</p>
+          <!-- Quem precisa de mais de um parágrafo (o desligar do módulo) passa o corpo no slot. -->
+          <slot>
+            <p class="confirm-dialog__message">{{ props.message }}</p>
+          </slot>
         </template>
 
         <template #footer>

@@ -5,8 +5,8 @@
  * Cada aba é um link de verdade (a URL da tela), então abrir em outra guia, voltar e favoritar
  * funcionam como em qualquer link.
  *
- * `vidro`: dentro do cabeçalho do app, as abas moram numa trilha só de vidro, com texto branco, e a
- * aberta é papel branco com a tinta escura (o seletor de modo do app, no validar cupom).
+ * `pasta`: no cabeçalho do app (a faixa), as abas viram orelhas de pasta na borda de baixo dela, e a
+ * aberta tem a cor da página. Fora da faixa (a moldura antiga), o sublinhado na cor do lugar.
  */
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -15,9 +15,15 @@ import { RouterLink } from 'vue-router'
 import type { Aba } from '@/navegacao/espacos'
 
 const props = withDefaults(
-  defineProps<{ abas: Aba[]; atual: string | null; rotulo: string; vidro?: boolean }>(),
+  defineProps<{
+    abas: Aba[]
+    atual: string | null
+    rotulo: string
+    /** Orelhas de pasta na borda de baixo da faixa; a aberta tem a cor da página. */
+    pasta?: boolean
+  }>(),
   {
-    vidro: false,
+    pasta: false,
   },
 )
 
@@ -73,7 +79,7 @@ watch(
     ref="nav"
     class="abas"
     :class="{
-      'abas--vidro': vidro,
+      'abas--pasta': pasta,
       'abas--corta-inicio': cortaInicio,
       'abas--corta-fim': cortaFim,
     }"
@@ -256,106 +262,125 @@ watch(
   color: var(--risco-tinta);
 }
 
-/* ----------------------------------------------------------- trilha de vidro (cabeçalho)
- * O seletor do app: uma trilha só, em vidro, com as abas dentro; a aberta é papel branco e as
- * outras ficam transparentes sobre a trilha. Uma pílula de vidro solta por aba, cada uma com o seu
- * selo colorido, lia como uma fileira de filtros, e não como as telas de um mesmo lugar.
+/* ------------------------------------------------------------------ orelhas de pasta (faixa)
+ * As abas presas na borda de baixo da faixa, como as orelhas de uma pasta. A aberta tem a cor da
+ * página e duas curvas para fora no pé, então ela e o conteúdo embaixo viram uma peça só. As outras
+ * são orelhas de vidro (18%, o que leva o branco de 14 px a 4,6:1 sobre a sálvia).
  *
- * O vidro aqui é mais fundo que o `--app-vidro` (18% contra 13%): é o que leva o texto branco de
- * 14 px a 4,6:1 sobre a sálvia do cabeçalho.
+ * O vão entre as orelhas (10 px) é o lugar das curvas do pé da aberta, para elas não pisarem na
+ * vizinha. A trilha ganha 10 px de cada lado pelo mesmo motivo: a rolagem de lado cortaria a curva
+ * da primeira e da última.
  */
 
-.abas--vidro {
-  width: fit-content;
-  max-width: 100%;
-  gap: 4px;
-  padding: 4px;
+.abas--pasta {
+  --pasta-curva: 10px;
+
+  align-items: flex-end;
+  gap: var(--pasta-curva);
+  margin-inline: calc(var(--pasta-curva) * -1);
+  padding-inline: var(--pasta-curva);
   border-bottom: 0;
-  border-radius: 999px;
-  background: rgb(0 0 0 / 18%);
 }
 
-.abas--vidro .abas__aba,
-.abas--vidro .abas__aba:first-child {
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: transparent;
+.abas--pasta .abas__aba,
+.abas--pasta .abas__aba:first-child {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: 14px 14px 0 0;
+  background: rgb(0 0 0 / 18%);
   color: #fff;
   font-weight: 600;
   transition: background-color var(--pj-tempo-curto) var(--pj-curva-chega);
 }
 
-.abas--vidro .abas__icone {
+.abas--pasta .abas__icone {
   color: #fff;
 }
 
-.abas--vidro .abas__aba:hover {
-  background: rgb(0 0 0 / 12%);
+.abas--pasta .abas__aba:hover {
+  background: rgb(0 0 0 / 26%);
   color: #fff;
 }
 
-.abas--vidro .abas__aba::after,
-.abas--vidro .abas__aba:hover::after {
+.abas--pasta .abas__aba::after,
+.abas--pasta .abas__aba:hover::after {
   display: none;
 }
 
-/* Com 4 px entre as abas, o anel fica por dentro para não encostar na vizinha. */
-.abas--vidro .abas__aba:focus-visible {
-  border-radius: 999px;
+.abas--pasta .abas__aba:focus-visible {
+  border-radius: 14px 14px 0 0;
   outline: 2px solid #fff;
-  outline-offset: -2px;
+  outline-offset: -3px;
 }
 
-/*
- * O número de cada aba é neutro, num vidro um tom mais fundo que a trilha: cinco selos pêssego
- * enfileirados eram ruído, já que quase toda aba com algo parado é "atenção". Só o risco fica com a
- * cor dele, que é o que precisa saltar.
- */
-.abas--vidro .abas__selo {
+.abas--pasta .abas__aba.abas__aba--atual,
+.abas--pasta .abas__aba.abas__aba--atual:hover {
+  background: var(--app-fundo);
+  color: var(--app-tinta);
+  font-weight: 700;
+}
+
+.abas--pasta .abas__aba--atual .abas__icone {
+  color: var(--app-salvia-texto);
+}
+
+.abas--pasta .abas__aba--atual:focus-visible {
+  outline-color: var(--app-salvia-texto);
+}
+
+/* As duas curvas do pé: um quadrado da cor da página com um quarto de círculo vazado. */
+.abas--pasta .abas__aba--atual::before,
+.abas--pasta .abas__aba.abas__aba--atual::after,
+.abas--pasta .abas__aba.abas__aba--atual:hover::after {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  width: var(--pasta-curva);
+  height: var(--pasta-curva);
+  border-radius: 0;
+  pointer-events: none;
+  content: '';
+}
+
+.abas--pasta .abas__aba--atual::before {
+  left: calc(var(--pasta-curva) * -1);
+  background: radial-gradient(
+    circle at 0 0,
+    transparent calc(var(--pasta-curva) - 0.5px),
+    var(--app-fundo) var(--pasta-curva)
+  );
+}
+
+.abas--pasta .abas__aba.abas__aba--atual::after,
+.abas--pasta .abas__aba.abas__aba--atual:hover::after {
+  right: calc(var(--pasta-curva) * -1);
+  left: auto;
+  background: radial-gradient(
+    circle at 100% 0,
+    transparent calc(var(--pasta-curva) - 0.5px),
+    var(--app-fundo) var(--pasta-curva)
+  );
+}
+
+.abas--pasta .abas__selo {
   background: rgb(0 0 0 / 20%);
   color: #fff;
 }
 
-.abas--vidro .abas__selo--risco {
-  background: var(--risco-fundo);
-  color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
-}
-
-.abas--vidro .abas__aba--atual .abas__selo {
+.abas--pasta .abas__aba--atual .abas__selo {
   background: var(--neutro-fundo);
   color: var(--neutro-tinta);
 }
 
-.abas--vidro .abas__aba--atual .abas__selo--risco {
+.abas--pasta .abas__selo--risco,
+.abas--pasta .abas__aba--atual .abas__selo--risco {
   background: var(--risco-fundo);
   color: color-mix(in oklab, var(--risco-tinta) 75%, #000);
 }
 
-.abas--vidro .abas__aba.abas__aba--atual,
-.abas--vidro .abas__aba.abas__aba--atual:hover {
-  background: #fff;
-  color: #2c4741;
-  font-weight: 700;
-}
-
-.abas--vidro .abas__aba--atual .abas__icone {
-  color: #2c4741;
-}
-
-.app-dark .abas--vidro .abas__aba.abas__aba--atual,
-.app-dark .abas--vidro .abas__aba.abas__aba--atual:hover {
-  background: var(--app-cartao);
-  color: var(--app-tinta);
-}
-
-.app-dark .abas--vidro .abas__aba--atual .abas__icone {
-  color: var(--app-tinta);
-}
-
 /* No escuro o rosa do risco é tinta clara sobre fundo fundo: escurecer só derrubaria o contraste. */
-.app-dark .abas--vidro .abas__selo--risco,
-.app-dark .abas--vidro .abas__aba--atual .abas__selo--risco {
+.app-dark .abas--pasta .abas__selo--risco,
+.app-dark .abas--pasta .abas__aba--atual .abas__selo--risco {
   color: var(--risco-tinta);
 }
 </style>

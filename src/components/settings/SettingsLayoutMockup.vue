@@ -5,13 +5,19 @@
  * quadradinho pastel de cada um; à direita, a faixa sálvia do alto com o título e as abas, e a
  * página branca com uma lista.
  *
+ * Cada formato do menu (16/11/2026) desenha a sua barra: "Seções" com o título apagado de cada
+ * grupo e o ícone solto; "Ladrilhos" com o quadradinho em cada tela e a guia; "Só ícones" com a
+ * coluna estreita; "Menu no alto" sem barra, com a faixa branca dos espaços em cima da tela.
+ *
  * Cada escolha da navegação muda a peça do jeito que muda o portal: a barra larga ou só de ícones,
  * todos os espaços abertos ou só o da tela, linhas confortáveis ou baixas, e o aviso de pendência
  * em número ou em ponto. As medidas são em `em` e a raiz define o `font-size` pela largura da
  * própria miniatura, então a peça inteira escala junto com o lugar onde está.
  */
 
-withDefaults(
+import { computed } from 'vue'
+
+const props = withDefaults(
   defineProps<{
     /**
      * `claro` e `escuro` têm cor fixa: a prévia do claro precisa ser clara mesmo com o portal no
@@ -26,16 +32,36 @@ withDefaults(
     densa?: boolean
     /** O aviso de pendência no espaço fechado e no destino: número ou ponto. */
     selo?: 'numero' | 'ponto'
+    /** O formato do menu: muda a barra inteira (ou a tira, no menu no alto). */
+    formato?: 'secoes' | 'ladrilhos' | 'icones' | 'topo'
   }>(),
-  { tema: 'atual', largura: 'larga', todos: true, densa: false, selo: 'numero' },
+  {
+    tema: 'atual',
+    largura: 'larga',
+    todos: true,
+    densa: false,
+    selo: 'numero',
+    formato: 'ladrilhos',
+  },
 )
 
-/** Os três espaços, quantos destinos cada um mostra aberto e o aviso de quando está fechado. */
+/** Os três espaços, as seções que cada um mostra aberto e o aviso de quando está fechado. */
 const ESPACOS = [
-  { id: 'clinica', destinos: 4, selo: '6' },
-  { id: 'hotel', destinos: 3, selo: '10' },
-  { id: 'portal', destinos: 2, selo: '' },
+  { id: 'clinica', secoes: [2, 3], selo: '6' },
+  { id: 'hotel', secoes: [3], selo: '10' },
+  { id: 'portal', secoes: [2], selo: '' },
 ] as const
+
+const noAlto = computed(() => props.formato === 'topo')
+const larguraVista = computed(() => (props.formato === 'icones' ? 'icones' : props.largura))
+/** Nas seções a linha é sempre a baixa; a densidade só muda os ladrilhos. */
+const densaVista = computed(() => props.formato !== 'ladrilhos' || props.densa)
+const estiloVisto = computed(() => (props.formato === 'ladrilhos' ? 'ladrilhos' : 'secoes'))
+
+/** A tela atual: a segunda linha da primeira seção da Clínica. */
+function aceso(espaco: number, secao: number, n: number) {
+  return espaco === 0 && secao === 0 && n === 2
+}
 </script>
 
 <template>
@@ -43,13 +69,14 @@ const ESPACOS = [
     class="maquete"
     :class="[
       `maquete--${tema}`,
-      `maquete--${largura}`,
+      `maquete--${larguraVista}`,
+      `maquete--estilo-${estiloVisto}`,
       `maquete--selo-${selo}`,
-      { 'maquete--densa': densa },
+      { 'maquete--densa': densaVista, 'maquete--topo': noAlto },
     ]"
     aria-hidden="true"
   >
-    <span class="maquete__barra">
+    <span v-if="!noAlto" class="maquete__barra">
       <span class="maquete__topo">
         <span class="maquete__pata" />
         <span class="maquete__traco maquete__traco--claro maquete__rotulo" />
@@ -79,23 +106,44 @@ const ESPACOS = [
         </span>
 
         <span v-if="todos || indice === 0" class="maquete__destinos">
-          <span
-            v-for="n in espaco.destinos"
-            :key="n"
-            class="maquete__linha maquete__destino"
-            :class="{ 'maquete__destino--ativo': indice === 0 && n === 2 }"
-          >
-            <span class="maquete__icone" />
-            <span class="maquete__traco maquete__rotulo" />
-            <span v-if="indice === 0 && n === 3" class="maquete__selo maquete__selo--leve">
-              {{ selo === 'numero' ? '2' : '' }}
+          <template v-for="(quantos, secao) in espaco.secoes" :key="secao">
+            <span v-if="espaco.secoes.length > 1" class="maquete__secao" />
+            <span
+              v-for="n in quantos"
+              :key="n"
+              class="maquete__linha maquete__destino"
+              :class="{ 'maquete__destino--ativo': aceso(indice, secao, n) }"
+            >
+              <span class="maquete__icone" />
+              <span class="maquete__traco maquete__rotulo" />
+              <span
+                v-if="indice === 0 && secao === 1 && n === 2"
+                class="maquete__selo maquete__selo--leve"
+              >
+                {{ selo === 'numero' ? '2' : '' }}
+              </span>
             </span>
-          </span>
+          </template>
         </span>
       </template>
     </span>
 
     <span class="maquete__tela">
+      <!-- Menu no alto: a faixa branca com a empresa, o Início, os espaços e a conta. -->
+      <span v-if="noAlto" class="maquete__alto">
+        <span class="maquete__pata maquete__pata--alto" />
+        <span class="maquete__traco maquete__traco--forte maquete__empresa" />
+        <span
+          v-for="(espaco, indice) in ESPACOS"
+          :key="espaco.id"
+          class="maquete__pilula"
+          :class="{ 'maquete__pilula--atual': indice === 0 }"
+        >
+          <span class="maquete__ladrilho" :class="`maquete__ladrilho--${espaco.id}`" />
+          <span class="maquete__traco maquete__traco--forte" />
+        </span>
+        <span class="maquete__rosto maquete__rosto--alto" />
+      </span>
       <span class="maquete__faixa">
         <span class="maquete__titulo" />
         <span class="maquete__resumo" />
@@ -175,6 +223,11 @@ const ESPACOS = [
 /* Só ícones: a barra encolhe até a coluna dos quadradinhos. */
 .maquete--icones {
   grid-template-columns: 9% minmax(0, 1fr);
+}
+
+/* Menu no alto: sem barra, a tela de ponta a ponta. */
+.maquete.maquete--topo {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* A escala vem da largura da própria miniatura: a peça inteira cresce e encolhe junto. */
@@ -352,6 +405,37 @@ const ESPACOS = [
   background: var(--m-atencao-ponto);
 }
 
+/* O título da seção: um traço curto e apagado em cima de cada grupo. */
+.maquete__secao {
+  width: 2.6em;
+  height: 0.38em;
+  flex: none;
+  margin: 0.55em 0 0.2em 0.35em;
+  border-radius: 99px;
+  background: var(--m-traco);
+}
+
+/* Seções: sem degrau nem guia, e o ícone solto (só o contorno), sem o quadradinho. */
+.maquete--estilo-secoes .maquete__destinos {
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  border: 0;
+}
+
+.maquete--estilo-secoes .maquete__icone {
+  width: 1em;
+  height: 1em;
+  margin-inline: 0.15em;
+  border: 0.14em solid var(--m-traco-forte);
+  border-radius: 0.3em;
+  background: transparent;
+}
+
+.maquete--estilo-secoes .maquete__destino--ativo .maquete__icone {
+  border-color: rgb(255 255 255 / 85%);
+  background: transparent;
+}
+
 /* Linhas baixas: mais destinos à vista na mesma altura. */
 .maquete--densa .maquete__linha {
   min-height: 1.95em;
@@ -414,6 +498,65 @@ const ESPACOS = [
   min-width: 0;
   height: 0.6em;
   font-size: 1em;
+}
+
+/* Só ícones: o título da seção vira o fio curto entre os grupos. */
+.maquete--icones .maquete__secao {
+  width: 1.2em;
+  height: 1px;
+  margin: 0.25em auto;
+  border-radius: 0;
+  background: var(--m-regua);
+}
+
+/* ------------------------------------------------------------- o menu no alto */
+
+.maquete__alto {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55em;
+  padding: 0.7em 1.2em;
+  border-bottom: 1px solid var(--m-regua);
+  background: var(--m-barra);
+}
+
+.maquete__pata--alto {
+  width: 1.6em;
+  height: 1.6em;
+  background: var(--m-destaque);
+}
+
+.maquete__empresa {
+  max-width: 4.5em;
+  margin-inline-end: 0.6em;
+}
+
+.maquete__pilula {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.6em 0.3em 0.3em;
+  border-radius: 0.7em;
+}
+
+.maquete__pilula .maquete__traco {
+  width: 2.8em;
+}
+
+.maquete__pilula .maquete__ladrilho {
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 0.45em;
+}
+
+.maquete__pilula--atual {
+  background: var(--m-veu);
+}
+
+.maquete__rosto--alto {
+  margin-inline-start: auto;
 }
 
 /* ------------------------------------------------------------------ a tela */

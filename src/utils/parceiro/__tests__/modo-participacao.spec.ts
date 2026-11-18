@@ -110,6 +110,28 @@ describe('modo-participacao', () => {
     expect(desconhecido.field).toBeUndefined()
   })
 
+  it('categoria que exige CNPJ ou CRMV: a message da API e o campo pelo `faltando`', () => {
+    const exige = (codigo: string, faltando?: string[]) =>
+      resolveCadastroErrorView(
+        new ApiError(`Mensagem de ${codigo}`, 409, undefined, undefined, {
+          codigo,
+          detalhes: faltando ? { faltando } : {},
+        }),
+      )
+
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CNPJ', ['CNPJ'])).toEqual({
+      message: 'Mensagem de PARCEIRO_CATEGORIA_EXIGE_CNPJ',
+      field: 'cnpj',
+    })
+    /* O formulário não tem campo de CRMV: o foco vai às categorias, onde a escolha foi feita. */
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV', ['CRMV']).field).toBe('categorias')
+    /* Os dois faltando: o CNPJ, que o formulário tem, primeiro. */
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CNPJ', ['CNPJ', 'CRMV']).field).toBe('cnpj')
+    /* Sem `faltando`, vale o código. */
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CNPJ').field).toBe('cnpj')
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV').field).toBe('categorias')
+  })
+
   it('detecta erro AFILIADO_NAO_ATIVO da carteira', () => {
     expect(isAfiliadoNaoAtivoError(new ApiError('Conflito', 409, 'AFILIADO_NAO_ATIVO'))).toBe(true)
     expect(isAfiliadoNaoAtivoError(new ApiError('Outro', 409))).toBe(false)

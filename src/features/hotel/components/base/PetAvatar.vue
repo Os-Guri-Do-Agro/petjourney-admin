@@ -8,10 +8,12 @@
  *
  * ## A foto e o que entra no lugar dela
  *
- * `fotoUrl` é o caminho do retrato quando ele existe. Na camada mocada, só os pets do roteiro de
- * demonstração têm foto (retratos de licença livre em `public/demo/pacientes/`, com os créditos
- * ao lado); inventar uma imagem para cada animal seria povoar o repositório de retratos que alguém
- * acabaria confundindo com dado real. Para todos os outros, o componente desenha o que dá para
+ * `fotoUrl` é o retrato quando ele existe. Pela API, é a foto efetiva do paciente: a que a clínica
+ * subiu ou, sem ela, a miniatura da foto do pet no app (só com o vínculo ativo), numa URL assinada
+ * que vence. A imagem pode falhar ao carregar (URL vencida com a tela aberta muito tempo, rede): aí
+ * o componente cai no desenho abaixo, nunca no ícone de imagem quebrada, e uma `fotoUrl` nova tem a
+ * chance dela. Na demonstração, só os pets do roteiro têm foto (retratos de licença livre em
+ * `public/demo/pacientes/`, com os créditos ao lado). Sem foto, o componente desenha o que dá para
  * desenhar com o que existe no cadastro:
  *
  * - **as iniciais**, que separam Mel de Thor;
@@ -22,7 +24,7 @@
  * boletim. Cor que muda entre telas é pior que cor nenhuma, porque ensina a não confiar nela.
  */
 import { PhCat, PhDog } from '@phosphor-icons/vue'
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import type { PetSpecies } from '../../data/types'
 
@@ -31,8 +33,8 @@ const props = withDefaults(
     nome: string
     iniciais: string
     especie?: PetSpecies | null
-    /** O retrato, quando a API o tiver. Vazio cai no avatar desenhado. */
-    fotoUrl?: string
+    /** O retrato, quando a API o tiver. Vazio, nulo ou com falha ao carregar cai no desenho. */
+    fotoUrl?: string | null
     /**
      * `xs` cabe numa barra do mapa; `lg` encabeça a tela da estadia; `xl` fica ao lado do nome
      * grande da ficha do paciente, na clínica.
@@ -40,6 +42,16 @@ const props = withDefaults(
     tamanho?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   }>(),
   { especie: null, fotoUrl: '', tamanho: 'sm' },
+)
+
+/** A imagem não carregou: vale até chegar outra `fotoUrl`. */
+const falhou = ref(false)
+
+watch(
+  () => props.fotoUrl,
+  () => {
+    falhou.value = false
+  },
 )
 
 /**
@@ -89,7 +101,14 @@ const icone = computed(() => {
       anunciada como "Mel, Mel". E o comentário mora **dentro** da raiz — um comentário acima dela
       transformaria o componente em fragmento, e fragmento não repassa o `class` que o pai manda.
     -->
-    <img v-if="fotoUrl" class="avatar__foto" :src="fotoUrl" :alt="''" loading="lazy" />
+    <img
+      v-if="fotoUrl && !falhou"
+      class="avatar__foto"
+      :src="fotoUrl"
+      :alt="''"
+      loading="lazy"
+      @error="falhou = true"
+    />
 
     <template v-else>
       <component :is="icone" v-if="icone" class="avatar__especie" weight="fill" />

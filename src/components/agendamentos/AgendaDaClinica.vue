@@ -20,7 +20,7 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AgendamentoGaveta from '@/components/agendamentos/AgendamentoGaveta.vue'
 import DesfazerNaAgenda from '@/components/agendamentos/DesfazerNaAgenda.vue'
@@ -43,8 +43,15 @@ import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/us
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { hojeNoFuso } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
+import {
+  invalidarPendenciasDoPortal,
+  usePendenciasDoPortal,
+} from '@/composables/usePendenciasDoPortal'
+import { useEspacos } from '@/navegacao/espacos'
 import {
   instanteNoFuso,
   listarSalas,
@@ -75,7 +82,7 @@ import {
 import { listarProfissionais } from '@/service/parceiro/profissionais-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -245,23 +252,122 @@ const semanaNaTela = computed(() =>
   semana.value && semana.value.de === segundaDe(data.value) ? semana.value : null,
 )
 
+/* ------------------------------------------------------------------------------ dia livre */
+
+/*
+ * O dia sem nada marcado (17/11/2026, "não podemos pôr algo em vez de mostrar algo tão grande e
+ * vazio?"): no lugar da grade das 7 às 22 em branco, quem atende, o "Marcar horário", o próximo dia
+ * que tem horário e quem está esperando para encher o dia. A grade fica a um clique, para quem marca
+ * clicando no horário. Qualquer agendamento no dia (até cancelado) traz a grade de volta.
+ */
+const gradeAberta = ref(false)
+watch(data, () => {
+  gradeAberta.value = false
+})
+
+const diaLivre = computed(
+  () =>
+    visao.value === 'dia' &&
+    Boolean(diaNaTela.value?.colunas.length) &&
+    !diaNaTela.value?.agendamentos.length &&
+    !diaNaTela.value?.clinicaFechada &&
+    !gradeAberta.value,
+)
+
+const diaPassou = computed(() => data.value < hoje.value)
+
+const quemAtende = computed(() => {
+  const nomes = diaNaTela.value?.colunas.map((coluna) => coluna.nome) ?? []
+  if (!nomes.length) return ''
+  const lista = new Intl.ListFormat(locale.value, { style: 'long', type: 'conjunction' })
+  return t(nomes.length === 1 ? 'agendamentos.livre.quemUm' : 'agendamentos.livre.quem', {
+    nomes: lista.format(nomes),
+  })
+})
+
+/** O próximo dia com horário, pela carga da semana (desta e, se preciso, da seguinte). */
+const proximoComHorario = ref<string | null>(null)
+const leituraDoProximo = criarUltimaLeitura()
+
+async function acharProximo() {
+  const vez = leituraDoProximo.nova()
+  proximoComHorario.value = null
+  if (!diaLivre.value) return
+  try {
+    for (const semanaDe of [data.value, somarDias(data.value, 7)]) {
+      const lida = await obterSemana(semanaDe, parceiroQuery())
+      if (!leituraDoProximo.valendo(vez)) return
+      const achado = lida.dias.find((item) => item.data > data.value && item.agendados > 0)
+      if (achado) {
+        proximoComHorario.value = achado.data
+        return
+      }
+    }
+  } catch {
+    /* Sem a semana, o botão só não aparece: o resto do dia livre vale. */
+  }
+}
+
+watch(diaLivre, (livre) => {
+  if (livre) void acharProximo()
+})
+
+/* Quem está esperando, pelos números do menu (a mesma leitura do servidor, sem pedir de novo). */
+const { ativo: demonstracao } = useModoDemonstracao()
+const { espacos } = useEspacos()
+const pendencias = usePendenciasDoPortal(
+  () =>
+    !demonstracao.value &&
+    store.loadState === 'ready' &&
+    !store.semAcessoParceiro &&
+    !store.cadastroSuspenso,
+)
+
+function temTela(to: string) {
+  return espacos.value.some((espaco) =>
+    espaco.destinos.some((destino) => destino.abas.some((aba) => aba.to === to)),
+  )
+}
+
+const paraEncher = computed(() =>
+  (
+    [
+      { id: 'espera', icone: 'ph ph-hourglass-medium', to: '/clinica/fila' },
+      { id: 'retornos', icone: 'ph ph-arrow-u-up-left', to: '/clinica/retornos-pendentes' },
+      { id: 'pedidos', icone: 'ph ph-tray-arrow-down', to: '/clinica/pedidos' },
+    ] as const
+  )
+    .filter((item) => temTela(item.to))
+    .map((item) => ({
+      ...item,
+      rotulo: t(`agendamentos.livre.encher.${item.id}.rotulo`),
+      dica: t(`agendamentos.livre.encher.${item.id}.dica`),
+      total: pendencias.selos.value.get(item.to)?.total ?? 0,
+    })),
+)
+
 /* --------------------------------------------------------------------- tipos e equipe */
 
 const tipos = ref<TipoDeAtendimento[]>([])
 const salas = ref<Sala[]>([])
 const equipe = ref<{ id: string; nome: string }[]>([])
+/** A equipe que atende na agenda foi lida de fato (a falha não conta como "ninguém"). */
+const equipeLida = ref(false)
 const passo = ref(15)
 
 async function carregarApoio() {
   const [listaDeTipos, listaDeSalas, listaDeProfissionais, politica] = await Promise.all([
     listarTipos(parceiroQuery()).catch(() => [] as TipoDeAtendimento[]),
     listarSalas(parceiroQuery()).catch(() => [] as Sala[]),
-    listarProfissionais({ ...parceiroQuery(), ativo: true, atendeNaAgenda: true }).catch(() => []),
+    listarProfissionais({ ...parceiroQuery(), ativo: true, atendeNaAgenda: true }).catch(
+      () => null,
+    ),
     obterPolitica(parceiroQuery()).catch(() => null),
   ])
   tipos.value = listaDeTipos
   salas.value = listaDeSalas
-  equipe.value = listaDeProfissionais.map((item) => ({ id: item.id, nome: item.nome }))
+  equipe.value = (listaDeProfissionais ?? []).map((item) => ({ id: item.id, nome: item.nome }))
+  equipeLida.value = listaDeProfissionais !== null
   if (politica?.granularidadeMinutos) passo.value = politica.granularidadeMinutos
 }
 
@@ -626,6 +732,23 @@ watch(
   { immediate: true },
 )
 
+/**
+ * Veio das "Ações rápidas" do Início com `?novo=1` (ou `?novo=1&paciente=<id>`): abre a marcação
+ * vazia, no próximo horário de hoje, quando os tipos chegarem, e tira o pedido da URL (recarregar
+ * não reabre a gaveta).
+ */
+watch(
+  () => [tipos.value.length, route.query.novo] as const,
+  ([quantosTipos, novo]) => {
+    if (!quantosTipos || novo !== '1' || !podeEscrever.value) return
+    abrirMarcacao()
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+  },
+  { immediate: true },
+)
+
 function marcado(mutacao: Mutacao) {
   depoisDeMudar(mutacao, t('agendamentos.feito.criar'), true)
   const novo = mutacao.agendamentos.find((item) => item.id === mutacao.id)
@@ -687,6 +810,69 @@ async function moverPelaGrade(movimento: Movimento, confirmar = false) {
 /* ------------------------------------------------------------------------------ avisos */
 
 const feriado = computed(() => diaNaTela.value?.feriado ?? null)
+
+/* ---------------------------------------------------------------------------- o vazio */
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem ninguém que atenda na agenda, todo
+ * dia fica sem coluna; aí o vazio mostra como a agenda se monta, em três etapas, e leva a
+ * Profissionais quem gere a equipe. Com equipe, o dia sem coluna é folga de todos: o recado, o
+ * "Ver a semana" e, com a clínica aberta nesse dia, o "Ajustar os expedientes" para quem gere a
+ * equipe (17/11/2026: o vazio chama para o que resolve).
+ */
+const semEquipeNaAgenda = computed(() => equipeLida.value && equipe.value.length === 0)
+const podeGerirEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
+
+const podeEditarHorario = computed(
+  () => store.temPermissao('estabelecimento.editar') && store.podeOperar,
+)
+
+/*
+ * Cada etapa com o botão dela (17/11/2026, "a clínica deve cadastrar profissional e configurar
+ * horário"): cadastrar quem atende, configurar o horário da clínica e, apagado até haver alguém na
+ * agenda, marcar. Só aparece o botão de quem pode fazer aquilo.
+ */
+const passosDaAgenda = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`agendamentos.guia.${id}.titulo`),
+    texto: t(`agendamentos.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'equipe',
+      'ph ph-user-plus',
+      podeGerirEquipe.value
+        ? {
+            rotulo: t('agendamentos.guia.cadastrarProfissional'),
+            icone: 'ph ph-user-plus',
+            to: { path: '/parceiro/profissionais', query: { novo: '1' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'expediente',
+      'ph ph-clock',
+      podeEditarHorario.value
+        ? {
+            rotulo: t('agendamentos.guia.configurarHorario'),
+            icone: 'ph ph-clock',
+            to: { path: '/parceiro/estabelecimento', query: { aba: 'horarios', editar: '1' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'marcar',
+      'ph ph-calendar-plus',
+      podeEscrever.value
+        ? { rotulo: t('agendamentos.marcar.titulo'), icone: 'ph ph-calendar-plus', bloqueada: true }
+        : undefined,
+    ),
+  ]
+})
 </script>
 
 <template>
@@ -872,21 +1058,104 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
           <Skeleton height="24rem" />
         </div>
 
-        <div v-else-if="!diaNaTela.colunas.length" class="ui-folha ui-vazio ag__vazio">
-          <span class="ui-ladrilho ui-ladrilho--neutro" aria-hidden="true">
-            <i class="ph ph-moon" />
-          </span>
-          <h2>{{ t('agendamentos.vazio.titulo') }}</h2>
-          <p>{{ t('agendamentos.vazio.descricao') }}</p>
-          <Button
-            type="button"
-            severity="secondary"
-            outlined
-            icon="ph ph-calendar-blank"
-            :label="t('agendamentos.vazio.semana')"
-            @click="irPara({ visao: 'semana' })"
-          />
-        </div>
+        <UiVazioIlustrado
+          v-else-if="!diaNaTela.colunas.length && semEquipeNaAgenda"
+          icone="ph ph-users-three"
+          :titulo="t('agendamentos.guia.vazioTitulo')"
+          :texto="t('agendamentos.guia.vazioTexto')"
+          :guia-titulo="t('agendamentos.guia.titulo')"
+          :passos="passosDaAgenda"
+        >
+        </UiVazioIlustrado>
+
+        <UiVazioIlustrado
+          v-else-if="!diaNaTela.colunas.length"
+          icone="ph ph-moon"
+          :titulo="t('agendamentos.vazio.titulo')"
+          :texto="t('agendamentos.vazio.descricao')"
+        >
+          <template #acao>
+            <!-- A clínica abre e ninguém tem expediente: quem gere a equipe acerta o de cada um. -->
+            <Button
+              v-if="podeGerirEquipe && !diaNaTela.clinicaFechada"
+              :as="RouterLink"
+              to="/parceiro/profissionais"
+              icon="ph ph-clock-user"
+              :label="t('agendamentos.vazio.expedientes')"
+            />
+            <Button
+              type="button"
+              severity="secondary"
+              outlined
+              icon="ph ph-calendar-blank"
+              :label="t('agendamentos.vazio.semana')"
+              @click="irPara({ visao: 'semana' })"
+            />
+          </template>
+        </UiVazioIlustrado>
+
+        <section v-else-if="diaLivre" class="ag-livre ui-folha" aria-labelledby="ag-livre">
+          <div class="ag-livre__recado">
+            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+              <i class="ph ph-calendar-blank" />
+            </span>
+            <h2 id="ag-livre" class="ag-livre__titulo">{{ t('agendamentos.livre.titulo') }}</h2>
+            <p class="ag-livre__texto">
+              <span v-if="quemAtende">{{ quemAtende }}</span>
+              {{ diaPassou ? t('agendamentos.livre.passado') : t('agendamentos.livre.convite') }}
+            </p>
+            <div class="ag-livre__acoes">
+              <Button
+                v-if="podeEscrever && !diaPassou"
+                type="button"
+                icon="ph ph-calendar-plus"
+                :label="t('agendamentos.marcar.titulo')"
+                @click="abrirMarcacao()"
+              />
+              <Button
+                v-if="proximoComHorario"
+                type="button"
+                severity="secondary"
+                outlined
+                icon="ph ph-arrow-right"
+                icon-pos="right"
+                :label="
+                  t('agendamentos.livre.proximo', {
+                    dia: frases.diaPorExtenso(proximoComHorario),
+                  })
+                "
+                @click="irPara({ data: proximoComHorario })"
+              />
+              <Button
+                type="button"
+                severity="secondary"
+                outlined
+                icon="ph ph-rows"
+                :label="t('agendamentos.livre.grade')"
+                @click="gradeAberta = true"
+              />
+            </div>
+          </div>
+
+          <div v-if="paraEncher.length && !diaPassou" class="ag-livre__encher">
+            <h3 class="ag-livre__subtitulo">{{ t('agendamentos.livre.encher.titulo') }}</h3>
+            <ul class="ag-livre__lista">
+              <li v-for="item in paraEncher" :key="item.id">
+                <RouterLink class="ag-livre__item" :to="item.to">
+                  <span class="ui-ladrilho" aria-hidden="true"><i :class="item.icone" /></span>
+                  <span class="ag-livre__item-texto">
+                    <strong>{{ item.rotulo }}</strong>
+                    <small>{{ item.dica }}</small>
+                  </span>
+                  <span v-if="item.total" class="ui-contagem">{{
+                    rotulos.numero(item.total)
+                  }}</span>
+                  <i class="ph ph-caret-right ag-livre__seta" aria-hidden="true" />
+                </RouterLink>
+              </li>
+            </ul>
+          </div>
+        </section>
 
         <div
           v-else
@@ -1106,10 +1375,6 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
   opacity: 0.7;
 }
 
-.ag__vazio .p-button {
-  justify-self: center;
-}
-
 .ag__turno {
   display: grid;
   max-height: 16rem;
@@ -1148,6 +1413,123 @@ const feriado = computed(() => diaNaTela.value?.feriado ?? null)
 @media (prefers-reduced-motion: reduce) {
   .ag__folha {
     transition: none;
+  }
+}
+
+/* --------------------------------------------------------------------------- dia livre */
+
+/*
+ * O recado à esquerda (o ladrilho, o título, quem atende e as ações) e, à direita, quem está
+ * esperando para encher o dia. Sem largura, um embaixo do outro.
+ */
+.ag-livre {
+  container: dia-livre / inline-size;
+  display: grid;
+  align-items: start;
+  gap: 24px 40px;
+  padding: 28px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+}
+
+.ag-livre__recado {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.ag-livre__titulo {
+  margin: 6px 0 0;
+  color: var(--tinta);
+  font-size: 19px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.ag-livre__texto {
+  display: grid;
+  max-width: 52ch;
+  gap: 2px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ag-livre__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ag-livre__encher {
+  display: grid;
+  gap: 8px;
+}
+
+.ag-livre__subtitulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.ag-livre__lista {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-livre__lista > li + li {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
+}
+
+.ag-livre__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 8px;
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ag-livre__item:hover {
+  background: color-mix(in oklab, var(--tinta) 4.5%, transparent);
+}
+
+.ag-livre__item:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: -2px;
+}
+
+.ag-livre__item-texto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 1px;
+}
+
+.ag-livre__item-texto strong {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.ag-livre__item-texto small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+}
+
+.ag-livre__seta {
+  color: var(--tinta-3);
+  font-size: 15px;
+}
+
+@container dia-livre (max-width: 760px) {
+  .ag-livre {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 </style>

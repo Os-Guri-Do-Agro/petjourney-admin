@@ -11,6 +11,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import {
@@ -151,9 +152,13 @@ const resumo = computed(() => {
     </p>
 
     <template v-if="checklist">
-      <p v-if="!checklist.grupos.length" class="ck__nota ck__vazio">
-        {{ t('internacao.checklist.vazio') }}
-      </p>
+      <UiVazioIlustrado
+        v-if="!checklist.grupos.length"
+        aninhado
+        icone="ph ph-list-checks"
+        :titulo="t('internacao.checklist.vazio')"
+        :texto="t('internacao.checklist.vazioTexto')"
+      />
       <div v-for="grupo in checklist.grupos" :key="grupo.hora" class="ck__grupo">
         <!-- A hora já está em cada linha: o grupo só marca onde o "agora" passa. -->
         <p v-if="grupo.hora === checklist.linhaDoAgora" class="ck__agora-linha">
@@ -190,14 +195,11 @@ const resumo = computed(() => {
 </template>
 
 <style scoped>
+/* Embaixo do fio do cabeçalho, com respiro, e alinhado ao conteúdo do cartão (o recuo de 24 px era
+ * do cartão antigo, que não tinha respiro próprio). */
 .ck__nota {
-  margin: 0;
-  padding: 0 24px 12px;
-}
-
-.ck__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
+  margin: 14px 0 0;
+  padding: 0;
 }
 
 .ck__grupo {

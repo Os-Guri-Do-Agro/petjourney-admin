@@ -23,7 +23,13 @@ import { UFS } from '@/utils/brasil/ufs'
 
 const campos = defineModel<CamposDoCliente>({ required: true })
 
-defineProps<{ erros?: ErrosDoCliente; desabilitado?: boolean; id: string }>()
+defineProps<{
+  erros?: ErrosDoCliente
+  desabilitado?: boolean
+  id: string
+  /** Sem o contato de emergência (é do hotel): o registro em campo da Saúde pública não usa. */
+  semEmergencia?: boolean
+}>()
 
 const { t } = useI18n()
 
@@ -279,35 +285,37 @@ onUnmounted(() => controle?.abort())
     />
   </section>
 
-  <h3 class="eg__grupo-titulo">{{ t('cadastro.campos.emergencia') }}</h3>
+  <template v-if="!semEmergencia">
+    <h3 class="eg__grupo-titulo">{{ t('cadastro.campos.emergencia') }}</h3>
 
-  <div class="eg__linha">
-    <section class="eg__secao">
-      <label class="eg__rotulo" :for="`${id}-emergencia-nome`">
-        {{ t('cadastro.campos.emergenciaNome') }}
-      </label>
-      <InputText
-        :id="`${id}-emergencia-nome`"
-        v-model="campos.emergenciaNome"
-        maxlength="120"
-        :disabled="desabilitado"
-      />
-    </section>
+    <div class="eg__linha">
+      <section class="eg__secao">
+        <label class="eg__rotulo" :for="`${id}-emergencia-nome`">
+          {{ t('cadastro.campos.emergenciaNome') }}
+        </label>
+        <InputText
+          :id="`${id}-emergencia-nome`"
+          v-model="campos.emergenciaNome"
+          maxlength="120"
+          :disabled="desabilitado"
+        />
+      </section>
 
-    <section class="eg__secao">
-      <label class="eg__rotulo" :for="`${id}-emergencia-telefone`">
-        {{ t('cadastro.campos.emergenciaTelefone') }}
-      </label>
-      <InputText
-        :id="`${id}-emergencia-telefone`"
-        v-model="campos.emergenciaTelefone"
-        inputmode="tel"
-        :invalid="Boolean(erros?.emergenciaTelefone)"
-        :disabled="desabilitado"
-      />
-      <small v-if="erros?.emergenciaTelefone" class="eg__invalido">
-        {{ erros.emergenciaTelefone }}
-      </small>
-    </section>
-  </div>
+      <section class="eg__secao">
+        <label class="eg__rotulo" :for="`${id}-emergencia-telefone`">
+          {{ t('cadastro.campos.emergenciaTelefone') }}
+        </label>
+        <InputText
+          :id="`${id}-emergencia-telefone`"
+          v-model="campos.emergenciaTelefone"
+          inputmode="tel"
+          :invalid="Boolean(erros?.emergenciaTelefone)"
+          :disabled="desabilitado"
+        />
+        <small v-if="erros?.emergenciaTelefone" class="eg__invalido">
+          {{ erros.emergenciaTelefone }}
+        </small>
+      </section>
+    </div>
+  </template>
 </template>

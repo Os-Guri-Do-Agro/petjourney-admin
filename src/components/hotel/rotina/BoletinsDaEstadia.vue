@@ -19,6 +19,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { novaChaveDeIdempotencia } from '@/service/idempotencia'
@@ -333,7 +334,22 @@ function jaAberto(texto: string) {
         </span>
       </li>
     </ul>
-    <p v-else-if="conversa" class="bo__nota bo__vazio">{{ t('boletimDoHotel.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="conversa"
+      aninhado
+      icone="ph ph-chat-text"
+      :titulo="t('boletimDoHotel.vazio')"
+      :texto="t('boletimDoHotel.vazioTexto')"
+    >
+      <template v-if="podeEscrever && !aberto && !conversa.semCanalNoApp" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('boletimDoHotel.escrever')"
+          @click="escreverAberta = true"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <Button
       v-if="conversa?.proximoCursor"
@@ -367,11 +383,6 @@ function jaAberto(texto: string) {
 .bo__nota {
   margin: 0;
   padding: 0 10px 12px;
-}
-
-.bo__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .bo__acoes {

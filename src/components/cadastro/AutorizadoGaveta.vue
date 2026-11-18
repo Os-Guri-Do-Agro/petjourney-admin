@@ -36,7 +36,8 @@ const erroDoTelefone = ref('')
 const erro = ref('')
 const salvando = ref(false)
 
-watch(visible, (aberta) => {
+/* Com a gaveta aberta, outro item da lista troca o conteúdo (não só o abrir). */
+watch([visible, () => props.autorizado?.id] as const, ([aberta]) => {
   if (!aberta) return
 
   nome.value = props.autorizado?.nome ?? ''

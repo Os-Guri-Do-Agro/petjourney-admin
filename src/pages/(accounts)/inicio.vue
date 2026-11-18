@@ -11,11 +11,14 @@
  * 1. **A saudação e uma frase de estado.** "Boa tarde, Carla" e, embaixo, a data e o que pede
  *    atenção em todos os espaços — "2 assuntos urgentes pedem sua atenção hoje: 1 na Clínica e 1
  *    no Hotel." Embaixo dela, numa fileira, os números de cada espaço (`useAberturaDoInicio`).
- * 2. **Um bloco por espaço de trabalho que a empresa tem**, na cor dele (Clínica maré, Hotel
+ * 2. **Ações rápidas** (16/11/2026): novo paciente, marcar consulta, atender agora, aplicar vacina,
+ *    lista de espera e vincular código — o que a pessoa pode fazer, cada uma abrindo o formulário
+ *    que já existe na tela dona dele (`HomeAcoesRapidas`).
+ * 3. **Um bloco por espaço de trabalho que a empresa tem**, na cor dele (Clínica maré, Hotel
  *    lavanda), com os números do agora — cada um leva à tela onde se resolve — e o próximo passo.
  *    Quem não tem o Hotel não vê bloco de Hotel: os blocos são os espaços da barra (`useEspacos`).
- * 3. **O que pede ação**, a lista do sistema (`UiPauta`), agrupada por espaço.
- * 4. **O resto, calmo, embaixo**: a agenda da semana, o Portal numa linha e a marca.
+ * 4. **O que pede ação**, a lista do sistema (`UiPauta`), agrupada por espaço.
+ * 5. **O resto, calmo, embaixo**: a agenda da semana, o Portal numa linha e a marca.
  *
  * ## O Portal fica no pé (03/11/2026)
  *
@@ -45,6 +48,7 @@
 import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import HomeAcoesRapidas from '@/components/home/HomeAcoesRapidas.vue'
 import HomeAgenda from '@/components/home/HomeAgenda.vue'
 import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
 import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
@@ -103,6 +107,16 @@ const blocos = computed(() =>
       (espaco.id === 'clinica' && clinicaNoInicio.value) ||
       (espaco.id === 'hotel' && hotelNaDemonstracao.value),
   ),
+)
+
+/*
+ * Com a Clínica como único espaço, a abertura já mostra os quatro números dela e as Ações rápidas
+ * têm o "Marcar consulta": o bloco repetiria o que está logo acima (17/11/2026, os zeros duas vezes;
+ * as áreas no lugar deles só repetiam o menu, "ficou bem esquisito"). Ele aparece ao lado de outro
+ * espaço, quando a abertura mostra só dois números de cada.
+ */
+const blocosNaTela = computed(() =>
+  blocos.value.length === 1 && blocos.value[0]?.id === 'clinica' ? [] : blocos.value,
 )
 
 // ------------------------------------------------------------------------------ a saudação
@@ -245,15 +259,17 @@ onUnmounted(() => {
     <div class="inicio">
       <PartnerOperabilityBanner />
 
-      <section v-if="blocos.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
-        <div class="espacos__grade" :class="`espacos__grade--${blocos.length}`">
-          <template v-for="espaco in blocos" :key="espaco.id">
+      <HomeAcoesRapidas />
+
+      <section v-if="blocosNaTela.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
+        <div class="espacos__grade" :class="`espacos__grade--${blocosNaTela.length}`">
+          <template v-for="espaco in blocosNaTela" :key="espaco.id">
             <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
             <HomeEspacoHotel v-else :espaco="espaco" />
           </template>
         </div>
       </section>
-      <HomePortalAreas v-else-if="portal" />
+      <HomePortalAreas v-else-if="portal && !blocos.length" />
 
       <HomeModulos />
 

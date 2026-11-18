@@ -17,6 +17,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { novaChaveDeIdempotencia } from '@/service/idempotencia'
@@ -384,7 +385,14 @@ function mudou() {
         </span>
       </li>
     </ul>
-    <p v-else-if="conversa" class="bl__nota bl__vazio">{{ t('internacao.boletim.vazio') }}</p>
+    <!-- Sem app nenhum boletim nasce: a descrição do cartão já diz que o aviso é por telefone. -->
+    <UiVazioIlustrado
+      v-else-if="conversa"
+      aninhado
+      icone="ph ph-chat-text"
+      :titulo="t('internacao.boletim.vazio')"
+      :texto="conversa.semCanalNoApp ? '' : t('internacao.boletim.vazioTexto')"
+    />
 
     <Button
       v-if="conversa?.proximoCursor"
@@ -424,11 +432,6 @@ function mudou() {
 .bl__nota {
   margin: 0;
   padding: 0 24px 12px;
-}
-
-.bl__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .bl__acoes {

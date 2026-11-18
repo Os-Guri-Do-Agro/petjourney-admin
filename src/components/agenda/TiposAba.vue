@@ -16,9 +16,12 @@ import ToggleSwitch from 'primevue/toggleswitch'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
@@ -41,8 +44,13 @@ const props = defineProps<{ podeEditar: boolean }>()
 
 const { t } = useI18n()
 const toast = useToast()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
+
+/* Marcar na agenda: a recepção, o veterinário e quem gere, com a Clínica para escrever. */
+const marca = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('agenda.escrever'),
+)
 
 const tipos = ref<TipoDeAtendimento[]>([])
 const carregando = ref(true)
@@ -61,10 +69,73 @@ async function carregar() {
   }
 }
 
-onMounted(() => void carregar())
+const route = useRoute()
+const router = useRouter()
+
+/*
+ * Veio da marcação sem tipo ("Criar tipo de atendimento") com `?novo=1`: a gaveta abre já aqui, e o
+ * pedido sai da URL (recarregar não reabre).
+ */
+onMounted(async () => {
+  await carregar()
+  if (route.query.novo !== '1') return
+  if (props.podeEditar) abrir(null)
+  const query = { ...route.query }
+  delete query.novo
+  void router.replace({ query })
+})
 
 const ativos = computed(() => tipos.value.filter((tipo) => tipo.ativo))
 const inativos = computed(() => tipos.value.filter((tipo) => !tipo.ativo))
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem tipo nenhum, o que
+ * um tipo leva (nome e categoria, duração e salas) e onde ele aparece (ao marcar e no pedido
+ * online). Cada etapa com o botão dela: "Novo tipo" abre a gaveta aqui, "Configurar salas" leva à
+ * aba Salas e o "Marcar horário" fica apagado até haver tipo.
+ */
+const passosDosTipos = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`agenda.config.tipo.guia.${id}.titulo`),
+    texto: t(`agenda.config.tipo.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'nome',
+      'ph ph-tag',
+      props.podeEditar
+        ? { rotulo: t('agenda.config.tipo.novo'), icone: 'ph ph-plus', aoClicar: () => abrir(null) }
+        : undefined,
+    ),
+    passo(
+      'duracao',
+      'ph ph-clock',
+      props.podeEditar
+        ? {
+            rotulo: t('agenda.config.tipo.guia.configurarSalas'),
+            icone: 'ph ph-door',
+            to: '/clinica/configuracao',
+          }
+        : undefined,
+    ),
+    passo(
+      'marcar',
+      'ph ph-calendar-plus',
+      marca.value
+        ? {
+            rotulo: t('agendamentos.marcar.titulo'),
+            icone: 'ph ph-calendar-plus',
+            to: { path: '/clinica/agenda', query: { novo: '1' } },
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+  ]
+})
 
 function resumo(tipo: TipoDeAtendimento) {
   const salas = tipo.salasCompativeis.length
@@ -245,9 +316,17 @@ async function mover(indice: number, passo: -1 | 1) {
       <li v-for="n in 3" :key="n" class="ui-linha"><Skeleton width="14rem" height="1rem" /></li>
     </ul>
 
-    <p v-else-if="!tipos.length" class="cfa__vazio">{{ t('agenda.config.tipo.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="!tipos.length && !erro"
+      aninhado
+      icone="ph ph-stethoscope"
+      :titulo="t('agenda.config.tipo.vazio')"
+      :texto="t('agenda.config.tipo.vazioTexto')"
+      :guia-titulo="t('agenda.config.tipo.guia.titulo')"
+      :passos="passosDosTipos"
+    />
 
-    <template v-else>
+    <template v-else-if="tipos.length">
       <ul class="ui-lista">
         <li v-for="(tipo, indice) in ativos" :key="tipo.id" class="ui-linha">
           <span class="ui-linha__texto">
@@ -474,12 +553,6 @@ async function mover(indice: number, passo: -1 | 1) {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.cfa__vazio {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .cfa__subtitulo {

@@ -23,12 +23,15 @@ import {
   STATUS_RISCADOS,
   type CartaoNaGrade,
 } from '@/components/agendamentos/leitura-da-agenda'
+import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   acoesDaSituacao,
   type AgendaDoDia,
   type Agendamento,
   type ColunaDaAgenda,
 } from '@/service/parceiro/agenda-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const props = defineProps<{
   dia: AgendaDoDia
@@ -300,6 +303,13 @@ function terminarArraste() {
         >
           <span class="gd__linha1">
             <span class="ui-num gd__inicio">{{ cartao.agendamento.inicio.slice(11, 16) }}</span>
+            <PetAvatar
+              :nome="cartao.agendamento.paciente.nome"
+              :iniciais="iniciais(cartao.agendamento.paciente.nome)"
+              :especie="ESPECIE_DO_AVATAR[cartao.agendamento.paciente.especie] ?? null"
+              :foto-url="cartao.agendamento.paciente.fotoUrl"
+              tamanho="xs"
+            />
             <strong class="gd__paciente"
               ><bdi>{{ cartao.agendamento.paciente.nome }}</bdi></strong
             >

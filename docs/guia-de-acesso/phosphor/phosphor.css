@@ -1,0 +1,68 @@
+/* Phosphor (regular), só os ícones desta folha. Copiado de @phosphor-icons/web. */
+@font-face { font-family: "Phosphor"; src: url("./Phosphor.woff2") format("woff2"); font-display: block; }
+.ph {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: "Phosphor" !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Enable Ligatures ================ */
+  letter-spacing: 0;
+  -webkit-font-feature-settings: "liga";
+  -moz-font-feature-settings: "liga=1";
+  -moz-font-feature-settings: "liga";
+  -ms-font-feature-settings: "liga" 1;
+  font-feature-settings: "liga";
+  -webkit-font-variant-ligatures: discretionary-ligatures;
+  font-variant-ligatures: discretionary-ligatures;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.ph.ph-globe-simple:before {
+  content: "\e28e";
+}
+.ph.ph-envelope-simple:before {
+  content: "\e218";
+}
+.ph.ph-lock-simple:before {
+  content: "\e308";
+}
+.ph.ph-key:before {
+  content: "\e2d6";
+}
+.ph.ph-envelope-open:before {
+  content: "\e216";
+}
+.ph.ph-user-plus:before {
+  content: "\e4d0";
+}
+.ph.ph-warning-circle:before {
+  content: "\e4e2";
+}
+.ph.ph-buildings:before {
+  content: "\e102";
+}
+.ph.ph-star:before {
+  content: "\e46a";
+}
+.ph.ph-check-circle:before {
+  content: "\e184";
+}
+.ph.ph-monitor:before {
+  content: "\e32e";
+}
+.ph.ph-device-mobile:before {
+  content: "\e1e0";
+}
+.ph.ph-shield-check:before {
+  content: "\e40c";
+}
+.ph.ph-lifebuoy:before {
+  content: "\e63a";
+}

@@ -39,6 +39,7 @@ function agendamento(parcial: Partial<Agendamento> & { id: string }): Agendament
       especie: 'CACHORRO',
       clienteId: 'c',
       clienteNome: 'Marina',
+      fotoUrl: null,
     },
     profissionalId: 'ana',
     tipoId: 't',

@@ -5,6 +5,10 @@
  * Nome e espécie são obrigatórios; "Outra" pede qual. A data de nascimento pode vir de uma idade
  * dita no balcão ("uns 3 anos"): aí ela é marcada como estimada. O porte é escolhido, não sai do
  * peso. Castrado tem o "não informado", que é diferente de "não".
+ *
+ * `parte` divide os campos nos passos do cadastro novo: o essencial (nome, espécie, raça, sexo,
+ * castrado) e os detalhes, todos opcionais (nascimento, porte, peso, microchip, pelagem). A gaveta
+ * de editar mostra tudo.
  */
 import Checkbox from 'primevue/checkbox'
 import DatePicker from 'primevue/datepicker'
@@ -21,12 +25,19 @@ import { ESPECIES, PORTES } from '@/service/parceiro/pacientes-service'
 
 const campos = defineModel<CamposDoPaciente>({ required: true })
 
-defineProps<{
-  erros?: ErrosDoPaciente
-  desabilitado?: boolean
-  /** Prefixo dos ids, para duas instâncias na mesma página não repetirem. */
-  id: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    erros?: ErrosDoPaciente
+    desabilitado?: boolean
+    /** Prefixo dos ids, para duas instâncias na mesma página não repetirem. */
+    id: string
+    parte?: 'tudo' | 'essencial' | 'detalhes'
+  }>(),
+  { erros: undefined, parte: 'tudo' },
+)
+
+const essencial = computed(() => props.parte !== 'detalhes')
+const detalhes = computed(() => props.parte !== 'essencial')
 
 const { t, locale } = useI18n()
 
@@ -40,8 +51,19 @@ const opcoesDeEspecie = computed(() =>
  */
 const NAO_INFORMADO = 'NI'
 
+/*
+ * O peso de referência de cada porte, ao lado do nome (pedido do Luís, 17/11/2026), para quem
+ * escolhe ter uma ideia. É a faixa de um cão adulto: só aparece para cachorro, ou enquanto a
+ * espécie não foi escolhida; em gato e nos outros, o porte fica só com o nome.
+ */
+const mostraPeso = computed(() => !campos.value.especie || campos.value.especie === 'CACHORRO')
+
 const opcoesDePorte = computed(() =>
-  PORTES.map((valor) => ({ valor, rotulo: t(`cadastro.porte.${valor}`) })),
+  PORTES.map((valor) => ({
+    valor,
+    rotulo: t(`cadastro.porte.${valor}`),
+    peso: mostraPeso.value ? t(`cadastro.porteReferencia.${valor}`) : '',
+  })),
 )
 
 const opcoesDeSexo = computed(() => [
@@ -92,7 +114,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 </script>
 
 <template>
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <label class="eg__rotulo" :for="`${id}-nome`">{{ t('cadastro.campos.nome') }}</label>
     <InputText
       :id="`${id}-nome`"
@@ -105,7 +127,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     <small v-if="erros?.nome" class="eg__invalido">{{ erros.nome }}</small>
   </section>
 
-  <div class="eg__linha">
+  <div v-if="essencial" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-especie`">{{ t('cadastro.campos.especie') }}</label>
       <Select
@@ -145,7 +167,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </section>
   </div>
 
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <span :id="`${id}-sexo`" class="eg__rotulo">{{ t('cadastro.campos.sexo') }}</span>
     <SelectButton
       v-model="sexo"
@@ -158,7 +180,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     />
   </section>
 
-  <section class="eg__secao">
+  <section v-if="essencial" class="eg__secao">
     <span :id="`${id}-castrado`" class="eg__rotulo">{{ t('cadastro.campos.castrado') }}</span>
     <SelectButton
       v-model="castrado"
@@ -171,7 +193,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     />
   </section>
 
-  <section class="eg__secao">
+  <section v-if="detalhes" class="eg__secao">
     <span :id="`${id}-nascimento`" class="eg__rotulo">
       {{ t('cadastro.campos.nascimento') }}
       <span class="eg__opcional">{{ t('cadastro.opcional') }}</span>
@@ -195,7 +217,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </label>
   </section>
 
-  <div class="eg__linha">
+  <div v-if="detalhes" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-porte`">{{ t('cadastro.campos.porte') }}</label>
       <Select
@@ -207,7 +229,15 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
         :placeholder="t('cadastro.naoInformado')"
         show-clear
         :disabled="desabilitado"
-      />
+      >
+        <template #option="{ option }">
+          <span class="pc__porte">
+            <span>{{ option.rotulo }}</span>
+            <span v-if="option.peso" class="pc__peso ui-num">{{ option.peso }}</span>
+          </span>
+        </template>
+      </Select>
+      <small v-if="mostraPeso" class="eg__dica">{{ t('cadastro.porteReferencia.dica') }}</small>
     </section>
 
     <section class="eg__secao">
@@ -228,7 +258,7 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
     </section>
   </div>
 
-  <div class="eg__linha">
+  <div v-if="detalhes" class="eg__linha">
     <section class="eg__secao">
       <label class="eg__rotulo" :for="`${id}-microchip`">
         {{ t('cadastro.campos.microchip') }}
@@ -259,6 +289,26 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 </template>
 
 <style scoped>
+/* Lado a lado, cada campo fica do tamanho dele: o erro de um não estica o vizinho. */
+.eg__linha > .eg__secao {
+  align-content: start;
+}
+
+/* O nome do porte à esquerda e o peso de referência à direita, mais apagado. */
+.pc__porte {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pc__peso {
+  color: var(--tinta-3);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+
 .pc__calendario {
   justify-self: start;
 }

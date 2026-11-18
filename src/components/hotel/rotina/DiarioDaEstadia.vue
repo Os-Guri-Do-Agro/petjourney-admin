@@ -11,6 +11,7 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import {
   lerDiario,
@@ -139,9 +140,22 @@ async function verFoto(registroId: string) {
         </span>
       </li>
     </ul>
-    <p v-else-if="pagina && !erro" class="di__nota di__vazio">
-      {{ t('rotinaDoHotel.diario.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-else-if="pagina && !erro"
+      aninhado
+      icone="ph ph-notebook"
+      :titulo="t('rotinaDoHotel.diario.vazio')"
+      :texto="t('rotinaDoHotel.diario.vazioTexto')"
+    >
+      <template v-if="podeEscrever" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('rotinaDoHotel.diario.escrever')"
+          @click="escreverAberta = true"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <Button
       v-if="pagina?.proximoCursor"
@@ -167,11 +181,6 @@ async function verFoto(registroId: string) {
 .di__nota {
   margin: 0;
   padding: 0 10px 12px;
-}
-
-.di__vazio {
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .di__nome {

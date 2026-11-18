@@ -21,8 +21,9 @@ import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import NovoPacienteGaveta from '@/components/cadastro/NovoPacienteGaveta.vue'
 import {
   alertasPorGravidade,
   ICONE_DO_ALERTA,
@@ -31,6 +32,8 @@ import {
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { ApiError } from '@/service/api'
@@ -46,6 +49,7 @@ import { listarPendencias } from '@/service/parceiro/pendencias-service'
 import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const { store, parceiroQuery } = useParceiroPortal()
 const rotulos = useRotulosDoCadastro()
@@ -63,12 +67,13 @@ const carregandoMais = ref(false)
 const jaCarregou = ref(false)
 const erro = ref('')
 
-/** Quem escreve: a permissão e um dos dois módulos que não esteja só para consulta. */
-const podeCadastrar = computed(
-  () =>
-    store.temPermissao('paciente.escrever') &&
-    Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
+/** Um dos dois módulos que não esteja só para consulta (desligado ou suspenso só deixa ler). */
+const moduloEscreve = computed(() =>
+  Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
 )
+
+/** Quem escreve: a permissão e um módulo que escreve. */
+const podeCadastrar = computed(() => store.temPermissao('paciente.escrever') && moduloEscreve.value)
 
 /* "Todas" é o texto de espera, e o x do Select limpa a escolha: o PrimeVue lê `null` como vazio. */
 const opcoesDeEspecie = computed(() =>
@@ -162,7 +167,10 @@ onMounted(() => {
 })
 
 /** Quem importa (DONO e GESTOR): o migrador da base (E2-05). */
-const podeImportar = computed(() => store.temPermissao('importacao.executar'))
+const temPermissaoDeImportar = computed(() => store.temPermissao('importacao.executar'))
+
+/** Importar grava pacientes: com o módulo só para consulta, o botão sai como o "Novo paciente". */
+const podeImportar = computed(() => temPermissaoDeImportar.value && moduloEscreve.value)
 
 /*
  * A importação pausada ou parada (o contador `importacoesPausadas` da E1-06, tom de atenção, só
@@ -171,7 +179,7 @@ const podeImportar = computed(() => store.temPermissao('importacao.executar'))
 const importacoesParadas = ref(0)
 
 async function lerImportacaoParada() {
-  if (!podeImportar.value) return
+  if (!temPermissaoDeImportar.value) return
   try {
     const pendencias = await listarPendencias(parceiroQuery())
     importacoesParadas.value =
@@ -207,9 +215,72 @@ const fraseDoResumo = computed(() => {
       )
 })
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem paciente ativo, como o cadastro
+ * enche, em três etapas (a gaveta em passos, a planilha antiga, a busca do balcão), com Cadastrar e
+ * Importar nas etapas para quem pode. Inativos só diz o que vai aparecer ali; a busca sem resultado
+ * fica só com o recado.
+ */
+const passosDoCadastro = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`cadastro.lista.guia.${id}.titulo`),
+    texto: t(`cadastro.lista.guia.${id}.texto`),
+    acao,
+  })
+
+  /*
+   * Cada etapa com o botão dela (17/11/2026): cadastrar abre a gaveta aqui, importar leva ao
+   * migrador; a busca é o campo logo acima, sem botão.
+   */
+  return [
+    passo(
+      'passos',
+      'ph ph-list-numbers',
+      podeCadastrar.value
+        ? { rotulo: t('cadastro.lista.cadastrar'), icone: 'ph ph-plus', aoClicar: cadastrar }
+        : undefined,
+    ),
+    passo(
+      'importar',
+      'ph ph-file-arrow-up',
+      podeImportar.value
+        ? {
+            rotulo: t('cadastro.lista.importar'),
+            icone: 'ph ph-file-arrow-up',
+            to: '/clinica/paciente/importar',
+          }
+        : undefined,
+    ),
+    passo('buscar', 'ph ph-magnifying-glass'),
+  ]
+})
+
+/*
+ * Cadastrar abre a gaveta em passos aqui mesmo, sem sair da lista (pedido do Luís, 17/11/2026).
+ * Quem chega de fora (Ações rápidas do Início, o endereço antigo `/clinica/paciente/novo`) vem com
+ * `?novo=1`: a gaveta abre e o pedido sai da URL, para recarregar não abrir de novo.
+ */
+const novoAberto = ref(false)
+
 function cadastrar() {
-  void router.push('/clinica/paciente/novo')
+  novoAberto.value = true
 }
+
+watch(
+  () => [route.query.novo, podeCadastrar.value] as const,
+  ([pedido, pode]) => {
+    /* Sem a permissão ainda (o contexto chegando), espera; o pedido fica na URL até lá. */
+    if (pedido !== '1' || !pode) return
+
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+    novoAberto.value = true
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -311,28 +382,31 @@ function cadastrar() {
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-vazio cl__vazio">
-        <i class="ph ph-paw-print" aria-hidden="true" />
-        <strong>
-          {{
-            filtrando
-              ? t('cadastro.lista.vazioBusca')
-              : situacao === 'ativos'
-                ? t('cadastro.lista.vazio')
-                : t('cadastro.lista.vazioInativos')
-          }}
-        </strong>
-        <span v-if="situacao === 'ativos'">{{ t('cadastro.lista.vazioDica') }}</span>
-        <Button
-          v-if="podeCadastrar && situacao === 'ativos'"
-          type="button"
-          icon="ph ph-plus"
-          severity="secondary"
-          outlined
-          :label="t('cadastro.lista.cadastrar')"
-          @click="cadastrar"
-        />
-      </div>
+      <!-- A busca sem resultado não ensina nada: a lista não está vazia, o filtro está. -->
+      <UiVazioIlustrado
+        v-else-if="!itens.length && filtrando"
+        aninhado
+        icone="ph ph-magnifying-glass"
+        :titulo="t('cadastro.lista.vazioBusca')"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length && situacao === 'ativos'"
+        aninhado
+        icone="ph ph-paw-print"
+        :titulo="t('cadastro.lista.vazio')"
+        :texto="t('cadastro.lista.vazioDica')"
+        :guia-titulo="t('cadastro.lista.guia.titulo')"
+        :passos="passosDoCadastro"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        aninhado
+        icone="ph ph-archive"
+        :titulo="t('cadastro.lista.vazioInativos')"
+        :texto="t('cadastro.lista.guia.inativosTexto')"
+      />
 
       <ul v-else class="ui-lista cl__lista" :class="{ 'cl__lista--velha': carregando }">
         <li v-for="paciente in itens" :key="paciente.id">
@@ -344,6 +418,7 @@ function cadastrar() {
               :nome="paciente.nome"
               :iniciais="iniciais(paciente.nome)"
               :especie="ESPECIE_DO_AVATAR[paciente.especie] ?? null"
+              :foto-url="paciente.fotoUrl"
               tamanho="md"
             />
 
@@ -409,6 +484,8 @@ function cadastrar() {
         />
       </div>
     </section>
+
+    <NovoPacienteGaveta v-if="podeCadastrar" v-model:visible="novoAberto" />
   </UiPagina>
 </template>
 
@@ -481,10 +558,15 @@ function cadastrar() {
   text-decoration: none;
 }
 
+/*
+ * Colunas de largura fixa (o responsável e os alertas): o nome do responsável começa no mesmo ponto
+ * em todas as linhas, com ou sem selo de alerta (antes, a linha sem selo empurrava o responsável
+ * para a direita).
+ */
 .cl__responsavel {
   display: grid;
   gap: 2px;
-  flex: 0 1 14rem;
+  flex: 0 0 14rem;
   min-width: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
@@ -507,6 +589,7 @@ function cadastrar() {
 
 .cl__fim {
   display: flex;
+  flex: 0 0 15rem;
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
@@ -524,17 +607,6 @@ function cadastrar() {
   padding: 12px;
 }
 
-.cl__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.cl__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
-}
-
 .cl__esqueleto {
   pointer-events: none;
 }
@@ -542,6 +614,10 @@ function cadastrar() {
 @container (max-width: 640px) {
   .cl__responsavel {
     display: none;
+  }
+
+  .cl__fim {
+    flex-basis: auto;
   }
 }
 

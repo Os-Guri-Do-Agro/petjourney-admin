@@ -20,6 +20,8 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
@@ -107,9 +109,13 @@ watch(aberta, (agora) => {
   chaveador.concluir()
 })
 
+/** Clicar no campo já mostra a lista; no acompanhante, os animais da mesma casa. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+const { campo: campoDoAcompanhante, abrirLista: abrirAcompanhantes } = useListaAoClicar()
+
 async function buscar(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoes.value = pagina.itens.filter((item) => item.ativo)
   } catch {
     sugestoes.value = []
@@ -118,7 +124,8 @@ async function buscar(evento: { query: string }) {
 
 /** O acompanhante é da mesma casa: só os animais do mesmo responsável. */
 async function buscarAcompanhante(evento: { query: string }) {
-  await buscar(evento)
+  /* Sem termo (o clique no campo), procura pelo nome do responsável: vêm os animais da casa. */
+  await buscar({ query: evento.query || (hospede.value?.cliente?.nome ?? '') })
   const dono = hospede.value?.cliente?.id
   sugestoes.value = sugestoes.value.filter(
     (item) => item.id !== hospede.value?.id && (!dono || item.cliente.id === dono),
@@ -301,6 +308,7 @@ async function criar() {
         <div class="eg__secao">
           <label class="eg__rotulo" for="nr-hospede">{{ t('reservasDoHotel.nova.hospede') }}</label>
           <AutoComplete
+            ref="campoDoPaciente"
             v-model="paciente"
             input-id="nr-hospede"
             :suggestions="sugestoes"
@@ -310,7 +318,13 @@ async function criar() {
             :disabled="salvando || Boolean(inicio)"
             force-selection
             @complete="buscar"
-          />
+            @click="abrirLista"
+            @keydown.down="abrirLista"
+          >
+            <template #option="{ option }">
+              <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+            </template>
+          </AutoComplete>
         </div>
         <div class="eg__secao">
           <label class="eg__rotulo" for="nr-acompanhante">
@@ -318,6 +332,7 @@ async function criar() {
             <span class="eg__opcional">{{ t('cadastro.opcional') }}</span>
           </label>
           <AutoComplete
+            ref="campoDoAcompanhante"
             v-model="acompanhante"
             input-id="nr-acompanhante"
             :suggestions="sugestoes"
@@ -326,7 +341,13 @@ async function criar() {
             :disabled="salvando || !hospede"
             force-selection
             @complete="buscarAcompanhante"
-          />
+            @click="abrirAcompanhantes"
+            @keydown.down="abrirAcompanhantes"
+          >
+            <template #option="{ option }">
+              <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+            </template>
+          </AutoComplete>
           <small class="eg__dica">{{ t('reservasDoHotel.nova.acompanhanteDica') }}</small>
         </div>
       </section>

@@ -2,17 +2,26 @@
 /**
  * O mapa na lateral: Início, e cada espaço com os seus destinos.
  *
- * O espaço aberto é o da tela atual; os outros ficam fechados numa linha só, com o total de
- * pendências deles — ninguém precisa abrir o Hotel para saber que lá há sete coisas paradas.
- * No modo "lista" (Configurações) e na moldura do app, todos nascem abertos, e o título de cada
- * espaço vira um botão que o recolhe e o abre de novo; o que a pessoa recolheu fica lembrado no
- * navegador. Recolhido, o espaço mostra o total de pendências, como no outro modo.
+ * O título de cada espaço é o botão que o abre e o recolhe, em todos os formatos do menu, também
+ * na barra só de ícones (pedido do Luís, 16/11/2026: antes, no modo "Só o da tela" e na barra de
+ * ícones, o título era um link e a seta não recolhia nada). Recolhido, o espaço fica numa linha só,
+ * com o total de pendências dele — ninguém precisa abrir o Hotel para saber que lá há sete coisas
+ * paradas.
+ *
+ * O que muda com "Espaços na barra" (Configurações → Aparência) é o resto:
+ * - "Um de cada vez": abrir um recolhe o que estava aberto, e ir para uma tela abre o espaço dela.
+ *   Nada fica guardado.
+ * - "Você escolhe": cada espaço fica como a pessoa deixou, lembrado no navegador. Espaço em que ela
+ *   nunca mexeu segue a tela: aberto quando se está nele, recolhido quando se sai.
  *
  * Os destinos do espaço aberto ficam num painel de vidro, e o destino atual acende na cor do
  * espaço. Abrir e fechar um espaço desliza.
+ *
+ * Desde 16/11/2026 os destinos vêm agrupados pelas seções do espaço ("Dia a dia", "Atendimento",
+ * "Gestão"), cada uma com o título dela: a barra deixou de ser uma pilha de nove linhas iguais.
  */
 import Button from 'primevue/button'
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute } from 'vue-router'
 
@@ -22,7 +31,8 @@ const props = defineProps<{
   espacos: Espaco[]
   aqui: Localizacao
   recolhida: boolean
-  todosAbertos: boolean
+  /** "Você escolhe": cada espaço abre e recolhe por si, e a escolha fica lembrada. */
+  voceEscolhe: boolean
 }>()
 
 const emit = defineEmits<{ navegou: [] }>()
@@ -32,52 +42,141 @@ const route = useRoute()
 
 const noInicio = computed(() => route.path === '/inicio')
 
+/** A chave de antes: só a lista dos espaços recolhidos. Lida uma vez, para não perder a escolha. */
 const CHAVE_RECOLHIDOS = 'petjourney-barra-espacos-recolhidos'
+const CHAVE_ESCOLHAS = 'petjourney-barra-espacos-escolhas'
 
-/** Os espaços que a pessoa recolheu. Preferência deste navegador: sem ela, todos abertos. */
-function lerRecolhidos() {
+type Escolha = 'aberto' | 'fechado'
+
+/**
+ * O que a pessoa escolheu para cada espaço, neste navegador. Espaço sem escolha segue a tela: abre
+ * quando se está nele e recolhe quando se sai. Com os três espaços sempre abertos o menu tinha
+ * 1.262 px numa barra de 655 (análise de 16/11/2026), e metade ficava abaixo da dobra sem aviso.
+ */
+function lerEscolhas(): Record<string, Escolha> {
   try {
-    const salvo = JSON.parse(window.localStorage.getItem(CHAVE_RECOLHIDOS) ?? '[]')
+    const salvo: unknown = JSON.parse(window.localStorage.getItem(CHAVE_ESCOLHAS) ?? 'null')
 
-    return new Set<string>(Array.isArray(salvo) ? salvo : [])
+    if (salvo && typeof salvo === 'object' && !Array.isArray(salvo)) {
+      return Object.fromEntries(
+        Object.entries(salvo).filter(([, valor]) => valor === 'aberto' || valor === 'fechado'),
+      ) as Record<string, Escolha>
+    }
+
+    const recolhidos: unknown = JSON.parse(window.localStorage.getItem(CHAVE_RECOLHIDOS) ?? '[]')
+
+    return Array.isArray(recolhidos)
+      ? Object.fromEntries(recolhidos.map((id) => [String(id), 'fechado' as const]))
+      : {}
   } catch {
-    return new Set<string>()
+    return {}
   }
 }
 
-const recolhidos = ref(lerRecolhidos())
+const escolhas = ref(lerEscolhas())
 
-/** Com a barra só de ícones não há título para clicar: os espaços ficam como estavam, abertos. */
-const recolhivel = computed(() => props.todosAbertos && !props.recolhida)
+/**
+ * "Um de cada vez": o espaço aberto agora. Começa no da tela e segue a navegação: ir para uma tela
+ * abre o espaço dela (no Início e na Conta, nenhum). Entre uma tela e outra, a pessoa abre e
+ * recolhe à vontade.
+ */
+const abertoAgora = ref<string | null>(props.aqui.espaco?.id ?? null)
+
+watch(
+  () => [route.path, props.aqui.espaco?.id] as const,
+  ([, id]) => {
+    abertoAgora.value = id ?? null
+  },
+)
+
+/** Sem escolha: aberto o espaço da tela atual; no Início e na Conta, o primeiro. */
+function abertoPorPadrao(espaco: Espaco) {
+  const atual = props.aqui.espaco?.id
+
+  return atual ? atual === espaco.id : props.espacos[0]?.id === espaco.id
+}
 
 function alternar(espaco: Espaco) {
-  const proximos = new Set(recolhidos.value)
-
-  if (proximos.has(espaco.id)) {
-    proximos.delete(espaco.id)
-  } else {
-    proximos.add(espaco.id)
+  if (!props.voceEscolhe) {
+    abertoAgora.value = aberto(espaco) ? null : espaco.id
+    return
   }
 
-  recolhidos.value = proximos
+  const proximas: Record<string, Escolha> = {
+    ...escolhas.value,
+    [espaco.id]: aberto(espaco) ? 'fechado' : 'aberto',
+  }
+
+  escolhas.value = proximas
 
   try {
-    window.localStorage.setItem(CHAVE_RECOLHIDOS, JSON.stringify([...proximos]))
+    window.localStorage.setItem(CHAVE_ESCOLHAS, JSON.stringify(proximas))
   } catch {
     /* Sem armazenamento (janela anônima bloqueada): vale só nesta visita. */
   }
 }
 
 function aberto(espaco: Espaco) {
-  if (props.todosAbertos) {
-    return !recolhivel.value || !recolhidos.value.has(espaco.id)
+  if (!props.voceEscolhe) {
+    return abertoAgora.value === espaco.id
   }
 
-  return props.aqui.espaco?.id === espaco.id
+  const escolha = escolhas.value[espaco.id]
+
+  return escolha ? escolha === 'aberto' : abertoPorPadrao(espaco)
 }
+
+/*
+ * Quando o menu não cabe na altura (notebook baixo, tablet deitado), ele rola, e a barra de rolagem
+ * fica escondida. O lado que continua fora da vista esmaece, para dizer que há mais: sem isso o
+ * Portal sumia abaixo da dobra e ninguém sabia que estava lá.
+ */
+const mapa = ref<HTMLElement | null>(null)
+const cortaInicio = ref(false)
+const cortaFim = ref(false)
+
+function medirRolagem() {
+  const el = mapa.value
+
+  if (!el) {
+    return
+  }
+
+  const sobra = el.scrollHeight - el.clientHeight
+
+  cortaInicio.value = el.scrollTop > 2
+  cortaFim.value = el.scrollTop < sobra - 2
+}
+
+let observadorDoMapa: ResizeObserver | null = null
+
+onMounted(() => {
+  medirRolagem()
+
+  if (mapa.value && typeof ResizeObserver !== 'undefined') {
+    observadorDoMapa = new ResizeObserver(medirRolagem)
+    observadorDoMapa.observe(mapa.value)
+
+    /* Abrir e recolher um espaço muda a altura do conteúdo, não a da barra. */
+    for (const filho of Array.from(mapa.value.children)) {
+      observadorDoMapa.observe(filho)
+    }
+  }
+})
+
+onBeforeUnmount(() => observadorDoMapa?.disconnect())
+
+watch(
+  () => [route.path, props.recolhida, props.espacos.length],
+  () => nextTick(medirRolagem),
+)
 
 function idDaGaveta(espaco: Espaco) {
   return `gaveta-do-espaco-${espaco.id}`
+}
+
+function idDaSecao(espaco: Espaco, secao: string) {
+  return `secao-${espaco.id}-${secao}`
 }
 
 function destinoAtivo(id: string, espaco: Espaco) {
@@ -87,9 +186,15 @@ function destinoAtivo(id: string, espaco: Espaco) {
 
 <template>
   <nav
+    ref="mapa"
     class="mapa"
-    :class="{ 'mapa--recolhida': recolhida }"
+    :class="{
+      'mapa--recolhida': recolhida,
+      'mapa--corta-inicio': cortaInicio,
+      'mapa--corta-fim': cortaFim,
+    }"
     :aria-label="t('shell.barra.navegacao')"
+    @scroll.passive="medirRolagem"
   >
     <RouterLink
       class="mapa__inicio"
@@ -109,17 +214,20 @@ function destinoAtivo(id: string, espaco: Espaco) {
       class="espaco"
       :class="[`pj-lugar--${espaco.lugar}`, { 'espaco--aberto': aberto(espaco) }]"
     >
-      <!-- Com todos abertos, o título recolhe e abre o espaço; no outro modo, leva até ele. -->
+      <!-- O título abre e recolhe o espaço, em todos os formatos; só de ícones, o nome vai no title. -->
       <Button
-        v-if="recolhivel"
         unstyled
         type="button"
         class="espaco__cabeca espaco__cabeca--alterna"
         :aria-expanded="aberto(espaco)"
         :aria-controls="idDaGaveta(espaco)"
+        :aria-label="recolhida ? espaco.rotulo : undefined"
+        :title="recolhida ? espaco.rotulo : undefined"
         @click="alternar(espaco)"
       >
-        <span class="mapa__ladrilho espaco__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
+        <span class="mapa__ladrilho espaco__icone" aria-hidden="true"
+          ><i :class="espaco.icone"
+        /></span>
         <span class="mapa__rotulo espaco__nome shell-rotulo">{{ espaco.rotulo }}</span>
         <span
           v-if="espaco.selo && !aberto(espaco)"
@@ -130,29 +238,6 @@ function destinoAtivo(id: string, espaco: Espaco) {
         </span>
         <i class="ph ph-caret-right espaco__seta shell-rotulo" aria-hidden="true" />
       </Button>
-      <RouterLink
-        v-else
-        class="espaco__cabeca"
-        :to="espaco.to"
-        :aria-expanded="aberto(espaco)"
-        :title="recolhida ? espaco.rotulo : undefined"
-        @click="emit('navegou')"
-      >
-        <span class="mapa__ladrilho espaco__icone" aria-hidden="true"><i :class="espaco.icone" /></span>
-        <span class="mapa__rotulo espaco__nome shell-rotulo">{{ espaco.rotulo }}</span>
-        <span
-          v-if="espaco.selo && !aberto(espaco)"
-          class="mapa__selo"
-          :class="`mapa__selo--${espaco.tom ?? 'neutro'}`"
-        >
-          {{ espaco.selo }}
-        </span>
-        <i
-          v-if="!todosAbertos"
-          class="ph ph-caret-right espaco__seta shell-rotulo"
-          aria-hidden="true"
-        />
-      </RouterLink>
 
       <!--
         A gaveta do espaço fica montada mesmo fechada: assim ela abre e fecha deslizando (a linha
@@ -164,40 +249,63 @@ function destinoAtivo(id: string, espaco: Espaco) {
         :inert="!aberto(espaco) || undefined"
         :aria-hidden="!aberto(espaco) || undefined"
       >
+        <!--
+          Os destinos por seção, cada uma com o título dela: quem bate o olho sabe o que mora ali
+          antes de ler a lista. Espaço de uma seção só não repete o título; só de ícones, o título
+          vira um fio entre os grupos.
+        -->
         <div class="espaco__dobra">
-          <ul class="espaco__destinos">
-            <li v-for="destino in espaco.destinos" :key="destino.id">
-              <RouterLink
-                class="destino"
-                :class="{
-                  'destino--ativo': destinoAtivo(destino.id, espaco),
-                  'destino--bloqueado': destino.bloqueado,
-                }"
-                :to="destino.to"
-                active-class=""
-                exact-active-class=""
-                :aria-current="destinoAtivo(destino.id, espaco) ? 'page' : undefined"
-                :title="recolhida ? destino.rotulo : (destino.tituloDoSelo ?? undefined)"
-                @click="emit('navegou')"
+          <div class="espaco__destinos">
+            <div
+              v-for="secao in espaco.secoes"
+              :key="secao.id"
+              class="secao"
+              role="group"
+              :aria-labelledby="espaco.secoes.length > 1 ? idDaSecao(espaco, secao.id) : undefined"
+              :aria-label="espaco.secoes.length > 1 ? undefined : espaco.rotulo"
+            >
+              <span
+                v-if="espaco.secoes.length > 1"
+                :id="idDaSecao(espaco, secao.id)"
+                class="secao__titulo shell-rotulo"
               >
-                <i class="destino__icone" :class="destino.icone" aria-hidden="true" />
-                <span class="mapa__rotulo shell-rotulo">{{ destino.rotulo }}</span>
-                <i
-                  v-if="destino.bloqueado"
-                  class="ph ph-lock-simple destino__cadeado shell-rotulo"
-                  aria-hidden="true"
-                />
-                <span
-                  v-else-if="destino.selo"
-                  class="mapa__selo"
-                  :class="`mapa__selo--${destino.tom ?? 'neutro'}`"
-                  :aria-label="destino.tituloDoSelo"
-                >
-                  {{ destino.selo }}
-                </span>
-              </RouterLink>
-            </li>
-          </ul>
+                {{ secao.rotulo }}
+              </span>
+              <ul class="secao__lista">
+                <li v-for="destino in secao.destinos" :key="destino.id">
+                  <RouterLink
+                    class="destino"
+                    :class="{
+                      'destino--ativo': destinoAtivo(destino.id, espaco),
+                      'destino--bloqueado': destino.bloqueado,
+                    }"
+                    :to="destino.to"
+                    active-class=""
+                    exact-active-class=""
+                    :aria-current="destinoAtivo(destino.id, espaco) ? 'page' : undefined"
+                    :title="recolhida ? destino.rotulo : (destino.tituloDoSelo ?? undefined)"
+                    @click="emit('navegou')"
+                  >
+                    <i class="destino__icone" :class="destino.icone" aria-hidden="true" />
+                    <span class="mapa__rotulo shell-rotulo">{{ destino.rotulo }}</span>
+                    <i
+                      v-if="destino.bloqueado"
+                      class="ph ph-lock-simple destino__cadeado shell-rotulo"
+                      aria-hidden="true"
+                    />
+                    <span
+                      v-else-if="destino.selo"
+                      class="mapa__selo"
+                      :class="`mapa__selo--${destino.tom ?? 'neutro'}`"
+                      :aria-label="destino.tituloDoSelo"
+                    >
+                      {{ destino.selo }}
+                    </span>
+                  </RouterLink>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -205,6 +313,25 @@ function destinoAtivo(id: string, espaco: Espaco) {
 </template>
 
 <style scoped>
+/* O lado do menu que continua fora da vista esmaece nos últimos 40 px. */
+.mapa--corta-fim {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
+}
+
+.mapa--corta-inicio {
+  mask-image: linear-gradient(to top, #000 calc(100% - 40px), transparent);
+}
+
+.mapa--corta-inicio.mapa--corta-fim {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 40px,
+    #000 calc(100% - 40px),
+    transparent
+  );
+}
+
 /*
  * A barra no acabamento novo (20/10/2026): cada espaço é uma linha com o ladrilho da cor dele; o
  * espaço aberto mostra os destinos num painel de vidro, como um cartão dentro da moldura verde, e o
@@ -381,7 +508,55 @@ function destinoAtivo(id: string, espaco: Espaco) {
   border: 1px solid rgb(255 255 255 / 7%);
   border-radius: 14px;
   background: rgb(255 255 255 / 4%);
+}
+
+/* ------------------------------------------------------------------------------- seção */
+
+.secao {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.secao + .secao {
+  margin-top: 8px;
+}
+
+/* O título da seção: a etiqueta baixa e apagada que diz o assunto, sem disputar com as telas. */
+.secao__titulo {
+  overflow: hidden;
+  padding: 6px 10px 4px;
+  color: var(--sobre-rail-2);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secao__lista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  margin: 0;
+  padding: 0;
   list-style: none;
+}
+
+/*
+ * Só de ícones: o título sai (sem palavra, ele só ocuparia altura) e um fio curto separa os
+ * grupos, no eixo da coluna.
+ */
+.mapa--recolhida .secao__titulo {
+  display: none;
+}
+
+.mapa--recolhida .secao + .secao::before {
+  display: block;
+  width: 22px;
+  height: 1px;
+  margin: 5px auto;
+  background: rgb(255 255 255 / 12%);
+  content: '';
 }
 
 .destino {

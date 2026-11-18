@@ -27,6 +27,8 @@ import { RouterLink } from 'vue-router'
 import { ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
+import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { diaCurto } from '@/components/pedidos/leitura-do-pedido'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -50,9 +52,16 @@ import {
   type NovoAgendamento,
   type Simulacao,
 } from '@/service/parceiro/agenda-service'
-import { listarPacientes } from '@/service/parceiro/pacientes-service'
+import { listarPacientes, type PacienteNaLista } from '@/service/parceiro/pacientes-service'
 
-export type PacienteEscolhido = { id: string; nome: string; responsavel: string }
+export type PacienteEscolhido = {
+  id: string
+  nome: string
+  responsavel: string
+  /** O rosto na lista da busca; quem abre a gaveta com o paciente já escolhido não precisa dele. */
+  especie?: PacienteNaLista['especie']
+  fotoUrl?: string | null
+}
 
 export type InicioDaMarcacao = {
   data: string
@@ -81,7 +90,7 @@ const visible = defineModel<boolean>('visible', { default: false })
 const { t } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAgenda()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
 
 const paciente = ref<PacienteEscolhido | null>(null)
@@ -139,12 +148,21 @@ watch(visible, (aberta) => {
 
 /* ---------------------------------------------------------------------------- opções */
 
+/** Clicar no campo já mostra a lista dos pacientes, sem esperar a digitação. */
+const { campo: campoDoPaciente, abrirLista } = useListaAoClicar()
+
 async function buscarPaciente(evento: { query: string }) {
   try {
-    const pagina = await listarPacientes({ q: evento.query, limit: 10 }, parceiroQuery())
+    const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoesDePaciente.value = pagina.itens
       .filter((item) => item.ativo)
-      .map((item) => ({ id: item.id, nome: item.nome, responsavel: item.cliente.nome }))
+      .map((item) => ({
+        id: item.id,
+        nome: item.nome,
+        responsavel: item.cliente.nome,
+        especie: item.especie,
+        fotoUrl: item.fotoUrl,
+      }))
   } catch {
     sugestoesDePaciente.value = []
   }
@@ -155,6 +173,15 @@ function rotuloDoPaciente(item: PacienteEscolhido) {
 }
 
 const tiposAtivos = computed(() => props.tipos.filter((tipo) => tipo.ativo))
+
+/*
+ * Sem tipo de atendimento ativo não dá para marcar (17/11/2026, "o sistema deve ensinar"): o campo
+ * diz isso e leva quem configura a agenda até a aba Tipos.
+ */
+const podeCriarTipo = computed(
+  () =>
+    Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('estabelecimento.editar'),
+)
 const tipo = computed(() => props.tipos.find((item) => item.id === tipoId.value) ?? null)
 
 const opcoesDeSala = computed(() =>
@@ -384,6 +411,7 @@ const nomeDoProfissional = (id: string) =>
           t('agendamentos.marcar.paciente')
         }}</label>
         <AutoComplete
+          ref="campoDoPaciente"
           v-model="paciente"
           input-id="marcar-paciente"
           :suggestions="sugestoesDePaciente"
@@ -393,7 +421,13 @@ const nomeDoProfissional = (id: string) =>
           :disabled="salvando"
           force-selection
           @complete="buscarPaciente"
-        />
+          @click="abrirLista"
+          @keydown.down="abrirLista"
+        >
+          <template #option="{ option }">
+            <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+          </template>
+        </AutoComplete>
       </section>
 
       <div class="eg__linha">
@@ -410,6 +444,20 @@ const nomeDoProfissional = (id: string) =>
             :disabled="salvando"
             @update:model-value="trocarTipo"
           />
+          <template v-if="!tiposAtivos.length">
+            <small class="eg__dica">{{ t('agendamentos.marcar.semTipos') }}</small>
+            <Button
+              v-if="podeCriarTipo"
+              :as="RouterLink"
+              :to="{ path: '/clinica/configuracao', query: { aba: 'tipos', novo: '1' } }"
+              class="mg__criar-tipo"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-stethoscope"
+              :label="t('agendamentos.marcar.criarTipo')"
+            />
+          </template>
         </section>
         <section class="eg__secao">
           <label class="eg__rotulo" for="marcar-profissional">{{
@@ -836,6 +884,11 @@ const nomeDoProfissional = (id: string) =>
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Sem tipo ativo: o botão que leva aos Tipos, do tamanho dele, embaixo do campo. */
+.mg__criar-tipo {
+  justify-self: start;
 }
 
 .mg__chave {

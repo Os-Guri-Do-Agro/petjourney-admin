@@ -22,7 +22,10 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { useAtalhosDoDia } from '@/components/meu-dia/atalhos-do-dia'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { HorarioDoDia, ModeloDoMeuDia } from '@/features/clinico/composables/modelo-do-meu-dia'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -38,6 +41,55 @@ const LIMITE_DE_PENDENCIAS = 6
 
 const filaAberta = ref(false)
 const pendenciasAbertas = ref(false)
+
+/*
+ * O dia sem ninguém (17/11/2026, "nada pode simplesmente ficar vazio"): o cartão do destaque diz
+ * o que fazer e marca horário; a fila vazia ensina como ela se forma; e, com o dia calmo, o painel
+ * ganha embaixo o "Para adiantar", com o que dá para fazer enquanto ninguém chega.
+ */
+const { podeMarcar, atalhos } = useAtalhosDoDia()
+
+/*
+ * Cada etapa com o botão dela (17/11/2026): marcar leva à agenda com a marcação aberta; a chegada
+ * se registra na agenda, apagada enquanto não há ninguém marcado hoje (a fila está vazia). Iniciar
+ * a consulta é o botão da linha do paciente, que ainda não existe: sem botão aqui.
+ */
+const passosDaFila = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`clinico.meuDia.vazio.passos.${id}.titulo`),
+    texto: t(`clinico.meuDia.vazio.passos.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'agenda',
+      'ph ph-calendar-check',
+      podeMarcar.value
+        ? {
+            rotulo: t('clinico.meuDia.vazio.marcar'),
+            icone: 'ph ph-calendar-plus',
+            to: { path: '/clinica/agenda', query: { novo: '1' } },
+          }
+        : undefined,
+    ),
+    passo(
+      'chegada',
+      'ph ph-door-open',
+      podeMarcar.value
+        ? {
+            rotulo: t('clinico.meuDia.vazio.passos.chegada.acao'),
+            icone: 'ph ph-door-open',
+            to: '/clinica/agenda',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo('sala', 'ph ph-stethoscope'),
+  ]
+})
 
 /**
  * Os pacientes do cartão do destaque, um por vez num carrossel: todos os que estão em sala. Sem
@@ -464,7 +516,32 @@ const opcoesDeEscopo = computed(() => [
             </p>
           </section>
 
-          <p v-else class="cartao paciente cartao--vazio">{{ t('clinico.meuDia.ninguemAgora') }}</p>
+          <article v-else class="cartao paciente cartao--vazio" aria-labelledby="foco-ninguem">
+            <span class="vazio-hero__icone" aria-hidden="true"
+              ><i class="ph ph-sun-horizon"
+            /></span>
+            <span class="vazio-hero__texto">
+              <strong id="foco-ninguem">{{ t('clinico.meuDia.vazio.heroTitulo') }}</strong>
+              <span>{{ t('clinico.meuDia.vazio.heroTexto') }}</span>
+            </span>
+            <span class="vazio-hero__acoes">
+              <Button
+                v-if="podeMarcar"
+                :as="RouterLink"
+                :to="{ path: '/clinica/agenda', query: { novo: '1' } }"
+                icon="ph ph-calendar-plus"
+                :label="t('clinico.meuDia.vazio.marcar')"
+              />
+              <Button
+                :as="RouterLink"
+                to="/clinica/agenda"
+                severity="secondary"
+                outlined
+                icon="ph ph-calendar-dots"
+                :label="t('clinico.meuDia.vazio.abrirAgenda')"
+              />
+            </span>
+          </article>
         </div>
       </div>
     </template>
@@ -554,7 +631,14 @@ const opcoesDeEscopo = computed(() => [
             />
           </li>
         </ul>
-        <p v-else class="vazio">{{ t('clinico.meuDia.semProximo') }}</p>
+        <UiVazioIlustrado
+          v-else
+          icone="ph ph-users-three"
+          :titulo="t('clinico.meuDia.vazio.filaTitulo')"
+          :texto="t('clinico.meuDia.vazio.filaTexto')"
+          :guia-titulo="t('clinico.meuDia.vazio.guiaTitulo')"
+          :passos="passosDaFila"
+        />
 
         <Button
           v-if="filaEscondida > 0"
@@ -614,7 +698,15 @@ const opcoesDeEscopo = computed(() => [
               </RouterLink>
             </li>
           </ul>
-          <p v-else class="vazio">{{ t('inicio.pauta.calma') }}</p>
+          <p v-else class="calmo">
+            <span class="icone-veu icone-veu--ok" aria-hidden="true">
+              <i class="ph ph-check-circle" />
+            </span>
+            <span class="linha__texto">
+              <strong>{{ t('clinico.meuDia.vazio.pautaTitulo') }}</strong>
+              <span class="linha__duas">{{ t('clinico.meuDia.vazio.pautaTexto') }}</span>
+            </span>
+          </p>
 
           <Button
             v-if="pendenciasEscondidas > 0"
@@ -631,6 +723,29 @@ const opcoesDeEscopo = computed(() => [
             @click="pendenciasAbertas = !pendenciasAbertas"
           />
         </div>
+
+        <!-- Com ninguém na fila, o que dá para adiantar enquanto o dia está calmo. -->
+        <section
+          v-if="!fila.length && atalhos.length"
+          class="adiantar"
+          aria-labelledby="foco-adiantar"
+        >
+          <h3 id="foco-adiantar" class="adiantar__titulo">
+            {{ t('clinico.meuDia.vazio.adiantar.titulo') }}
+          </h3>
+          <ul class="lista painel">
+            <li v-for="atalho in atalhos" :key="atalho.id" class="linha">
+              <RouterLink class="linha__toque" :to="atalho.to">
+                <span class="icone-veu" aria-hidden="true"><i :class="atalho.icone" /></span>
+                <span class="linha__texto">
+                  <strong>{{ atalho.rotulo }}</strong>
+                  <span class="linha__duas">{{ atalho.dica }}</span>
+                </span>
+                <i class="ph ph-caret-right linha__seta" aria-hidden="true" />
+              </RouterLink>
+            </li>
+          </ul>
+        </section>
       </aside>
     </div>
 
@@ -658,6 +773,12 @@ const opcoesDeEscopo = computed(() => [
 .app-pj .p-button.p-button-sm {
   min-height: 38px;
   border-radius: 12px;
+}
+
+/* O contornado precisa do contorno: sem ele, num cartão branco, virava texto solto. */
+.app-pj .p-button.p-button-outlined {
+  border-width: 1px;
+  border-color: var(--linha-media);
 }
 
 /* ------------------------------------------------------------------------------ destaque */
@@ -925,8 +1046,48 @@ const opcoesDeEscopo = computed(() => [
   color: var(--app-tinta);
 }
 
+/*
+ * O destaque sem ninguém: o ícone no véu, o recado e as duas ações, de cima para baixo e alinhados
+ * à esquerda, como o cartão do paciente que ele substitui.
+ */
 .cartao--vazio {
-  font-size: 15px;
+  align-content: center;
+  justify-items: start;
+  gap: 14px;
+}
+
+.vazio-hero__icone {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  background: var(--app-veu-forte);
+  color: var(--app-salvia-texto);
+  font-size: 26px;
+}
+
+.vazio-hero__texto {
+  display: grid;
+  gap: 4px;
+}
+
+.vazio-hero__texto strong {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.vazio-hero__texto span {
+  max-width: 46ch;
+  color: var(--app-texto-2);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+
+.vazio-hero__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cartao--esqueleto {
@@ -1443,13 +1604,6 @@ const opcoesDeEscopo = computed(() => [
   justify-self: start;
 }
 
-.vazio {
-  margin: 0;
-  padding: 22px 0;
-  color: var(--app-texto-2);
-  font-size: 14.5px;
-}
-
 /* ------------------------------------------------------------------------ painel em véu */
 
 .painel {
@@ -1469,8 +1623,37 @@ const opcoesDeEscopo = computed(() => [
   align-self: center;
 }
 
-.painel .vazio {
-  padding: 18px 4px;
+/* Nada pedindo ação: a mesma linha das pendências, com o ícone do que está em ordem. */
+.calmo {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 0;
+  padding: 14px 0;
+}
+
+.icone-veu--ok {
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 22px;
+}
+
+/* O "Para adiantar": o mesmo painel em véu, com o título pequeno em cima. */
+.adiantar {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.adiantar__titulo {
+  margin: 0;
+  color: var(--app-tinta);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.adiantar .icone-veu {
+  font-size: 21px;
 }
 
 /* O quadradinho de ícone do app: 40 px, cantos de 13, ícone duotone sobre o véu do estado. */

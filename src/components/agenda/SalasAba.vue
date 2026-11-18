@@ -11,9 +11,12 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
@@ -51,10 +54,65 @@ async function carregar() {
   }
 }
 
-onMounted(() => void carregar())
+const route = useRoute()
+const router = useRouter()
+
+/*
+ * Veio do guia dos Leitos ("Criar sala de internação") com `?nova=INTERNACAO`: a gaveta abre já com
+ * o tipo escolhido, e o pedido sai da URL (recarregar não reabre).
+ */
+onMounted(async () => {
+  await carregar()
+  const pedida = route.query.nova
+  if (typeof pedida !== 'string') return
+  if (props.podeEditar && (TIPOS_DE_SALA as readonly string[]).includes(pedida)) {
+    abrir(null, pedida as TipoDeSala)
+  }
+  const query = { ...route.query }
+  delete query.nova
+  void router.replace({ query })
+})
 
 const ativas = computed(() => salas.value.filter((sala) => sala.ativa))
 const inativas = computed(() => salas.value.filter((sala) => !sala.ativa))
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: sem sala nenhuma, para
+ * que as salas servem (o tipo, as colunas da agenda, os tipos de atendimento que as usam). Cada
+ * etapa que se faz com o botão dela: "Nova sala" abre a gaveta aqui e "Configurar tipos" leva à aba
+ * Tipos de atendimento. As colunas da agenda são automáticas: sem botão.
+ */
+const passosDasSalas = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`agenda.config.sala.guia.${id}.titulo`),
+    texto: t(`agenda.config.sala.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'tipo',
+      'ph ph-door',
+      props.podeEditar
+        ? { rotulo: t('agenda.config.sala.nova'), icone: 'ph ph-plus', aoClicar: () => abrir(null) }
+        : undefined,
+    ),
+    passo('colunas', 'ph ph-columns'),
+    passo(
+      'atendimentos',
+      'ph ph-stethoscope',
+      props.podeEditar
+        ? {
+            rotulo: t('agenda.config.sala.guia.configurarTipos'),
+            icone: 'ph ph-stethoscope',
+            to: { path: '/clinica/configuracao', query: { aba: 'tipos' } },
+          }
+        : undefined,
+    ),
+  ]
+})
 
 function avisarErro(err: unknown) {
   toast.add({
@@ -78,10 +136,10 @@ const opcoesDeTipo = computed(() =>
   TIPOS_DE_SALA.map((valor) => ({ valor, rotulo: t(`agenda.config.sala.tipo.${valor}`) })),
 )
 
-function abrir(sala: Sala | null) {
+function abrir(sala: Sala | null, tipoInicial?: TipoDeSala) {
   emEdicao.value = sala
   nome.value = sala?.nome ?? ''
-  tipo.value = sala?.tipo ?? 'CONSULTORIO'
+  tipo.value = sala?.tipo ?? tipoInicial ?? 'CONSULTORIO'
   tentou.value = false
   erroNoNome.value = ''
   aberta.value = true
@@ -209,9 +267,17 @@ const ICONE_DA_SALA: Record<TipoDeSala, string> = {
       </li>
     </ul>
 
-    <p v-else-if="!salas.length" class="cfa__vazio">{{ t('agenda.config.sala.vazio') }}</p>
+    <UiVazioIlustrado
+      v-else-if="!salas.length && !erro"
+      aninhado
+      icone="ph ph-door"
+      :titulo="t('agenda.config.sala.vazio')"
+      :texto="t('agenda.config.sala.vazioTexto')"
+      :guia-titulo="t('agenda.config.sala.guia.titulo')"
+      :passos="passosDasSalas"
+    />
 
-    <template v-else>
+    <template v-else-if="salas.length">
       <ul class="ui-lista">
         <li v-for="(sala, indice) in ativas" :key="sala.id" class="ui-linha">
           <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
@@ -356,12 +422,6 @@ const ICONE_DA_SALA: Record<TipoDeSala, string> = {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 6px;
-}
-
-.cfa__vazio {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14px;
 }
 
 .cfa__subtitulo {

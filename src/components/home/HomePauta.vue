@@ -23,6 +23,7 @@ import { useI18n } from 'vue-i18n'
 import type { LinhaDaTabela } from '@/components/home/pauta-tabela'
 import UiPauta from '@/components/ui/UiPauta.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible } from '@/composables/useLayoutPreferences'
 
 import { usePautaDaHome, type ModuloDaPauta } from './usePautaDaHome'
@@ -197,10 +198,14 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
           <UiPauta v-else-if="modulo.linhas.length > 0" :linhas="linhasDe(modulo)" />
 
           <!-- Calma só com conferência completa. Parcial ou falha nunca chegam aqui. -->
-          <p v-else-if="modulo.situacao === 'ok'" class="ui-folha ui-vazio calma">
-            <i class="ph ph-check-circle" aria-hidden="true" />
-            <strong>{{ t('inicio.pauta.calma') }}</strong>
-          </p>
+          <div v-else-if="modulo.situacao === 'ok'" class="ui-folha">
+            <UiVazioIlustrado
+              aninhado
+              icone="ph ph-check-circle"
+              :titulo="t('inicio.pauta.calma')"
+              :texto="t('inicio.pauta.calmaTexto')"
+            />
+          </div>
         </div>
       </section>
     </div>
@@ -352,18 +357,6 @@ function linhasDe(modulo: ModuloDaPauta): LinhaDaTabela[] {
   color: var(--tinta);
   font-size: 14px;
   line-height: 1.45;
-}
-
-.calma {
-  grid-auto-flow: column;
-  justify-content: start;
-  align-items: center;
-  gap: 10px;
-}
-
-.calma i {
-  color: var(--ok-tinta);
-  font-size: 20px;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -17,6 +17,7 @@ import { lerErroDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { iniciaisDe } from '@/components/meu-dia/useMeuDiaDaClinica'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { DEFAULT_LOCALE, INTL_LOCALE, isLocale } from '@/i18n/locales'
@@ -72,6 +73,8 @@ type Linha = {
   to: RouteLocationRaw
   nome: string
   meta: string
+  /** O próximo passo numa frase curta, quando a ação sozinha não diz (o resumo sem app). */
+  detalhe?: string
   quando: string
   pesa: boolean
   acao: string
@@ -87,6 +90,8 @@ type Pilha = {
   falhou: boolean
   linhas: Linha[]
   telaInteira: string | null
+  /** Quantos itens a API mandou (as linhas podem juntar vários do mesmo paciente). */
+  mostrados: number
 }
 
 function juntar(partes: Array<string | null | undefined>) {
@@ -153,6 +158,52 @@ function profissionalDe(item: ItemDoPainel) {
   return item.profissionalNome ?? profissionais.value.get(item.profissionalId ?? '') ?? ''
 }
 
+/** Nas pilhas do prontuário o `id` é o atendimento: a ação abre ele, e não a ficha. */
+function atendimento(item: ItemDoPainel): RouteLocationRaw {
+  return `/clinica/atendimento/${item.id}`
+}
+
+/** "Aberto por Ana em 09/11, 16:58"; sem o nome, "Aberto em 09/11, 16:58". */
+function quemEQuando(chave: 'aberto' | 'iniciado', item: ItemDoPainel) {
+  const nome = profissionalDe(item)
+  const quando = momento(item.quando)
+  if (!quando) return nome
+  return nome
+    ? t(`clinico.atividades.api.${chave}Por`, { nome, quando })
+    : t(`clinico.atividades.api.${chave}Em`, { quando })
+}
+
+/*
+ * O resumo que não chegou: o que fazer depende do porquê. Não liberado, liberar (no atendimento);
+ * sem ligação com o app, ligar (na ficha, com a gaveta aberta); removido ou óbito, só ver.
+ */
+function acaoDoResumo(item: ItemDoPainel): Pick<Linha, 'to' | 'acao' | 'icone' | 'detalhe'> {
+  const motivo = item.motivo ?? 'NAO_LIBERADO'
+  const detalhe = t(`clinico.atividades.api.detalhe.${motivo}`)
+  if (motivo === 'NAO_LIBERADO') {
+    return {
+      to: atendimento(item),
+      acao: t('clinico.atividades.api.acao.liberarResumo'),
+      icone: 'ph ph-paper-plane-tilt',
+      detalhe,
+    }
+  }
+  if (motivo === 'SEM_VINCULO' && item.pacienteId) {
+    return {
+      to: { path: `/clinica/ficha/${item.pacienteId}`, query: { ligar: 'app' } },
+      acao: t('clinico.atividades.api.acao.ligarAoApp'),
+      icone: 'ph ph-device-mobile',
+      detalhe,
+    }
+  }
+  return {
+    to: atendimento(item),
+    acao: t('clinico.atividades.api.acao.verAtendimento'),
+    icone: 'ph ph-file-text',
+    detalhe,
+  }
+}
+
 function linhaDe(chave: ChaveDaPilha, item: ItemDoPainel): Linha {
   const base = { id: `${chave}-${item.id}`, nome: nomeDe(item), icone: ICONE[chave] }
   const verPaciente = t('clinico.atividades.api.acao.verPaciente')
@@ -200,45 +251,93 @@ function linhaDe(chave: ChaveDaPilha, item: ItemDoPainel): Linha {
         acao: t('clinico.meuDia.marcarRetorno'),
       }
     case 'vacinasAtrasadas':
+      /* A ficha abre já na gaveta de aplicar (o mesmo pedido das Ações rápidas). */
       return {
         ...base,
-        to: ficha(item),
+        to: item.pacienteId
+          ? { path: `/clinica/ficha/${item.pacienteId}`, query: { aplicar: 'vacina' } }
+          : ficha(item),
         meta: juntar([
           item.vacinaNome,
           t('clinico.atividades.api.doseDe', { dia: dia(item.data) }),
         ]),
         quando: atraso(item.diasDeAtraso),
         pesa: (item.diasDeAtraso ?? 0) >= 30,
-        acao: verPaciente,
+        acao: item.pacienteId ? t('clinico.atividades.api.acao.aplicarVacina') : verPaciente,
+        icone: 'ph ph-syringe',
       }
     case 'iniciadosNuncaAbertos':
       return {
         ...base,
-        to: ficha(item),
-        meta: juntar([profissionalDe(item), t('clinico.atividades.api.nuncaAberto')]),
+        to: atendimento(item),
+        meta: quemEQuando('iniciado', item),
+        detalhe: t('clinico.atividades.api.detalhe.nuncaAberto'),
         quando: t('clinico.atividades.api.iniciadoHa', { tempo: duracao((item.horas ?? 0) * 60) }),
         pesa: (item.horas ?? 0) >= 2,
-        acao: verPaciente,
+        acao: t('clinico.atividades.api.acao.abrirProntuario'),
+        icone: 'ph ph-door-open',
       }
     case 'rascunhosSemFecho':
       return {
         ...base,
-        to: ficha(item),
-        meta: profissionalDe(item),
+        to: atendimento(item),
+        meta: quemEQuando('aberto', item),
         quando: t('clinico.atividades.api.abertoHa', { tempo: duracao((item.horas ?? 0) * 60) }),
         pesa: (item.horas ?? 0) >= 24,
-        acao: verPaciente,
+        acao: t('clinico.atividades.api.acao.continuar'),
+        icone: 'ph ph-note-pencil',
       }
     case 'resumosNaoPublicados':
       return {
         ...base,
-        to: ficha(item),
-        meta: item.motivo ? t(`clinico.atividades.api.motivo.${item.motivo}`) : '',
+        ...acaoDoResumo(item),
+        meta: juntar([
+          item.motivo ? t(`clinico.atividades.api.motivo.${item.motivo}`) : '',
+          profissionalDe(item),
+        ]),
         quando: t('clinico.atividades.api.finalizadoEm', { quando: momento(item.quando) }),
         pesa: false,
-        acao: verPaciente,
       }
   }
+}
+
+/*
+ * Os resumos sem ligação com o app são do paciente, não do atendimento: ligar uma vez resolve
+ * todos. Uma linha por paciente, com quantos atendimentos esperam e o mais recente.
+ */
+function linhasDaPilha(chave: ChaveDaPilha, itens: ItemDoPainel[]): Linha[] {
+  if (chave !== 'resumosNaoPublicados') return itens.map((item) => linhaDe(chave, item))
+
+  const porPaciente = new Map<string, ItemDoPainel[]>()
+  const linhas: Array<Linha | string> = []
+  for (const item of itens) {
+    if (item.motivo === 'SEM_VINCULO' && item.pacienteId) {
+      const grupo = porPaciente.get(item.pacienteId)
+      if (grupo) grupo.push(item)
+      else {
+        porPaciente.set(item.pacienteId, [item])
+        linhas.push(item.pacienteId)
+      }
+    } else {
+      linhas.push(linhaDe(chave, item))
+    }
+  }
+
+  return linhas.map((linha) => {
+    if (typeof linha !== 'string') return linha
+    const grupo = porPaciente.get(linha)!
+    const recente = [...grupo].sort((a, b) => (b.quando ?? '').localeCompare(a.quando ?? ''))[0]!
+    const base = linhaDe(chave, recente)
+    if (grupo.length === 1) return base
+    return {
+      ...base,
+      meta: juntar([
+        t('clinico.atividades.api.motivo.SEM_VINCULO'),
+        t('clinico.atividades.api.atendimentosDoPaciente', { n: grupo.length }, grupo.length),
+      ]),
+      quando: t('clinico.atividades.api.ultimoEm', { quando: momento(recente.quando) }),
+    }
+  })
 }
 
 const pilhas = computed<Pilha[]>(() => {
@@ -256,8 +355,9 @@ const pilhas = computed<Pilha[]>(() => {
         icone: ICONE[chave],
         total: bloco.total ?? 0,
         falhou: bloco.falhou,
-        linhas: bloco.falhou ? [] : bloco.itens.map((item) => linhaDe(chave, item)),
+        linhas: bloco.falhou ? [] : linhasDaPilha(chave, bloco.itens),
         telaInteira: tela && rotaDoModulo(tela)?.integrada ? tela : null,
+        mostrados: bloco.falhou ? 0 : bloco.itens.length,
       },
     ]
   })
@@ -265,6 +365,23 @@ const pilhas = computed<Pilha[]>(() => {
 
 const vazio = computed(
   () => !carregando.value && !erro.value && Boolean(resposta.value) && pilhas.value.length === 0,
+)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): nada pendente é boa notícia, e o vazio
+ * conta como a lista se enche e se esvazia, em três etapas. Não tem ação: nada aqui faz pendência.
+ */
+const passosDasAtividades = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'prazo', icone: 'ph ph-clock-countdown' },
+    { id: 'papel', icone: 'ph ph-stack' },
+    { id: 'resolver', icone: 'ph ph-check-circle' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`clinico.atividades.api.guia.${id}.titulo`),
+    texto: t(`clinico.atividades.api.guia.${id}.texto`),
+  })),
 )
 
 /** "2 pedidos com o prazo vencido e 3 faltas sem justificativa." */
@@ -318,6 +435,8 @@ onMounted(() => {
     :vazio-titulo="t('clinico.atividades.vazioTitulo')"
     :vazio-descricao="t('clinico.atividades.api.vazioDescricao')"
     vazio-icone="ph ph-check-circle"
+    :vazio-guia-titulo="t('clinico.atividades.api.guia.titulo')"
+    :vazio-passos="passosDasAtividades"
     bloquear-se-suspenso
     @tentar-de-novo="carregar"
   >
@@ -377,7 +496,13 @@ onMounted(() => {
 
               <span class="ui-linha__texto">
                 <strong class="ui-linha__titulo">{{ linha.nome }}</strong>
-                <span class="ui-linha__meta atividade__meta">{{ linha.meta }}</span>
+                <span v-if="linha.meta" class="ui-linha__meta atividade__meta">{{
+                  linha.meta
+                }}</span>
+                <span v-if="linha.detalhe" class="atividade__detalhe">
+                  <i class="ph ph-arrow-bend-down-right" aria-hidden="true" />
+                  {{ linha.detalhe }}
+                </span>
               </span>
 
               <span class="ui-linha__fim atividade__fim">
@@ -400,10 +525,8 @@ onMounted(() => {
         </ul>
 
         <!-- Até 20 por pilha: o resto mora na tela do assunto. -->
-        <p v-if="!pilha.falhou && pilha.total > pilha.linhas.length" class="pilha__resto">
-          {{
-            t('clinico.atividades.api.mostrando', { n: pilha.linhas.length, total: pilha.total })
-          }}
+        <p v-if="!pilha.falhou && pilha.total > pilha.mostrados" class="pilha__resto">
+          {{ t('clinico.atividades.api.mostrando', { n: pilha.mostrados, total: pilha.total }) }}
           <RouterLink v-if="pilha.telaInteira" :to="pilha.telaInteira">
             {{ t('clinico.atividades.api.verTudo') }}
             <i class="ph ph-arrow-right" aria-hidden="true" />
@@ -436,6 +559,21 @@ onMounted(() => {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   line-clamp: 2;
+}
+
+/* O próximo passo, embaixo da frase: miúdo, com a seta de "então". */
+.atividade__detalhe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  color: var(--tinta-3);
+  font-size: 12.5px;
+}
+
+.atividade__detalhe i {
+  flex: none;
+  font-size: 13px;
 }
 
 .atividade__fim {

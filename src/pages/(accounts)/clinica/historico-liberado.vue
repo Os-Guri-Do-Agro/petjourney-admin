@@ -18,6 +18,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
 import { useTelaLarga } from '@/composables/useTelaLarga'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -60,6 +61,36 @@ const fraseDoResumo = computed(() => {
     ? t('clinico.historicoLiberado.resumo.nenhum')
     : t('clinico.historicoLiberado.resumo.valendo', { n }, n)
 })
+
+// ------------------------------------------------------------------ o vazio
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): a frase do vazio já diz que o código vem
+ * do app e se digita no balcão; as três etapas contam o resto (o que o responsável escolhe, o código
+ * de uma vez só, o Valendo e o Terminados). A ação é a mesma do alto, Receber pelo código, e mora
+ * na etapa do código (17/11/2026: cada etapa com o botão dela); escolher é do responsável, no app,
+ * e o Valendo vem sozinho.
+ */
+const passosDoHistorico = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'escolher', icone: 'ph ph-sliders-horizontal' },
+    { id: 'codigo', icone: 'ph ph-key' },
+    { id: 'valer', icone: 'ph ph-calendar-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`clinico.historicoLiberado.guia.${id}.titulo`),
+    texto: t(`clinico.historicoLiberado.guia.${id}.texto`),
+    acao:
+      id === 'codigo'
+        ? {
+            rotulo: t('clinico.historicoLiberado.acoes.receber'),
+            icone: 'ph ph-key',
+            aoClicar: () => abrir('receber'),
+          }
+        : undefined,
+  })),
+)
 
 // ------------------------------------------------------------------ as gavetas
 // Uma de cada vez, todas do mesmo lado: abrir uma guarda a outra.
@@ -144,11 +175,11 @@ function quandoAbriu(linha: LinhaDoHistorico): string {
     :vazio="historico.carregado && historico.linhas.length === 0"
     :vazio-titulo="t('clinico.historicoLiberado.vazio.titulo')"
     :vazio-descricao="t('clinico.historicoLiberado.vazio.corpo')"
-    :vazio-acao="t('clinico.historicoLiberado.acoes.receber')"
     vazio-icone="ph ph-share-network"
+    :vazio-guia-titulo="t('clinico.historicoLiberado.guia.titulo')"
+    :vazio-passos="passosDoHistorico"
     bloquear-se-suspenso
     @tentar-de-novo="carregar"
-    @acao-do-vazio="abrir('receber')"
   >
     <template v-if="fraseDoResumo" #resumo>
       <span aria-live="polite">{{ fraseDoResumo }}</span>

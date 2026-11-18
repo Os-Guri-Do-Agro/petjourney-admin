@@ -12,6 +12,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import PortalSaqueDetalheDrawer from '@/components/parceiro/PortalSaqueDetalheDrawer.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -147,7 +148,6 @@ watch(drawerVisible, (open) => {
 })
 </script>
 
-
 <template>
   <div id="partner-panel-saques" class="saques">
     <div
@@ -183,13 +183,14 @@ watch(drawerVisible, (open) => {
       />
     </div>
 
-    <div v-else-if="saques.length === 0" class="saques__estado">
-      <span class="ui-ladrilho ui-ladrilho--g" aria-hidden="true">
-        <i class="ph ph-hand-coins" />
-      </span>
-      <strong>{{ t('carteira.saques.emptyTitle') }}</strong>
-      <p>{{ t('carteira.tela.saquesVazio') }}</p>
-    </div>
+    <!-- Dentro do cartão das listas e sem botão: o "Sacar" já está no saldo, logo acima. -->
+    <UiVazioIlustrado
+      v-else-if="saques.length === 0"
+      aninhado
+      icone="ph ph-hand-coins"
+      :titulo="t('carteira.saques.emptyTitle')"
+      :texto="t('carteira.tela.saquesVazio')"
+    />
 
     <ul v-else class="ui-lista saques__lista">
       <li v-for="saque in saquesOrdenados" :key="saque.id">
@@ -233,7 +234,6 @@ watch(drawerVisible, (open) => {
     <PortalSaqueDetalheDrawer v-model:visible="drawerVisible" :saque-id="selectedSaqueId" />
   </div>
 </template>
-
 
 <style scoped>
 /* Os saques moram no cartão da página (`carteira/index.vue`): aqui não há folha própria. */

@@ -9,6 +9,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { TipoDaCasa } from '@/service/parceiro/hotel-casa-service'
 import {
@@ -116,9 +117,21 @@ defineExpose({ carregar })
 
     <p v-if="erro" class="ca__erro" role="alert">{{ erro }}</p>
     <p v-if="truncado" class="ca__nota">{{ t('reservasDoHotel.espera.truncado') }}</p>
-    <p v-if="!itens.length && !carregando" class="ca__nota">
-      {{ t('reservasDoHotel.espera.vazio') }}
-    </p>
+    <UiVazioIlustrado
+      v-if="!itens.length && !carregando"
+      aninhado
+      icone="ph ph-hourglass"
+      :titulo="t('reservasDoHotel.espera.vazio')"
+    >
+      <template v-if="podeReservar" #acao>
+        <Button
+          type="button"
+          icon="ph ph-plus"
+          :label="t('reservasDoHotel.espera.nova')"
+          @click="novaAberta = true"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <ul v-else class="ui-lista">
       <li v-for="e in itens" :key="e.id" class="ui-linha">

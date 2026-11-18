@@ -16,6 +16,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { listarTratamentos, type TratamentoNaLista } from '@/service/parceiro/adesao-service'
 
@@ -26,7 +28,7 @@ const route = useRoute()
 const router = useRouter()
 const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAdesao()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 
 type Recorte = 'PEDEM_ATENCAO' | 'TODOS'
 
@@ -85,6 +87,40 @@ function meta(item: TratamentoNaLista) {
     .join(' · ')
 }
 
+/** Quem liga o "Crítico" na ficha: a mesma conta da ficha (`TratamentosDaFicha`). */
+const podeMarcarCritico = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('prontuario.escrever'),
+)
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): sem crítico pedindo atenção, como o
+ * tratamento em casa chega até aqui, em três etapas (a casa registra as doses, a clínica marca o
+ * crítico, a queda aparece nesta lista). Em "Todos", só o que vai aparecer ali.
+ *
+ * Cada etapa com o botão dela (17/11/2026): as doses são da casa, no app, e a queda chega sozinha;
+ * só marcar o crítico é da clínica, e o botão abre "Todos", onde cada linha leva à ficha.
+ */
+const passosDoTratamento = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'doses', icone: 'ph ph-device-mobile' },
+    { id: 'critico', icone: 'ph ph-flag' },
+    { id: 'alerta', icone: 'ph ph-bell-ringing' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`adesao.guia.${id}.titulo`),
+    texto: t(`adesao.guia.${id}.texto`),
+    acao:
+      id === 'critico' && podeMarcarCritico.value
+        ? {
+            rotulo: t('adesao.guia.verTodos'),
+            icone: 'ph ph-list-bullets',
+            aoClicar: () => trocarRecorte('TODOS'),
+          }
+        : undefined,
+  })),
+)
+
 const resumo = computed(() => {
   if (!lido.value) return ''
   if (recorte.value !== 'PEDEM_ATENCAO') return t('clinico.adesao.subtitulo')
@@ -115,7 +151,23 @@ const resumo = computed(() => {
 
       <p v-if="erro && lido" class="tc__erro" role="alert">{{ erro }}</p>
 
-      <section class="ui-folha ui-lista" :aria-busy="carregando">
+      <UiVazioIlustrado
+        v-if="lido && !carregando && !itens.length && recorte === 'PEDEM_ATENCAO'"
+        icone="ph ph-pill"
+        :titulo="t('adesao.lista.vazioAtencao')"
+        :texto="t('adesao.guia.texto')"
+        :guia-titulo="t('adesao.guia.titulo')"
+        :passos="passosDoTratamento"
+      />
+
+      <UiVazioIlustrado
+        v-else-if="lido && !carregando && !itens.length"
+        icone="ph ph-house-line"
+        :titulo="t('clinico.adesao.lista.vazioTitulo')"
+        :texto="t('clinico.adesao.lista.vazioDescricao')"
+      />
+
+      <section v-else class="ui-folha ui-lista" :aria-busy="carregando">
         <ul v-if="itens.length" class="ui-lista">
           <li v-for="item in itens" :key="item.tratamentoId">
             <RouterLink class="ui-linha" :to="`/clinica/ficha/${item.pacienteId}`">
@@ -139,13 +191,6 @@ const resumo = computed(() => {
             </RouterLink>
           </li>
         </ul>
-        <p v-else-if="lido && !carregando" class="ui-vazio tc__vazio">
-          {{
-            recorte === 'PEDEM_ATENCAO'
-              ? t('adesao.lista.vazioAtencao')
-              : t('clinico.adesao.lista.vazioDescricao')
-          }}
-        </p>
       </section>
 
       <Button
@@ -196,12 +241,6 @@ const resumo = computed(() => {
 
 .tc__alerta i {
   color: var(--atencao-tinta);
-}
-
-.tc__vazio {
-  margin: 0;
-  padding: 24px 16px;
-  color: var(--tinta-2);
 }
 
 .tc__mais {

@@ -15,6 +15,7 @@
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
 import Skeleton from 'primevue/skeleton'
+import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
@@ -24,6 +25,8 @@ import ConfiguracaoOnlineGaveta from '@/components/pedidos/ConfiguracaoOnlineGav
 import { chaveDaRecusa, chaveDoMotivo, diaCurto } from '@/components/pedidos/leitura-do-pedido'
 import RespostaDoPedidoGaveta from '@/components/pedidos/RespostaDoPedidoGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -39,9 +42,11 @@ import {
   type ConfiguracaoOnline,
   type PedidoNaCaixa,
 } from '@/service/parceiro/pedidos-service'
+import { SITE_PUBLICO } from '@/utils/parceiro/pagina-publica'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const { t, locale } = useI18n()
+const toast = useToast()
 const route = useRoute()
 const router = useRouter()
 const { store, parceiroQuery } = useParceiroPortal()
@@ -157,6 +162,53 @@ onMounted(() => {
   void carregar()
   void carregarConfiguracao()
 })
+
+/* ---------------------------------------------------------------------------- o vazio */
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): na caixa de quem espera resposta, como o
+ * pedido chega até aqui, em três etapas, e a ação que faz pedido chegar: o link da clínica, quando
+ * ele recebe pedidos, ou ligar o agendamento online, quando está desligado. As outras situações
+ * só dizem o que vai aparecer nelas.
+ */
+const ICONE_DO_VAZIO: Record<AbaDaCaixa, string> = {
+  PENDENTES: 'ph ph-calendar-plus',
+  ACEITOS: 'ph ph-calendar-check',
+  RECUSADOS: 'ph ph-calendar-x',
+  ENCERRADOS: 'ph ph-archive',
+}
+
+const passosDoPedido = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'pedir', icone: 'ph ph-device-mobile' },
+    { id: 'chegar', icone: 'ph ph-tray-arrow-down' },
+    { id: 'responder', icone: 'ph ph-calendar-check' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`pedidos.caixa.guia.${id}.titulo`),
+    texto: t(`pedidos.caixa.guia.${id}.texto`),
+  })),
+)
+
+/** O link de pedidos, só quando ele recebe: agendamento ligado e pedido pelo link aceito. */
+const linkDePedidos = computed(() => {
+  const config = configuracao.value
+  return config?.ativo && config.aceitaPeloLink && config.slug
+    ? `${SITE_PUBLICO}/agendar/${encodeURIComponent(config.slug)}`
+    : null
+})
+
+async function copiarLinkDePedidos() {
+  if (!linkDePedidos.value) return
+
+  try {
+    await navigator.clipboard.writeText(linkDePedidos.value)
+    toast.add({ severity: 'success', summary: t('clinico.pedidos.link.copiado'), life: 2500 })
+  } catch {
+    toast.add({ severity: 'warn', summary: linkDePedidos.value, life: 8000 })
+  }
+}
 
 /* ------------------------------------------------------------------------------ a linha */
 
@@ -310,11 +362,52 @@ function aoResponder() {
         </li>
       </ul>
 
-      <div v-else-if="!itens.length" class="ui-folha ui-vazio pc__vazio">
-        <i class="ph ph-calendar-plus" aria-hidden="true" />
-        <strong>{{ t(`pedidos.caixa.vazio.${aba}`) }}</strong>
-        <span v-if="aba === 'PENDENTES'">{{ t('clinico.pedidos.vazio.descricao') }}</span>
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!itens.length && aba === 'PENDENTES'"
+        :icone="ICONE_DO_VAZIO.PENDENTES"
+        :titulo="t('pedidos.caixa.vazio.PENDENTES')"
+        :texto="t('clinico.pedidos.vazio.descricao')"
+        :guia-titulo="t('pedidos.caixa.guia.titulo')"
+        :passos="passosDoPedido"
+      >
+        <template
+          v-if="linkDePedidos || (configuracao && !configuracao.ativo && podeConfigurar)"
+          #acao
+        >
+          <template v-if="linkDePedidos">
+            <Button
+              type="button"
+              icon="ph ph-copy"
+              :label="t('clinico.pedidos.link.copiar')"
+              @click="copiarLinkDePedidos"
+            />
+            <Button
+              as="a"
+              :href="linkDePedidos"
+              target="_blank"
+              rel="noopener noreferrer"
+              severity="secondary"
+              outlined
+              icon="ph ph-arrow-square-out"
+              :label="t('clinico.pedidos.link.abrir')"
+            />
+          </template>
+          <Button
+            v-else
+            type="button"
+            icon="ph ph-power"
+            :label="t('pedidos.caixa.guia.ligar')"
+            @click="configAberta = true"
+          />
+        </template>
+      </UiVazioIlustrado>
+
+      <UiVazioIlustrado
+        v-else-if="!itens.length"
+        :icone="ICONE_DO_VAZIO[aba]"
+        :titulo="t(`pedidos.caixa.vazio.${aba}`)"
+        :texto="t(`pedidos.caixa.vazioTexto.${aba}`)"
+      />
 
       <ul v-else class="ui-lista ui-folha">
         <li
@@ -436,18 +529,6 @@ function aoResponder() {
 .pc__desligado > i {
   color: var(--atencao-tinta);
   font-size: 18px;
-}
-
-/* O vazio da casa (o mesmo da lista de Pacientes), centrado. */
-.pc__vazio {
-  justify-items: center;
-  padding: 40px 16px;
-  text-align: center;
-}
-
-.pc__vazio > i {
-  color: var(--tinta-3);
-  font-size: 26px;
 }
 
 .pc__linha {

@@ -34,8 +34,10 @@ import { RouterLink, useRouter } from 'vue-router'
 import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiPauta from '@/components/ui/UiPauta.vue'
 import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import HotelDevPanel from '@/features/hotel/components/base/HotelDevPanel.vue'
 import HotelTour from '@/features/hotel/components/base/HotelTour.vue'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
@@ -599,6 +601,36 @@ const vazio = computed(
     chegamHoje.value.length === 0,
 )
 
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026): o dia sem ninguém mostra o caminho do
+ * hóspede pela casa (chega, fica, sai), com as frases do tutorial desta tela, e as reservas
+ * embaixo, de onde vem quem chega.
+ */
+/*
+ * O "Ver reservas" é o botão da etapa de quem chega (17/11/2026): o check-in sai da reserva. Quem
+ * está na casa e quem sai só aparecem aqui depois dele: sem botão.
+ */
+const passosDoDia = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'chegam', titulo: 'chegam', icone: 'ph ph-sign-in' },
+    { id: 'casa', titulo: 'naCasa', icone: 'ph ph-house-line' },
+    { id: 'saem', titulo: 'saem', icone: 'ph ph-sign-out' },
+  ].map(({ id, titulo, icone }) => ({
+    id,
+    icone,
+    titulo: t(`hotel.hoje.painel.${titulo}`),
+    texto: t(`hotel.hoje.painel.tour.${id}.texto`),
+    acao:
+      id === 'chegam'
+        ? {
+            rotulo: t('hotel.mapa.verReservas'),
+            icone: 'ph ph-calendar-blank',
+            to: '/hotel/reservas',
+          }
+        : undefined,
+  })),
+)
+
 async function entregarTurno(nota: string, recebidoPor: string) {
   if (await hospedagem.entregarTurno(nota, recebidoPor)) {
     passagemAberta.value = false
@@ -666,6 +698,8 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
     :vazio-titulo="t('hotel.painel.vazioTitulo')"
     :vazio-descricao="t('hotel.painel.vazioDescricao')"
     vazio-icone="ph ph-sun-horizon"
+    :vazio-guia-titulo="t('hotel.painel.guiaTitulo')"
+    :vazio-passos="passosDoDia"
     @tentar-de-novo="carregar"
   >
     <!--
@@ -786,7 +820,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               </div>
             </li>
           </ul>
-          <p v-else class="ui-vazio">{{ t('hotel.painel.semChegadas') }}</p>
+          <UiVazioIlustrado
+            v-else
+            class="posto__vazio"
+            aninhado
+            icone="ph ph-sign-in"
+            :titulo="t('hotel.painel.semChegadas')"
+            :texto="t('hotel.painel.semChegadasTexto')"
+          />
         </section>
 
         <section class="posto posto--casa ui-folha" aria-labelledby="posto-casa">
@@ -844,7 +885,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               </RouterLink>
             </li>
           </ul>
-          <p v-else class="ui-vazio">{{ t('hotel.hospedes.vazioTitulo') }}</p>
+          <UiVazioIlustrado
+            v-else
+            class="posto__vazio"
+            aninhado
+            icone="ph ph-house-line"
+            :titulo="t('hotel.hospedes.vazioTitulo')"
+            :texto="t('hotel.painel.naCasaVaziaTexto')"
+          />
 
           <footer v-if="hospedagem.hospedes.length" class="posto__pe">
             <RouterLink class="ui-mais" to="/hotel/hospedes">
@@ -917,7 +965,14 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
               </div>
             </li>
           </ul>
-          <p v-else class="ui-vazio">{{ t('hotel.painel.semSaidas') }}</p>
+          <UiVazioIlustrado
+            v-else
+            class="posto__vazio"
+            aninhado
+            icone="ph ph-sign-out"
+            :titulo="t('hotel.painel.semSaidas')"
+            :texto="t('hotel.painel.semSaidasTexto')"
+          />
         </section>
       </div>
 
@@ -1195,13 +1250,11 @@ const passosDoTour = computed<PassoDoTour[]>(() => [
   text-decoration: none;
 }
 
-.posto .ui-vazio {
+/* O vazio do posto ocupa a altura que sobra, sob o fio do cabeçalho, como a lista ocuparia. */
+.posto__vazio {
   flex: 1;
   align-content: center;
-  justify-items: center;
   border-top: 1px solid var(--linha-suave);
-  color: var(--tinta-3);
-  text-align: center;
 }
 
 .posto__pe {

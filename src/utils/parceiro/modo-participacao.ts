@@ -181,10 +181,13 @@ export function resolveSolicitarModoError(error: unknown) {
   return error.message
 }
 
+/** O campo do formulário do cadastro que o erro marca e que recebe o foco. */
+export type CampoDoCadastro = 'nome' | 'cnpj' | 'categorias'
+
 /** Erros do funil de cadastro (Parte 9), roteados pelo `reason` estável. */
 export function resolveCadastroErrorView(error: unknown): {
   message: string
-  field?: 'nome' | 'cnpj'
+  field?: CampoDoCadastro
 } {
   const t = i18n.global.t.bind(i18n.global)
 
@@ -198,6 +201,24 @@ export function resolveCadastroErrorView(error: unknown): {
   /* O dígito verificador errado (E1-08): a frase da API, no campo do CNPJ. */
   if (error.codigo === 'CNPJ_INVALIDO') {
     return { message: error.message, field: 'cnpj' }
+  }
+
+  /*
+   * Cadastro aprovado que ganha uma categoria com exigência que ele não tem (pedidos de 17/11):
+   * clínica veterinária sem CNPJ, veterinário autônomo sem CRMV. Nada foi gravado; o `faltando`
+   * diz o que falta. O formulário não tem campo de CRMV: sem o CNPJ na lista, o foco vai às
+   * categorias, onde a escolha foi feita.
+   */
+  if (
+    error.codigo === 'PARCEIRO_CATEGORIA_EXIGE_CNPJ' ||
+    error.codigo === 'PARCEIRO_CATEGORIA_EXIGE_CRMV'
+  ) {
+    const faltando = Array.isArray(error.detalhes.faltando) ? error.detalhes.faltando : []
+    const faltaCnpj = faltando.length
+      ? faltando.includes('CNPJ')
+      : error.codigo === 'PARCEIRO_CATEGORIA_EXIGE_CNPJ'
+
+    return { message: error.message, field: faltaCnpj ? 'cnpj' : 'categorias' }
   }
 
   switch (error.reason) {

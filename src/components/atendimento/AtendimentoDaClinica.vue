@@ -49,6 +49,7 @@ import AtoGaveta from './AtoGaveta.vue'
 import CondutaDoAtendimento from './CondutaDoAtendimento.vue'
 import DiagnosticoDoAtendimento from './DiagnosticoDoAtendimento.vue'
 import ExameDoAtendimento from './ExameDoAtendimento.vue'
+import AtendimentoFinalizadoDialogo from './AtendimentoFinalizadoDialogo.vue'
 import FinalizarAtendimentoGaveta from './FinalizarAtendimentoGaveta.vue'
 import PreConsultaNoAtendimento from './PreConsultaNoAtendimento.vue'
 import ReceitaDoAtendimento from './ReceitaDoAtendimento.vue'
@@ -315,11 +316,33 @@ const itensDoMenu = computed(() => {
   return itens
 })
 
+/*
+ * Finalizou: no lugar do toast, a janela com os próximos passos (liberar o resumo, marcar o
+ * retorno, escrever um adendo). Enquanto ela está aberta, o resultado dessas ações aparece nela, e
+ * não em toast (que ficaria por cima do X).
+ */
+const concluidoAberto = ref(false)
+const avisoDoConcluido = ref('')
+const adendoDepoisDeFechar = ref(false)
+
 function finalizado(novo: Atendimento) {
   edicao.substituir(novo)
   faltam.value = []
   invalidarPendenciasDoPortal()
-  toast.add({ severity: 'success', summary: t('atendimento.finalizar.feito'), life: 4000 })
+  avisoDoConcluido.value = ''
+  concluidoAberto.value = true
+}
+
+/* O adendo é uma gaveta: abre depois que a janela some, para as duas não disputarem o foco. */
+function pedirAdendo() {
+  adendoDepoisDeFechar.value = true
+  concluidoAberto.value = false
+}
+
+function concluidoFechou() {
+  if (!adendoDepoisDeFechar.value) return
+  adendoDepoisDeFechar.value = false
+  adendoAberto.value = true
 }
 
 function anulado(novo: Atendimento) {
@@ -340,26 +363,28 @@ async function liberar() {
   const a = atendimento.value
   if (!a) return
   liberando.value = true
+  avisoDoConcluido.value = ''
   try {
     const resposta = await liberarResumo(a.id, parceiroQuery())
-    toast.add({
-      severity: resposta.publicado ? 'success' : 'warn',
-      summary: resposta.publicado
-        ? t('atendimento.resumo.publicado')
-        : t(`atendimento.resumo.motivo.${resposta.motivo ?? 'SEM_VINCULO'}`),
-      life: 5000,
-    })
+    /* Com a janela de concluído aberta, o passo do resumo já mostra o resultado. */
+    if (!concluidoAberto.value) {
+      toast.add({
+        severity: resposta.publicado ? 'success' : 'warn',
+        summary: resposta.publicado
+          ? t('atendimento.resumo.publicado')
+          : t(`atendimento.resumo.motivo.${resposta.motivo ?? 'SEM_VINCULO'}`),
+        life: 5000,
+      })
+    }
     invalidarPendenciasDoPortal()
     await edicao.reler()
   } catch (err) {
     const motivo = motivoDaRecusa(err)
-    toast.add({
-      severity: 'error',
-      summary: motivo
-        ? t(`atendimento.selo.${motivo}`)
-        : lerErroDoCadastro(err, t('atendimento.resumo.erro')).mensagem,
-      life: 6000,
-    })
+    const frase = motivo
+      ? t(`atendimento.selo.${motivo}`)
+      : lerErroDoCadastro(err, t('atendimento.resumo.erro')).mensagem
+    if (concluidoAberto.value) avisoDoConcluido.value = frase
+    else toast.add({ severity: 'error', summary: frase, life: 6000 })
   } finally {
     liberando.value = false
   }
@@ -440,7 +465,8 @@ async function marcar() {
         : lido.codigo === 'RETORNO_NAO_DEFINIDO'
           ? t('atendimento.retornos.naoDefinidoNoAtendimento')
           : lido.mensagem
-    toast.add({ severity: 'warn', summary: frase, life: 7000 })
+    if (concluidoAberto.value) avisoDoConcluido.value = frase
+    else toast.add({ severity: 'warn', summary: frase, life: 7000 })
   } finally {
     marcando.value = false
   }
@@ -823,6 +849,30 @@ const aguardaSelo = computed(
           :atendimento="atendimento"
           :aviso="avisoDoAnular"
           @anulado="anulado"
+        />
+        <AtendimentoFinalizadoDialogo
+          v-model:visible="concluidoAberto"
+          :pet="atendimento.paciente.nome"
+          :resumo="{
+            publicado: atendimento.resumo.publicado,
+            frase: fraseDoResumo,
+            temMotivo: Boolean(atendimento.resumo.motivoNaoPublicado),
+          }"
+          :pode-liberar="podeLiberar"
+          :liberando="liberando"
+          :retorno="{
+            dias: atendimento.conduta.retornoTipoId ? atendimento.conduta.retornoEmDias : null,
+            marcado: Boolean(atendimento.conduta.retornoAgendamentoId),
+          }"
+          :pode-marcar-retorno="podeMarcarRetorno"
+          :marcando="marcando"
+          :pode-adendo="podeFinalizar"
+          :voltar="voltar"
+          :aviso="avisoDoConcluido"
+          @liberar="liberar"
+          @marcar-retorno="marcar"
+          @adendo="pedirAdendo"
+          @fechou="concluidoFechou"
         />
         <AdendoGaveta
           v-model:visible="adendoAberto"

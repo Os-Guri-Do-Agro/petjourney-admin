@@ -13,6 +13,9 @@ import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import UiLinhasCarregando from '@/components/ui/UiLinhasCarregando.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
@@ -130,6 +133,53 @@ function metaDaVacina(vacina: VacinaNaGeladeira) {
     .filter(Boolean)
     .join(' · ')
 }
+
+/*
+ * O vazio que ensina (o desenho de Acessos, 17/11/2026), dentro do cartão: com a geladeira vazia,
+ * como o estoque anda (receber o lote, a aplicação que dá baixa, o mínimo que avisa). Cada etapa
+ * com o botão dela: "Receber lote" abre a gaveta aqui; "Aplicar vacina" (na lista de chamada) e
+ * "Definir mínimo" (na linha da vacina) ficam apagados até o primeiro lote.
+ */
+const aplica = computed(() => escreve.value && store.temPermissao('vacina.aplicar'))
+
+const passosDoEstoque = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`estoque.guia.${id}.titulo`),
+    texto: t(`estoque.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'receber',
+      'ph ph-package',
+      movimenta.value
+        ? { rotulo: t('estoque.receber.acao'), icone: 'ph ph-plus', aoClicar: () => receber(null) }
+        : undefined,
+    ),
+    passo(
+      'aplicar',
+      'ph ph-syringe',
+      aplica.value
+        ? {
+            rotulo: t('vacinas.aplicar.titulo'),
+            icone: 'ph ph-syringe',
+            to: '/clinica/vacinas',
+            bloqueada: true,
+          }
+        : undefined,
+    ),
+    passo(
+      'avisar',
+      'ph ph-bell-ringing',
+      planeja.value
+        ? { rotulo: t('estoque.guia.definirMinimo'), icone: 'ph ph-bell-ringing', bloqueada: true }
+        : undefined,
+    ),
+  ]
+})
 
 /* ------------------------------------------------------------------------------- lotes */
 
@@ -279,7 +329,29 @@ function mudou(texto: string) {
           </span>
         </li>
       </ul>
-      <p v-else-if="geladeira" class="gl__nota">{{ t('estoque.vazio') }}</p>
+      <UiVazioIlustrado
+        v-else-if="geladeira"
+        aninhado
+        icone="ph ph-snowflake"
+        :titulo="t('estoque.vazioTitulo')"
+        :texto="t('estoque.vazio')"
+        :guia-titulo="t('estoque.guia.titulo')"
+        :passos="passosDoEstoque"
+      />
+      <!-- A primeira leitura: as linhas esperando, ou o erro com o tentar de novo. -->
+      <p v-else-if="erro && !carregando" class="eg__erro gl__falha" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>{{ erro }}</span>
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          outlined
+          :label="t('cadastro.tentarDeNovo')"
+          @click="carregar"
+        />
+      </p>
+      <UiLinhasCarregando v-else :linhas="4" :com-acao="movimenta || planeja" />
     </section>
 
     <section v-if="geladeira?.lotes.length" class="ui-folha ui-cartao" aria-labelledby="gl-lotes">
@@ -449,9 +521,17 @@ function mudou(texto: string) {
   gap: 6px;
 }
 
+.gl__falha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 14px 0 0;
+}
+
 .gl__nota {
-  margin: 0;
-  padding: 0 24px 14px;
+  margin: 14px 0 0;
+  padding: 0;
   color: var(--tinta-2);
   font-size: 14px;
 }

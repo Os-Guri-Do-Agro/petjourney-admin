@@ -25,6 +25,8 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useLogout } from '@/composables/useLogout'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
@@ -93,6 +95,20 @@ const resumoDaTela = computed(
 
 /** Conta sem empresa (o Início dela diz "Portal ainda não liberado"): o próximo passo é cadastrar a sua. */
 const semEmpresa = computed(() => store.semAcessoParceiro)
+
+/* A caixa vazia ensina como o convite chega: a empresa convida, o e-mail traz o link, você aceita. */
+const passosDoConvite = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'convida', icone: 'ph ph-users-three' },
+    { id: 'email', icone: 'ph ph-envelope-simple' },
+    { id: 'aceita', icone: 'ph ph-link-simple' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`parceiro.convite.caixa.guia.${id}.titulo`),
+    texto: t(`parceiro.convite.caixa.guia.${id}.texto`),
+  })),
+)
 
 /** Depois de recusar, os convites que ainda esperam esta conta, se houver. */
 const outrosConvites = computed(() =>
@@ -568,16 +584,30 @@ onMounted(() => {
         />
       </div>
 
-      <ul v-else-if="convites" class="ui-lista ui-folha">
-        <li v-if="!convites.length" class="ui-linha">
-          <span class="convite-linha__logo convite-linha__logo--sem" aria-hidden="true">
-            <i class="ph ph-tray" />
-          </span>
-          <span class="ui-linha__texto">
-            <span class="ui-linha__titulo">{{ t('parceiro.convite.caixa.vazio') }}</span>
-          </span>
-        </li>
+      <!--
+        Nenhum convite: como ele chega (17/11/2026, "o sistema deve ensinar"). Convidar é da empresa
+        e aceitar é pelo link do e-mail, então as etapas não têm botão; o que se faz aqui é, para a
+        conta sem empresa, cadastrar a sua.
+      -->
+      <UiVazioIlustrado
+        v-else-if="convites && !convites.length"
+        icone="ph ph-envelope-simple-open"
+        :titulo="t('parceiro.convite.caixa.vazio')"
+        :texto="t('parceiro.convite.caixa.vazioTexto')"
+        :guia-titulo="t('parceiro.convite.caixa.guia.titulo')"
+        :passos="passosDoConvite"
+      >
+        <template v-if="semEmpresa" #acao>
+          <Button
+            :as="RouterLink"
+            to="/settings?aba=empresa"
+            icon="ph ph-buildings"
+            :label="t('frame.noAccess.ctaPrograms')"
+          />
+        </template>
+      </UiVazioIlustrado>
 
+      <ul v-else-if="convites" class="ui-lista ui-folha">
         <li v-for="convite in convites" :key="convite.conviteId" class="ui-linha convite-linha">
           <img
             v-if="convite.parceiro.logoUrl"

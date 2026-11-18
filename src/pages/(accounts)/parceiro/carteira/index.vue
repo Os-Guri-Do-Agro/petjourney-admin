@@ -12,6 +12,8 @@ import PortalCarteiraVisaoPanel, {
   type EstadoDaCarteira,
 } from '@/components/parceiro/panels/PortalCarteiraVisaoPanel.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { usePartnerTabs } from '@/composables/usePartnerTabs'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -57,17 +59,14 @@ const loadError = computed(() =>
   store.loadState === 'error' && !store.semAcessoParceiro ? store.errorMessage : '',
 )
 
-const showAfiliadoGate = computed(
-  () => store.loadState === 'ready' && !store.statusAfiliadoAtivo,
-)
+const showAfiliadoGate = computed(() => store.loadState === 'ready' && !store.statusAfiliadoAtivo)
 
 /**
  * Pedido já feito (ou cadastro em análise): a folha diz que está em análise e leva aos programas
  * para acompanhar. "Solicitar programa afiliado" mandava pedir de novo o que já estava pedido.
  */
 const gateEmAnalise = computed(
-  () =>
-    store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO',
+  () => store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO',
 )
 
 const estado = ref<EstadoDaCarteira | null>(null)
@@ -106,6 +105,39 @@ function goToProgramas() {
   void router.replace({ path: '/parceiro/programas', hash: '#programas' })
 }
 
+/*
+ * Sem o programa, como a carteira abre (17/11/2026, "o sistema deve ensinar"): pedir o programa é
+ * do dono, e a etapa ganha o botão (ou o "Feito", com o pedido em análise); a aprovação é da equipe
+ * PetJourney, sem botão; a chave PIX se cadastra aqui mesmo, apagada até a carteira abrir.
+ */
+/** A etapa de pedir tem botão só para o dono que ainda não pediu; fora isso, "Ver programas" embaixo. */
+const pedirPeloGuia = computed(() => store.isDono && !gateEmAnalise.value)
+
+const passosDaCarteira = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, extra: Partial<PassoDoGuia> = {}): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`carteira.gate.guia.${id}.titulo`),
+    texto: t(`carteira.gate.guia.${id}.texto`),
+    ...extra,
+  })
+
+  return [
+    passo('pedir', 'ph ph-paper-plane-tilt', {
+      feito: gateEmAnalise.value,
+      acao: pedirPeloGuia.value
+        ? { rotulo: t('carteira.gate.cta'), icone: 'ph ph-squares-four', aoClicar: goToProgramas }
+        : undefined,
+    }),
+    passo('analise', 'ph ph-hourglass'),
+    passo('pix', 'ph ph-key', {
+      acao: store.isDono
+        ? { rotulo: t('carteira.saudacao.cadastrarPix'), icone: 'ph ph-key', bloqueada: true }
+        : undefined,
+    }),
+  ]
+})
+
 onMounted(() => {
   void ensureContext()
 })
@@ -129,25 +161,29 @@ onMounted(() => {
     </template>
 
     <!-- Sem o programa de afiliados não há carteira: a folha diz isso e leva aos programas. -->
-    <div v-if="showAfiliadoGate" class="carteira-gate ui-folha">
-      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
-        <i class="ph ph-wallet" />
-      </span>
-      <h2>{{ gateEmAnalise ? t('carteira.gate.emAnaliseTitle') : t('carteira.gate.title') }}</h2>
-      <p>{{ gateEmAnalise ? t('carteira.gate.emAnaliseBody') : t('carteira.gate.body') }}</p>
-      <Button
-        type="button"
-        icon="ph ph-squares-four"
-        :label="gateEmAnalise ? t('divulgacao.shareKit.esperaCta') : t('carteira.gate.cta')"
-        @click="goToProgramas"
-      />
-    </div>
+    <UiVazioIlustrado
+      v-if="showAfiliadoGate"
+      icone="ph ph-wallet"
+      :titulo="gateEmAnalise ? t('carteira.gate.emAnaliseTitle') : t('carteira.gate.title')"
+      :texto="gateEmAnalise ? t('carteira.gate.emAnaliseBody') : t('carteira.gate.body')"
+      :guia-titulo="t('carteira.gate.guia.titulo')"
+      :passos="passosDaCarteira"
+    >
+      <!-- Pedido feito, ou sem poder pedir: a etapa não tem botão, e "Ver programas" acompanha. -->
+      <template v-if="!pedirPeloGuia" #acao>
+        <Button
+          type="button"
+          icon="ph ph-squares-four"
+          :label="t('divulgacao.shareKit.esperaCta')"
+          severity="secondary"
+          outlined
+          @click="goToProgramas"
+        />
+      </template>
+    </UiVazioIlustrado>
 
     <div v-else class="carteira">
-      <PortalCarteiraVisaoPanel
-        @estado="estado = $event"
-        @needs-programas="goToProgramas"
-      />
+      <PortalCarteiraVisaoPanel @estado="estado = $event" @needs-programas="goToProgramas" />
 
       <section class="carteira__listas ui-folha ui-cartao" :aria-label="tabsAriaLabel">
         <header class="ui-cartao__cabeca carteira__cabeca">
@@ -205,32 +241,6 @@ onMounted(() => {
   min-height: 34px;
   padding-inline: 14px;
   font-size: 14px;
-}
-
-.carteira-gate {
-  display: grid;
-  max-width: 560px;
-  justify-items: center;
-  gap: 8px;
-  margin: 8px auto;
-  padding: 40px 32px;
-  text-align: center;
-}
-
-.carteira-gate h2 {
-  margin: 10px 0 0;
-  color: var(--tinta);
-  font-size: 18px;
-  font-weight: 650;
-}
-
-.carteira-gate p {
-  max-width: 48ch;
-  margin: 0 0 12px;
-  color: var(--tinta-2);
-  line-height: 1.5;
-  /* Sem "e-" sozinho no fim da linha e "mail." na outra. */
-  text-wrap: pretty;
 }
 
 @media (max-width: 640px) {

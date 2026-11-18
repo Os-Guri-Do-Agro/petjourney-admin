@@ -200,6 +200,16 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         icon: 'ph ph-note-pencil',
       },
       { key: 'clinico.internacao.titulo', to: '/clinica/internacao', icon: 'ph ph-building' },
+      /*
+       * O checklist do plantão (E5-02): o que dar agora, de todos os internados. Só se chegava a ele
+       * por um link pequeno dentro do mapa; agora é aba do destino Internação (`espacos.ts`).
+       */
+      {
+        key: 'espacos.abas.plantao',
+        to: '/clinica/internacao/plantao',
+        icon: 'ph ph-list-checks',
+        soComApi: true,
+      },
       /* O boletim a ligar ou a enviar (E5-03): a recepção liga e envia; o selo é o contador. */
       {
         key: 'internacao.boletim.fila',
@@ -529,28 +539,29 @@ export function useAppNavigation() {
 
   const portalItems = computed<AppNavigationItem[]>(() => {
     void locale.value
-    const items: AppNavigationItem[] = [
-      { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'ph ph-squares-four' },
-      { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
-    ]
+    const items: AppNavigationItem[] = []
 
-    /*
-     * A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada.
-     * Antes do contexto chegar vale a forma da última sessão, para o item não entrar atrasado.
-     */
-    if (parceiroStore.menuComIndicados) {
+    /* Com os dois programas ativos, Programas não tem mais o que pedir e sai do menu. */
+    if (parceiroStore.menuComProgramas) {
       items.push({
-        label: t('nav.items.indicados'),
-        to: '/parceiro/indicados',
-        icon: 'ph ph-user-list',
+        label: t('nav.items.programas'),
+        to: '/parceiro/programas',
+        icon: 'ph ph-squares-four',
       })
     }
 
-    items.push({
-      label: t('nav.items.acessos'),
-      to: '/parceiro/acessos',
-      icon: 'ph ph-clipboard-text',
-    })
+    /*
+     * Clientes primeiro, e nela Acessos, que se abre todo dia, antes da Divulgação. Indicados é uma
+     * aba da Divulgação desde 17/11/2026, não um item do menu.
+     */
+    items.push(
+      { label: t('nav.items.acessos'), to: '/parceiro/acessos', icon: 'ph ph-clipboard-text' },
+      {
+        label: t('nav.items.divulgacao'),
+        to: '/parceiro/divulgacao',
+        icon: 'ph ph-share-network',
+      },
+    )
 
     if (parceiroStore.menuComCarteira) {
       items.push({

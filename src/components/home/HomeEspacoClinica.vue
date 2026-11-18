@@ -21,6 +21,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import { useAtalhosDoDia } from '@/components/meu-dia/atalhos-do-dia'
 import { useEspacos, type Espaco } from '@/navegacao/espacos'
 
 import type { NumeroDoEspaco, PassoDoEspaco } from './espaco-da-home'
@@ -33,6 +34,7 @@ defineProps<{ espaco: Espaco }>()
 const { t } = useI18n()
 const dia = useDiaDaCasa()
 const { pedidosDaClinica, pedidosDaClinicaCarregados } = useEspacos()
+const { podeMarcar } = useAtalhosDoDia()
 
 const agenda = computed(() => dia.clinica.value)
 const pronta = computed(() => agenda.value.carga === 'pronta')
@@ -221,6 +223,15 @@ const passo = computed<PassoDoEspaco | null>(() => {
       }),
       icone: 'ph ph-calendar-dots',
       to: { path: '/clinica/agenda', query: { foco: proximo.id } },
+    }
+  }
+
+  /* Nada parado: em vez de só dizer que está calmo, o pé propõe marcar um horário. */
+  if (podeMarcar.value) {
+    return {
+      rotulo: t('inicio.passo.calmaMarcar'),
+      icone: 'ph ph-calendar-plus',
+      to: { path: '/clinica/agenda', query: { novo: '1' } },
     }
   }
 

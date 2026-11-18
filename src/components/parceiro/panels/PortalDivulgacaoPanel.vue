@@ -2,21 +2,27 @@
 /**
  * O convite para quem ainda não usa o PetJourney: quem cria a conta com o código da empresa fica
  * ligado a ela, e as assinaturas dessa pessoa rendem participação no programa de afiliados. Três
- * jeitos de convidar (passar o código, mandar o link, imprimir o QR), as leituras do QR e as
- * regras. Com a flag de cupons ligada, os cupons e os resgates ganham seções próprias embaixo.
+ * jeitos de convidar, cada um num cartão na cor dele (o código, o link e o QR), as leituras do QR e
+ * o "Como funciona" em etapas, com as regras completas sob demanda (17/11/2026: "algo fácil de
+ * entender para não precisar ter tanto texto, mas legal"). Com a flag de cupons ligada, os cupons e
+ * os resgates ganham seções próprias embaixo.
  *
  * As âncoras `#indicacao`, `#cupons` e `#resgates` são o destino dos redirects legados
  * (`?aba=indicacao|cupons|resgates`) e do link "Resgates" do diálogo de validar cupom.
  */
+import { PhKeyboard, PhLink, PhQrCode } from '@phosphor-icons/vue'
 import Button from 'primevue/button'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import IndicacaoMetricasCard from '@/components/parceiro/IndicacaoMetricasCard.vue'
 import IndicacaoQrBlock from '@/components/parceiro/IndicacaoQrBlock.vue'
+import UiPassos, { type PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiSecao from '@/components/ui/UiSecao.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 // Volta junto com o teaser de cupom (ver o comentário no fim do template).
 // import { useCupomComingSoon } from '@/composables/useCupomComingSoon'
 import { useCupomResgateModal } from '@/composables/useCupomResgateModal'
@@ -44,7 +50,7 @@ const PROGRAMAS_ROUTE = { path: '/parceiro/programas', hash: '#programas' } as c
 const { t, locale } = useI18n()
 const toast = useToast()
 const { store, ensureContext, parceiroQuery } = useParceiroPortal()
-const { lastSuccessAt } = useCupomResgateModal()
+const { lastSuccessAt, canOpen: podeValidarCupom, open: abrirValidarCupom } = useCupomResgateModal()
 // const { open: openCupomComingSoon } = useCupomComingSoon()
 const cupomFeatureEnabled = CUPOM_FEATURE_ENABLED
 
@@ -70,15 +76,55 @@ const TERM_ICONS: Record<(typeof TERM_IDS)[number], string> = {
 
 const termsOpen = ref(false)
 
+/** "Como funciona" em três etapas, sem botão: quem age é a pessoa convidada. */
+const passosDoConvite = computed<PassoDoGuia[]>(() =>
+  [
+    { id: 'convida', icone: 'ph ph-share-network' },
+    { id: 'conta', icone: 'ph ph-user-circle-plus' },
+    { id: 'rende', icone: 'ph ph-percent' },
+  ].map(({ id, icone }) => ({
+    id,
+    icone,
+    titulo: t(`divulgacao.convite.passos.${id}.titulo`),
+    texto: t(`divulgacao.convite.passos.${id}.texto`),
+  })),
+)
+
+/** Pedido já feito, ou o cadastro em análise: a primeira etapa da espera está feita. */
+const esperaEmAnalise = computed(
+  () => store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO',
+)
+
 /**
  * O título da espera. Com o pedido já feito (ou o cadastro em análise), "Programa afiliado
  * necessário" mandava pedir de novo o que estava em análise.
  */
 const tituloDaEspera = computed(() =>
-  store.statusAuditoria === 'PENDENTE' || store.modoBloco('afiliado').status === 'SOLICITADO'
-    ? t('carteira.gate.emAnaliseTitle')
-    : t('carteira.gate.title'),
+  esperaEmAnalise.value ? t('carteira.gate.emAnaliseTitle') : t('carteira.gate.title'),
 )
+
+/** Como o código é liberado: o pedido (feito, se já foi), a aprovação e o código nesta tela. */
+const passosDaEspera = computed<PassoDoGuia[]>(() => [
+  {
+    id: 'pedir',
+    icone: 'ph ph-paper-plane-tilt',
+    titulo: t('carteira.gate.guia.pedir.titulo'),
+    texto: t('carteira.gate.guia.pedir.texto'),
+    feito: esperaEmAnalise.value,
+  },
+  {
+    id: 'analise',
+    icone: 'ph ph-hourglass',
+    titulo: t('carteira.gate.guia.analise.titulo'),
+    texto: t('carteira.gate.guia.analise.texto'),
+  },
+  {
+    id: 'codigo',
+    icone: 'ph ph-qr-code',
+    titulo: t('divulgacao.espera.guia.codigo.titulo'),
+    texto: t('divulgacao.espera.guia.codigo.texto'),
+  },
+])
 
 const indicacaoTerms = computed(() =>
   TERM_IDS.map((id) => ({
@@ -149,15 +195,32 @@ const metrics = computed(() => {
   ]
 })
 
-async function copyToClipboard(value: string, label: string) {
+/*
+ * O que acabou de ser copiado: o próprio botão diz "Copiado" por dois segundos, ali onde o olho
+ * está, em vez de um aviso no canto da tela.
+ */
+const copiado = ref<'codigo' | 'link' | null>(null)
+let tempoDoCopiado: ReturnType<typeof setTimeout> | undefined
+
+async function copiar(qual: 'codigo' | 'link') {
+  const valor = qual === 'codigo' ? codigoIndicacao.value : linkIndicacao.value
+
+  if (await copyToClipboard(valor)) {
+    copiado.value = qual
+    clearTimeout(tempoDoCopiado)
+    tempoDoCopiado = setTimeout(() => {
+      copiado.value = null
+    }, 2000)
+  }
+}
+
+onBeforeUnmount(() => clearTimeout(tempoDoCopiado))
+
+/** Copia; quando o navegador recusa, o aviso diz como copiar à mão. */
+async function copyToClipboard(value: string) {
   try {
     await navigator.clipboard.writeText(value)
-    toast.add({
-      severity: 'success',
-      summary: t('divulgacao.toast.copied'),
-      detail: t('divulgacao.toast.copiedDetail', { label }),
-      life: 2500,
-    })
+    return true
   } catch {
     toast.add({
       severity: 'warn',
@@ -165,6 +228,7 @@ async function copyToClipboard(value: string, label: string) {
       detail: t('divulgacao.toast.copyFailDetail'),
       life: 3000,
     })
+    return false
   }
 }
 
@@ -367,31 +431,18 @@ watch(lastSuccessAt, (at) => {
     <!-- ------------------------------------------------------------ carregando -->
     <template v-else-if="loading">
       <div
-        class="kit ui-folha"
+        class="convite"
         role="status"
         aria-live="polite"
         aria-busy="true"
         :aria-label="t('divulgacao.indicacao.loadingAria')"
       >
-        <div class="kit__cabeca" aria-hidden="true">
-          <Skeleton width="44px" height="44px" border-radius="13px" />
-          <div class="kit__titulos">
-            <Skeleton width="16rem" height="1.1rem" border-radius="6px" />
-            <Skeleton width="min(100%, 30rem)" height="0.8rem" border-radius="6px" />
-          </div>
-        </div>
-        <div class="kit__principal" aria-hidden="true">
-          <div v-for="n in 2" :key="n" class="kit__forma">
-            <div class="kit__forma-cabeca">
-              <Skeleton width="36px" height="36px" border-radius="11px" />
-              <div class="kit__forma-titulos">
-                <Skeleton width="8rem" height="0.9rem" border-radius="6px" />
-                <Skeleton width="12rem" height="0.75rem" border-radius="6px" />
-              </div>
-            </div>
-            <Skeleton width="100%" height="4.5rem" border-radius="14px" />
-          </div>
-        </div>
+        <Skeleton width="20rem" height="1.2rem" border-radius="6px" />
+        <ul class="convite__vias" aria-hidden="true">
+          <li v-for="n in 3" :key="n">
+            <Skeleton width="100%" height="15rem" border-radius="22px" />
+          </li>
+        </ul>
       </div>
 
       <div
@@ -421,141 +472,130 @@ watch(lastSuccessAt, (at) => {
           {{ t('divulgacao.indicacao.lede') }}
         </p>
 
-        <!-- Sem afiliado ativo não há código: a folha diz o que falta e leva aos programas. -->
-        <div v-if="!indicacao.podeIndicar" class="estado ui-folha">
-          <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
-            <i class="ph ph-hourglass" />
-          </span>
-          <h2>{{ tituloDaEspera }}</h2>
-          <!--
-            O `aviso` da API diz o que falta em cada estado (cadastro em análise, recusado,
-            programa não pedido...) e vem no idioma da tela desde o PJ-4BI7TE. A frase fixa só
-            entra quando ele não vem.
-          -->
-          <p>{{ indicacao.aviso || t('divulgacao.shareKit.esperaHint') }}</p>
-          <RouterLink class="p-button p-component estado__acao" :to="PROGRAMAS_ROUTE">
-            <i class="ph ph-squares-four" aria-hidden="true" />
-            {{ t('divulgacao.shareKit.esperaCta') }}
-          </RouterLink>
-        </div>
+        <!--
+          Sem afiliado ativo não há código: o que falta, como o código é liberado e o caminho dos
+          programas. O `aviso` da API diz o que falta em cada estado (cadastro em análise,
+          recusado, programa não pedido...) e vem no idioma da tela desde o PJ-4BI7TE; a frase
+          fixa só entra quando ele não vem. Indicação nunca no botão cheio (03/11): as etapas não
+          têm botão (o de pedir seria o cheio) e "Ver programas" vai embaixo, contornado.
+        -->
+        <UiVazioIlustrado
+          v-if="!indicacao.podeIndicar"
+          icone="ph ph-hourglass"
+          :titulo="tituloDaEspera"
+          :texto="indicacao.aviso || t('divulgacao.shareKit.esperaHint')"
+          :guia-titulo="t('divulgacao.espera.guia.titulo')"
+          :passos="passosDaEspera"
+        >
+          <template #acao>
+            <Button
+              :as="RouterLink"
+              :to="PROGRAMAS_ROUTE"
+              icon="ph ph-squares-four"
+              :label="t('divulgacao.shareKit.esperaCta')"
+              severity="secondary"
+              outlined
+            />
+          </template>
+        </UiVazioIlustrado>
 
         <!--
-          O convite numa folha só. Em cima, para que serve: quem ainda não usa o app e cria a conta
-          com o código fica ligado à empresa, e as assinaturas rendem participação. Embaixo, os
-          três jeitos de convidar, cada um com um verbo e uma frase: passar o código e mandar o
-          link (os dois num campo do mesmo desenho, com o copiar à mão) e imprimir o QR (ao lado).
+          Os três jeitos de convidar, cada um num cartão na cor dele, lado a lado, no desenho das
+          Ações rápidas do Início (17/11/2026, "algo mais legal, fácil de entender, sem tanto
+          texto"): o verbo e uma frase curta, a coisa em si num quadro branco do mesmo tamanho nos
+          três (o código, o link, o QR) e os botões embaixo. O ícone do jeito, grande e meio
+          girado, sai pela borda do cartão.
         -->
-        <div
-          v-else
-          class="kit ui-folha"
-          :class="{ 'kit--com-qr': Boolean(indicacao.qrImageUrl) }"
-          role="group"
-          aria-labelledby="kit-titulo"
-        >
-          <header class="kit__cabeca">
-            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
-              <i class="ph ph-user-plus" />
-            </span>
-            <div class="kit__titulos">
-              <h2 id="kit-titulo" class="kit__titulo">{{ t('divulgacao.kit.titulo') }}</h2>
-              <p class="kit__descricao">{{ t('divulgacao.kit.descricao') }}</p>
-            </div>
-          </header>
-
-          <div class="kit__principal">
-            <div class="kit__forma kit__forma--codigo">
-              <div class="kit__forma-cabeca">
-                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-keyboard" /></span>
-                <div class="kit__forma-titulos">
-                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.codigo') }}</h3>
-                  <p class="kit__forma-dica">{{ t('divulgacao.kit.codigoDica') }}</p>
-                </div>
+        <UiSecao v-else id="convite" :titulo="t('divulgacao.kit.titulo')">
+          <ul class="convite__vias">
+            <li class="via via--pets">
+              <PhKeyboard class="via__fundo" weight="duotone" aria-hidden="true" />
+              <div class="via__cabeca">
+                <span class="via__selo" aria-hidden="true"><i class="ph ph-keyboard" /></span>
+                <span class="via__titulos">
+                  <h3 class="via__titulo">{{ t('divulgacao.kit.codigo') }}</h3>
+                  <span class="via__dica">{{ t('divulgacao.convite.codigoDica') }}</span>
+                </span>
               </div>
-
-              <!--
-                O código no campo, como o link logo abaixo, com o copiar dentro dele. O rótulo
-                "Seu código de indicação" saiu da vista: o título ao lado já diz o que é, e ele fica
-                para o leitor de tela.
-              -->
-              <div
-                class="kit__campo kit__codigo"
-                role="group"
-                :aria-label="t('inicio.indique.seuCodigo')"
-              >
-                <strong class="kit__valor ui-num">
-                  <bdi dir="ltr">{{ codigoIndicacao }}</bdi>
-                </strong>
+              <div class="via__quadro" role="group" :aria-label="t('inicio.indique.seuCodigo')">
+                <strong class="via__codigo ui-num"
+                  ><bdi dir="ltr">{{ codigoIndicacao }}</bdi></strong
+                >
+              </div>
+              <div class="via__acoes">
                 <Button
                   type="button"
-                  icon="ph ph-copy"
-                  :label="t('divulgacao.kit.copiar')"
+                  :icon="copiado === 'codigo' ? 'ph ph-check' : 'ph ph-copy'"
+                  :label="
+                    copiado === 'codigo'
+                      ? t('divulgacao.convite.copiado')
+                      : t('divulgacao.kit.copiar')
+                  "
                   :aria-label="t('divulgacao.shareKit.copyCodeAria')"
-                  severity="secondary"
-                  outlined
-                  size="small"
-                  @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
+                  @click="copiar('codigo')"
                 />
               </div>
-            </div>
+            </li>
 
-            <div class="kit__forma kit__forma--link">
-              <div class="kit__forma-cabeca">
-                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-link" /></span>
-                <div class="kit__forma-titulos">
-                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.link') }}</h3>
-                  <p class="kit__forma-dica">{{ t('divulgacao.kit.linkDica') }}</p>
-                </div>
+            <li class="via via--clinica">
+              <PhLink class="via__fundo" weight="duotone" aria-hidden="true" />
+              <div class="via__cabeca">
+                <span class="via__selo" aria-hidden="true"><i class="ph ph-link" /></span>
+                <span class="via__titulos">
+                  <h3 class="via__titulo">{{ t('divulgacao.kit.link') }}</h3>
+                  <span class="via__dica">{{ t('divulgacao.convite.linkDica') }}</span>
+                </span>
               </div>
-
-              <div class="kit__link">
-                <bdi class="kit__campo kit__endereco" dir="ltr" :title="linkIndicacao">
-                  {{ linkLegivel }}
-                </bdi>
-                <div class="kit__link-acoes">
-                  <Button
-                    type="button"
-                    icon="ph ph-copy"
-                    :label="t('divulgacao.shareKit.copyLink')"
-                    @click="copyToClipboard(linkIndicacao, t('divulgacao.shareKit.linkName'))"
-                  />
-                  <Button
-                    as="a"
-                    :href="whatsappHref"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    icon="ph ph-whatsapp-logo"
-                    :label="t('divulgacao.kit.whatsapp')"
-                    severity="secondary"
-                    outlined
-                  />
-                </div>
+              <div class="via__quadro">
+                <bdi class="via__link" dir="ltr" :title="linkIndicacao">{{ linkLegivel }}</bdi>
               </div>
-            </div>
-          </div>
+              <div class="via__acoes">
+                <Button
+                  type="button"
+                  :icon="copiado === 'link' ? 'ph ph-check' : 'ph ph-copy'"
+                  :label="
+                    copiado === 'link'
+                      ? t('divulgacao.convite.copiado')
+                      : t('divulgacao.shareKit.copyLink')
+                  "
+                  @click="copiar('link')"
+                />
+                <Button
+                  as="a"
+                  :href="whatsappHref"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  icon="ph ph-whatsapp-logo"
+                  label="WhatsApp"
+                  :aria-label="t('divulgacao.kit.whatsapp')"
+                  severity="secondary"
+                  outlined
+                />
+              </div>
+            </li>
 
-          <div v-if="indicacao.qrImageUrl" class="kit__lado">
-            <IndicacaoQrBlock
-              class="kit__qr"
-              :image-url="indicacao.qrImageUrl"
-              :code="codigoIndicacao"
-              :disabled="!indicacao.podeIndicar"
-              size="md"
-            />
-          </div>
-        </div>
+            <li v-if="indicacao.qrImageUrl" class="via via--portal">
+              <PhQrCode class="via__fundo" weight="duotone" aria-hidden="true" />
+              <div class="via__cabeca">
+                <span class="via__selo" aria-hidden="true"><i class="ph ph-qr-code" /></span>
+                <span class="via__titulos">
+                  <h3 class="via__titulo">{{ t('divulgacao.kit.qr') }}</h3>
+                  <span class="via__dica">{{ t('divulgacao.convite.qrDica') }}</span>
+                </span>
+              </div>
+              <IndicacaoQrBlock
+                class="via__qr"
+                :image-url="indicacao.qrImageUrl"
+                :code="codigoIndicacao"
+                :disabled="!indicacao.podeIndicar"
+                forma="cartao"
+              />
+            </li>
+          </ul>
+        </UiSecao>
       </section>
 
-      <!-- Leituras do QR: só faz sentido quando existe código para ler. -->
-      <IndicacaoMetricasCard
-        v-if="indicacao.podeIndicar"
-        class="divulgacao__metricas"
-        :metricas="metricas"
-        :loading="metricasLoading"
-        :erro="metricasErro"
-        @retry="loadMetricas"
-      />
-
-      <!-- ------------------------------------------------------------ as regras -->
+      <!-- ------------------------------------------------- como funciona, logo depois dos cartões -->
       <section
         id="div-terms"
         class="regras ui-folha ui-cartao"
@@ -563,15 +603,18 @@ watch(lastSuccessAt, (at) => {
         aria-labelledby="div-terms-titulo"
       >
         <header class="ui-cartao__cabeca regras__cabeca">
-          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-percent" /></span>
+          <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-lightbulb" /></span>
           <div class="ui-cartao__titulos">
-            <h2 id="div-terms-titulo" class="ui-cartao__titulo">{{ t('divulgacao.regras.titulo') }}</h2>
-            <p class="ui-cartao__descricao regras__frase">{{ t('divulgacao.regras.frase') }}</p>
+            <h2 id="div-terms-titulo" class="ui-cartao__titulo">
+              {{ t('divulgacao.convite.passos.titulo') }}
+            </h2>
           </div>
           <div class="ui-cartao__acoes">
             <Button
               type="button"
-              :label="termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')"
+              :label="
+                termsOpen ? t('divulgacao.terms.toggleHide') : t('divulgacao.terms.toggleShow')
+              "
               :icon="termsOpen ? 'ph ph-caret-up' : 'ph ph-caret-down'"
               icon-pos="right"
               severity="secondary"
@@ -584,17 +627,32 @@ watch(lastSuccessAt, (at) => {
           </div>
         </header>
 
+        <!-- As três etapas dizem o essencial; o detalhe (carência, saque, condição) abre embaixo. -->
+        <UiPassos class="regras__passos" :passos="passosDoConvite" />
+
         <!-- v-show, não v-if: o alvo do `aria-controls` precisa existir sempre. -->
         <dl v-show="termsOpen" id="div-terms-full" class="regras__lista">
           <div v-for="term in indicacaoTerms" :key="term.id" class="regra ui-poco">
             <dt>
-              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"><i :class="term.icon" /></span>
+              <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true"
+                ><i :class="term.icon"
+              /></span>
               {{ term.title }}
             </dt>
             <dd>{{ term.body }}</dd>
           </div>
         </dl>
       </section>
+
+      <!-- Leituras do QR: só faz sentido quando existe código para ler. -->
+      <IndicacaoMetricasCard
+        v-if="indicacao.podeIndicar"
+        class="divulgacao__metricas"
+        :metricas="metricas"
+        :loading="metricasLoading"
+        :erro="metricasErro"
+        @retry="loadMetricas"
+      />
 
       <!-- ------------------------------------------------------------ cupons e resgates -->
       <template v-if="cupomFeatureEnabled">
@@ -627,7 +685,13 @@ watch(lastSuccessAt, (at) => {
                 </div>
               </header>
 
-              <p v-if="cupons.length === 0" class="ui-vazio">{{ t('divulgacao.cupons.empty') }}</p>
+              <UiVazioIlustrado
+                v-if="cupons.length === 0"
+                aninhado
+                icone="ph ph-ticket"
+                :titulo="t('divulgacao.cupons.empty')"
+                :texto="t('divulgacao.cupons.vazioTexto')"
+              />
 
               <ul v-else class="ui-lista">
                 <li v-for="cupom in cupons" :key="cupom.id" class="ui-linha cupom">
@@ -640,7 +704,9 @@ watch(lastSuccessAt, (at) => {
                   </span>
                   <span class="ui-linha__fim">
                     <span class="cupom__usos ui-num">
-                      {{ t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates) }}
+                      {{
+                        t('divulgacao.cupons.usos', { n: cupom.totalResgates }, cupom.totalResgates)
+                      }}
                     </span>
                     <strong class="cupom__desconto ui-num">{{ cupom.descontoPercentual }}%</strong>
                     <span class="ui-selo" :class="{ 'ui-selo--ok': cupom.ativo }">
@@ -649,7 +715,11 @@ watch(lastSuccessAt, (at) => {
                         :class="cupom.ativo ? 'ph-check-circle' : 'ph-pause-circle'"
                         aria-hidden="true"
                       />
-                      {{ cupom.ativo ? t('programas.card.status.ativo') : t('programas.card.status.suspenso') }}
+                      {{
+                        cupom.ativo
+                          ? t('programas.card.status.ativo')
+                          : t('programas.card.status.suspenso')
+                      }}
                     </span>
                   </span>
                 </li>
@@ -686,9 +756,25 @@ watch(lastSuccessAt, (at) => {
                 </div>
               </header>
 
-              <p v-if="resgates.length === 0" class="ui-vazio">
-                {{ t('divulgacao.resgates.empty') }}
-              </p>
+              <!-- O resgate nasce no balcão: o vazio leva ao "Validar cupom", contornado (Divulgação). -->
+              <UiVazioIlustrado
+                v-if="resgates.length === 0"
+                aninhado
+                icone="ph ph-receipt"
+                :titulo="t('divulgacao.resgates.empty')"
+                :texto="t('divulgacao.resgates.vazioTexto')"
+              >
+                <template v-if="podeValidarCupom" #acao>
+                  <Button
+                    type="button"
+                    icon="ph ph-ticket"
+                    :label="t('shell.cupom.cta')"
+                    severity="secondary"
+                    outlined
+                    @click="abrirValidarCupom"
+                  />
+                </template>
+              </UiVazioIlustrado>
 
               <ul v-else class="ui-lista">
                 <li v-for="resgate in resgates" :key="resgate.resgateId" class="ui-linha">
@@ -791,231 +877,204 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
-.estado__acao {
-  gap: 8px;
-  margin-top: 10px;
-  text-decoration: none;
-}
-
-/* ------------------------------------------------------------------ o kit
- * Uma folha em três partes: a cabeça (para que serve o convite, com a luz do Portal rente ao
- * topo), os jeitos de convidar (código e link, cada um com verbo, frase e a coisa em si) e, ao
- * lado, o QR num poço. Quem decide a forma é a largura do painel e a da coluna principal, não a
- * da janela.
+/* ------------------------------------------------------------------ o convite
+ * Três cartões lado a lado, com o ícone grande saindo pela borda do fim, como as Ações rápidas do
+ * Início. A cor de cada jeito é um toque (17/11/2026, "cores muito fortes"): o fundo é o papel com
+ * um pouco do pastel, o texto fica na tinta da página, e a cor cheia só no selo e no ícone de
+ * fundo. Dentro, de cima para baixo: o selo com o verbo e a frase, o quadro com a coisa (mesma
+ * altura nos três) e os botões. Abaixo de ~760 px de largura do bloco, um embaixo do outro.
  */
 
-.kit {
+.convite {
   display: grid;
-  overflow: hidden;
-  grid-template-areas:
-    'cabeca'
-    'principal'
-    'lado';
-  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
 }
 
-@container divulgacao (min-width: 860px) {
-  .kit--com-qr {
-    grid-template-areas:
-      'cabeca cabeca'
-      'principal lado';
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
+.convite__vias {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  list-style: none;
+}
 
-  .kit--com-qr .kit__lado {
-    border-top: 0;
-    border-inline-start: 1px solid var(--linha-suave);
+@container divulgacao (max-width: 760px) {
+  .convite__vias {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-.kit__cabeca {
+.via {
+  position: relative;
   display: flex;
-  align-items: flex-start;
+  min-width: 0;
+  flex-direction: column;
   gap: 16px;
-  padding: 26px 28px 24px;
-  border-bottom: 1px solid var(--linha-suave);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)),
-    var(--superficie)
-  );
-  grid-area: cabeca;
+  overflow: hidden;
+  padding: 18px;
+  isolation: isolate;
+  border-radius: 22px;
+  background: color-mix(in oklab, var(--tom-fundo) 38%, var(--app-cartao, var(--superficie)));
+  color: var(--tinta);
+  container: via / inline-size;
 }
 
-.kit__titulos {
+.app-dark .via {
+  background: color-mix(in oklab, var(--tom-fundo) 45%, var(--app-cartao, var(--superficie)));
+}
+
+/* O ícone do jeito, em duotone, saindo pelo canto de cima do fim: marca-d'água, não figura. */
+.via__fundo {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -20px;
+  inset-inline-end: -20px;
+  width: 112px;
+  height: 112px;
+  color: var(--tom-tinta);
+  opacity: 0.16;
+  rotate: -16deg;
+}
+
+.app-dark .via__fundo {
+  opacity: 0.22;
+}
+
+:dir(rtl) .via__fundo {
+  rotate: 16deg;
+}
+
+.via__cabeca {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding-inline-end: 56px;
+}
+
+/* O selo: a cor cheia do jeito, como os ladrilhos da casa; é ele que diz qual cartão é qual. */
+.via__selo {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--tom-fundo);
+  color: var(--tom-tinta);
+  font-size: 21px;
+}
+
+.via__titulos {
   display: grid;
   min-width: 0;
-  gap: 6px;
-  padding-top: 1px;
+  gap: 2px;
 }
 
-.kit__titulo {
+.via__titulo {
   margin: 0;
-  color: var(--tinta);
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.015em;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   line-height: 1.3;
 }
 
-.kit__descricao {
-  max-width: 68ch;
-  margin: 0;
+.via__dica {
   color: var(--tinta-2);
-  font-size: 14.5px;
-  line-height: 1.55;
-  text-wrap: pretty;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-/* Quando o QR ao lado é mais alto, o vão se reparte entre os jeitos, em vez de sobrar embaixo. */
-.kit__principal {
+/* O quadro branco: a coisa em si, centrada, na mesma altura nos três cartões. */
+.via__quadro {
   display: grid;
   min-width: 0;
-  align-content: stretch;
-  container: kit-principal / inline-size;
-  grid-area: principal;
-}
-
-/* Cada jeito de convidar: o verbo e a frase de um lado, a coisa do outro (empilha no estreito). */
-.kit__forma {
-  display: grid;
-  min-width: 0;
-  gap: 16px;
-  padding: 24px 28px;
-}
-
-.kit__forma + .kit__forma {
-  border-top: 1px solid var(--linha-suave);
-}
-
-@container kit-principal (min-width: 620px) {
-  .kit__forma {
-    align-items: center;
-    column-gap: 32px;
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
-  }
-}
-
-.kit__forma-cabeca {
-  display: flex;
-  min-width: 0;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.kit__forma-titulos {
-  display: grid;
-  min-width: 0;
-  gap: 4px;
-}
-
-.kit__forma-titulo {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 15px;
-  font-weight: 650;
-  letter-spacing: -0.01em;
-  line-height: 1.35;
-}
-
-.kit__forma-dica {
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 13.5px;
-  line-height: 1.5;
-  text-wrap: pretty;
-}
-
-/*
- * O código e o link no mesmo campo: poço claro com fio, nos cantos do cartão pequeno. O código é o
- * que a pessoa vai digitar, então vem maior e espaçado, mas sem tinta de fundo nem cara de cupom:
- * indicação não é o destaque da tela.
- */
-.kit__campo {
-  min-width: 0;
-  border: 1px solid var(--linha-suave);
-  border-radius: var(--raio-cartao-pequeno);
-  background: var(--superficie-2);
+  height: 7rem;
+  place-items: center;
+  padding: 10px 16px;
+  border: 1px solid color-mix(in oklab, var(--tom-tinta) 14%, transparent);
+  border-radius: 16px;
+  background: var(--app-cartao, var(--superficie));
   color: var(--tinta);
 }
 
-.kit__codigo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-  padding-block: 7px;
-  padding-inline: 16px 7px;
+/* O quadro do QR com o mesmo fio dos outros (o papel dele é branco nos dois temas: leitura). */
+.via :deep(.indicacao-qr__frame) {
+  border: 1px solid color-mix(in oklab, var(--tom-tinta) 14%, transparent);
 }
 
-.kit__valor {
-  min-width: 0;
-  overflow-wrap: anywhere;
+.via__codigo {
   font-family: var(--font-dados);
-  font-size: 24px;
-  font-weight: 650;
-  letter-spacing: 0.12em;
-  line-height: 1.2;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
 }
 
-/* O copiar dentro do poço é papel, para não afundar nele como um contorno solto. */
-.kit__codigo :deep(.p-button) {
-  flex: none;
-  background: var(--superficie);
-}
-
-.kit__link {
-  display: grid;
-  min-width: 0;
-  gap: 12px;
-}
-
-.kit__endereco {
+/* O link inteiro, em até duas linhas: cortado com reticências, ninguém sabia o que mandava. */
+.via__link {
+  display: -webkit-box;
+  max-width: 100%;
   overflow: hidden;
-  padding: 13px 16px;
   font-family: var(--font-dados);
-  font-size: 15.5px;
-  font-weight: 550;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 14.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  text-align: center;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
 }
 
-.kit__link-acoes {
+/* Os botões embaixo, sempre no pé do cartão, mesmo quando a frase de um quebra em duas linhas. */
+.via__acoes {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: auto;
 }
 
-/* Os dois botões ocupam a largura do endereço logo acima, e quebram juntos quando não cabem. */
-.kit__link-acoes :deep(.p-button) {
+.via__acoes :deep(.p-button) {
   flex: 1 1 auto;
   justify-content: center;
 }
 
-/* O QR num painel ao lado, em poço: a folha tem partes, não cartões dentro de cartão. */
-.kit__lado {
-  display: grid;
-  place-items: center;
-  padding: 24px 28px 26px;
-  border-top: 1px solid var(--linha-suave);
-  background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
-  grid-area: lado;
+/*
+ * Cartão estreito (os três lado a lado no tablet): os botões ficam numa linha só, mais compactos.
+ * Quebrando em duas, os cartões de dois botões cresciam e abriam um vão no do código.
+ */
+@container via (max-width: 330px) {
+  .via__acoes,
+  .via :deep(.indicacao-qr__acoes) {
+    flex-wrap: nowrap;
+    gap: 6px;
+  }
+
+  .via :deep(.p-button) {
+    min-width: 0;
+    padding-inline: 10px;
+    font-size: 14px;
+  }
 }
 
-@media (max-width: 760px) {
-  .kit__cabeca {
-    gap: 14px;
-    padding: 22px 18px 20px;
-  }
+/* O QR: o quadro dele ocupa o lugar do quadro branco, e os botões o pé, como nos outros. */
+.via__qr {
+  flex: 1;
+}
 
-  .kit__forma {
-    padding: 20px 18px 22px;
-  }
+.via--pets {
+  --tom-fundo: var(--pets-fundo);
+  --tom-tinta: var(--pets-tinta);
+}
 
-  .kit__lado {
-    padding: 22px 18px 24px;
-  }
+.via--clinica {
+  --tom-fundo: var(--clinica-fundo);
+  --tom-tinta: var(--clinica-tinta);
+}
+
+.via--portal {
+  --tom-fundo: var(--portal-fundo);
+  --tom-tinta: var(--portal-tinta);
 }
 
 /* ------------------------------------------------------------------ regras */
@@ -1024,20 +1083,15 @@ watch(lastSuccessAt, (at) => {
   overflow: clip;
 }
 
-.regras:not(.regras--aberta) .regras__cabeca {
-  padding-bottom: 16px;
-}
-
-.regras__frase.ui-cartao__descricao {
-  color: var(--tinta-2);
-  font-size: 13.5px;
+.regras__passos {
+  padding-top: 18px;
 }
 
 .regras__lista {
   display: grid;
   gap: 12px;
   margin: 0;
-  padding: 18px 20px 20px;
+  padding-top: 20px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
@@ -1072,7 +1126,6 @@ watch(lastSuccessAt, (at) => {
 
 @media (max-width: 640px) {
   .regras__lista {
-    padding: 16px;
     grid-template-columns: minmax(0, 1fr);
   }
 

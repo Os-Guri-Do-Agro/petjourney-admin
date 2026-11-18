@@ -15,11 +15,14 @@ import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
 
 import ExpedienteGaveta from '@/components/agenda/ExpedienteGaveta.vue'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import ProfissionalGaveta from '@/components/parceiro/ProfissionalGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
+import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
+import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { getAuthUser } from '@/service/auth/auth-session'
 import { listarEquipe } from '@/service/parceiro/equipe-service'
@@ -43,6 +46,7 @@ const desativadasAbertas = ref(false)
 
 const meuId = computed(() => getAuthUser()?.userId ?? null)
 const geroEquipe = computed(() => store.temPermissao('equipe.gerir') && store.podeOperar)
+
 const minhaFicha = computed(() => store.eu?.profissional ?? null)
 const aguardandoCrmv = computed(() => store.eu?.aguardandoCrmv ?? [])
 
@@ -249,6 +253,73 @@ function abrirExpediente(profissional: Profissional) {
   expedienteAberto.value = true
 }
 
+/*
+ * O vazio que ensina (17/11/2026, "tela vazia e nada é explicado"): o que é a ficha, o CRMV e a
+ * agenda, cada etapa com o botão dela ("tem sempre que ter os botões call to action"): cadastrar
+ * a ficha, a ficha com o CRMV e, apagado até haver ficha, abrir a agenda.
+ */
+/**
+ * O botão da etapa do CRMV: quem está logado e precisa do CRMV (`aguardandoCrmv`) cadastra a
+ * própria ficha, como no aviso do alto; quem gere a equipe e não precisa dele cadastra a ficha de
+ * um veterinário, já com o CRMV escolhido.
+ */
+const acaoDoCrmv = computed<PassoDoGuia['acao']>(() => {
+  if (aguardandoCrmv.value.length && (geroEquipe.value || minhaFicha.value)) {
+    return {
+      rotulo: minhaFicha.value
+        ? t('parceiro.profissionais.crmv.completar')
+        : t('parceiro.profissionais.crmv.cadastrar'),
+      icone: 'ph ph-identification-card',
+      aoClicar: cadastrarMinhaFicha,
+    }
+  }
+
+  return geroEquipe.value
+    ? {
+        rotulo: t('parceiro.profissionais.guia.cadastrarVeterinario'),
+        icone: 'ph ph-seal-check',
+        aoClicar: () => abrirNova({ conselho: 'CRMV' }),
+      }
+    : undefined
+})
+
+const passosDasFichas = computed<PassoDoGuia[]>(() => {
+  const passo = (id: string, icone: string, acao?: PassoDoGuia['acao']): PassoDoGuia => ({
+    id,
+    icone,
+    titulo: t(`parceiro.profissionais.guia.${id}.titulo`),
+    texto: t(`parceiro.profissionais.guia.${id}.texto`),
+    acao,
+  })
+
+  return [
+    passo(
+      'ficha',
+      'ph ph-identification-card',
+      geroEquipe.value
+        ? {
+            rotulo: t('parceiro.profissionais.cadastrar'),
+            icone: 'ph ph-plus',
+            aoClicar: () => abrirNova(),
+          }
+        : undefined,
+    ),
+    passo('crmv', 'ph ph-seal-check', acaoDoCrmv.value),
+    passo(
+      'agenda',
+      'ph ph-calendar-dots',
+      veExpediente.value
+        ? {
+            rotulo: t('parceiro.profissionais.guia.abrirAgenda'),
+            icone: 'ph ph-calendar-dots',
+            to: '/clinica/agenda',
+            bloqueada: !ativos.value.length,
+          }
+        : undefined,
+    ),
+  ]
+})
+
 function itemDoExpediente(profissional: Profissional): MenuItem[] {
   return veExpediente.value
     ? [
@@ -309,9 +380,22 @@ function abrirMenu(evento: Event, profissional: Profissional) {
   menu.value?.toggle(evento)
 }
 
+const route = useRoute()
+const router = useRouter()
+
 onMounted(async () => {
   await ensureContext()
   await carregar()
+  /*
+   * Veio de um "Cadastrar profissional" de outra tela (o vazio da Agenda) com `?novo=1`: a gaveta
+   * abre já aqui, e o pedido sai da URL (recarregar não reabre).
+   */
+  if (route.query.novo === '1') {
+    if (geroEquipe.value) abrirNova()
+    const query = { ...route.query }
+    delete query.novo
+    void router.replace({ query })
+  }
 })
 </script>
 
@@ -387,10 +471,14 @@ onMounted(async () => {
         />
       </div>
 
-      <div v-else-if="!ativos.length" class="profissionais__vazio ui-folha">
-        <strong>{{ t('parceiro.profissionais.vazio') }}</strong>
-        <span>{{ t('parceiro.profissionais.vazioDica') }}</span>
-      </div>
+      <UiVazioIlustrado
+        v-else-if="!ativos.length"
+        icone="ph ph-users-three"
+        :titulo="t('parceiro.profissionais.vazio')"
+        :texto="t('parceiro.profissionais.vazioDica')"
+        :guia-titulo="t('parceiro.profissionais.guia.titulo')"
+        :passos="passosDasFichas"
+      />
 
       <ul v-else class="ui-lista ui-folha">
         <li v-for="profissional in ativos" :key="profissional.id" class="ui-linha ficha">
@@ -576,20 +664,6 @@ onMounted(async () => {
 .profissionais__erro > i {
   color: var(--risco-tinta);
   font-size: 18px;
-}
-
-.profissionais__vazio {
-  display: grid;
-  gap: 4px;
-  padding: 22px 24px;
-  color: var(--tinta-2);
-  font-size: 14px;
-}
-
-.profissionais__vazio strong {
-  color: var(--tinta);
-  font-size: 15px;
-  font-weight: 600;
 }
 
 .profissionais__desativados {
