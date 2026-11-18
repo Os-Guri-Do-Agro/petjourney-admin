@@ -569,9 +569,17 @@ const avisoDeConsulta = computed(() => {
   --p-button-primary-color: #2c4741;
   --p-button-primary-hover-color: #2c4741;
   --p-button-primary-active-color: #2c4741;
-  --p-button-secondary-background: var(--app-vidro);
-  --p-button-secondary-hover-background: var(--app-vidro-forte);
-  --p-button-secondary-active-background: var(--app-vidro-forte);
+  /*
+   * O botão de apoio na faixa (17/11/2026, "botão muito apagado"): fundo cheio, a sálvia
+   * escurecida, nunca vazado. O de contorno era só borda de 45% e texto branco direto na sálvia
+   * (3,3:1 no claro) e sumia ao lado do principal. Com 22% de preto por baixo, o branco lê a 5,1:1
+   * no claro e a 7:1 no escuro.
+   */
+  --faixa-botao: rgb(0 0 0 / 22%);
+  --faixa-botao-forte: rgb(0 0 0 / 30%);
+  --p-button-secondary-background: var(--faixa-botao);
+  --p-button-secondary-hover-background: var(--faixa-botao-forte);
+  --p-button-secondary-active-background: var(--faixa-botao-forte);
   --p-button-secondary-color: #fff;
   --p-button-secondary-hover-color: #fff;
   --p-button-secondary-active-color: #fff;
@@ -579,10 +587,14 @@ const avisoDeConsulta = computed(() => {
   --p-button-text-primary-color: #fff;
   --p-button-text-primary-hover-background: var(--app-vidro);
   --p-button-text-secondary-hover-background: var(--app-vidro);
-  --p-button-outlined-secondary-border-color: rgb(255 255 255 / 45%);
-  --p-button-outlined-primary-border-color: rgb(255 255 255 / 45%);
+  --p-button-outlined-secondary-border-color: rgb(255 255 255 / 55%);
+  --p-button-outlined-primary-border-color: rgb(255 255 255 / 55%);
   --p-button-outlined-secondary-color: #fff;
   --p-button-outlined-primary-color: #fff;
+  --p-button-outlined-secondary-hover-background: var(--faixa-botao-forte);
+  --p-button-outlined-primary-hover-background: var(--faixa-botao-forte);
+  --p-button-outlined-secondary-active-background: var(--faixa-botao-forte);
+  --p-button-outlined-primary-active-background: var(--faixa-botao-forte);
 
   display: grid;
   gap: 18px;
@@ -651,6 +663,18 @@ const avisoDeConsulta = computed(() => {
  */
 .faixa__cabeca :deep(.capa__aba--atual i) {
   color: #fff;
+}
+
+/*
+ * O de contorno na faixa ganha o fundo do de apoio. O kit (`html.trilha .p-button.p-button-outlined`)
+ * pinta ele de `--superficie`, que na faixa é transparente: daí o botão vazado.
+ */
+.faixa .faixa__cabeca :deep(.p-button.p-button-outlined) {
+  background: var(--faixa-botao);
+}
+
+.faixa .faixa__cabeca :deep(.p-button.p-button-outlined:not(:disabled):hover) {
+  background: var(--faixa-botao-forte);
 }
 
 /* Link na faixa (o telefone do responsável, "ver mais") é branco e sublinhado, nunca azul. */
