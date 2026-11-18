@@ -887,7 +887,50 @@
       },
       "pedidoEnviado": "Solicitud enviada",
       "pedidoEnviadoDetalhe": "El equipo PetJourney analizará la solicitud.",
-      "erro": "No funcionó"
+      "erro": "No funcionó",
+      "ligarTeste": "Activar prueba gratuita de {dias} días",
+      "ligarTesteDica": "Sin costo y sin tarjeta. Después de los {dias} días, el equipo PetJourney se comunica con usted para continuar.",
+      "religar": "Reactivar",
+      "desligadoPorVoce": "Desactivado por usted.",
+      "desligadoPorVoceAte": "Desactivado por usted. Puede reactivarlo hasta el {data}.",
+      "desligar": "Desactivar",
+      "soDonoGerencia": "Solo el dueño activa o desactiva módulos.",
+      "ligadoTeste": "{modulo}: prueba gratuita activada hasta el {data}.",
+      "religado": {
+        "CLINICA": "{modulo} reactivada.",
+        "HOTEL": "{modulo} reactivado."
+      },
+      "desligado": {
+        "CLINICA": "{modulo} desactivada.",
+        "HOTEL": "{modulo} desactivado."
+      },
+      "confirmarDesligar": {
+        "titulo": {
+          "CLINICA": "¿Desactivar la {modulo}?",
+          "HOTEL": "¿Desactivar el {modulo}?"
+        },
+        "texto": "Lo que ya se registró sigue disponible para consulta y exportación. Mientras el módulo esté desactivado, nadie del equipo puede crear ni modificar nada en él.",
+        "ficam": "Quedan solo para consulta: {itens}.",
+        "itens": {
+          "agendamentosFuturos": "{n} cita futura | {n} citas futuras",
+          "internacoesAbertas": "{n} internación en curso | {n} internaciones en curso",
+          "reservasFuturas": "{n} reserva futura | {n} reservas futuras",
+          "hospedagensAbertas": "{n} estadía en curso | {n} estadías en curso"
+        },
+        "nada": "Nada en curso se verá afectado.",
+        "fim": "Nada se cancela ni se elimina, y los tutores no reciben aviso. Puede reactivarlo cuando quiera mientras el plazo del módulo siga vigente.",
+        "internado": "Hay un paciente internado: el equipo no podrá registrar medicación ni evolución hasta que usted lo reactive.",
+        "confirmar": "Desactivar"
+      },
+      "bloqueio": {
+        "MODULO_JA_ATIVO": "Este módulo ya está activo.",
+        "MODULO_TESTE_JA_USADO": "La prueba gratuita de este módulo ya se usó. Para seguir con él, comuníquese con el equipo PetJourney.",
+        "MODULO_DECIDIDO_PELO_SUPORTE": "El equipo PetJourney suspendió, rechazó o desactivó este módulo. Para activarlo de nuevo, comuníquese con el equipo PetJourney.",
+        "MODULO_PRAZO_VENCIDO_PARA_RELIGAR": "El plazo de este módulo terminó mientras estaba desactivado. Para reactivarlo, comuníquese con el equipo PetJourney.",
+        "MODULO_FORA_DA_CATEGORIA": "Este módulo no forma parte de las categorías de su registro, así que la prueba gratuita no se activa sola. Solicite el módulo y el equipo PetJourney lo analiza.",
+        "MODULO_GERENCIAR_APENAS_DONO": "Solo el dueño puede activar o desactivar un módulo.",
+        "PARCEIRO_NAO_OPERACIONAL": "Su registro de socio aún no está aprobado para operar."
+      }
     },
     "agenda": {
       "titulo": "Agenda",

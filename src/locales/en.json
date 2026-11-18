@@ -887,7 +887,50 @@
       },
       "pedidoEnviado": "Request sent",
       "pedidoEnviadoDetalhe": "The PetJourney team will review it.",
-      "erro": "That did not work"
+      "erro": "That did not work",
+      "ligarTeste": "Start {dias}-day free trial",
+      "ligarTesteDica": "No cost and no card. After the {dias} days, the PetJourney team will contact you to continue.",
+      "religar": "Turn back on",
+      "desligadoPorVoce": "Turned off by you.",
+      "desligadoPorVoceAte": "Turned off by you. You can turn it back on until {data}.",
+      "desligar": "Turn off",
+      "soDonoGerencia": "Only the owner turns modules on or off.",
+      "ligadoTeste": "{modulo}: free trial on until {data}.",
+      "religado": {
+        "CLINICA": "{modulo} turned back on.",
+        "HOTEL": "{modulo} turned back on."
+      },
+      "desligado": {
+        "CLINICA": "{modulo} turned off.",
+        "HOTEL": "{modulo} turned off."
+      },
+      "confirmarDesligar": {
+        "titulo": {
+          "CLINICA": "Turn off the {modulo}?",
+          "HOTEL": "Turn off the {modulo}?"
+        },
+        "texto": "Everything already recorded stays available to view and export. While the module is off, no one on the team can create or change anything in it.",
+        "ficam": "These become view only: {itens}.",
+        "itens": {
+          "agendamentosFuturos": "{n} upcoming appointment | {n} upcoming appointments",
+          "internacoesAbertas": "{n} ongoing hospitalization | {n} ongoing hospitalizations",
+          "reservasFuturas": "{n} upcoming booking | {n} upcoming bookings",
+          "hospedagensAbertas": "{n} ongoing stay | {n} ongoing stays"
+        },
+        "nada": "Nothing in progress will be affected.",
+        "fim": "Nothing is canceled or deleted, and pet parents are not notified. You can turn it back on whenever you like while the module period lasts.",
+        "internado": "There is a hospitalized patient: the team will not be able to record medication or progress notes until you turn it back on.",
+        "confirmar": "Turn off"
+      },
+      "bloqueio": {
+        "MODULO_JA_ATIVO": "This module is already active.",
+        "MODULO_TESTE_JA_USADO": "The free trial for this module has already been used. To keep using it, contact the PetJourney team.",
+        "MODULO_DECIDIDO_PELO_SUPORTE": "The PetJourney team has suspended, declined or turned off this module. To turn it back on, contact the PetJourney team.",
+        "MODULO_PRAZO_VENCIDO_PARA_RELIGAR": "This module's period ended while it was turned off. To turn it back on, contact the PetJourney team.",
+        "MODULO_FORA_DA_CATEGORIA": "This module is not part of your business categories, so the free trial can't be turned on by yourself. Request the module and the PetJourney team will review it.",
+        "MODULO_GERENCIAR_APENAS_DONO": "Only an owner can turn a module on or off.",
+        "PARCEIRO_NAO_OPERACIONAL": "Your partner registration is not yet approved to operate."
+      }
     },
     "agenda": {
       "titulo": "Schedule",

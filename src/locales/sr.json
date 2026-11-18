@@ -887,7 +887,50 @@
       },
       "pedidoEnviado": "Zahtev je poslat",
       "pedidoEnviadoDetalhe": "Tim PetJourney će razmotriti zahtev.",
-      "erro": "Nije uspelo"
+      "erro": "Nije uspelo",
+      "ligarTeste": "Uključite besplatnu probu od {dias} dana",
+      "ligarTesteDica": "Bez troškova i bez kartice. Posle {dias} dana, tim PetJourney će vas kontaktirati radi nastavka.",
+      "religar": "Ponovo uključite",
+      "desligadoPorVoce": "Vi ste ga isključili.",
+      "desligadoPorVoceAte": "Vi ste ga isključili. Možete ga ponovo uključiti do {data}.",
+      "desligar": "Isključite",
+      "soDonoGerencia": "Samo vlasnik uključuje ili isključuje module.",
+      "ligadoTeste": "{modulo}: besplatna proba je uključena do {data}.",
+      "religado": {
+        "CLINICA": "{modulo} je ponovo uključena.",
+        "HOTEL": "{modulo} je ponovo uključen."
+      },
+      "desligado": {
+        "CLINICA": "{modulo} je isključena.",
+        "HOTEL": "{modulo} je isključen."
+      },
+      "confirmarDesligar": {
+        "titulo": {
+          "CLINICA": "Isključiti modul {modulo}?",
+          "HOTEL": "Isključiti modul {modulo}?"
+        },
+        "texto": "Ono što je već zabeleženo ostaje dostupno za pregled i izvoz. Dok je modul isključen, niko iz tima ne može ništa da kreira ni da menja u njemu.",
+        "ficam": "Samo za pregled ostaju: {itens}.",
+        "itens": {
+          "agendamentosFuturos": "{n} budući termin | {n} buduća termina | {n} budućih termina",
+          "internacoesAbertas": "{n} hospitalizacija u toku | {n} hospitalizacije u toku | {n} hospitalizacija u toku",
+          "reservasFuturas": "{n} buduća rezervacija | {n} buduće rezervacije | {n} budućih rezervacija",
+          "hospedagensAbertas": "{n} boravak u toku | {n} boravka u toku | {n} boravaka u toku"
+        },
+        "nada": "Ništa što je u toku neće biti pogođeno.",
+        "fim": "Ništa se ne otkazuje niti briše, a staratelji ne dobijaju obaveštenje. Možete ga ponovo uključiti kad god želite dok rok modula važi.",
+        "internado": "Ima hospitalizovanog pacijenta: tim neće moći da beleži lekove ni tok lečenja dok ga ponovo ne uključite.",
+        "confirmar": "Isključite"
+      },
+      "bloqueio": {
+        "MODULO_JA_ATIVO": "Ovaj modul je već aktivan.",
+        "MODULO_TESTE_JA_USADO": "Besplatna proba ovog modula je već iskorišćena. Da biste nastavili da ga koristite, obratite se timu PetJourney.",
+        "MODULO_DECIDIDO_PELO_SUPORTE": "Tim PetJourney je suspendovao, odbio ili isključio ovaj modul. Da biste ga ponovo uključili, obratite se timu PetJourney.",
+        "MODULO_PRAZO_VENCIDO_PARA_RELIGAR": "Rok ovog modula je istekao dok je bio isključen. Da biste ga ponovo uključili, obratite se timu PetJourney.",
+        "MODULO_FORA_DA_CATEGORIA": "Ovaj modul nije deo kategorija vaše registracije, pa besplatnu probu ne možete sami da uključite. Zatražite modul i tim PetJourney će ga razmotriti.",
+        "MODULO_GERENCIAR_APENAS_DONO": "Samo vlasnik može da uključi ili isključi modul.",
+        "PARCEIRO_NAO_OPERACIONAL": "Vaša partnerska prijava još nije odobrena za rad."
+      }
     },
     "agenda": {
       "titulo": "Raspored",

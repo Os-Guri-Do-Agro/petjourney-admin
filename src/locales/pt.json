@@ -887,7 +887,50 @@
       },
       "pedidoEnviado": "Pedido enviado",
       "pedidoEnviadoDetalhe": "A equipe PetJourney analisa o pedido.",
-      "erro": "Não deu certo"
+      "erro": "Não deu certo",
+      "ligarTeste": "Ligar teste grátis de {dias} dias",
+      "ligarTesteDica": "Sem custo e sem cartão. Depois dos {dias} dias, a equipe PetJourney fala com você para continuar.",
+      "religar": "Religar",
+      "desligadoPorVoce": "Desligado por você.",
+      "desligadoPorVoceAte": "Desligado por você. Você pode religar até {data}.",
+      "desligar": "Desligar",
+      "soDonoGerencia": "Só o dono liga ou desliga módulos.",
+      "ligadoTeste": "{modulo}: teste grátis ligado até {data}.",
+      "religado": {
+        "CLINICA": "{modulo} religada.",
+        "HOTEL": "{modulo} religado."
+      },
+      "desligado": {
+        "CLINICA": "{modulo} desligada.",
+        "HOTEL": "{modulo} desligado."
+      },
+      "confirmarDesligar": {
+        "titulo": {
+          "CLINICA": "Desligar a {modulo}?",
+          "HOTEL": "Desligar o {modulo}?"
+        },
+        "texto": "O que já foi registrado continua disponível para consulta e exportação. Enquanto o módulo estiver desligado, ninguém da equipe consegue criar nem alterar nada nele.",
+        "ficam": "Ficam só para consulta: {itens}.",
+        "itens": {
+          "agendamentosFuturos": "{n} agendamento futuro | {n} agendamentos futuros",
+          "internacoesAbertas": "{n} internação em andamento | {n} internações em andamento",
+          "reservasFuturas": "{n} reserva futura | {n} reservas futuras",
+          "hospedagensAbertas": "{n} hospedagem em andamento | {n} hospedagens em andamento"
+        },
+        "nada": "Nada em andamento será afetado.",
+        "fim": "Nada é cancelado nem apagado, e os responsáveis não recebem aviso. Você pode religar quando quiser enquanto o prazo do módulo valer.",
+        "internado": "Há paciente internado: a equipe não vai conseguir registrar medicação nem evolução até você religar.",
+        "confirmar": "Desligar"
+      },
+      "bloqueio": {
+        "MODULO_JA_ATIVO": "Este módulo já está ativo.",
+        "MODULO_TESTE_JA_USADO": "O teste grátis deste módulo já foi usado. Para continuar com ele, fale com a equipe PetJourney.",
+        "MODULO_DECIDIDO_PELO_SUPORTE": "A equipe PetJourney suspendeu, recusou ou desligou este módulo. Para ligá-lo de novo, fale com a equipe PetJourney.",
+        "MODULO_PRAZO_VENCIDO_PARA_RELIGAR": "O prazo deste módulo terminou enquanto ele estava desligado. Para religá-lo, fale com a equipe PetJourney.",
+        "MODULO_FORA_DA_CATEGORIA": "Este módulo não faz parte das categorias do seu cadastro, então o teste grátis não liga sozinho. Peça o módulo e a equipe PetJourney analisa.",
+        "MODULO_GERENCIAR_APENAS_DONO": "Só o dono pode ligar ou desligar um módulo.",
+        "PARCEIRO_NAO_OPERACIONAL": "Seu cadastro de parceiro ainda não está aprovado para operar."
+      }
     },
     "agenda": {
       "titulo": "Agenda",
