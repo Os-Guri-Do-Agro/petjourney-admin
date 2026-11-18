@@ -13,8 +13,10 @@ export type StatusModoParceiro =
 
 export type ModoParticipacao = 'afiliado' | 'participativo'
 
+/** O enum `CategoriaParceiro` do contrato (o `VETERINARIO` é o veterinário autônomo). */
 export type CategoriaParceiro =
   | 'CLINICA_VETERINARIA'
+  | 'VETERINARIO'
   | 'PET_SHOP'
   | 'BANHO_TOSA'
   | 'ADESTRAMENTO'
@@ -88,7 +90,10 @@ export type PortalStatus = {
  */
 export type ParceiroCadastroPayload = {
   nome: string
+  /** Compatibilidade: o formulário manda só `categorias` (a principal é a primeira). */
   categoria?: CategoriaParceiro | null
+  /** De 1 a 8, sem repetir; a primeira é a principal. Ausente = não mexe (PATCH) ou nenhuma (POST). */
+  categorias?: CategoriaParceiro[]
   cnpj?: string | null
   telefoneComercial?: string | null
   crmv?: string | null
@@ -106,7 +111,10 @@ export type ParceiroCadastroPatchPayload = Partial<Omit<ParceiroCadastroPayload,
 export type ParceiroCadastro = {
   parceiroId: string
   nome: string
+  /** A principal (= `categorias[0]`). */
   categoria: CategoriaParceiro | null
+  /** Todas, a principal primeiro; `[]` = sem categoria. */
+  categorias: CategoriaParceiro[]
   cnpj: string | null
   telefoneComercial: string | null
   crmv: string | null

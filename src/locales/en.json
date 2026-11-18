@@ -1154,6 +1154,7 @@
     "motivoLabel": "Stated reason",
     "categorias": {
       "CLINICA_VETERINARIA": "Veterinary clinic",
+      "VETERINARIO": "Independent veterinarian",
       "PET_SHOP": "Pet shop",
       "BANHO_TOSA": "Grooming",
       "ADESTRAMENTO": "Training",
@@ -10648,6 +10649,13 @@
       "GRANDE": "25 to 45 kg",
       "GIGANTE": "over 45 kg",
       "dica": "Reference weight of an adult dog."
+    },
+    "categorias": {
+      "rotulo": "Categories",
+      "dica": "Choose one or more. The first one is the main one.",
+      "principal": "Main",
+      "tornarPrincipal": "Make main",
+      "minimo": "Choose at least one category."
     }
   },
   "agenda": {

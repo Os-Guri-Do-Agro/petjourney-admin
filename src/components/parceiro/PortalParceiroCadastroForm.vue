@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Button from 'primevue/button'
 import InputText from 'primevue/inputtext'
-import Select from 'primevue/select'
+import MultiSelect from 'primevue/multiselect'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
 import Tabs from 'primevue/tabs'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PortalParceiroProgramasPicker from '@/components/parceiro/PortalParceiroProgramasPicker.vue'
@@ -17,7 +17,11 @@ import type {
   ParceiroCadastroPayload,
 } from '@/service/parceiro/types'
 import { formatPhone, stripPhone } from '@/utils/format/phone'
-import { MODOS_PARTICIPACAO, resolveProgramasIniciais } from '@/utils/parceiro/modo-participacao'
+import {
+  MODOS_PARTICIPACAO,
+  resolveProgramasIniciais,
+  type CampoDoCadastro,
+} from '@/utils/parceiro/modo-participacao'
 import { formatCnpj, isValidCnpj, stripCnpj } from '@/utils/validation/cnpj'
 
 const props = withDefaults(
@@ -25,8 +29,8 @@ const props = withDefaults(
     initial?: ParceiroCadastro | null
     submitLabel: string
     submitting?: boolean
-    /** Campo destacado por erro de unicidade (reason do backend). */
-    errorField?: 'nome' | 'cnpj' | null
+    /** Campo destacado (e focado) pelo erro do backend: unicidade ou exigência da categoria. */
+    errorField?: CampoDoCadastro | null
     /**
      * Só a submissão (POST) leva programas: o PATCH devolve 400 com o campo, então
      * a edição inline do cadastro aprovado renderiza o formulário sem a aba.
@@ -50,6 +54,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+/*
+ * As categorias que o portal oferece. O veterinário autônomo (`VETERINARIO`) pede o CRMV do
+ * parceiro, e este formulário não tem esse campo: ele só aparece quando o cadastro já o tem (feito
+ * pelo site), para continuar marcado e não sumir no salvar.
+ */
 const CATEGORIAS: CategoriaParceiro[] = [
   'CLINICA_VETERINARIA',
   'PET_SHOP',
@@ -60,13 +69,25 @@ const CATEGORIAS: CategoriaParceiro[] = [
   'OUTRO',
 ]
 
+/** De 1 a 8, sem repetir (pedidos de 17/11). */
+const MAX_CATEGORIAS = 8
+
+/** O id do campo que recebe o foco quando o erro do backend aponta para ele. */
+const ID_DO_CAMPO: Record<CampoDoCadastro, string> = {
+  nome: 'cad-nome',
+  cnpj: 'cad-cnpj',
+  categorias: 'cad-categorias',
+}
+
 type FormTab = 'dados' | 'programas'
 
 const activeTab = ref<FormTab>('dados')
+const raiz = ref<HTMLFormElement | null>(null)
 
 const form = reactive({
   nome: '',
-  categoria: null as CategoriaParceiro | null,
+  /** Na ordem de escolha: a primeira é a principal. */
+  categorias: [] as CategoriaParceiro[],
   cnpj: '',
   telefoneComercial: '',
   /* Sem campos visíveis: preservados do GET para a re-submissão não apagar (semântica replace).
@@ -85,13 +106,29 @@ const programas = ref<ModoParticipacao[]>([])
 const nomeError = ref('')
 const cnpjError = ref('')
 const telefoneError = ref('')
+const categoriasError = ref('')
+
+/** As do cadastro, sem repetir e no máximo 8. Sem `categorias` (API antiga), a principal. */
+function categoriasDe(initial: ParceiroCadastro | null): CategoriaParceiro[] {
+  const lista = initial?.categorias?.length
+    ? initial.categorias
+    : initial?.categoria
+      ? [initial.categoria]
+      : []
+
+  return [...new Set(lista)].slice(0, MAX_CATEGORIAS)
+}
 
 const categoriaOptions = computed(() =>
-  CATEGORIAS.map((value) => ({
+  [...new Set([...CATEGORIAS, ...categoriasDe(props.initial)])].map((value) => ({
     value,
     label: t(`parceiroCadastro.categorias.${value}`),
   })),
 )
+
+function tornarPrincipal(categoria: CategoriaParceiro) {
+  form.categorias = [categoria, ...form.categorias.filter((item) => item !== categoria)]
+}
 
 const tabs = computed(() => [
   { id: 'dados' as const, label: t('parceiroCadastro.tabs.dados'), icon: 'ph ph-building' },
@@ -106,7 +143,7 @@ const resumoEnvio = computed(() => [
 
 function applyInitial(initial: ParceiroCadastro | null) {
   form.nome = initial?.nome ?? ''
-  form.categoria = initial?.categoria ?? null
+  form.categorias = categoriasDe(initial)
   // O backend guarda o CNPJ canônico (letras e números, sem máscara): mascara para exibir.
   form.cnpj = formatCnpj(initial?.cnpj ?? '')
   form.telefoneComercial = formatPhone(initial?.telefoneComercial ?? '')
@@ -115,6 +152,7 @@ function applyInitial(initial: ParceiroCadastro | null) {
   nomeError.value = ''
   cnpjError.value = ''
   telefoneError.value = ''
+  categoriasError.value = ''
 }
 
 function onCnpjInput() {
@@ -133,6 +171,20 @@ watch(
     applyInitial(initial)
   },
   { immediate: true },
+)
+
+/* O erro do backend (CNPJ em uso, categoria que exige CNPJ ou CRMV) leva o foco ao campo. */
+watch(
+  () => props.errorField,
+  async (campo) => {
+    if (!campo) {
+      return
+    }
+
+    activeTab.value = 'dados'
+    await nextTick()
+    raiz.value?.querySelector<HTMLElement>(`#${ID_DO_CAMPO[campo]}`)?.focus()
+  },
 )
 
 /* A recusa devolve programa só pedido para NAO_SOLICITADO e o backend esquece a
@@ -180,7 +232,15 @@ function handleSubmit() {
     telefoneError.value = ''
   }
 
-  if (nomeError.value || cnpjError.value || telefoneError.value) {
+  /*
+   * Só `categorias` vai, com a principal na frente. Quem já tinha categoria não esvazia a lista
+   * (a API recusa `[]`); no cadastro novo ela continua opcional e, vazia, não vai.
+   */
+  const categorias = [...new Set(form.categorias)].slice(0, MAX_CATEGORIAS)
+  categoriasError.value =
+    !categorias.length && categoriasDe(props.initial).length ? t('cadastro.categorias.minimo') : ''
+
+  if (nomeError.value || cnpjError.value || telefoneError.value || categoriasError.value) {
     // O erro está sempre na aba de dados: enviar da aba de programas não pode dar tela muda.
     activeTab.value = 'dados'
     return
@@ -188,7 +248,7 @@ function handleSubmit() {
 
   emit('submit', {
     nome,
-    categoria: form.categoria,
+    ...(categorias.length ? { categorias } : {}),
     // CNPJ canônico: o backend normaliza para dígitos e a coluna é `@unique`.
     cnpj: cnpjDigitos,
     telefoneComercial: formatPhone(telefoneDigitos),
@@ -200,7 +260,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form class="cad-form-shell" novalidate @submit.prevent="handleSubmit">
+  <form ref="raiz" class="cad-form-shell" novalidate @submit.prevent="handleSubmit">
     <!-- Painéis ficam abaixo via v-show (cad-panel-*): id/aria-controls do Tab apontam para eles. -->
     <Tabs
       v-if="showProgramas"
@@ -252,17 +312,59 @@ function handleSubmit() {
         </small>
       </div>
 
-      <div class="cad-form__field">
-        <label for="cad-categoria">{{ t('parceiroCadastro.form.categoria') }}</label>
-        <Select
-          id="cad-categoria"
-          v-model="form.categoria"
+      <div class="cad-form__field cad-form__field--full">
+        <label for="cad-categorias">{{ t('cadastro.categorias.rotulo') }}</label>
+        <MultiSelect
+          v-model="form.categorias"
+          input-id="cad-categorias"
           :options="categoriaOptions"
           option-label="label"
           option-value="value"
           :placeholder="t('parceiroCadastro.form.categoriaPlaceholder')"
-          show-clear
+          :selection-limit="MAX_CATEGORIAS"
+          :invalid="Boolean(categoriasError) || errorField === 'categorias'"
+          :aria-describedby="categoriasError ? 'cad-categorias-error' : 'cad-categorias-dica'"
+          @change="categoriasError = ''"
         />
+        <small id="cad-categorias-dica" class="cad-form__hint">
+          {{ t('cadastro.categorias.dica') }}
+        </small>
+
+        <!-- A ordem só pede decisão com duas ou mais: a primeira é a principal. -->
+        <ul v-if="form.categorias.length > 1" class="cad-categorias">
+          <li
+            v-for="(categoria, posicao) in form.categorias"
+            :key="categoria"
+            class="cad-categorias__item"
+          >
+            <span class="cad-categorias__nome">
+              {{ t(`parceiroCadastro.categorias.${categoria}`) }}
+            </span>
+            <span v-if="posicao === 0" class="ui-selo">
+              <i class="ph ph-star" aria-hidden="true" />
+              {{ t('cadastro.categorias.principal') }}
+            </span>
+            <Button
+              v-else
+              type="button"
+              size="small"
+              severity="secondary"
+              outlined
+              :label="t('cadastro.categorias.tornarPrincipal')"
+              :disabled="submitting"
+              @click="tornarPrincipal(categoria)"
+            />
+          </li>
+        </ul>
+
+        <small
+          v-if="categoriasError"
+          id="cad-categorias-error"
+          class="cad-form__error"
+          role="alert"
+        >
+          {{ categoriasError }}
+        </small>
       </div>
 
       <div class="cad-form__field">
@@ -477,9 +579,40 @@ function handleSubmit() {
 }
 
 .cad-form__field :deep(.p-inputtext),
-.cad-form__field :deep(.p-select) {
+.cad-form__field :deep(.p-select),
+.cad-form__field :deep(.p-multiselect) {
   width: 100%;
   min-height: 44px;
+}
+
+.cad-form__field :deep(.p-multiselect) {
+  align-items: center;
+}
+
+/*
+ * As escolhidas, na ordem: a principal com o selo, as outras com "Tornar principal". Item de campo
+ * não ganha caixa própria: a caixa é a da seção.
+ */
+.cad-categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cad-categorias__item {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.cad-categorias__nome {
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 550;
 }
 
 /* O que vai junto no envio: uma faixa no tom de fundo, com o link para mudar. */

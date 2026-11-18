@@ -1154,6 +1154,7 @@
     "motivoLabel": "السبب المذكور",
     "categorias": {
       "CLINICA_VETERINARIA": "عيادة بيطرية",
+      "VETERINARIO": "طبيب بيطري مستقل",
       "PET_SHOP": "متجر حيوانات أليفة",
       "BANHO_TOSA": "استحمام وتشذيب",
       "ADESTRAMENTO": "تدريب",
@@ -10648,6 +10649,13 @@
       "GRANDE": "من 25 إلى 45 كغ",
       "GIGANTE": "أكثر من 45 كغ",
       "dica": "الوزن المرجعي لكلب بالغ."
+    },
+    "categorias": {
+      "rotulo": "الفئات",
+      "dica": "اختر فئة واحدة أو أكثر. الأولى هي الرئيسية.",
+      "principal": "الرئيسية",
+      "tornarPrincipal": "التعيين كرئيسية",
+      "minimo": "اختر فئة واحدة على الأقل."
     }
   },
   "agenda": {

@@ -1154,6 +1154,7 @@
     "motivoLabel": "Motivo informado",
     "categorias": {
       "CLINICA_VETERINARIA": "Clínica veterinária",
+      "VETERINARIO": "Veterinário autônomo",
       "PET_SHOP": "Pet shop",
       "BANHO_TOSA": "Banho e tosa",
       "ADESTRAMENTO": "Adestramento",
@@ -10648,6 +10649,13 @@
       "GRANDE": "25 a 45 kg",
       "GIGANTE": "acima de 45 kg",
       "dica": "Peso de referência de um cão adulto."
+    },
+    "categorias": {
+      "rotulo": "Categorias",
+      "dica": "Escolha uma ou mais. A primeira é a principal.",
+      "principal": "Principal",
+      "tornarPrincipal": "Tornar principal",
+      "minimo": "Escolha pelo menos uma categoria."
     }
   },
   "agenda": {

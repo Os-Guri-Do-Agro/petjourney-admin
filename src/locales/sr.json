@@ -1154,6 +1154,7 @@
     "motivoLabel": "Navedeni razlog",
     "categorias": {
       "CLINICA_VETERINARIA": "Veterinarska klinika",
+      "VETERINARIO": "Samostalni veterinar",
       "PET_SHOP": "Pet shop",
       "BANHO_TOSA": "Šišanje i nega",
       "ADESTRAMENTO": "Dresura",
@@ -10648,6 +10649,13 @@
       "GRANDE": "25 do 45 kg",
       "GIGANTE": "preko 45 kg",
       "dica": "Referentna težina odraslog psa."
+    },
+    "categorias": {
+      "rotulo": "Kategorije",
+      "dica": "Izaberite jednu ili više. Prva je glavna.",
+      "principal": "Glavna",
+      "tornarPrincipal": "Postavi kao glavnu",
+      "minimo": "Izaberite bar jednu kategoriju."
     }
   },
   "agenda": {
