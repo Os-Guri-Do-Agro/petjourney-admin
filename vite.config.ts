@@ -97,4 +97,20 @@ export default defineConfig({
      */
     include: ['@primevue/icons/baseicon'],
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        /*
+         * Arquivo `.mjs` sai como `.js`. A hospedagem devolve o `index.html` para extensão fora da
+         * lista dela, e `.mjs` está fora: o worker do mapa da Saúde pública
+         * (`maplibre-gl-worker.mjs`, importado com `?url`) chegava como HTML e o mapa ficava só com o
+         * fundo em produção (18/11/2026). No `npm run dev` o Vite serve o arquivo direto e não acontece.
+         */
+        assetFileNames: (arquivo) =>
+          arquivo.names.some((nome) => nome.endsWith('.mjs'))
+            ? 'assets/[name]-[hash].js'
+            : 'assets/[name]-[hash][extname]',
+      },
+    },
+  },
 })
