@@ -10463,35 +10463,13 @@
       "noApp": "No app",
       "naoLigado": "Este paciente ainda não está ligado ao app. Ligado, o responsável acompanha o que a clínica registra.",
       "desde": "Ligado desde {data}, por {origem}.",
-      "ligar": "Ligar ao app",
-      "lede": "Proponha ao responsável de {nome} ligar o cadastro ao pet dele no app. Ele precisa aceitar.",
-      "caminho": {
-        "codigo": "Código",
-        "email": "E-mail",
-        "qr": "QR da carteirinha"
-      },
-      "codigoDica": "Gera um código de 8 caracteres para o responsável digitar no app. Vale 72 horas.",
-      "codigoPronto": "Código para o responsável",
-      "codigoComo": "No app, na tela \"Tenho um código da clínica\".",
-      "validoAte": "Vale até {data}.",
-      "imprimir": "Imprimir",
-      "gerarCodigo": "Gerar código",
-      "emailDica": "O link para aceitar vai para o e-mail do cadastro:",
-      "enviarEmail": "Enviar link",
       "emailEnviado": "Pedido enviado. O link foi para {email}.",
       "qrRotulo": "Endereço do QR da carteirinha do pet",
       "qrDica": "Leia o QR da coleira com o celular e cole o endereço da página que abrir.",
       "enviarPedido": "Enviar pedido",
       "qrEnviado": "Pedido enviado. Se a carteirinha for de um pet no app, o responsável recebe o pedido para aceitar.",
-      "folha": {
-        "titulo": "Código para ligar ao app",
-        "para": "Para ligar {nome} ao app PetJourney",
-        "como": "No app PetJourney, abra \"Tenho um código da clínica\" e digite o código acima."
-      },
       "erros": {
-        "semEmail": "O cadastro não tem e-mail. Use o código.",
         "jaLigado": "Este paciente já está ligado a um pet do app.",
-        "inativo": "Paciente inativo ou com óbito não recebe proposta.",
         "teto": "Limite de 50 propostas por dia atingido. Tente amanhã."
       },
       "propostas": "Propostas",
@@ -10508,7 +10486,8 @@
         "PROPOSTA_CODIGO": "código",
         "ACESSO_TEMPORARIO": "acesso temporário",
         "QR_CARTEIRINHA": "QR da carteirinha",
-        "RESERVA_HOTEL": "reserva do hotel"
+        "RESERVA_HOTEL": "reserva do hotel",
+        "PROPOSTA_LINK": "convite por link"
       },
       "recusa": {
         "NAO_SOU_EU": "o responsável disse que não é ele",
@@ -10536,6 +10515,23 @@
       "motivo": "Motivo",
       "motivoTamanho": "Escreva de {min} a {max} caracteres.",
       "encerrado": "Vínculo encerrado"
+    },
+    "convite": {
+      "titulo": "Convidar para o app",
+      "lede": "Convite para {pets}. O responsável abre o link no celular e aceita pelo app.",
+      "whatsapp": "Enviar pelo WhatsApp",
+      "mostrarQr": "Mostrar QR",
+      "copiar": "Copiar mensagem",
+      "copiado": "Mensagem copiada",
+      "email": "Enviar por e-mail",
+      "validade": "Vale até {data}.",
+      "anteriorCancelado": "O convite anterior deixou de valer.",
+      "outrasFormas": "Outras formas",
+      "imprimir": "Imprimir",
+      "folha": "Baixe o app PetJourney na App Store ou no Google Play, toque em Minhas clínicas e aponte a câmera para o QR. Ou digite o código {codigo}.",
+      "agora": "Convidar para o app agora?",
+      "agoraNao": "Agora não",
+      "reenviar": "Reenviar"
     },
     "correcoes": {
       "titulo": "Pedidos de correção",

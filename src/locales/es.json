@@ -10463,35 +10463,13 @@
       "noApp": "En la app",
       "naoLigado": "Este paciente todavía no está vinculado a la app. Vinculado, el responsable sigue lo que la clínica registra.",
       "desde": "Vinculado desde el {data}, por {origem}.",
-      "ligar": "Vincular a la app",
-      "lede": "Proponga al responsable de {nome} vincular el registro a su mascota en la app. Debe aceptar.",
-      "caminho": {
-        "codigo": "Código",
-        "email": "Correo",
-        "qr": "QR de la credencial"
-      },
-      "codigoDica": "Genera un código de 8 caracteres para que el responsable lo escriba en la app. Vale 72 horas.",
-      "codigoPronto": "Código para el responsable",
-      "codigoComo": "En la app, en la pantalla \"Tengo un código de la clínica\".",
-      "validoAte": "Vale hasta el {data}.",
-      "imprimir": "Imprimir",
-      "gerarCodigo": "Generar código",
-      "emailDica": "El enlace para aceptar va al correo del registro:",
-      "enviarEmail": "Enviar enlace",
       "emailEnviado": "Pedido enviado. El enlace fue a {email}.",
       "qrRotulo": "Dirección del QR de la credencial de la mascota",
       "qrDica": "Lea el QR del collar con el celular y pegue la dirección de la página que se abra.",
       "enviarPedido": "Enviar pedido",
       "qrEnviado": "Pedido enviado. Si la credencial es de una mascota en la app, el responsable recibe el pedido para aceptar.",
-      "folha": {
-        "titulo": "Código para vincular a la app",
-        "para": "Para vincular a {nome} a la app PetJourney",
-        "como": "En la app PetJourney, abra \"Tengo un código de la clínica\" y escriba el código de arriba."
-      },
       "erros": {
-        "semEmail": "El registro no tiene correo. Use el código.",
         "jaLigado": "Este paciente ya está vinculado a una mascota de la app.",
-        "inativo": "Paciente inactivo o fallecido no recibe propuesta.",
         "teto": "Límite de 50 propuestas por día alcanzado. Intente mañana."
       },
       "propostas": "Propuestas",
@@ -10508,7 +10486,8 @@
         "PROPOSTA_CODIGO": "código",
         "ACESSO_TEMPORARIO": "acceso temporal",
         "QR_CARTEIRINHA": "QR de la credencial",
-        "RESERVA_HOTEL": "reserva del hotel"
+        "RESERVA_HOTEL": "reserva del hotel",
+        "PROPOSTA_LINK": "invitación por enlace"
       },
       "recusa": {
         "NAO_SOU_EU": "el responsable dijo que no es él",
@@ -10536,6 +10515,23 @@
       "motivo": "Motivo",
       "motivoTamanho": "Escriba de {min} a {max} caracteres.",
       "encerrado": "Vínculo terminado"
+    },
+    "convite": {
+      "titulo": "Invitar a la app",
+      "lede": "Invitación para {pets}. El responsable abre el enlace en el celular y acepta en la app.",
+      "whatsapp": "Enviar por WhatsApp",
+      "mostrarQr": "Mostrar QR",
+      "copiar": "Copiar mensaje",
+      "copiado": "Mensaje copiado",
+      "email": "Enviar por correo",
+      "validade": "Vale hasta el {data}.",
+      "anteriorCancelado": "La invitación anterior dejó de valer.",
+      "outrasFormas": "Otras formas",
+      "imprimir": "Imprimir",
+      "folha": "Descargue la app PetJourney en la App Store o en Google Play, toque en Mis clínicas y apunte la cámara al QR. O escriba el código {codigo}.",
+      "agora": "¿Invitar a la app ahora?",
+      "agoraNao": "Ahora no",
+      "reenviar": "Reenviar"
     },
     "correcoes": {
       "titulo": "Pedidos de corrección",

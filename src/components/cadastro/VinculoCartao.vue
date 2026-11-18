@@ -5,9 +5,10 @@
  * - Ligado: o selo "no app", desde quando e o que o responsável liberou (diário completo, peso de
  *   casa, notas); o que não foi liberado aparece como "não liberado", sem botão. Encerrar pede um
  *   motivo.
- * - Não ligado: "Ligar ao app", com os três caminhos (`LigarAoAppGaveta`).
+ * - Não ligado: "Convidar para o app" (`LigarAoAppGaveta`): link, WhatsApp e QR.
  * - As propostas do responsável, com o estado de cada uma; a pendente se cancela. "Não respondida"
- *   inclui a que nunca chegou a ninguém: a clínica não sabe de bloqueio.
+ *   inclui a que nunca chegou a ninguém: a clínica não sabe de bloqueio. A expirada e a não
+ *   respondida têm "Reenviar", que abre o convite de novo (a API cancela a anterior).
  * - Os pedidos de correção que o responsável mandou pelo app, para marcar como resolvidos depois
  *   de corrigir o cadastro.
  */
@@ -89,7 +90,7 @@ async function atenderPedidoDeLigar() {
   void router.replace({ query })
   await nextTick()
   raiz.value?.scrollIntoView({ block: 'start', behavior: 'smooth' })
-  if (!vinculo.value && props.podeEscrever && props.paciente.ativo) ligando.value = true
+  if (podeConvidar.value) ligando.value = true
 }
 
 watch(
@@ -101,6 +102,14 @@ watch(
 /* ----------------------------------------------------------------------------- ligar */
 
 const ligando = ref(false)
+
+/** Convidar (e reenviar) só faz sentido com o paciente ativo e ainda fora do app. */
+const podeConvidar = computed(() => !vinculo.value && props.podeEscrever && props.paciente.ativo)
+
+/** "Reenviar" na expirada e na não respondida; "Cancelar" só na não respondida. */
+const podeReenviar = (proposta: Proposta) =>
+  podeConvidar.value && (proposta.status === 'EXPIRADA' || proposta.status === 'PENDENTE')
+const podeCancelar = (proposta: Proposta) => props.podeEscrever && proposta.status === 'PENDENTE'
 
 /* ---------------------------------------------------------------------------- propostas */
 
@@ -248,11 +257,11 @@ const liberado = computed(() =>
         </p>
       </span>
       <Button
-        v-if="!vinculo && podeEscrever && paciente.ativo && !carregando"
+        v-if="podeConvidar && !carregando"
         type="button"
         size="small"
         icon="ph ph-device-mobile"
-        :label="t('cadastro.vinculo.ligar')"
+        :label="t('cadastro.convite.titulo')"
         @click="ligando = true"
       />
       <Button
@@ -293,8 +302,19 @@ const liberado = computed(() =>
             </strong>
             <span class="ui-linha__meta">{{ detalhe(proposta) }}</span>
           </span>
-          <span v-if="proposta.status === 'PENDENTE' && podeEscrever" class="ui-linha__fim">
+          <span v-if="podeReenviar(proposta) || podeCancelar(proposta)" class="ui-linha__fim">
             <Button
+              v-if="podeReenviar(proposta)"
+              type="button"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-paper-plane-tilt"
+              :label="t('cadastro.convite.reenviar')"
+              @click="ligando = true"
+            />
+            <Button
+              v-if="podeCancelar(proposta)"
               type="button"
               size="small"
               severity="secondary"
@@ -351,7 +371,7 @@ const liberado = computed(() =>
       </ul>
     </template>
 
-    <LigarAoAppGaveta v-model:visible="ligando" :paciente="paciente" @proposto="carregar" />
+    <LigarAoAppGaveta v-model:visible="ligando" :paciente="paciente" @mudou="carregar" />
 
     <CadastroGaveta
       v-model:visible="encerrando"

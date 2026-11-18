@@ -10463,35 +10463,13 @@
       "noApp": "In the app",
       "naoLigado": "This patient is not linked to the app yet. Once linked, the guardian follows what the clinic records.",
       "desde": "Linked since {data}, via {origem}.",
-      "ligar": "Link to the app",
-      "lede": "Ask {nome}'s guardian to link this record to their pet in the app. They need to accept.",
-      "caminho": {
-        "codigo": "Code",
-        "email": "Email",
-        "qr": "Card QR"
-      },
-      "codigoDica": "Creates an 8-character code for the guardian to type in the app. Valid for 72 hours.",
-      "codigoPronto": "Code for the guardian",
-      "codigoComo": "In the app, on the \"I have a code from the clinic\" screen.",
-      "validoAte": "Valid until {data}.",
-      "imprimir": "Print",
-      "gerarCodigo": "Create code",
-      "emailDica": "The link to accept goes to the record's email:",
-      "enviarEmail": "Send link",
       "emailEnviado": "Request sent. The link went to {email}.",
       "qrRotulo": "Address of the pet's card QR",
       "qrDica": "Scan the collar QR with a phone and paste the address of the page that opens.",
       "enviarPedido": "Send request",
       "qrEnviado": "Request sent. If the card belongs to a pet in the app, the guardian gets the request to accept.",
-      "folha": {
-        "titulo": "Code to link to the app",
-        "para": "To link {nome} to the PetJourney app",
-        "como": "In the PetJourney app, open \"I have a code from the clinic\" and type the code above."
-      },
       "erros": {
-        "semEmail": "The record has no email. Use the code.",
         "jaLigado": "This patient is already linked to a pet in the app.",
-        "inativo": "Inactive or deceased patients cannot get a request.",
         "teto": "Limit of 50 requests per day reached. Try tomorrow."
       },
       "propostas": "Requests",
@@ -10508,7 +10486,8 @@
         "PROPOSTA_CODIGO": "code",
         "ACESSO_TEMPORARIO": "temporary access",
         "QR_CARTEIRINHA": "card QR",
-        "RESERVA_HOTEL": "hotel booking"
+        "RESERVA_HOTEL": "hotel booking",
+        "PROPOSTA_LINK": "link invite"
       },
       "recusa": {
         "NAO_SOU_EU": "the guardian said it is not them",
@@ -10536,6 +10515,23 @@
       "motivo": "Reason",
       "motivoTamanho": "Write {min} to {max} characters.",
       "encerrado": "Link ended"
+    },
+    "convite": {
+      "titulo": "Invite to the app",
+      "lede": "Invitation for {pets}. The guardian opens the link on their phone and accepts in the app.",
+      "whatsapp": "Send on WhatsApp",
+      "mostrarQr": "Show QR",
+      "copiar": "Copy message",
+      "copiado": "Message copied",
+      "email": "Send by email",
+      "validade": "Valid until {data}.",
+      "anteriorCancelado": "The previous invitation is no longer valid.",
+      "outrasFormas": "Other ways",
+      "imprimir": "Print",
+      "folha": "Download the PetJourney app from the App Store or Google Play, tap My clinics and point the camera at the QR code. Or enter the code {codigo}.",
+      "agora": "Invite to the app now?",
+      "agoraNao": "Not now",
+      "reenviar": "Resend"
     },
     "correcoes": {
       "titulo": "Correction requests",

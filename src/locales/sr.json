@@ -10463,35 +10463,13 @@
       "noApp": "U aplikaciji",
       "naoLigado": "Ovaj pacijent još nije povezan sa aplikacijom. Kada se poveže, vlasnik prati šta klinika beleži.",
       "desde": "Povezan od {data}, preko: {origem}.",
-      "ligar": "Poveži sa aplikacijom",
-      "lede": "Predložite vlasniku ljubimca {nome} da poveže ovaj upis sa ljubimcem u aplikaciji. On mora da prihvati.",
-      "caminho": {
-        "codigo": "Kod",
-        "email": "E-pošta",
-        "qr": "QR kartice"
-      },
-      "codigoDica": "Pravi kod od 8 znakova koji vlasnik unosi u aplikaciji. Važi 72 sata.",
-      "codigoPronto": "Kod za vlasnika",
-      "codigoComo": "U aplikaciji, na ekranu \"Imam kod od klinike\".",
-      "validoAte": "Važi do {data}.",
-      "imprimir": "Štampaj",
-      "gerarCodigo": "Napravi kod",
-      "emailDica": "Link za prihvatanje ide na e-poštu iz upisa:",
-      "enviarEmail": "Pošalji link",
       "emailEnviado": "Zahtev je poslat. Link je otišao na {email}.",
       "qrRotulo": "Adresa QR koda kartice ljubimca",
       "qrDica": "Skenirajte QR kod sa ogrlice telefonom i nalepite adresu stranice koja se otvori.",
       "enviarPedido": "Pošalji zahtev",
       "qrEnviado": "Zahtev je poslat. Ako je kartica ljubimca iz aplikacije, vlasnik dobija zahtev da ga prihvati.",
-      "folha": {
-        "titulo": "Kod za povezivanje sa aplikacijom",
-        "para": "Za povezivanje ljubimca {nome} sa aplikacijom PetJourney",
-        "como": "U aplikaciji PetJourney otvorite \"Imam kod od klinike\" i unesite kod iznad."
-      },
       "erros": {
-        "semEmail": "Upis nema e-poštu. Koristite kod.",
         "jaLigado": "Ovaj pacijent je već povezan sa ljubimcem iz aplikacije.",
-        "inativo": "Neaktivan ili uginuo pacijent ne dobija predlog.",
         "teto": "Dostignuto je ograničenje od 50 predloga dnevno. Pokušajte sutra."
       },
       "propostas": "Predlozi",
@@ -10508,7 +10486,8 @@
         "PROPOSTA_CODIGO": "kod",
         "ACESSO_TEMPORARIO": "privremeni pristup",
         "QR_CARTEIRINHA": "QR kartice",
-        "RESERVA_HOTEL": "rezervacija hotela"
+        "RESERVA_HOTEL": "rezervacija hotela",
+        "PROPOSTA_LINK": "pozivnica linkom"
       },
       "recusa": {
         "NAO_SOU_EU": "vlasnik je rekao da to nije on",
@@ -10536,6 +10515,23 @@
       "motivo": "Razlog",
       "motivoTamanho": "Napišite od {min} do {max} znakova.",
       "encerrado": "Povezivanje je prekinuto"
+    },
+    "convite": {
+      "titulo": "Pozovi u aplikaciju",
+      "lede": "Pozivnica za {pets}. Vlasnik ljubimca otvara link na telefonu i prihvata u aplikaciji.",
+      "whatsapp": "Pošalji preko WhatsAppa",
+      "mostrarQr": "Prikaži QR",
+      "copiar": "Kopiraj poruku",
+      "copiado": "Poruka je kopirana",
+      "email": "Pošalji e-poštom",
+      "validade": "Važi do {data}.",
+      "anteriorCancelado": "Prethodna pozivnica više ne važi.",
+      "outrasFormas": "Drugi načini",
+      "imprimir": "Štampaj",
+      "folha": "Preuzmite aplikaciju PetJourney sa App Store-a ili Google Play-a, dodirnite Moje klinike i usmerite kameru na QR. Ili unesite kod {codigo}.",
+      "agora": "Pozvati u aplikaciju sada?",
+      "agoraNao": "Ne sada",
+      "reenviar": "Pošalji ponovo"
     },
     "correcoes": {
       "titulo": "Zahtevi za ispravku",
