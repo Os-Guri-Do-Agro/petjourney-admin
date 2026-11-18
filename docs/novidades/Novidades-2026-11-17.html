@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Novidades de 17/11/2026</title>
+    <link rel="stylesheet" href="phosphor/phosphor.css" />
+    <style>
+      /*
+       * Resumo de uma página do que entrou na PetJourney em 17/11/2026: portal da clínica, portal do
+       * parceiro, Saúde pública, app, site e CMS. Quem lê é a equipe e quem acompanha o produto, sem
+       * termos de código. Cada linha saiu dos commits de 17/11 dos quatro repositórios.
+       *
+       * Mesmo molde da folha de venda (../venda): faixa sálvia do portal, tinta marinho, cor só em
+       * pastel com a tinta da família por cima. Fonte em pesos FIXOS (400 e 600) e nada de sombra
+       * desfocada nem fundo semitransparente: é o que faz o PDF abrir certo no iPhone.
+       *
+       * O PDF é gerado daqui pelo Edge (ver README.md), nunca editado à mão.
+       */
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-ext-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-ext-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      :root {
+        --tinta: #1d3557;
+        --texto: #2a3446;
+        --suave: #5f6670;
+        --papel: #ffffff;
+        --destaque: #76938d;
+        --salvia-texto: #4f6862;
+        --veu: #f3f7f6;
+        --veu-forte: #e9f0ee;
+        --regua: #dfe8e5;
+
+        /* Famílias: o pastel de fundo e a tinta que lê por cima (trilha-tokens.css). */
+        --clinica-fundo: #c9e7fc;
+        --clinica-tinta: #005982;
+        --portal-fundo: #f4dab2;
+        --portal-tinta: #6e4b02;
+        --saude-fundo: #c3eadc;
+        --saude-tinta: #285e4e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--papel);
+      }
+
+      body {
+        color: var(--texto);
+        font-family: 'Readex Pro', system-ui, sans-serif;
+        font-size: 8.6pt;
+        font-weight: 400;
+        line-height: 1.38;
+      }
+
+      b,
+      strong {
+        color: var(--tinta);
+        font-weight: 600;
+      }
+
+      p,
+      ul,
+      h2,
+      h3 {
+        margin: 0;
+        padding: 0;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      .folha {
+        display: flex;
+        flex-direction: column;
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+      }
+
+      /* ------------------------------------------------------------ faixa */
+
+      .faixa {
+        position: relative;
+        flex: none;
+        height: 55mm;
+        border-radius: 0 0 9mm 9mm;
+        background: var(--destaque) url('../apresentacao/faixa-capa.png') center bottom / cover
+          no-repeat;
+      }
+
+      .abertura {
+        position: absolute;
+        top: 8.6mm;
+        left: 15mm;
+        width: 104mm;
+        color: #fff;
+      }
+
+      .abertura__logo {
+        display: block;
+        width: 28mm;
+        margin-bottom: 3.6mm;
+      }
+
+      .abertura__etiqueta {
+        display: inline-block;
+        padding: 1.2mm 3.2mm;
+        border-radius: 99px;
+        background: #657e79;
+        font-size: 7.4pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 2.6mm 0 2mm;
+        color: #fff;
+        font-size: 19pt;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .abertura__sub {
+        font-size: 9.8pt;
+        line-height: 1.42;
+      }
+
+      /* O mapa novo da Saúde pública, recortado da captura do cartão do painel. */
+      .vitrine {
+        position: absolute;
+        top: 8.6mm;
+        right: 15mm;
+        width: 62mm;
+        height: 36mm;
+        overflow: hidden;
+        border-radius: 3.2mm;
+        background: #fff;
+        /* Contorno sólido, sem desfoque: sombra desfocada vira caixa escura no PDF do iPhone. */
+        box-shadow: 0 0 0 1.2mm #8ba59f;
+      }
+
+      .vitrine img {
+        position: absolute;
+        top: -50.1mm;
+        left: -6.6mm;
+        width: 75mm;
+      }
+
+      .legenda {
+        position: absolute;
+        top: 47.4mm;
+        right: 15mm;
+        width: 62mm;
+        color: #fff;
+        font-size: 7.6pt;
+        line-height: 1.3;
+      }
+
+      /* ----------------------------------------------------------- miolo */
+
+      .miolo {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 4mm;
+        padding: 5.6mm 15mm 5.6mm;
+      }
+
+      .rotulo {
+        margin-bottom: 2mm;
+        color: var(--salvia-texto);
+        font-size: 7.6pt;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      .colunas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4.4mm;
+        align-items: start;
+      }
+
+      .coluna {
+        display: flex;
+        flex-direction: column;
+        gap: 4.4mm;
+      }
+
+      /* Um bloco por área: cabeça com o ícone no pastel da família, itens com ícone de traço. */
+      .bloco {
+        padding: 3.4mm 3.8mm 3.6mm;
+        border-radius: 3mm;
+        background: var(--veu);
+      }
+
+      .bloco__cabeca {
+        display: flex;
+        align-items: center;
+        gap: 2.2mm;
+        margin-bottom: 2.2mm;
+      }
+
+      .bloco__icone {
+        display: grid;
+        flex: none;
+        width: 7.4mm;
+        height: 7.4mm;
+        place-items: center;
+        border-radius: 2mm;
+        font-size: 12pt;
+      }
+
+      .bloco h3 {
+        color: var(--tinta);
+        font-size: 10.6pt;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+
+      .bloco__dica {
+        color: var(--suave);
+        font-size: 7.6pt;
+        line-height: 1.25;
+      }
+
+      .bloco--clinica .bloco__icone {
+        background: var(--clinica-fundo);
+        color: var(--clinica-tinta);
+      }
+
+      .bloco--portal .bloco__icone {
+        background: var(--portal-fundo);
+        color: var(--portal-tinta);
+      }
+
+      .bloco--saude .bloco__icone {
+        background: var(--saude-fundo);
+        color: var(--saude-tinta);
+      }
+
+      .itens li {
+        display: grid;
+        grid-template-columns: 4.6mm 1fr;
+        column-gap: 1.4mm;
+        padding: 1.25mm 0;
+        border-top: 0.3mm solid var(--regua);
+      }
+
+      .itens li:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .itens li:last-child {
+        padding-bottom: 0;
+      }
+
+      .itens .ph {
+        margin-top: 0.3mm;
+        color: var(--salvia-texto);
+        font-size: 10pt;
+      }
+
+      .aguarda {
+        display: inline-block;
+        margin-left: 0.6mm;
+        padding: 0 1.8mm;
+        border: 0.3mm solid var(--portal-tinta);
+        border-radius: 99px;
+        color: var(--portal-tinta);
+        font-size: 6.8pt;
+        font-weight: 600;
+        line-height: 1.5;
+        white-space: nowrap;
+      }
+
+      /* App, site e CMS: três colunas curtas. */
+      .outros {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4.4mm;
+      }
+
+      .sistema h3 {
+        display: flex;
+        align-items: center;
+        gap: 1.8mm;
+        margin-bottom: 1.4mm;
+        color: var(--tinta);
+        font-size: 9.6pt;
+        font-weight: 600;
+      }
+
+      .sistema h3 .ph {
+        display: grid;
+        width: 6mm;
+        height: 6mm;
+        place-items: center;
+        border-radius: 1.7mm;
+        background: var(--veu-forte);
+        color: var(--salvia-texto);
+        font-size: 10pt;
+      }
+
+      .sistema li {
+        position: relative;
+        padding-left: 3mm;
+        color: var(--texto);
+        font-size: 8.2pt;
+        line-height: 1.36;
+      }
+
+      .sistema li + li {
+        margin-top: 0.9mm;
+      }
+
+      .sistema li::before {
+        position: absolute;
+        top: 1.55mm;
+        left: 0.4mm;
+        width: 1.1mm;
+        height: 1.1mm;
+        border-radius: 99px;
+        background: var(--destaque);
+        content: '';
+      }
+
+      /* Materiais: uma fileira de etiquetas. */
+      .materiais {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.8mm;
+      }
+
+      .material {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.4mm;
+        padding: 1.2mm 2.8mm 1.2mm 2.2mm;
+        border: 0.3mm solid var(--regua);
+        border-radius: 99px;
+        color: var(--texto);
+        font-size: 8pt;
+        line-height: 1.3;
+      }
+
+      .material .ph {
+        color: var(--salvia-texto);
+        font-size: 9.4pt;
+      }
+
+      .material span {
+        color: var(--suave);
+      }
+
+      /* ------------------------------------------------------------ rodapé */
+
+      .rodape {
+        display: grid;
+        flex: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 6mm;
+        margin-top: auto;
+        padding: 3.6mm 15mm 4mm;
+        background: var(--saude-fundo);
+        color: var(--saude-tinta);
+        font-size: 8.4pt;
+        line-height: 1.36;
+      }
+
+      .rodape b {
+        color: var(--saude-tinta);
+      }
+
+      .rodape p {
+        display: grid;
+        grid-template-columns: 5mm 1fr;
+        column-gap: 1.2mm;
+      }
+
+      .rodape .ph {
+        margin-top: 0.2mm;
+        font-size: 11pt;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="folha">
+      <!-- ============================================================ FAIXA -->
+      <header class="faixa">
+        <div class="abertura">
+          <img class="abertura__logo" src="../apresentacao/logo-branca.png" alt="PetJourney" />
+          <span class="abertura__etiqueta">Resumo do dia · terça, 17/11/2026</span>
+          <h1>O que entrou na PetJourney em 17&nbsp;de&nbsp;novembro</h1>
+          <p class="abertura__sub">
+            Portal da clínica, portal do parceiro, Saúde pública, app, site e CMS. O que mudou para
+            quem usa, em uma página.
+          </p>
+        </div>
+
+        <div class="vitrine">
+          <img src="imagens/mapa-saude-publica.png" alt="Mapa de Campo Grande por região no painel da Saúde pública" />
+        </div>
+        <p class="legenda">O mapa da cidade no painel da Saúde pública.</p>
+      </header>
+
+      <div class="miolo">
+        <div class="colunas">
+          <!-- =================================================== CLÍNICA -->
+          <section class="bloco bloco--clinica">
+            <div class="bloco__cabeca">
+              <i class="bloco__icone ph ph-stethoscope"></i>
+              <div>
+                <h3>Portal da clínica</h3>
+                <p class="bloco__dica">O dia a dia do atendimento</p>
+              </div>
+            </div>
+            <ul class="itens">
+              <li>
+                <i class="ph ph-list-dashes"></i>
+                <span
+                  ><b>Menu por trabalho,</b> em seções, com quatro formatos à escolha.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-lightning"></i>
+                <span
+                  ><b>Início com ações rápidas.</b> Os atalhos do dia e as áreas da Clínica, sem
+                  repetir números.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-list-checks"></i>
+                <span
+                  ><b>Pendências com o próximo passo.</b> Cada paciente mostra quem, quando e o botão
+                  da ação certa.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-user-plus"></i>
+                <span
+                  ><b>Cadastro de paciente em passos,</b> em uma gaveta lateral.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-image"></i>
+                <span
+                  ><b>Fotos dos pets</b> nas listas de pacientes e de vacinas aplicadas.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-syringe"></i>
+                <span
+                  ><b>Vacinas em cartões.</b> Lista de chamada, visão por mês e "Editar
+                  registro".</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-bell-ringing"></i>
+                <span
+                  ><b>Lembrete de vacina.</b> A clínica pede e o responsável recebe no app.
+                  <span class="aguarda">aguarda a API</span></span
+                >
+              </li>
+              <li>
+                <i class="ph ph-qr-code"></i>
+                <span><b>Convite do paciente para o app</b> por link, WhatsApp e QR Code.</span>
+              </li>
+              <li>
+                <i class="ph ph-flag-checkered"></i>
+                <span
+                  ><b>Fim do atendimento</b> com os próximos passos na janela de concluído.</span
+                >
+              </li>
+              <li>
+                <i class="ph ph-lightbulb"></i>
+                <span
+                  ><b>Telas vazias que ensinam,</b> com o botão de cada etapa.</span
+                >
+              </li>
+            </ul>
+          </section>
+
+          <div class="coluna">
+            <!-- ============================================= PORTAL E EMPRESA -->
+            <section class="bloco bloco--portal">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-storefront"></i>
+                <div>
+                  <h3>Portal do parceiro e empresa</h3>
+                  <p class="bloco__dica">Clientes, divulgação e o cadastro da empresa</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-toggle-right"></i>
+                  <span
+                    ><b>Módulos pelo dono.</b> Ele liga o teste grátis, desliga e religa os módulos
+                    no Início.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-tag"></i>
+                  <span
+                    ><b>Várias categorias na empresa,</b> com a principal na frente. Também no site
+                    e no CMS.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-squares-four"></i>
+                  <span
+                    ><b>Menu do Portal</b> em Clientes e Empresa. Programas sai quando os dois
+                    estão ativos.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-megaphone"></i>
+                  <span
+                    ><b>Divulgação em abas,</b> Convidar e Indicados. Código, link e QR em três
+                    cartões.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-key"></i>
+                  <span
+                    ><b>Novo acesso temporário</b> em Acessos.</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- ================================================ SAÚDE PÚBLICA -->
+            <section class="bloco bloco--saude">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-buildings"></i>
+                <div>
+                  <h3>Saúde pública</h3>
+                  <p class="bloco__dica">Protótipo para a Câmara de Campo Grande</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-map-trifold"></i>
+                  <span
+                    ><b>Mapa da cidade</b> por bairro e por região, na escala de risco, com o
+                    detalhe da região ao lado.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-funnel"></i>
+                  <span
+                    ><b>Filtros</b> de período, região, campanha e espécie no painel, nas
+                    Campanhas, nas ONGs e no Piloto.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-clipboard-text"></i>
+                  <span
+                    ><b>Trabalho em campo:</b> registro, resultado com motivo e etiqueta com QR
+                    Code.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-chart-bar"></i>
+                  <span
+                    ><b>Relatórios</b> por região, bairro ou CEP, e da equipe.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-flag"></i>
+                  <span
+                    ><b>Piloto de 60 dias com a Subea</b> (Ofício 002/2026), com as metas e o botão
+                    "Registrar atendimento".</span
+                  >
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+
+        <!-- ===================================================== APP, SITE, CMS -->
+        <section>
+          <h2 class="rotulo">No app, no site e no CMS</h2>
+          <div class="outros">
+            <div class="sistema">
+              <h3><i class="ph ph-device-mobile"></i>App</h3>
+              <ul>
+                <li>Convite da clínica por link, WhatsApp e QR.</li>
+                <li>Lembrete de vacina abre a carteira do pet.</li>
+                <li>Cadastro em três etapas.</li>
+                <li>Clínica do parceiro em áreas, com fotos e convite.</li>
+              </ul>
+            </div>
+            <div class="sistema">
+              <h3><i class="ph ph-globe-simple"></i>Site</h3>
+              <ul>
+                <li>Prévia do convite da clínica na página do link.</li>
+                <li>Várias categorias no cadastro de parceiro.</li>
+                <li>Calculadora de parcerias com período e gráfico mês a mês.</li>
+              </ul>
+            </div>
+            <div class="sistema">
+              <h3><i class="ph ph-sliders-horizontal"></i>CMS</h3>
+              <ul>
+                <li>Selos e histórico dos módulos que o parceiro liga e desliga.</li>
+                <li>Várias categorias nos parceiros e nas listas.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================= MATERIAIS -->
+        <section>
+          <h2 class="rotulo">Materiais novos</h2>
+          <div class="materiais">
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Folha de venda para clínicas <span>1 p.</span></span
+            >
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Como entrar no portal <span>1 p.</span></span
+            >
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Folheto das empresas piloto <span>3 p.</span></span
+            >
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Guia rápido e resumo da Saúde pública</span
+            >
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Guia de teste dos pedidos de 17/11
+              <span>24 p.</span></span
+            >
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================ RODAPÉ -->
+      <footer class="rodape">
+        <p>
+          <i class="ph ph-check-circle"></i>
+          <span
+            ><b>Testado em 18/11:</b> fotos, módulos, categorias e convite passaram de ponta
+            a ponta.</span
+          >
+        </p>
+        <p>
+          <i class="ph ph-clock-countdown"></i>
+          <span
+            ><b>Ainda falta:</b> o lembrete de vacina, que espera a API no ambiente de
+            testes.</span
+          >
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
