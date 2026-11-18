@@ -25,8 +25,10 @@ import { useParceiroStore } from './stores/parceiro'
 import './theme/color-mode'
 import { PetJourneyPreset } from './theme/primevue'
 import { deixarEscPassarPeloSelectFechado } from './theme/primevue-esc-do-select'
+import { aceitarPontoComoDecimal } from './theme/primevue-ponto-decimal'
 
 deixarEscPassarPeloSelectFechado()
+aceitarPontoComoDecimal()
 
 const app = createApp(App)
 
