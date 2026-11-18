@@ -67,12 +67,13 @@ const carregandoMais = ref(false)
 const jaCarregou = ref(false)
 const erro = ref('')
 
-/** Quem escreve: a permissão e um dos dois módulos que não esteja só para consulta. */
-const podeCadastrar = computed(
-  () =>
-    store.temPermissao('paciente.escrever') &&
-    Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
+/** Um dos dois módulos que não esteja só para consulta (desligado ou suspenso só deixa ler). */
+const moduloEscreve = computed(() =>
+  Boolean(store.modulo('CLINICA')?.podeEscrever || store.modulo('HOTEL')?.podeEscrever),
 )
+
+/** Quem escreve: a permissão e um módulo que escreve. */
+const podeCadastrar = computed(() => store.temPermissao('paciente.escrever') && moduloEscreve.value)
 
 /* "Todas" é o texto de espera, e o x do Select limpa a escolha: o PrimeVue lê `null` como vazio. */
 const opcoesDeEspecie = computed(() =>
@@ -166,7 +167,10 @@ onMounted(() => {
 })
 
 /** Quem importa (DONO e GESTOR): o migrador da base (E2-05). */
-const podeImportar = computed(() => store.temPermissao('importacao.executar'))
+const temPermissaoDeImportar = computed(() => store.temPermissao('importacao.executar'))
+
+/** Importar grava pacientes: com o módulo só para consulta, o botão sai como o "Novo paciente". */
+const podeImportar = computed(() => temPermissaoDeImportar.value && moduloEscreve.value)
 
 /*
  * A importação pausada ou parada (o contador `importacoesPausadas` da E1-06, tom de atenção, só
@@ -175,7 +179,7 @@ const podeImportar = computed(() => store.temPermissao('importacao.executar'))
 const importacoesParadas = ref(0)
 
 async function lerImportacaoParada() {
-  if (!podeImportar.value) return
+  if (!temPermissaoDeImportar.value) return
   try {
     const pendencias = await listarPendencias(parceiroQuery())
     importacoesParadas.value =
