@@ -21,10 +21,11 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
-import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   emCurso,
   GRAVIDADES,
@@ -34,6 +35,7 @@ import {
   type Internacao,
 } from '@/service/parceiro/internacao-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 import BoletinsDaInternacao from './BoletinsDaInternacao.vue'
 import ChecklistDaInternacao from './ChecklistDaInternacao.vue'
@@ -255,6 +257,23 @@ function encerrou(encerrada: Internacao) {
         <i class="ph ph-arrow-left" aria-hidden="true" />
         {{ t('internacao.titulo') }}
       </RouterLink>
+    </template>
+
+    <!-- O rosto do paciente ao lado do nome; título e frase são os da página. -->
+    <template v-if="internacao" #cabecalho>
+      <div class="id__cabeca">
+        <PetAvatar
+          :nome="internacao.paciente.nome"
+          :iniciais="iniciais(internacao.paciente.nome)"
+          :especie="ESPECIE_DO_AVATAR[internacao.paciente.especie] ?? null"
+          :foto-url="internacao.paciente.fotoUrl"
+          tamanho="lg"
+        />
+        <div class="id__titulos">
+          <h1 class="id__titulo">{{ internacao.paciente.nome }}</h1>
+          <p v-if="resumo" class="id__resumo">{{ resumo }}</p>
+        </div>
+      </div>
     </template>
 
     <template v-if="internacao" #acoes>
@@ -616,6 +635,44 @@ function encerrou(encerrada: Internacao) {
 .id {
   display: grid;
   gap: 20px;
+}
+
+/* O cabeçalho da faixa com o rosto: título e frase nas medidas do da página, na cor da faixa. */
+.id__cabeca {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 14px;
+}
+
+.id__titulos {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.id__titulo {
+  margin: 0;
+  color: inherit;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.id__resumo {
+  max-width: 80ch;
+  margin: 0;
+  color: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .id__titulo {
+    font-size: 24px;
+  }
 }
 
 .id__voltar {

@@ -20,8 +20,9 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
-import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   listarPacientes,
   mesclarCliente,
@@ -33,6 +34,7 @@ import {
   type Paciente,
   type PacienteNaLista,
 } from '@/service/parceiro/pacientes-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const props = defineProps<{ tipo: 'paciente' | 'cliente'; paciente: Paciente | null }>()
 const emit = defineEmits<{ mesclado: [] }>()
@@ -236,6 +238,13 @@ async function mesclar() {
           class="ui-linha ui-linha--clicavel ms__linha"
           @click="escolher(item)"
         >
+          <PetAvatar
+            :nome="item.nome"
+            :iniciais="iniciais(item.nome)"
+            :especie="ESPECIE_DO_AVATAR[item.especie] ?? null"
+            :foto-url="item.fotoUrl"
+            tamanho="sm"
+          />
           <span class="ui-linha__texto">
             <strong class="ui-linha__titulo">
               {{ tipo === 'paciente' ? item.nome : item.cliente.nome }}

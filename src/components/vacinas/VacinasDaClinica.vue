@@ -11,9 +11,10 @@
  * - **Aplicadas**: o registro de um período (até 92 dias), com o lote e quem aplicou, as anuladas
  *   riscadas. É a lista da farmacovigilância.
  *
- * "Editar registro" é corrigir: a API não edita uma dose (guia e4 3.5, "nada se apaga"), então a
- * gaveta anula com o motivo e leva a registrar a certa. O lembrete ainda não tem rota na API
- * (`lembrete-de-vacina-service`, lacuna N42).
+ * N42 (guia `pedidos-luis-17-11.md`, seção 5): o lembrete vem de cada item da chamada (`lembrete`,
+ * `responsavelNoApp`); sem responsável no app, a caixa diz "Ligue para o telefone do cadastro" no
+ * lugar do botão. Ligar e desligar relêem a lista. "Editar registro" corrige a observação e a via
+ * pelo `PATCH`; vacina, dose, data e lote seguem por anular e registrar de novo.
  */
 import Button from 'primevue/button'
 import Menu from 'primevue/menu'
@@ -32,6 +33,7 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { lembreteDoItem, semCanalNoApp } from '@/service/parceiro/lembrete-de-vacina-service'
 import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import {
   lerAplicadas,
@@ -44,6 +46,7 @@ import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 import AnularAplicacaoGaveta from './AnularAplicacaoGaveta.vue'
 import DetalhesDaVacinaGaveta from './DetalhesDaVacinaGaveta.vue'
+import EditarAplicacaoGaveta from './EditarAplicacaoGaveta.vue'
 import LembreteDaVacinaGaveta from './LembreteDaVacinaGaveta.vue'
 import { useLembretesDaChamada } from './useLembretesDaChamada'
 
@@ -105,7 +108,6 @@ const opcoesDeSituacao = computed(() => [
 async function carregarChamada(mais = false) {
   carregando.value = true
   erro.value = ''
-  lembretes.ler()
   try {
     const pagina = await lerChamada(
       {
@@ -117,6 +119,11 @@ async function carregarChamada(mais = false) {
     chamada.value = mais ? [...chamada.value, ...pagina.itens] : pagina.itens
     cursorDaChamada.value = pagina.proximoCursor
     lido.value = true
+    /* A gaveta do lembrete aberta passa a mostrar o item relido (a dose que saiu fica como estava). */
+    const aberto = lembreteDe.value?.aplicacaoId
+    if (aberto) {
+      lembreteDe.value = chamada.value.find((i) => i.aplicacaoId === aberto) ?? lembreteDe.value
+    }
   } catch (err) {
     erro.value = lerErroDoCadastro(err, t('vacinas.erro.carregar')).mensagem
   } finally {
@@ -313,12 +320,15 @@ const anularAberta = ref(false)
 const aAnular = ref<{ item: Chamada; corrigir: boolean } | null>(null)
 const lembreteAberta = ref(false)
 const lembreteDe = ref<Chamada | null>(null)
+const editarAberta = ref(false)
+const aEditar = ref<Chamada | null>(null)
 
 /* Uma gaveta por vez: abrir uma fecha a outra. */
 function fecharGavetas() {
   detalhesAberta.value = false
   anularAberta.value = false
   lembreteAberta.value = false
+  editarAberta.value = false
 }
 
 function verDetalhes(cartao: Cartao) {
@@ -339,6 +349,18 @@ function abrirLembrete(item: Chamada) {
   lembreteAberta.value = true
 }
 
+function editar(item: Chamada) {
+  fecharGavetas()
+  aEditar.value = item
+  editarAberta.value = true
+}
+
+/** A linha de baixo do "Lembrete ativo": a entrega, o motivo e se ainda sai outro. */
+function envioDo(item: Chamada) {
+  const lembrete = lembreteDoItem(item)
+  return lembrete ? lembretes.resumo(lembrete) : null
+}
+
 function sobreADose(item: Chamada) {
   const dia = rotulos.dia(item.ultimaEm.slice(0, 10))
   return `${item.vacina.nome} · ${t('vacinas.detalhes.doseDe', { dia })}`
@@ -353,7 +375,7 @@ const itensDoMenu = computed<MenuItem[]>(() => {
     {
       label: t('vacinas.chamada.menu.editar'),
       icon: 'ph ph-pencil-simple',
-      command: () => anular(item, true),
+      command: () => editar(item),
     },
     {
       label: t('vacinas.chamada.menu.apagar'),
@@ -541,6 +563,7 @@ const resumo = computed(() =>
                     :nome="cartao.paciente.nome"
                     :iniciais="iniciais(cartao.paciente.nome)"
                     :especie="ESPECIE_DO_AVATAR[cartao.paciente.especie] ?? null"
+                    :foto-url="cartao.paciente.fotoUrl"
                     tamanho="md"
                   />
                   <span class="cartao__quem">
@@ -625,27 +648,42 @@ const resumo = computed(() =>
                       }}
                     </span>
 
-                    <!-- O lembrete fecha a caixa: a largura toda, fácil de achar e de tocar. -->
-                    <Button
-                      v-if="podeLembrar"
-                      type="button"
-                      size="small"
-                      severity="secondary"
-                      outlined
-                      class="dose__lembrete"
-                      :class="{ 'dose__lembrete--ativo': lembretes.doItem(item.aplicacaoId) }"
-                      :icon="
-                        lembretes.doItem(item.aplicacaoId)
-                          ? 'ph ph-bell-ringing'
-                          : 'ph ph-bell-simple'
-                      "
-                      :label="
-                        lembretes.doItem(item.aplicacaoId)
-                          ? t('vacinas.lembrete.ativo')
-                          : t('vacinas.lembrete.ativar')
-                      "
-                      @click="abrirLembrete(item)"
-                    />
+                    <!--
+                      O lembrete fecha a caixa: a largura toda, fácil de achar e de tocar. Ligado,
+                      a linha de baixo diz como saiu o último envio. Sem responsável no app, no
+                      lugar do botão, o telefone do cadastro (a rota nem é chamada).
+                    -->
+                    <template v-if="podeLembrar">
+                      <p v-if="semCanalNoApp(item)" class="dose__semapp">
+                        <i class="ph ph-device-mobile-slash" aria-hidden="true" />
+                        {{ t('vacinas.lembrete.ligueNoCadastro') }}
+                      </p>
+                      <template v-else>
+                        <Button
+                          type="button"
+                          size="small"
+                          severity="secondary"
+                          outlined
+                          class="dose__lembrete"
+                          :class="{ 'dose__lembrete--ativo': lembreteDoItem(item) }"
+                          :icon="lembreteDoItem(item) ? 'ph ph-bell-ringing' : 'ph ph-bell-simple'"
+                          :label="
+                            lembreteDoItem(item)
+                              ? t('vacinas.lembrete.ativo')
+                              : t('vacinas.lembrete.ativar')
+                          "
+                          @click="abrirLembrete(item)"
+                        />
+                        <p
+                          v-if="envioDo(item)"
+                          class="dose__envio"
+                          :class="envioDo(item)?.tom ? `dose__envio--${envioDo(item)?.tom}` : ''"
+                        >
+                          <i :class="envioDo(item)?.icone" aria-hidden="true" />
+                          <span>{{ envioDo(item)?.texto }}</span>
+                        </p>
+                      </template>
+                    </template>
                   </li>
                 </ul>
 
@@ -756,7 +794,17 @@ const resumo = computed(() =>
         :vacina-id="aAnular?.item.vacina.id"
         @anulada="anulada"
       />
-      <LembreteDaVacinaGaveta v-model:visible="lembreteAberta" :item="lembreteDe" />
+      <LembreteDaVacinaGaveta
+        v-model:visible="lembreteAberta"
+        :item="lembreteDe"
+        @mudou="carregarChamada()"
+      />
+      <EditarAplicacaoGaveta
+        v-model:visible="editarAberta"
+        :item="aEditar"
+        @corrigir="aEditar && anular(aEditar, true)"
+        @mudou="anulada"
+      />
     </template>
   </UiPagina>
 </template>
@@ -1030,6 +1078,45 @@ const resumo = computed(() =>
 .dose__lembrete--ativo.p-button {
   border-color: color-mix(in oklab, var(--ok-tinta) 35%, var(--linha));
   color: var(--ok-tinta);
+}
+
+/* Como saiu o último envio, logo abaixo do "Lembrete ativo"; a cor só no ícone. */
+.dose__envio,
+.dose__semapp {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: -4px 0 0;
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.dose__envio i,
+.dose__semapp i {
+  flex: none;
+  margin-top: 1px;
+  font-size: 15px;
+}
+
+.dose__envio--ok i {
+  color: var(--ok-tinta);
+}
+
+.dose__envio--atencao i {
+  color: var(--atencao-tinta);
+}
+
+/* Sem app: no lugar do botão, uma linha de texto (a clínica liga; a tela não disca). */
+.dose__semapp {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dose__semapp i {
+  color: var(--tinta-2);
 }
 
 .dose__marcado {

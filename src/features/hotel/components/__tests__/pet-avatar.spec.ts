@@ -67,6 +67,38 @@ describe('a foto, quando existe, é o avatar', () => {
     expect(tela.find('img').attributes('src')).toBe('/retratos/mel.jpg')
     expect(tela.text()).toBe('')
   })
+
+  it('foto nula é o mesmo que sem foto', () => {
+    const tela = montar({ fotoUrl: null })
+
+    expect(tela.find('img').exists()).toBe(false)
+    expect(tela.text()).toBe('ME')
+  })
+
+  /*
+   * A URL da API é assinada e vence: com a tela aberta muito tempo, ou sem rede, a imagem falha.
+   * O avatar volta às iniciais com a silhueta, nunca ao ícone de imagem quebrada, e a próxima URL
+   * (a lista relida) tem a chance dela.
+   */
+  it('a foto que não carrega volta às iniciais, e a URL nova tenta de novo', async () => {
+    const tela = montar({
+      especie: 'felina',
+      fotoUrl: 'https://cofre.exemplo/mel.jpg?assinatura=1',
+    })
+
+    expect(tela.find('img').exists()).toBe(true)
+
+    await tela.find('img').trigger('error')
+
+    expect(tela.find('img').exists()).toBe(false)
+    expect(tela.text()).toBe('ME')
+    expect(tela.find('svg').exists()).toBe(true)
+
+    await tela.setProps({ fotoUrl: 'https://cofre.exemplo/mel.jpg?assinatura=2' })
+
+    expect(tela.find('img').attributes('src')).toBe('https://cofre.exemplo/mel.jpg?assinatura=2')
+    expect(tela.text()).toBe('')
+  })
 })
 
 describe('o avatar não é anunciado duas vezes', () => {

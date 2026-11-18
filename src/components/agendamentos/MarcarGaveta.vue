@@ -27,6 +27,7 @@ import { RouterLink } from 'vue-router'
 import { ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
 import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { diaCurto } from '@/components/pedidos/leitura-do-pedido'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
@@ -51,9 +52,16 @@ import {
   type NovoAgendamento,
   type Simulacao,
 } from '@/service/parceiro/agenda-service'
-import { listarPacientes } from '@/service/parceiro/pacientes-service'
+import { listarPacientes, type PacienteNaLista } from '@/service/parceiro/pacientes-service'
 
-export type PacienteEscolhido = { id: string; nome: string; responsavel: string }
+export type PacienteEscolhido = {
+  id: string
+  nome: string
+  responsavel: string
+  /** O rosto na lista da busca; quem abre a gaveta com o paciente já escolhido não precisa dele. */
+  especie?: PacienteNaLista['especie']
+  fotoUrl?: string | null
+}
 
 export type InicioDaMarcacao = {
   data: string
@@ -148,7 +156,13 @@ async function buscarPaciente(evento: { query: string }) {
     const pagina = await listarPacientes({ q: evento.query, limit: 20 }, parceiroQuery())
     sugestoesDePaciente.value = pagina.itens
       .filter((item) => item.ativo)
-      .map((item) => ({ id: item.id, nome: item.nome, responsavel: item.cliente.nome }))
+      .map((item) => ({
+        id: item.id,
+        nome: item.nome,
+        responsavel: item.cliente.nome,
+        especie: item.especie,
+        fotoUrl: item.fotoUrl,
+      }))
   } catch {
     sugestoesDePaciente.value = []
   }
@@ -409,7 +423,11 @@ const nomeDoProfissional = (id: string) =>
           @complete="buscarPaciente"
           @click="abrirLista"
           @keydown.down="abrirLista"
-        />
+        >
+          <template #option="{ option }">
+            <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+          </template>
+        </AutoComplete>
       </section>
 
       <div class="eg__linha">

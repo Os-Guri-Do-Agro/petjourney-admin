@@ -17,6 +17,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { nomeDoDia } from '@/components/fila/leitura-da-fila'
@@ -223,7 +224,11 @@ function rotuloDoPaciente(item: PacienteNaLista) {
           @complete="buscar"
           @click="abrirLista"
           @keydown.down="abrirLista"
-        />
+        >
+          <template #option="{ option }">
+            <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+          </template>
+        </AutoComplete>
         <small v-if="erroDoPaciente" class="eg__invalido">{{ erroDoPaciente }}</small>
         <small v-else-if="tentou && !paciente && !paraQuem" class="eg__invalido">{{
           t('fila.pacienteObrigatorio')

@@ -17,6 +17,7 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import EntrarNaFilaGaveta from '@/components/fila/EntrarNaFilaGaveta.vue'
 import { quandoCurto, textoDaFaixa } from '@/components/fila/leitura-da-fila'
@@ -26,6 +27,7 @@ import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   listarTipos,
@@ -44,6 +46,7 @@ import {
   type SituacaoDaFila,
 } from '@/service/parceiro/fila-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const { t, locale } = useI18n()
@@ -438,6 +441,14 @@ const passosDaFila = computed<PassoDoGuia[]>(() => {
               aria-hidden="true"
             />
           </span>
+
+          <PetAvatar
+            :nome="entrada.paciente.nome"
+            :iniciais="iniciais(entrada.paciente.nome)"
+            :especie="ESPECIE_DO_AVATAR[entrada.paciente.especie] ?? null"
+            :foto-url="entrada.paciente.fotoUrl"
+            tamanho="md"
+          />
 
           <span class="ui-linha__texto">
             <strong class="ui-linha__titulo">

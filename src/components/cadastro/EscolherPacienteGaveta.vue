@@ -14,6 +14,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -95,10 +96,12 @@ function enviar() {
           @keydown.down="abrirLista"
         >
           <template #option="{ option }">
-            <span class="ep__opcao">
-              <strong>{{ option.nome }}</strong>
-              <small> {{ rotulos.especie(option) }} · {{ option.cliente.nome }} </small>
-            </span>
+            <OpcaoDoPaciente :paciente="option">
+              <span class="ep__opcao">
+                <strong>{{ option.nome }}</strong>
+                <small> {{ rotulos.especie(option) }} · {{ option.cliente.nome }} </small>
+              </span>
+            </OpcaoDoPaciente>
           </template>
         </AutoComplete>
         <small v-if="tentou && !escolhido" class="eg__invalido">{{

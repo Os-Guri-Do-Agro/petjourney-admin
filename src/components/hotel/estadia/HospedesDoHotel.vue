@@ -10,12 +10,15 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import { useRotulosDasReservas } from '@/components/hotel/reservas/useRotulosDasReservas'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { listarHospedes, type Hospede } from '@/service/parceiro/hotel-estadia-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const { t } = useI18n()
 const rotulos = useRotulosDasReservas()
@@ -125,6 +128,13 @@ const passosDoHospede = computed<PassoDoGuia[]>(() => {
         <ul v-if="ordenados.length" class="ui-lista">
           <li v-for="h in ordenados" :key="h.hospedagemId">
             <RouterLink :to="`/hotel/hospedagem/${h.hospedagemId}`" class="ui-linha hh__linha">
+              <PetAvatar
+                :nome="h.pacienteNome"
+                :iniciais="iniciais(h.pacienteNome)"
+                :especie="ESPECIE_DO_AVATAR[h.especie] ?? null"
+                :foto-url="h.fotoUrl"
+                tamanho="md"
+              />
               <span class="ui-linha__texto">
                 <span class="hh__nome">
                   <strong class="ui-linha__titulo">{{ h.pacienteNome }}</strong>

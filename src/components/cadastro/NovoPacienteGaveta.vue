@@ -12,8 +12,10 @@
  * 2. Pet: nome e espécie (obrigatórios), raça, sexo e castrado.
  * 3. Detalhes: nascimento, porte, peso, microchip e pelagem, todos opcionais.
  *
- * "Cadastrar" leva `Idempotency-Key`, uma por ação: o clique duplo não cria dois. Depois, a ficha
- * do paciente novo, de onde sai o que se faz com ele em seguida. Fechar pelo X guarda o que já foi
+ * "Cadastrar" leva `Idempotency-Key`, uma por ação: o clique duplo não cria dois. Depois, um passo
+ * "Convidar para o app agora?" (pedido 4 do guia de 17/11), com as ações do convite
+ * (`ConviteParaOApp`, que só cria o convite na primeira ação) e "Agora não"; ao sair dele, pelo
+ * botão ou pelo X, a ficha do paciente novo. Antes de cadastrar, fechar pelo X guarda o que já foi
  * preenchido; "Cancelar" descarta.
  */
 import Button from 'primevue/button'
@@ -39,9 +41,12 @@ import {
   type ErrosDoPaciente,
 } from '@/components/cadastro/campos'
 import ClienteCampos from '@/components/cadastro/ClienteCampos.vue'
+import ConviteParaOApp from '@/components/cadastro/ConviteParaOApp.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import PacienteCampos from '@/components/cadastro/PacienteCampos.vue'
+import { iniciais } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
   criarPaciente,
@@ -50,8 +55,10 @@ import {
   telefoneNaTela,
   termoDaBusca,
   type NovoPaciente,
+  type Paciente,
   type PacienteNaLista,
 } from '@/service/parceiro/pacientes-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const aberta = defineModel<boolean>('visible', { default: false })
 
@@ -111,6 +118,9 @@ const opcoesDeResponsavel = computed(() => [
 
 type ClienteEscolhido = { id: string; nome: string; telefone: string | null }
 
+/** Os rostos na linha do cliente; os nomes ao lado continuam todos. */
+const ROSTOS_POR_CLIENTE = 3
+
 const termo = ref('')
 const resultados = ref<PacienteNaLista[]>([])
 const buscando = ref(false)
@@ -158,15 +168,16 @@ onUnmounted(() => clearTimeout(espera))
 
 /** Um por cliente, com os pets dele para reconhecer ("Marina Prado · Bolota, Tofu"). */
 const clientes = computed(() => {
-  const porId = new Map<string, ClienteEscolhido & { pets: string[] }>()
+  const porId = new Map<string, ClienteEscolhido & { pets: string[]; rostos: PacienteNaLista[] }>()
 
   for (const item of resultados.value) {
     const atual = porId.get(item.cliente.id)
 
     if (atual) {
       atual.pets.push(item.nome)
+      atual.rostos.push(item)
     } else {
-      porId.set(item.cliente.id, { ...item.cliente, pets: [item.nome] })
+      porId.set(item.cliente.id, { ...item.cliente, pets: [item.nome], rostos: [item] })
     }
   }
 
@@ -187,6 +198,10 @@ const errosDoCliente = ref<ErrosDoCliente>({})
 
 const salvando = ref(false)
 const erroGeral = ref('')
+/** O paciente que acabou de nascer: a gaveta passa ao convite para o app. */
+const criado = ref<Paciente | null>(null)
+/** Algum convite saiu no passo do convite: o pé troca "Agora não" por "Fechar". */
+const convidou = ref(false)
 /** O CPF já é de um cliente desta casa: o id dele, para "usar este cliente". */
 const cpfDeOutroCliente = ref<string | null>(null)
 
@@ -294,17 +309,15 @@ async function cadastrar() {
   salvando.value = true
 
   try {
-    const criado = await criarPaciente(dados, chaveador.para(dados), parceiroQuery())
+    const novo = await criarPaciente(dados, chaveador.para(dados), parceiroQuery())
 
     chaveador.concluir()
     toast.add({
       severity: 'success',
-      summary: t('cadastro.novo.criado', { nome: criado.nome }),
+      summary: t('cadastro.novo.criado', { nome: novo.nome }),
       life: 3500,
     })
-    aberta.value = false
-    limpar()
-    void router.push(`/clinica/ficha/${criado.id}`)
+    criado.value = novo
   } catch (err) {
     const lido = lerErroDoCadastro(err, t('cadastro.erros.salvar'))
 
@@ -360,7 +373,22 @@ function limpar() {
   cpfDeOutroCliente.value = null
   tentouCliente.value = false
   tentouPaciente.value = false
+  criado.value = null
+  convidou.value = false
 }
+
+/** Sai do passo do convite ("Agora não", "Fechar" ou o X): a ficha do paciente novo. */
+function concluir() {
+  const id = criado.value?.id
+
+  aberta.value = false
+  limpar()
+  if (id) void router.push(`/clinica/ficha/${id}`)
+}
+
+watch(aberta, (agora) => {
+  if (!agora && criado.value) concluir()
+})
 
 function cancelar() {
   aberta.value = false
@@ -385,7 +413,13 @@ function irPara(indice: number) {
     icone="ph ph-paw-print"
     largura="34rem"
   >
-    <ol class="np__passos" :aria-label="t('cadastro.novo.passos.rotulo')">
+    <!-- Cadastrado: o convite para o app, no lugar dos passos e do formulário. -->
+    <section v-if="criado" class="np__convite" aria-labelledby="np-convite-titulo">
+      <h3 id="np-convite-titulo" class="np__convite-titulo">{{ t('cadastro.convite.agora') }}</h3>
+      <ConviteParaOApp :paciente="criado" @mudou="convidou = true" />
+    </section>
+
+    <ol v-if="!criado" class="np__passos" :aria-label="t('cadastro.novo.passos.rotulo')">
       <li
         v-for="(item, indice) in passos"
         :key="item.id"
@@ -412,6 +446,7 @@ function irPara(indice: number) {
     </ol>
 
     <form
+      v-if="!criado"
       id="novo-paciente"
       ref="formulario"
       class="eg np__form"
@@ -484,6 +519,18 @@ function irPara(indice: number) {
                   class="ui-linha ui-linha--clicavel np__cliente"
                   @click="escolher(item)"
                 >
+                  <!-- Os pets que a linha nomeia, para reconhecer o cadastro que já existe. -->
+                  <span class="np__rostos">
+                    <PetAvatar
+                      v-for="pet in item.rostos.slice(0, ROSTOS_POR_CLIENTE)"
+                      :key="pet.id"
+                      :nome="pet.nome"
+                      :iniciais="iniciais(pet.nome)"
+                      :especie="ESPECIE_DO_AVATAR[pet.especie] ?? null"
+                      :foto-url="pet.fotoUrl"
+                      tamanho="sm"
+                    />
+                  </span>
                   <span class="ui-linha__texto">
                     <strong class="ui-linha__titulo">{{ item.nome }}</strong>
                     <span class="ui-linha__meta">
@@ -552,32 +599,42 @@ function irPara(indice: number) {
 
     <template #pe>
       <Button
-        v-if="passo === 0"
+        v-if="criado"
         type="button"
-        severity="secondary"
-        outlined
-        :label="t('cadastro.cancelar')"
-        :disabled="salvando"
-        @click="cancelar"
+        :severity="convidou ? undefined : 'secondary'"
+        :outlined="!convidou"
+        :label="convidou ? t('cadastro.fechar') : t('cadastro.convite.agoraNao')"
+        @click="concluir"
       />
-      <Button
-        v-else
-        type="button"
-        severity="secondary"
-        outlined
-        icon="ph ph-arrow-left"
-        :label="t('cadastro.novo.voltar')"
-        :disabled="salvando"
-        @click="voltar"
-      />
-      <Button
-        type="submit"
-        form="novo-paciente"
-        :icon="ultimo ? 'ph ph-check' : 'ph ph-arrow-right'"
-        :icon-pos="ultimo ? 'left' : 'right'"
-        :label="ultimo ? t('cadastro.novo.cadastrar') : t('cadastro.novo.continuar')"
-        :loading="salvando"
-      />
+      <template v-else>
+        <Button
+          v-if="passo === 0"
+          type="button"
+          severity="secondary"
+          outlined
+          :label="t('cadastro.cancelar')"
+          :disabled="salvando"
+          @click="cancelar"
+        />
+        <Button
+          v-else
+          type="button"
+          severity="secondary"
+          outlined
+          icon="ph ph-arrow-left"
+          :label="t('cadastro.novo.voltar')"
+          :disabled="salvando"
+          @click="voltar"
+        />
+        <Button
+          type="submit"
+          form="novo-paciente"
+          :icon="ultimo ? 'ph ph-check' : 'ph ph-arrow-right'"
+          :icon-pos="ultimo ? 'left' : 'right'"
+          :label="ultimo ? t('cadastro.novo.cadastrar') : t('cadastro.novo.continuar')"
+          :loading="salvando"
+        />
+      </template>
     </template>
   </CadastroGaveta>
 </template>
@@ -683,6 +740,18 @@ function irPara(indice: number) {
   white-space: nowrap;
 }
 
+.np__convite {
+  display: grid;
+  gap: 12px;
+}
+
+.np__convite-titulo {
+  margin: 0;
+  color: var(--tinta);
+  font-size: 17px;
+  font-weight: 700;
+}
+
 .np__dica {
   margin: 0;
   color: var(--tinta-2);
@@ -724,5 +793,16 @@ function irPara(indice: number) {
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+/* Os rostos dos pets do cliente, um sobre o outro, como no pedido com vários pets. */
+.np__rostos {
+  display: inline-flex;
+  flex: none;
+}
+
+.np__rostos > * + * {
+  margin-inline-start: -8px;
+  box-shadow: 0 0 0 2px var(--superficie);
 }
 </style>

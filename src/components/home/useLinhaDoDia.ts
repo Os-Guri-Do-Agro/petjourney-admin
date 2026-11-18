@@ -22,6 +22,7 @@ import { computed, inject, onScopeDispose, ref, watch, type InjectionKey } from 
 
 import { criarReconferencia } from '@/composables/conferencia'
 import type { Appointment } from '@/features/clinico/data/types'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 import {
   estadoDoAtendimento,
@@ -132,7 +133,7 @@ async function carregarAgendaDoDiaPelaApi(data: string) {
   const contas: ContaDoDia[] = dia.agendamentos.flatMap((item) => {
     const estado = ESTADO_DO_PAINEL[item.status]
     if (!estado) return []
-    const partes = item.paciente.nome.trim().split(/s+/).filter(Boolean)
+    const partes = item.paciente.nome.trim().split(/\s+/).filter(Boolean)
     return [
       {
         id: item.id,
@@ -143,8 +144,8 @@ async function carregarAgendaDoDiaPelaApi(data: string) {
         petIniciais: [partes[0]?.[0], partes.length > 1 ? partes[partes.length - 1]![0] : '']
           .join('')
           .toLocaleUpperCase(),
-        petEspecie: null,
-        petFotoUrl: '',
+        petEspecie: ESPECIE_DO_AVATAR[item.paciente.especie] ?? null,
+        petFotoUrl: item.paciente.fotoUrl ?? '',
         tipo: nomeDoTipo.get(item.tipoId) ?? '',
         profissional: nomeDoProfissional.get(item.profissionalId) ?? '',
         chegadaEm: item.chegadaEm,
@@ -315,7 +316,7 @@ export function useLinhaDoDia(opcoes: {
         const estado = ESTADO_DO_PAINEL[item.status ?? '']
         if (!estado || !item.quando) return []
         const nome = item.pacienteNome ?? ''
-        const partes = nome.trim().split(/s+/).filter(Boolean)
+        const partes = nome.trim().split(/\s+/).filter(Boolean)
         return [
           {
             id: item.id,

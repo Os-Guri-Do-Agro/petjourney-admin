@@ -414,6 +414,7 @@ watch(
               :nome="paciente.nome"
               :iniciais="iniciais(paciente.nome)"
               :especie="ESPECIE_DO_AVATAR[paciente.especie] ?? null"
+              :foto-url="paciente.fotoUrl"
               tamanho="md"
             />
 

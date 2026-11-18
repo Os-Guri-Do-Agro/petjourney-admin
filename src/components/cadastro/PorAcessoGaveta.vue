@@ -18,14 +18,16 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
-import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
+import { iniciais, useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import {
   listarPacientes,
   termoDaBusca,
   type PacienteNaLista,
 } from '@/service/parceiro/pacientes-service'
 import { proporPorAcesso } from '@/service/parceiro/vinculo-service'
+import { ESPECIE_DO_AVATAR } from '@/utils/parceiro/acesso-na-lista'
 
 const props = defineProps<{ acessoId: string; petNome: string }>()
 const visible = defineModel<boolean>('visible', { default: false })
@@ -178,6 +180,13 @@ async function propor() {
               :aria-pressed="escolhido?.id === item.id"
               @click="escolhido = item"
             >
+              <PetAvatar
+                :nome="item.nome"
+                :iniciais="iniciais(item.nome)"
+                :especie="ESPECIE_DO_AVATAR[item.especie] ?? null"
+                :foto-url="item.fotoUrl"
+                tamanho="sm"
+              />
               <span class="ui-linha__texto">
                 <strong class="ui-linha__titulo">{{ item.nome }}</strong>
                 <span class="ui-linha__meta"

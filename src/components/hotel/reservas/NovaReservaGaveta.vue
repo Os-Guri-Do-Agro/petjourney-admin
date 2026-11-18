@@ -20,6 +20,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -319,7 +320,11 @@ async function criar() {
             @complete="buscar"
             @click="abrirLista"
             @keydown.down="abrirLista"
-          />
+          >
+            <template #option="{ option }">
+              <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+            </template>
+          </AutoComplete>
         </div>
         <div class="eg__secao">
           <label class="eg__rotulo" for="nr-acompanhante">
@@ -338,7 +343,11 @@ async function criar() {
             @complete="buscarAcompanhante"
             @click="abrirAcompanhantes"
             @keydown.down="abrirAcompanhantes"
-          />
+          >
+            <template #option="{ option }">
+              <OpcaoDoPaciente :paciente="option">{{ rotuloDoPaciente(option) }}</OpcaoDoPaciente>
+            </template>
+          </AutoComplete>
           <small class="eg__dica">{{ t('reservasDoHotel.nova.acompanhanteDica') }}</small>
         </div>
       </section>
