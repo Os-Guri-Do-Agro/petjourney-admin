@@ -74,12 +74,18 @@ const resumo = computed(
 
 const aviso = `Dados ilustrativos: simulação do piloto de 60 dias (${dataCurta(PILOTO.inicio)} a ${dataCurta(PILOTO.fim)}) num bairro de exemplo; a Subea escolhe o bairro. As metas são as do Ofício 002/2026. Nenhum tutor é identificado.`
 
+/*
+ * A etapa da equipe ganha o botão dela (17/11/2026, "tem sempre que ter os botões call to action"):
+ * registrar o atendimento abre a gaveta do balcão. A ficha e os avisos são do lado do tutor, e o
+ * painel são as metas logo abaixo: sem botão.
+ */
 const PASSOS: PassoDoGuia[] = [
   {
     id: 'qr',
     icone: 'ph ph-qr-code',
     titulo: 'QR Code no atendimento',
     texto: 'A equipe registra o que fez, em cerca de 1 minuto, e entrega o QR impresso ao tutor.',
+    acao: { rotulo: 'Registrar atendimento', icone: 'ph ph-qr-code', aoClicar: () => registrar() },
   },
   {
     id: 'ficha',
