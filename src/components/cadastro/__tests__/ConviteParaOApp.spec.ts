@@ -168,6 +168,33 @@ describe('convite para o app', () => {
     expect(wrapper.find('.cv-qr__como').text()).toContain('Ou digite o código K7MQ-X3PA.')
   })
 
+  it('Escape com o QR aberto fecha só o QR: a gaveta de baixo não recebe a tecla', async () => {
+    servico.proporVinculo.mockResolvedValue(CONVITE)
+    /* O ouvinte do `document` faz o papel do Drawer da gaveta, que fecha no Escape. */
+    const gavetaDeBaixo = vi.fn()
+    document.addEventListener('keydown', gavetaDeBaixo)
+
+    const wrapper = montar({ criarAoAbrir: true })
+    await flushPromises()
+    await botao(wrapper, 'Mostrar QR').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('.cv-qr__codigo').exists()).toBe(true))
+
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }),
+    )
+    await flushPromises()
+
+    expect(gavetaDeBaixo).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(wrapper.find('.cv-qr__codigo').exists()).toBe(false))
+
+    /* QR fechado: o Escape volta a ser da gaveta. */
+    document.body.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', bubbles: true }),
+    )
+    expect(gavetaDeBaixo).toHaveBeenCalledTimes(1)
+    document.removeEventListener('keydown', gavetaDeBaixo)
+  })
+
   it('"Enviar por e-mail" só aparece com e-mail no cadastro, e manda EMAIL', async () => {
     servico.proporVinculo.mockResolvedValueOnce(CONVITE).mockResolvedValueOnce({
       ...CONVITE,

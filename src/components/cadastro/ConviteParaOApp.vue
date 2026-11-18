@@ -19,7 +19,7 @@ import Drawer from 'primevue/drawer'
 import InputText from 'primevue/inputtext'
 import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro, type ErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
@@ -198,6 +198,25 @@ async function mostrarQr() {
   qrImagem.value = await imagemDoQr(convite.link, 720)
   qrAberto.value = true
 }
+
+/*
+ * O QR abre por cima da gaveta do convite, e cada Drawer do PrimeVue fecha no Escape por um
+ * ouvinte no `document`: um Escape fechava os dois. Na ficha, a gaveta fechada perde o convite
+ * (abrir de novo cria outro, e o que já foi pelo WhatsApp deixa de valer). Com o QR aberto, o
+ * Escape é pego antes, na captura da `window`, e fecha só o QR.
+ */
+function escapeFechaSoOQr(evento: KeyboardEvent) {
+  if (!qrAberto.value || (evento.key !== 'Escape' && evento.code !== 'Escape')) return
+  evento.stopPropagation()
+  qrAberto.value = false
+}
+
+watch(qrAberto, (aberto) => {
+  if (aberto) window.addEventListener('keydown', escapeFechaSoOQr, true)
+  else window.removeEventListener('keydown', escapeFechaSoOQr, true)
+})
+
+onUnmounted(() => window.removeEventListener('keydown', escapeFechaSoOQr, true))
 
 /** Uma folha simples, em uma janela própria, para entregar no balcão. */
 function imprimir() {
