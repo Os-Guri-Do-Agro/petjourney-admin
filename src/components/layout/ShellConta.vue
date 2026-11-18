@@ -539,17 +539,25 @@ button.conta__item {
   outline-offset: -2px;
 }
 
-/* O formato em uso: o papel branco dentro do trilho, como a pílula escolhida do app. */
+/*
+ * O formato em uso: pílula cheia na cor do botão principal (17/11/2026, "a visibilidade do formato
+ * ativo está muito baixa"). O papel branco no trilho cinza claro quase não se distinguia das outras
+ * opções. `--musgo` com `--sobre-musgo` dá 5:1 ou mais nos dois temas.
+ */
 .conta__formato-opcao--atual,
 .conta__formato-opcao--atual:hover {
-  background: var(--superficie);
-  box-shadow: var(--sombra-xs);
-  color: var(--tinta);
-  font-weight: 650;
+  background: var(--musgo);
+  color: var(--sobre-musgo, #fff);
+  font-weight: 700;
 }
 
 .conta__formato-opcao--atual i {
-  color: var(--app-salvia-texto, var(--musgo));
+  color: inherit;
+}
+
+.conta__formato-opcao--atual:focus-visible {
+  outline-color: var(--tinta);
+  outline-offset: 2px;
 }
 
 .conta__divisa {
