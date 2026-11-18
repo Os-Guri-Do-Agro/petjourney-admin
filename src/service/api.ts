@@ -158,6 +158,18 @@ export interface ApiFetchOpcoes {
 /** Avisa a raiz (App.vue) que a sessão caiu no meio do uso, para levar de volta à entrada. */
 export const EVENTO_SESSAO_EXPIRADA = 'petjourney:sessao-expirada'
 
+type Interceptador = (endpoint: string, init: RequestInit) => Promise<Response>
+
+let interceptador: Interceptador | null = null
+
+/**
+ * Responde as chamadas no lugar do servidor: é o modo demonstração (`src/demonstracao`), que só
+ * existe fora da produção. A resposta segue pelo mesmo caminho da rede (erro, 401, JSON).
+ */
+export function interceptarApi(responder: Interceptador | null) {
+  interceptador = responder
+}
+
 export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit,
@@ -181,10 +193,10 @@ export async function apiFetch<T>(
     headers.set('Accept-Language', acceptLanguage())
   }
 
-  const response = await fetch(`${requireApiUrl()}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  const init: RequestInit = { ...options, headers }
+  const response = interceptador
+    ? await interceptador(endpoint, init)
+    : await fetch(`${requireApiUrl()}${endpoint}`, init)
 
   if (!response.ok) {
     const errorBody = isJsonResponse(response) ? await response.json().catch(() => null) : null

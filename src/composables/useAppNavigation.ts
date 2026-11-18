@@ -1,12 +1,10 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import {
-  useClinicoPendencias,
-  type ContagemDePendencia,
-  type TomDePendencia,
+import type {
+  ContagemDePendencia,
+  TomDePendencia,
 } from '@/features/clinico/composables/useClinicoPendencias'
-import { useHotelPendencias } from '@/features/hotel/composables/useHotelPendencias'
 import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
 import { usePendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -158,8 +156,6 @@ type RotaDeModulo = {
   key: string
   to: string
   icon: string
-  /** Tela que só existe pela API: a demonstração não tem os dados dela e esconde o item. */
-  soComApi?: boolean
   /** Só para quem não abre esta outra tela (a recepção vê as vagas; quem lê o mapa, o mapa). */
   seNaoAbrir?: string
 }
@@ -208,21 +204,18 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         key: 'espacos.abas.plantao',
         to: '/clinica/internacao/plantao',
         icon: 'ph ph-list-checks',
-        soComApi: true,
       },
       /* O boletim a ligar ou a enviar (E5-03): a recepção liga e envia; o selo é o contador. */
       {
         key: 'internacao.boletim.fila',
         to: '/clinica/internacao/boletins-pendentes',
         icon: 'ph ph-phone',
-        soComApi: true,
       },
       /* A recepção não lê o mapa: "tem vaga?" pelas contagens (E5-01). */
       {
         key: 'internacao.vagas.titulo',
         to: '/clinica/internacao/vagas',
         icon: 'ph ph-bed',
-        soComApi: true,
         seNaoAbrir: '/clinica/internacao',
       },
     ],
@@ -238,7 +231,6 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
         key: 'atendimento.retornos.titulo',
         to: '/clinica/retornos-pendentes',
         icon: 'ph ph-clock-counter-clockwise',
-        soComApi: true,
       },
       /* Vacinas fica no menu clínico, não em Pets: é fila de trabalho da recepção, não cadastro. */
       { key: 'clinico.vacinas.titulo', to: '/clinica/vacinas', icon: 'ph ph-shield' },
@@ -279,7 +271,7 @@ const PATIENT_ROUTES = [
   /* Os pedidos de correção do cadastro que os responsáveis mandam pelo app (E2-02). */
   { key: 'cadastro.correcoes.titulo', to: '/clinica/correcoes', icon: 'ph ph-pencil-line' },
   { key: 'clinico.bulario.titulo', to: '/clinica/bulario', icon: 'ph ph-book-open' },
-  /* O paciente que chegou com o histórico liberado pelo responsável (doc 19): protótipo, só na demonstração. */
+  /* O histórico liberado pelo responsável (doc 19): protótipo sem API, não abre (`integrada: false`). */
   {
     key: 'clinico.historicoLiberado.titulo',
     to: '/clinica/historico-liberado',
@@ -290,7 +282,6 @@ const PATIENT_ROUTES = [
     key: 'copias.titulo',
     to: '/clinica/copias-do-prontuario',
     icon: 'ph ph-copy',
-    soComApi: true,
   },
 ] as const satisfies readonly RotaDeModulo[]
 
@@ -300,10 +291,10 @@ export function useAppNavigation() {
 
   /**
    * Quem vê cada tela da Clínica e do Hotel: o módulo ligado no servidor, a permissão da conta e a
-   * tela já integrada à API, ou tudo no modo demonstração (`navegacao/rotas-dos-modulos.ts`).
-   * Uma casa pode ter os dois módulos, um só, ou nenhum: os portões são independentes.
+   * tela já integrada à API (`navegacao/rotas-dos-modulos.ts`). Uma casa pode ter os dois módulos,
+   * um só, ou nenhum: os portões são independentes.
    */
-  const { podeAbrir, demonstracao } = useAcessoAosModulos()
+  const { podeAbrir } = useAcessoAosModulos()
 
   /** Os blocos de um módulo só com os destinos que esta conta abre; bloco vazio sai. */
   function blocosVisiveis(blocos: readonly BlocoDeModulo[]): AppNavigationBloco[] {
@@ -312,12 +303,7 @@ export function useAppNavigation() {
         id: bloco.id,
         label: t(bloco.key),
         items: bloco.rotas
-          .filter(
-            (rota) =>
-              podeAbrir(rota.to) &&
-              !(rota.soComApi && demonstracao.value) &&
-              !(rota.seNaoAbrir && podeAbrir(rota.seNaoAbrir)),
-          )
+          .filter((rota) => podeAbrir(rota.to) && !(rota.seNaoAbrir && podeAbrir(rota.seNaoAbrir)))
           .map(decorarRota),
       }))
       .filter((bloco) => bloco.items.length > 0)
@@ -353,55 +339,33 @@ export function useAppNavigation() {
   })
 
   /**
-   * Trabalho parado atrás de cada tela, contado sobre os dados locais: só no modo demonstração.
-   * Fora dela os selos vêm da API (`GET /parceiro/portal/pendencias`, E1-06).
+   * A Clínica no Início (o bloco e os números da abertura): pela rota `meu-dia` (E3-08), quando a
+   * conta pode abrir o Meu dia.
    */
-  const pendencias = useClinicoPendencias(() => demonstracao.value && hasClinicalProfile.value)
-
-  /** O mesmo para o hotel: rotina atrasada e véspera travada. Ver `useHotelPendencias`. */
-  const pendenciasDoHotel = useHotelPendencias(() => demonstracao.value && hasHotelProfile.value)
+  const clinicaPelaApi = computed(() => podeAbrir('/clinica/meu-dia'))
+  const clinicaNoInicio = clinicaPelaApi
 
   /**
-   * Clínica e Hotel nos painéis que ainda contam sobre os dados locais: as fitas do dia, a busca
-   * global, o menu de criar, a pauta e a agenda do Início. Fora da demonstração eles somem até a
-   * rota da API de cada um chegar, em vez de mostrar números de mentira ao lado dos de verdade.
-   */
-  const clinicaNaDemonstracao = computed(() => demonstracao.value && hasClinicalProfile.value)
-  const hotelNaDemonstracao = computed(() => demonstracao.value && hasHotelProfile.value)
-
-  /**
-   * A Clínica no Início (a fita do dia, o bloco e os números da abertura): fora da demonstração,
-   * pela rota `meu-dia` (E3-08), quando a conta pode abrir o Meu dia; na demonstração, sobre os
-   * dados locais, como sempre.
-   */
-  const clinicaPelaApi = computed(() => !demonstracao.value && podeAbrir('/clinica/meu-dia'))
-  const clinicaNoInicio = computed(() => clinicaNaDemonstracao.value || clinicaPelaApi.value)
-
-  /**
-   * Os contadores do servidor (`GET /parceiro/portal/pendencias`, E1-06), fora da demonstração. A
-   * API já filtra pelo que a conta pode ver; o portal só omite o zero.
+   * Os contadores do servidor (`GET /parceiro/portal/pendencias`, E1-06): os selos da barra. A API
+   * já filtra pelo que a conta pode ver; o portal só omite o zero.
    */
   const pendenciasDoPortal = usePendenciasDoPortal(
     () =>
-      !demonstracao.value &&
       parceiroStore.loadState === 'ready' &&
       !parceiroStore.semAcessoParceiro &&
       !parceiroStore.cadastroSuspenso,
   )
 
   /**
-   * Os pedidos de horário esperando a recepção, para o Início: na demonstração, a conta local; fora
-   * dela, o contador `pedidos` do servidor (o mesmo selo da barra), com o tom de atenção.
+   * Os pedidos de horário esperando a recepção, para o Início: o contador `pedidos` do servidor (o
+   * mesmo selo da barra), com o tom de atenção.
    */
   const pedidosDaClinica = computed<ContagemDePendencia>(() => {
-    if (demonstracao.value) return pendencias.pedidos.value
     const total =
       pendenciasDoPortal.lista.value.find((item) => item.chave === 'pedidos')?.valor ?? 0
     return { total, tom: 'atencao' }
   })
-  const pedidosDaClinicaCarregados = computed(() =>
-    demonstracao.value ? pendencias.carregado.value : pendenciasDoPortal.carregado.value,
-  )
+  const pedidosDaClinicaCarregados = computed(() => pendenciasDoPortal.carregado.value)
 
   /**
    * A frase de um contador do servidor: "2 convites esperando resposta". A `chave` é a do contador;
@@ -430,81 +394,20 @@ export function useAppNavigation() {
     () => {
       const selos = new Map<string, { total: number; tom: TomDePendencia; titulo: string }>()
 
-      if (!demonstracao.value) {
-        for (const [rota, selo] of pendenciasDoPortal.selos.value) {
-          selos.set(rota, {
-            total: selo.total,
-            tom: selo.tom,
-            /* O separador não é traduzido porque não é texto. */
-            titulo: selo.partes
-              .map((parte) => fraseDaPendencia(parte.chave, parte.total))
-              .join(' · '),
-          })
-        }
-
-        return selos
-      }
-
-      for (const [rota, { contagem, frase }] of Object.entries(contagemDaDemonstracao.value)) {
-        if (contagem.total > 0) {
-          selos.set(rota, {
-            total: contagem.total,
-            tom: contagem.tom,
-            titulo: t(frase, { total: contagem.total }, contagem.total),
-          })
-        }
+      for (const [rota, selo] of pendenciasDoPortal.selos.value) {
+        selos.set(rota, {
+          total: selo.total,
+          tom: selo.tom,
+          /* O separador não é traduzido porque não é texto. */
+          titulo: selo.partes
+            .map((parte) => fraseDaPendencia(parte.chave, parte.total))
+            .join(' · '),
+        })
       }
 
       return selos
     },
   )
-
-  /** Os contadores sobre os dados locais, na demonstração. */
-  const contagemDaDemonstracao = computed<
-    Record<string, { contagem: ContagemDePendencia; frase: string }>
-  >(() => ({
-    '/clinica/pedidos': {
-      contagem: pendencias.pedidos.value,
-      frase: 'clinico.navegacao.selo.pedidos',
-    },
-    '/clinica/fila': { contagem: pendencias.fila.value, frase: 'clinico.navegacao.selo.fila' },
-    '/clinica/internacao': {
-      contagem: pendencias.internacao.value,
-      frase: 'clinico.navegacao.selo.internacao',
-    },
-    '/clinica/atividades': {
-      contagem: pendencias.atividades.value,
-      frase: 'clinico.navegacao.selo.atividades',
-    },
-    '/clinica/vacinas': {
-      contagem: pendencias.vacinas.value,
-      frase: 'clinico.navegacao.selo.vacinas',
-    },
-    '/clinica/estoque': {
-      contagem: pendencias.estoque.value,
-      frase: 'clinico.navegacao.selo.estoque',
-    },
-    '/clinica/faltas': {
-      contagem: pendencias.faltas.value,
-      frase: 'clinico.navegacao.selo.faltas',
-    },
-    '/clinica/tratamentos': {
-      contagem: pendencias.tratamentos.value,
-      frase: 'clinico.navegacao.selo.tratamentos',
-    },
-    '/hotel/rotina': {
-      contagem: pendenciasDoHotel.rotina.value,
-      frase: 'hotel.navegacao.selo.rotina',
-    },
-    '/hotel/pedidos': {
-      contagem: pendenciasDoHotel.pedidos.value,
-      frase: 'hotel.navegacao.selo.pedidos',
-    },
-    '/hotel/reservas': {
-      contagem: pendenciasDoHotel.vespera.value,
-      frase: 'hotel.navegacao.selo.vespera',
-    },
-  }))
 
   /* Zero não vira selo: um "0" em cada linha é ruído que ensina a não olhar para a coluna. */
   function comSelo(item: AppNavigationItem): AppNavigationItem {
@@ -532,9 +435,7 @@ export function useAppNavigation() {
   const patientItems = computed<AppNavigationItem[]>(() => {
     void locale.value
 
-    return PATIENT_ROUTES.filter(
-      (rota) => podeAbrir(rota.to) && !('soComApi' in rota && rota.soComApi && demonstracao.value),
-    ).map(decorarRota)
+    return PATIENT_ROUTES.filter((rota) => podeAbrir(rota.to)).map(decorarRota)
   })
 
   const portalItems = computed<AppNavigationItem[]>(() => {
@@ -694,15 +595,10 @@ export function useAppNavigation() {
     overviewItem,
     hasClinicalProfile,
     hasHotelProfile,
-    modoDemonstracao: demonstracao,
-    clinicaNaDemonstracao,
     clinicaPelaApi,
     clinicaNoInicio,
     pedidosDaClinica,
     pedidosDaClinicaCarregados,
-    hotelNaDemonstracao,
-    pendenciasClinicas: pendencias,
-    pendenciasDoHotel,
     pendenciasDoPortal,
     fraseDaPendencia,
   }

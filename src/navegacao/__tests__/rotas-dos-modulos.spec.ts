@@ -12,13 +12,8 @@ import {
   type AcessoDaConta,
 } from '../rotas-dos-modulos'
 
-function acesso(
-  modulos: NomeDoModulo[],
-  permissoes: Permissao[],
-  demonstracao = false,
-): AcessoDaConta {
+function acesso(modulos: NomeDoModulo[], permissoes: Permissao[]): AcessoDaConta {
   return {
-    demonstracao,
     podeLer: (modulo) => modulos.includes(modulo),
     temPermissao: (permissao) => permissoes.includes(permissao),
   }
@@ -40,13 +35,11 @@ describe('rotaDoModulo', () => {
     expect(podeAbrirCaminho('/parceiro/equipe', acesso([], []))).toBe(true)
   })
 
-  it('tela de módulo sem entrada própria só abre na demonstração', () => {
+  it('tela de módulo sem entrada própria não abre', () => {
     const rota = rotaDoModulo('/hotel/tela-nova')
 
     expect(rota?.modulo).toBe('HOTEL')
-    expect(
-      podeAbrirRotaDeModulo({ ...rota!, soDemonstracao: true }, acesso(['HOTEL'], ['hotel.ler'])),
-    ).toBe(false)
+    expect(podeAbrirRotaDeModulo(rota!, acesso(['HOTEL'], ['hotel.ler']))).toBe(false)
   })
 
   it('toda tela de /clinica e /hotel que existe no roteador tem entrada', () => {
@@ -70,11 +63,11 @@ describe('rotaDoModulo', () => {
 })
 
 describe('podeAbrirRotaDeModulo', () => {
-  it('na demonstração tudo abre', () => {
-    expect(podeAbrirCaminho('/clinica/agenda', acesso([], [], true))).toBe(true)
+  it('sem o módulo e a permissão, nada abre', () => {
+    expect(podeAbrirCaminho('/clinica/agenda', acesso([], []))).toBe(false)
   })
 
-  it('tela ainda não integrada não abre fora da demonstração, mesmo com módulo e permissão', () => {
+  it('tela ainda não integrada não abre, mesmo com módulo e permissão', () => {
     expect(podeAbrirCaminho('/clinica/paciente/abc', acesso(['CLINICA'], ['paciente.ler']))).toBe(
       false,
     )

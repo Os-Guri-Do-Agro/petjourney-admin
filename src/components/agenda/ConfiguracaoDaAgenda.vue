@@ -22,7 +22,6 @@ import TiposAba from '@/components/agenda/TiposAba.vue'
 import CatalogoAba from '@/components/catalogo/CatalogoAba.vue'
 import LeitosAba from '@/components/internacao/LeitosAba.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import type { Aba } from '@/navegacao/espacos'
 
@@ -42,19 +41,16 @@ const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { store } = useParceiroPortal()
-const { ativo: demonstracao } = useModoDemonstracao()
 
 /** O catálogo da clínica (E4-02) só para quem gere o catálogo: DONO e GESTOR. */
 const geraCatalogo = computed(() => store.temPermissao('catalogo.gerir'))
 
 /*
  * Os leitos da internação (E5-01): quem cadastra (DONO, GESTOR) e quem desativa (o veterinário e a
- * enfermagem, `internacao.executar`). Só pela API: a demonstração tem o cadastro no mapa.
+ * enfermagem, `internacao.executar`).
  */
 const veLeitos = computed(
-  () =>
-    !demonstracao.value &&
-    (store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar')),
+  () => store.temPermissao('estabelecimento.editar') || store.temPermissao('internacao.executar'),
 )
 
 const abasVisiveis = computed(() =>

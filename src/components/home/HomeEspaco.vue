@@ -7,8 +7,8 @@
  * barra), um atalho de trabalho à direita, de dois a quatro **números do agora** — cada um leva à
  * tela onde ele se resolve — e, no pé, **o próximo passo**: a coisa que vale fazer primeiro ali.
  *
- * Quem decide os números e o passo é o bloco de cada espaço (`HomeEspacoClinica`,
- * `HomeEspacoHotel`); este componente só desenha. O Portal não é bloco: vai numa linha no pé ou,
+ * Quem decide os números e o passo é o bloco de cada espaço (`HomeEspacoClinica`); este
+ * componente só desenha. O Portal não é bloco: vai numa linha no pé ou,
  * sozinho, nas áreas dele (`HomePortalAreas`).
  *
  * ## A cor

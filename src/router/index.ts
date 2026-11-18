@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { podeAbrirCaminho, rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
 import { isAuthenticated } from '@/service/auth/auth-session'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -117,27 +116,22 @@ router.beforeEach(async (to) => {
     return semToken
   }
 
-  const { ativo: demonstracao } = useModoDemonstracao()
-
   /*
-   * A página de agendamento da clínica e a de reserva do hotel, de quem não tem conta. Ainda rodam
-   * sobre os dados locais: só abrem na demonstração. As de verdade ficam no site (Q2, E3-05 e
-   * E7-03). Ver `paginas-abertas.ts`.
+   * A página de agendamento da clínica e a de reserva do hotel, de quem não tem conta, eram
+   * protótipos sobre dados locais. As de verdade ficam no site (Q2, E3-05 e E7-03): aqui não
+   * abrem. Ver `paginas-abertas.ts`.
    */
   if (moduloDaPaginaAberta(to.path)) {
-    if (demonstracao.value) {
-      return true
-    }
-
     return hasActiveSession ? getDefaultLandingPath() : { path: '/auth/login' }
   }
 
   /*
    * Tela de Clínica ou Hotel: abre com o módulo ligado no servidor, a permissão da conta e a tela
-   * já integrada, ou na demonstração (`navegacao/rotas-dos-modulos.ts`). Menu escondido não basta:
-   * sem esta guarda, quem tem `/clinica/agenda` no histórico continuaria entrando.
+   * já integrada (`navegacao/rotas-dos-modulos.ts`). Vale também no modo demonstração, que só
+   * responde a API no lugar do servidor. Menu escondido não basta: sem esta guarda, quem tem
+   * `/clinica/agenda` no histórico continuaria entrando.
    */
-  if (hasActiveSession && rotaDoModulo(to.path) && !demonstracao.value) {
+  if (hasActiveSession && rotaDoModulo(to.path)) {
     const store = useParceiroStore()
 
     if (store.loadState !== 'ready') {
@@ -145,7 +139,6 @@ router.beforeEach(async (to) => {
     }
 
     const liberada = podeAbrirCaminho(to.path, {
-      demonstracao: false,
       podeLer: (modulo) => store.modulo(modulo)?.podeLer ?? false,
       temPermissao: (permissao) => store.temPermissao(permissao),
     })

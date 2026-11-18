@@ -26,7 +26,7 @@ import {
   exemplosDaColuna,
   type EscolhaDeEspecie,
 } from '@/components/importacao/planilha-para-a-api'
-import { DEMONSTRACAO_DISPONIVEL } from '@/composables/useModoDemonstracao'
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import {
   DEMONSTRACOES,
   type DemonstracaoId,
@@ -44,6 +44,10 @@ const { t } = useI18n()
 const toast = useToast()
 const store = useImportacaoStore()
 const rotulos = useRotulosDoCadastro()
+
+/** As planilhas de exemplo: no `npm run dev` e com a demonstração ligada. */
+const { ativo: emDemonstracao } = useModoDemonstracao()
+const comExemplos = computed(() => import.meta.env.DEV || emDemonstracao.value)
 
 const erro = ref('')
 const ocupado = ref(false)
@@ -364,11 +368,7 @@ async function abrir(id: string) {
         </p>
       </section>
 
-      <section
-        v-if="DEMONSTRACAO_DISPONIVEL"
-        class="ui-folha ui-cartao"
-        aria-labelledby="arq-exemplos"
-      >
+      <section v-if="comExemplos" class="ui-folha ui-cartao" aria-labelledby="arq-exemplos">
         <header class="ui-cartao__cabeca">
           <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-flask" /></span>
           <span class="ui-cartao__titulos">

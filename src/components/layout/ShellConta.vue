@@ -14,7 +14,7 @@ import Popover from 'primevue/popover'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink } from 'vue-router'
 
 import ConfirmActionDialog from '@/components/common/ConfirmActionDialog.vue'
 import {
@@ -42,7 +42,6 @@ const dicaDoBuild = computed(() =>
 )
 const perfil = useUsuarioPerfilStore()
 const { logout } = useLogout()
-const router = useRouter()
 const demonstracao = useModoDemonstracao()
 const demonstracaoAtiva = demonstracao.ativo
 
@@ -83,11 +82,10 @@ function alternarTema(escuro: boolean) {
   }
 }
 
-/** Desligar estando numa tela de mock deixaria a pessoa nela: o guard decide na próxima navegação. */
+/** Ligar e desligar recarregam o portal no Início (ver `useModoDemonstracao`). */
 function alternarDemonstracao(valor: boolean) {
-  demonstracao.definir(valor)
   fechar()
-  void router.replace(valor ? router.currentRoute.value.fullPath : '/inicio')
+  void demonstracao.definir(valor)
 }
 
 const ICONE_DO_FORMATO: Record<LayoutFormat, string> = {
@@ -285,7 +283,7 @@ async function sair() {
           </div>
         </div>
 
-        <!-- Só no build de desenvolvimento: Clínica e Hotel sobre os dados locais. -->
+        <!-- Fora da produção: o portal sobre a clínica de exemplo (src/demonstracao). -->
         <div v-if="demonstracao.disponivel" class="conta__linha" role="none">
           <i class="ph ph-presentation-chart" aria-hidden="true" />
           <label class="conta__linha-rotulo" for="conta-demonstracao">

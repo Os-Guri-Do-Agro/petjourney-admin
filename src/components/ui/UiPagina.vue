@@ -28,7 +28,6 @@ import UiRabiscos from '@/components/ui/UiRabiscos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { isGuidanceVisible, toggleGuidance } from '@/composables/useLayoutPreferences'
 import { useLogout } from '@/composables/useLogout'
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { type Aba, useEspacos } from '@/navegacao/espacos'
 import { rotaDoModulo } from '@/navegacao/rotas-dos-modulos'
 import type { NomeDoModulo } from '@/service/parceiro/acesso-service'
@@ -211,7 +210,6 @@ const comFaixa = computed(() => molduraPedida.value === 'app')
 const abasDePasta = computed(() => comFaixa.value && abas.value.length > 0)
 
 const rotaAtual = useRoute()
-const { ativo: demonstracao } = useModoDemonstracao()
 
 /**
  * Tela de módulo com o módulo só para consulta (suspenso, desligado, prazo vencido, parceiro não
@@ -219,7 +217,7 @@ const { ativo: demonstracao } = useModoDemonstracao()
  * `MODULO_SOMENTE_LEITURA`; a linha evita que a pessoa descubra isso tentando.
  */
 const avisoDeConsulta = computed(() => {
-  const rota = demonstracao.value ? null : rotaDoModulo(rotaAtual.path)
+  const rota = rotaDoModulo(rotaAtual.path)
 
   if (!rota) {
     return ''

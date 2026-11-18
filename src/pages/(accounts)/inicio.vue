@@ -51,7 +51,6 @@ import { useI18n } from 'vue-i18n'
 import HomeAcoesRapidas from '@/components/home/HomeAcoesRapidas.vue'
 import HomeAgenda from '@/components/home/HomeAgenda.vue'
 import HomeEspacoClinica from '@/components/home/HomeEspacoClinica.vue'
-import HomeEspacoHotel from '@/components/home/HomeEspacoHotel.vue'
 import HomeEspacoPortal from '@/components/home/HomeEspacoPortal.vue'
 import HomeModulos from '@/components/home/HomeModulos.vue'
 import HomeMarca from '@/components/home/HomeMarca.vue'
@@ -71,14 +70,15 @@ import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
 const { t, locale } = useI18n()
 const { store, ensureContext } = useParceiroPortal()
-const { espacos, clinicaNoInicio, clinicaPelaApi, hotelNaDemonstracao } = useEspacos()
+const { espacos, clinicaNoInicio, clinicaPelaApi } = useEspacos()
 const perfil = useUsuarioPerfilStore()
 const { resumo, modulos } = usePautaDaHome()
 
+/* O Hotel ainda não tem a rota do dia na API: fica fora do Início até ela chegar. */
 const dia = useLinhaDoDia({
   clinica: () => clinicaNoInicio.value,
   clinicaPelaApi: () => clinicaPelaApi.value,
-  hotel: () => hotelNaDemonstracao.value,
+  hotel: () => false,
 })
 
 provide(CHAVE_DO_DIA, dia)
@@ -92,7 +92,7 @@ let clockId: ReturnType<typeof setInterval> | undefined
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
 /** Com clínica ou hotel ligados, a página ganha a pauta e a agenda da semana. */
-const temModulos = computed(() => clinicaNoInicio.value || hotelNaDemonstracao.value)
+const temModulos = computed(() => clinicaNoInicio.value)
 
 const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'portal') ?? null)
 
@@ -103,9 +103,8 @@ const portal = computed(() => espacos.value.find((espaco) => espaco.id === 'port
 const blocos = computed(() =>
   espacos.value.filter(
     (espaco) =>
-      /* A Clínica pela API (meu-dia) ou na demonstração; o Hotel, por enquanto, só na demonstração. */
-      (espaco.id === 'clinica' && clinicaNoInicio.value) ||
-      (espaco.id === 'hotel' && hotelNaDemonstracao.value),
+      /* A Clínica pela API (meu-dia); o Hotel entra quando a rota do dia dele chegar. */
+      espaco.id === 'clinica' && clinicaNoInicio.value,
   ),
 )
 
@@ -263,10 +262,7 @@ onUnmounted(() => {
 
       <section v-if="blocosNaTela.length" class="espacos" :aria-label="t('inicio.espacos.rotulo')">
         <div class="espacos__grade" :class="`espacos__grade--${blocosNaTela.length}`">
-          <template v-for="espaco in blocosNaTela" :key="espaco.id">
-            <HomeEspacoClinica v-if="espaco.id === 'clinica'" :espaco="espaco" />
-            <HomeEspacoHotel v-else :espaco="espaco" />
-          </template>
+          <HomeEspacoClinica v-for="espaco in blocosNaTela" :key="espaco.id" :espaco="espaco" />
         </div>
       </section>
       <HomePortalAreas v-else-if="portal && !blocos.length" />
@@ -283,7 +279,7 @@ onUnmounted(() => {
           class="calma__agenda"
           :clinica="clinicaNoInicio"
           :clinica-pela-api="clinicaPelaApi"
-          :hotel="hotelNaDemonstracao"
+          :hotel="false"
         />
         <HomeEspacoPortal v-if="temModulos && portal" :espaco="portal" />
         <!-- A ação do cartão da marca ainda não foi decidida: sem ouvinte, ele é uma figura. -->

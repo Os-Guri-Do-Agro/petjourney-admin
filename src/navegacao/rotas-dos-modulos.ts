@@ -6,11 +6,12 @@
  * - a conta tem a permissão da tela, da matriz da E1-03;
  * - a tela já fala com a API (`integrada`).
  *
- * Fora disso, só no modo demonstração (build de desenvolvimento), sobre os dados locais.
+ * Fora disso, não abre. O modo demonstração não muda nada aqui: ele só responde a API no lugar do
+ * servidor, e as telas abrem pelas mesmas regras.
  *
  * `integrada` é o estado da integração tela a tela: nasce `false` e vira `true` no commit que liga
- * a tela às rotas da API. Enquanto for `false`, a tela some do menu e a rota volta para o início
- * fora da demonstração: dado de mentira não aparece para quem está trabalhando.
+ * a tela às rotas da API. Enquanto for `false`, a tela some do menu e a rota volta para o início:
+ * protótipo sobre dado local não aparece para quem está trabalhando.
  *
  * As permissões seguem as seções "Quem entra" dos guias (`docs/integracao-portal-parceiro/guias`).
  */
@@ -27,8 +28,6 @@ export type RotaDeModulo = {
   /** Outras permissões que também abrem a tela (o resumo do hotel abre para o financeiro). */
   ouPermissoes?: readonly Permissao[]
   integrada: boolean
-  /** Só existe na demonstração, com ou sem API (vitrine de design, páginas públicas de mock). */
-  soDemonstracao?: boolean
 }
 
 export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
@@ -200,7 +199,6 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     modulo: 'CLINICA',
     permissao: 'agenda.ler',
     integrada: false,
-    soDemonstracao: true,
   },
 
   /* Hotel (E7): a casa (E7-01), as reservas (E7-02), a caixa de pedidos (E7-03), a estadia (E7-04) e a rotina (E7-05) pela API. */
@@ -247,24 +245,17 @@ export function rotaDoModulo(caminho: string): RotaDeModulo | null {
 
   const modulo = PREFIXOS_DO_MODULO.find(([prefixo]) => casa(caminho, prefixo))?.[1]
 
-  /* Tela de módulo sem entrada é tela nova: abre só na demonstração até alguém registrá-la. */
-  return modulo
-    ? { prefixo: caminho, modulo, permissao: 'agenda.ler', integrada: false, soDemonstracao: true }
-    : null
+  /* Tela de módulo sem entrada é tela nova ou protótipo: não abre até alguém registrá-la. */
+  return modulo ? { prefixo: caminho, modulo, permissao: 'agenda.ler', integrada: false } : null
 }
 
 export type AcessoDaConta = {
-  demonstracao: boolean
   podeLer: (modulo: NomeDoModulo) => boolean
   temPermissao: (permissao: Permissao) => boolean
 }
 
 export function podeAbrirRotaDeModulo(rota: RotaDeModulo, acesso: AcessoDaConta): boolean {
-  if (acesso.demonstracao) {
-    return true
-  }
-
-  if (rota.soDemonstracao || !rota.integrada) {
+  if (!rota.integrada) {
     return false
   }
 

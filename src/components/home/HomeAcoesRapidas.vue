@@ -10,7 +10,7 @@
  *
  * Nada aqui é formulário novo: cada ação abre o formulário que já existe, na tela dona dele, por um
  * pedido na URL que a tela atende e tira (`?novo=1` na Agenda, `?adicionar=1` na Lista de espera,
- * `?aplicar=vacina` na ficha, `?vincular` nos Acessos), como o "Criar" da demonstração. As duas que
+ * `?aplicar=vacina` na ficha, `?vincular` nos Acessos). As duas que
  * precisam de um paciente e não nascem na ficha dele (atender agora e aplicar vacina) pedem o
  * paciente numa gaveta antes.
  *
@@ -32,7 +32,6 @@ import { RouterLink, useRouter, type RouteLocationRaw } from 'vue-router'
 import EscolherPacienteGaveta from '@/components/cadastro/EscolherPacienteGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiSecao from '@/components/ui/UiSecao.vue'
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useEspacos } from '@/navegacao/espacos'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
@@ -43,7 +42,6 @@ const { t } = useI18n()
 const router = useRouter()
 const { store, parceiroQuery } = useParceiroPortal()
 const { espacos } = useEspacos()
-const { ativo: demonstracao } = useModoDemonstracao()
 
 /** A cor de cada ação, em pastel da casa: o fundo da família com a tinta dela. */
 type Tom = 'pets' | 'clinica' | 'hotel' | 'rosa' | 'barro' | 'portal'
@@ -75,7 +73,7 @@ const clinicaEscreve = computed(
 type Permissao = Parameters<typeof store.temPermissao>[0]
 
 function pode(permissao: Permissao) {
-  return demonstracao.value || (clinicaEscreve.value && store.temPermissao(permissao))
+  return clinicaEscreve.value && store.temPermissao(permissao)
 }
 
 function acao(id: string, icone: string, figura: Component, tom: Tom, extra: Partial<Acao>): Acao {
@@ -96,11 +94,9 @@ const acoes = computed<Acao[]>(() => {
 
   if (comClinica && pode('paciente.escrever')) {
     lista.push(
-      /* Pela API, a gaveta em passos na lista de Pacientes; na demonstração, o formulário dela. */
+      /* A gaveta em passos na lista de Pacientes. */
       acao('paciente', 'ph ph-paw-print', PhPawPrint, 'pets', {
-        to: demonstracao.value
-          ? '/clinica/paciente/novo'
-          : { path: '/clinica/pacientes', query: { novo: '1' } },
+        to: { path: '/clinica/pacientes', query: { novo: '1' } },
       }),
     )
   }
@@ -113,14 +109,13 @@ const acoes = computed<Acao[]>(() => {
     )
   }
 
-  /* As duas pelo paciente só pela API: na demonstração a ficha e o prontuário são outros. */
-  if (comClinica && !demonstracao.value && pode('prontuario.escrever')) {
+  if (comClinica && pode('prontuario.escrever')) {
     lista.push(
       acao('atender', 'ph ph-stethoscope', PhStethoscope, 'hotel', { peloPaciente: 'atender' }),
     )
   }
 
-  if (comClinica && !demonstracao.value && pode('vacina.aplicar')) {
+  if (comClinica && pode('vacina.aplicar')) {
     lista.push(acao('vacina', 'ph ph-syringe', PhSyringe, 'rosa', { peloPaciente: 'vacina' }))
   }
 

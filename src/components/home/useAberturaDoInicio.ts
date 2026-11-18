@@ -2,10 +2,10 @@
  * Os números da abertura do Início: o mesmo painel do Hoje da Clínica e do Hoje do Hotel, com a
  * frase à esquerda e, à direita, os poucos números que dizem por onde começar.
  *
- * São os números dos blocos de cada espaço, na mesma ordem e com a mesma régua — o painel só os
- * reúne no alto. Com Clínica e Hotel, os dois primeiros de cada (quem espera na recepção, quem está
- * em consulta, quem está na casa, quem chega hoje); com um espaço só, os quatro dele. A conta só com
- * o Portal não ganha número no alto: as áreas do Portal, logo embaixo, já são o resumo inteiro.
+ * São os números do bloco da Clínica, com a mesma régua — o painel só os reúne no alto: quem
+ * espera na recepção, quem está em consulta, os pedidos e o que vem a seguir. O Hotel entra quando
+ * a rota do dia dele chegar à API. A conta só com o Portal não ganha número no alto: as áreas do
+ * Portal, logo embaixo, já são o resumo inteiro.
  */
 
 import { computed } from 'vue'
@@ -35,10 +35,8 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
   const { t } = useI18n()
   const {
     clinicaNoInicio: hasClinicalProfile,
-    hotelNaDemonstracao: hasHotelProfile,
     pedidosDaClinica,
     pedidosDaClinicaCarregados,
-    pendenciasDoHotel,
   } = useEspacos()
 
   const daClinica = computed<IndicadorDaAbertura[]>(() => {
@@ -85,58 +83,5 @@ export function useAberturaDoInicio(dia: DiaDaCasa) {
     ]
   })
 
-  const doHotel = computed<IndicadorDaAbertura[]>(() => {
-    const casa = dia.hotel.value
-    const chegam = casa.movimentos.filter((movimento) => movimento.tipo === 'chegada')
-    const saem = casa.movimentos.filter((movimento) => movimento.tipo === 'saida')
-    const rotina = pendenciasDoHotel.rotina.value
-
-    return [
-      {
-        id: 'casa',
-        valor: doDia(casa.carga, casa.hospedes),
-        rotulo: t('inicio.espacos.hotel.naCasa'),
-        icone: 'ph ph-house-line',
-        to: '/hotel/hospedes',
-      },
-      {
-        id: 'chegam',
-        valor: doDia(casa.carga, chegam.length),
-        rotulo: t('inicio.espacos.hotel.chegam', { total: chegam.length }, chegam.length),
-        icone: 'ph ph-sign-in',
-        to: '/hotel/painel',
-        /* Chegada sem documento não entra até alguém resolver: é o alerta do quadro. */
-        tom: chegam.some((movimento) => movimento.travado) ? 'risco' : undefined,
-      },
-      {
-        id: 'saem',
-        valor: doDia(casa.carga, saem.length),
-        rotulo: t('inicio.espacos.hotel.saem', { total: saem.length }, saem.length),
-        icone: 'ph ph-sign-out',
-        to: '/hotel/painel',
-      },
-      {
-        id: 'rotina',
-        valor: pendenciasDoHotel.carregado.value ? rotina.total : null,
-        rotulo: t('inicio.espacos.hotel.rotina', { total: rotina.total }, rotina.total),
-        icone: 'ph ph-list-checks',
-        to: '/hotel/rotina',
-        tom: pontoDo(rotina.total, rotina.tom),
-      },
-    ]
-  })
-
-  return computed<IndicadorDaAbertura[]>(() => {
-    const clinica = hasClinicalProfile.value
-    const hotel = hasHotelProfile.value
-
-    if (clinica && hotel) {
-      return [...daClinica.value.slice(0, 2), ...doHotel.value.slice(0, 2)]
-    }
-
-    if (clinica) return daClinica.value
-    if (hotel) return doHotel.value
-
-    return []
-  })
+  return computed<IndicadorDaAbertura[]>(() => (hasClinicalProfile.value ? daClinica.value : []))
 }

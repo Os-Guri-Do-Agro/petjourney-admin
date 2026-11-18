@@ -46,7 +46,6 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import {
   invalidarPendenciasDoPortal,
   usePendenciasDoPortal,
@@ -313,14 +312,9 @@ watch(diaLivre, (livre) => {
 })
 
 /* Quem está esperando, pelos números do menu (a mesma leitura do servidor, sem pedir de novo). */
-const { ativo: demonstracao } = useModoDemonstracao()
 const { espacos } = useEspacos()
 const pendencias = usePendenciasDoPortal(
-  () =>
-    !demonstracao.value &&
-    store.loadState === 'ready' &&
-    !store.semAcessoParceiro &&
-    !store.cadastroSuspenso,
+  () => store.loadState === 'ready' && !store.semAcessoParceiro && !store.cadastroSuspenso,
 )
 
 function temTela(to: string) {

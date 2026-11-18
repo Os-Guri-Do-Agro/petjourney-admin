@@ -18,7 +18,6 @@ import { RouterLink, useRoute } from 'vue-router'
 
 import ShellAvisos from '@/components/layout/ShellAvisos.vue'
 import ShellConta from '@/components/layout/ShellConta.vue'
-import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
 import ShellPendencia from '@/components/layout/ShellPendencia.vue'
 import type { Destino, Espaco, Localizacao } from '@/navegacao/espacos'
@@ -27,12 +26,7 @@ import { useParceiroStore } from '@/stores/parceiro'
 const props = defineProps<{
   espacos: Espaco[]
   aqui: Localizacao
-  /** A busca e o "criar" só existem no modo demonstração da Clínica, como na barra. */
-  clinica: boolean
-  atalhoDaBusca: string
 }>()
-
-const emit = defineEmits<{ buscar: [] }>()
 
 const { t } = useI18n()
 const route = useRoute()
@@ -204,17 +198,6 @@ function abasDe(destino: Destino) {
     </nav>
 
     <div class="topo-app__ferramentas">
-      <button
-        v-if="clinica"
-        type="button"
-        class="topo-app__ferramenta"
-        :title="`${t('clinico.busca.abrir')} (${atalhoDaBusca})`"
-        :aria-label="t('clinico.busca.abrir')"
-        @click="emit('buscar')"
-      >
-        <i class="ph ph-magnifying-glass" aria-hidden="true" />
-      </button>
-      <ShellCriar v-if="clinica" recolhida :clinica="clinica" />
       <ShellPendencia recolhida />
       <ShellAvisos recolhida />
       <ShellConta recolhida />
@@ -275,8 +258,7 @@ function abasDe(destino: Destino) {
 }
 
 .topo-app__marca:focus-visible,
-.topo-app__item:focus-visible,
-.topo-app__ferramenta:focus-visible {
+.topo-app__item:focus-visible {
   outline: 2px solid var(--app-salvia-texto, var(--musgo));
   outline-offset: 2px;
 }
@@ -396,24 +378,7 @@ function abasDe(destino: Destino) {
   gap: 6px;
 }
 
-.topo-app__ferramenta {
-  display: grid;
-  width: 40px;
-  height: 40px;
-  place-items: center;
-  border: 0;
-  border-radius: 13px;
-  background: var(--app-veu, var(--superficie-2));
-  color: var(--app-salvia-texto, var(--tinta-2));
-  cursor: pointer;
-  font-size: 19px;
-}
-
-.topo-app__ferramenta:hover {
-  background: var(--app-veu-forte, var(--superficie-3));
-}
-
-/* O sino e a conta vieram do pé da barra: aqui são quadrados do tamanho da busca. */
+/* O sino e a conta vieram do pé da barra: aqui são quadrados de 40 px. */
 .topo-app__ferramentas :deep(.sino) {
   width: 40px;
   height: 40px;

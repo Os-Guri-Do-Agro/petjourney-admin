@@ -1,3 +1,5 @@
+/* Primeiro de tudo: com a demonstração ligada, o relógio desloca antes de outro módulo ler a hora. */
+import './demonstracao/cedo'
 import './assets/main.css'
 import './features/clinico/theme/clinic-tokens.css'
 import './theme/hc-tokens.css'
@@ -16,7 +18,7 @@ import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
 
 import App from './App.vue'
-import { useModoDemonstracao } from './composables/useModoDemonstracao'
+import { prepararDemonstracao, useModoDemonstracao } from './composables/useModoDemonstracao'
 import i18n, { syncDocumentLang } from './i18n'
 import { sincronizarPrimeVue } from './i18n/primevue'
 import router from './router'
@@ -29,6 +31,9 @@ import { aceitarPontoComoDecimal } from './theme/primevue-ponto-decimal'
 
 deixarEscPassarPeloSelectFechado()
 aceitarPontoComoDecimal()
+
+/* Antes do router: a primeira navegação já pede dados, e na demonstração eles vêm daqui. */
+await prepararDemonstracao()
 
 const app = createApp(App)
 

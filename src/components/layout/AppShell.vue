@@ -2,8 +2,8 @@
 /**
  * A moldura do portal.
  *
- * Uma barra só, à esquerda, com tudo o que não muda de tela para tela: a empresa, a busca, o
- * "criar", o mapa (Início e os espaços com seus destinos) e a conta. O resto da largura é da tela.
+ * Uma barra só, à esquerda, com tudo o que não muda de tela para tela: a empresa, o mapa (Início
+ * e os espaços com seus destinos) e a conta. O resto da largura é da tela.
  * Não há cabeçalho: o título da tela é o primeiro texto da tela, e o "onde estou" mora no mapa,
  * aceso na cor do espaço, e nas abas do destino.
  *
@@ -11,12 +11,10 @@
  * Seções, Ladrilhos e Só ícones são a barra lateral; "Menu no alto" tira a barra e põe no alto a
  * faixa do `ShellTopo`, com um menu por espaço.
  *
- * Na Clínica, a fita do dia fica presa no alto: o expediente inteiro, com a agulha em agora.
- *
  * Até 900 px a barra vira gaveta, e um topo fino com o menu e o nome da tela toma o lugar dela.
  */
 import { useToast } from 'primevue/usetoast'
-import { computed, defineAsyncComponent, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -24,7 +22,6 @@ import ComingSoonFeatureDialog from '@/components/common/ComingSoonFeatureDialog
 import { molduraPedida } from '@/components/layout/moldura'
 import ShellAvisos from '@/components/layout/ShellAvisos.vue'
 import ShellConta from '@/components/layout/ShellConta.vue'
-import ShellCriar from '@/components/layout/ShellCriar.vue'
 import ShellEmpresa from '@/components/layout/ShellEmpresa.vue'
 import ShellNavegacao from '@/components/layout/ShellNavegacao.vue'
 import ShellPendencia from '@/components/layout/ShellPendencia.vue'
@@ -61,8 +58,7 @@ const usuarioPerfilStore = useUsuarioPerfilStore()
 /** A lista das empresas da conta, aberta pelo bloco da empresa no topo da barra. */
 const empresas = ref<InstanceType<typeof ShellEmpresa> | null>(null)
 const empresasAbertas = ref(false)
-const { espacos, aqui, lugar, navigationSections, clinicaNaDemonstracao, hotelNaDemonstracao } =
-  oferecerEspacos()
+const { espacos, aqui, lugar } = oferecerEspacos()
 const { open: abrirResgate, canOpen: podeResgatar } = useCupomResgateModal()
 const { visible: cupomEmBreveVisivel, open: abrirCupomEmBreve } = useCupomComingSoon()
 const cupomLigado = CUPOM_FEATURE_ENABLED
@@ -71,7 +67,6 @@ const cupomLigado = CUPOM_FEATURE_ENABLED
 const larguraParaBarraLarga = useTelaLarga(NAVIGATOR_AUTO_MIN_WIDTH)
 const compacto = ref(casaCompacto())
 const gavetaAberta = ref(false)
-const buscaAberta = ref(false)
 const avisosAbertos = ref(false)
 let consulta: MediaQueryList | undefined
 
@@ -142,54 +137,10 @@ function aoMudarTela(evento: MediaQueryListEvent) {
 }
 
 function aoTeclar(evento: KeyboardEvent) {
-  /*
-   * `Ctrl/⌘ + K` abre a busca, e atravessa campo de texto de propósito: quem está no meio de uma
-   * anamnese e precisa conferir o histórico do paciente não vai clicar fora antes.
-   */
-  if ((evento.ctrlKey || evento.metaKey) && evento.key.toLowerCase() === 'k') {
-    if (!clinicaNaDemonstracao.value) {
-      return
-    }
-
-    evento.preventDefault()
-    buscaAberta.value = !buscaAberta.value
-    return
-  }
-
   if (evento.key === 'Escape' && gavetaAberta.value) {
     gavetaAberta.value = false
   }
 }
-
-const ClinicBuscaGlobal = defineAsyncComponent(
-  () => import('@/features/clinico/components/base/ClinicBuscaGlobal.vue'),
-)
-const FitaDoDia = defineAsyncComponent(
-  () => import('@/features/clinico/components/base/FitaDoDia.vue'),
-)
-const FitaDaCasa = defineAsyncComponent(
-  () => import('@/features/hotel/components/base/FitaDaCasa.vue'),
-)
-
-const atalhoDaBusca = computed(() =>
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K',
-)
-
-/**
- * A fita aparece em toda a Clínica, menos na Agenda: lá a grade já é o dia inteiro, com a
- * própria linha do agora, e a fita só tomaria a altura de que a grade precisa.
- */
-const mostrarFita = computed(
-  () =>
-    clinicaNaDemonstracao.value &&
-    lugar.value === 'clinica' &&
-    !route.path.startsWith('/clinica/agenda'),
-)
-
-/** No Hotel, a fita da casa; menos na Rotina, que já é a prancheta do dia hora a hora. */
-const mostrarFitaDaCasa = computed(
-  () => hotelNaDemonstracao.value && lugar.value === 'hotel' && route.path !== '/hotel/rotina',
-)
 
 /** No topo do celular: o nome do destino, ou do espaço, ou da tela solta. */
 const tituloNoTopo = computed(() => {
@@ -411,22 +362,6 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <div class="barra__ferramentas">
-          <button
-            v-if="clinicaNaDemonstracao"
-            type="button"
-            class="barra__busca"
-            :title="t('clinico.busca.abrir')"
-            :aria-label="t('clinico.busca.abrir')"
-            @click="buscaAberta = true"
-          >
-            <i class="ph ph-magnifying-glass" aria-hidden="true" />
-            <span class="barra__busca-texto shell-rotulo">{{ t('clinico.busca.abrirCurto') }}</span>
-            <kbd class="shell-rotulo">{{ atalhoDaBusca }}</kbd>
-          </button>
-          <ShellCriar :recolhida="barraRecolhida" :clinica="clinicaNaDemonstracao" />
-        </div>
-
         <ShellNavegacao
           class="barra__mapa"
           :espacos="espacos"
@@ -461,14 +396,7 @@ onUnmounted(() => {
     </aside>
 
     <div class="palco">
-      <ShellTopo
-        v-if="menuNoAlto"
-        :espacos="espacos"
-        :aqui="aqui"
-        :clinica="clinicaNaDemonstracao"
-        :atalho-da-busca="atalhoDaBusca"
-        @buscar="buscaAberta = true"
-      />
+      <ShellTopo v-if="menuNoAlto" :espacos="espacos" :aqui="aqui" />
 
       <header v-if="compacto" class="topo">
         <button
@@ -485,21 +413,7 @@ onUnmounted(() => {
           ><i :class="aqui.espaco?.icone ?? 'ph ph-house-simple'"
         /></span>
         <strong class="topo__titulo">{{ tituloNoTopo }}</strong>
-        <button
-          v-if="clinicaNaDemonstracao"
-          type="button"
-          class="topo__menu"
-          :aria-label="t('clinico.busca.abrir')"
-          @click="buscaAberta = true"
-        >
-          <i class="ph ph-magnifying-glass" aria-hidden="true" />
-        </button>
       </header>
-
-      <template v-if="moldura === 'portal'">
-        <FitaDoDia v-if="mostrarFita" class="palco__fita" />
-        <FitaDaCasa v-else-if="mostrarFitaDaCasa" class="palco__fita" />
-      </template>
 
       <main id="conteudo" ref="conteudo" class="palco__conteudo" tabindex="-1">
         <slot />
@@ -514,13 +428,6 @@ onUnmounted(() => {
       resposta ao trocar de rota. Quem abre é a carteira, depois de um saque concluído.
     -->
     <FeedbackSaqueDialog />
-
-    <ClinicBuscaGlobal
-      v-if="clinicaNaDemonstracao"
-      :aberto="buscaAberta"
-      :secoes="navigationSections"
-      @fechar="buscaAberta = false"
-    />
   </div>
 </template>
 
@@ -733,60 +640,6 @@ onUnmounted(() => {
   scale: -1 1;
 }
 
-.barra__ferramentas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 0 12px 16px;
-}
-
-.barra__busca {
-  display: flex;
-  flex: 1 1 120px;
-  min-width: 40px;
-  height: 40px;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-  padding: 0 10px;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 11px;
-  background: rgb(255 255 255 / 5%);
-  color: var(--sobre-rail-2);
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  text-align: left;
-  white-space: nowrap;
-  transition:
-    border-color var(--pj-tempo-curto) ease,
-    background-color var(--pj-tempo-curto) ease;
-}
-
-.barra__busca:hover {
-  border-color: rgb(255 255 255 / 20%);
-  background: rgb(255 255 255 / 8%);
-  color: var(--sobre-rail);
-}
-
-.barra__busca i {
-  flex: none;
-  font-size: 18px;
-}
-
-.barra__busca-texto {
-  flex: 1;
-}
-
-.barra__busca kbd {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgb(255 255 255 / 10%);
-  font-family: var(--font-dados);
-  font-size: 11px;
-}
-
-.barra__busca:focus-visible,
 .barra__recolher:focus-visible,
 .barra__cupom:focus-visible {
   outline: 2px solid var(--sobre-rail);
@@ -887,16 +740,6 @@ onUnmounted(() => {
   background: rgb(255 255 255 / 8%);
 }
 
-.shell--recolhida .barra__ferramentas {
-  flex-direction: column;
-  align-items: center;
-}
-
-.shell--recolhida .barra__busca {
-  flex: none;
-  width: 40px;
-}
-
 /* -------------------------------------------------------------------------------------- palco
  * A folha: presa na moldura com cantos de 22px, e quem rola é o conteúdo dela — a barra e a fita
  * ficam paradas. No alto, a luz do espaço (um brilho na cor do lugar) diz onde se está antes de
@@ -921,12 +764,6 @@ onUnmounted(() => {
 .app-dark .palco {
   outline: 1px solid rgb(255 255 255 / 6%);
   outline-offset: -1px;
-}
-
-.palco__fita {
-  position: relative;
-  z-index: 30;
-  flex: none;
 }
 
 /*
@@ -1024,11 +861,6 @@ onUnmounted(() => {
   border-radius: 0;
   box-shadow: none;
   outline: none;
-}
-
-.shell--compacto .palco__fita {
-  position: sticky;
-  top: 56px;
 }
 
 .shell--compacto .palco__conteudo {

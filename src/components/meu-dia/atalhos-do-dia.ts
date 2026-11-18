@@ -2,13 +2,12 @@
  * O que dá para fazer no Hoje quando o dia está calmo (pedido do Luís, 17/11/2026: "nada pode
  * simplesmente ficar vazio, indique ao usuário o que ele pode fazer"). As mesmas regras das Ações
  * rápidas do Início: a tela está no menu da pessoa (módulo ligado, permissão de ler) e, para criar,
- * a Clínica com escrita e a permissão da ação. Na demonstração, tudo aparece.
+ * a Clínica com escrita e a permissão da ação.
  */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { RouteLocationRaw } from 'vue-router'
 
-import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { useEspacos } from '@/navegacao/espacos'
 
@@ -27,7 +26,6 @@ export function useAtalhosDoDia() {
   const { t } = useI18n()
   const { store } = useParceiroPortal()
   const { espacos } = useEspacos()
-  const { ativo: demonstracao } = useModoDemonstracao()
 
   function temTela(to: string) {
     return espacos.value.some((espaco) =>
@@ -38,10 +36,7 @@ export function useAtalhosDoDia() {
   type Permissao = Parameters<typeof store.temPermissao>[0]
 
   function pode(permissao: Permissao) {
-    return (
-      demonstracao.value ||
-      (Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao(permissao))
-    )
+    return Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao(permissao)
   }
 
   const podeMarcar = computed(() => temTela('/clinica/agenda') && pode('agenda.escrever'))

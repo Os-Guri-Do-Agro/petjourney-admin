@@ -4,32 +4,16 @@
  * Morava dentro de `HomePauta`. Saiu porque o cabeçalho da página também precisa dela: a linha
  * abaixo do "Olá" diz quantos assuntos pedem atenção, e dois cálculos da mesma pauta divergiriam
  * na primeira mudança de régua. A régua é a dos selos do menu: um número em um lugar só, e zero não
- * vira linha. Na demonstração os números são contados sobre os dados locais (`useClinicoPendencias`,
- * `useHotelPendencias`); fora dela vêm do servidor (`usePendenciasDoPortal`, E1-06).
+ * vira linha. Os números vêm do servidor (`usePendenciasDoPortal`, E1-06).
  */
 
-import {
-  PhBed,
-  PhCalendarPlus,
-  PhCalendarX,
-  PhClipboardText,
-  PhHourglassMedium,
-  PhHouseLine,
-  PhListChecks,
-  PhPill,
-  PhStethoscope,
-  PhStorefront,
-  PhSyringe,
-} from '@phosphor-icons/vue'
+import { PhHouseLine, PhStethoscope, PhStorefront } from '@phosphor-icons/vue'
 import { computed, type Component } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import type { SituacaoDaConferencia } from '@/composables/conferencia'
 import { useAppNavigation } from '@/composables/useAppNavigation'
-import type {
-  ContagemDePendencia,
-  TomDePendencia,
-} from '@/features/clinico/composables/useClinicoPendencias'
+import type { TomDePendencia } from '@/features/clinico/composables/useClinicoPendencias'
 import { pendenciasComValor, tomDaPendencia } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { telaDaRota, type ModuloDaPendencia } from '@/service/parceiro/pendencias-service'
@@ -94,14 +78,9 @@ const GRUPO_DO_MODULO: Record<
 export function usePautaDaHome() {
   const { t, locale } = useI18n()
   const {
-    clinicaNaDemonstracao: hasClinicalProfile,
-    hotelNaDemonstracao: hasHotelProfile,
     hasClinicalProfile: temClinica,
     hasHotelProfile: temHotel,
-    modoDemonstracao,
     navigationSections,
-    pendenciasClinicas,
-    pendenciasDoHotel,
     pendenciasDoPortal,
     fraseDaPendencia,
   } = useAppNavigation()
@@ -120,8 +99,8 @@ export function usePautaDaHome() {
       ),
   )
 
-  /** A pauta fora da demonstração: os contadores do servidor, agrupados por módulo. */
-  const modulosDoServidor = computed<ModuloDaPauta[]>(() => {
+  /** A pauta: os contadores do servidor, agrupados por módulo. */
+  const modulos = computed<ModuloDaPauta[]>(() => {
     const lista = pendenciasDoPortal.lista.value
     const comValor = pendenciasComValor(lista)
 
@@ -161,112 +140,14 @@ export function usePautaDaHome() {
     })
   })
 
-  function linha(
-    id: string,
-    to: string,
-    icone: Component,
-    contagem: ContagemDePendencia,
-  ): LinhaDaPauta {
-    return {
-      id,
-      to,
-      icone,
-      total: contagem.total,
-      tom: contagem.tom,
-      frase: t(`inicio.pauta.${id}`, { total: contagem.total }, contagem.total),
-      /* Cada parte é uma frase inteira do catálogo; o separador não é traduzido porque não é texto. */
-      detalhe: (contagem.partes ?? [])
-        .map((parte) => t(`inicio.pauta.parte.${parte.chave}`, { total: parte.total }, parte.total))
-        .join(' · '),
-    }
-  }
-
-  const modulosDaDemonstracao = computed<ModuloDaPauta[]>(() => {
-    const lista: ModuloDaPauta[] = []
-
-    if (hasClinicalProfile.value) {
-      lista.push({
-        id: 'clinica',
-        titulo: t('clinico.navegacao.secao'),
-        icone: PhStethoscope,
-        atalho: { to: '/clinica/meu-dia', rotulo: t('clinico.meuDia.titulo') },
-        carregado: pendenciasClinicas.carregado.value,
-        situacao: pendenciasClinicas.situacao.value,
-        jaConferiu: pendenciasClinicas.conferidoEm.value !== null,
-        recarregar: pendenciasClinicas.recarregar,
-        linhas: porGravidade(
-          [
-            linha('pedidos', '/clinica/pedidos', PhCalendarPlus, pendenciasClinicas.pedidos.value),
-            linha('fila', '/clinica/fila', PhHourglassMedium, pendenciasClinicas.fila.value),
-            linha('internacao', '/clinica/internacao', PhBed, pendenciasClinicas.internacao.value),
-            linha(
-              'atividades',
-              '/clinica/atividades',
-              PhClipboardText,
-              pendenciasClinicas.atividades.value,
-            ),
-            linha('vacinas', '/clinica/vacinas', PhSyringe, pendenciasClinicas.vacinas.value),
-            linha(
-              'tratamentos',
-              '/clinica/tratamentos',
-              PhPill,
-              pendenciasClinicas.tratamentos.value,
-            ),
-          ].filter((item) => item.total > 0),
-        ),
-      })
-    }
-
-    if (hasHotelProfile.value) {
-      lista.push({
-        id: 'hotel',
-        titulo: t('hotel.navegacao.secao'),
-        icone: PhHouseLine,
-        atalho: { to: '/hotel/painel', rotulo: t('hotel.painel.titulo') },
-        carregado: pendenciasDoHotel.carregado.value,
-        situacao: pendenciasDoHotel.situacao.value,
-        jaConferiu: pendenciasDoHotel.conferidoEm.value !== null,
-        recarregar: pendenciasDoHotel.recarregar,
-        linhas: porGravidade(
-          [
-            linha('rotina', '/hotel/rotina', PhListChecks, pendenciasDoHotel.rotina.value),
-            linha('vespera', '/hotel/reservas', PhCalendarX, pendenciasDoHotel.vespera.value),
-            linha(
-              'pedidosDeReserva',
-              '/hotel/pedidos',
-              PhCalendarPlus,
-              pendenciasDoHotel.pedidos.value,
-            ),
-          ].filter((item) => item.total > 0),
-        ),
-      })
-    }
-
-    return lista
-  })
-
-  const modulos = computed(() =>
-    modoDemonstracao.value ? modulosDaDemonstracao.value : modulosDoServidor.value,
-  )
-
-  /**
-   * Na demonstração, a pauta existe para quem tem ao menos um módulo de operação. Fora dela, só
-   * quando o servidor devolve alguma coisa a fazer numa tela que a conta abre.
-   */
+  /** A pauta existe quando o servidor devolve alguma coisa a fazer numa tela que a conta abre. */
   const visivel = computed(() => modulos.value.length > 0)
 
   /** Algum módulo ainda não terminou a primeira conferência. */
   const algumModuloCarregando = computed(() => modulos.value.some((modulo) => !modulo.carregado))
 
   /** Alguma conferência está em andamento — a primeira ou uma reconferência. */
-  const conferindo = computed(() =>
-    modoDemonstracao.value
-      ? [
-          hasClinicalProfile.value && pendenciasClinicas.carregando.value,
-          hasHotelProfile.value && pendenciasDoHotel.carregando.value,
-        ].some(Boolean)
-      : pendenciasDoPortal.carregando.value,
-  )
+  const conferindo = computed(() => pendenciasDoPortal.carregando.value)
 
   /**
    * A hora da conferência, só quando **todos** os módulos terminaram, e a mais antiga entre eles:
@@ -275,14 +156,9 @@ export function usePautaDaHome() {
   const conferidoEm = computed(() => {
     if (algumModuloCarregando.value) return ''
 
-    const datas = (
-      modoDemonstracao.value
-        ? [
-            hasClinicalProfile.value ? pendenciasClinicas.conferidoEm.value : null,
-            hasHotelProfile.value ? pendenciasDoHotel.conferidoEm.value : null,
-          ]
-        : [pendenciasDoPortal.conferidoEm.value]
-    ).filter((data): data is Date => data !== null)
+    const datas = [pendenciasDoPortal.conferidoEm.value].filter(
+      (data): data is Date => data !== null,
+    )
 
     if (datas.length === 0) return ''
 
@@ -328,8 +204,8 @@ export function usePautaDaHome() {
   }
 
   /**
-   * Fora da demonstração e sem nada a fazer: quem tem Clínica ou Hotel na barra ouve que está em
-   * dia (ou que não deu para conferir); a conta só do Portal segue com a frase do Portal.
+   * Sem nada a fazer: quem tem Clínica ou Hotel na barra ouve que está em dia (ou que não deu para
+   * conferir); a conta só do Portal segue com a frase do Portal.
    */
   function resumoSemLinhas(): ResumoDaPauta {
     if (!temClinica.value && !temHotel.value) return { estado: 'semModulos' }
@@ -340,9 +216,7 @@ export function usePautaDaHome() {
   }
 
   const resumo = computed<ResumoDaPauta>(() => {
-    if (!visivel.value) {
-      return modoDemonstracao.value ? { estado: 'semModulos' } : resumoSemLinhas()
-    }
+    if (!visivel.value) return resumoSemLinhas()
 
     if (algumModuloCarregando.value) return { estado: 'conferindo' }
 
