@@ -35,8 +35,15 @@
   text-transform: uppercase;
 }
 
+/*
+ * O rótulo e o campo ficam no alto, mesmo quando a coluna vizinha da `.eg__linha` é mais alta e
+ * estica esta: sem o `align-content: start`, as linhas do grid dividiam a sobra, e o campo descia
+ * para o meio, mais alto que os outros (18/11/2026, "Profissional" ao lado da dica e do botão
+ * "Criar tipo de atendimento" no Marcar horário).
+ */
 .eg__secao {
   display: grid;
+  align-content: start;
   gap: 8px;
 }
 
