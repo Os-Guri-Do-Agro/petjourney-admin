@@ -7,13 +7,13 @@
  * responder — e o formulário deixa de parecer uma coluna de caixas iguais.
  *
  * **A marcação precisa saltar.** É o controle segmentado do Trilha: um trilho afundado
- * (`--superficie-3`) e a opção escolhida em papel (`--superficie`) com `--sombra-1` — ela sobe do
- * trilho. Forma, sombra e peso: três sinais, e nenhum deles depende de enxergar cor, o que mantém
- * a régua da escala de cinza.
+ * (`--superficie-3`) e a opção escolhida cheia na cor da ação (`--segmento-escolhido-*`), com o
+ * rótulo em 600. Fundo escuro sobre trilho claro (claro sobre escuro, no tema escuro) e peso: a
+ * diferença é de luminância, e não só de matiz, o que mantém a régua da escala de cinza.
  *
  * O `tom` é opcional e carrega **significado**, não enfeite: numa lista de sistemas, ver de
  * relance quais estão normais, quais alterados e quais nem foram avaliados é o motivo de a
- * lista existir. A escolhida com tom ganha a tinta do tom e um ponto na cor dele.
+ * lista existir. A escolhida com tom ganha o pastel e a tinta do tom, e um ponto na cor dele.
  *
  * É um `radiogroup` de verdade — e agora com o teclado que a função exige.
  *
@@ -214,9 +214,10 @@ function escolher(valor: T | null) {
 /*
  * O controle segmentado do Trilha.
  *
- * Trilho afundado (`--superficie-3`, raio 10) e a escolhida em papel com `--sombra-1`: a escolha
- * sobe, em vez de ganhar cor. Quem diz o significado é o tom — a tinta da opção escolhida e o
- * ponto antes do rótulo —, e a contagem, na pílula do kit.
+ * Trilho afundado (`--superficie-3`, raio 10) e a escolhida cheia na cor da ação
+ * (`--segmento-escolhido-*`, do tema). Até 18/11/2026 era papel com sombra, e não se via qual opção
+ * estava ativa. Quem diz o significado é o tom (o pastel, a tinta, o contorno e o ponto antes do
+ * rótulo) e a contagem, na pílula do kit.
  *
  * `.grupo.grupo--trilho.p-selectbutton` mais `:deep`: os botões são filhos do `SelectButton` e não
  * recebem o atributo de escopo, e a especificidade precisa passar a do tema (`html.trilha body
@@ -281,25 +282,29 @@ function escolher(valor: T | null) {
   background: color-mix(in oklab, var(--superficie) 45%, transparent);
 }
 
-/* A escolhida: papel sobre o trilho, com a sombra curta de quem está um degrau acima. */
+/* A escolhida: cheia na cor da ação, como todo segmento do portal. */
 .grupo.grupo--trilho.p-selectbutton :deep(.p-togglebutton.p-togglebutton-checked) {
+  --grupo-escolhido-fundo: var(--segmento-escolhido-fundo);
+  --grupo-escolhido-tinta: var(--segmento-escolhido-tinta);
+  --grupo-escolhido-contorno: var(--segmento-escolhido-contorno);
+
   border-color: transparent;
   background: transparent;
-  color: var(--tinta);
+  color: var(--grupo-escolhido-tinta);
   font-weight: 600;
 }
 
 .grupo.grupo--trilho.p-selectbutton
   :deep(.p-togglebutton.p-togglebutton-checked .p-togglebutton-content) {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
+  background: var(--grupo-escolhido-fundo);
+  box-shadow: var(--grupo-escolhido-contorno);
 }
 
 /*
- * O tom da escolhida: a tinta do estado e um ponto na cor dele antes do rótulo. O ponto é o que
- * se vê de longe numa coluna de oito sistemas; a palavra continua sendo quem diz. Opção com
+ * O tom da escolhida: o pastel e a tinta do estado, e um ponto na cor dele antes do rótulo. O ponto
+ * é o que se vê de longe numa coluna de oito sistemas; a palavra continua sendo quem diz. Opção com
  * contagem (os recortes de uma lista) leva o tom só na pílula do número: lá a escolhida é um
- * recorte, não um achado.
+ * recorte, não um achado, e fica na cor da ação.
  */
 .grupo.grupo--trilho.p-selectbutton :deep(.p-togglebutton-checked .p-togglebutton-content::before) {
   display: var(--grupo-ponto-exibe, none);
@@ -315,29 +320,34 @@ function escolher(valor: T | null) {
   :deep(.grupo__opcao--ok.p-togglebutton-checked:not(.grupo__opcao--contada)) {
   --grupo-ponto: var(--ok);
   --grupo-ponto-exibe: block;
-
-  color: var(--ok-tinta);
+  --grupo-escolhido-fundo: var(--ok-fundo);
+  --grupo-escolhido-tinta: var(--ok-tinta);
+  --grupo-escolhido-contorno: inset 0 0 0 1px var(--ok-tinta);
 }
 
 .grupo.grupo--trilho.p-selectbutton
   :deep(.grupo__opcao--atencao.p-togglebutton-checked:not(.grupo__opcao--contada)) {
   --grupo-ponto: var(--atencao);
   --grupo-ponto-exibe: block;
-
-  color: var(--atencao-tinta);
+  --grupo-escolhido-fundo: var(--atencao-fundo);
+  --grupo-escolhido-tinta: var(--atencao-tinta);
+  --grupo-escolhido-contorno: inset 0 0 0 1px var(--atencao-tinta);
 }
 
 .grupo.grupo--trilho.p-selectbutton
   :deep(.grupo__opcao--risco.p-togglebutton-checked:not(.grupo__opcao--contada)) {
   --grupo-ponto: var(--risco);
   --grupo-ponto-exibe: block;
-
-  color: var(--risco-tinta);
+  --grupo-escolhido-fundo: var(--risco-fundo);
+  --grupo-escolhido-tinta: var(--risco-tinta);
+  --grupo-escolhido-contorno: inset 0 0 0 1px var(--risco-tinta);
 }
 
-/* Neutro é a escolha que não afirma nada — "não avaliado", "sem preferência". */
+/* Neutro é a escolha que não afirma nada ("não avaliado", "sem preferência"): papel e tinta. */
 .grupo.grupo--trilho.p-selectbutton :deep(.grupo__opcao--neutro.p-togglebutton-checked) {
-  color: var(--tinta-2);
+  --grupo-escolhido-fundo: var(--superficie);
+  --grupo-escolhido-tinta: var(--tinta);
+  --grupo-escolhido-contorno: inset 0 0 0 1px var(--linha-forte);
 }
 
 .grupo.grupo--trilho.p-selectbutton :deep(.p-togglebutton:focus-visible) {
@@ -359,8 +369,8 @@ function escolher(valor: T | null) {
 }
 
 /* ------------------------------------------------------------------ contagem
- * A pílula do kit (`ui-contagem`). No trilho afundado ela vira papel — a cor de fundo do kit é a
- * do próprio trilho e a pílula sumiria —, e na opção escolhida volta ao afundado. Os tons de
+ * A pílula do kit (`ui-contagem`). No trilho afundado ela vira papel (a cor de fundo do kit é a
+ * do próprio trilho e a pílula sumiria), e continua papel sobre a escolhida. Os tons de
  * atenção e risco levam o par do estado: é o número que faz alguém abrir aquele recorte.
  */
 .grupo.grupo--trilho :deep(.p-togglebutton) .grupo__contagem {
@@ -373,7 +383,8 @@ function escolher(valor: T | null) {
 }
 
 .grupo.grupo--trilho :deep(.p-togglebutton-checked) .grupo__contagem {
-  background: var(--superficie-3);
+  background: var(--superficie);
+  color: var(--tinta);
 }
 
 .grupo.grupo--trilho :deep(.grupo__opcao--atencao) .grupo__contagem {

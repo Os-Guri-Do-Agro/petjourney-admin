@@ -438,9 +438,21 @@ html:root.trilha,
 }
 
 /* ------------------------------------------------------------------------------- segmentos
- * O `SelectButton` no Trilha: trilho afundado (`superficie-3`) e a escolhida em papel, com
- * `sombra-1` — a escolha sobe, em vez de ganhar cor.
+ * O `SelectButton` no Trilha: trilho afundado (`superficie-3`) e a escolhida cheia na cor da
+ * ação (`--musgo`), com o texto de cima dela (`--sobre-musgo`).
+ *
+ * Até 18/11/2026 a escolhida era papel com `sombra-1` sobre o trilho cinza, e a moldura do app zera
+ * a sombra: sobrava branco sobre cinza-claro, e o usuário não via qual opção estava ativa ("não está
+ * evidente qual opção está ativa", nos Pedidos da Agenda). Agora vale a mesma marca do item ativo
+ * do menu e do "Formato do menu" da conta: sálvia cheia. Todo segmento do portal lê estes três
+ * tokens; quem tem estado (normal, atenção, risco) troca por pastel e tinta do estado.
  */
+
+:root.trilha {
+  --segmento-escolhido-fundo: var(--musgo);
+  --segmento-escolhido-tinta: var(--sobre-musgo);
+  --segmento-escolhido-contorno: none;
+}
 
 html.trilha .hc-tema .p-selectbutton:not(.grupo) {
   border: 0;
@@ -467,10 +479,11 @@ html.trilha
   color: var(--tinta);
 }
 
+/* O botão fica transparente: quem pinta é o conteúdo, que ocupa o botão inteiro (trilha-ui.css). */
 html.trilha .hc-tema .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
-  color: var(--tinta);
+  background: transparent;
+  box-shadow: none;
+  color: var(--segmento-escolhido-tinta);
   font-weight: 600;
 }
 
@@ -565,7 +578,8 @@ html.trilha body .partner-page__guidance.p-button {
 
 /*
  * Segmentos e abas de seção: o mesmo trilho do Trilha em todo lugar — afundado, com a escolhida
- * em papel e `sombra-1`. O tom (risco, atenção) fica na contagem, que é quem diz o número.
+ * cheia na cor da ação (`--segmento-escolhido-*`, ver "segmentos" acima). O tom (risco, atenção) fica
+ * na contagem, que é quem diz o número.
  */
 html.trilha body .grupo.p-selectbutton,
 html.trilha body .partner-tabs .partner-tabs__list .p-tablist-tab-list {
@@ -613,7 +627,7 @@ html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active,
 html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
   border-color: transparent;
   background: transparent;
-  color: var(--tinta);
+  color: var(--segmento-escolhido-tinta);
   font-weight: 600;
 }
 
@@ -624,8 +638,8 @@ html.trilha
   .p-togglebutton-content,
 html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active,
 html.trilha body .partner-tabs .partner-tabs__button.p-tab.p-tab-active:hover {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
 }
 
 /*

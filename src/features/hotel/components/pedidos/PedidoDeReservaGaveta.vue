@@ -1210,10 +1210,11 @@ function reservar() {
   flex-wrap: wrap;
 }
 
-/* O segmento escolhido: superfície e tinta, legível nos dois temas. */
+/* O segmento escolhido: cheio na cor da ação, como em todo segmento do portal. */
 .gr__motivos :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  background: var(--superficie);
-  color: var(--tinta);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
+  color: var(--segmento-escolhido-tinta);
 }
 
 /* ------------------------------------------------------------------ rodapé */

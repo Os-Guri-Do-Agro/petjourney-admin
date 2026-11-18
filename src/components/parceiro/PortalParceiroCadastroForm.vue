@@ -508,9 +508,9 @@ function handleSubmit() {
 }
 
 .cad-tabs__button.p-tab-active {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
-  color: var(--tinta);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
+  color: var(--segmento-escolhido-tinta);
   font-weight: 600;
 }
 

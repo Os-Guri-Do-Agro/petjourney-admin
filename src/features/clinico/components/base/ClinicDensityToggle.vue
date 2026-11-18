@@ -125,8 +125,8 @@ const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 }
 
 /*
- * O mesmo controle segmentado do `ClinicToggleGroup`: trilho afundado e a escolhida em papel, com
- * `--sombra-1`. `:deep` porque os botões são filhos do `SelectButton`; a especificidade
+ * O mesmo controle segmentado do `ClinicToggleGroup`: trilho afundado e a escolhida cheia na cor
+ * da ação (`--segmento-escolhido-*`). `:deep` porque os botões são filhos do `SelectButton`; a especificidade
  * (`.prefs .prefs__grupo.prefs__trilho`) passa a do tema (`html.trilha .hc-tema .p-selectbutton`)
  * e a da camada global da clínica (`.clinic-scope .p-togglebutton`).
  */
@@ -173,15 +173,15 @@ const ptZoom = passthrough(() => t('clinico.zoom.titulo'))
 
 .prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton.p-togglebutton-checked) {
   background: transparent;
-  color: var(--tinta);
+  color: var(--segmento-escolhido-tinta);
   font-weight: 600;
 }
 
 .prefs
   .prefs__grupo.prefs__trilho.p-selectbutton
   :deep(.p-togglebutton.p-togglebutton-checked .p-togglebutton-content) {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
 }
 
 .prefs .prefs__grupo.prefs__trilho.p-selectbutton :deep(.p-togglebutton:focus-visible) {

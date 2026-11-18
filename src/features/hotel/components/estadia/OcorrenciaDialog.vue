@@ -254,13 +254,24 @@ function confirmar() {
   font-size: 17px;
 }
 
-/* A gravidade escolhida leva a cor dela: âmbar moderada, vermelho grave — e a palavra junto. */
-.gravidade--moderada :deep(.p-togglebutton-checked .p-togglebutton-label) {
-  color: var(--atencao-tinta);
+/*
+ * A gravidade escolhida leva a cor dela, no pastel e na tinta do estado: âmbar moderada, vermelho
+ * grave, e a palavra junto. A leve fica na cor da ação, como todo segmento. Troca os tokens que
+ * o tema usa para a escolhida (`--segmento-escolhido-*`), em vez de brigar com a regra dele.
+ */
+.gravidade--moderada {
+  --segmento-escolhido-fundo: var(--atencao-fundo);
+  --segmento-escolhido-tinta: var(--atencao-tinta);
+  --segmento-escolhido-contorno: inset 0 0 0 1px var(--atencao-tinta);
+}
+
+.gravidade--grave {
+  --segmento-escolhido-fundo: var(--risco-fundo);
+  --segmento-escolhido-tinta: var(--risco-tinta);
+  --segmento-escolhido-contorno: inset 0 0 0 1px var(--risco-tinta);
 }
 
 .gravidade--grave :deep(.p-togglebutton-checked .p-togglebutton-label) {
-  color: var(--risco-tinta);
   font-weight: 650;
 }
 

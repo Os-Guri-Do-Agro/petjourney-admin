@@ -544,7 +544,8 @@ function quandoAbriu(linha: LinhaDoHistorico): string {
 }
 
 .ensaio :deep(.p-togglebutton-checked .p-togglebutton-content) {
-  background: var(--superficie);
-  color: var(--tinta);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
+  color: var(--segmento-escolhido-tinta);
 }
 </style>

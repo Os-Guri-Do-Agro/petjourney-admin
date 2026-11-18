@@ -690,9 +690,10 @@
 }
 
 /* ------------------------------------------------------------------- controle segmentado
- * O `SelectButton` do PrimeVue em toda tela: trilho afundado e a opção escolhida em papel, com
- * sombra baixa — a escolha sobe, em vez de ganhar cor. Vence as regras de `.clinic-scope` (que
- * pintavam o escolhido em tom de acento e, no escuro, deixavam a palavra clara sobre fundo claro).
+ * O `SelectButton` do PrimeVue em toda tela: trilho afundado e a opção escolhida cheia na cor da
+ * ação (`--segmento-escolhido-*`, em trilha-tema.css). Até 18/11/2026 era papel com sombra baixa,
+ * e não se via qual opção estava ativa. Vence as regras de
+ * `.clinic-scope` (que, no escuro, deixavam a palavra clara sobre fundo claro).
  * O `.grupo` (Programas, abas do Portal) tem desenho próprio e fica de fora.
  */
 
@@ -735,29 +736,22 @@ html.trilha
 
 html.trilha .p-selectbutton:not(.grupo) .p-togglebutton.p-togglebutton-checked {
   background: transparent;
-  color: var(--tinta);
+  color: var(--segmento-escolhido-tinta);
 }
 
 html.trilha
   .p-selectbutton:not(.grupo)
   .p-togglebutton.p-togglebutton-checked
   .p-togglebutton-content {
-  background: var(--superficie);
-  box-shadow: var(--sombra-1);
-  color: var(--tinta);
+  background: var(--segmento-escolhido-fundo);
+  box-shadow: var(--segmento-escolhido-contorno);
+  color: var(--segmento-escolhido-tinta);
   font-weight: 600;
 }
 
-/* No escuro o papel é mais escuro que o trilho: o trilho afunda mais e a escolhida sobe clara. */
+/* No escuro o trilho afunda mais, para a escolhida se destacar dele. */
 html.trilha.app-dark .p-selectbutton:not(.grupo) {
   background: color-mix(in oklab, var(--fundo) 55%, #000);
-}
-
-html.trilha.app-dark
-  .p-selectbutton:not(.grupo)
-  .p-togglebutton.p-togglebutton-checked
-  .p-togglebutton-content {
-  background: var(--superficie-3);
 }
 
 /*
