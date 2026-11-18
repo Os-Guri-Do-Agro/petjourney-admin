@@ -7,7 +7,7 @@ import {
   type AppNavigationItem,
   type AppNavigationSection,
 } from '@/composables/useAppNavigation'
-import { noPrototipoDeSaudePublica } from '@/features/saude-publica/prototipo'
+import { saudePublicaNoMenu } from '@/features/saude-publica/prototipo'
 import type { LugarDoTrilha } from '@/theme/trilha/rotas'
 
 /**
@@ -615,8 +615,8 @@ function criarEspacos() {
     void locale.value
 
     return montarEspacos(navegacao.navigationSections.value, t, {
-      /* Escondido: o espaço só aparece enquanto se está numa tela do protótipo. */
-      saudePublica: noPrototipoDeSaudePublica(route.path),
+      /* Aberto fora da produção; em produção, só enquanto se está numa tela do protótipo. */
+      saudePublica: saudePublicaNoMenu(route.path),
     })
   })
 

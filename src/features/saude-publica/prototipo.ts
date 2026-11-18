@@ -6,13 +6,14 @@
  * prometem ao município: o painel por região e bairro, o piloto com a Subea, as campanhas avisadas
  * aos tutores, as ONGs com a adoção que leva o histórico, e o relatório de 90 dias.
  *
- * **Escondido** (pedido do Luís, 17/11/2026: "deixar o módulo de saúde pública escondido"): o espaço
- * não aparece no menu de ninguém, nem no modo demonstração. Só chega nele quem abre o endereço
- * (`/saude-publica`), e o menu mostra o espaço só enquanto se está numa tela dele, para andar entre
- * o painel, o piloto, as campanhas, as ONGs e o relatório. "Sair do protótipo" volta ao Início, e o
- * espaço some. Antes, abrir uma vez gravava no navegador e o espaço ficava no menu para sempre:
- * essa marca antiga é apagada na primeira leitura.
+ * **Aberto fora da produção** (pedido do Luís, 18/11/2026: "na branch de develop deixe ele
+ * aberto"): no `npm run dev` e no build do `develop` (portal-dev), o espaço fica no menu de todos.
+ * No build da `main` continua escondido, como pedido em 17/11: só chega nele quem abre o endereço
+ * (`/saude-publica`), e o menu mostra o espaço só enquanto se está numa tela dele. "Sair do
+ * protótipo" volta ao Início. A marca que uma versão antiga gravava no navegador é apagada na
+ * primeira leitura.
  */
+import { FORA_DA_PRODUCAO } from '@/utils/versao'
 
 const CHAVE_ANTIGA = 'pj.prototipo.saude-publica'
 
@@ -28,8 +29,16 @@ function apagarMarcaAntiga() {
   }
 }
 
-/** O caminho é de uma tela do protótipo: só aí o espaço aparece no menu. */
+/** O caminho é de uma tela do protótipo. */
 export function noPrototipoDeSaudePublica(caminho: string) {
   apagarMarcaAntiga()
   return caminho === '/saude-publica' || caminho.startsWith('/saude-publica/')
+}
+
+/**
+ * O espaço aparece no menu: sempre fora da produção; em produção, só enquanto se está numa tela
+ * dele.
+ */
+export function saudePublicaNoMenu(caminho: string, foraDaProducao = FORA_DA_PRODUCAO) {
+  return noPrototipoDeSaudePublica(caminho) || foraDaProducao
 }

@@ -2,8 +2,9 @@
 /**
  * A linha de todas as telas do protótipo: diz, antes de qualquer número, que eles são ilustrativos
  * (uma simulação dos 90 primeiros dias), para ninguém sair da apresentação achando que são medidos.
- * Discreta (o selo e uma frase, sem caixa): é aviso, não assunto. O espaço só aparece no menu
- * enquanto se está numa tela dele (`prototipo.ts`); "Sair do protótipo" volta ao Início, e ele some.
+ * Discreta (o selo e uma frase, sem caixa): é aviso, não assunto. Fora da produção o espaço fica
+ * no menu; em produção, só enquanto se está numa tela dele (`prototipo.ts`). "Sair do protótipo"
+ * volta ao Início.
  */
 import Button from 'primevue/button'
 import { useRouter } from 'vue-router'

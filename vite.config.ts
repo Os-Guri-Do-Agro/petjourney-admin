@@ -55,6 +55,25 @@ function commitDoBuild(): string {
 const buildDoPortal = { commit: commitDoBuild(), data: new Date().toISOString() }
 
 /*
+ * De qual ramo saiu o build: o `develop` publica em portal-dev, a `main` em produção. A hospedagem
+ * (AWS Amplify) diz o ramo em `AWS_BRANCH`; na máquina, o git. Sem nenhum dos dois, fica vazio, e o
+ * que só abre fora da `main` continua fechado.
+ */
+function ramoDoBuild(): string {
+  const daHospedagem = process.env.AWS_BRANCH?.trim()
+  if (daHospedagem) return daHospedagem
+  try {
+    const ramo = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim()
+    return ramo === 'HEAD' ? '' : ramo
+  } catch {
+    return ''
+  }
+}
+
+/*
  * A mesma informação no `index.html`, que todo deploy precisa trocar: `npm run conferir:publicacao`
  * lê esta etiqueta no endereço publicado para saber se o que subiu já está no ar.
  */
@@ -79,6 +98,7 @@ export default defineConfig({
   define: {
     __VERSAO_DO_PORTAL__: JSON.stringify(versaoDoPortal),
     __BUILD_DO_PORTAL__: JSON.stringify(buildDoPortal),
+    __RAMO_DO_BUILD__: JSON.stringify(ramoDoBuild()),
   },
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss(), etiquetaDaVersao],
   resolve: {
