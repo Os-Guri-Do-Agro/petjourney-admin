@@ -1660,6 +1660,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
+            "description": "Casa se QUALQUER categoria do parceiro for esta.",
             "schema": {
               "type": "string",
               "enum": [
@@ -1717,6 +1718,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
+            "description": "Casa se QUALQUER categoria do parceiro for esta.",
             "schema": {
               "type": "string",
               "enum": [
@@ -3087,6 +3089,141 @@
           }
         ],
         "summary": "Pedir um modulo (clinica|hotel): so o DONO, parceiro operavel. Nunca pedido ou recusado vira SOLICITADO; 409 MODULO_JA_SOLICITADO, MODULO_JA_ATIVO ou MODULO_REATIVACAO_PELO_SUPORTE nos outros estados",
+        "tags": [
+          "parceiro-portal-modulos"
+        ]
+      }
+    },
+    "/parceiro/portal/modulos/{modulo}/ligar": {
+      "post": {
+        "operationId": "ModuloParceiroController_ligar",
+        "parameters": [
+          {
+            "name": "modulo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuloLigadoDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ligar um modulo (clinica|hotel): so o DONO, parceiro operavel. Nunca teve ou SOLICITADO: TESTE gratis de 30 dias (uma vez por modulo). DESLIGADO pelo proprio DONO com prazo valendo: volta ao status anterior. 403 MODULO_GERENCIAR_APENAS_DONO; 409 MODULO_JA_ATIVO, MODULO_TESTE_JA_USADO, MODULO_DECIDIDO_PELO_SUPORTE, MODULO_PRAZO_VENCIDO_PARA_RELIGAR, MODULO_FORA_DA_CATEGORIA (teste so de modulo sugerido pelas categorias) ou PARCEIRO_NAO_OPERACIONAL; 429 MODULO_TAXA_EXCEDIDA (20 trocas por hora por modulo)",
+        "tags": [
+          "parceiro-portal-modulos"
+        ]
+      }
+    },
+    "/parceiro/portal/modulos/{modulo}/desligar": {
+      "post": {
+        "operationId": "ModuloParceiroController_desligar",
+        "parameters": [
+          {
+            "name": "modulo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModuloDesligadoDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Desligar um modulo (clinica|hotel): so o DONO, parceiro operavel, de TESTE ou ATIVO. Vira DESLIGADO: leitura e exportacao continuam, criar e alterar param; nada e cancelado. A resposta conta os itens vivos que ficaram so leitura. 403 MODULO_GERENCIAR_APENAS_DONO; 409 MODULO_JA_DESLIGADO, MODULO_NAO_ESTA_LIGADO ou PARCEIRO_NAO_OPERACIONAL; 429 MODULO_TAXA_EXCEDIDA",
+        "tags": [
+          "parceiro-portal-modulos"
+        ]
+      }
+    },
+    "/parceiro/portal/modulos/{modulo}/efeito-do-desligar": {
+      "get": {
+        "operationId": "ModuloParceiroController_efeitoDoDesligar",
+        "parameters": [
+          {
+            "name": "modulo",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EfeitoDoDesligarDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Previa do desligar (so o DONO): agendamentos futuros e internacoes abertas (clinica), reservas futuras e hospedagens abertas (hotel) que ficariam so leitura",
         "tags": [
           "parceiro-portal-modulos"
         ]
@@ -6021,7 +6158,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
-            "description": "Categoria do prestador. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
+            "description": "Categoria do prestador: casa se QUALQUER uma das categorias dele for esta. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
             "schema": {
               "type": "string",
               "enum": [
@@ -6109,7 +6246,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
-            "description": "Categoria do prestador. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
+            "description": "Categoria do prestador: casa se QUALQUER uma das categorias dele for esta. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
             "schema": {
               "type": "string",
               "enum": [
@@ -6226,7 +6363,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
-            "description": "Categoria do prestador. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
+            "description": "Categoria do prestador: casa se QUALQUER uma das categorias dele for esta. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
             "schema": {
               "type": "string",
               "enum": [
@@ -6314,7 +6451,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
-            "description": "Categoria do prestador. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
+            "description": "Categoria do prestador: casa se QUALQUER uma das categorias dele for esta. Ausente = cuidado veterinario (CLINICA_VETERINARIA + VETERINARIO).",
             "schema": {
               "type": "string",
               "enum": [
@@ -12829,7 +12966,7 @@
             "bearer": []
           }
         ],
-        "summary": "Propoe ligar pacientes deste cliente ao app: EMAIL (link ao e-mail do cliente) ou CODIGO (6 digitos, 72 h)",
+        "summary": "Convida o cliente a ligar estes pacientes ao app (7 dias). LINK: link e codigo de 8 caracteres juntos, com mensagem pronta e whatsappUrl; CODIGO: o mesmo (atalho antigo); EMAIL: o link vai ao e-mail do cadastro. Vale o ultimo: as pendentes do cliente so com pacientes deste convite deixam de valer (`canceladas`)",
         "tags": [
           "parceiro-portal"
         ]
@@ -13242,7 +13379,7 @@
             "bearer": []
           }
         ],
-        "summary": "Liga a proposta a esta conta: { token } do link ou { codigo } do balcao, 8 caracteres (5 tentativas por hora por conta, 30 por origem)",
+        "summary": "Liga a proposta a esta conta: { token } do link ou { codigo } do balcao, 8 caracteres (5 tentativas por hora por conta, 30 por origem). Link vencido: 410 VINCULO_EXPIRADO com `clinica: { nome, whatsappPublico, telefonePublico }` para pedir outro convite; pelo codigo, vencido continua 404. Ja resgatado por outra conta: 409 PROPOSTA_JA_RESGATADA so no link do convite por e-mail; no LINK e no CODIGO, o mesmo 404 (a recepcao ve a credencial)",
         "tags": [
           "tutor-clinica"
         ]
@@ -13594,6 +13731,41 @@
         ],
         "tags": [
           "tutor-clinica"
+        ]
+      }
+    },
+    "/public/vinculo-clinico/previa": {
+      "post": {
+        "operationId": "VinculoPublicoController_previa",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PreviaBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreviaDoConviteDto"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "TAXA_PUBLICA_EXCEDIDA, com Retry-After"
+          }
+        },
+        "summary": "Previa do convite da clinica pelo token do link: VALIDA, VENCIDA ou INDISPONIVEL (inexistente, cancelado, respondido, recusado pela pessoa, clinica desativada), sempre 200; o bloqueio aparece como pendente (D7). Nunca devolve nome de pet ou de pessoa, o codigo nem se o link ja foi aberto. 30 por 10 min por origem (429 TAXA_PUBLICA_EXCEDIDA)",
+        "tags": [
+          "public"
         ]
       }
     },
@@ -14777,7 +14949,7 @@
             "name": "categoria",
             "required": false,
             "in": "query",
-            "description": "Categoria do parceiro.",
+            "description": "Categoria do parceiro: casa se QUALQUER uma das categorias dele for esta (principal ou nao).",
             "schema": {
               "type": "string",
               "enum": [
@@ -20170,7 +20342,8 @@
                 "AGENDAMENTO_LEMBRETE_VESPERA",
                 "AGENDAMENTO_FALTA",
                 "FILA_VAGA_OFERECIDA",
-                "PRE_CONSULTA_PENDENTE"
+                "PRE_CONSULTA_PENDENTE",
+                "VACINA_LEMBRETE_DA_CLINICA"
               ]
             }
           },
@@ -24647,6 +24820,173 @@
           }
         ],
         "summary": "Anula a aplicacao lancada por engano (com motivo; nada se apaga). Sai do app e o responsavel recebe CLINICA_ANULOU_REGISTRO, sem nome de vacina",
+        "tags": [
+          "parceiro-portal"
+        ]
+      }
+    },
+    "/parceiro/portal/clinica/aplicacoes/{id}": {
+      "patch": {
+        "operationId": "VacinacaoParceiroController_editar",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarAplicacaoDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AplicacaoDeVacinaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "APLICACAO_EDICAO_VAZIA (nem `observacao` nem `via`); campo a mais (ex.: `loteDigitado`)"
+          },
+          "403": {
+            "description": "SEM_PERMISSAO ou CRMV_OBRIGATORIO (permissao: vacina.aplicar)"
+          },
+          "409": {
+            "description": "APLICACAO_JA_ANULADA, VIA_INVALIDA, APLICACAO_ALTERADA"
+          },
+          "429": {
+            "description": "VACINACAO_TAXA_EXCEDIDA: 300 escritas de vacinacao por usuario por hora"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "N42 (D1): corrige o que nao muda a conta, `observacao` e `via`, com `motivo` de 5 a 500 (o antes e o depois ficam no registro da correcao; a trilha leva os nomes dos campos). Vacina, dose, data e lote: so anulando e registrando de novo. Nao avisa o responsavel; a via nova acompanha a vacina do app",
+        "tags": [
+          "parceiro-portal"
+        ]
+      }
+    },
+    "/parceiro/portal/clinica/aplicacoes/{id}/lembrete": {
+      "post": {
+        "operationId": "VacinacaoParceiroController_ligarLembrete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ja estava ligado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LembreteDaVacinaDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Ligado agora",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LembreteDaVacinaDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "SEM_PERMISSAO ou CRMV_OBRIGATORIO (permissao: agenda.escrever)"
+          },
+          "409": {
+            "description": "LEMBRETE_FORA_DA_CHAMADA (`situacao`: EM_DIA, ANULADA, NAO_VIGENTE, FORA_DA_LISTA); SEM_CANAL_NO_APP"
+          },
+          "429": {
+            "description": "VACINACAO_TAXA_EXCEDIDA: 300 escritas de vacinacao por usuario por hora"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "N42: liga o lembrete de vacina pedido pela clinica na dose da lista de chamada. O primeiro envio sai na hora (o mesmo despacho dos avisos da clinica; o VACINA_REFORCO_PROXIMO das ultimas 24 h conta como ele) e repete uma vez. Ja ligado: 200 com o mesmo lembrete, sem envio novo. Corpo vazio",
+        "tags": [
+          "parceiro-portal"
+        ]
+      },
+      "delete": {
+        "operationId": "VacinacaoParceiroController_desligarLembrete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "parceiroId",
+            "required": false,
+            "in": "query",
+            "description": "Obrigatorio quando o usuario tem mais de um parceiro",
+            "schema": {}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "403": {
+            "description": "SEM_PERMISSAO ou CRMV_OBRIGATORIO (permissao: agenda.escrever)"
+          },
+          "429": {
+            "description": "VACINACAO_TAXA_EXCEDIDA: 300 escritas de vacinacao por usuario por hora"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "N42: desliga o lembrete (para os proximos envios; o que ja saiu fica no aparelho). Sem lembrete ligado: 204 tambem",
         "tags": [
           "parceiro-portal"
         ]
@@ -45395,7 +45735,31 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "description": "Area de atuacao (opcional)"
+            "description": "Categoria principal (opcional; compatibilidade). Sozinha vira `categorias: [categoria]`. Junto de `categorias`, precisa estar na lista; a principal e sempre `categorias[0]`."
+          },
+          "categorias": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Todas as categorias do negocio (1 a 8, sem repetir). A PRIMEIRA e a principal e vira `categoria`. Vence `categoria` quando os dois vem; nesse caso `categoria` precisa estar na lista (400 PARCEIRO_CATEGORIA_FORA_DA_LISTA).",
+            "example": [
+              "CLINICA_VETERINARIA",
+              "PET_SHOP"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "cnpj": {
             "type": "string",
@@ -45489,7 +45853,25 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "nullable": true
+            "nullable": true,
+            "description": "A principal (= categorias[0])"
+          },
+          "categorias": {
+            "type": "array",
+            "description": "Todas, a principal primeiro. [] = sem categoria",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "cnpj": {
             "type": "string",
@@ -45525,6 +45907,7 @@
           "parceiroId",
           "nome",
           "categoria",
+          "categorias",
           "cnpj",
           "telefoneComercial",
           "crmv",
@@ -45553,7 +45936,31 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "description": "Area de atuacao (opcional)"
+            "description": "Categoria principal (opcional; compatibilidade). Sozinha vira `categorias: [categoria]`. Junto de `categorias`, precisa estar na lista; a principal e sempre `categorias[0]`."
+          },
+          "categorias": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Todas as categorias do negocio (1 a 8, sem repetir). A PRIMEIRA e a principal e vira `categoria`. Vence `categoria` quando os dois vem; nesse caso `categoria` precisa estar na lista (400 PARCEIRO_CATEGORIA_FORA_DA_LISTA).",
+            "example": [
+              "CLINICA_VETERINARIA",
+              "PET_SHOP"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "cnpj": {
             "type": "string",
@@ -46674,6 +47081,55 @@
           "podeSolicitar": {
             "type": "boolean",
             "description": "O usuario logado pode pedir este modulo agora: e DONO, o parceiro e operavel e o modulo nunca foi pedido ou foi recusado"
+          },
+          "origem": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "TESTE_GRATUITO",
+              "PLANO"
+            ],
+            "nullable": true,
+            "description": "TESTE_GRATUITO = teste (do admin ou do proprio DONO)"
+          },
+          "desligadoPeloDono": {
+            "type": "boolean",
+            "description": "DESLIGADO pelo proprio DONO (pode religar enquanto o prazo valer)"
+          },
+          "podeLigar": {
+            "type": "boolean",
+            "description": "O usuario logado pode chamar o `ligar` agora: e DONO, o parceiro e operavel e o estado permite"
+          },
+          "ligarVira": {
+            "type": "string",
+            "enum": [
+              "TESTE_GRATIS",
+              "RELIGAR"
+            ],
+            "nullable": true,
+            "description": "O que o `ligar` faria: TESTE_GRATIS (teste de diasDeTesteGratis dias) ou RELIGAR (volta ao status anterior)"
+          },
+          "bloqueioAoLigar": {
+            "type": "string",
+            "enum": [
+              "MODULO_JA_ATIVO",
+              "MODULO_TESTE_JA_USADO",
+              "MODULO_DECIDIDO_PELO_SUPORTE",
+              "MODULO_PRAZO_VENCIDO_PARA_RELIGAR",
+              "MODULO_FORA_DA_CATEGORIA",
+              "MODULO_GERENCIAR_APENAS_DONO",
+              "PARCEIRO_NAO_OPERACIONAL"
+            ],
+            "nullable": true,
+            "description": "Codigo do erro que o `ligar` daria agora (o portal mostra o texto do codigo). null quando pode ligar. MODULO_JA_ATIVO quando o modulo ja esta em TESTE ou ATIVO"
+          },
+          "podeDesligar": {
+            "type": "boolean",
+            "description": "O usuario logado pode desligar agora (DONO, parceiro operavel, TESTE ou ATIVO)"
+          },
+          "diasDeTesteGratis": {
+            "type": "number",
+            "description": "Duracao do teste gratis que o DONO liga sozinho (uma vez por modulo)"
           }
         },
         "required": [
@@ -46683,7 +47139,14 @@
           "podeLer",
           "podeEscrever",
           "motivoSomenteLeitura",
-          "podeSolicitar"
+          "podeSolicitar",
+          "origem",
+          "desligadoPeloDono",
+          "podeLigar",
+          "ligarVira",
+          "bloqueioAoLigar",
+          "podeDesligar",
+          "diasDeTesteGratis"
         ]
       },
       "ModulosDoParceiroDto": {
@@ -46701,7 +47164,7 @@
           },
           "elegiveis": {
             "type": "array",
-            "description": "Sugestao pela categoria do cadastro (so sugere; qualquer modulo pode ser pedido)",
+            "description": "Sugestao pelas categorias do cadastro (uniao de todas; so sugere, qualquer modulo pode ser pedido)",
             "items": {
               "type": "string",
               "enum": [
@@ -46737,6 +47200,177 @@
         "required": [
           "modulo",
           "status"
+        ]
+      },
+      "ModuloLigadoDto": {
+        "type": "object",
+        "properties": {
+          "modulo": {
+            "type": "string",
+            "enum": [
+              "CLINICA",
+              "HOTEL"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "TESTE",
+              "ATIVO"
+            ]
+          },
+          "origem": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "TESTE_GRATUITO",
+              "PLANO"
+            ],
+            "nullable": true
+          },
+          "ativoAte": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Fim do teste; null = sem prazo"
+          },
+          "acao": {
+            "type": "string",
+            "enum": [
+              "TESTE_GRATIS",
+              "RELIGADO"
+            ],
+            "description": "TESTE_GRATIS: teste de 30 dias comecou. RELIGADO: voltou ao status de antes do desligar"
+          }
+        },
+        "required": [
+          "modulo",
+          "status",
+          "origem",
+          "ativoAte",
+          "acao"
+        ]
+      },
+      "EfeitoDoDesligarDto": {
+        "type": "object",
+        "properties": {
+          "modulo": {
+            "type": "string",
+            "enum": [
+              "CLINICA",
+              "HOTEL"
+            ]
+          },
+          "agendamentosFuturos": {
+            "type": "number",
+            "description": "Clinica: agendamentos AGENDADO/CONFIRMADO daqui para frente e os em andamento"
+          },
+          "internacoesAbertas": {
+            "type": "number",
+            "description": "Clinica: internacoes com status INTERNADO"
+          },
+          "reservasFuturas": {
+            "type": "number",
+            "description": "Hotel: reservas PENDENTE/CONFIRMADA que ainda nao terminaram"
+          },
+          "hospedagensAbertas": {
+            "type": "number",
+            "description": "Hotel: hospedagens abertas (animal na casa)"
+          },
+          "total": {
+            "type": "number",
+            "description": "Soma: itens vivos que ficam so leitura (nada e cancelado nem apagado)"
+          }
+        },
+        "required": [
+          "modulo",
+          "agendamentosFuturos",
+          "internacoesAbertas",
+          "reservasFuturas",
+          "hospedagensAbertas",
+          "total"
+        ]
+      },
+      "ModuloDesligadoDto": {
+        "type": "object",
+        "properties": {
+          "modulo": {
+            "type": "string",
+            "enum": [
+              "CLINICA",
+              "HOTEL"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DESLIGADO"
+            ]
+          },
+          "efeito": {
+            "description": "O que ficou so leitura no momento do desligar",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EfeitoDoDesligarDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "modulo",
+          "status",
+          "efeito"
+        ]
+      },
+      "EventoDoDonoDto": {
+        "type": "object",
+        "properties": {
+          "acao": {
+            "type": "string",
+            "enum": [
+              "LIGOU_TESTE",
+              "DESLIGOU",
+              "RELIGOU"
+            ]
+          },
+          "de": {
+            "type": "string",
+            "enum": [
+              "SOLICITADO",
+              "TESTE",
+              "ATIVO",
+              "SUSPENSO",
+              "DESLIGADO",
+              "REJEITADO"
+            ],
+            "nullable": true
+          },
+          "para": {
+            "type": "string",
+            "enum": [
+              "SOLICITADO",
+              "TESTE",
+              "ATIVO",
+              "SUSPENSO",
+              "DESLIGADO",
+              "REJEITADO"
+            ]
+          },
+          "porUsuarioId": {
+            "type": "string",
+            "description": "Usuario.id do DONO"
+          },
+          "em": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "acao",
+          "de",
+          "para",
+          "porUsuarioId",
+          "em"
         ]
       },
       "ModuloDoAdminDto": {
@@ -46806,6 +47440,53 @@
             "nullable": true,
             "description": "O ativoAte que ja recebeu o aviso de vencimento"
           },
+          "testeDoDonoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Quando o proprio DONO ligou o teste gratis (uma vez por modulo; nunca volta a null)"
+          },
+          "testeDoDonoPorId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Usuario.id do DONO que ligou o teste"
+          },
+          "desligadoPeloDonoEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "DESLIGADO pelo proprio DONO (null = pelo admin ou nao desligado). A decisao do admin zera"
+          },
+          "desligadoPeloDonoPorId": {
+            "type": "string",
+            "nullable": true
+          },
+          "statusAntesDeDesligar": {
+            "type": "string",
+            "enum": [
+              "SOLICITADO",
+              "TESTE",
+              "ATIVO",
+              "SUSPENSO",
+              "DESLIGADO",
+              "REJEITADO"
+            ],
+            "nullable": true,
+            "description": "Status ao qual o DONO pode religar (TESTE ou ATIVO)"
+          },
+          "recusadoPeloAdminEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Ultima recusa do admin (REJEITADO). O novo pedido do DONO nao zera; so o admin ligando (TESTE/ATIVO) limpa. Com ela, o DONO nao liga o teste gratis sozinho"
+          },
+          "historicoDoDono": {
+            "description": "Acoes do DONO, mais nova primeiro (ate 20)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventoDoDonoDto"
+            }
+          },
           "podeLer": {
             "type": "boolean"
           },
@@ -46824,6 +47505,13 @@
           "decididoEm",
           "motivo",
           "avisoVencimentoDe",
+          "testeDoDonoEm",
+          "testeDoDonoPorId",
+          "desligadoPeloDonoEm",
+          "desligadoPeloDonoPorId",
+          "statusAntesDeDesligar",
+          "recusadoPeloAdminEm",
+          "historicoDoDono",
           "podeLer",
           "podeEscrever"
         ]
@@ -46846,7 +47534,25 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "nullable": true
+            "nullable": true,
+            "description": "A principal (= categorias[0])"
+          },
+          "categorias": {
+            "type": "array",
+            "description": "Todas, a principal primeiro. [] = sem categoria",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "operacional": {
             "type": "boolean",
@@ -46872,6 +47578,7 @@
         "required": [
           "parceiroId",
           "categoria",
+          "categorias",
           "operacional",
           "elegiveis",
           "modulos"
@@ -52979,9 +53686,10 @@
             "type": "string",
             "enum": [
               "EMAIL",
-              "CODIGO"
+              "CODIGO",
+              "LINK"
             ],
-            "description": "EMAIL manda o link ao e-mail do cliente; CODIGO devolve 6 digitos para o balcao"
+            "description": "LINK: convite com link e codigo juntos, mensagem pronta e whatsappUrl (a recepcao manda pelo WhatsApp ou mostra o QR do link). CODIGO: o mesmo convite (atalho antigo). EMAIL: o link vai ao e-mail do cadastro e a recepcao nao ve a credencial"
           }
         },
         "required": [
@@ -53003,7 +53711,8 @@
               "PROPOSTA_CODIGO",
               "ACESSO_TEMPORARIO",
               "QR_CARTEIRINHA",
-              "RESERVA_HOTEL"
+              "RESERVA_HOTEL",
+              "PROPOSTA_LINK"
             ]
           },
           "status": {
@@ -53018,12 +53727,32 @@
           },
           "expiraEm": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Agora + 7 dias"
           },
           "codigo": {
             "type": "string",
             "nullable": true,
-            "description": "So no canal CODIGO: 8 caracteres (ex.: K7MQX3PA; mostre como K7MQ-X3PA) para o responsavel digitar no app"
+            "description": "LINK e CODIGO: 8 caracteres (ex.: K7MQX3PA; mostre como K7MQ-X3PA) para o responsavel digitar no app. EMAIL: null"
+          },
+          "link": {
+            "type": "string",
+            "nullable": true,
+            "description": "LINK e CODIGO: https://petjourney.health/clinica/vinculo/<token> (abre o app; use no QR do balcao). EMAIL: null"
+          },
+          "mensagem": {
+            "type": "string",
+            "nullable": true,
+            "description": "LINK e CODIGO: a mensagem pronta no idioma do pedido (link, codigo e validade). EMAIL: null"
+          },
+          "whatsappUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "LINK e CODIGO: https://wa.me/<telefone do cadastro>?text=<mensagem>; sem telefone, https://wa.me/?text=... EMAIL: null"
+          },
+          "canceladas": {
+            "type": "number",
+            "description": "Quantos convites pendentes deste cliente deixaram de valer (vale o ultimo: so os que tinham apenas pacientes deste convite)"
           }
         },
         "required": [
@@ -53031,7 +53760,11 @@
           "canal",
           "status",
           "expiraEm",
-          "codigo"
+          "codigo",
+          "link",
+          "mensagem",
+          "whatsappUrl",
+          "canceladas"
         ]
       },
       "PetDaPropostaDoParceiroDto": {
@@ -53074,7 +53807,8 @@
               "PROPOSTA_CODIGO",
               "ACESSO_TEMPORARIO",
               "QR_CARTEIRINHA",
-              "RESERVA_HOTEL"
+              "RESERVA_HOTEL",
+              "PROPOSTA_LINK"
             ]
           },
           "status": {
@@ -53195,7 +53929,8 @@
               "PROPOSTA_CODIGO",
               "ACESSO_TEMPORARIO",
               "QR_CARTEIRINHA",
-              "RESERVA_HOTEL"
+              "RESERVA_HOTEL",
+              "PROPOSTA_LINK"
             ]
           },
           "ativadoEm": {
@@ -53424,7 +54159,8 @@
               "PROPOSTA_CODIGO",
               "ACESSO_TEMPORARIO",
               "QR_CARTEIRINHA",
-              "RESERVA_HOTEL"
+              "RESERVA_HOTEL",
+              "PROPOSTA_LINK"
             ]
           },
           "expiraEm": {
@@ -53657,6 +54393,90 @@
             "description": "Um pet; sem ele, todos os seus com esta clinica"
           }
         }
+      },
+      "PreviaBodyDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token do link do convite (no corpo, para nao ir a log de acesso)"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ClinicaDaPreviaDto": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "description": "Nome publico (perfil publicado) ou o nome do cadastro"
+          },
+          "cidade": {
+            "type": "string",
+            "nullable": true
+          },
+          "uf": {
+            "type": "string",
+            "nullable": true
+          },
+          "logoUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "whatsappPublico": {
+            "type": "string",
+            "nullable": true,
+            "description": "So com o perfil publicado"
+          }
+        },
+        "required": [
+          "nome",
+          "cidade",
+          "uf",
+          "logoUrl",
+          "whatsappPublico"
+        ]
+      },
+      "PreviaDoConviteDto": {
+        "type": "object",
+        "properties": {
+          "situacao": {
+            "type": "string",
+            "enum": [
+              "VALIDA",
+              "VENCIDA",
+              "INDISPONIVEL"
+            ],
+            "description": "VALIDA: pendente e no prazo. VENCIDA: pendente e fora do prazo (o bloqueio pela pessoa aparece como pendente, D7). INDISPONIVEL: inexistente, cancelada, respondida, recusada pela pessoa ou clinica desativada"
+          },
+          "clinica": {
+            "nullable": true,
+            "description": "null em INDISPONIVEL",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClinicaDaPreviaDto"
+              }
+            ]
+          },
+          "expiraEm": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "quantidadeDePets": {
+            "type": "number",
+            "nullable": true,
+            "description": "null em INDISPONIVEL"
+          }
+        },
+        "required": [
+          "situacao",
+          "clinica",
+          "expiraEm",
+          "quantidadeDePets"
+        ]
       },
       "EntradaDoDiarioParaClinicaDto": {
         "type": "object",
@@ -55363,7 +56183,31 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "description": "Area de atuacao (opcional)"
+            "description": "Categoria principal (opcional; compatibilidade). Sozinha vira `categorias: [categoria]`. Junto de `categorias`, precisa estar na lista; a principal e sempre `categorias[0]`."
+          },
+          "categorias": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Todas as categorias do negocio (1 a 8, sem repetir). A PRIMEIRA e a principal e vira `categoria`. Vence `categoria` quando os dois vem; nesse caso `categoria` precisa estar na lista (400 PARCEIRO_CATEGORIA_FORA_DA_LISTA).",
+            "example": [
+              "CLINICA_VETERINARIA",
+              "PET_SHOP"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "telefoneComercial": {
             "type": "string",
@@ -55419,7 +56263,31 @@
               "FARMACIA",
               "OUTRO"
             ],
-            "description": "Area de atuacao (opcional)"
+            "description": "Categoria principal (opcional; compatibilidade). Sozinha vira `categorias: [categoria]`. Junto de `categorias`, precisa estar na lista; a principal e sempre `categorias[0]`."
+          },
+          "categorias": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Todas as categorias do negocio (1 a 8, sem repetir). A PRIMEIRA e a principal e vira `categoria`. Vence `categoria` quando os dois vem; nesse caso `categoria` precisa estar na lista (400 PARCEIRO_CATEGORIA_FORA_DA_LISTA).",
+            "example": [
+              "CLINICA_VETERINARIA",
+              "PET_SHOP"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
           },
           "telefoneComercial": {
             "type": "string",
@@ -57199,7 +58067,12 @@
           },
           "temFoto": {
             "type": "boolean",
-            "description": "Tem foto (a URL vem na ficha)"
+            "description": "A clinica subiu foto propria (a que o \"remover foto\" apaga)"
+          },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial."
           },
           "codigoNaOrigem": {
             "type": "string",
@@ -57231,6 +58104,7 @@
           "inativoMotivo",
           "obitoEm",
           "temFoto",
+          "fotoUrl",
           "codigoNaOrigem",
           "cliente",
           "alertas"
@@ -57508,17 +58382,17 @@
           },
           "temFoto": {
             "type": "boolean",
-            "description": "Tem foto (a URL vem na ficha)"
+            "description": "A clinica subiu foto propria (a que o \"remover foto\" apaga)"
+          },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial."
           },
           "codigoNaOrigem": {
             "type": "string",
             "nullable": true,
             "description": "Codigo no sistema anterior (migrador, E2-05)"
-          },
-          "fotoUrl": {
-            "type": "string",
-            "nullable": true,
-            "description": "URL assinada, vale 15 minutos (bucket privado)"
           },
           "castrado": {
             "type": "boolean",
@@ -57566,8 +58440,8 @@
           "inativoMotivo",
           "obitoEm",
           "temFoto",
-          "codigoNaOrigem",
           "fotoUrl",
+          "codigoNaOrigem",
           "castrado",
           "pesoKg",
           "microchip",
@@ -59618,6 +60492,11 @@
           },
           "clienteNome": {
             "type": "string"
+          },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial. Vem preenchida na agenda do dia; nas outras respostas, null."
           }
         },
         "required": [
@@ -59625,7 +60504,8 @@
           "nome",
           "especie",
           "clienteId",
-          "clienteNome"
+          "clienteNome",
+          "fotoUrl"
         ]
       },
       "ConflitoDto": {
@@ -62016,7 +62896,8 @@
               "AGENDAMENTO_LEMBRETE_VESPERA",
               "AGENDAMENTO_FALTA",
               "FILA_VAGA_OFERECIDA",
-              "PRE_CONSULTA_PENDENTE"
+              "PRE_CONSULTA_PENDENTE",
+              "VACINA_LEMBRETE_DA_CLINICA"
             ]
           },
           "situacao": {
@@ -62070,7 +62951,7 @@
           },
           "automatico": {
             "type": "boolean",
-            "description": "Vespera e falta: ninguem da clinica pediu"
+            "description": "Vespera e falta: ninguem da clinica pediu. N42: a repeticao do lembrete de vacina (com o `enviadoPorId` de quem ligou)"
           },
           "enviadoPorId": {
             "type": "string",
@@ -62183,7 +63064,8 @@
               "AGENDAMENTO_LEMBRETE_VESPERA",
               "AGENDAMENTO_FALTA",
               "FILA_VAGA_OFERECIDA",
-              "PRE_CONSULTA_PENDENTE"
+              "PRE_CONSULTA_PENDENTE",
+              "VACINA_LEMBRETE_DA_CLINICA"
             ]
           },
           "situacao": {
@@ -62237,7 +63119,7 @@
           },
           "automatico": {
             "type": "boolean",
-            "description": "Vespera e falta: ninguem da clinica pediu"
+            "description": "Vespera e falta: ninguem da clinica pediu. N42: a repeticao do lembrete de vacina (com o `enviadoPorId` de quem ligou)"
           },
           "enviadoPorId": {
             "type": "string",
@@ -62276,6 +63158,11 @@
             "nullable": true,
             "description": "E3-04: a entrada da fila (a oferta de vaga)"
           },
+          "aplicacaoId": {
+            "type": "string",
+            "nullable": true,
+            "description": "N42: a aplicacao de vacina do lembrete pedido pela clinica (VACINA_LEMBRETE_DA_CLINICA)"
+          },
           "paciente": {
             "nullable": true,
             "allOf": [
@@ -62307,6 +63194,7 @@
           "entrega",
           "agendamentoId",
           "filaId",
+          "aplicacaoId",
           "paciente",
           "mensagemCortada"
         ]
@@ -62374,7 +63262,8 @@
               "AGENDAMENTO_LEMBRETE_VESPERA",
               "AGENDAMENTO_FALTA",
               "FILA_VAGA_OFERECIDA",
-              "PRE_CONSULTA_PENDENTE"
+              "PRE_CONSULTA_PENDENTE",
+              "VACINA_LEMBRETE_DA_CLINICA"
             ]
           },
           "agendamentoId": {
@@ -62437,6 +63326,11 @@
           },
           "clienteNome": {
             "type": "string"
+          },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial. Vem preenchida na lista da fila; nas outras respostas, null."
           }
         },
         "required": [
@@ -62444,7 +63338,8 @@
           "nome",
           "especie",
           "clienteId",
-          "clienteNome"
+          "clienteNome",
+          "fotoUrl"
         ]
       },
       "JanelaDaFilaDto": {
@@ -70634,6 +71529,108 @@
           "motivo"
         ]
       },
+      "EditarAplicacaoDto": {
+        "type": "object",
+        "properties": {
+          "observacao": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 500,
+            "description": "Interna da clinica: nunca vai ao app. Nulo ou vazio apaga"
+          },
+          "via": {
+            "type": "string",
+            "enum": [
+              "ORAL",
+              "SUBCUTANEA",
+              "INTRAMUSCULAR",
+              "INTRAVENOSA",
+              "TOPICA",
+              "OTOLOGICA",
+              "OFTALMICA",
+              "INTRANASAL"
+            ],
+            "description": "Uma das vias da vacina no catalogo (409 VIA_INVALIDA). Nula: 400 (a via nao se apaga)"
+          },
+          "motivo": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500,
+            "example": "Via digitada errada",
+            "description": "Vai para o registro da correcao"
+          }
+        },
+        "required": [
+          "motivo"
+        ]
+      },
+      "LembreteDaVacinaDto": {
+        "type": "object",
+        "properties": {
+          "aplicacaoId": {
+            "type": "string"
+          },
+          "ligadoEm": {
+            "type": "string",
+            "example": "2026-11-17T11:05:31-03:00"
+          },
+          "ligadoPorId": {
+            "type": "string",
+            "description": "O usuario da equipe que ligou"
+          },
+          "ultimoEnvioEm": {
+            "type": "string",
+            "nullable": true,
+            "description": "Nulo ate o primeiro sair"
+          },
+          "proximoEnvioEm": {
+            "type": "string",
+            "nullable": true,
+            "description": "A repeticao (no dia da proxima dose, ou 7 dias depois do primeiro envio, as 9h). Nulo sem envio previsto"
+          },
+          "envios": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 2,
+            "description": "Envios feitos ou tentados (o primeiro e a repeticao)"
+          },
+          "entrega": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "PENDENTE",
+              "SO_NA_CAIXA",
+              "ENVIADO",
+              "ENTREGUE",
+              "FALHOU"
+            ],
+            "description": "O ultimo envio, como o `AvisoDaClinicaDto.entrega`; nulo antes do primeiro. FALHOU tambem quando o aviso nao saiu (ver `motivoSemEnvio`)"
+          },
+          "motivoSemEnvio": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "SEM_CANAL_NO_APP",
+              "NAO_AVISAR",
+              "TETO_DO_DIA",
+              "SUPERADO",
+              "FORA_DO_PRAZO",
+              "FALHOU"
+            ],
+            "description": "Por que o ultimo envio nao saiu (TETO_DO_DIA, SEM_CANAL_NO_APP, NAO_AVISAR, SUPERADO); o rastro diz o mesmo"
+          }
+        },
+        "required": [
+          "aplicacaoId",
+          "ligadoEm",
+          "ligadoPorId",
+          "ultimoEnvioEm",
+          "proximoEnvioEm",
+          "envios",
+          "entrega",
+          "motivoSemEnvio"
+        ]
+      },
       "AplicacaoNaListaDto": {
         "type": "object",
         "properties": {
@@ -70755,6 +71752,19 @@
                 "$ref": "#/components/schemas/AgendamentoDaProximaDto"
               }
             ]
+          },
+          "lembrete": {
+            "nullable": true,
+            "description": "N42: o lembrete ligado nesta dose (o cartao mostra \"Lembrete ativo\" e o ultimo envio)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LembreteDaVacinaDto"
+              }
+            ]
+          },
+          "responsavelNoApp": {
+            "type": "boolean",
+            "description": "N42: o paciente tem canal no app (vinculo ativo, pet ativo e alguem para receber). Falso: \"Ligue para o telefone do cadastro\""
           }
         },
         "required": [
@@ -70767,7 +71777,9 @@
           "diasParaVencer",
           "situacao",
           "doseSeguinte",
-          "agendamentoProxima"
+          "agendamentoProxima",
+          "lembrete",
+          "responsavelNoApp"
         ]
       },
       "PaginaDeChamadaDto": {
@@ -74463,6 +75475,23 @@
             ],
             "nullable": true
           },
+          "categorias": {
+            "type": "array",
+            "description": "Todas, a principal primeiro. [] = sem categoria",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
+          },
           "itens": {
             "type": "array",
             "items": {
@@ -74474,6 +75503,7 @@
           "parceiroId",
           "nome",
           "categoria",
+          "categorias",
           "itens"
         ]
       },
@@ -74783,6 +75813,23 @@
             ],
             "nullable": true
           },
+          "categorias": {
+            "type": "array",
+            "description": "Todas, a principal primeiro. [] = sem categoria",
+            "items": {
+              "type": "string",
+              "enum": [
+                "CLINICA_VETERINARIA",
+                "VETERINARIO",
+                "PET_SHOP",
+                "BANHO_TOSA",
+                "ADESTRAMENTO",
+                "HOTEL_CRECHE",
+                "FARMACIA",
+                "OUTRO"
+              ]
+            }
+          },
           "papel": {
             "type": "string",
             "enum": [
@@ -74795,6 +75842,7 @@
           "parceiroId",
           "nome",
           "categoria",
+          "categorias",
           "papel"
         ]
       },
@@ -79987,12 +81035,18 @@
                 "$ref": "#/components/schemas/Especie"
               }
             ]
+          },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial. Vem preenchida no mapa de leitos e no detalhe da internacao."
           }
         },
         "required": [
           "id",
           "nome",
-          "especie"
+          "especie",
+          "fotoUrl"
         ]
       },
       "ProfissionalDaInternacaoDto": {
@@ -92291,6 +93345,11 @@
               }
             ]
           },
+          "fotoUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Foto efetiva do paciente: a da clinica ou, sem ela, uma miniatura limpa da foto do pet do app (so com vinculo ATIVO). URL assinada do bucket privado, valida por pelo menos 15 minutos a partir da resposta; a mesma URL pode voltar em respostas seguidas (o navegador aproveita o cache). null sem foto, com o storage fora ou enquanto a miniatura do app e preparada (aparece num pedido seguinte). Na falha ao carregar, mostre a inicial."
+          },
           "acomodacaoId": {
             "type": "string"
           },
@@ -92350,6 +93409,7 @@
           "pacienteId",
           "pacienteNome",
           "especie",
+          "fotoUrl",
           "acomodacaoId",
           "acomodacaoNome",
           "entradaEm",
@@ -99605,6 +100665,9 @@
           "MARCAR_PROXIMA_SEM_TIPO",
           "VACINACAO_TAXA_EXCEDIDA",
           "VACINACAO_PERIODO_INVALIDO",
+          "LEMBRETE_FORA_DA_CHAMADA",
+          "SEM_CANAL_NO_APP",
+          "APLICACAO_EDICAO_VAZIA",
           "ATENDIMENTO_ALTERADO",
           "ATENDIMENTO_FINALIZADO",
           "ATENDIMENTO_ANULADO",
@@ -99961,6 +101024,17 @@
           "ESTABELECIMENTO_QR_TAXA_EXCEDIDA",
           "MODULO_APENAS_DONO",
           "MODULO_TRANSICAO_INVALIDA",
+          "MODULO_GERENCIAR_APENAS_DONO",
+          "MODULO_TAXA_EXCEDIDA",
+          "MODULO_JA_SOLICITADO",
+          "MODULO_REATIVACAO_PELO_SUPORTE",
+          "MODULO_JA_ATIVO",
+          "MODULO_TESTE_JA_USADO",
+          "MODULO_DECIDIDO_PELO_SUPORTE",
+          "MODULO_PRAZO_VENCIDO_PARA_RELIGAR",
+          "MODULO_NAO_ESTA_LIGADO",
+          "MODULO_JA_DESLIGADO",
+          "MODULO_FORA_DA_CATEGORIA",
           "PARCEIRO_CADASTRO_SUSPENSO",
           "PARCEIRO_NAO_ENCONTRADO",
           "PARCEIRO_NAO_OPERACIONAL",
@@ -100005,6 +101079,8 @@
           "PARCEIRO_CNPJ_NAO_CONSULTADO",
           "PARCEIRO_CNPJ_OBRIGATORIO",
           "PARCEIRO_CRMV_OBRIGATORIO",
+          "PARCEIRO_CATEGORIA_EXIGE_CNPJ",
+          "PARCEIRO_CATEGORIA_EXIGE_CRMV",
           "CONFIGURACAO_CHAVE_INVALIDA",
           "CONFIGURACAO_VALOR_INVALIDO"
         ],
