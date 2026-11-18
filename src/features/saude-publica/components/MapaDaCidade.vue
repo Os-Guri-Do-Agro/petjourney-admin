@@ -387,9 +387,15 @@ async function montar() {
         instancia.getCanvas().style.cursor = ''
         instancia.setFilter('bairro-apontado', filtroDoBairro(null))
       })
+      /*
+       * O rótulo da região mora dentro do mapa (marcador), e o clique nele chega também ao bairro de
+       * baixo: escolhia a região e, logo em seguida, desfazia a escolha (17/11/2026, "abre e fecha
+       * sozinho"). O rótulo cuida do próprio clique; o bairro só escolhe a região, nunca desfaz.
+       */
       instancia.on('click', 'bairros-cor', (evento) => {
+        if (noRotulo(evento)) return
         const regiao = evento.features?.[0]?.properties?.regiao as IdDaRegiao | undefined
-        if (regiao) escolher(regiao)
+        if (regiao) selecionada.value = regiao
       })
 
       /* Um rótulo por região, no ponto de dentro dela; o Vue desenha o conteúdo. */
@@ -432,10 +438,22 @@ function filtroDaRegiao(id: IdDaRegiao | null): FilterSpecification {
 
 /* ---------------------------------------------------------------------------- interação */
 
+/** O evento veio de um rótulo de região (marcador), e não do bairro embaixo dele? */
+function noRotulo(evento: MapLayerMouseEvent) {
+  const alvo = evento.originalEvent.target
+  return alvo instanceof Element && Boolean(alvo.closest('.maplibregl-marker'))
+}
+
 function apontar(evento: MapLayerMouseEvent) {
   const feature = evento.features?.[0]
   const instancia = mapa.value
   if (!feature || !instancia) return
+  /* Em cima do rótulo, a dica do bairro de baixo taparia o próprio rótulo. */
+  if (noRotulo(evento)) {
+    apontado.value = null
+    instancia.setFilter('bairro-apontado', filtroDoBairro(null))
+    return
+  }
   const propriedades = feature.properties as Record<string, unknown>
   const nome = String(propriedades.nome)
   const numeroOuNulo = (valor: unknown) => (typeof valor === 'number' ? valor : null)
@@ -559,6 +577,7 @@ onBeforeUnmount(desmontar)
         }"
         :aria-pressed="selecionada === item.id"
         :aria-label="rotuloAcessivel(item)"
+        :data-regiao="item.id"
         @click="escolher(item.id)"
       >
         <span class="mapa-cidade__rotulo-nome">{{ item.regiao.nome }}</span>

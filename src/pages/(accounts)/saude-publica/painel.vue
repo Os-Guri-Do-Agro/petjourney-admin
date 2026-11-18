@@ -7,23 +7,26 @@
  * fileira; embaixo, uma caixa por assunto. O problema (os casos humanos de leishmaniose, da Sesau)
  * ao lado da prevenção na cidade, cujos quatro números também escolhem o que o mapa pinta; depois o
  * mapa de Campo Grande, com os 74 bairros pintados e as 7 regiões urbanas, e os bairros que pedem
- * atenção. Clicar numa região (no rótulo ou num bairro dela) abre o detalhe dela numa
- * gaveta, com o atalho para criar uma campanha.
+ * atenção. Clicar numa região (no rótulo ou num bairro dela) abre o detalhe dela ao lado do mapa,
+ * no lugar dos bairros da cidade (`DetalheDaRegiao`), com o atalho para criar uma campanha. Só
+ * nesta tela o detalhe não é gaveta (17/11/2026): a gaveta empurrava a página e espremia o mapa;
+ * ao lado, o mapa continua do mesmo tamanho e clicável, e outra região troca o detalhe.
  *
  * Os filtros (período, regiões, campanha e espécie; `FiltrosDoPrototipo`) valem para tudo o que é
  * número aqui, menos os casos humanos da Sesau, que são da cidade e do ano. A campanha escolhida
  * ganha uma linha com o que rendeu.
  */
 import SelectButton from 'primevue/selectbutton'
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import UiAbertura, { type IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import AvisoDoPrototipo from '@/features/saude-publica/components/AvisoDoPrototipo.vue'
+import DetalheDaRegiao from '@/features/saude-publica/components/DetalheDaRegiao.vue'
 import FiltrosDoPrototipo from '@/features/saude-publica/components/FiltrosDoPrototipo.vue'
+import ListaDeBairros from '@/features/saude-publica/components/ListaDeBairros.vue'
 import MapaDaCidade from '@/features/saude-publica/components/MapaDaCidade.vue'
 import MapaDasRegioes from '@/features/saude-publica/components/MapaDasRegioes.vue'
-import RegiaoGaveta from '@/features/saude-publica/components/RegiaoGaveta.vue'
 import {
   CONTEXTO_LEISHMANIOSE,
   dataCurta,
@@ -38,7 +41,6 @@ import {
   type IdDaRegiao,
   type Indicador,
 } from '@/features/saude-publica/dados'
-import '@/features/saude-publica/escala-de-perigo.css'
 import { useFiltrosDoPrototipo } from '@/features/saude-publica/filtros'
 import {
   animaisNoRecorte,
@@ -153,12 +155,6 @@ const campanha = computed(() => {
 })
 
 /** Os bairros mais atrasados no indicador escolhido, com a cor da mesma faixa do mapa. */
-const FAIXAS = [40, 50, 60, 70]
-function faixaDe(valor: number) {
-  const indice = FAIXAS.findIndex((limite) => valor < limite)
-  return indice === -1 ? FAIXAS.length : indice
-}
-
 const bairros = computed(() =>
   aplica.value
     ? bairrosDoRecorte(recorte.value)
@@ -206,17 +202,39 @@ const VISTAS: { valor: VistaDoMapa; rotulo: string; icone: string }[] = [
   { valor: 'esquema', rotulo: 'Esquema', icone: 'ph ph-hexagon' },
 ]
 
+/* A região aberta ao lado do mapa; outra região troca o detalhe, a mesma fecha. */
 const regiaoEscolhida = ref<IdDaRegiao | null>(null)
-const gavetaAberta = ref(false)
+const caixaDoMapa = ref<HTMLElement | null>(null)
 
 function escolherRegiao(id: IdDaRegiao | null) {
   regiaoEscolhida.value = id
-  gavetaAberta.value = Boolean(id)
 }
 
-function aoFecharGaveta(aberta: boolean) {
-  gavetaAberta.value = aberta
-  if (!aberta) regiaoEscolhida.value = null
+/*
+ * A altura da caixa do mapa: o detalhe ao lado não passa dela. Mais alto, ele ditava a altura da
+ * linha, descia além do mapa e não tinha como ficar preso ao alto da tela durante a rolagem.
+ */
+const alturaDoMapa = ref<number | null>(null)
+let observadorDoMapa: ResizeObserver | null = null
+
+onMounted(() => {
+  const caixa = caixaDoMapa.value
+  if (!caixa || typeof ResizeObserver === 'undefined') return
+  observadorDoMapa = new ResizeObserver(() => {
+    alturaDoMapa.value = caixa.offsetHeight
+  })
+  observadorDoMapa.observe(caixa)
+})
+
+onBeforeUnmount(() => observadorDoMapa?.disconnect())
+
+/** Fecha o detalhe e devolve o foco à região no mapa, para o teclado seguir de onde estava. */
+async function fecharRegiao() {
+  const id = regiaoEscolhida.value
+  if (!id) return
+  regiaoEscolhida.value = null
+  await nextTick()
+  caixaDoMapa.value?.querySelector<HTMLElement | SVGElement>(`[data-regiao="${id}"]`)?.focus()
 }
 </script>
 
@@ -320,8 +338,8 @@ function aoFecharGaveta(aberta: boolean) {
         </section>
       </div>
 
-      <div class="sp-linha">
-        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-mapa">
+      <div class="sp-linha" @keydown.esc="fecharRegiao">
+        <section ref="caixaDoMapa" class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-mapa">
           <header class="ui-cartao__cabeca sp-cabeca">
             <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-trifold" /></span>
             <span class="ui-cartao__titulos">
@@ -369,7 +387,17 @@ function aoFecharGaveta(aberta: boolean) {
           />
         </section>
 
-        <section class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-bairros">
+        <!-- A região escolhida no mapa ocupa a coluna dos bairros enquanto está aberta. -->
+        <DetalheDaRegiao
+          v-if="regiaoEscolhida"
+          :regiao-id="regiaoEscolhida"
+          :recorte="recorte"
+          :indicador="indicador"
+          :altura-do-mapa="alturaDoMapa"
+          @fechar="fecharRegiao"
+        />
+
+        <section v-else class="ui-folha ui-cartao sp-caixa" aria-labelledby="sp-bairros">
           <header class="ui-cartao__cabeca sp-cabeca">
             <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-map-pin" /></span>
             <span class="ui-cartao__titulos">
@@ -384,23 +412,7 @@ function aoFecharGaveta(aberta: boolean) {
           <p v-if="!aplica" class="sp-fonte">
             {{ definicao.rotulo }} é só de cães: escolha "Cães" ou "Cães e gatos" nos filtros.
           </p>
-          <ol v-else class="sp-bairros sp-escala">
-            <li v-for="bairro in bairros" :key="bairro.nome" class="sp-bairro">
-              <span class="sp-bairro__nome">{{ bairro.nome }}</span>
-              <span class="sp-bairro__valor ui-num">{{ bairro.valor }}%</span>
-              <span class="sp-bairro__trilho" aria-hidden="true">
-                <span
-                  class="sp-bairro__barra"
-                  :class="`sp-faixa-${faixaDe(bairro.valor)}`"
-                  :style="{ width: `${bairro.valor}%` }"
-                />
-              </span>
-              <span class="sp-bairro__publico">
-                {{ numero(bairro.publico) }}
-                {{ quemConta(indicador) }}
-              </span>
-            </li>
-          </ol>
+          <ListaDeBairros v-else :bairros="bairros" :quem="quemConta(indicador)" />
           <p class="sp-fonte">
             <i class="ph ph-lock-simple" aria-hidden="true" />
             Só contagens e percentuais, sem tutor identificado. Bairro com menos de
@@ -409,13 +421,6 @@ function aoFecharGaveta(aberta: boolean) {
         </section>
       </div>
     </div>
-
-    <RegiaoGaveta
-      :visible="gavetaAberta"
-      :regiao-id="regiaoEscolhida"
-      :recorte="recorte"
-      @update:visible="aoFecharGaveta"
-    />
   </UiPagina>
 </template>
 
@@ -576,80 +581,6 @@ function aoFecharGaveta(aberta: boolean) {
 
 .sp-fonte i {
   margin-top: 2px;
-}
-
-/* ---------------------------------------------------------------------------- bairros */
-
-.sp-bairros {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.sp-bairro {
-  display: grid;
-  align-items: center;
-  gap: 4px 12px;
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.sp-bairro__nome {
-  overflow: hidden;
-  color: var(--tinta);
-  font-size: 13.5px;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.sp-bairro__valor {
-  color: var(--tinta);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.sp-bairro__trilho {
-  position: relative;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--superficie);
-  grid-column: 1 / -1;
-}
-
-.sp-bairro__barra {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  border-radius: 999px;
-}
-
-.sp-bairro__publico {
-  color: var(--tinta-3);
-  font-size: 12px;
-  grid-column: 1 / -1;
-}
-
-/* A escala de perigo dos mapas: a barra do bairro tem a cor que ele tem no mapa. */
-.sp-faixa-0 {
-  background: var(--faixa-0);
-}
-
-.sp-faixa-1 {
-  background: var(--faixa-1);
-}
-
-.sp-faixa-2 {
-  background: var(--faixa-2);
-}
-
-.sp-faixa-3 {
-  background: var(--faixa-3);
-}
-
-.sp-faixa-4 {
-  background: var(--faixa-4);
 }
 
 /* A escolha da vista, entre o cabeçalho e o mapa. */

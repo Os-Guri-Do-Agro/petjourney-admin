@@ -162,6 +162,7 @@ function rotuloAcessivel(item: (typeof hexagonos.value)[number]) {
           role="button"
           :aria-pressed="selecionada === item.regiao.id"
           :aria-label="rotuloAcessivel(item)"
+          :data-regiao="item.regiao.id"
           @mouseenter="apontada = item.regiao.id"
           @focus="apontada = item.regiao.id"
           @blur="apontada = null"
