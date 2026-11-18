@@ -556,17 +556,7 @@ export function useAppNavigation() {
       icon: 'ph ph-share-network',
     })
 
-    /*
-     * A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada.
-     * Antes do contexto chegar vale a forma da última sessão, para o item não entrar atrasado.
-     */
-    if (parceiroStore.menuComIndicados) {
-      items.push({
-        label: t('nav.items.indicados'),
-        to: '/parceiro/indicados',
-        icon: 'ph ph-user-list',
-      })
-    }
+    /* Indicados é uma aba da Divulgação desde 17/11/2026, não um item do menu. */
 
     items.push({
       label: t('nav.items.acessos'),

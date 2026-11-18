@@ -47,6 +47,14 @@ export const partnerLegacyRedirects: RouteRecordRaw[] = [
     path: '/parceiro/indicacao',
     redirect: { path: '/parceiro/divulgacao', hash: '#indicacao' },
   },
+  /* Indicados virou a segunda aba da Divulgação (17/11/2026): link salvo cai na lista. */
+  {
+    path: '/parceiro/indicados',
+    redirect: (to) => ({
+      path: '/parceiro/divulgacao',
+      query: { ...to.query, aba: 'indicados' },
+    }),
+  },
   {
     path: '/parceiro/cupons',
     redirect: { path: '/parceiro/divulgacao', hash: '#cupons' },

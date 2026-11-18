@@ -3,6 +3,9 @@
  * O QR de indicação com o que se faz com ele: baixar a imagem e imprimir o cartaz do balcão. Em
  * cima, o verbo e a frase (quem escaneia cai no cadastro já com o código da empresa).
  *
+ * `forma="linha"` (a Divulgação, 17/11/2026): a miniatura e os botões lado a lado, sem o título,
+ * que a linha da caixa já traz à esquerda.
+ *
  * O quadro em volta do QR é branco nos dois temas: é a zona de silêncio que o leitor de QR precisa
  * para achar as bordas, e no escuro um QR sobre fundo escuro não lê em câmera nenhuma.
  */
@@ -20,10 +23,13 @@ const props = withDefaults(
     disabled?: boolean
     /** `sm` = selo pequeno; `md` = divulgação */
     size?: 'sm' | 'md'
+    /** `bloco`: título, QR e botões empilhados; `linha`: miniatura e botões lado a lado. */
+    forma?: 'bloco' | 'linha'
   }>(),
   {
     disabled: false,
     size: 'md',
+    forma: 'bloco',
   },
 )
 
@@ -66,11 +72,15 @@ watch(
 <template>
   <figure
     class="indicacao-qr"
-    :class="[`indicacao-qr--${props.size}`, { 'indicacao-qr--disabled': props.disabled }]"
+    :class="[
+      `indicacao-qr--${props.size}`,
+      `indicacao-qr--${props.forma}`,
+      { 'indicacao-qr--disabled': props.disabled },
+    ]"
     :style="estiloDoQuadro"
   >
     <!-- O verbo e a frase em cima, como os outros jeitos de convidar; sem imagem, o aviso. -->
-    <figcaption class="indicacao-qr__legenda">
+    <figcaption v-if="props.forma === 'bloco' || imagemFalhou" class="indicacao-qr__legenda">
       <template v-if="!imagemFalhou">
         <strong class="indicacao-qr__titulo">
           <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
@@ -212,6 +222,41 @@ watch(
 .indicacao-qr__acoes :deep(.p-button) {
   flex: 1 1 auto;
   justify-content: center;
+}
+
+/* Na linha: a miniatura e os botões lado a lado, alinhados ao começo, sem esticar. */
+.indicacao-qr--linha {
+  display: flex;
+  max-width: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+.indicacao-qr--linha .indicacao-qr__frame {
+  padding: 6px;
+  border-radius: 12px;
+}
+
+.indicacao-qr--linha .indicacao-qr__img,
+.indicacao-qr--linha .indicacao-qr__fallback {
+  width: 96px;
+  height: 96px;
+}
+
+.indicacao-qr--linha .indicacao-qr__legenda {
+  order: 2;
+  justify-items: start;
+  text-align: start;
+}
+
+.indicacao-qr--linha .indicacao-qr__acoes {
+  width: auto;
+  justify-content: flex-start;
+}
+
+.indicacao-qr--linha .indicacao-qr__acoes :deep(.p-button) {
+  flex: none;
 }
 
 .indicacao-qr--disabled {

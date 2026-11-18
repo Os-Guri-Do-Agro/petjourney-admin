@@ -538,7 +538,7 @@ const valorDasLeituras = computed(() => {
         class="areas__indicados"
         :titulo="t('nav.items.indicados')"
         icone="ph ph-user-list"
-        to="/parceiro/indicados"
+        to="/parceiro/divulgacao?aba=indicados"
         :valor="valorDosIndicados"
         :rotulo="
           t('inicio.areas.indicados.total', { total: indicados?.total ?? 0 }, indicados?.total ?? 0)

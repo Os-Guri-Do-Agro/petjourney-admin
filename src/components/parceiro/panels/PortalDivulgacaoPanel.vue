@@ -395,31 +395,31 @@ watch(lastSuccessAt, (at) => {
     <!-- ------------------------------------------------------------ carregando -->
     <template v-else-if="loading">
       <div
-        class="kit ui-folha"
+        class="convite ui-folha ui-cartao"
         role="status"
         aria-live="polite"
         aria-busy="true"
         :aria-label="t('divulgacao.indicacao.loadingAria')"
       >
-        <div class="kit__cabeca" aria-hidden="true">
-          <Skeleton width="44px" height="44px" border-radius="13px" />
-          <div class="kit__titulos">
+        <div class="ui-cartao__cabeca" aria-hidden="true">
+          <Skeleton width="40px" height="40px" border-radius="12px" />
+          <div class="ui-cartao__titulos">
             <Skeleton width="16rem" height="1.1rem" border-radius="6px" />
             <Skeleton width="min(100%, 30rem)" height="0.8rem" border-radius="6px" />
           </div>
         </div>
-        <div class="kit__principal" aria-hidden="true">
-          <div v-for="n in 2" :key="n" class="kit__forma">
-            <div class="kit__forma-cabeca">
+        <ul class="convite__jeitos" aria-hidden="true">
+          <li v-for="n in 3" :key="n" class="jeito">
+            <div class="jeito__cabeca">
               <Skeleton width="36px" height="36px" border-radius="11px" />
-              <div class="kit__forma-titulos">
+              <div class="jeito__titulos">
                 <Skeleton width="8rem" height="0.9rem" border-radius="6px" />
                 <Skeleton width="12rem" height="0.75rem" border-radius="6px" />
               </div>
             </div>
-            <Skeleton width="100%" height="4.5rem" border-radius="14px" />
-          </div>
-        </div>
+            <Skeleton width="min(100%, 26rem)" height="2.9rem" border-radius="14px" />
+          </li>
+        </ul>
       </div>
 
       <div
@@ -477,49 +477,43 @@ watch(lastSuccessAt, (at) => {
         </UiVazioIlustrado>
 
         <!--
-          O convite numa folha só. Em cima, para que serve: quem ainda não usa o app e cria a conta
-          com o código fica ligado à empresa, e as assinaturas rendem participação. Embaixo, os
-          três jeitos de convidar, cada um com um verbo e uma frase: passar o código e mandar o
-          link (os dois num campo do mesmo desenho, com o copiar à mão) e imprimir o QR (ao lado).
+          O convite numa caixa só, como as outras da tela (17/11/2026): para que serve no título, e
+          os três jeitos de convidar em linhas iguais, cada um com o verbo e a frase à esquerda e a
+          coisa em si à direita: o código com o copiar, o link com copiar e WhatsApp, e o QR em
+          miniatura com baixar e imprimir. Antes o QR ficava numa coluna ao lado, mais alta que os
+          outros dois, e o código boiava num vão do tamanho dela.
         -->
-        <div
-          v-else
-          class="kit ui-folha"
-          :class="{ 'kit--com-qr': Boolean(indicacao.qrImageUrl) }"
-          role="group"
-          aria-labelledby="kit-titulo"
-        >
-          <header class="kit__cabeca">
-            <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--lugar" aria-hidden="true">
+        <section v-else class="convite ui-folha ui-cartao" aria-labelledby="kit-titulo">
+          <header class="ui-cartao__cabeca">
+            <span class="ui-ladrilho ui-ladrilho--lugar" aria-hidden="true">
               <i class="ph ph-user-plus" />
             </span>
-            <div class="kit__titulos">
-              <h2 id="kit-titulo" class="kit__titulo">{{ t('divulgacao.kit.titulo') }}</h2>
-              <p class="kit__descricao">{{ t('divulgacao.kit.descricao') }}</p>
+            <div class="ui-cartao__titulos">
+              <h2 id="kit-titulo" class="ui-cartao__titulo">{{ t('divulgacao.kit.titulo') }}</h2>
+              <p class="ui-cartao__descricao">{{ t('divulgacao.kit.descricao') }}</p>
             </div>
           </header>
 
-          <div class="kit__principal">
-            <div class="kit__forma kit__forma--codigo">
-              <div class="kit__forma-cabeca">
+          <ul class="convite__jeitos">
+            <li class="jeito">
+              <div class="jeito__cabeca">
                 <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-keyboard" /></span>
-                <div class="kit__forma-titulos">
-                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.codigo') }}</h3>
-                  <p class="kit__forma-dica">{{ t('divulgacao.kit.codigoDica') }}</p>
+                <div class="jeito__titulos">
+                  <h3 class="jeito__titulo">{{ t('divulgacao.kit.codigo') }}</h3>
+                  <p class="jeito__dica">{{ t('divulgacao.kit.codigoDica') }}</p>
                 </div>
               </div>
 
               <!--
-                O código no campo, como o link logo abaixo, com o copiar dentro dele. O rótulo
-                "Seu código de indicação" saiu da vista: o título ao lado já diz o que é, e ele fica
-                para o leitor de tela.
+                O código no campo, com o copiar dentro dele. O rótulo "Seu código de indicação"
+                fica para o leitor de tela: o título ao lado já diz o que é.
               -->
               <div
-                class="kit__campo kit__codigo"
+                class="convite__campo convite__codigo"
                 role="group"
                 :aria-label="t('inicio.indique.seuCodigo')"
               >
-                <strong class="kit__valor ui-num">
+                <strong class="convite__valor ui-num">
                   <bdi dir="ltr">{{ codigoIndicacao }}</bdi>
                 </strong>
                 <Button
@@ -533,22 +527,22 @@ watch(lastSuccessAt, (at) => {
                   @click="copyToClipboard(codigoIndicacao, t('divulgacao.shareKit.codeLabel'))"
                 />
               </div>
-            </div>
+            </li>
 
-            <div class="kit__forma kit__forma--link">
-              <div class="kit__forma-cabeca">
+            <li class="jeito">
+              <div class="jeito__cabeca">
                 <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-link" /></span>
-                <div class="kit__forma-titulos">
-                  <h3 class="kit__forma-titulo">{{ t('divulgacao.kit.link') }}</h3>
-                  <p class="kit__forma-dica">{{ t('divulgacao.kit.linkDica') }}</p>
+                <div class="jeito__titulos">
+                  <h3 class="jeito__titulo">{{ t('divulgacao.kit.link') }}</h3>
+                  <p class="jeito__dica">{{ t('divulgacao.kit.linkDica') }}</p>
                 </div>
               </div>
 
-              <div class="kit__link">
-                <bdi class="kit__campo kit__endereco" dir="ltr" :title="linkIndicacao">
+              <div class="convite__link">
+                <bdi class="convite__campo convite__endereco" dir="ltr" :title="linkIndicacao">
                   {{ linkLegivel }}
                 </bdi>
-                <div class="kit__link-acoes">
+                <div class="convite__acoes">
                   <Button
                     type="button"
                     icon="ph ph-copy"
@@ -567,19 +561,26 @@ watch(lastSuccessAt, (at) => {
                   />
                 </div>
               </div>
-            </div>
-          </div>
+            </li>
 
-          <div v-if="indicacao.qrImageUrl" class="kit__lado">
-            <IndicacaoQrBlock
-              class="kit__qr"
-              :image-url="indicacao.qrImageUrl"
-              :code="codigoIndicacao"
-              :disabled="!indicacao.podeIndicar"
-              size="md"
-            />
-          </div>
-        </div>
+            <li v-if="indicacao.qrImageUrl" class="jeito">
+              <div class="jeito__cabeca">
+                <span class="ui-ladrilho" aria-hidden="true"><i class="ph ph-printer" /></span>
+                <div class="jeito__titulos">
+                  <h3 class="jeito__titulo">{{ t('divulgacao.kit.qr') }}</h3>
+                  <p class="jeito__dica">{{ t('divulgacao.kit.qrDica') }}</p>
+                </div>
+              </div>
+
+              <IndicacaoQrBlock
+                :image-url="indicacao.qrImageUrl"
+                :code="codigoIndicacao"
+                :disabled="!indicacao.podeIndicar"
+                forma="linha"
+              />
+            </li>
+          </ul>
+        </section>
       </section>
 
       <!-- Leituras do QR: só faz sentido quando existe código para ler. -->
@@ -862,119 +863,60 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.5;
 }
 
-/* ------------------------------------------------------------------ o kit
- * Uma folha em três partes: a cabeça (para que serve o convite, com a luz do Portal rente ao
- * topo), os jeitos de convidar (código e link, cada um com verbo, frase e a coisa em si) e, ao
- * lado, o QR num poço. Quem decide a forma é a largura do painel e a da coluna principal, não a
- * da janela.
+/* ------------------------------------------------------------------ o convite
+ * Uma caixa como as outras da tela, e os três jeitos de convidar em linhas iguais, de ponta a
+ * ponta, com a régua entre elas: o verbo e a frase numa coluna, a coisa em si na outra. Quem
+ * decide se as duas colunas cabem lado a lado é a largura da caixa, não a da janela.
  */
 
-.kit {
+.convite {
+  container: convite / inline-size;
+}
+
+.convite__jeitos {
   display: grid;
-  overflow: hidden;
-  grid-template-areas:
-    'cabeca'
-    'principal'
-    'lado';
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jeito {
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  gap: 14px 32px;
+  padding: 18px 0;
   grid-template-columns: minmax(0, 1fr);
 }
 
-@container divulgacao (min-width: 860px) {
-  .kit--com-qr {
-    grid-template-areas:
-      'cabeca cabeca'
-      'principal lado';
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .kit--com-qr .kit__lado {
-    border-top: 0;
-    border-inline-start: 1px solid var(--linha-suave);
-  }
+.jeito:last-child {
+  padding-bottom: 0;
 }
 
-.kit__cabeca {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 26px 28px 24px;
-  border-bottom: 1px solid var(--linha-suave);
-  background: linear-gradient(
-    180deg,
-    color-mix(in oklab, var(--pj-lugar-fundo) 60%, var(--superficie)),
-    var(--superficie)
-  );
-  grid-area: cabeca;
+.jeito + .jeito {
+  border-top: 1px solid var(--app-regua, var(--linha-suave));
 }
 
-.kit__titulos {
-  display: grid;
-  min-width: 0;
-  gap: 6px;
-  padding-top: 1px;
-}
-
-.kit__titulo {
-  margin: 0;
-  color: var(--tinta);
-  font-size: 18px;
-  font-weight: 650;
-  letter-spacing: -0.015em;
-  line-height: 1.3;
-}
-
-.kit__descricao {
-  max-width: 68ch;
-  margin: 0;
-  color: var(--tinta-2);
-  font-size: 14.5px;
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
-/* Quando o QR ao lado é mais alto, o vão se reparte entre os jeitos, em vez de sobrar embaixo. */
-.kit__principal {
-  display: grid;
-  min-width: 0;
-  align-content: stretch;
-  container: kit-principal / inline-size;
-  grid-area: principal;
-}
-
-/* Cada jeito de convidar: o verbo e a frase de um lado, a coisa do outro (empilha no estreito). */
-.kit__forma {
-  display: grid;
-  min-width: 0;
-  gap: 16px;
-  padding: 24px 28px;
-}
-
-.kit__forma + .kit__forma {
-  border-top: 1px solid var(--linha-suave);
-}
-
-@container kit-principal (min-width: 620px) {
-  .kit__forma {
-    align-items: center;
-    column-gap: 32px;
-    grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.25fr);
+@container convite (min-width: 700px) {
+  .jeito {
+    grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.5fr);
   }
 }
 
-.kit__forma-cabeca {
+.jeito__cabeca {
   display: flex;
   min-width: 0;
   align-items: flex-start;
   gap: 12px;
 }
 
-.kit__forma-titulos {
+.jeito__titulos {
   display: grid;
   min-width: 0;
-  gap: 4px;
+  gap: 3px;
 }
 
-.kit__forma-titulo {
+.jeito__titulo {
   margin: 0;
   color: var(--tinta);
   font-size: 15px;
@@ -983,7 +925,8 @@ watch(lastSuccessAt, (at) => {
   line-height: 1.35;
 }
 
-.kit__forma-dica {
+.jeito__dica {
+  max-width: 46ch;
   margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
@@ -992,11 +935,11 @@ watch(lastSuccessAt, (at) => {
 }
 
 /*
- * O código e o link no mesmo campo: poço claro com fio, nos cantos do cartão pequeno. O código é o
- * que a pessoa vai digitar, então vem maior e espaçado, mas sem tinta de fundo nem cara de cupom:
- * indicação não é o destaque da tela.
+ * O código e o link no mesmo campo: poço claro com fio. O código é o que a pessoa vai digitar,
+ * então vem maior e espaçado, mas sem tinta de fundo nem cara de cupom, e na largura dele: esticado
+ * na linha toda, sobrava um campo vazio ao lado das seis letras.
  */
-.kit__campo {
+.convite__campo {
   min-width: 0;
   border: 1px solid var(--linha-suave);
   border-radius: var(--raio-cartao-pequeno);
@@ -1004,83 +947,58 @@ watch(lastSuccessAt, (at) => {
   color: var(--tinta);
 }
 
-.kit__codigo {
+.convite__codigo {
   display: flex;
+  width: min(100%, 24rem);
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px 16px;
-  padding-block: 7px;
-  padding-inline: 16px 7px;
+  padding-block: 6px;
+  padding-inline: 16px 6px;
 }
 
-.kit__valor {
+.convite__valor {
   min-width: 0;
   overflow-wrap: anywhere;
   font-family: var(--font-dados);
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 650;
   letter-spacing: 0.12em;
   line-height: 1.2;
 }
 
 /* O copiar dentro do poço é papel, para não afundar nele como um contorno solto. */
-.kit__codigo :deep(.p-button) {
+.convite__codigo :deep(.p-button) {
   flex: none;
   background: var(--superficie);
 }
 
-.kit__link {
-  display: grid;
+/* O link e os dois botões numa linha; quando não cabem, os botões descem juntos. */
+.convite__link {
+  display: flex;
   min-width: 0;
-  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 }
 
-.kit__endereco {
+.convite__endereco {
   overflow: hidden;
-  padding: 13px 16px;
+  flex: 1 1 16rem;
+  padding: 11px 16px;
   font-family: var(--font-dados);
-  font-size: 15.5px;
+  font-size: 15px;
   font-weight: 550;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.kit__link-acoes {
+.convite__acoes {
   display: flex;
+  flex: 0 1 auto;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-/* Os dois botões ocupam a largura do endereço logo acima, e quebram juntos quando não cabem. */
-.kit__link-acoes :deep(.p-button) {
-  flex: 1 1 auto;
-  justify-content: center;
-}
-
-/* O QR num painel ao lado, em poço: a folha tem partes, não cartões dentro de cartão. */
-.kit__lado {
-  display: grid;
-  place-items: center;
-  padding: 24px 28px 26px;
-  border-top: 1px solid var(--linha-suave);
-  background: color-mix(in oklab, var(--superficie-2) 70%, transparent);
-  grid-area: lado;
-}
-
-@media (max-width: 760px) {
-  .kit__cabeca {
-    gap: 14px;
-    padding: 22px 18px 20px;
-  }
-
-  .kit__forma {
-    padding: 20px 18px 22px;
-  }
-
-  .kit__lado {
-    padding: 22px 18px 24px;
-  }
 }
 
 /* ------------------------------------------------------------------ regras */

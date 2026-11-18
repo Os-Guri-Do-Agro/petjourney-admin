@@ -4,8 +4,12 @@
  * em selo, o plano, o dia e quanto rendeu de participação. O recorte é da API (`?status=`): trocar
  * o filtro recomeça a lista do zero, e "Carregar mais" segue o cursor opaco da página anterior.
  *
- * A lista mostra nome de cliente, por isso só o DONO a vê. OPERADOR recebe 403, parceiro fora de
- * operação recebe 409 e API sem a rota responde 404: cada um vira o estado da página, como no app.
+ * Mora na aba "Indicados" da Divulgação (17/11/2026, "os indicados deveriam ser uma tab na tela de
+ * divulgação"); `/parceiro/indicados` redireciona para ela.
+ *
+ * A lista mostra nome de cliente, por isso só o DONO a vê (a aba nem aparece para os outros).
+ * OPERADOR recebe 403, parceiro fora de operação recebe 409 e API sem a rota responde 404: cada um
+ * vira o estado da aba, como no app.
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -14,7 +18,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
-import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -53,7 +56,7 @@ const SELO_DO_STATUS: Record<StatusDoIndicado, { classe: string; icone: string }
 
 const { t, locale } = useI18n()
 const router = useRouter()
-const { store, bootstrapping, ensureContext, parceiroQuery } = useParceiroPortal()
+const { ensureContext, parceiroQuery } = useParceiroPortal()
 
 const filtro = ref<Filtro>('TODOS')
 const indicados = ref<IndicadoDoParceiroDto[]>([])
@@ -74,20 +77,12 @@ const opcoesDoFiltro = computed(() =>
 
 const statusDoFiltro = computed(() => (filtro.value === 'TODOS' ? undefined : filtro.value))
 
-const erroDaPagina = computed(() => {
-  if (store.loadState === 'error' && !store.semAcessoParceiro) {
-    return store.errorMessage
-  }
-
-  return erroAoCarregar.value
-})
-
 /** Ninguém entrou ainda: sem filtro para trocar, a página inteira diz isso e leva ao código. */
 const ninguemAinda = computed(
   () => !carregando.value && filtro.value === 'TODOS' && total.value === 0,
 )
 
-/** O bloqueio toma a página inteira: diz por que a lista não abre, e não há o que ensinar. */
+/** O bloqueio toma a aba inteira: diz por que a lista não abre, e não há o que ensinar. */
 const vazioDoBloqueio = computed(() =>
   bloqueio.value
     ? {
@@ -219,8 +214,9 @@ async function tentarDeNovo() {
   await carregar()
 }
 
+/** O código e o QR estão na outra aba da mesma tela. */
 function verMeuCodigo() {
-  void router.push({ path: '/parceiro/divulgacao', hash: '#indicacao' })
+  void router.push({ path: '/parceiro/divulgacao' })
 }
 
 function formatarData(iso: string) {
@@ -273,22 +269,31 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UiPagina
-    class="tela-indicados"
-    :titulo="t('parceiro.indicados.titulo')"
-    :resumo="t('parceiro.indicados.resumo')"
-    :carregando="bootstrapping || (store.loadState === 'loading' && !store.dashboard)"
-    :erro="erroDaPagina"
-    :sem-acesso-de-parceiro="store.semAcessoParceiro"
-    bloquear-se-suspenso
-    :vazio="Boolean(vazioDoBloqueio)"
-    :vazio-titulo="vazioDoBloqueio?.titulo"
-    :vazio-descricao="vazioDoBloqueio?.descricao"
-    :vazio-icone="vazioDoBloqueio?.icone"
-    @tentar-de-novo="tentarDeNovo"
-  >
+  <div class="indicados-da-empresa">
     <UiVazioIlustrado
-      v-if="ninguemAinda"
+      v-if="vazioDoBloqueio"
+      :icone="vazioDoBloqueio.icone"
+      :titulo="vazioDoBloqueio.titulo"
+      :texto="vazioDoBloqueio.descricao"
+    />
+
+    <div v-else-if="erroAoCarregar" class="indicados__erro ui-folha" role="alert">
+      <span class="ui-ladrilho ui-ladrilho--g ui-ladrilho--risco" aria-hidden="true">
+        <i class="ph ph-warning-circle" />
+      </span>
+      <p>{{ erroAoCarregar }}</p>
+      <Button
+        type="button"
+        icon="ph ph-arrow-clockwise"
+        :label="t('common.retry')"
+        severity="secondary"
+        outlined
+        @click="tentarDeNovo"
+      />
+    </div>
+
+    <UiVazioIlustrado
+      v-else-if="ninguemAinda"
       icone="ph ph-user-list"
       :titulo="t('parceiro.indicados.vazio.titulo')"
       :texto="t('parceiro.indicados.vazio.corpo')"
@@ -403,10 +408,31 @@ onMounted(async () => {
         {{ t('parceiro.indicados.rodape') }}
       </p>
     </div>
-  </UiPagina>
+  </div>
 </template>
 
 <style scoped>
+.indicados-da-empresa {
+  display: grid;
+}
+
+/* A lista não abriu por outro motivo: o recado e o tentar de novo, no desenho do da Divulgação. */
+.indicados__erro {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.indicados__erro p {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .indicados {
   display: grid;
   gap: 16px;

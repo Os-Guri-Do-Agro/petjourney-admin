@@ -33,10 +33,10 @@ const PARCEIRO_NOME_STORAGE_KEY = 'petjourney-parceiro-nome'
  */
 const PARCEIRO_AUDITORIA_STORAGE_KEY = 'petjourney-parceiro-auditoria'
 /**
- * A forma do menu do Portal na última sessão: se a conta é dona (Indicados), se o Programa de
- * Afiliados estava ativo (Carteira) e se os dois programas estavam ativos (Programas sai do menu).
- * Sem ela, os itens entravam ou saíam do menu de um a três segundos depois dos outros, a cada
- * recarga, e o menu "pulava" diante de quem olhava.
+ * A forma do menu do Portal na última sessão: se a conta é dona (a aba Indicados da Divulgação), se
+ * o Programa de Afiliados estava ativo (Carteira) e se os dois programas estavam ativos (Programas
+ * sai do menu). Sem ela, os itens entravam ou saíam do menu de um a três segundos depois dos
+ * outros, a cada recarga, e o menu "pulava" diante de quem olhava.
  */
 const PARCEIRO_MENU_STORAGE_KEY = 'petjourney-parceiro-menu'
 
@@ -111,7 +111,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
   const formaGuardada = ref<FormaDoMenu | null>(lerFormaDoMenu())
   /**
    * O que o menu do Portal mostra antes de o contexto chegar: a forma da última sessão. Só o menu
-   * lê isto; permissão e tela continuam decidindo por `isDono` e `statusAfiliadoAtivo`.
+   * e as abas da Divulgação leem isto; permissão e tela continuam decidindo por `isDono` e
+   * `statusAfiliadoAtivo`.
    */
   const menuComIndicados = computed(() =>
     dashboard.value ? isDono.value : (formaGuardada.value?.dono ?? false),

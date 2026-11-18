@@ -2024,6 +2024,16 @@
           "texto": "Kada je program aktivan, ovaj ekran prikazuje kod, link i QR kod za pozivanje."
         }
       }
+    },
+    "abas": {
+      "convidar": {
+        "rotulo": "Pozovite",
+        "dica": "Kod, link i QR kod da pozovete one koji još ne koriste PetJourney."
+      },
+      "indicados": {
+        "rotulo": "Preporučeni",
+        "dica": "Ko se prijavio vašim kodom, da li se pretplatio i koliko je doneo."
+      }
     }
   },
   "carteira": {

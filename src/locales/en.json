@@ -2024,6 +2024,16 @@
           "texto": "With the program active, this screen shows the code, the link and the QR to invite people."
         }
       }
+    },
+    "abas": {
+      "convidar": {
+        "rotulo": "Invite",
+        "dica": "The code, the link and the QR to invite people who don't use PetJourney yet."
+      },
+      "indicados": {
+        "rotulo": "Referrals",
+        "dica": "Who signed up with your code, whether they subscribed and what it earned."
+      }
     }
   },
   "carteira": {

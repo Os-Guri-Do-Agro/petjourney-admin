@@ -2024,6 +2024,16 @@
           "texto": "Com o programa ativo, esta tela mostra o código, o link e o QR para convidar."
         }
       }
+    },
+    "abas": {
+      "convidar": {
+        "rotulo": "Convidar",
+        "dica": "O código, o link e o QR para convidar quem ainda não usa o PetJourney."
+      },
+      "indicados": {
+        "rotulo": "Indicados",
+        "dica": "Quem entrou pelo seu código, se já assinou e quanto rendeu."
+      }
     }
   },
   "carteira": {
