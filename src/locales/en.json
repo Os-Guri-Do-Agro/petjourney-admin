@@ -1167,7 +1167,7 @@
       "nomePlaceholder": "Neighborhood Pet Shop",
       "nomeRequired": "Enter the company name.",
       "categoria": "Category",
-      "categoriaPlaceholder": "Select a category",
+      "categoriaPlaceholder": "Select one or more categories",
       "cnpj": "CNPJ",
       "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "Business phone",

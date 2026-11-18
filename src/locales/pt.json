@@ -1167,7 +1167,7 @@
       "nomePlaceholder": "Pet Shop do Bairro",
       "nomeRequired": "Informe o nome da empresa.",
       "categoria": "Categoria",
-      "categoriaPlaceholder": "Selecione a categoria",
+      "categoriaPlaceholder": "Selecione uma ou mais categorias",
       "cnpj": "CNPJ",
       "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "Telefone comercial",

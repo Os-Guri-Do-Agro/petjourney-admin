@@ -1167,7 +1167,7 @@
       "nomePlaceholder": "متجر الحي للحيوانات الأليفة",
       "nomeRequired": "يرجى إدخال اسم الشركة.",
       "categoria": "الفئة",
-      "categoriaPlaceholder": "اختيار الفئة",
+      "categoriaPlaceholder": "اختر فئة واحدة أو أكثر",
       "cnpj": "CNPJ",
       "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "هاتف العمل",

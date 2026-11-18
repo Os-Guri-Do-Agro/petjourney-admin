@@ -1167,7 +1167,7 @@
       "nomePlaceholder": "Pet shop iz komšiluka",
       "nomeRequired": "Unesite naziv firme.",
       "categoria": "Kategorija",
-      "categoriaPlaceholder": "Izaberite kategoriju",
+      "categoriaPlaceholder": "Izaberite jednu ili više kategorija",
       "cnpj": "CNPJ",
       "cnpjPlaceholder": "00.000.000/0000-00",
       "telefone": "Poslovni telefon",
