@@ -4,9 +4,9 @@
  * anterior daquela vacina volta a cobrar. No app, a vacina e o lembrete saem e o responsável é
  * avisado. O horário da próxima dose fica na agenda: depois de anular, a tela oferece abri-lo.
  *
- * `corrigir` (o "Editar registro" da lista de chamada, 17/11/2026): a API não edita uma dose, a
- * correção é anular e registrar a certa. A gaveta diz isso antes, e depois de anular leva à ficha
- * com a gaveta de aplicar já aberta na mesma vacina.
+ * `corrigir` (o "Apagar e registrar de novo" da gaveta "Editar registro", N42): vacina, dose, data e
+ * lote não se editam, a correção é anular e registrar a certa. A gaveta diz isso antes, e depois de
+ * anular leva à ficha com a gaveta de aplicar já aberta na mesma vacina.
  */
 import Button from 'primevue/button'
 import Textarea from 'primevue/textarea'

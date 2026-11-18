@@ -12154,14 +12154,30 @@
         "deNovoEm7": "Ponovo za 7 dana, ako doza još nedostaje.",
         "para": "Prestaje sam kada se doza da."
       },
-      "ligadoEm": "Uključeno {quando}.",
-      "soNesteNavegador": "Za sada je podsetnik označen samo u ovom pregledaču: slanje kroz aplikaciju počinje kada API dobije rutu.",
+      "ligadoEm": "Uključeno {quando}",
       "desligar": "Isključi podsetnik",
       "fechar": "Zatvori",
       "erro": {
         "generico": "Podsetnik nije moguće promeniti.",
         "semApp": "{responsavel} nema ljubimca u aplikaciji. Pozovite broj iz kartona."
-      }
+      },
+      "ligueNoCadastro": "Pozovite broj iz kartona",
+      "entrega": {
+        "PENDENTE": "U redu za slanje",
+        "SO_NA_CAIXA": "Samo u prijemnom sandučetu",
+        "ENVIADO": "Poslato",
+        "ENTREGUE": "Isporučeno",
+        "FALHOU": "Nije poslato"
+      },
+      "motivo": {
+        "TETO_DO_DIA": "Vlasnik je danas već dobio 6 obaveštenja o vakcinama od ove klinike.",
+        "SEM_CANAL_NO_APP": "Vlasnik više nije u aplikaciji.",
+        "SUPERADO": "Doza je već upisana."
+      },
+      "ultimoEnvio": "Poslednje slanje: {entrega}",
+      "ultimoEnvioEm": "Poslednje slanje {quando}: {entrega}",
+      "proximoEnvioEm": "Sledeće slanje {quando}",
+      "semNovoEnvio": "Novo slanje nije predviđeno"
     },
     "detalhes": {
       "titulo": "Vakcine za {pet}",
@@ -12181,11 +12197,19 @@
       "doseDe": "doza od {dia}"
     },
     "corrigir": {
-      "titulo": "Izmeni zapis",
-      "dica": "Upisana doza se ne menja: da biste je ispravili, poništite ovu uz razlog i odmah upišite tačnu. U aplikaciji vlasnik vidi \"Zapis je ispravila klinika\".",
+      "titulo": "Obriši i upiši ponovo",
+      "dica": "Vakcina, doza, datum i serija se ne menjaju: poništite ovu dozu uz razlog i odmah upišite tačnu. U aplikaciji vlasnik vidi \"Zapis je ispravila klinika\".",
       "confirmar": "Poništi i upiši tačnu",
       "feita": "Doza je poništena. Sada upišite tačnu u kartonu.",
       "registrar": "Upiši tačnu dozu"
+    },
+    "editar": {
+      "titulo": "Izmeni zapis",
+      "dica": "Menja samo napomenu i put primene. Vlasnik ne dobija obaveštenje.",
+      "observacaoDica": "Ostaje samo u klinici, ne ide u aplikaciju. Prazna se briše iz zapisa.",
+      "outrosCampos": "Vakcina, doza, datum i serija se ovde ne menjaju: obrišite zapis i upišite ga ponovo.",
+      "apagarERegistrar": "Obriši i upiši ponovo",
+      "feita": "Zapis je ispravljen."
     }
   },
   "atendimento": {
@@ -15607,5 +15631,10 @@
     "fotoSempre": "Fotografija kada je ima",
     "fotoSempreDica": "Želja vlasnika, nikad obaveza kuće.",
     "vazioTexto": "Izveštaji vlasniku ostaju ovde, oni koje piše tim i automatski, sa isporukom svakog."
+  },
+  "avisosDaClinica": {
+    "tipo": {
+      "VACINA_LEMBRETE_DA_CLINICA": "Podsetnik za vakcinu"
+    }
   }
 }

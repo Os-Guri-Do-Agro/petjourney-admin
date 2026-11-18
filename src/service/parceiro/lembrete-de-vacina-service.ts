@@ -1,56 +1,29 @@
 /**
- * O lembrete de vacina que a clínica liga pela lista de chamada (pedido do Luís, 17/11/2026):
- * o responsável recebe no app que a vacina do pet está para vencer (ou venceu) e volta a receber
- * se a dose ainda faltar. Para sozinho quando a dose é aplicada.
+ * O lembrete de vacina que a clínica liga pela lista de chamada (pedido do Luís, 17/11/2026; lacuna
+ * N42, guia `pedidos-luis-17-11.md` seção 5): o responsável recebe no app um aviso na hora e uma
+ * repetição (no dia da próxima dose, se ainda vai vencer, ou 7 dias depois, se já venceu). Para
+ * sozinho quando a dose é aplicada ou registrada, quando a aplicação é anulada e quando o paciente
+ * ou o vínculo deixam de valer.
  *
- * **A API ainda não tem a rota.** Hoje ela só avisa sozinha, uma vez, quando o reforço de uma dose
- * aplicada na clínica entra nos 30 dias (`VACINA_REFORCO_PROXIMO`, guia e4 4.3); a clínica não pede
- * o aviso, não avisa a vencida nem a série aberta, e não vê se saiu. O pedido ao backend está em
- * `docs/integracao-portal-parceiro/novembro/spec-lembrete-de-vacina.md` (lacuna N42).
+ * O estado vem da própria lista de chamada: cada item traz `lembrete` (nulo sem lembrete ligado) e
+ * `responsavelNoApp` (falso: a clínica liga para o telefone do cadastro, sem chamar a rota). Ligar
+ * e desligar pedem `agenda.escrever`; depois dos dois, a tela relê a lista.
  *
- * Até a rota existir (`LEMBRETE_NA_API = false`), o lembrete fica marcado **neste navegador**: a
- * tela mostra o estado e a gaveta diz que nada saiu para o app. Quando a API entrar, troque a
- * constante e leia o `lembrete` que a lista de chamada passa a trazer em cada item (spec, seção 3).
+ * Até o N42, o lembrete ficava marcado só no navegador (`pj.lembretes-de-vacina.<parceiro>`):
+ * `apagarLembretesGuardados` limpa o que sobrou.
  */
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
+import type { ChamadaDto, LembreteDaVacinaDto } from '../contrato/openapi'
 
-export const LEMBRETE_NA_API = false
+/** A rota existe desde o N42 (API `a0db382`): o lembrete sai pelo app. */
+export const LEMBRETE_NA_API = true
 
-export type LembreteDaVacina = {
-  aplicacaoId: string
-  /** Quando a clínica ligou. */
-  ligadoEm: string
-  /** O último envio pelo app (nulo enquanto não saiu nenhum). */
-  ultimoEnvioEm: string | null
-}
+export type LembreteDaVacina = LembreteDaVacinaDto
+export type EntregaDoLembrete = NonNullable<LembreteDaVacinaDto['entrega']>
+export type MotivoSemEnvio = NonNullable<LembreteDaVacinaDto['motivoSemEnvio']>
 
 type ParceiroQuery = { parceiroId?: string | null }
-
-const CHAVE = 'pj.lembretes-de-vacina'
-
-function chaveDoParceiro(params?: ParceiroQuery) {
-  return `${CHAVE}.${params?.parceiroId ?? 'ativo'}`
-}
-
-/** Os lembretes guardados neste navegador, por aplicação. Armazenamento bloqueado: nenhum. */
-export function lembretesGuardados(params?: ParceiroQuery): Record<string, LembreteDaVacina> {
-  try {
-    const bruto = localStorage.getItem(chaveDoParceiro(params))
-    const lido = bruto ? (JSON.parse(bruto) as unknown) : null
-    return lido && typeof lido === 'object' ? (lido as Record<string, LembreteDaVacina>) : {}
-  } catch {
-    return {}
-  }
-}
-
-function guardar(params: ParceiroQuery | undefined, lembretes: Record<string, LembreteDaVacina>) {
-  try {
-    localStorage.setItem(chaveDoParceiro(params), JSON.stringify(lembretes))
-  } catch {
-    /* Armazenamento bloqueado: vale até a recarga. */
-  }
-}
 
 const daAplicacao = (id: string, params?: ParceiroQuery) => {
   const caminho = `/parceiro/portal/clinica/aplicacoes/${encodeURIComponent(id)}/lembrete`
@@ -59,33 +32,82 @@ const daAplicacao = (id: string, params?: ParceiroQuery) => {
     : caminho
 }
 
-/** Liga o lembrete da dose que falta (a `aplicacaoId` da lista de chamada). */
+/**
+ * Liga o lembrete da dose que falta (a `aplicacaoId` da lista de chamada). 201 ligou agora; 200 já
+ * estava ligado (o mesmo lembrete, sem envio novo).
+ */
 export async function ligarLembreteDaVacina(
   aplicacaoId: string,
   params?: ParceiroQuery,
 ): Promise<LembreteDaVacina> {
-  if (LEMBRETE_NA_API) {
-    const resposta = await apiFetch<ApiEnvelope<LembreteDaVacina>>(
-      daAplicacao(aplicacaoId, params),
-      {
-        method: 'POST',
-        body: JSON.stringify({}),
-      },
-    )
-    return resposta.data
-  }
-  const lembrete = { aplicacaoId, ligadoEm: new Date().toISOString(), ultimoEnvioEm: null }
-  guardar(params, { ...lembretesGuardados(params), [aplicacaoId]: lembrete })
-  return lembrete
+  const resposta = await apiFetch<ApiEnvelope<LembreteDaVacina>>(daAplicacao(aplicacaoId, params), {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+  return resposta.data
 }
 
-/** Desliga: nada mais sai para o app; o que já saiu fica no aparelho do responsável. */
+/** Desliga (204 sempre): nada mais sai para o app; o que já saiu fica no aparelho do responsável. */
 export async function desligarLembreteDaVacina(aplicacaoId: string, params?: ParceiroQuery) {
-  if (LEMBRETE_NA_API) {
-    await apiFetch<void>(daAplicacao(aplicacaoId, params), { method: 'DELETE' })
-    return
+  await apiFetch<void>(daAplicacao(aplicacaoId, params), { method: 'DELETE' })
+}
+
+/** O lembrete do item da lista (a API mais velha que o N42 não manda o campo). */
+export function lembreteDoItem(item: Pick<ChamadaDto, 'lembrete'>): LembreteDaVacina | null {
+  return item.lembrete ?? null
+}
+
+/**
+ * Sem canal no app e sem lembrete ligado: no lugar do botão, "Ligue para o telefone do cadastro".
+ * Só o `false` explícito conta (sem o campo, a API é anterior ao N42 e o botão fica).
+ */
+export function semCanalNoApp(item: Pick<ChamadaDto, 'lembrete' | 'responsavelNoApp'>) {
+  return item.responsavelNoApp === false && !lembreteDoItem(item)
+}
+
+/** Os motivos que a tela explica quando o envio não saiu (guia, seção 5, item 4). */
+const MOTIVOS_EXPLICADOS: readonly MotivoSemEnvio[] = [
+  'TETO_DO_DIA',
+  'SEM_CANAL_NO_APP',
+  'SUPERADO',
+]
+
+export type SituacaoDoLembrete = {
+  /** A entrega do último envio; nula antes do primeiro. */
+  entrega: EntregaDoLembrete | null
+  /** Com `FALHOU`, por que não saiu (só os que a tela explica). */
+  motivo: MotivoSemEnvio | null
+  /** O próximo envio previsto; nulo: "Sem novo envio previsto". */
+  proximoEnvioEm: string | null
+}
+
+/** O que o cartão e a gaveta mostram de um lembrete ligado. */
+export function situacaoDoLembrete(lembrete: LembreteDaVacina): SituacaoDoLembrete {
+  const motivo = lembrete.motivoSemEnvio
+  return {
+    entrega: lembrete.entrega ?? null,
+    motivo:
+      lembrete.entrega === 'FALHOU' && motivo && MOTIVOS_EXPLICADOS.includes(motivo)
+        ? motivo
+        : null,
+    proximoEnvioEm: lembrete.proximoEnvioEm ?? null,
   }
-  const lembretes = lembretesGuardados(params)
-  delete lembretes[aplicacaoId]
-  guardar(params, lembretes)
+}
+
+const GUARDADOS = 'pj.lembretes-de-vacina'
+
+/** Apaga os lembretes que ficaram marcados neste navegador antes do N42. Devolve quantos. */
+export function apagarLembretesGuardados(): number {
+  try {
+    const chaves: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const chave = localStorage.key(i)
+      if (chave === GUARDADOS || chave?.startsWith(`${GUARDADOS}.`)) chaves.push(chave)
+    }
+    for (const chave of chaves) localStorage.removeItem(chave)
+    return chaves.length
+  } catch {
+    /* Armazenamento bloqueado: não há o que apagar. */
+    return 0
+  }
 }

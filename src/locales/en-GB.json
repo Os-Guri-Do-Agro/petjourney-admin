@@ -12154,14 +12154,30 @@
         "deNovoEm7": "Again in 7 days, if the dose is still missing.",
         "para": "Stops on its own when the dose is given."
       },
-      "ligadoEm": "Turned on {quando}.",
-      "soNesteNavegador": "For now, the reminder is only marked in this browser: sending through the app starts when the API has the route.",
+      "ligadoEm": "Turned on {quando}",
       "desligar": "Turn off reminder",
       "fechar": "Close",
       "erro": {
         "generico": "Could not change the reminder.",
         "semApp": "{responsavel} doesn't have the pet in the app. Call the phone number on file."
-      }
+      },
+      "ligueNoCadastro": "Call the phone number on file",
+      "entrega": {
+        "PENDENTE": "Queued",
+        "SO_NA_CAIXA": "Inbox only",
+        "ENVIADO": "Sent",
+        "ENTREGUE": "Delivered",
+        "FALHOU": "Not sent"
+      },
+      "motivo": {
+        "TETO_DO_DIA": "The owner already got 6 vaccine notices from this clinic today.",
+        "SEM_CANAL_NO_APP": "The owner is no longer on the app.",
+        "SUPERADO": "The dose has already been recorded."
+      },
+      "ultimoEnvio": "Last send: {entrega}",
+      "ultimoEnvioEm": "Last send {quando}: {entrega}",
+      "proximoEnvioEm": "Next send {quando}",
+      "semNovoEnvio": "No further send planned"
     },
     "detalhes": {
       "titulo": "{pet}'s vaccines",
@@ -12181,11 +12197,19 @@
       "doseDe": "dose on {dia}"
     },
     "corrigir": {
-      "titulo": "Edit record",
-      "dica": "A recorded dose does not change: to correct it, void this one with a reason and then record the right one. In the app, the owner sees \"Record corrected by the clinic\".",
+      "titulo": "Delete and record again",
+      "dica": "Vaccine, dose, date and batch cannot be edited: void this dose with a reason and then record the right one. In the app, the owner sees \"Record corrected by the clinic\".",
       "confirmar": "Void and record the right one",
       "feita": "Dose voided. Now record the right one in the record.",
       "registrar": "Record the right dose"
+    },
+    "editar": {
+      "titulo": "Edit record",
+      "dica": "Changes only the note and the route. The owner is not notified.",
+      "observacaoDica": "Stays at the clinic, never goes to the app. Leave it empty to remove it.",
+      "outrosCampos": "Vaccine, dose, date and batch do not change here: delete the record and record it again.",
+      "apagarERegistrar": "Delete and record again",
+      "feita": "Record corrected."
     }
   },
   "atendimento": {
@@ -15607,5 +15631,10 @@
     "fotoSempre": "Photo when available",
     "fotoSempreDica": "The owner's wish, never an obligation of the house.",
     "vazioTexto": "Updates to the owner stay here, the ones written by the team and the automatic ones, with the delivery of each."
+  },
+  "avisosDaClinica": {
+    "tipo": {
+      "VACINA_LEMBRETE_DA_CLINICA": "Vaccine reminder"
+    }
   }
 }

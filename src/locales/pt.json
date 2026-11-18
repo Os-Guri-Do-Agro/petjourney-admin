@@ -12154,14 +12154,30 @@
         "deNovoEm7": "De novo em 7 dias, se a dose ainda faltar.",
         "para": "Para sozinho quando a dose for aplicada."
       },
-      "ligadoEm": "Ativado em {quando}.",
-      "soNesteNavegador": "Por enquanto, o lembrete fica marcado só neste navegador: o envio pelo app começa quando a API tiver a rota.",
+      "ligadoEm": "Ativado em {quando}",
       "desligar": "Desligar lembrete",
       "fechar": "Fechar",
       "erro": {
         "generico": "Não deu para mudar o lembrete.",
         "semApp": "{responsavel} não tem o pet no app. Ligue para o telefone do cadastro."
-      }
+      },
+      "ligueNoCadastro": "Ligue para o telefone do cadastro",
+      "entrega": {
+        "PENDENTE": "Na fila",
+        "SO_NA_CAIXA": "Só na caixa de entrada",
+        "ENVIADO": "Enviado",
+        "ENTREGUE": "Entregue",
+        "FALHOU": "Não saiu"
+      },
+      "motivo": {
+        "TETO_DO_DIA": "O responsável já recebeu 6 avisos de vacina desta clínica hoje.",
+        "SEM_CANAL_NO_APP": "O responsável não está mais no app.",
+        "SUPERADO": "A dose já foi registrada."
+      },
+      "ultimoEnvio": "Último envio: {entrega}",
+      "ultimoEnvioEm": "Último envio em {quando}: {entrega}",
+      "proximoEnvioEm": "Próximo envio em {quando}",
+      "semNovoEnvio": "Sem novo envio previsto"
     },
     "detalhes": {
       "titulo": "Vacinas de {pet}",
@@ -12181,11 +12197,19 @@
       "doseDe": "dose de {dia}"
     },
     "corrigir": {
-      "titulo": "Editar registro",
-      "dica": "Uma dose registrada não muda: para corrigir, anule esta com o motivo e registre a certa em seguida. No app, o responsável vê \"Registro corrigido pela clínica\".",
+      "titulo": "Apagar e registrar de novo",
+      "dica": "Vacina, dose, data e lote não se editam: anule esta dose com o motivo e registre a certa em seguida. No app, o responsável vê \"Registro corrigido pela clínica\".",
       "confirmar": "Anular e registrar a certa",
       "feita": "Dose anulada. Agora registre a certa na ficha.",
       "registrar": "Registrar a dose certa"
+    },
+    "editar": {
+      "titulo": "Editar registro",
+      "dica": "Muda só a observação e a via. O responsável não é avisado.",
+      "observacaoDica": "Fica só na clínica, não vai para o app. Vazia, sai do registro.",
+      "outrosCampos": "Vacina, dose, data e lote não mudam aqui: apague o registro e registre de novo.",
+      "apagarERegistrar": "Apagar e registrar de novo",
+      "feita": "Registro corrigido."
     }
   },
   "atendimento": {
@@ -15607,5 +15631,10 @@
     "fotoSempre": "Foto quando houver",
     "fotoSempreDica": "Um desejo do responsável, nunca uma obrigação da casa.",
     "vazioTexto": "Os boletins ao responsável ficam aqui, os escritos pela equipe e os automáticos, com a entrega de cada um."
+  },
+  "avisosDaClinica": {
+    "tipo": {
+      "VACINA_LEMBRETE_DA_CLINICA": "Lembrete de vacina"
+    }
   }
 }
