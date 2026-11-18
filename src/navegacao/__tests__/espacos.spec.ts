@@ -87,11 +87,11 @@ describe('montarEspacos', () => {
     ])
   })
 
-  it('separa o portal em parceria, clientes e empresa, e some com a seção vazia', () => {
+  it('separa o portal em clientes e empresa, com clientes primeiro', () => {
     const portal = espacos.find((espaco) => espaco.id === 'portal')!
 
-    expect(portal.secoes.map((secao) => secao.id)).toEqual(['parceria', 'clientes'])
-    expect(portal.to).toBe('/parceiro/programas')
+    expect(portal.secoes.map((secao) => secao.id)).toEqual(['clientes', 'empresa'])
+    expect(portal.to).toBe('/parceiro/acessos')
   })
 
   it('agrupa por trabalho: prontuário fora de Pacientes, vacinas e estoque fora de Pendências', () => {

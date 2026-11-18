@@ -33,8 +33,10 @@ export type TomDoSelo = 'neutro' | 'atencao' | 'risco'
  * As seções de um espaço: o título diz o que mora embaixo dele antes de a pessoa ler a lista
  * (pedido do Luís, 16/11/2026: "seções onde o usuário olhe e já saiba o que vai ter dentro").
  * Clínica e Hotel: o **dia a dia** (o que se abre toda hora), o **atendimento** (o paciente e o
- * cuidado) e a **gestão** (números e ajustes). Portal: a **parceria** (programas e indicação), os
- * **clientes** (os pets compartilhados) e a **empresa** (carteira, equipe, estabelecimento).
+ * cuidado) e a **gestão** (números e ajustes). Portal: os **clientes** (os pets compartilhados e o
+ * convite a quem ainda não usa) e a **empresa** (programas, carteira, equipe, estabelecimento). Até
+ * 17/11/2026 havia a seção "Parceria"; com Programas fora do menu quando os dois estão ativos e
+ * Indicados virando aba da Divulgação, ela e Clientes ficavam com um item cada.
  * Saúde pública (protótipo): o **acompanhamento** (painel e relatório) e a **ação** (campanhas,
  * ONGs).
  */
@@ -42,7 +44,6 @@ export type IdDaSecao =
   | 'dia'
   | 'atendimento'
   | 'gestao'
-  | 'parceria'
   | 'clientes'
   | 'empresa'
   | 'acompanhamento'
@@ -271,9 +272,8 @@ const ICONE_DO_PORTAL: Record<string, string> = {
 
 /** A seção de cada destino do portal; o que não estiver aqui cai em "Empresa". */
 const SECAO_DO_PORTAL: Record<string, IdDaSecao> = {
-  '/parceiro/programas': 'parceria',
-  '/parceiro/divulgacao': 'parceria',
   '/parceiro/acessos': 'clientes',
+  '/parceiro/divulgacao': 'clientes',
 }
 
 /**
@@ -371,7 +371,6 @@ const ORDEM_DAS_SECOES: IdDaSecao[] = [
   'atendimento',
   'acompanhamento',
   'acao',
-  'parceria',
   'clientes',
   'gestao',
   'empresa',

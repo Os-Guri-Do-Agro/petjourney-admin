@@ -550,19 +550,18 @@ export function useAppNavigation() {
       })
     }
 
-    items.push({
-      label: t('nav.items.divulgacao'),
-      to: '/parceiro/divulgacao',
-      icon: 'ph ph-share-network',
-    })
-
-    /* Indicados é uma aba da Divulgação desde 17/11/2026, não um item do menu. */
-
-    items.push({
-      label: t('nav.items.acessos'),
-      to: '/parceiro/acessos',
-      icon: 'ph ph-clipboard-text',
-    })
+    /*
+     * Clientes primeiro, e nela Acessos, que se abre todo dia, antes da Divulgação. Indicados é uma
+     * aba da Divulgação desde 17/11/2026, não um item do menu.
+     */
+    items.push(
+      { label: t('nav.items.acessos'), to: '/parceiro/acessos', icon: 'ph ph-clipboard-text' },
+      {
+        label: t('nav.items.divulgacao'),
+        to: '/parceiro/divulgacao',
+        icon: 'ph ph-share-network',
+      },
+    )
 
     if (parceiroStore.menuComCarteira) {
       items.push({
