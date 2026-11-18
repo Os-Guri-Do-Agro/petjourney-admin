@@ -3589,7 +3589,8 @@
         "estoque": "{total} vaccine below minimum | {total} vaccines below minimum",
         "faltas": "{total} patient with an unexplained no-show | {total} patients with unexplained no-shows",
         "pedidos": "{total} appointment request awaiting a reply | {total} appointment requests awaiting a reply"
-      }
+      },
+      "financeiro": "Finance"
     },
     "busca": {
       "abrir": "Search for a patient or a clinical screen",
@@ -10128,7 +10129,8 @@
       "relatorios": "Reports",
       "configuracao": "Settings",
       "prontuarios": "Medical records",
-      "vacinas": "Vaccines"
+      "vacinas": "Vaccines",
+      "financeiro": "Finance"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -10170,7 +10172,12 @@
       "reforcos": "Boosters",
       "plantao": "Shift",
       "boletins": "Updates",
-      "vagas": "Vacancies"
+      "vagas": "Vacancies",
+      "caixa": "Till",
+      "contas": "Bills",
+      "notasFiscais": "Invoices",
+      "repasses": "Vet payouts",
+      "resultado": "Results"
     },
     "abasAria": "{destino} screens",
     "secoes": {

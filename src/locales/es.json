@@ -3589,7 +3589,8 @@
         "estoque": "{total} vacuna bajo el mínimo | {total} vacunas bajo el mínimo",
         "faltas": "{total} paciente con falta sin motivo | {total} pacientes con faltas sin motivo",
         "pedidos": "{total} solicitud de cita esperando respuesta | {total} solicitudes de cita esperando respuesta"
-      }
+      },
+      "financeiro": "Finanzas"
     },
     "busca": {
       "abrir": "Buscar un paciente o una pantalla del módulo clínico",
@@ -10128,7 +10129,8 @@
       "relatorios": "Informes",
       "configuracao": "Configuración",
       "prontuarios": "Historias clínicas",
-      "vacinas": "Vacunas"
+      "vacinas": "Vacunas",
+      "financeiro": "Finanzas"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -10170,7 +10172,12 @@
       "reforcos": "Refuerzos",
       "plantao": "Guardia",
       "boletins": "Boletines",
-      "vagas": "Lugares"
+      "vagas": "Lugares",
+      "caixa": "Caja",
+      "contas": "Cuentas",
+      "notasFiscais": "Facturas",
+      "repasses": "Pagos a veterinarios",
+      "resultado": "Resultado"
     },
     "abasAria": "Pantallas de {destino}",
     "secoes": {

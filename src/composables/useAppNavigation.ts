@@ -252,6 +252,34 @@ const CLINICAL_BLOCKS: readonly BlocoDeModulo[] = [
     key: 'clinico.navegacao.analise',
     rotas: [{ key: 'clinico.resumo.titulo', to: '/clinica/resumo', icon: 'ph ph-chart-bar' }],
   },
+  /*
+   * O financeiro (protótipo de 18/11/2026, `features/financeiro`): o caixa do balcão, as contas a
+   * pagar e a receber, as notas fiscais de serviço, os repasses dos veterinários e o resultado do
+   * mês. Abre fora da produção (`rotas-dos-modulos.ts`).
+   */
+  {
+    id: 'financeiro',
+    key: 'clinico.navegacao.financeiro',
+    rotas: [
+      { key: 'espacos.abas.caixa', to: '/clinica/financeiro', icon: 'ph ph-cash-register' },
+      { key: 'espacos.abas.contas', to: '/clinica/financeiro/contas', icon: 'ph ph-receipt' },
+      {
+        key: 'espacos.abas.notasFiscais',
+        to: '/clinica/financeiro/notas',
+        icon: 'ph ph-invoice',
+      },
+      {
+        key: 'espacos.abas.repasses',
+        to: '/clinica/financeiro/repasses',
+        icon: 'ph ph-hand-coins',
+      },
+      {
+        key: 'espacos.abas.resultado',
+        to: '/clinica/financeiro/resultado',
+        icon: 'ph ph-chart-line-up',
+      },
+    ],
+  },
   /* Salas, tipos de atendimento, bloqueios e política da agenda (E3-01). */
   {
     id: 'configuracao',

@@ -3589,7 +3589,8 @@
         "estoque": "{total} vacina abaixo do mínimo | {total} vacinas abaixo do mínimo",
         "faltas": "{total} paciente com falta sem motivo | {total} pacientes com falta sem motivo",
         "pedidos": "{total} pedido de horário esperando resposta | {total} pedidos de horário esperando resposta"
-      }
+      },
+      "financeiro": "Financeiro"
     },
     "busca": {
       "abrir": "Buscar paciente ou tela do módulo clínico",
@@ -10128,7 +10129,8 @@
       "relatorios": "Relatórios",
       "configuracao": "Configuração",
       "prontuarios": "Prontuários",
-      "vacinas": "Vacinas"
+      "vacinas": "Vacinas",
+      "financeiro": "Financeiro"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -10170,7 +10172,12 @@
       "reforcos": "Reforços",
       "plantao": "Plantão",
       "boletins": "Boletins",
-      "vagas": "Vagas"
+      "vagas": "Vagas",
+      "caixa": "Caixa",
+      "contas": "Contas",
+      "notasFiscais": "Notas fiscais",
+      "repasses": "Repasses",
+      "resultado": "Resultado"
     },
     "abasAria": "Telas de {destino}",
     "secoes": {

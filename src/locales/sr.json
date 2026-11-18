@@ -3589,7 +3589,8 @@
         "estoque": "{total} vakcina ispod minimuma | {total} vakcine ispod minimuma | {total} vakcina ispod minimuma",
         "faltas": "{total} pacijent ima izostanak bez razloga | {total} pacijenta imaju izostanke bez razloga | {total} pacijenata ima izostanke bez razloga",
         "pedidos": "{total} zahtev za termin čeka odgovor | {total} zahteva za termin čekaju odgovor | {total} zahteva za termin čeka odgovor"
-      }
+      },
+      "financeiro": "Finansije"
     },
     "busca": {
       "abrir": "Pretražite pacijente ili ekrane kliničkog modula",
@@ -10128,7 +10129,8 @@
       "relatorios": "Izveštaji",
       "configuracao": "Podešavanja",
       "prontuarios": "Kartoni",
-      "vacinas": "Vakcine"
+      "vacinas": "Vakcine",
+      "financeiro": "Finansije"
     },
     "hotel": {
       "rotulo": "Hotel",
@@ -10170,7 +10172,12 @@
       "reforcos": "Revakcinacije",
       "plantao": "Smena",
       "boletins": "Izveštaji",
-      "vagas": "Slobodna mesta"
+      "vagas": "Slobodna mesta",
+      "caixa": "Kasa",
+      "contas": "Računi",
+      "notasFiscais": "Fakture",
+      "repasses": "Isplate veterinarima",
+      "resultado": "Rezultat"
     },
     "abasAria": "Ekrani: {destino}",
     "secoes": {

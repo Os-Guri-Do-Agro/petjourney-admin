@@ -200,6 +200,24 @@ const RECEITA_DA_CLINICA: ReceitaDeDestino[] = [
     ],
   },
   {
+    /*
+     * O dinheiro da clínica e o dos veterinários (protótipo de 18/11/2026, `features/financeiro`):
+     * o caixa do balcão, as contas, as notas fiscais, os repasses e o resultado. `exata` no Caixa:
+     * as outras abas moram embaixo do mesmo caminho.
+     */
+    id: 'financeiro',
+    chave: 'espacos.clinica.financeiro',
+    icone: 'ph ph-coins',
+    secao: 'gestao',
+    abas: [
+      { rota: '/clinica/financeiro', chave: 'espacos.abas.caixa', exata: true },
+      { rota: '/clinica/financeiro/contas', chave: 'espacos.abas.contas' },
+      { rota: '/clinica/financeiro/notas', chave: 'espacos.abas.notasFiscais' },
+      { rota: '/clinica/financeiro/repasses', chave: 'espacos.abas.repasses' },
+      { rota: '/clinica/financeiro/resultado', chave: 'espacos.abas.resultado' },
+    ],
+  },
+  {
     id: 'relatorios',
     chave: 'espacos.clinica.relatorios',
     icone: 'ph ph-chart-line-up',

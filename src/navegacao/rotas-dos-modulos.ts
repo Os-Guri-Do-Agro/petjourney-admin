@@ -17,6 +17,7 @@
  */
 
 import type { NomeDoModulo, Permissao } from '@/service/parceiro/acesso-service'
+import { FORA_DA_PRODUCAO } from '@/utils/versao'
 
 export type ModuloDaRota = NomeDoModulo | 'QUALQUER'
 
@@ -192,6 +193,18 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     modulo: 'CLINICA',
     permissao: 'paciente.ler',
     integrada: false,
+  },
+  /*
+   * O financeiro da clínica e dos veterinários (protótipo de 18/11/2026, `features/financeiro`):
+   * caixa, contas, repasses e resultado sobre dados ilustrativos, com o selo "Protótipo" em toda
+   * tela. Como a Saúde pública, abre fora da produção (na máquina e no portal-dev) para quem tem a
+   * Clínica e `financeiro.ler`; na `main` continua fechado até a API ganhar as rotas.
+   */
+  {
+    prefixo: '/clinica/financeiro',
+    modulo: 'CLINICA',
+    permissao: 'financeiro.ler',
+    integrada: FORA_DA_PRODUCAO,
   },
   /* Vitrine de design do módulo: não é tela de trabalho. */
   {
