@@ -13977,7 +13977,12 @@
       "outroDia": "Outro dia",
       "confirmar": "Receber",
       "erro": "Não deu para receber o lote.",
-      "feito": "Lote {codigo} recebido, {n} dose. | Lote {codigo} recebido, {n} doses."
+      "feito": "Lote {codigo} recebido, {n} dose. | Lote {codigo} recebido, {n} doses.",
+      "vacinaFora": "Essa vacina ainda não está no catálogo da clínica.",
+      "vacinaForaSemPermissao": "Essa vacina ainda não está no catálogo. Quem cuida do catálogo (o dono ou o gestor) cadastra em Configuração.",
+      "catalogoVazio": "O catálogo da clínica ainda não tem vacinas.",
+      "cadastrarVacina": "Cadastrar “{nome}”",
+      "cadastrarVacinaNova": "Cadastrar vacina nova"
     },
     "baixa": {
       "acao": "Dar baixa",

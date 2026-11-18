@@ -4,6 +4,12 @@
  * (não frascos), o custo por dose, e o que ajuda a conferir (fornecedor, nota, quem conferiu, o dia
  * em que chegou). O código vai em maiúsculas e é único por vacina. O duplo toque devolve o mesmo
  * lote (Idempotency-Key).
+ *
+ * A vacina do frasco que ainda não está no catálogo (18/11/2026, "só deixa selecionar das vacinas já
+ * cadastradas e não uma nova"): quem gere o catálogo (`catalogo.gerir`, DONO e GESTOR) cadastra ali
+ * mesmo. O pé da lista abre a gaveta da vacina do Catálogo por cima, com o nome digitado na busca;
+ * ao salvar, ela volta escolhida e o que já foi preenchido no lote fica. O protocolo (doses, idade
+ * mínima, reforço) é o da gaveta do Catálogo: a vacina nova serve também ao plano vacinal.
  */
 import AutoComplete from 'primevue/autocomplete'
 import Button from 'primevue/button'
@@ -17,8 +23,10 @@ import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
+import VacinaGaveta from '@/components/catalogo/VacinaGaveta.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
+import type { Vacina } from '@/service/parceiro/catalogos-service'
 import {
   CODIGO_DO_LOTE,
   CODIGO_MAX,
@@ -31,13 +39,18 @@ import {
 } from '@/service/parceiro/estoque-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
 
+type VacinaDaLista = { id: string; nome: string; fabricante: string | null }
+
 const props = defineProps<{
-  vacinas: { id: string; nome: string; fabricante: string | null }[]
+  vacinas: VacinaDaLista[]
   profissionais: Profissional[]
   vacinaInicial: string | null
 }>()
 const aberta = defineModel<boolean>('visible', { default: false })
-const emit = defineEmits<{ recebido: [lote: LoteDoEstoque] }>()
+const emit = defineEmits<{
+  recebido: [lote: LoteDoEstoque]
+  vacinaCadastrada: [vacina: VacinaDaLista]
+}>()
 
 const { t, locale } = useI18n()
 const { store, parceiroQuery } = useParceiroPortal()
@@ -63,8 +76,19 @@ const salvando = ref(false)
 const erro = ref('')
 const erroNoCodigo = ref('')
 
+/* A vacina que não está no catálogo: o texto da busca, as cadastradas aqui e a gaveta do Catálogo. */
+const cadastraVacina = computed(
+  () => Boolean(store.modulo('CLINICA')?.podeEscrever) && store.temPermissao('catalogo.gerir'),
+)
+const busca = ref('')
+const cadastradasAqui = ref<VacinaDaLista[]>([])
+const gavetaDaVacina = ref(false)
+const nomeDaVacinaNova = ref('')
+const campoDaVacina = ref<{ hide?: () => void } | null>(null)
+
 watch(aberta, async (agora) => {
   if (!agora) return
+  busca.value = ''
   vacinaId.value = props.vacinaInicial
   codigo.value = ''
   validade.value = null
@@ -85,12 +109,28 @@ watch(aberta, async (agora) => {
     ).itens
 })
 
-const opcoesDeVacina = computed(() =>
-  props.vacinas.map((v) => ({
+const opcoesDeVacina = computed(() => {
+  const ids = new Set(props.vacinas.map((v) => v.id))
+  return [...props.vacinas, ...cadastradasAqui.value.filter((v) => !ids.has(v.id))].map((v) => ({
     valor: v.id,
     rotulo: v.fabricante ? `${v.nome} · ${v.fabricante}` : v.nome,
-  })),
-)
+  }))
+})
+
+function cadastrarVacina() {
+  const texto = busca.value.trim()
+  nomeDaVacinaNova.value = texto ? texto.charAt(0).toLocaleUpperCase() + texto.slice(1) : ''
+  campoDaVacina.value?.hide?.()
+  gavetaDaVacina.value = true
+}
+
+function vacinaCadastrada(vacina: Vacina | null) {
+  if (!vacina) return
+  const item = { id: vacina.id, nome: vacina.nome, fabricante: vacina.fabricante ?? null }
+  if (!cadastradasAqui.value.some((v) => v.id === item.id)) cadastradasAqui.value.push(item)
+  vacinaId.value = item.id
+  emit('vacinaCadastrada', item)
+}
 const opcoesDeRecebido = computed(() => [
   { valor: HOJE, rotulo: t('estoque.receber.hoje') },
   { valor: OUTRO, rotulo: t('estoque.receber.outroDia') },
@@ -165,6 +205,7 @@ async function receber() {
       <section class="eg__secao">
         <label class="eg__rotulo" for="rl-vacina">{{ t('estoque.vacina') }}</label>
         <Select
+          ref="campoDaVacina"
           v-model="vacinaId"
           input-id="rl-vacina"
           :options="opcoesDeVacina"
@@ -173,7 +214,39 @@ async function receber() {
           filter
           :invalid="tentou && !vacinaId"
           :disabled="salvando"
-        />
+          @filter="(evento) => (busca = evento.value)"
+        >
+          <template #emptyfilter>
+            {{
+              cadastraVacina
+                ? t('estoque.receber.vacinaFora')
+                : t('estoque.receber.vacinaForaSemPermissao')
+            }}
+          </template>
+          <template #empty>
+            {{
+              cadastraVacina
+                ? t('estoque.receber.catalogoVazio')
+                : t('estoque.receber.vacinaForaSemPermissao')
+            }}
+          </template>
+          <template v-if="cadastraVacina" #footer>
+            <div class="rl__nova">
+              <Button
+                type="button"
+                size="small"
+                severity="secondary"
+                icon="ph ph-plus"
+                :label="
+                  busca.trim()
+                    ? t('estoque.receber.cadastrarVacina', { nome: busca.trim() })
+                    : t('estoque.receber.cadastrarVacinaNova')
+                "
+                @click="cadastrarVacina"
+              />
+            </div>
+          </template>
+        </Select>
       </section>
 
       <div class="eg__linha">
@@ -312,10 +385,28 @@ async function receber() {
       />
     </template>
   </CadastroGaveta>
+
+  <VacinaGaveta
+    v-model:visible="gavetaDaVacina"
+    :vacina="null"
+    :nome-inicial="nomeDaVacinaNova"
+    @salvo="vacinaCadastrada"
+  />
 </template>
 
 <style scoped>
 .rl__dica {
   margin-top: -14px;
+}
+
+/* O pé da lista de vacinas: cadastrar a que não está no catálogo. */
+.rl__nova {
+  display: flex;
+  padding: 8px 10px 10px;
+  border-top: 1px solid var(--linha);
+}
+
+.rl__nova :deep(.p-button) {
+  max-width: 100%;
 }
 </style>

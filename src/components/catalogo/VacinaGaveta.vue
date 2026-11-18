@@ -3,6 +3,10 @@
  * Vacina da clínica: criar e editar (E4-02, guia e4 1.6 e 1.7). O protocolo da série do filhote é
  * a pergunta clínica em aberto: `FIXA` (n doses, uma a cada intervalo) ou `ATE_IDADE_MINIMA` (no
  * mínimo n, repetindo até uma ser dada com a idade mínima). A conta do plano vacinal é da API.
+ *
+ * Também abre por cima do Receber lote (18/11/2026), quando a vacina do frasco ainda não está no
+ * catálogo: `nomeInicial` traz o que a pessoa digitou na busca, e `salvo` devolve a vacina criada
+ * para o lote já sair com ela escolhida.
  */
 import Button from 'primevue/button'
 import InputNumber from 'primevue/inputnumber'
@@ -25,9 +29,9 @@ import {
   type Vacina,
 } from '@/service/parceiro/catalogos-service'
 
-const props = defineProps<{ vacina: Vacina | null }>()
+const props = defineProps<{ vacina: Vacina | null; nomeInicial?: string | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
-const emit = defineEmits<{ salvo: [] }>()
+const emit = defineEmits<{ salvo: [vacina: Vacina | null] }>()
 
 const { t } = useI18n()
 const { parceiroQuery } = useParceiroPortal()
@@ -62,7 +66,7 @@ watch([aberta, () => props.vacina?.id] as const, ([agora]) => {
   tentou.value = false
   erroNoNome.value = ''
   erroGeral.value = ''
-  nome.value = v?.nome ?? ''
+  nome.value = v?.nome ?? props.nomeInicial ?? ''
   fabricante.value = v?.fabricante ?? ''
   especies.value = v ? [...v.especies] : ['CACHORRO']
   vias.value = v ? [...v.vias] : ['SUBCUTANEA']
@@ -129,14 +133,20 @@ async function salvar() {
   salvando.value = true
   const dados = corpo()
   try {
+    let criada: Vacina | null = null
     if (props.vacina) {
       await editarAcrescimo('vacinas', props.vacina.id, dados, parceiroQuery())
     } else {
-      await criarAcrescimo('vacinas', dados, chaveador.para(dados), parceiroQuery())
+      criada = await criarAcrescimo<Vacina>(
+        'vacinas',
+        dados,
+        chaveador.para(dados),
+        parceiroQuery(),
+      )
       chaveador.concluir()
     }
     aberta.value = false
-    emit('salvo')
+    emit('salvo', criada)
   } catch (err) {
     const lido = lerErroDoCadastro(err, t('cadastro.erros.salvar'))
     if (lido.codigo === 'CATALOGO_NOME_EM_USO') erroNoNome.value = t('catalogo.erro.nomeEmUso')

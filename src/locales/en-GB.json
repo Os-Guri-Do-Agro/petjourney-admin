@@ -13977,7 +13977,12 @@
       "outroDia": "Another day",
       "confirmar": "Receive",
       "erro": "Could not receive the lot.",
-      "feito": "Lot {codigo} received, {n} dose. | Lot {codigo} received, {n} doses."
+      "feito": "Lot {codigo} received, {n} dose. | Lot {codigo} received, {n} doses.",
+      "vacinaFora": "This vaccine isn't in the clinic's catalogue yet.",
+      "vacinaForaSemPermissao": "This vaccine isn't in the catalogue yet. Whoever manages the catalogue (the owner or the manager) adds it in Settings.",
+      "catalogoVazio": "The clinic's catalogue has no vaccines yet.",
+      "cadastrarVacina": "Add “{nome}”",
+      "cadastrarVacinaNova": "Add a new vaccine"
     },
     "baixa": {
       "acao": "Write off",

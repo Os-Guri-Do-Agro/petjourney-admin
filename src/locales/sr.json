@@ -13977,7 +13977,12 @@
       "outroDia": "Drugi dan",
       "confirmar": "Primi",
       "erro": "Serija nije primljena.",
-      "feito": "Serija {codigo} primljena, {n} doza. | Serija {codigo} primljena, {n} doze. | Serija {codigo} primljena, {n} doza."
+      "feito": "Serija {codigo} primljena, {n} doza. | Serija {codigo} primljena, {n} doze. | Serija {codigo} primljena, {n} doza.",
+      "vacinaFora": "Ova vakcina još nije u katalogu klinike.",
+      "vacinaForaSemPermissao": "Ova vakcina još nije u katalogu. Onaj ko vodi katalog (vlasnik ili menadžer) dodaje je u Podešavanjima.",
+      "catalogoVazio": "Katalog klinike još nema vakcina.",
+      "cadastrarVacina": "Dodaj „{nome}”",
+      "cadastrarVacinaNova": "Dodaj novu vakcinu"
     },
     "baixa": {
       "acao": "Otpiši",

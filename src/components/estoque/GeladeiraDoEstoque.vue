@@ -243,6 +243,11 @@ const vacinasParaReceber = computed(() => {
   return [...guardadas, ...catalogo.value.filter((v) => !ids.has(v.id))]
 })
 
+/* A vacina cadastrada no Receber lote entra na lista sem esperar o pacote do catálogo de novo. */
+function vacinaNoCatalogo(vacina: { id: string; nome: string; fabricante: string | null }) {
+  if (!catalogo.value.some((v) => v.id === vacina.id)) catalogo.value.push(vacina)
+}
+
 function receber(vacinaId: string | null) {
   vacinaParaReceber.value = vacinaId
   receberAberta.value = true
@@ -442,6 +447,7 @@ function mudou(texto: string) {
       :vacinas="vacinasParaReceber"
       :profissionais="profissionais"
       :vacina-inicial="vacinaParaReceber"
+      @vacina-cadastrada="vacinaNoCatalogo"
       @recebido="
         (novo) =>
           mudou(
