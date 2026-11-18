@@ -3,8 +3,9 @@
  * O QR de indicação com o que se faz com ele: baixar a imagem e imprimir o cartaz do balcão. Em
  * cima, o verbo e a frase (quem escaneia cai no cadastro já com o código da empresa).
  *
- * `forma="linha"` (a Divulgação, 17/11/2026): a miniatura e os botões lado a lado, sem o título,
- * que a linha da caixa já traz à esquerda.
+ * `forma="cartao"` (o cartão do QR na Divulgação, 17/11/2026): sem o título, que o cartão já traz;
+ * o QR num quadro branco da largura do cartão e os botões no pé, como nos cartões do código e do
+ * link ao lado.
  *
  * O quadro em volta do QR é branco nos dois temas: é a zona de silêncio que o leitor de QR precisa
  * para achar as bordas, e no escuro um QR sobre fundo escuro não lê em câmera nenhuma.
@@ -23,8 +24,8 @@ const props = withDefaults(
     disabled?: boolean
     /** `sm` = selo pequeno; `md` = divulgação */
     size?: 'sm' | 'md'
-    /** `bloco`: título, QR e botões empilhados; `linha`: miniatura e botões lado a lado. */
-    forma?: 'bloco' | 'linha'
+    /** `bloco`: título, QR e botões empilhados; `cartao`: o QR no quadro e os botões no pé. */
+    forma?: 'bloco' | 'cartao'
   }>(),
   {
     disabled: false,
@@ -224,39 +225,38 @@ watch(
   justify-content: center;
 }
 
-/* Na linha: a miniatura e os botões lado a lado, alinhados ao começo, sem esticar. */
-.indicacao-qr--linha {
+/*
+ * No cartão: o quadro branco na largura toda e na altura do quadro dos cartões vizinhos (7rem), o QR
+ * centrado nele, e os botões no pé, dividindo a largura.
+ */
+.indicacao-qr--cartao {
   display: flex;
   max-width: none;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 18px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
 }
 
-.indicacao-qr--linha .indicacao-qr__frame {
-  padding: 6px;
-  border-radius: 12px;
+.indicacao-qr--cartao .indicacao-qr__frame {
+  height: 7rem;
+  padding: 8px;
+  border: 0;
+  border-radius: 16px;
 }
 
-.indicacao-qr--linha .indicacao-qr__img,
-.indicacao-qr--linha .indicacao-qr__fallback {
-  width: 96px;
-  height: 96px;
+.indicacao-qr--cartao .indicacao-qr__img,
+.indicacao-qr--cartao .indicacao-qr__fallback {
+  width: 92px;
+  height: 92px;
 }
 
-.indicacao-qr--linha .indicacao-qr__legenda {
-  order: 2;
+.indicacao-qr--cartao .indicacao-qr__legenda {
   justify-items: start;
   text-align: start;
 }
 
-.indicacao-qr--linha .indicacao-qr__acoes {
-  width: auto;
-  justify-content: flex-start;
-}
-
-.indicacao-qr--linha .indicacao-qr__acoes :deep(.p-button) {
-  flex: none;
+.indicacao-qr--cartao .indicacao-qr__acoes {
+  margin-top: auto;
 }
 
 .indicacao-qr--disabled {

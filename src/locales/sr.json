@@ -2034,6 +2034,27 @@
         "rotulo": "Preporučeni",
         "dica": "Ko se prijavio vašim kodom, da li se pretplatio i koliko je doneo."
       }
+    },
+    "convite": {
+      "codigoDica": "Osoba ga upiše pri pravljenju naloga.",
+      "linkDica": "Ko ga otvori, ide pravo na prijavu.",
+      "qrDica": "Ostavite ga na pultu za skeniranje.",
+      "copiado": "Kopirano",
+      "passos": {
+        "titulo": "Kako funkcioniše",
+        "convida": {
+          "titulo": "Vi pozivate",
+          "texto": "Kodom, linkom ili QR kodom."
+        },
+        "conta": {
+          "titulo": "Osoba pravi nalog",
+          "texto": "I povezana je sa vašom firmom."
+        },
+        "rende": {
+          "titulo": "Svaka pretplata donosi",
+          "texto": "5% svakog meseca, do 18 meseci."
+        }
+      }
     }
   },
   "carteira": {

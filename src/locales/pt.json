@@ -2034,6 +2034,27 @@
         "rotulo": "Indicados",
         "dica": "Quem entrou pelo seu código, se já assinou e quanto rendeu."
       }
+    },
+    "convite": {
+      "codigoDica": "A pessoa digita ao criar a conta.",
+      "linkDica": "Quem abre já cai no cadastro.",
+      "qrDica": "Deixe no balcão para escanear.",
+      "copiado": "Copiado",
+      "passos": {
+        "titulo": "Como funciona",
+        "convida": {
+          "titulo": "Você convida",
+          "texto": "Pelo código, pelo link ou pelo QR."
+        },
+        "conta": {
+          "titulo": "A pessoa cria a conta",
+          "texto": "E fica ligada à sua empresa."
+        },
+        "rende": {
+          "titulo": "Cada assinatura rende",
+          "texto": "5% todo mês, por até 18 meses."
+        }
+      }
     }
   },
   "carteira": {

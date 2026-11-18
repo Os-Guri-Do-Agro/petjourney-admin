@@ -2034,6 +2034,27 @@
         "rotulo": "Referidos",
         "dica": "Quién entró con su código, si ya se suscribió y cuánto rindió."
       }
+    },
+    "convite": {
+      "codigoDica": "La persona lo escribe al crear la cuenta.",
+      "linkDica": "Quien lo abre va directo al registro.",
+      "qrDica": "Déjelo en el mostrador para escanear.",
+      "copiado": "Copiado",
+      "passos": {
+        "titulo": "Cómo funciona",
+        "convida": {
+          "titulo": "Usted invita",
+          "texto": "Con el código, el enlace o el QR."
+        },
+        "conta": {
+          "titulo": "La persona crea la cuenta",
+          "texto": "Y queda vinculada a su empresa."
+        },
+        "rende": {
+          "titulo": "Cada suscripción rinde",
+          "texto": "5% cada mes, por hasta 18 meses."
+        }
+      }
     }
   },
   "carteira": {

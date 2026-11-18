@@ -2034,6 +2034,27 @@
         "rotulo": "Referrals",
         "dica": "Who signed up with your code, whether they subscribed and what it earned."
       }
+    },
+    "convite": {
+      "codigoDica": "They type it when creating the account.",
+      "linkDica": "Opening it goes straight to sign-up.",
+      "qrDica": "Leave it at the counter to scan.",
+      "copiado": "Copied",
+      "passos": {
+        "titulo": "How it works",
+        "convida": {
+          "titulo": "You invite",
+          "texto": "With the code, the link or the QR."
+        },
+        "conta": {
+          "titulo": "They create an account",
+          "texto": "And it is linked to your business."
+        },
+        "rende": {
+          "titulo": "Each subscription earns",
+          "texto": "5% every month, for up to 18 months."
+        }
+      }
     }
   },
   "carteira": {
