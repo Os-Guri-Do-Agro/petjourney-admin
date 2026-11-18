@@ -13920,7 +13920,7 @@
     "fornecedor": "Proveedor",
     "notaFiscal": "Factura",
     "vacinas": "Vacunas",
-    "vacinasDescricao": "Las que la clínica guarda: el saldo que aplica hoy contra el mínimo.",
+    "vacinasDescricao": "Las dosis de cada vacuna listas para aplicar y el mínimo que la clínica quiere mantener.",
     "lotes": "Lotes",
     "lotesDescricao": "El vencido con dosis primero (descarte pendiente), después el que vence antes.",
     "vazio": "La clínica todavía no guarda vacunas: reciba el primer lote o defina un mínimo.",

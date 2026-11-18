@@ -13920,7 +13920,7 @@
     "fornecedor": "Supplier",
     "notaFiscal": "Invoice",
     "vacinas": "Vaccines",
-    "vacinasDescricao": "The ones the clinic keeps: the usable balance today against the minimum.",
+    "vacinasDescricao": "The doses of each vaccine ready to give, and the minimum the clinic wants to keep.",
     "lotes": "Lots",
     "lotesDescricao": "Expired with doses first (pending disposal), then the ones that expire sooner.",
     "vazio": "The clinic does not keep vaccines yet: receive the first lot or set a minimum.",

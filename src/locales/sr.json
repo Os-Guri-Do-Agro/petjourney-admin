@@ -13920,7 +13920,7 @@
     "fornecedor": "Dobavljač",
     "notaFiscal": "Račun",
     "vacinas": "Vakcine",
-    "vacinasDescricao": "One koje klinika drži: stanje koje se danas može primeniti prema minimumu.",
+    "vacinasDescricao": "Doze svake vakcine spremne za primenu i minimum koji klinika želi da održava.",
     "lotes": "Serije",
     "lotesDescricao": "Istekle sa dozama prvo (čekaju odlaganje), zatim one koje ranije ističu.",
     "vazio": "Klinika još ne drži vakcine: primite prvu seriju ili odredite minimum.",
