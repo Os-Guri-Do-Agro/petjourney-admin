@@ -27,3 +27,28 @@ const PESO_DO_TOM: Record<TomDePendencia, number> = { risco: 0, atencao: 1, neut
 export function porGravidade<T extends { tom: TomDePendencia }>(linhas: T[]): T[] {
   return [...linhas].sort((uma, outra) => PESO_DO_TOM[uma.tom] - PESO_DO_TOM[outra.tom])
 }
+
+/**
+ * O título do Hoje diz qual é o assunto, e não só quantos (18/11/2026: "texto avisa que tem
+ * assunto, mas não aponta qual o assunto", sobre "1 assunto esperando você"). Vale o primeiro, na
+ * ordem da gravidade, com quem espera na recepção logo depois dos urgentes, e quantos mais há.
+ */
+export function tituloDoDia(
+  t: (chave: string, valores?: Record<string, unknown>, plural?: number) => string,
+  linhas: Pick<LinhaDaTabela, 'frase' | 'tom'>[],
+  naRecepcao: number,
+): string {
+  const recepcao = naRecepcao
+    ? [t('clinico.meuDia.resumo.recepcao', { total: naRecepcao }, naRecepcao)]
+    : []
+  const assuntos = [
+    ...linhas.filter((linha) => linha.tom === 'risco').map((linha) => linha.frase),
+    ...recepcao,
+    ...linhas.filter((linha) => linha.tom !== 'risco').map((linha) => linha.frase),
+  ]
+  const [primeiro, ...outros] = assuntos
+  if (!primeiro) return t('clinico.meuDia.resumo.emDia')
+  const assunto = primeiro.charAt(0).toLocaleUpperCase() + primeiro.slice(1)
+  if (!outros.length) return assunto
+  return t('clinico.meuDia.resumo.eMais', { assunto, total: outros.length }, outros.length)
+}

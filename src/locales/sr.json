@@ -4129,7 +4129,9 @@
       "resumo": {
         "urgentes": "{total} hitan predmet traži vašu pažnju | {total} hitna predmeta traže vašu pažnju | {total} hitnih predmeta traži vašu pažnju",
         "pendentes": "{total} predmet vas čeka | {total} predmeta vas čekaju | {total} predmeta vas čeka",
-        "emDia": "Ništa ne stoji. Ostatak dana je u rasporedu."
+        "emDia": "Ništa ne stoji. Ostatak dana je u rasporedu.",
+        "recepcao": "{total} pacijent na recepciji | {total} pacijenta na recepciji | {total} pacijenata na recepciji",
+        "eMais": "{assunto} i još {total} predmet | {assunto} i još {total} predmeta | {assunto} i još {total} predmeta"
       },
       "pauta": {
         "boletim": "Izveštaj za {pet} čeka kontakt sa vlasnikom",

@@ -14,7 +14,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 
-import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
+import { porGravidade, tituloDoDia, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import type { IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import { lerErroDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
@@ -262,20 +262,8 @@ export function useMeuDiaDaClinica() {
 
   /* --------------------------------------------------------------------------- o resumo */
 
-  const urgentes = computed(() => linhasDaPauta.value.filter((linha) => linha.tom === 'risco'))
-
-  const fraseDoResumo = computed(() => {
-    const total = linhasDaPauta.value.length + naRecepcao.value.length
-    if (urgentes.value.length) {
-      return t(
-        'clinico.meuDia.resumo.urgentes',
-        { total: urgentes.value.length },
-        urgentes.value.length,
-      )
-    }
-    if (total > 0) return t('clinico.meuDia.resumo.pendentes', { total }, total)
-    return t('clinico.meuDia.resumo.emDia')
-  })
+  /* O título nomeia o assunto (o primeiro, pela gravidade) e quantos mais: ver `tituloDoDia`. */
+  const fraseDoResumo = computed(() => tituloDoDia(t, linhasDaPauta.value, naRecepcao.value.length))
 
   const dataDeHoje = computed(() => {
     const dia = resposta.value?.data

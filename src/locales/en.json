@@ -4129,7 +4129,9 @@
       "resumo": {
         "urgentes": "{total} urgent matter needs your attention | {total} urgent matters need your attention",
         "pendentes": "{total} matter waiting for you | {total} matters waiting for you",
-        "emDia": "Nothing stuck. The rest of the day is on the schedule."
+        "emDia": "Nothing stuck. The rest of the day is on the schedule.",
+        "recepcao": "{total} patient in reception | {total} patients in reception",
+        "eMais": "{assunto} and {total} more matter | {assunto} and {total} more matters"
       },
       "pauta": {
         "boletim": "{pet}'s update is waiting on contact with the owner",

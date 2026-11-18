@@ -11,7 +11,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter, type RouteLocationRaw } from 'vue-router'
 
-import { porGravidade, type LinhaDaTabela } from '@/components/home/pauta-tabela'
+import { porGravidade, tituloDoDia, type LinhaDaTabela } from '@/components/home/pauta-tabela'
 import type { IndicadorDaAbertura } from '@/components/ui/UiAbertura.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import { encounterRepository } from '@/features/clinico/data/repositories'
@@ -186,26 +186,8 @@ export function useMeuDia() {
     return porGravidade(linhas)
   })
 
-  const urgentes = computed(() => linhasDaPauta.value.filter((linha) => linha.tom === 'risco'))
-
-  /** O que espera por alguém nesta tela: a pauta ao lado e quem está na recepção, na fila. */
-  const fraseDoResumo = computed(() => {
-    const total = linhasDaPauta.value.length + naRecepcao.value.length
-
-    if (urgentes.value.length > 0) {
-      return t(
-        'clinico.meuDia.resumo.urgentes',
-        { total: urgentes.value.length },
-        urgentes.value.length,
-      )
-    }
-
-    if (total > 0) {
-      return t('clinico.meuDia.resumo.pendentes', { total }, total)
-    }
-
-    return t('clinico.meuDia.resumo.emDia')
-  })
+  /** O que espera por alguém nesta tela, nomeado: o primeiro assunto e quantos mais (`tituloDoDia`). */
+  const fraseDoResumo = computed(() => tituloDoDia(t, linhasDaPauta.value, naRecepcao.value.length))
 
   /**
    * O dia que a agenda carregou, e não o relógio lido uma vez: assim a data acompanha a virada da

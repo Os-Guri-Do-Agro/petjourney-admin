@@ -4129,7 +4129,9 @@
       "resumo": {
         "urgentes": "{total} assunto urgente pede sua atenção | {total} assuntos urgentes pedem sua atenção",
         "pendentes": "{total} assunto esperando você | {total} assuntos esperando você",
-        "emDia": "Nada parado. O resto do dia está na agenda."
+        "emDia": "Nada parado. O resto do dia está na agenda.",
+        "recepcao": "{total} paciente na recepção | {total} pacientes na recepção",
+        "eMais": "{assunto} e mais {total} assunto | {assunto} e mais {total} assuntos"
       },
       "pauta": {
         "boletim": "Boletim de {pet} aguarda contato com o responsável",
