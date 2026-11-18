@@ -151,8 +151,15 @@ onMounted(() => {
 })
 
 const ocupado = computed(() => criando.value || enviandoEmail.value)
-/** Só o teto do dia não adianta tentar de novo agora. */
-const podeTentarDeNovo = computed(() => erro.value?.codigo !== 'PROPOSTA_TETO_DIARIO')
+/**
+ * Não adianta tentar de novo: o teto do dia, e o pet que já está no app quando ele é o único do
+ * convite (a releitura só tira outro pet da lista; o desta ficha sempre entra e daria o mesmo 409).
+ */
+const podeTentarDeNovo = computed(() => {
+  const codigo = erro.value?.codigo
+  if (codigo === 'PROPOSTA_TETO_DIARIO') return false
+  return !(codigo === 'VINCULO_JA_ATIVO' && pacientes.value.length <= 1)
+})
 
 function validade(convite: PropostaCriada) {
   return t('cadastro.convite.validade', {

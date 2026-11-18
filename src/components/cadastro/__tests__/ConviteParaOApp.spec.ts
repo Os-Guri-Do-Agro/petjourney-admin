@@ -304,4 +304,19 @@ describe('convite para o app', () => {
     })
     expect(wrapper.text()).toContain('Enviar pelo WhatsApp')
   })
+
+  it('o 409 de paciente já ligado, com um pet só no convite, não oferece tentar de novo', async () => {
+    servico.pacientesDoConvite.mockResolvedValue([{ id: 'pac1', nome: 'Bolota' }])
+    servico.proporVinculo.mockRejectedValueOnce(
+      new ApiError('Este pet já está vinculado a esta clínica.', 409, undefined, undefined, {
+        codigo: 'VINCULO_JA_ATIVO',
+      }),
+    )
+
+    const wrapper = montar({ criarAoAbrir: true })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Este pet já está vinculado a esta clínica.')
+    expect(wrapper.text()).not.toContain('Tentar de novo')
+  })
 })
