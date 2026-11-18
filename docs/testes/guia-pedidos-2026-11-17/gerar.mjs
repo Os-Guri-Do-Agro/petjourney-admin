@@ -38,7 +38,7 @@ const CORTES = {
   cms: { x: 249, w: 1191, mm: 0.105 },
   gaveta: { x: 955, w: 485, mm: 0.12 },
   dialogo: { x: 505, w: 430, mm: 0.14 },
-  formulario: { x: 170, w: 400, mm: 0.12 },
+  formulario: { x: 215, w: 400, mm: 0.12 },
   celular: { x: 0, w: 390, mm: 0.15 },
 }
 const AO_LADO = new Set(['gaveta', 'dialogo', 'formulario', 'celular'])
@@ -57,8 +57,9 @@ function passo(n, p) {
   const erro = p.erro ? `<div class="erro">No preparo: ${p.erro}</div>` : ''
   const nc = p.naoConferido ? `<div class="nc">Não conferido no preparo: ${p.naoConferido}</div>` : ''
   const simulado = p.simulado ? `<div class="sim">No preparo: ${p.simulado}</div>` : ''
+  const real = p.real ? `<div class="real">${p.real}</div>` : ''
   const texto = `<div class="bloco"><div class="acao"><span class="num">${n}</span><div>${lado}${p.acao}</div></div>
-  <div class="deve"><b>Deve aparecer:</b> ${p.deve}</div>${simulado}${erro}${nota}${nc}</div>`
+  <div class="deve"><b>Deve aparecer:</b> ${p.deve}</div>${real}${simulado}${erro}${nota}${nc}</div>`
   if (prints.length === 1 && AO_LADO.has(prints[0][1])) {
     return `<div class="passo lado-a-lado"><div class="txt">${texto}</div><div class="fotos">${foto(prints[0])}</div></div>`
   }
@@ -87,86 +88,82 @@ const BRUNA = 'qa-bruna@petjourney.test (senha Teste@123), responsável da Fubá
 const PORTAL = 'portal, no computador (1280 px de largura ou mais) ou no tablet.'
 const SIMULADO_PORTAL = 'tela aberta no portal local lendo a API de dev; o que grava foi respondido no próprio navegador (nada foi gravado na API).'
 
+const REAL = 'Testado em 18/11 na API de dev'
+const BASICO = 'qa-basico@petjourney.test (senha Teste@123), dona da "Pet Shop Teste QA".'
+
 const testes = [
   {
-    letra: 'A', ondeCurto: 'Portal', situacaoCurta: 'Passou, com fotos simuladas', titulo: 'Fotos dos pets nas listas', sub: 'Pedido 1: a foto da clínica ou a do app, e as iniciais quando não há foto',
-    situacao: 'Preparo em 17/11 no portal: passou. A clínica de QA não tem paciente com foto, internado nem fila: as fotos e esses estados foram simulados no navegador. A API de dev já manda o campo da foto.',
-    tom: 'atencao',
-    onde: PORTAL, conta: CLINICA,
-    antes: 'Ponha foto em um paciente pela ficha ("Pôr foto"). Para ver a foto que vem do app, use um paciente ligado a um responsável que tem foto do pet no app (a Fubá, se a Bruna puser foto nela).',
+    letra: 'A', ondeCurto: 'Portal', situacaoCurta: 'Passou (1 correção)', titulo: 'Fotos dos pets nas listas', sub: 'Pedido 1: a foto da clínica ou a do app, e as iniciais quando não há foto',
+    situacao: `${REAL}, gravando de verdade: passou. A aba "Aplicadas" das vacinas estava sem a foto e foi corrigida no mesmo dia (ec17ef8).`,
+    onde: PORTAL, conta: `${CLINICA} No app: ${BRUNA}`,
+    antes: 'A Mel já tem foto da clínica e a Fubá já tem foto no app (postas no teste de 18/11). Para ver de novo a foto chegar do app, ponha foto em outro pet pelo app da Bruna.',
     passos: [
-      { lado: 'P', acao: `${b('Clínica >')} ${q('Pacientes')}${b(', aba')} ${q('Cadastros')}.`, deve: 'A foto redonda ao lado do nome de quem tem foto. Quem não tem mostra a inicial num círculo claro com a silhueta da espécie bem apagada atrás (gato, cachorro...).', simulado: SIMULADO_PORTAL, prints: [['portal-1-1']] },
-      { lado: 'P', acao: `${b('Abra a ficha de um paciente com vínculo e foto no app, volte e recarregue')} ${q('Pacientes')} ${b('alguns segundos depois.')}`, deve: 'Na primeira leitura, as iniciais; depois de recarregar, a foto do app no lugar delas.', naoConferido: 'a conta de QA não tem paciente com foto no app.' },
-      { lado: 'P', acao: `${q('Início')}${b(', bloco')} ${q('Agenda da semana')}${b(', com um pet chamado Bisteca e outro Bolinha de Neve marcados.')}`, deve: `Bisteca com a inicial ${q('B')} (antes saía "BT") e Bolinha de Neve com ${q('BN')}.`, simulado: 'horários simulados; a regra também passou nos testes automáticos.', prints: [['portal-1-3']] },
-      { lado: 'P', acao: `${b('Clínica >')} ${q('Internação')}${b(', mapa dos leitos, com um gato internado sem foto.')}`, deve: 'A foto no leito de quem tem; o gato sem foto com a inicial e a silhueta de gato (antes não havia silhueta). Tocando no leito, a foto grande no alto do detalhe da internação.', simulado: 'internados simulados.', prints: [['portal-1-2']] },
-      { lado: 'P', acao: `${q('Agenda')} > ${q('Marcar horário')}${b(' e toque no campo do paciente.')} ${b('Faça o mesmo em')} ${q('Atender agora')}${b(', na fila, na internação e no hotel.')}`, deve: 'Em cada opção da lista, o rosto do pet (foto ou iniciais) antes do nome. No cartão de cada horário da agenda do dia, um rosto pequeno entre a hora e o nome.', simulado: 'conferido em "Marcar horário" e "Atender agora"; as outras gavetas usam o mesmo componente.', prints: [['portal-1-4']] },
-      { lado: 'P', acao: `${b('Ainda com a foto aparecendo: no Chrome, F12 > aba Network, botão direito numa foto >')} ${q('Block request domain')}${b(', e recarregue Pacientes, Agenda, Vacinas e Internação.')}`, deve: 'Em todas, as iniciais com a silhueta da espécie no lugar da foto. Nenhum ícone de imagem quebrada.', simulado: 'foto apontando para um endereço que não existe: nenhuma imagem quebrada.' },
+      { lado: 'P', acao: `${b('Clínica >')} ${q('Pacientes')}${b(', aba')} ${q('Cadastros')}.`, deve: 'A foto redonda ao lado do nome de quem tem foto (Mel e Fubá). Quem não tem mostra a inicial num círculo claro com a silhueta da espécie bem apagada atrás.', real: `${REAL}: passou.`, prints: [['real-1-1']] },
+      { lado: 'A', acao: b('No app da Bruna, ponha foto num pet ligado à clínica. No portal, recarregue Pacientes e, alguns segundos depois, recarregue de novo.'), deve: 'Na primeira leitura, as iniciais; na seguinte, a foto do app no lugar delas (uma miniatura).', real: `${REAL}: passou. A miniatura da Fubá apareceu na leitura de 13 segundos depois.` },
+      { lado: 'P', acao: `${q('Vacinas')}${b(', abas')} ${q('Lista de chamada')} ${b('e')} ${q('Aplicadas')}.`, deve: 'Nas duas, o rosto do pet no cartão ou no começo da linha: foto ou iniciais.', real: `${REAL}: passou depois da correção da aba Aplicadas, que não mostrava rosto nenhum.`, prints: [['real-1-5']] },
+      { lado: 'P', acao: `${q('Agenda')}${b(', visão Dia, com horários marcados hoje, e')} ${q('Marcar horário')} ${b('> campo do paciente.')}`, deve: 'Na grade, um rosto pequeno entre a hora e o nome. Na lista do campo, o rosto antes de cada nome ("Bisteca · Júlia QA" com "B").', real: `${REAL}: passou.`, prints: [['real-1-7']] },
+      { lado: 'P', acao: `${q('Início')}${b(', bloco')} ${q('Agenda da semana')}${b(', com o Bisteca marcado hoje.')}`, deve: `Bisteca com ${q('B')} (antes saía "BT").`, real: `${REAL}: passou.`, prints: [['real-1-10']] },
+      { lado: 'P', acao: `${q('Internação')}${b(', mapa, com um pet com foto e a gata Pipoca (sem foto) internados. Depois, toque no leito.')}`, deve: 'No leito, a foto; a Pipoca com "P" e a silhueta de gato. No detalhe da internação, a foto no alto, ao lado do nome.', real: `${REAL}: passou (as duas internações já tiveram alta).`, prints: [['real-1-2']] },
+      { lado: 'P', acao: `${q('Lista de espera')}${b(', com um pet com foto na fila.')}`, deve: 'Depois da posição ("1º"), a foto do pet.', real: `${REAL}: passou (a Fubá já saiu da fila).` },
+      { lado: 'P', acao: `${b('F12 > aba Network, botão direito numa foto >')} ${q('Block request domain')}${b(', e recarregue Pacientes.')}`, deve: 'Todos com a inicial e a silhueta da espécie. Nenhum ícone de imagem quebrada.', real: `${REAL}: passou.` },
     ],
     naoBug: [
       'Na primeira leitura de um paciente com vínculo, aparecem as iniciais: a foto do app vem numa leitura seguinte.',
-      'Na visão Semana da agenda, no dia de hoje do Início e no painel Hoje não há foto: a API não manda foto nessas listas.',
-      'Logo depois de mover ou marcar um horário, o rosto pode mostrar as iniciais por um instante, até a agenda se reler.',
-      '"Bolinha de Neve" aparece "BD" na grade da agenda e "BN" no Início: as duas telas já faziam iniciais de jeitos diferentes.',
+      'Na visão Semana da agenda e no dia de hoje do Início não há foto: a API não manda foto nessas listas.',
+      'Logo depois de marcar ou mover um horário, o rosto pode mostrar as iniciais por um instante, até a agenda se reler.',
     ],
     bug: [
       'Aparece o ícone de imagem quebrada ou um quadrado vazio em qualquer avatar.',
-      'O paciente com foto da clínica mostra as iniciais em alguma das listas, com a imagem carregando normalmente.',
+      'O paciente com foto mostra as iniciais em alguma lista, com a imagem carregando normalmente.',
       '"Bisteca" mostra "BT".',
-      'A lista de pacientes se recarrega sozinha várias vezes esperando a foto.',
     ],
   },
   {
-    letra: 'B', ondeCurto: 'Portal e CMS', situacaoCurta: 'Passou com simulação', titulo: 'O dono liga e desliga os módulos', sub: 'Pedido 2: teste grátis de 30 dias, desligar com a prévia, religar, e o que o CMS mostra',
-    situacao: 'Preparo em 17/11. Portal: passou com as respostas simuladas (nenhum módulo foi ligado nem desligado de verdade); a leitura da API de dev com a clínica de QA passou. CMS: passou com respostas simuladas.',
+    letra: 'B', ondeCurto: 'Portal e CMS', situacaoCurta: 'Portal passou; CMS sem teste real', titulo: 'O dono liga e desliga os módulos', sub: 'Pedido 2: teste grátis de 30 dias, desligar com a prévia, religar, e o que o CMS mostra',
+    situacao: `${REAL} com a qa-basico, gravando de verdade: ligar, desligar, religar e o erro de "já desligado" passaram, sem correção. Não testados: o operador (não há conta de operador) e o CMS (falta a senha de admin do dev; só com respostas simuladas).`,
     tom: 'atencao',
-    onde: `${PORTAL} O CMS com a sua conta de administrador.`, conta: 'Conta A: uma empresa nova, feita pelo site com a categoria Clínica veterinária e CNPJ, aprovada no CMS e sem nenhum módulo. Conta B: um operador da conta A (convite pela Equipe). E a portal-demo@petjourney.test para o caso do suporte.',
-    antes: 'O teste grátis só se liga uma vez por módulo: depois do passo 2, a conta A não repete o passo 2. Não toque em "Desligar" na portal-demo.',
+    onde: `${PORTAL} O CMS com a conta de administrador.`, conta: `${BASICO} Ela precisa ter "Clínica veterinária" nas categorias (teste C) para a Clínica aceitar o teste grátis.`,
+    antes: 'O teste grátis só liga uma vez por módulo. A qa-basico já usou o da Clínica em 18/11 e ficou com ela desligada por você (dá para religar até 18/12). Para ver de novo o "Ligar teste grátis", use o Hotel dela (com "Hotel e creche" nas categorias) ou uma empresa nova aprovada.',
     passos: [
-      { lado: 'P', acao: `${b('Entre com a conta A.')} ${q('Início')}${b(', faixa dos módulos (abaixo dos programas).')}`, deve: `Clínica com ${q('Combina com o seu cadastro')}, ${q('Sem custo e sem cartão. Depois dos 30 dias, a equipe PetJourney fala com você para continuar.')} e o botão ${q('Ligar teste grátis de 30 dias')}. Hotel com ${q('Este módulo não faz parte das categorias do seu cadastro, então o teste grátis não liga sozinho. Peça o módulo e a equipe PetJourney analisa.')} e ${q('Pedir o módulo')}.`, simulado: 'respostas simuladas sobre a tela real.', prints: [['portal-2-1']] },
-      { lado: 'P', acao: `${q('Ligar teste grátis de 30 dias')}.`, deve: `O aviso ${q('Clínica: teste grátis ligado até [data daqui a 30 dias].')} Sem recarregar, o menu ganha a Clínica, e a linha passa a ${q('Em teste até [data].')} com ${q('Desligar')}.`, simulado: 'ligar respondido no navegador.' },
-      { lado: 'P', acao: `${b('Marque dois horários em dias futuros e interne um paciente. Volte ao Início e toque em')} ${q('Desligar')}.`, deve: `${q('Desligar a Clínica?')}, ${q('Ficam só para consulta: 2 agendamentos futuros e 1 internação em andamento.')}, o destaque ${q('Há paciente internado: a equipe não vai conseguir registrar medicação nem evolução até você religar.')} e ${q('Nada é cancelado nem apagado, e os responsáveis não recebem aviso.')} Sem nada em andamento: ${q('Nada em andamento será afetado.')}`, simulado: 'prévia simulada com 3 agendamentos e 1 internação.', prints: [['portal-2-3', 'dialogo']] },
-      { lado: 'P', acao: `${q('Desligar')} ${b('na confirmação e, depois,')} ${q('Religar')}.`, deve: `${q('Clínica desligada.')} e a linha ${q('Desligado por você. Você pode religar até [a mesma data].')} com ${q('Só consulta')}; no menu, a Clínica só para consulta. Religada: ${q('Clínica religada.')} e de volta ${q('Em teste até [a mesma data].')}`, simulado: 'desligar e religar respondidos no navegador.' },
-      { lado: 'P', acao: b('Entre com a conta B (operador) e abra o Início.'), deve: `A linha da Clínica com o estado e ${q('Só o dono liga ou desliga módulos.')}, sem nenhum botão.`, simulado: 'papel trocado no navegador.' },
-      { lado: 'P', acao: b('Entre com a portal-demo e abra o Início.'), deve: `Clínica com ${q('Desligar')}; Hotel com ${q('A equipe PetJourney suspendeu, recusou ou desligou este módulo. Para ligá-lo de novo, fale com a equipe PetJourney.')} e ${q('Só consulta')}, sem botão.`, simulado: 'passou lendo a API de dev, sem simulação.' },
-      { lado: 'C', acao: `${b('No CMS:')} ${q('Parceiros')} ${b('> o parceiro > aba')} ${q('Módulos')}${b(', depois de o dono ligar o teste grátis pelo portal.')}`, deve: `No cartão da Clínica, ${q('Ligado pelo parceiro (teste grátis) em DD/MM')} e, embaixo, ${q('Histórico do parceiro')} com ${q('Ligou o teste grátis')} e a data. ${q('Última decisão')} continua ${q('-')}: o ligar do dono não é decisão do admin.`, naoConferido: 'a tela nesse estado; a regra passou nos testes do CMS.' },
-      { lado: 'C', acao: `${b('Depois de o dono desligar a Clínica pelo portal,')} ${q('Atualizar')}.`, deve: `${q('Desligado pelo parceiro em DD/MM')}, ${q('Pode religar para')} com ${q('Em teste')}, ${q('Teste grátis do parceiro já usado em DD/MM')} e o histórico com ${q('Desligou')} no alto.`, simulado: 'tela do CMS local com as respostas trocadas no navegador.', prints: [['cms-1', 'cms']] },
-      { lado: 'C', acao: `${b('No mesmo cartão,')} ${q('Ligar em teste')} ${b('(não confirme, se não quiser tirar o religar do dono).')}`, deve: `No alto do modal: ${q('Sua decisão substitui a do parceiro: ele não consegue mais religar sozinho.')}`, simulado: 'tela do CMS local.' },
-      { lado: 'C', acao: b('Num módulo recusado pelo admin e pedido de novo pelo dono.'), deve: `${q('Pedido refeito depois de recusa em DD/MM')}.`, simulado: 'tela do CMS local (cartão do Hotel no print acima).' },
+      { lado: 'P', acao: `${q('Início')}${b(', faixa dos módulos (abaixo dos programas).')}`, deve: `Clínica com ${q('Combina com o seu cadastro')}, ${q('Sem custo e sem cartão. Depois dos 30 dias, a equipe PetJourney fala com você para continuar.')} e ${q('Ligar teste grátis de 30 dias')}. Fora da categoria: o texto de fora da categoria e ${q('Pedir o módulo')}.`, real: `${REAL}: passou.`, prints: [['real-2-1']] },
+      { lado: 'P', acao: `${q('Ligar teste grátis de 30 dias')}.`, deve: `${q('Clínica: teste grátis ligado até [data daqui a 30 dias].')} Sem recarregar, o menu ganha a Clínica, e a linha passa a ${q('Em teste até [data].')} com ${q('Desligar')}.`, real: `${REAL}: passou ("Clínica: teste grátis ligado até 18 de dezembro.").`, prints: [['real-2-2']] },
+      { lado: 'P', acao: `${q('Desligar')}.`, deve: `${q('Desligar a Clínica?')} com o texto de que nada é cancelado e, conforme o que houver, ${q('Ficam só para consulta: [n] agendamentos futuros e [n] internação em andamento.')} ou ${q('Nada em andamento será afetado.')}`, real: `${REAL}: passou com "Nada em andamento será afetado." (a qa-basico não tem agenda). Os números passaram nos testes automáticos.`, prints: [['real-2-3', 'dialogo']] },
+      { lado: 'P', acao: `${q('Desligar')} ${b('na confirmação.')}`, deve: `${q('Clínica desligada.')}, a linha ${q('Desligado por você. Você pode religar até [data].')} com ${q('Só consulta')} e ${q('Religar')}. Na Agenda e em Pacientes, sem os botões de criar e com o aviso de módulo desligado.`, real: `${REAL}: passou.`, prints: [['real-2-4']] },
+      { lado: 'P', acao: `${q('Religar')}.`, deve: `${q('Clínica religada.')} e de volta ${q('Em teste até [a mesma data].')}`, real: `${REAL}: passou (a data ficou a mesma).` },
+      { lado: 'P', acao: b('Com a Clínica ligada, desligue em outra aba e, nesta, sem recarregar, toque em "Desligar" e confirme.'), deve: `${q('Não deu certo')} com ${q('Este módulo já está desligado.')}, e a linha se atualiza sozinha.`, real: `${REAL}: passou.` },
+      { lado: 'P', acao: b('Entre com um operador da empresa e abra o Início.'), deve: `A linha com o estado e ${q('Só o dono liga ou desliga módulos.')}, sem botão.`, naoConferido: 'não há conta de operador no dev (o convite pede o token que chega por e-mail).' },
+      { lado: 'C', acao: `${b('No CMS:')} ${q('Parceiros')} ${b('> Pet Shop Teste QA > aba')} ${q('Módulos')}.`, deve: `Na Clínica, ${q('Desligado pelo parceiro em 18/11')}, ${q('Pode religar para')} ${q('Em teste')} e ${q('Teste grátis do parceiro já usado em 18/11')}; ${q('Histórico do parceiro')} com Ligou o teste grátis, Desligou e Religou. Em ${q('Ligar em teste')}: ${q('Sua decisão substitui a do parceiro: ele não consegue mais religar sozinho.')}`, naoConferido: 'falta a senha de admin do CMS no dev. O print é do CMS local com respostas simuladas.', prints: [['cms-1', 'cms']] },
     ],
     naoBug: [
       'O estado do teste diz "Em teste até [data]." (a frase que já existia), e não "Teste grátis até".',
-      'Desligar não cancela horário nem internação: ficam para consulta, e os responsáveis não recebem aviso.',
+      'Desligar não cancela horário nem internação: eles ficam para consulta, e os responsáveis não recebem aviso.',
       'O módulo ativo só aparece na faixa para o dono, porque só ele desliga.',
-      'No CMS, o ligar e o religar do dono não preenchem "Última decisão" nem o motivo: esses são do admin.',
+      'No CMS, o ligar e o religar do dono não preenchem "Última decisão": essa é do admin.',
     ],
     bug: [
-      'O botão diz "30 dias" quando a API manda outro número de dias.',
+      'O botão diz "30 dias" quando a API manda outro número.',
       'Depois de ligar, desligar ou religar, o menu só muda recarregando a página.',
       'A confirmação mostra "0 internações" ou "1 agendamentos futuros".',
-      'O operador vê algum botão de ligar, desligar ou pedir.',
-      'No CMS, "Desligado pelo parceiro" aparece num módulo desligado pelo admin.',
+      'O operador vê botão de ligar, desligar ou pedir.',
     ],
   },
   {
-    letra: 'C', ondeCurto: 'Site, portal e CMS', situacaoCurta: 'Passou na tela, sem gravar', titulo: 'Cadastro com várias categorias', sub: 'Pedido 3: escolher mais de uma categoria, com uma principal',
-    situacao: 'Preparo em 17/11: site, portal e CMS passaram na tela sem gravar. O que vai para a API foi conferido pelo corpo do pedido (no navegador e nos testes); a gravação de verdade não foi feita.',
+    letra: 'C', ondeCurto: 'Site, portal e CMS', situacaoCurta: 'Site e portal passaram; CMS sem teste real', titulo: 'Cadastro com várias categorias', sub: 'Pedido 3: escolher mais de uma categoria, com uma principal',
+    situacao: `${REAL}, gravando de verdade: o cadastro pelo site e a edição no portal passaram. Correção no mesmo dia: o texto do campo no portal passou a "Selecione uma ou mais categorias" (ea39552). O CMS não foi testado de verdade (falta a senha de admin do dev).`,
     tom: 'atencao',
-    onde: 'Site (cadastro de parceiro), portal (dados do cadastro) e CMS (parceiros).', conta: 'Um e-mail ainda sem conta, para o cadastro pelo site. No portal, a conta nova (ou a da clínica de QA). No CMS, a sua conta de administrador.',
+    onde: 'Site (cadastro de parceiro), portal (Configurações > Empresa) e CMS (Parceiros).', conta: `Site: um e-mail ainda sem conta (no teste, qa-categorias-1811@petjourney.test, que ficou pendente de aprovação). Portal: ${BASICO}`,
     passos: [
-      { lado: 'S', acao: `${b('No site,')} ${q('Sou parceiro')}${b(', preencha a etapa 1 e, na etapa 2, marque Pet shop, Clínica veterinária e Banho e tosa.')}`, deve: `${q('Escolha uma ou mais categorias')} e oito caixas. ${q('Principal')} embaixo da primeira marcada (Pet shop) e ${q('Tornar principal')} nas outras. Embaixo: ${q('A principal aparece primeiro na sua página e nas buscas.')}`, simulado: 'tela do site local, sem enviar.', prints: [['site-5', 'formulario']] },
-      { lado: 'S', acao: `${q('Tornar principal')} ${b('em Banho e tosa, depois desmarque Banho e tosa.')}`, deve: `${q('Principal')} passa para Banho e tosa; desmarcada, volta para Pet shop (a primeira que sobrou). Tocar em ${q('Tornar principal')} não marca nem desmarca a caixa.`, simulado: 'tela e testes do site.' },
-      { lado: 'S', acao: `${b('Deixe Pet shop e Clínica veterinária, termine e')} ${q('Enviar cadastro')}${b('. Com o F12 aberto, aba Network.')}`, deve: `${q('Obrigado pelo seu cadastro!')} O pedido do cadastro leva ${q('categorias: [PET_SHOP, CLINICA_VETERINARIA]')} e não leva ${q('categoria')}. Sem nenhuma marcada, o cadastro passa e não leva nenhuma das duas.`, naoConferido: 'o envio de verdade; o corpo do pedido passou nos testes do site.' },
-      { lado: 'P', acao: `${b('No portal:')} ${q('Configurações')} > ${q('Empresa')}${b(', campo')} ${q('Categorias')}${b('. Marque Hotel e creche e Pet shop.')}`, deve: `${q('Escolha uma ou mais. A primeira é a principal.')} e, embaixo, a ordem: a primeira com ${q('Principal')} e as outras com ${q('Tornar principal')}.`, simulado: 'lido da API de dev e marcado na tela, sem salvar.', prints: [['portal-3-1']] },
-      { lado: 'P', acao: `${b('Troque a principal,')} ${q('Salvar alterações')} ${b('e recarregue a página.')}`, deve: `O aviso de salvo; recarregando, as três categorias na mesma ordem. Editar só o telefone e salvar mantém as três. Desmarcar todas: ${q('Escolha pelo menos uma categoria.')} e nada é enviado.`, naoConferido: 'a gravação; o pedido leva só categorias, conferido no navegador e nos testes.' },
-      { lado: 'P', acao: `${b('Com Clínica veterinária e Hotel e creche salvas, abra o')} ${q('Início')}.`, deve: `Na faixa dos módulos, o Hotel também com ${q('Combina com o seu cadastro')} e ${q('Ligar teste grátis de 30 dias')} (se o teste do Hotel ainda não foi usado).`, naoConferido: 'a mudança vinda da API; a tela com os dois sugeridos foi simulada.' },
-      { lado: 'C', acao: `${b('No CMS:')} ${q('Parceiros')} > ${q('Novo parceiro')} ${b('(ou editar um parceiro), marque duas categorias e use')} ${q('Tornar principal')}.`, deve: `${q('Categorias')}, ${q('Escolha uma ou mais. A primeira é a principal.')}, o selo ${q('Principal')} e ${q('Tornar principal')} nas outras. Salvo: ${q('Parceiro atualizado com sucesso!')} e, reaberto, a mesma ordem.`, simulado: 'tela do CMS local; a gravação foi respondida no navegador e levou só categorias.', prints: [['cms-6', 'cms']] },
-      { lado: 'C', acao: `${b('Lista')} ${q('Parceiros')}${b(', depois o filtro de categoria')} ${q('Pet shop')}.`, deve: 'Embaixo do nome, um selo por categoria: a principal com fundo, as outras só com borda. O filtro também acha quem tem Pet shop como segunda categoria. O mesmo em Auditoria e em Feedback dos parceiros.', simulado: 'os selos na tela do CMS local; o filtro é da API e não foi conferido.', prints: [['cms-3', 'cms']] },
+      { lado: 'S', acao: `${b('No site,')} ${q('Sou parceiro')}${b(', etapa 2: marque Pet shop e Clínica veterinária e deixe Pet shop como principal.')}`, deve: `${q('Escolha uma ou mais categorias')}, ${q('Principal')} na escolhida e ${q('Tornar principal')} na outra; embaixo, ${q('A principal aparece primeiro na sua página e nas buscas.')}`, real: `${REAL}: passou.`, prints: [['real-3-2', 'formulario']] },
+      { lado: 'S', acao: `${b('Termine e')} ${q('Enviar cadastro')}${b('. Depois, entre no portal com a conta nova.')}`, deve: `${q('Obrigado pelo seu cadastro!')} No portal, em Configurações > Empresa, as duas categorias, Pet shop como principal.`, real: `${REAL}: passou (a API devolveu Pet shop e Clínica veterinária, nessa ordem).` },
+      { lado: 'P', acao: `${b('No portal, com a qa-basico:')} ${q('Configurações')} > ${q('Empresa')} > ${q('Categorias')}${b('. Acrescente Clínica veterinária e Hotel e creche, toque em')} ${q('Tornar principal')} ${b('numa delas,')} ${q('Salvar alterações')} ${b('e recarregue.')}`, deve: `${q('Cadastro atualizado')}; recarregando, as três na ordem salva, a principal com ${q('Principal')}.`, real: `${REAL}: passou.`, prints: [['real-3-1']] },
+      { lado: 'P', acao: b('Mude só o telefone e salve. Depois, desmarque todas as categorias e tente salvar.'), deve: `O telefone salvo e as três categorias mantidas. Sem nenhuma: ${q('Escolha pelo menos uma categoria.')} e nada é enviado.`, real: `${REAL}: passou. No fim, a qa-basico voltou a só Pet shop, com o telefone de antes.` },
+      { lado: 'P', acao: b('Numa empresa aprovada sem CNPJ, acrescente Clínica veterinária e salve.'), deve: `${q('Esta categoria precisa de CNPJ. Informe o CNPJ do negócio para salvar.')} e o cursor no CNPJ. Nada é salvo.`, naoConferido: 'não há conta aprovada sem CNPJ no dev; passou nos testes automáticos.' },
+      { lado: 'C', acao: `${b('No CMS:')} ${q('Parceiros')}${b(', editar um parceiro, marcar duas categorias e')} ${q('Tornar principal')}${b('; depois a lista e o filtro')} ${q('Pet shop')}.`, deve: 'Na edição, "Principal" e "Tornar principal". Na lista, um selo por categoria, a principal com fundo. O filtro também acha quem tem Pet shop como segunda categoria.', naoConferido: 'falta a senha de admin do CMS no dev. O print é do CMS local com respostas simuladas.', prints: [['cms-3', 'cms']] },
     ],
     naoBug: [
-      'No CMS, a aba Módulos ainda mostra "Categoria:" só com a principal; os módulos sugeridos já somam as categorias (clínica e hotel sugere Clínica e Hotel).',
-      'O filtro de categoria continua escolhendo uma categoria por vez.',
-      'No portal, "Veterinário autônomo" só aparece quando o cadastro já a tem: o portal não tem o campo de CRMV que ela exige.',
-      'O erro de CNPJ da API quase não aparece no portal: o formulário já pede o CNPJ antes de mandar.',
+      'No CMS, a aba Módulos ainda mostra "Categoria:" só com a principal.',
+      'No portal, "Veterinário autônomo" só aparece quando o cadastro já a tem: o portal não tem campo de CRMV.',
+      'O cadastro pelo site continua sem exigir categoria.',
     ],
     bug: [
       'Editar só o telefone (portal ou CMS) apaga as outras categorias.',
@@ -175,86 +172,76 @@ const testes = [
     ],
   },
   {
-    letra: 'D', ondeCurto: 'Portal, app e site', situacaoCurta: 'Portal passou com simulação; app só por scripts', titulo: 'Convidar o paciente para o app', sub: 'Pedido 4: link, WhatsApp e QR no portal; o convite aberto no app e no site',
-    situacao: 'Preparo em 17/11. Portal: passou com o convite respondido no navegador (nenhum convite foi criado nem enviado). Site: passou com a prévia respondida no navegador. App: conferido por scripts com as funções do app; as telas não foram abertas.',
+    letra: 'D', ondeCurto: 'Portal, site e app', situacaoCurta: 'Passou (2 correções); telas do app não abertas', titulo: 'Convidar o paciente para o app', sub: 'Pedido 4: link, WhatsApp e QR no portal; a prévia no site; o aceite no app',
+    situacao: `${REAL}, de ponta a ponta e gravando de verdade: passou. Duas correções no mesmo dia: o Escape no QR fechava também a gaveta (45f9a10) e o "Tentar de novo" voltava com o pet que já estava no app (940c743). O aceite do lado do app foi feito pela API, com a conta da Júlia; as telas do app não foram abertas.`,
     tom: 'atencao',
-    onde: `${PORTAL} O app de dev no celular, com e sem login.`, conta: `${CLINICA} No app, uma conta de responsável sua (ou uma nova).`,
-    antes: 'Escolha um paciente ativo, ainda fora do app, com responsável que tenha telefone (de preferência o seu celular) e e-mail. Na conta de QA: "Rafael lima". Cada convite de verdade conta no limite de 50 por dia e cancela o convite anterior do mesmo responsável.',
+    onde: `${PORTAL} O site no navegador. O app de dev no celular.`, conta: `${CLINICA} No app: qa-julia@petjourney.test (senha Teste@123) ou uma conta sua.`,
+    antes: 'No teste de 18/11 foram criados a cliente Júlia QA e o paciente Bisteca, já ligado ao app da Júlia. Para repetir, cadastre outro pet ou use um paciente ainda fora do app. Cada convite cancela o anterior do mesmo responsável.',
     passos: [
-      { lado: 'P', acao: `${b('Abra a ficha do paciente e desça até o cartão')} ${q('No app do responsável')}.`, deve: `O botão ${q('Convidar para o app')} no alto do cartão e, em cada proposta ${q('Expirada')} ou ${q('Não respondida')}, o botão ${q('Reenviar')}.`, simulado: SIMULADO_PORTAL, prints: [['portal-4-3']] },
-      { lado: 'P', acao: `${b('Toque em')} ${q('Convidar para o app')}.`, deve: `A gaveta ${q('Convidar para o app')}, sem abas: ${q('Convite para [pet]. O responsável abre o link no celular e aceita pelo app.')}, o botão cheio ${q('Enviar pelo WhatsApp')}, ${q('Mostrar QR')}, ${q('Copiar mensagem')}, ${q('Enviar por e-mail')} (só se o cliente tem e-mail), ${q('Vale até [data daqui a 7 dias]')} e ${q('Outras formas')} recolhido.`, simulado: 'resposta do convite simulada.', prints: [['portal-4-1', 'gaveta']] },
-      { lado: 'P', acao: `${q('Enviar pelo WhatsApp')}.`, deve: 'O WhatsApp abre numa aba nova, na conversa com o telefone do cadastro, com a mensagem pronta: nome da clínica, o pet, o link, o código e a validade.', naoConferido: 'a conversa no WhatsApp (o portal abre o endereço que a API manda).' },
-      { lado: 'P', acao: `${q('Mostrar QR')}.`, deve: `A tela inteira com o QR num cartão branco, o código em dois blocos (como ${q('K7MQ-X3PA')}), o texto ${q('Baixe o app PetJourney na App Store ou no Google Play, toque em Minhas clínicas e aponte a câmera para o QR. Ou digite o código ...')}, a validade e ${q('Imprimir')}.`, simulado: 'conferido também em 1024 px e no tema escuro.', prints: [['portal-4-2', 'tudo']] },
-      { lado: 'S', acao: b('No computador (sem o app), abra o link da mensagem.'), deve: `A página do site com o logo, ${q('[clínica] quer conectar seus pets ao app PetJourney')}, a cidade e a UF, ${q('Vale até [data]')}, as lojas e ${q('Depois de instalar, toque no link de novo ou digite o código que veio na mensagem.')} Nenhum nome de pet ou de pessoa.`, simulado: 'tela do site local com a prévia respondida no navegador; o pedido sai do navegador, com a página sem Analytics.', prints: [['site-1', 'tudo']] },
-      { lado: 'A', acao: b('No celular SEM login no app, toque no link da mensagem do WhatsApp.'), deve: `O logo da clínica, ${q('[clínica] te convidou')}, ${q('A clínica quer acompanhar seus pets pelo app. Crie sua conta para ver o convite.')} e os botões ${q('Criar conta')} e ${q('Já tenho conta')}.`, naoConferido: 'a tela; a chamada da prévia passou nos scripts.' },
-      { lado: 'A', acao: `${q('Já tenho conta')} ${b('e entre com a sua conta.')}`, deve: `Depois de entrar, a tela ${q('Pedido da clínica')} com o pet do convite. Aceite.`, naoConferido: 'a tela; a espera para abrir só depois do login passou nos scripts.' },
-      { lado: 'P', acao: b('Volte ao portal, feche a gaveta e abra o convite de novo para o mesmo paciente.'), deve: `${q('O convite anterior deixou de valer.')} abaixo da validade. ${b('No site, o link anterior')} passa a mostrar o texto genérico ${q('Proposta da clínica')}, sem o nome da clínica; um convite com mais de 7 dias mostra ${q('Este convite venceu.')} e ${q('Pedir outro convite pelo WhatsApp')} (só se a clínica tem WhatsApp público).`, simulado: 'frase do portal e as páginas do site com respostas simuladas.' },
-      { lado: 'P', acao: `${b('Cadastre um paciente novo (')}${q('Cadastrar paciente')}${b(') para um responsável que já é da casa.')}`, deve: `No fim, ${q('Convidar para o app agora?')} com as mesmas ações e ${q('Agora não')} no pé. ${q('Agora não')} leva à ficha sem criar convite.`, simulado: 'cadastro respondido no navegador.', prints: [['portal-4-4', 'gaveta']] },
-      { lado: 'A', acao: `${b('Com uma conta que já tem um pet de mesmo nome e espécie do convite, abra o convite e escolha')} ${q('Criar [pet] no app')}.`, deve: `A folha ${q('Você já tem [pet] no app')} com ${q('Ligar ao que já tenho')} e ${q('Criar mesmo assim')}.`, naoConferido: 'a tela; a regra (nome sem acento e sem maiúscula, mesma espécie) passou nos scripts.' },
-      { lado: 'A', acao: `${b('Num celular sem dados do app, abra o app:')} ${q('Recebi um convite de uma clínica')}${b(', crie a conta.')}`, deve: `Depois do cadastro, a tela do código com ${q('Digite o código que a recepção da clínica te passou. Ele tem 8 letras e números e vale por 7 dias.')} Digite o código do convite: abre o pedido da clínica.`, naoConferido: 'a tela. O topo da boas-vindas ficou mais baixo para os três botões caberem: olhe num celular pequeno.' },
+      { lado: 'P', acao: `${q('Cadastrar paciente')} ${b('para um responsável com telefone e, no fim,')} ${q('Enviar pelo WhatsApp')}.`, deve: `${q('Convidar para o app agora?')}; o WhatsApp abre com o telefone do cadastro e a mensagem pronta (clínica, pet, link, código e validade); na gaveta, ${q('Vale até [data daqui a 7 dias]')} e o pé vira ${q('Fechar')}.`, real: `${REAL}: passou.`, prints: [['real-4-1', 'gaveta']] },
+      { lado: 'P', acao: `${q('Mostrar QR')}${b(', depois')} ${q('Imprimir')} ${b('e')} ${q('Copiar mensagem')}.`, deve: `A tela inteira com o QR, o código em dois blocos (o mesmo da mensagem) e ${q('Baixe o app PetJourney na App Store ou no Google Play, toque em Minhas clínicas e aponte a câmera para o QR. Ou digite o código ...')}`, real: `${REAL}: passou (o QR é o do link da API).`, prints: [['real-4-2', 'tudo']] },
+      { lado: 'S', acao: b('Abra o link da mensagem num computador.'), deve: `${q('[Clínica] quer conectar seus pets ao app PetJourney')}, a cidade e a UF, ${q('Vale até [data]')}, as lojas e ${q('Depois de instalar, toque no link de novo ou digite o código que veio na mensagem.')} Nenhum nome de pet ou de pessoa.`, real: `${REAL}: passou (a página não manda o endereço adiante e não tem Analytics).`, prints: [['real-4-4', 'tudo']] },
+      { lado: 'A', acao: b('No celular, toque no link (sem login: crie a conta ou entre) e aceite o pedido da clínica.'), deve: `No portal, a ficha do paciente passa a ${q('Ligado desde [data], por convite por link.')}, com a proposta ${q('Aceita')}.`, real: `${REAL}: passou, com o aceite feito pela API na conta da Júlia.`, naoConferido: 'as telas do app (a prévia sem login, "Criar conta", "Já tenho conta" e o pedido da clínica).', prints: [['real-4-3']] },
+      { lado: 'P', acao: `${b('Na ficha de outro paciente fora do app,')} ${q('Convidar para o app')}${b(', feche e abra de novo.')}`, deve: `Na segunda vez, ${q('O convite anterior deixou de valer.')} O código antigo dá "não encontrado" no app, e o link antigo, no site, cai em ${q('Proposta da clínica')}, sem o nome da clínica.`, real: `${REAL}: passou.`, prints: [['real-4-6', 'gaveta']] },
+      { lado: 'P', acao: b('Convide um paciente que já está no app; e, num cliente sem e-mail, toque em "Enviar por e-mail".'), deve: `${q('Este pet já está vinculado a esta clínica.')} sem ${q('Tentar de novo')}. Sem e-mail: a mensagem da API e o botão de e-mail some.`, real: `${REAL}: passou depois da correção do "Tentar de novo".` },
+      { lado: 'A', acao: `${b('Num celular sem dados do app:')} ${q('Recebi um convite de uma clínica')}${b('. E, com uma conta que já tem um pet de mesmo nome e espécie, aceite escolhendo criar o pet.')}`, deve: `Depois do cadastro, a tela do código (${q('... vale por 7 dias.')}). No pet repetido, ${q('Você já tem [pet] no app')} com ${q('Ligar ao que já tenho')} e ${q('Criar mesmo assim')}.`, naoConferido: 'as telas do app; a regra passou nos scripts.' },
     ],
     naoBug: [
-      'Abrir a gaveta já cria um convite (o guia do backend pede assim): abrir e fechar várias vezes gasta convites do limite diário, e só o último vale.',
-      '"Enviar por e-mail" faz um convite novo e o link da gaveta deixa de valer.',
-      'Sem telefone no cadastro, o WhatsApp abre sem destinatário e a recepção escolhe o contato.',
-      'A mensagem do WhatsApp vem pronta da API e diz para digitar o código em "Minhas clínicas"; a folha impressa fala em apontar a câmera (texto do guia do backend). Ver a pendência 3 no fim.',
-      'O convite por link e o código não mandam push ao responsável: só o QR da carteirinha e o acesso temporário mandam.',
+      'Abrir a gaveta pela ficha já cria um convite (o guia do backend pede assim). Só o último vale.',
+      'A mensagem do WhatsApp manda digitar o código em "Minhas clínicas"; a folha impressa fala em apontar a câmera (pendência 3).',
+      'O convite por link não manda push ao responsável: só o QR da carteirinha e o acesso temporário mandam.',
+      'A mensagem de cliente sem e-mail ainda cita o "código de balcão": o texto é da API.',
     ],
     bug: [
       'A gaveta ainda mostra as abas antigas ("Código", "E-mail", "QR da carteirinha").',
       'O WhatsApp abre sem a mensagem, ou com outro número quando o cadastro tem telefone.',
-      'O link sem login vai direto ao login (com internet e a API de dev atualizada).',
-      'Depois de entrar pelo link, o app fica na home e não abre o pedido da clínica.',
-      '"Agora não", no fim do cadastro, deixa uma proposta nova na ficha.',
+      'O link sem login vai direto ao login, com a API de dev atualizada.',
+      'Depois de entrar pelo link, o app não abre o pedido da clínica.',
     ],
   },
   {
-    letra: 'E', ondeCurto: 'Portal e app', situacaoCurta: 'Esperando o N42 na API de dev', titulo: 'Lembrete de vacina pedido pela clínica', sub: 'Pedido 5 (N42): ligar o lembrete na lista de chamada, o push no app e "Editar registro"',
-    situacao: 'Preparo em 17/11, 21h20: a API de dev AINDA NÃO TINHA o N42 (a lista de chamada vinha sem os campos do lembrete). O portal passou com respostas simuladas; o push não foi conferido. Faça este teste só depois de o N42 estar no dev (veja o primeiro passo).',
+    letra: 'E', ondeCurto: 'Portal e app', situacaoCurta: 'Bloqueado: N42 fora do dev', titulo: 'Lembrete de vacina pedido pela clínica', sub: 'Pedido 5 (N42): ligar o lembrete na lista de chamada, o push no app e "Editar registro"',
+    situacao: 'Bloqueado: em 18/11 às 02h25 a API de dev ainda não tinha o N42 (a lista de chamada vem sem o lembrete, e a edição da aplicação dá 404). O portal foi conferido só com respostas simuladas. Faça este teste depois que o N42 for publicado no dev (veja o primeiro passo).',
     tom: 'falhou',
     onde: `${PORTAL} O app de dev da Bruna no celular, com notificações ligadas.`, conta: `${CLINICA} No app: ${BRUNA}`,
     antes: 'O lembrete manda push de verdade: use só a Fubá, da Bruna (conta de teste).',
     passos: [
-      { lado: 'P', acao: `${b('Clínica >')} ${q('Vacinas')}${b(', aba')} ${q('Lista de chamada')}.`, deve: `Em cada caixa de vacina, um destes três: ${q('Ativar lembrete')}, ${q('Lembrete ativo')} ou ${q('Ligue para o telefone do cadastro')} (este em texto, sem botão, para pet sem responsável no app). ${b('Se todas as caixas mostram "Ativar lembrete", o N42 ainda não está no dev: pare aqui.')}`, simulado: 'os estados foram simulados sobre a lista real do dev.', prints: [['portal-5-1']] },
-      { lado: 'P', acao: `${b('Na caixa da Fubá,')} ${q('Ativar lembrete')} ${b('e, na gaveta,')} ${q('Ativar lembrete')} ${b('de novo.')}`, deve: `A gaveta fecha, a lista se relê e a Fubá passa a ${q('Lembrete ativo')}, com ${q('Na fila')} embaixo (depois ${q('Entregue')}, recarregando).`, simulado: 'ligar foi respondido no navegador.' },
+      { lado: 'P', acao: `${b('Clínica >')} ${q('Vacinas')}${b(', aba')} ${q('Lista de chamada')}.`, deve: `Em cada caixa de vacina, um destes três: ${q('Ativar lembrete')}, ${q('Lembrete ativo')} ou ${q('Ligue para o telefone do cadastro')} (este em texto, sem botão). ${b('Se todas as caixas mostram "Ativar lembrete", o N42 ainda não está no dev: pare aqui.')}`, simulado: 'estados simulados sobre a lista real do dev.', prints: [['portal-5-1']] },
+      { lado: 'P', acao: `${b('Na caixa da Fubá,')} ${q('Ativar lembrete')} ${b('e, na gaveta,')} ${q('Ativar lembrete')} ${b('de novo.')}`, deve: `A lista se relê e a Fubá passa a ${q('Lembrete ativo')}, com ${q('Na fila')} embaixo (depois ${q('Entregue')}).`, simulado: 'respondido no navegador.' },
       { lado: 'A', acao: b('No celular da Bruna, veja o push e toque nele.'), deve: 'O aviso "Vacina de Fubá chegando" (ou "atrasada") com o ícone da seringa; o toque abre as vacinas da Fubá, no perfil de responsável.', naoConferido: 'o push; a rota do toque passou nos scripts do app.' },
-      { lado: 'P', acao: `${b('Toque em')} ${q('Lembrete ativo')}.`, deve: `${q('Ativado em [dia, hora]')}, ${q('Último envio em [dia, hora]: Entregue')} e ${q('Próximo envio em [dia da próxima dose], 09:00')} ou ${q('Sem novo envio previsto')}. No pé, ${q('Desligar lembrete')}. As horas são as da clínica.`, simulado: 'estado simulado.', prints: [['portal-5-2', 'gaveta']] },
-      { lado: 'P', acao: `${q('Desligar lembrete')}${b(', e depois ligue de novo no mesmo dia.')}`, deve: `Desligado, a caixa volta a ${q('Ativar lembrete')}. Ligado de novo: ${q('Lembrete ativo')} e nenhum segundo push no mesmo dia.`, naoConferido: 'o segundo push (regra da API).' },
-      { lado: 'P', acao: b('Se um envio não sair (difícil de provocar: 6 avisos de vacina da clínica ao mesmo responsável no dia).'), deve: `${q('Não saiu')} com o motivo: ${q('O responsável já recebeu 6 avisos de vacina desta clínica hoje.')}, ${q('O responsável não está mais no app.')} ou ${q('A dose já foi registrada.')}`, simulado: 'estado simulado.', prints: [['portal-5-3', 'gaveta']] },
-      { lado: 'P', acao: `${b('No "..." do cartão da Fubá,')} ${q('Editar registro')}${b('. Mude a observação, preencha o motivo e')} ${q('Salvar')}.`, deve: `A gaveta com ${q('Observação')}, ${q('Via')} e ${q('Motivo')}; ${q('Salvar')} desligado enquanto nada muda e o motivo pede ${q('Pelo menos 5 caracteres.')} Salvo: ${q('Registro corrigido.')} Vacina, dose, data e lote seguem por ${q('Apagar e registrar de novo')}.`, simulado: 'a gravação foi respondida no navegador e levou só a observação e o motivo.', prints: [['portal-5-4', 'gaveta']] },
-      { lado: 'P', acao: b('Entre com uma pessoa da equipe só com a função Enfermagem e abra a mesma lista.'), deve: 'Nenhuma caixa com o lembrete (nem o texto do telefone). O "..." continua: ela aplica vacina.', simulado: 'permissão tirada no navegador.' },
+      { lado: 'P', acao: `${b('Toque em')} ${q('Lembrete ativo')}.`, deve: `${q('Ativado em [dia, hora]')}, ${q('Último envio em [dia, hora]: Entregue')} e ${q('Próximo envio em [data], 09:00')} ou ${q('Sem novo envio previsto')}; no pé, ${q('Desligar lembrete')}. As horas são as da clínica.`, simulado: 'estado simulado.', prints: [['portal-5-2', 'gaveta']] },
+      { lado: 'P', acao: `${q('Desligar lembrete')}${b(', e ligue de novo no mesmo dia.')}`, deve: `A caixa volta a ${q('Ativar lembrete')}; ligada de novo, ${q('Lembrete ativo')} e nenhum segundo push no mesmo dia.`, naoConferido: 'precisa do N42 no dev.' },
+      { lado: 'P', acao: `${b('No "..." do cartão da Fubá,')} ${q('Editar registro')}${b('. Mude a observação, preencha o motivo e')} ${q('Salvar')}.`, deve: `${q('Salvar')} desligado enquanto nada muda; o motivo pede ${q('Pelo menos 5 caracteres.')}; salvo: ${q('Registro corrigido.')}`, simulado: 'respondido no navegador.', prints: [['portal-5-4', 'gaveta']] },
+      { lado: 'P', acao: b('Entre com uma pessoa só com a função Enfermagem e abra a mesma lista.'), deve: 'Nenhuma caixa com o lembrete. O "..." continua: ela aplica vacina.', simulado: 'permissão tirada no navegador.' },
     ],
     naoBug: [
-      '"Na fila" logo depois de ligar: o push sai em instantes e a entrega muda numa leitura seguinte.',
+      '"Na fila" logo depois de ligar: a entrega muda numa leitura seguinte.',
       '"Sem novo envio previsto" depois da repetição: o lembrete manda no máximo dois avisos.',
-      'Depois de ligar ou desligar, a lista volta ao começo (ela se relê, como depois de anular).',
-      'O rastro de avisos da clínica não tem tela no portal ainda: o tipo "Lembrete de vacina" só tem o nome pronto.',
+      'O rastro de avisos da clínica não tem tela no portal ainda.',
     ],
     bug: [
       'Com o N42 no dev, um pet sem responsável no app mostra "Ativar lembrete".',
       '"Ligue para o telefone do cadastro" vira botão ou abre a discagem.',
-      'Depois de ligar ou desligar, a caixa fica como antes até recarregar a página.',
-      'O aviso antigo "o lembrete fica marcado só neste navegador" ainda aparece.',
-      'A Enfermagem vê o lembrete, ou "Salvar" do "Editar registro" fica ligado sem mudança.',
+      'Depois de ligar ou desligar, a caixa fica como antes até recarregar.',
+      'A Enfermagem vê o lembrete.',
     ],
   },
 ]
 
-/* Pendências achadas na implementação (guia do backend x API x telas). */
+/* Pendências achadas na implementação e no teste (guia do backend x API x telas). */
 const pendencias = [
-  ['E', 'A API de dev ainda não tem o N42 em 17/11, 21h20: a lista de chamada não traz o lembrete. Sem isso, o teste E não roda.', 'API (publicar no dev)'],
-  ['D', 'O push "VINCULO_PROPOSTO" não sai no convite por link, só no QR da carteirinha e no acesso temporário. O guia do backend diz que o push abre a proposta: no convite por link não há push.', 'API ou guia'],
-  ['D', 'A folha impressa do QR (texto do guia) manda apontar a câmera em "Minhas clínicas", mas o app não tem leitor de QR ali; a mensagem da API manda digitar o código. Decidir qual texto vale.', 'Decisão (Luís e Nicolas)'],
-  ['D', '"Falar com a clínica" na proposta vencida quase nunca aparece: o 410 do detalhe da proposta não traz o contato da clínica (só o resgate pelo link traz).', 'API'],
-  ['D', 'Não há rota com os pacientes de um cliente: o portal procura pelo nome do cliente (até 50) para juntar os pets no convite. Cliente com nome muito comum pode deixar pet de fora.', 'API (rota nova) ou aceitar'],
-  ['D', 'Mensagens da API pensadas para o outro lado: o 422 "Escolha o que fazer com cada pet da proposta." e o 400 "...ou use o código de balcão" aparecem na recepção.', 'API (texto)'],
-  ['E', 'O rastro de avisos da clínica (GET /clinica/avisos) não tem tela no portal; o filtro "Lembrete de vacina" fica para quando a tela existir.', 'Portal (tela nova, fora do guia)'],
-  ['E', '"CRMV_OBRIGATORIO" (403) está no contrato e falta na tabela de erros do guia; o portal mostra a mensagem da API.', 'Guia'],
-  ['A', 'O guia cita uma lista de "possíveis repetidos" no cadastro de paciente que não existe; a foto entrou na busca de clientes.', 'Guia'],
+  ['E', 'A API de dev ainda não tem o N42 (conferido em 18/11 às 02h25): sem ele, o teste E não roda.', 'API (publicar no dev)'],
+  ['B, C', 'O CMS não foi testado de verdade: falta a senha da conta de admin do CMS no dev.', 'Luís (senha)'],
+  ['D', 'A folha impressa do QR (texto do guia) manda apontar a câmera em "Minhas clínicas", mas o app não tem leitor de QR ali; a mensagem da API manda digitar o código. Decidir qual texto vale.', 'Decisão'],
   ['C', 'O portal não tem campo de CRMV: a categoria "Veterinário autônomo" não é oferecida e o erro de CRMV leva o foco às categorias. Decidir se o portal ganha o campo.', 'Decisão'],
+  ['D', 'O convite por link não manda push ao responsável (só o QR da carteirinha e o acesso temporário mandam).', 'API ou guia'],
+  ['D', '"Falar com a clínica" na proposta vencida quase nunca aparece: o 410 do detalhe da proposta não traz o contato da clínica.', 'API'],
+  ['D', 'Não há rota com os pacientes de um cliente: o portal procura pelo nome do cliente (até 50) para juntar os pets no convite.', 'API (rota nova)'],
+  ['D', 'Mensagens da API pensadas para o responsável aparecem na recepção (o 422 do convite e o "código de balcão" do 400).', 'API (texto)'],
+  ['B', 'Um teste grátis vencido continua com "Desligar" (a API manda podeDesligar).', 'API'],
   ['C', 'A API também pede CNPJ para Farmácia (o guia fala só de clínica). O portal segue a API.', 'Guia'],
-  ['B', 'Um teste grátis vencido continua com "Desligar" (a API manda podeDesligar), ao lado de "O período do módulo terminou...".', 'API'],
-  ['Todos', 'As specs citadas no guia (docs/specs/2026/q4/q4-2/) não estão no repositório da API (a pasta docs/ é ignorada no git). Os fronts seguiram o guia e o código da API.', 'Nicolas'],
+  ['E', 'O rastro de avisos da clínica não tem tela no portal; o filtro "Lembrete de vacina" fica para quando ela existir.', 'Portal (tela nova)'],
+  ['Todos', 'As specs citadas no guia (docs/specs/2026/q4/q4-2/) não estão no repositório da API (a pasta docs/ é ignorada no git).', 'Nicolas'],
 ]
 
 const css = `
@@ -295,6 +282,7 @@ ul { margin: 1mm 0 0; padding-left: 5mm; } li { margin: 0.6mm 0; }
 .deve { background: #EAF5EE; border-radius: 6px; padding: 2mm 3.5mm; margin-left: 10mm; }
 .erro { background: #FBEAEA; border-radius: 6px; padding: 1.8mm 3.5mm; margin: 1.5mm 0 0 10mm; font-weight: 600; color: #8A2E2E; }
 .nota { background: #FCF3E6; border-radius: 6px; padding: 1.8mm 3.5mm; margin: 1.5mm 0 0 10mm; font-size: 9.5pt; }
+.real { background: #DDEFE3; border-radius: 6px; padding: 1.5mm 3.5mm; margin: 1.5mm 0 0 10mm; font-size: 8.8pt; color: #24563A; font-weight: 600; }
 .sim { background: #F4F6F6; border-radius: 6px; padding: 1.5mm 3.5mm; margin: 1.5mm 0 0 10mm; font-size: 8.8pt; color: #44545A; }
 .nc { background: #EDEDED; border-radius: 6px; padding: 1.8mm 3.5mm; margin: 1.5mm 0 0 10mm; font-size: 9pt; color: #444; }
 .fotos { display: flex; gap: 4mm; margin: 3mm 0 0 10mm; flex-wrap: wrap; }
@@ -320,17 +308,17 @@ const linhasIndice = testes
 
 const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Guia de teste: pedidos de 17/11</title><style>${css}</style></head><body>
 <h1>Guia de teste: pedidos de 17/11</h1>
-<div class="capa-sub">17/11/2026 · Portal do parceiro, app, site e CMS · API de dev</div>
+<div class="capa-sub">17 e 18/11/2026 · Portal do parceiro, app, site e CMS · API de dev</div>
 
 <div class="caixa"><h3>O que tem neste guia</h3>
 <p style="margin:0 0 2mm">Um teste por pedido feito ao backend em 17/11. A API foi feita pelo Nicolas; as telas, a partir do guia que ele mandou.</p>
-<table><tr><th>Teste</th><th>Onde</th><th>Situação no preparo (17/11)</th></tr>${linhasIndice}</table></div>
+<table><tr><th>Teste</th><th>Onde</th><th>Situação no teste de 18/11</th></tr>${linhasIndice}</table></div>
 
 <div class="caixa alerta"><h3>Antes de testar</h3><ul>
-<li><b>Nada subiu ainda.</b> Está tudo commitado no <code>develop</code> local de cada repositório, sem push. Para testar nos ambientes de develop (portal-dev, app de dev, site e CMS), é preciso subir primeiro. No computador, dá para testar o portal pelo <code>npm run dev</code>.</li>
-<li><b>Lembrete de vacina (teste E):</b> em 17/11, 21h20, a API de dev ainda não tinha o N42. Confira o primeiro passo do teste E antes.</li>
-<li><b>Como foi o preparo:</b> as telas do portal foram abertas com a conta da clínica de QA, lendo a API de dev. Tudo o que grava (ligar módulo, convite, lembrete, editar) foi respondido no próprio navegador, para não mandar mensagem, push nem gastar o teste grátis de ninguém. Por isso o fundo cinza "Não conferido" e as notas "No preparo" dizem o que falta ver de verdade.</li>
-<li><b>App:</b> as telas novas não foram abertas no celular; o comportamento foi conferido rodando as funções do app em scripts. É onde mais vale o seu olho.</li>
+<li><b>Testado de verdade em 18/11</b> na API de dev, gravando, com as contas de QA: fotos, convite, módulos e categorias passaram. Cinco correções saíram no mesmo dia e já estão nos commits.</li>
+<li><b>Nada subiu ainda.</b> Está tudo commitado no <code>develop</code> local de cada repositório, sem push. Para testar nos ambientes de develop, é preciso subir primeiro. No computador, o portal roda com <code>npm run dev</code>.</li>
+<li><b>Lembrete de vacina (teste E):</b> continua bloqueado, porque a API de dev ainda não tem o N42.</li>
+<li><b>O que ainda não foi visto de verdade:</b> as telas do app (o lado do responsável foi feito pela API), o CMS (falta a senha de admin do dev), o operador (não há conta) e o push. São os quadros cinza "Não conferido".</li>
 </ul></div>
 
 <div class="caixa"><h3>Como usar</h3><ul>
@@ -344,11 +332,13 @@ const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><tit
 <table><tr><th>Conta</th><th>Para quê</th></tr>
 <tr><td><b>portal-demo@petjourney.test</b><br>senha Teste@123</td><td>A clínica de QA ("Clínica e Hotel Demo"), DONO. Pacientes Mel, Nino, Bidu, Fubá, Pipoca e Rafael lima. Clínica ativa; Hotel desligado pelo suporte.</td></tr>
 <tr><td><b>qa-bruna@petjourney.test</b><br>senha Teste@123</td><td>Responsável da Fubá, ligada à clínica. Para o push do lembrete (teste E).</td></tr>
-<tr><td>Sua conta de responsável no app</td><td>Para abrir o convite (teste D). Use um celular sem login para o link sem conta.</td></tr>
+<tr><td><b>qa-julia@petjourney.test</b><br>senha Teste@123</td><td>Responsável com o Bento e o Bisteca (este ligado à clínica pelo convite de 18/11). Para o teste D, ou use uma conta sua.</td></tr>
+<tr><td><b>qa-basico@petjourney.test</b><br>senha Teste@123</td><td>Dona da "Pet Shop Teste QA" (só Pet shop). A Clínica dela teve o teste grátis ligado em 18/11 e está desligada por você (religa até 18/12). O Hotel ainda tem o teste grátis.</td></tr>
+<tr><td><b>qa-categorias-1811@petjourney.test</b><br>senha Teste@123</td><td>Empresa criada pelo site em 18/11 com Pet shop e Clínica veterinária; pendente de aprovação no CMS.</td></tr>
 </table></div>
 
-<div class="caixa"><h3>Pendências achadas na implementação</h3>
-<p>Diferenças entre o guia do backend, a API e as telas. Não são erros do teste: são decisões ou ajustes que dependem da API ou de você.</p>
+<div class="caixa"><h3>Pendências</h3>
+<p>O que depende da API, de uma decisão sua ou de uma senha. Não são erros do teste.</p>
 <table class="compacta"><tr><th>Teste</th><th>O que é</th><th>Com quem</th></tr>${pendencias.map(([t, o, c], i) => `<tr><td>${i + 1}. ${t}</td><td>${o}</td><td>${c}</td></tr>`).join('')}</table></div>
 
 ${testes.map(teste).join('\n')}
