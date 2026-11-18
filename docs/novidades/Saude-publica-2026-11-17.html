@@ -1,0 +1,690 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Saúde pública: o que entrou em 17/11/2026</title>
+    <link rel="stylesheet" href="phosphor/phosphor.css" />
+    <style>
+      /*
+       * Resumo de uma página do que entrou no módulo de Saúde pública em 17/11/2026, o dia em que
+       * o protótipo para a Câmara de Campo Grande e a Subea nasceu. Quem lê é a equipe e quem
+       * acompanha o produto, sem termos de código. Cada linha saiu dos commits de 17/11 em
+       * src/features/saude-publica e src/pages/(accounts)/saude-publica.
+       *
+       * Mesmo molde da folha de venda (../venda): faixa sálvia do portal, tinta marinho, cor só em
+       * pastel com a tinta da família por cima. Fonte em pesos FIXOS (400 e 600) e nada de sombra
+       * desfocada nem fundo semitransparente: é o que faz o PDF abrir certo no iPhone.
+       *
+       * O PDF é gerado daqui pelo Edge (ver README.md), nunca editado à mão.
+       */
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-ext-400-normal.woff2') format('woff2');
+        font-weight: 400;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+
+      @font-face {
+        font-family: 'Readex Pro';
+        src: url('fontes/readex-pro-latin-ext-600-normal.woff2') format('woff2');
+        font-weight: 600;
+        unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+          U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+          U+2113, U+2C60-2C7F, U+A720-A7FF;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      :root {
+        --tinta: #1d3557;
+        --texto: #2a3446;
+        --suave: #5f6670;
+        --papel: #ffffff;
+        --destaque: #76938d;
+        --salvia-texto: #4f6862;
+        --veu: #f3f7f6;
+        --veu-forte: #e9f0ee;
+        --regua: #dfe8e5;
+
+        /* O verde da Saúde pública: o pastel de fundo e a tinta que lê por cima. */
+        --saude-fundo: #c3eadc;
+        --saude-tinta: #285e4e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--papel);
+      }
+
+      body {
+        color: var(--texto);
+        font-family: 'Readex Pro', system-ui, sans-serif;
+        font-size: 8.5pt;
+        font-weight: 400;
+        line-height: 1.36;
+      }
+
+      b,
+      strong {
+        color: var(--tinta);
+        font-weight: 600;
+      }
+
+      p,
+      ul,
+      h2,
+      h3 {
+        margin: 0;
+        padding: 0;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      .folha {
+        display: flex;
+        flex-direction: column;
+        width: 210mm;
+        height: 297mm;
+        overflow: hidden;
+      }
+
+      /* ------------------------------------------------------------ faixa */
+
+      .faixa {
+        position: relative;
+        flex: none;
+        height: 55mm;
+        border-radius: 0 0 9mm 9mm;
+        background: var(--destaque) url('../apresentacao/faixa-capa.png') center bottom / cover
+          no-repeat;
+      }
+
+      .abertura {
+        position: absolute;
+        top: 8.6mm;
+        left: 15mm;
+        width: 106mm;
+        color: #fff;
+      }
+
+      .abertura__logo {
+        display: block;
+        width: 28mm;
+        margin-bottom: 3.6mm;
+      }
+
+      .abertura__etiqueta {
+        display: inline-block;
+        padding: 1.2mm 3.2mm;
+        border-radius: 99px;
+        background: #657e79;
+        font-size: 7.4pt;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 2.6mm 0 2mm;
+        color: #fff;
+        font-size: 19pt;
+        font-weight: 600;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .abertura__sub {
+        font-size: 9.4pt;
+        line-height: 1.42;
+      }
+
+      /* O mapa da cidade, recortado da captura do cartão do painel. */
+      .vitrine {
+        position: absolute;
+        top: 8.6mm;
+        right: 15mm;
+        width: 62mm;
+        height: 36mm;
+        overflow: hidden;
+        border-radius: 3.2mm;
+        background: #fff;
+        /* Contorno sólido, sem desfoque: sombra desfocada vira caixa escura no PDF do iPhone. */
+        box-shadow: 0 0 0 1.2mm #8ba59f;
+      }
+
+      .vitrine img {
+        position: absolute;
+        top: -50.1mm;
+        left: -6.6mm;
+        width: 75mm;
+      }
+
+      .legenda {
+        position: absolute;
+        top: 47.4mm;
+        right: 15mm;
+        width: 62mm;
+        color: #fff;
+        font-size: 7.6pt;
+        line-height: 1.3;
+      }
+
+      /* ----------------------------------------------------------- miolo */
+
+      .miolo {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 3.6mm;
+        padding: 5.2mm 15mm 5mm;
+      }
+
+      .rotulo {
+        margin-bottom: 1.8mm;
+        color: var(--salvia-texto);
+        font-size: 7.6pt;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+
+      /* Os números do protótipo: quatro em uma fileira, com o número na tinta da Saúde pública. */
+      .numeros {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3mm;
+      }
+
+      .numero {
+        display: flex;
+        align-items: baseline;
+        gap: 2mm;
+        padding: 2.2mm 3.4mm;
+        border-radius: 2.6mm;
+        background: var(--saude-fundo);
+        color: var(--saude-tinta);
+        font-size: 8pt;
+        line-height: 1.25;
+      }
+
+      .numero b {
+        color: var(--saude-tinta);
+        font-size: 14pt;
+        line-height: 1;
+      }
+
+      .colunas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4mm;
+        align-items: start;
+      }
+
+      .coluna {
+        display: flex;
+        flex-direction: column;
+        gap: 3.6mm;
+      }
+
+      /* Um bloco por tela: cabeça com o ícone do menu no verde da Saúde pública, itens com ícone. */
+      .bloco {
+        padding: 3mm 3.6mm 3.2mm;
+        border-radius: 3mm;
+        background: var(--veu);
+      }
+
+      .bloco__cabeca {
+        display: flex;
+        align-items: center;
+        gap: 2.2mm;
+        margin-bottom: 2mm;
+      }
+
+      .bloco__icone {
+        display: grid;
+        flex: none;
+        width: 7mm;
+        height: 7mm;
+        place-items: center;
+        border-radius: 2mm;
+        background: var(--saude-fundo);
+        color: var(--saude-tinta);
+        font-size: 11.5pt;
+      }
+
+      .bloco h3 {
+        color: var(--tinta);
+        font-size: 10.4pt;
+        font-weight: 600;
+        line-height: 1.15;
+      }
+
+      .bloco__dica {
+        color: var(--suave);
+        font-size: 7.6pt;
+        line-height: 1.25;
+      }
+
+      .itens li {
+        display: grid;
+        grid-template-columns: 4.6mm 1fr;
+        column-gap: 1.4mm;
+        padding: 1.15mm 0;
+        border-top: 0.3mm solid var(--regua);
+      }
+
+      .itens li:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .itens li:last-child {
+        padding-bottom: 0;
+      }
+
+      .itens .ph {
+        margin-top: 0.3mm;
+        color: var(--salvia-texto);
+        font-size: 10pt;
+      }
+
+      /* Materiais: uma fileira de etiquetas. */
+      .materiais {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.8mm;
+      }
+
+      .material {
+        display: inline-flex;
+        align-items: center;
+        gap: 1.4mm;
+        padding: 1.2mm 2.8mm 1.2mm 2.2mm;
+        border: 0.3mm solid var(--regua);
+        border-radius: 99px;
+        color: var(--texto);
+        font-size: 8pt;
+        line-height: 1.3;
+      }
+
+      .material .ph {
+        color: var(--salvia-texto);
+        font-size: 9.4pt;
+      }
+
+      .material span {
+        color: var(--suave);
+      }
+
+      /* ------------------------------------------------------------ rodapé */
+
+      .rodape {
+        display: grid;
+        flex: none;
+        grid-template-columns: 1fr 1fr;
+        gap: 6mm;
+        margin-top: auto;
+        padding: 3.6mm 15mm 4mm;
+        background: var(--saude-fundo);
+        color: var(--saude-tinta);
+        font-size: 8.3pt;
+        line-height: 1.36;
+      }
+
+      .rodape b {
+        color: var(--saude-tinta);
+      }
+
+      .rodape p {
+        display: grid;
+        grid-template-columns: 5mm 1fr;
+        column-gap: 1.2mm;
+      }
+
+      .rodape .ph {
+        margin-top: 0.2mm;
+        font-size: 11pt;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="folha">
+      <!-- ============================================================ FAIXA -->
+      <header class="faixa">
+        <div class="abertura">
+          <img class="abertura__logo" src="../apresentacao/logo-branca.png" alt="PetJourney" />
+          <span class="abertura__etiqueta">Saúde pública · terça, 17/11/2026</span>
+          <h1>O que entrou na Saúde pública em 17&nbsp;de&nbsp;novembro</h1>
+          <p class="abertura__sub">
+            O protótipo para a Câmara de Campo Grande e a Subea nasceu ontem, com dados
+            ilustrativos.
+          </p>
+        </div>
+
+        <div class="vitrine">
+          <img
+            src="imagens/mapa-saude-publica.png"
+            alt="Mapa de Campo Grande por região no painel da Saúde pública"
+          />
+        </div>
+        <p class="legenda">O mapa da cidade no Painel.</p>
+      </header>
+
+      <div class="miolo">
+        <!-- ========================================================== NÚMEROS -->
+        <div class="numeros">
+          <p class="numero"><b>5</b>telas no menu</p>
+          <p class="numero"><b>74</b>bairros do IBGE</p>
+          <p class="numero"><b>7</b>regiões urbanas</p>
+          <p class="numero"><b>674</b>CEPs reais</p>
+        </div>
+
+        <div class="colunas">
+          <div class="coluna">
+            <!-- ================================================== PAINEL -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-map-trifold"></i>
+                <div>
+                  <h3>Painel</h3>
+                  <p class="bloco__dica">O retrato do programa na cidade</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-gauge"></i>
+                  <span
+                    ><b>Números do programa,</b> casos humanos de leishmaniose (Sesau) e quatro
+                    indicadores de prevenção.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-map-pin-area"></i>
+                  <span
+                    ><b>Mapa da cidade</b> com os bairros e as regiões, pintados pelo indicador
+                    escolhido.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-hexagon"></i>
+                  <span
+                    ><b>Esquema em hexágonos,</b> uma região por hexágono, para ler de longe em uma
+                    apresentação.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-traffic-signal"></i>
+                  <span
+                    ><b>Escala de risco</b> do vermelho (menos de 40% em dia) ao verde (70% ou
+                    mais).</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-cursor-click"></i>
+                  <span
+                    ><b>Detalhe da região</b> ao lado do mapa e os bairros que pedem atenção.</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- ================================================= FILTROS -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-funnel"></i>
+                <div>
+                  <h3>Filtros</h3>
+                  <p class="bloco__dica">O mesmo recorte em todo o espaço</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-calendar-blank"></i>
+                  <span
+                    ><b>Período</b> de 90, 30 ou 7 dias ou datas no calendário, além de região,
+                    campanha e espécie.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-magnifying-glass-plus"></i>
+                  <span
+                    ><b>Valem para o Painel, as Campanhas e as ONGs.</b> O mapa se aproxima das
+                    regiões escolhidas.</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- ================================================== PILOTO -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-van"></i>
+                <div>
+                  <h3>Piloto Subea</h3>
+                  <p class="bloco__dica">60 dias em um bairro, Ofício 002/2026</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-list-numbers"></i>
+                  <span
+                    ><b>As quatro etapas</b> do anexo do ofício, com o botão "Registrar atendimento"
+                    na etapa da equipe.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-target"></i>
+                  <span
+                    ><b>Metas do ofício</b> com o andamento dos 60 dias. A meta mostra quem falta e
+                    manda o lembrete só para eles.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-device-mobile"></i>
+                  <span
+                    ><b>Ficha no celular.</b> Quem apresenta faz o papel do tutor. As metas andam na
+                    hora.</span
+                  >
+                </li>
+              </ul>
+            </section>
+          </div>
+
+          <div class="coluna">
+            <!-- =============================================== CAMPANHAS -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-megaphone"></i>
+                <div>
+                  <h3>Campanhas</h3>
+                  <p class="bloco__dica">Agendadas e encerradas, por região</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-plus-circle"></i>
+                  <span
+                    ><b>Nova campanha em passos,</b> com a prévia do aviso no celular do tutor e o
+                    alcance: só quem tem o cuidado pendente.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-calendar-check"></i>
+                  <span
+                    ><b>Página do dia</b> de cada campanha, com os números, os atendimentos, a
+                    equipe e "Registrar no dia".</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- ============================================ REGISTRO EM CAMPO -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-clipboard-text"></i>
+                <div>
+                  <h3>Registrar atendimento</h3>
+                  <p class="bloco__dica">Consultório Móvel, campanhas e piloto</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-user"></i>
+                  <span
+                    ><b>Quem leva:</b> tutor ou ONG, com busca por CPF, telefone ou nome. CPF e CNPJ
+                    são opcionais.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-map-pin"></i>
+                  <span
+                    ><b>Endereço pelo CEP,</b> que acha o bairro oficial e a região do
+                    relatório.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-check-square"></i>
+                  <span
+                    ><b>O que foi feito:</b> cada procedimento como "Feito" ou "Não deu", com o
+                    motivo.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-qr-code"></i>
+                  <span
+                    ><b>Etiqueta com QR Code</b> para imprimir, com o animal e os próximos
+                    cuidados.</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- ==================================================== ONGS -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-hand-heart"></i>
+                <div>
+                  <h3>ONGs e adoção</h3>
+                  <p class="bloco__dica">Sistema sem custo para as ONGs</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-paw-print"></i>
+                  <span
+                    ><b>A adoção leva o histórico de saúde</b> do animal, com 3 meses do plano
+                    completo.</span
+                  >
+                </li>
+              </ul>
+            </section>
+
+            <!-- =============================================== RELATÓRIO -->
+            <section class="bloco">
+              <div class="bloco__cabeca">
+                <i class="bloco__icone ph ph-file-text"></i>
+                <div>
+                  <h3>Relatório</h3>
+                  <p class="bloco__dica">Imprime e baixa planilha para o Excel</p>
+                </div>
+              </div>
+              <ul class="itens">
+                <li>
+                  <i class="ph ph-map-pin-area"></i>
+                  <span
+                    ><b>Atendimentos por lugar:</b> realizados, não realizados e o motivo mais comum
+                    por região, bairro ou CEP.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-users-three"></i>
+                  <span
+                    ><b>Equipe:</b> atendimentos por pessoa, % realizado, dias em campo e média por
+                    dia.</span
+                  >
+                </li>
+                <li>
+                  <i class="ph ph-printer"></i>
+                  <span
+                    ><b>Relatório de 90 dias:</b> o que o ofício promete à Câmara, pronto para
+                    imprimir.</span
+                  >
+                </li>
+              </ul>
+            </section>
+          </div>
+        </div>
+
+        <!-- ========================================================= MATERIAIS -->
+        <section>
+          <h2 class="rotulo">Para a apresentação</h2>
+          <div class="materiais">
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Guia rápido para a Câmara, com o roteiro de 8 minutos
+              <span>7 p.</span></span
+            >
+            <span class="material"
+              ><i class="ph ph-file-text"></i>Resumo da empresa e do módulo <span>1 p.</span></span
+            >
+          </div>
+        </section>
+      </div>
+
+      <!-- ============================================================ RODAPÉ -->
+      <footer class="rodape">
+        <p>
+          <i class="ph ph-lock"></i>
+          <span
+            ><b>Ninguém identificado.</b> Painel, metas e relatórios mostram só contagens e
+            percentuais. O CPF fica no registro e na etiqueta, mascarado.</span
+          >
+        </p>
+        <p>
+          <i class="ph ph-door-open"></i>
+          <span
+            ><b>Como abrir:</b> o endereço /saude-publica no portal. O espaço fica fora do menu.
+            "Sair do protótipo" o esconde de novo.</span
+          >
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>
