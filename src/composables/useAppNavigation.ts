@@ -539,10 +539,22 @@ export function useAppNavigation() {
 
   const portalItems = computed<AppNavigationItem[]>(() => {
     void locale.value
-    const items: AppNavigationItem[] = [
-      { label: t('nav.items.programas'), to: '/parceiro/programas', icon: 'ph ph-squares-four' },
-      { label: t('nav.items.divulgacao'), to: '/parceiro/divulgacao', icon: 'ph ph-share-network' },
-    ]
+    const items: AppNavigationItem[] = []
+
+    /* Com os dois programas ativos, Programas não tem mais o que pedir e sai do menu. */
+    if (parceiroStore.menuComProgramas) {
+      items.push({
+        label: t('nav.items.programas'),
+        to: '/parceiro/programas',
+        icon: 'ph ph-squares-four',
+      })
+    }
+
+    items.push({
+      label: t('nav.items.divulgacao'),
+      to: '/parceiro/divulgacao',
+      icon: 'ph ph-share-network',
+    })
 
     /*
      * A lista mostra nome de cliente: a API só a entrega ao dono, e o menu não abre porta fechada.

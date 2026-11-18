@@ -33,9 +33,10 @@ const PARCEIRO_NOME_STORAGE_KEY = 'petjourney-parceiro-nome'
  */
 const PARCEIRO_AUDITORIA_STORAGE_KEY = 'petjourney-parceiro-auditoria'
 /**
- * A forma do menu do Portal na última sessão: se a conta é dona (Indicados) e se o Programa de
- * Afiliados estava ativo (Carteira). Sem ela, os dois itens entravam no menu de um a três
- * segundos depois dos outros, a cada recarga, e o menu "pulava" diante de quem olhava.
+ * A forma do menu do Portal na última sessão: se a conta é dona (Indicados), se o Programa de
+ * Afiliados estava ativo (Carteira) e se os dois programas estavam ativos (Programas sai do menu).
+ * Sem ela, os itens entravam ou saíam do menu de um a três segundos depois dos outros, a cada
+ * recarga, e o menu "pulava" diante de quem olhava.
  */
 const PARCEIRO_MENU_STORAGE_KEY = 'petjourney-parceiro-menu'
 
@@ -44,6 +45,7 @@ type LoadState = 'idle' | 'loading' | 'ready' | 'error'
 interface FormaDoMenu {
   dono: boolean
   afiliadoAtivo: boolean
+  programasAtivos: boolean
 }
 
 function lerDoArmazenamento(chave: string) {
@@ -63,7 +65,12 @@ function lerFormaDoMenu(): FormaDoMenu | null {
     const guardada = JSON.parse(lerDoArmazenamento(PARCEIRO_MENU_STORAGE_KEY) ?? 'null')
 
     return typeof guardada?.dono === 'boolean' && typeof guardada?.afiliadoAtivo === 'boolean'
-      ? { dono: guardada.dono, afiliadoAtivo: guardada.afiliadoAtivo }
+      ? {
+          dono: guardada.dono,
+          afiliadoAtivo: guardada.afiliadoAtivo,
+          /* A forma guardada antes de 17/11/2026 não tinha o campo: Programas fica no menu. */
+          programasAtivos: guardada.programasAtivos === true,
+        }
       : null
   } catch {
     return null
@@ -96,6 +103,10 @@ export const useParceiroStore = defineStore('parceiro', () => {
   /** Cadastro suspenso pelo admin: portal parceiro fica totalmente inacessível. */
   const cadastroSuspenso = computed(() => statusAuditoria.value === 'SUSPENSO')
   const statusAfiliadoAtivo = computed(() => status.value?.afiliado.status === 'ATIVO')
+  /** Os dois programas valendo: não há mais o que pedir, e a tela Programas sai do menu. */
+  const programasAtivos = computed(
+    () => statusAfiliadoAtivo.value && status.value?.participativo.status === 'ATIVO',
+  )
   const nomeGuardado = ref<string | null>(lerDoArmazenamento(PARCEIRO_NOME_STORAGE_KEY))
   const formaGuardada = ref<FormaDoMenu | null>(lerFormaDoMenu())
   /**
@@ -107,6 +118,13 @@ export const useParceiroStore = defineStore('parceiro', () => {
   )
   const menuComCarteira = computed(() =>
     status.value ? statusAfiliadoAtivo.value : (formaGuardada.value?.afiliadoAtivo ?? false),
+  )
+  /*
+   * Com os dois programas ativos, a tela Programas não tem mais nada a pedir (17/11/2026): ela sai
+   * do menu, e os dois aparecem resumidos em Configurações → Empresa. A rota continua abrindo.
+   */
+  const menuComProgramas = computed(() =>
+    status.value ? !programasAtivos.value : !(formaGuardada.value?.programasAtivos ?? false),
   )
   /** Virou APROVADO desde a última vez que esta sessão olhou: a moldura avisa e zera. */
   const aprovacaoRecente = ref(false)
@@ -275,6 +293,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
       guardarFormaDoMenu({
         dono: dashboardData.papel === 'DONO',
         afiliadoAtivo: statusData.afiliado?.status === 'ATIVO',
+        programasAtivos:
+          statusData.afiliado?.status === 'ATIVO' && statusData.participativo?.status === 'ATIVO',
       })
       anotarAuditoria(dashboardData.parceiro.id, statusData.statusAuditoria)
       loadState.value = 'ready'
@@ -352,6 +372,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
       guardarFormaDoMenu({
         dono: isDono.value,
         afiliadoAtivo: statusData.afiliado?.status === 'ATIVO',
+        programasAtivos:
+          statusData.afiliado?.status === 'ATIVO' && statusData.participativo?.status === 'ATIVO',
       })
     }
   }
@@ -421,6 +443,8 @@ export const useParceiroStore = defineStore('parceiro', () => {
     statusAfiliadoAtivo,
     menuComIndicados,
     menuComCarteira,
+    menuComProgramas,
+    programasAtivos,
     parceiroNome,
     temPermissao,
     aguardaCrmv,
