@@ -84,6 +84,17 @@ describe('avisarSaidaNaApi', () => {
     expect(new Headers(init?.headers).has('Authorization')).toBe(false)
   })
 
+  it('o token da demonstração nunca vai à API', () => {
+    window.localStorage.setItem('refresh_token', 'cabeca.corpo.demonstracao')
+    const enviar = vi.fn((..._args: Parameters<typeof fetch>) =>
+      Promise.resolve(new Response('{}')),
+    )
+
+    avisarSaidaNaApi({ fetch: enviar, base: 'https://api.teste' })
+
+    expect(enviar).not.toHaveBeenCalled()
+  })
+
   it('não chama a API sem refresh token', () => {
     const enviar = vi.fn((..._args: Parameters<typeof fetch>) =>
       Promise.resolve(new Response('{}')),

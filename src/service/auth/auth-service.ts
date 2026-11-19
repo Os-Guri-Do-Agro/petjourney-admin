@@ -228,12 +228,15 @@ export type OpcoesDaSaida = {
  * Não espera a resposta e ignora erro: rede fora não pode prender ninguém na conta. Vai por `fetch`
  * direto, sem `Authorization` (a rota é pública e responde 200 até para token desconhecido), com
  * `keepalive` para sair mesmo se a página trocar logo depois.
+ *
+ * O token da demonstração (terminado em `.demonstracao`, `src/demonstracao/sessao.ts`) nunca vai à
+ * API. O sufixo é conferido aqui, sem importar a demonstração: ela fica fora do código da saída.
  */
 export function avisarSaidaNaApi(opcoes: OpcoesDaSaida = {}) {
   const refreshToken = getRefreshToken()
   const base = opcoes.base ?? getApiUrl()
 
-  if (!refreshToken || !base) {
+  if (!refreshToken || !base || refreshToken.endsWith('.demonstracao')) {
     return
   }
 
