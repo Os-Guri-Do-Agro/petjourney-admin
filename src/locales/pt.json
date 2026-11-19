@@ -1176,7 +1176,10 @@
       "cnpjInvalid": "CNPJ inválido. Confira os números.",
       "telefoneRequired": "Informe um telefone de contato.",
       "telefoneInvalid": "Telefone inválido. Use DDD e número.",
-      "requiredLegend": "Nome, CNPJ e telefone são obrigatórios: é com eles que a equipe analisa o credenciamento e fala com você."
+      "requiredLegend": "Nome, CNPJ e telefone são obrigatórios: é com eles que a equipe analisa o credenciamento e fala com você.",
+      "crmv": "CRMV",
+      "crmvPlaceholder": "Ex.: 12345/SP",
+      "crmvDica": "O registro do veterinário autônomo. A equipe PetJourney confere na aprovação."
     },
     "wizard": {
       "title": "Cadastre sua empresa parceira",
@@ -1331,7 +1334,8 @@
       "ROEDOR": "Roedor",
       "COELHO": "Coelho",
       "PEIXE": "Peixe",
-      "REPTIL": "Réptil"
+      "REPTIL": "Réptil",
+      "OUTRO": "Outro"
     },
     "filtros": {
       "aria": "Filtros da lista de atendimentos",
@@ -1455,7 +1459,10 @@
       },
       "emptyTitle": "Nada compartilhado neste acesso",
       "emptyBody": "O responsável liberou o atendimento, mas não incluiu nenhum dado clínico de {pet}. Mesmo assim, tudo que você registrar nas anotações chega até ele.",
-      "emptyCta": "Ir para anotações"
+      "emptyCta": "Ir para anotações",
+      "omitidos": {
+        "medicamentos": "Remédios mais antigos que não couberam no acesso: {n}."
+      }
     },
     "tratamentos": {
       "title": "Tratamento contínuo",
@@ -1505,7 +1512,13 @@
         "remedios": "Remédios",
         "observacoes": "Observações",
         "nota": "Nota do responsável"
-      }
+      },
+      "recorte": {
+        "periodo": "Todos os registros de {de} a {ate}, como o responsável escolheu.",
+        "entradas": "Os registros que o responsável escolheu, um a um."
+      },
+      "omitidas": "Registros mais antigos do período que não couberam no acesso: {n}.",
+      "fotosOmitidas": "Fotos deste dia que não couberam no acesso: {n}."
     },
     "anotacoes": {
       "title": "Histórico de anotações",

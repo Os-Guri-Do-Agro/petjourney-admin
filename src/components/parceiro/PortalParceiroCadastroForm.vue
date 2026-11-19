@@ -55,12 +55,12 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 /*
- * As categorias que o portal oferece. O veterinário autônomo (`VETERINARIO`) pede o CRMV do
- * parceiro, e este formulário não tem esse campo: ele só aparece quando o cadastro já o tem (feito
- * pelo site), para continuar marcado e não sumir no salvar.
+ * As categorias que o portal oferece. O veterinário autônomo (`VETERINARIO`, sem clínica própria)
+ * fica separado da clínica e, marcado, abre o campo do CRMV: a aprovação pede o registro.
  */
 const CATEGORIAS: CategoriaParceiro[] = [
   'CLINICA_VETERINARIA',
+  'VETERINARIO',
   'PET_SHOP',
   'BANHO_TOSA',
   'ADESTRAMENTO',
@@ -77,6 +77,7 @@ const ID_DO_CAMPO: Record<CampoDoCadastro, string> = {
   nome: 'cad-nome',
   cnpj: 'cad-cnpj',
   categorias: 'cad-categorias',
+  crmv: 'cad-crmv',
 }
 
 type FormTab = 'dados' | 'programas'
@@ -90,9 +91,10 @@ const form = reactive({
   categorias: [] as CategoriaParceiro[],
   cnpj: '',
   telefoneComercial: '',
-  /* Sem campos visíveis: preservados do GET para a re-submissão não apagar (semântica replace).
-     O CRMV do parceiro vai no corpo (campo crmv); a API não copia mais do perfil antigo (E1-07). */
-  crmv: null as string | null,
+  /* Só aparece com Veterinário autônomo marcado; escondido, o do GET volta como veio (semântica
+     replace). A API não copia mais o CRMV do perfil antigo (E1-07). */
+  crmv: '',
+  /* Sem campo visível: preservado do GET para a re-submissão não apagar. */
   logoUrl: null as string | null,
 })
 
@@ -126,6 +128,9 @@ const categoriaOptions = computed(() =>
   })),
 )
 
+/** O CRMV só pede espaço quando a categoria pede o registro (pedidos de 17/11, D8). */
+const mostraCrmv = computed(() => form.categorias.includes('VETERINARIO'))
+
 function tornarPrincipal(categoria: CategoriaParceiro) {
   form.categorias = [categoria, ...form.categorias.filter((item) => item !== categoria)]
 }
@@ -147,7 +152,7 @@ function applyInitial(initial: ParceiroCadastro | null) {
   // O backend guarda o CNPJ canônico (letras e números, sem máscara): mascara para exibir.
   form.cnpj = formatCnpj(initial?.cnpj ?? '')
   form.telefoneComercial = formatPhone(initial?.telefoneComercial ?? '')
-  form.crmv = initial?.crmv ?? null
+  form.crmv = initial?.crmv ?? ''
   form.logoUrl = initial?.logoUrl ?? null
   nomeError.value = ''
   cnpjError.value = ''
@@ -252,7 +257,7 @@ function handleSubmit() {
     // CNPJ canônico: o backend normaliza para dígitos e a coluna é `@unique`.
     cnpj: cnpjDigitos,
     telefoneComercial: formatPhone(telefoneDigitos),
-    crmv: form.crmv,
+    crmv: form.crmv.trim() || null,
     logoUrl: form.logoUrl,
     ...(props.showProgramas ? { programas: [...programas.value] } : {}),
   })
@@ -405,6 +410,23 @@ function handleSubmit() {
         />
         <small v-if="telefoneError" id="cad-telefone-error" class="cad-form__error" role="alert">
           {{ telefoneError }}
+        </small>
+      </div>
+
+      <div v-if="mostraCrmv" class="cad-form__field">
+        <label for="cad-crmv">{{ t('parceiroCadastro.form.crmv') }}</label>
+        <InputText
+          id="cad-crmv"
+          v-model="form.crmv"
+          :placeholder="t('parceiroCadastro.form.crmvPlaceholder')"
+          :invalid="errorField === 'crmv'"
+          aria-describedby="cad-crmv-dica"
+          autocapitalize="characters"
+          autocomplete="off"
+          maxlength="40"
+        />
+        <small id="cad-crmv-dica" class="cad-form__hint">
+          {{ t('parceiroCadastro.form.crmvDica') }}
         </small>
       </div>
 

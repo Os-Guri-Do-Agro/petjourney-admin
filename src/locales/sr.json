@@ -1176,7 +1176,10 @@
       "cnpjInvalid": "CNPJ nije ispravan. Proverite brojeve.",
       "telefoneRequired": "Unesite kontakt telefon.",
       "telefoneInvalid": "Telefon nije ispravan. Unesite pozivni broj i broj telefona.",
-      "requiredLegend": "Naziv, CNPJ i telefon su obavezni: tim ih koristi da proveri Vašu registraciju i da Vas kontaktira."
+      "requiredLegend": "Naziv, CNPJ i telefon su obavezni: tim ih koristi da proveri Vašu registraciju i da Vas kontaktira.",
+      "crmv": "CRMV",
+      "crmvPlaceholder": "Npr. 12345/SP",
+      "crmvDica": "Registracija samostalnog veterinara. Tim PetJourney je proverava pri odobravanju."
     },
     "wizard": {
       "title": "Registrujte svoju partnersku firmu",
@@ -1331,7 +1334,8 @@
       "ROEDOR": "Glodar",
       "COELHO": "Zec",
       "PEIXE": "Riba",
-      "REPTIL": "Gmizavac"
+      "REPTIL": "Gmizavac",
+      "OUTRO": "Ostalo"
     },
     "filtros": {
       "aria": "Filteri liste poseta",
@@ -1455,7 +1459,10 @@
       },
       "emptyTitle": "Ništa nije podeljeno u ovom pristupu",
       "emptyBody": "Staratelj je odobrio posetu, ali nije uključio nijedan klinički podatak za ljubimca {pet}. Ipak, sve što unesete u beleške stiže do staratelja.",
-      "emptyCta": "Idite na beleške"
+      "emptyCta": "Idite na beleške",
+      "omitidos": {
+        "medicamentos": "Stariji lekovi koji nisu stali u pristup: {n}."
+      }
     },
     "tratamentos": {
       "title": "Stalna terapija",
@@ -1505,7 +1512,13 @@
         "remedios": "Lekovi",
         "observacoes": "Napomene",
         "nota": "Beleška staratelja"
-      }
+      },
+      "recorte": {
+        "periodo": "Svi unosi od {de} do {ate}, kako je staratelj izabrao.",
+        "entradas": "Unosi koje je staratelj izabrao, jedan po jedan."
+      },
+      "omitidas": "Stariji unosi iz perioda koji nisu stali u pristup: {n}.",
+      "fotosOmitidas": "Fotografije iz ovog dana koje nisu stale u pristup: {n}."
     },
     "anotacoes": {
       "title": "Istorija beleški",

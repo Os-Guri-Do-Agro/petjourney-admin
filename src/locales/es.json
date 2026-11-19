@@ -1176,7 +1176,10 @@
       "cnpjInvalid": "CNPJ inválido. Verifique los números.",
       "telefoneRequired": "Informe un teléfono de contacto.",
       "telefoneInvalid": "Teléfono inválido. Use código de área y número.",
-      "requiredLegend": "Nombre, CNPJ y teléfono son obligatorios: con ellos el equipo analiza el registro y se comunica con usted."
+      "requiredLegend": "Nombre, CNPJ y teléfono son obligatorios: con ellos el equipo analiza el registro y se comunica con usted.",
+      "crmv": "CRMV",
+      "crmvPlaceholder": "Ej.: 12345/SP",
+      "crmvDica": "El registro del veterinario independiente. El equipo de PetJourney lo revisa en la aprobación."
     },
     "wizard": {
       "title": "Registre su empresa socia",
@@ -1331,7 +1334,8 @@
       "ROEDOR": "Roedor",
       "COELHO": "Conejo",
       "PEIXE": "Pez",
-      "REPTIL": "Reptil"
+      "REPTIL": "Reptil",
+      "OUTRO": "Otro"
     },
     "filtros": {
       "aria": "Filtros de la lista de atenciones",
@@ -1455,7 +1459,10 @@
       },
       "emptyTitle": "Nada compartido en este acceso",
       "emptyBody": "El tutor autorizó la atención, pero no incluyó ningún dato clínico de {pet}. Lo que registre en las notas igual le llega.",
-      "emptyCta": "Ir a las notas"
+      "emptyCta": "Ir a las notas",
+      "omitidos": {
+        "medicamentos": "Medicamentos más antiguos que no cupieron en el acceso: {n}."
+      }
     },
     "tratamentos": {
       "title": "Tratamiento continuo",
@@ -1505,7 +1512,13 @@
         "remedios": "Medicamentos",
         "observacoes": "Observaciones",
         "nota": "Nota del tutor"
-      }
+      },
+      "recorte": {
+        "periodo": "Todos los registros del {de} al {ate}, como eligió el tutor.",
+        "entradas": "Los registros que el tutor eligió, uno por uno."
+      },
+      "omitidas": "Registros más antiguos del período que no cupieron en el acceso: {n}.",
+      "fotosOmitidas": "Fotos de este día que no cupieron en el acceso: {n}."
     },
     "anotacoes": {
       "title": "Historial de notas",

@@ -1176,7 +1176,10 @@
       "cnpjInvalid": "Invalid CNPJ. Check the numbers.",
       "telefoneRequired": "Enter a contact phone number.",
       "telefoneInvalid": "Invalid phone. Include dialling code and number.",
-      "requiredLegend": "Name, CNPJ, and phone are required: the team uses them to review your registration and reach you."
+      "requiredLegend": "Name, CNPJ, and phone are required: the team uses them to review your registration and reach you.",
+      "crmv": "CRMV",
+      "crmvPlaceholder": "e.g. 12345/SP",
+      "crmvDica": "The independent vet's registration. The PetJourney team checks it on approval."
     },
     "wizard": {
       "title": "Register your partner company",
@@ -1331,7 +1334,8 @@
       "ROEDOR": "Rodent",
       "COELHO": "Rabbit",
       "PEIXE": "Fish",
-      "REPTIL": "Reptile"
+      "REPTIL": "Reptile",
+      "OUTRO": "Other"
     },
     "filtros": {
       "aria": "Appointment list filters",
@@ -1455,7 +1459,10 @@
       },
       "emptyTitle": "Nothing shared in this access",
       "emptyBody": "The pet parent granted the visit but did not include any clinical data for {pet}. Whatever you record in the notes still reaches them.",
-      "emptyCta": "Go to notes"
+      "emptyCta": "Go to notes",
+      "omitidos": {
+        "medicamentos": "Older medicines that did not fit in the access: {n}."
+      }
     },
     "tratamentos": {
       "title": "Ongoing treatment",
@@ -1505,7 +1512,13 @@
         "remedios": "Medicines",
         "observacoes": "Remarks",
         "nota": "Pet parent's note"
-      }
+      },
+      "recorte": {
+        "periodo": "Every entry from {de} to {ate}, as the pet parent chose.",
+        "entradas": "The entries the pet parent picked, one by one."
+      },
+      "omitidas": "Older entries in this period that did not fit in the access: {n}.",
+      "fotosOmitidas": "Photos from this day that did not fit in the access: {n}."
     },
     "anotacoes": {
       "title": "Notes history",

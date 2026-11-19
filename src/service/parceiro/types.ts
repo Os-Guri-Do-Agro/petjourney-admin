@@ -289,7 +289,16 @@ export type StatusCompartilhamento = 'ATIVO' | 'EXPIRADO' | 'REVOGADO'
 /** `ENCERRADO` é virtual: agrupa EXPIRADO + REVOGADO num cursor só, no servidor. */
 export type StatusFiltroCompartilhamento = StatusCompartilhamento | 'ENCERRADO'
 
-export type EspeciePet = 'CACHORRO' | 'GATO' | 'AVE' | 'ROEDOR' | 'COELHO' | 'PEIXE' | 'REPTIL'
+export type EspeciePet =
+  | 'CACHORRO'
+  | 'GATO'
+  | 'AVE'
+  | 'ROEDOR'
+  | 'COELHO'
+  | 'PEIXE'
+  | 'REPTIL'
+  /* A API aceita `?especie=OUTRO`; o cartão mostra o nome que o responsável escreveu no app. */
+  | 'OUTRO'
 
 export type OrdenacaoPacientes = 'recentes' | 'nome' | 'expiraEm'
 
@@ -355,6 +364,25 @@ export type EntradaDiarioCompartilhada = {
   nota?: string | null
   /** Ids de arquivo do cofre, como em `DocumentoCompartilhado.arquivoIds`. */
   fotoIds?: string[]
+  /** Só com `diarioSelecao` e só quando > 0: fotos deste dia que não couberam no cofre do acesso. */
+  fotosOmitidas?: number
+}
+
+/**
+ * O recorte do diário que o responsável escolheu ao conceder o acesso.
+ *
+ * Presente, o diário é linha do tempo: todos os registros do recorte, com ou sem sintoma, em
+ * qualquer ordem. Ausente, vale a regra antiga (dias com sintoma ou doença, 30 dias, até 15).
+ */
+export type DiarioSelecaoSnapshot = {
+  modo: 'PERIODO' | 'ENTRADAS'
+  de?: string
+  ate?: string
+  /** Dia do calendário do responsável (`AAAA-MM-DD`), como ele escolheu: é o que se mostra. */
+  deDia?: string
+  ateDia?: string
+  /** Só em PERIODO e só quando > 0: registros mais antigos que passaram do teto de 60. */
+  entradasOmitidas?: number
 }
 
 /**
@@ -458,6 +486,10 @@ export type SnapshotPetCompartilhado = {
   observacoesTutor?: string | null
   /** Vazio quando a categoria DIARIO não foi liberada. */
   diario?: EntradaDiarioCompartilhada[]
+  /** O recorte escolhido pelo responsável; ausente em acesso com a regra antiga. */
+  diarioSelecao?: DiarioSelecaoSnapshot
+  /** Só quando > 0: remédios de dose mais antiga que passaram do teto de 20 em `medicamentos`. */
+  medicamentosOmitidos?: number
   /** Vazio quando a categoria DOCUMENTOS não foi liberada. */
   documentos?: DocumentoCompartilhado[]
   /** Parte 15. Ausente = acesso anterior ao contrato: não inferir motivo. */

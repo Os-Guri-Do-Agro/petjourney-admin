@@ -182,7 +182,7 @@ export function resolveSolicitarModoError(error: unknown) {
 }
 
 /** O campo do formulário do cadastro que o erro marca e que recebe o foco. */
-export type CampoDoCadastro = 'nome' | 'cnpj' | 'categorias'
+export type CampoDoCadastro = 'nome' | 'cnpj' | 'categorias' | 'crmv'
 
 /** Erros do funil de cadastro (Parte 9), roteados pelo `reason` estável. */
 export function resolveCadastroErrorView(error: unknown): {
@@ -206,8 +206,7 @@ export function resolveCadastroErrorView(error: unknown): {
   /*
    * Cadastro aprovado que ganha uma categoria com exigência que ele não tem (pedidos de 17/11):
    * clínica veterinária sem CNPJ, veterinário autônomo sem CRMV. Nada foi gravado; o `faltando`
-   * diz o que falta. O formulário não tem campo de CRMV: sem o CNPJ na lista, o foco vai às
-   * categorias, onde a escolha foi feita.
+   * diz o que falta e o foco vai ao campo (com os dois, o CNPJ primeiro).
    */
   if (
     error.codigo === 'PARCEIRO_CATEGORIA_EXIGE_CNPJ' ||
@@ -218,7 +217,7 @@ export function resolveCadastroErrorView(error: unknown): {
       ? faltando.includes('CNPJ')
       : error.codigo === 'PARCEIRO_CATEGORIA_EXIGE_CNPJ'
 
-    return { message: error.message, field: faltaCnpj ? 'cnpj' : 'categorias' }
+    return { message: error.message, field: faltaCnpj ? 'cnpj' : 'crmv' }
   }
 
   switch (error.reason) {

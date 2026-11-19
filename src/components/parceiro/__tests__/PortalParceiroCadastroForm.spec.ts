@@ -152,28 +152,48 @@ describe('categorias do cadastro', () => {
     expect((await enviar(wrapper))?.categorias).toEqual(['FARMACIA'])
   })
 
-  it('o veterinário autônomo só é opção quando o cadastro já o tem, e não some ao salvar', async () => {
-    const opcoes = (wrapper: VueWrapper) =>
-      (wrapper.findComponent(MultiSelect).props('options') as { value: string }[]).map(
-        (opcao) => opcao.value,
-      )
+  it('o veterinário autônomo é opção separada da clínica, logo depois dela', () => {
+    const wrapper = montar(cadastro(['PET_SHOP']))
+    const opcoes = (wrapper.findComponent(MultiSelect).props('options') as { value: string }[]).map(
+      (opcao) => opcao.value,
+    )
 
-    expect(opcoes(montar(cadastro(['PET_SHOP'])))).not.toContain('VETERINARIO')
+    expect(opcoes.slice(0, 2)).toEqual(['CLINICA_VETERINARIA', 'VETERINARIO'])
+  })
+
+  it('o CRMV só aparece com Veterinário autônomo marcado e vai no corpo, sem espaços', async () => {
+    const semVeterinario = montar(cadastro(['PET_SHOP'], { crmv: 'CRMV-SP 123' }))
+    expect(semVeterinario.find('#cad-crmv').exists()).toBe(false)
+    /* Escondido, o CRMV gravado volta como veio: o PATCH substitui o cadastro inteiro. */
+    expect((await enviar(semVeterinario))?.crmv).toBe('CRMV-SP 123')
 
     const comVeterinario = montar(cadastro(['VETERINARIO', 'PET_SHOP'], { crmv: 'CRMV-SP 123' }))
-    expect(opcoes(comVeterinario)).toContain('VETERINARIO')
     expect(itensDaOrdem(comVeterinario)[0]).toBe('Veterinário autônomo · Principal')
-    expect((await enviar(comVeterinario))?.categorias).toEqual(['VETERINARIO', 'PET_SHOP'])
+    const campo = comVeterinario.find<HTMLInputElement>('#cad-crmv')
+    expect(campo.element.value).toBe('CRMV-SP 123')
+
+    await campo.setValue('  12345/SP ')
+    const enviado = await enviar(comVeterinario)
+    expect(enviado?.categorias).toEqual(['VETERINARIO', 'PET_SHOP'])
+    expect(enviado?.crmv).toBe('12345/SP')
+
+    await campo.setValue('   ')
+    expect((await enviar(comVeterinario))?.crmv).toBeNull()
   })
 })
 
 describe('foco pelo erro do backend', () => {
-  it('409 de CNPJ: o foco vai ao CNPJ; de CRMV: às categorias', async () => {
-    const wrapper = montar(cadastro(['PET_SHOP', 'CLINICA_VETERINARIA']))
+  it('409 de CNPJ: o foco vai ao CNPJ; de CRMV: ao CRMV', async () => {
+    const wrapper = montar(cadastro(['PET_SHOP', 'CLINICA_VETERINARIA', 'VETERINARIO']))
 
     await wrapper.setProps({ errorField: 'cnpj' })
     await flushPromises()
     expect(document.activeElement?.id).toBe('cad-cnpj')
+
+    await wrapper.setProps({ errorField: null })
+    await wrapper.setProps({ errorField: 'crmv' })
+    await flushPromises()
+    expect(document.activeElement?.id).toBe('cad-crmv')
 
     await wrapper.setProps({ errorField: null })
     await wrapper.setProps({ errorField: 'categorias' })

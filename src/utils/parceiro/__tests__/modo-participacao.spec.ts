@@ -123,13 +123,13 @@ describe('modo-participacao', () => {
       message: 'Mensagem de PARCEIRO_CATEGORIA_EXIGE_CNPJ',
       field: 'cnpj',
     })
-    /* O formulário não tem campo de CRMV: o foco vai às categorias, onde a escolha foi feita. */
-    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV', ['CRMV']).field).toBe('categorias')
-    /* Os dois faltando: o CNPJ, que o formulário tem, primeiro. */
+    /* O campo do CRMV aparece com Veterinário autônomo marcado: o foco vai a ele. */
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV', ['CRMV']).field).toBe('crmv')
+    /* Os dois faltando: o CNPJ primeiro. */
     expect(exige('PARCEIRO_CATEGORIA_EXIGE_CNPJ', ['CNPJ', 'CRMV']).field).toBe('cnpj')
     /* Sem `faltando`, vale o código. */
     expect(exige('PARCEIRO_CATEGORIA_EXIGE_CNPJ').field).toBe('cnpj')
-    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV').field).toBe('categorias')
+    expect(exige('PARCEIRO_CATEGORIA_EXIGE_CRMV').field).toBe('crmv')
   })
 
   it('detecta erro AFILIADO_NAO_ATIVO da carteira', () => {
