@@ -1,6 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { extractResetToken, resolveLoginProfileFlags } from '@/service/auth/auth-service'
+import {
+  avisarSaidaNaApi,
+  extractResetToken,
+  resolveLoginProfileFlags,
+} from '@/service/auth/auth-service'
 
 describe('resolveLoginProfileFlags', () => {
   it('lê tutorInactive do body de login', () => {
@@ -54,5 +58,55 @@ describe('extractResetToken', () => {
     expect(() => extractResetToken({})).toThrow(/inválida/i)
     expect(() => extractResetToken({ reset_token: '' })).toThrow(/inválida/i)
     expect(() => extractResetToken(null)).toThrow(/inválida/i)
+  })
+})
+
+describe('avisarSaidaNaApi', () => {
+  afterEach(() => {
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+  })
+
+  it('manda o refresh token para /auth/logout, sem Authorization e com keepalive', () => {
+    window.localStorage.setItem('refresh_token', 'refresh-1')
+    const enviar = vi.fn((..._args: Parameters<typeof fetch>) =>
+      Promise.resolve(new Response('{}', { status: 200 })),
+    )
+
+    avisarSaidaNaApi({ fetch: enviar, base: 'https://api.teste' })
+
+    expect(enviar).toHaveBeenCalledTimes(1)
+    const [url, init] = enviar.mock.calls[0]!
+    expect(url).toBe('https://api.teste/auth/logout')
+    expect(init?.method).toBe('POST')
+    expect(init?.keepalive).toBe(true)
+    expect(JSON.parse(String(init?.body))).toEqual({ refresh_token: 'refresh-1' })
+    expect(new Headers(init?.headers).has('Authorization')).toBe(false)
+  })
+
+  it('não chama a API sem refresh token', () => {
+    const enviar = vi.fn((..._args: Parameters<typeof fetch>) =>
+      Promise.resolve(new Response('{}')),
+    )
+
+    avisarSaidaNaApi({ fetch: enviar, base: 'https://api.teste' })
+
+    expect(enviar).not.toHaveBeenCalled()
+  })
+
+  it('rede fora ou fetch que quebra não chegam a quem está saindo', async () => {
+    window.sessionStorage.setItem('refresh_token', 'refresh-2')
+    const rejeita = vi.fn((..._args: Parameters<typeof fetch>) =>
+      Promise.reject(new TypeError('Failed to fetch')),
+    )
+    const quebra = vi.fn((..._args: Parameters<typeof fetch>): Promise<Response> => {
+      throw new Error('sem fetch')
+    })
+
+    expect(() => avisarSaidaNaApi({ fetch: rejeita, base: 'https://api.teste' })).not.toThrow()
+    expect(() => avisarSaidaNaApi({ fetch: quebra, base: 'https://api.teste' })).not.toThrow()
+    await Promise.resolve()
+    expect(rejeita).toHaveBeenCalledTimes(1)
+    expect(quebra).toHaveBeenCalledTimes(1)
   })
 })

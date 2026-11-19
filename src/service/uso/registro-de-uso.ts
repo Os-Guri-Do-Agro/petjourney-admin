@@ -27,6 +27,8 @@ export const ENVIAR_COM = 20
 export const MAXIMO_POR_LOTE = 50
 /** Sem API (rede caída), a fila guarda os mais recentes até aqui. */
 export const MAXIMO_NA_FILA = 200
+/** Teto da espera pedida pela API no 429 (`tenteDeNovoEmSegundos` ou `Retry-After`). */
+export const ESPERA_MAXIMA_NO_429_MS = 60 * 60 * 1000
 
 const CHAVE_DA_SESSAO = 'pj.uso.sessao'
 
@@ -86,6 +88,34 @@ function sessaoDaAba(novoId: () => string): string {
   }
 }
 
+/**
+ * Quanto a API pediu para esperar num 429: `tenteDeNovoEmSegundos` do corpo ou, sem ele, o
+ * `Retry-After`. Sem nenhum dos dois, `null` (o lote sai no próximo ciclo, como antes).
+ */
+async function esperaPedidaNo429(resposta: Response): Promise<number | null> {
+  let segundos = Number.NaN
+
+  try {
+    const corpo: unknown = await resposta.clone().json()
+
+    if (corpo && typeof corpo === 'object' && 'tenteDeNovoEmSegundos' in corpo) {
+      segundos = Number(corpo.tenteDeNovoEmSegundos)
+    }
+  } catch {
+    /* Corpo que não é JSON: fica o cabeçalho. */
+  }
+
+  if (!Number.isFinite(segundos) || segundos <= 0) {
+    segundos = Number(resposta.headers.get('Retry-After'))
+  }
+
+  if (!Number.isFinite(segundos) || segundos <= 0) {
+    return null
+  }
+
+  return Math.min(segundos * 1000, ESPERA_MAXIMA_NO_429_MS)
+}
+
 /** O molde da rota, como o `file-routes.ts` gerou: `/clinica/paciente/:petId/resumo`. */
 export function moldeDaRota(rota: RouteLocationNormalized): string | null {
   return rota.matched[rota.matched.length - 1]?.path ?? null
@@ -99,6 +129,8 @@ export function criarRegistroDeUso(opcoes: OpcoesDoRegistro = {}) {
   let fila: NaFila[] = []
   const emVoo = new Set<NaFila>()
   let desligado = false
+  /** Depois de um 429: nada sai antes disso (as telas continuam entrando na fila). */
+  let esperarAte = 0
   let ultimaTela: string | null = null
   let sessaoId: string | null = null
 
@@ -180,6 +212,11 @@ export function criarRegistroDeUso(opcoes: OpcoesDoRegistro = {}) {
       return
     }
 
+    /* A API pediu para esperar: nem a saída da aba manda antes da hora (levaria outro 429). */
+    if (agora().getTime() < esperarAte) {
+      return
+    }
+
     const base = getApiUrl()
 
     if (!base) {
@@ -237,7 +274,16 @@ export function criarRegistroDeUso(opcoes: OpcoesDoRegistro = {}) {
       if (resposta.status >= 400 && resposta.status < 500 && resposta.status !== 429) {
         tirarDaFila(lote)
       }
-      /* 429 e 5xx: o lote fica para o próximo ciclo. */
+
+      /* 429: o lote fica e a fila espera o que a API pediu (no máximo 1 hora). */
+      if (resposta.status === 429) {
+        const espera = await esperaPedidaNo429(resposta)
+
+        if (espera !== null) {
+          esperarAte = agora().getTime() + espera
+        }
+      }
+      /* 5xx: o lote fica para o próximo ciclo. */
     } catch {
       /* Rede: o lote fica para o próximo ciclo. */
     } finally {

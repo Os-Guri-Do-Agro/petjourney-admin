@@ -279,6 +279,63 @@ describe('o envio', () => {
     expect(registro.estado().naFila).toHaveLength(0)
   })
 
+  it('429 com tenteDeNovoEmSegundos: nada sai antes da hora, e as telas continuam entrando', async () => {
+    entrarComo('u1')
+    let instante = new Date('2026-11-18T14:03:11.120Z').getTime()
+    const enviarPelaRede = vi.fn<Rede>(
+      async () =>
+        new Response(
+          JSON.stringify({ codigo: 'USO_TAXA_EXCEDIDA', limite: 30, tenteDeNovoEmSegundos: 60 }),
+          { status: 429, headers: { 'Retry-After': '5' } },
+        ),
+    )
+    const { registro } = criar({
+      fetch: enviarPelaRede as unknown as typeof fetch,
+      agora: () => new Date(instante),
+    })
+
+    registro.registrarTela(rota('/inicio'))
+    await registro.enviar()
+    expect(enviarPelaRede).toHaveBeenCalledTimes(1)
+
+    instante += 59_000
+    registro.registrarTela(rota('/clinica/agenda'))
+    await registro.enviar()
+    await registro.enviar({ aoSair: true })
+    expect(enviarPelaRede).toHaveBeenCalledTimes(1)
+    expect(registro.estado().naFila).toHaveLength(2)
+
+    instante += 1_000
+    enviarPelaRede.mockResolvedValueOnce(resposta(202))
+    await registro.enviar()
+    expect(enviarPelaRede).toHaveBeenCalledTimes(2)
+    expect(corpoDe(enviarPelaRede.mock.calls[1]!).eventos).toHaveLength(2)
+    expect(registro.estado().naFila).toHaveLength(0)
+  })
+
+  it('429 sem corpo usa o Retry-After, e a espera não passa de 1 hora', async () => {
+    entrarComo('u1')
+    let instante = 0
+    const enviarPelaRede = vi.fn<Rede>(
+      async () => new Response(null, { status: 429, headers: { 'Retry-After': '86400' } }),
+    )
+    const { registro } = criar({
+      fetch: enviarPelaRede as unknown as typeof fetch,
+      agora: () => new Date(instante),
+    })
+
+    registro.registrarTela(rota('/inicio'))
+    await registro.enviar()
+
+    instante = 60 * 60 * 1000 - 1
+    await registro.enviar()
+    expect(enviarPelaRede).toHaveBeenCalledTimes(1)
+
+    instante = 60 * 60 * 1000
+    await registro.enviar()
+    expect(enviarPelaRede).toHaveBeenCalledTimes(2)
+  })
+
   it('erro de rede guarda o lote', async () => {
     entrarComo('u1')
     const enviarPelaRede = vi.fn<Rede>(async () => {

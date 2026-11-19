@@ -1,6 +1,8 @@
 import { useRouter } from 'vue-router'
 
+import { useModoDemonstracao } from '@/composables/useModoDemonstracao'
 import { clearAuthSession } from '@/service/auth/auth-session'
+import { avisarSaidaNaApi } from '@/service/auth/auth-service'
 import { useParceiroStore } from '@/stores/parceiro'
 import { useUsuarioPerfilStore } from '@/stores/usuario-perfil'
 
@@ -9,8 +11,14 @@ export function useLogout() {
   const router = useRouter()
   const parceiroStore = useParceiroStore()
   const usuarioPerfilStore = useUsuarioPerfilStore()
+  const demonstracao = useModoDemonstracao()
 
   async function logout() {
+    /* Antes de limpar, enquanto o refresh token existe. A sessão da demonstração nunca vai à API. */
+    if (!demonstracao.ativo.value) {
+      avisarSaidaNaApi()
+    }
+
     parceiroStore.reset()
     usuarioPerfilStore.clear()
     clearAuthSession()

@@ -1,4 +1,4 @@
-import { apiFetch } from '../api'
+import { apiFetch, getApiUrl } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
 import type { PapelParceiro, StatusAuditoriaParceiro } from '../parceiro/types'
 import {
@@ -213,6 +213,42 @@ export async function trocarParaParceiro(parceiroId: string) {
   setAuthSession(tokens, preferLocalStorageForRefresh())
 
   return tokens
+}
+
+export type OpcoesDaSaida = {
+  /** Para os testes. */
+  fetch?: typeof fetch
+  base?: string
+}
+
+/**
+ * Avisa a API que a pessoa saiu da conta: ela grava o "Saiu" (Uso da plataforma, no CMS) e deixa
+ * de aceitar o refresh token. Chamar antes de limpar a sessão.
+ *
+ * Não espera a resposta e ignora erro: rede fora não pode prender ninguém na conta. Vai por `fetch`
+ * direto, sem `Authorization` (a rota é pública e responde 200 até para token desconhecido), com
+ * `keepalive` para sair mesmo se a página trocar logo depois.
+ */
+export function avisarSaidaNaApi(opcoes: OpcoesDaSaida = {}) {
+  const refreshToken = getRefreshToken()
+  const base = opcoes.base ?? getApiUrl()
+
+  if (!refreshToken || !base) {
+    return
+  }
+
+  const enviar = opcoes.fetch ?? ((...args: Parameters<typeof fetch>) => fetch(...args))
+
+  try {
+    void enviar(`${base}/auth/logout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      keepalive: true,
+    }).catch(() => {})
+  } catch {
+    /* Sem `fetch` no navegador: a saída continua do mesmo jeito. */
+  }
 }
 
 /**
