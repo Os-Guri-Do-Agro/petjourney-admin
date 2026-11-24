@@ -22,8 +22,11 @@ type Situacao = {
   aguardandoCrmv?: string[]
   motivoDaConferencia?: 'SEM_SELO' | 'VENCIDO' | 'SEM_IDENTIDADE' | null
   identidade?: { status: string } | null
+  elegiveis?: string[]
+  modulos?: { modulo: string; podeLer: boolean }[]
 }
 
+/* Por padrão, uma clínica com a Clínica aberta: é onde a receita existe. */
 function comEu(situacao: Situacao) {
   const store = useParceiroStore()
   store.loadState = 'ready'
@@ -33,6 +36,8 @@ function comEu(situacao: Situacao) {
     atosAguardandoConferencia: [],
     motivoDaConferencia: null,
     identidade: null,
+    elegiveis: ['CLINICA'],
+    modulos: [{ modulo: 'CLINICA', podeLer: true }],
     ...situacao,
   } as unknown as EuNoParceiro
   return store
@@ -66,6 +71,23 @@ describe('ShellPendencia', () => {
     comEu({ identidade: null })
 
     expect(montar().find('.pendencia').exists()).toBe(false)
+  })
+
+  it('pet shop sem Clínica não vê o pedido de receita, mesmo com o CRMV pendente no /eu', () => {
+    comEu({
+      aguardandoCrmv: ['prontuario.assinar'],
+      motivoDaConferencia: 'SEM_IDENTIDADE',
+      elegiveis: [],
+      modulos: [{ modulo: 'CLINICA', podeLer: false }],
+    })
+
+    expect(montar().find('.pendencia').exists()).toBe(false)
+  })
+
+  it('clínica que ainda vai ligar a Clínica (elegível) já vê o pedido', () => {
+    comEu({ motivoDaConferencia: 'SEM_IDENTIDADE', modulos: [] })
+
+    expect(montar().find('.pendencia').exists()).toBe(true)
   })
 
   it('falta só a identidade: leva à gaveta da identidade', () => {

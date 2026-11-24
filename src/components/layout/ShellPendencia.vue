@@ -51,7 +51,23 @@ const faltaIdentidade = computed(() => {
   return eu.value?.motivoDaConferencia === 'SEM_IDENTIDADE' || faltaCrmv.value
 })
 
+/*
+ * Receita e prontuário só existem com a Clínica: o pedido vale para quem tem o módulo aberto ou para
+ * a empresa cuja categoria combina com a Clínica (vai ligá-la). Um pet shop sem Clínica não assina
+ * nada, mesmo que o /eu liste o CRMV como pendente para o papel de dono.
+ */
+const temClinicaNoHorizonte = computed(() => {
+  const atual = eu.value
+  if (!atual) return false
+
+  return (
+    (atual.elegiveis ?? []).includes('CLINICA') ||
+    (atual.modulos ?? []).some((modulo) => modulo.modulo === 'CLINICA' && modulo.podeLer)
+  )
+})
+
 const pedido = computed<Pedido | null>(() => {
+  if (!temClinicaNoHorizonte.value) return null
   if (faltaIdentidade.value && faltaCrmv.value) return 'ambos'
   if (faltaIdentidade.value) return 'identidade'
   if (faltaCrmv.value) return 'crmv'
