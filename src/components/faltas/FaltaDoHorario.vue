@@ -144,9 +144,14 @@ const encerrada = computed(() => lida.value?.situacao === 'ENCERRADA')
 const podeContato = computed(
   () => props.podeEscrever && Boolean(lida.value) && !encerrada.value && !anonimizado.value,
 )
+/*
+ * Guia E3-03 (3.4 e 3.5): só o óbito tira o "reagendar" (`aceitaReagendamento: false`). Já
+ * reagendada, a tela não sabe se o horário novo foi cancelado (não há rota para ler um agendamento
+ * pelo id): o botão continua, e, se o novo ainda vale, a API responde 409 FALTA_JA_REAGENDADA, que
+ * o `falhou` mostra e relê. Esconder o botão travava quem cancelou o horário novo.
+ */
 const podeReagendar = computed(
-  () =>
-    props.podeEscrever && Boolean(lida.value?.aceitaReagendamento) && !lida.value?.reagendadoComoId,
+  () => props.podeEscrever && Boolean(lida.value?.aceitaReagendamento),
 )
 
 /* ---------------------------------------------------------------------------- contato */
