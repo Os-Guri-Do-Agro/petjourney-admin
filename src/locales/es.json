@@ -4540,6 +4540,8 @@
           "aproximado": "El cálculo dio {conta}; redondeado a {fracao}. Revíselo antes de prescribir.",
           "fracao": "Comprimido: {fracao}",
           "faixaEspecie": "Rango usual de la especie: {min} a {max} mg/kg",
+          "faixaMgKg": "{min} a {max} mg/kg",
+          "valorMgKg": "{valor} mg/kg",
           "faixaGeral": "Rango usual general (el vademécum no trae esta especie): {min} a {max} mg/kg",
           "semPeso": "Sin peso no hay cálculo: indique el peso de hoy.",
           "porAdministracao": "por administración, cada {horas} h"

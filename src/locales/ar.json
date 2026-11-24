@@ -4540,6 +4540,8 @@
           "aproximado": "أعطى الحساب {conta}؛ مُقرَّب إلى {fracao}. راجعه قبل الوصف.",
           "fracao": "القرص: {fracao}",
           "faixaEspecie": "النطاق المعتاد للنوع: {min} إلى {max} ملغ/كغ",
+          "faixaMgKg": "{min} إلى {max} ملغ/كغ",
+          "valorMgKg": "{valor} ملغ/كغ",
           "faixaGeral": "النطاق المعتاد العام (الدليل لا يذكر هذا النوع): {min} إلى {max} ملغ/كغ",
           "semPeso": "بلا وزن لا يوجد حساب: أدخل وزن اليوم.",
           "porAdministracao": "لكل إعطاء، كل {horas} ساعة"

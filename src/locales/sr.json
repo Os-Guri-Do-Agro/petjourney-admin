@@ -4540,6 +4540,8 @@
           "aproximado": "Račun je dao {conta}; zaokruženo na {fracao}. Proverite pre propisivanja.",
           "fracao": "Tableta: {fracao}",
           "faixaEspecie": "Uobičajeni opseg za vrstu: {min} do {max} mg/kg",
+          "faixaMgKg": "{min} do {max} mg/kg",
+          "valorMgKg": "{valor} mg/kg",
           "faixaGeral": "Opšti uobičajeni opseg (registar nema ovu vrstu): {min} do {max} mg/kg",
           "semPeso": "Bez težine nema računa: unesite današnju težinu.",
           "porAdministracao": "po primeni, na svakih {horas} h"

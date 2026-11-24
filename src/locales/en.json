@@ -4540,6 +4540,8 @@
           "aproximado": "The math gave {conta}; rounded to {fracao}. Check before prescribing.",
           "fracao": "Tablet: {fracao}",
           "faixaEspecie": "Usual range for the species: {min} to {max} mg/kg",
+          "faixaMgKg": "{min} to {max} mg/kg",
+          "valorMgKg": "{valor} mg/kg",
           "faixaGeral": "General usual range (the formulary has no data for this species): {min} to {max} mg/kg",
           "semPeso": "No weight, no calculation: enter today's weight.",
           "porAdministracao": "per administration, every {horas} h"

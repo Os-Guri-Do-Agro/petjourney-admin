@@ -24,6 +24,7 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
+import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import { ApiError } from '@/service/api'
 import {
   buscarMedicamentos,
@@ -34,7 +35,7 @@ import {
 } from '@/service/parceiro/catalogos-service'
 import { obterPaciente } from '@/service/parceiro/pacientes-service'
 
-const { t, te } = useI18n()
+const { t, te, locale } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const { store, parceiroQuery } = useParceiroPortal()
@@ -200,14 +201,23 @@ const proibidoParaOPaciente = computed(() => {
   return doseDaEspecie(med, paciente.value.especie).proibido
 })
 
+/** O número no formato do idioma: "0,1" em português, e não o "0.1" cru da API. */
+function numero(valor: number) {
+  return new Intl.NumberFormat(INTL_LOCALE[locale.value as Locale], { maximumFractionDigits: 3 }).format(
+    valor,
+  )
+}
+
 function faixa(min: number, max: number) {
-  return min === max ? `${min} mg/kg` : `${min} a ${max} mg/kg`
+  return min === max
+    ? t('clinico.bulario.api.dose.valorMgKg', { valor: numero(min) })
+    : t('clinico.bulario.api.dose.faixaMgKg', { min: numero(min), max: numero(max) })
 }
 
 function apresentacao(med: Medicamento) {
   return [
     med.apresentacao,
-    `${med.concentracao} mg/${t(`clinico.bulario.api.unidade.${med.unidadeApresentacao}`, 1)}`,
+    `${numero(med.concentracao)} mg/${t(`clinico.bulario.api.unidade.${med.unidadeApresentacao}`, 1)}`,
   ]
     .filter(Boolean)
     .join(' · ')

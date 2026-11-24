@@ -4540,6 +4540,8 @@
           "aproximado": "A conta deu {conta}; arredondado para {fracao}. Confira antes de prescrever.",
           "fracao": "Comprimido: {fracao}",
           "faixaEspecie": "Faixa usual da espécie: {min} a {max} mg/kg",
+          "faixaMgKg": "{min} a {max} mg/kg",
+          "valorMgKg": "{valor} mg/kg",
           "faixaGeral": "Faixa usual geral (o bulário não traz esta espécie): {min} a {max} mg/kg",
           "semPeso": "Sem peso, nenhuma conta: informe o peso de hoje.",
           "porAdministracao": "por administração, a cada {horas} h"
