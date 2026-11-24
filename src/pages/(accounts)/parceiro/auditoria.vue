@@ -22,6 +22,7 @@ import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useAcessoAosModulos } from '@/composables/useAcessoAosModulos'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
+import { ApiError } from '@/service/api'
 import {
   ACOES_DA_TRILHA,
   listarTrilha,
@@ -56,20 +57,11 @@ const ICONE_DA_ACAO: Record<AcaoLida, string> = {
   EXCLUIR: 'ph ph-trash',
 }
 
-/** Os tipos de registro que a API grava hoje. Tipo novo, sem frase ainda, sai pelo nome técnico. */
-const RECURSOS_CONHECIDOS = new Set([
-  'atendimento',
-  'paciente-do-parceiro',
-  'cliente-do-parceiro',
-  'alerta-do-paciente',
-  'aplicacao-vacina',
-  'consulta-do-app',
-  'vacina-do-app',
-  'diario-do-app',
-  'trilha-clinica',
-])
-
-const { t, locale } = useI18n()
+/*
+ * Os tipos de registro (`recursoTipo`, com hífen) têm o nome em `parceiro.auditoria.recurso`, com
+ * sublinhado: os 66 que a API gravava em 24/11. Tipo novo, sem nome ainda, sai como "um registro (tipo)".
+ */
+const { t, te, locale } = useI18n()
 const { store, bootstrapping, ensureContext, parceiroQuery } = useParceiroPortal()
 
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
@@ -80,6 +72,7 @@ const carregando = ref(false)
 const carregandoMais = ref(false)
 const carregado = ref(false)
 const erro = ref('')
+const semPermissao = ref(false)
 
 /* ------------------------------------------------------------------------------ filtros */
 
@@ -129,6 +122,7 @@ async function carregar() {
 
   carregando.value = true
   erro.value = ''
+  semPermissao.value = false
 
   try {
     await ensureContext()
@@ -143,6 +137,8 @@ async function carregar() {
   } catch (err) {
     if (meu !== pedido) return
 
+    /* Sem `auditoria.ler` (a tela aberta pelo endereço): tentar de novo não muda o papel. */
+    semPermissao.value = err instanceof ApiError && err.statusCode === 403
     erro.value = err instanceof Error ? err.message : t('parceiro.auditoria.erro')
   } finally {
     if (meu === pedido) carregando.value = false
@@ -215,8 +211,10 @@ function quem(evento: EventoDaTrilha) {
 }
 
 function recurso(evento: EventoDaTrilha) {
-  return RECURSOS_CONHECIDOS.has(evento.recursoTipo)
-    ? t(`parceiro.auditoria.recurso.${evento.recursoTipo.replace(/-/g, '_')}`)
+  const chave = `parceiro.auditoria.recurso.${evento.recursoTipo.replace(/-/g, '_')}`
+
+  return evento.recursoTipo !== 'outro' && te(chave)
+    ? t(chave)
     : t('parceiro.auditoria.recurso.outro', { tipo: evento.recursoTipo })
 }
 
@@ -355,7 +353,12 @@ const passosDaAuditoria = computed<PassoDoGuia[]>(() =>
     @tentar-de-novo="ensureContext(true)"
   >
     <div class="auditoria">
-      <div class="filtros" role="search" :aria-label="t('parceiro.auditoria.filtros.rotulo')">
+      <div
+        v-if="!semPermissao"
+        class="filtros"
+        role="search"
+        :aria-label="t('parceiro.auditoria.filtros.rotulo')"
+      >
         <div class="filtro">
           <span id="filtro-acao" class="filtro__rotulo">{{
             t('parceiro.auditoria.filtros.acao')
@@ -421,6 +424,7 @@ const passosDaAuditoria = computed<PassoDoGuia[]>(() =>
         <i class="ph ph-warning-circle" aria-hidden="true" />
         <p>{{ erro }}</p>
         <Button
+          v-if="!semPermissao"
           :label="t('parceiro.auditoria.tentar')"
           severity="secondary"
           outlined
