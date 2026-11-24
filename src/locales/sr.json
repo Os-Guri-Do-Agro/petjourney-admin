@@ -11130,6 +11130,15 @@
         "ACEITOS": "Prihvaćeni zahtevi ostaju ovde, sa terminom koji je ušao u raspored.",
         "RECUSADOS": "Odbijeni zahtevi ostaju ovde, sa razlogom koji je staratelj dobio.",
         "ENCERRADOS": "Ovde ostaju zahtevi kojima je istekao rok i oni koje je staratelj povukao."
+      },
+      "cadastro": {
+        "rotulo": "Evidencija u klinici",
+        "semCliente": "Nijedan klijent klinike nema ovaj broj telefona: prihvatanjem se pravi evidencija sa podacima iz zahteva.",
+        "jaECliente": "Već je klijent · {pets}",
+        "novo": "Novi klijent",
+        "novoDica": "Pravi drugog klijenta sa podacima iz zahteva.",
+        "fichaDe": "Karton za {nome}",
+        "fichaNova": "Novi karton"
       }
     },
     "config": {

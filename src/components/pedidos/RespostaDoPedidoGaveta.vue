@@ -14,6 +14,10 @@
  * (`holiday-closed`). Os avisos que ficam depois do aceite aparecem no resultado.
  *
  * O telefone aparece como texto: a clínica liga pelo telefone dela, a tela não disca.
+ *
+ * Pedido pelo site (canal `LINK`): a gaveta procura o telefone no cadastro da clínica e, achando,
+ * deixa escolhido o cliente que a casa já tem e a ficha de cada pet (mesmo nome e espécie), que vão
+ * no `vincularA` do aceite. Sem isso, o aceite criava cliente e paciente repetidos.
  */
 import Button from 'primevue/button'
 import RadioButton from 'primevue/radiobutton'
@@ -26,15 +30,21 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
+import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import {
   chaveDaRecusa,
   chaveDoConflito,
   chaveDoMotivo,
+  clientesDoTelefone,
   comMaiuscula,
   conflitosQueAvisam,
   diaCurto,
   diaLongo,
+  fichasParecidas,
+  vinculoDoAceite,
+  type ClienteDaCasa,
+  type FichaDaCasa,
 } from '@/components/pedidos/leitura-do-pedido'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -54,7 +64,7 @@ import {
   type MotivoDaRecusa,
   type SugestaoDoPedido,
 } from '@/service/parceiro/pedidos-service'
-import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
+import { listarPacientes, telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{
@@ -110,6 +120,7 @@ async function carregar() {
     const inicial = sumiu.value ? opcoesDeAcao.value.find((opcao) => opcao.valor === 'outro') : null
     acao.value = inicial?.valor ?? opcoesDeAcao.value[0]?.valor ?? 'recusar'
     if (acao.value === 'outro' && pedido.value.status === 'PENDENTE') void buscarSugestoes()
+    void buscarCadastro()
   } catch (err) {
     if (!leituraDoPedido.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('pedidos.caixa.erroAoCarregar')).mensagem
@@ -128,7 +139,12 @@ onMounted(() => {
 
 function reiniciar() {
   leituraDasSugestoes.nova()
+  leituraDoCadastro.nova()
   buscando.value = false
+  buscandoCadastro.value = false
+  clientesDaCasa.value = []
+  clienteEscolhido.value = CADASTRO_NOVO
+  fichas.value = {}
   pedido.value = null
   mensagem.value = ''
   aConfirmar.value = null
@@ -252,17 +268,106 @@ function rotuloDaSugestao(sugestao: SugestaoDoPedido) {
   })
 }
 
+/* ------------------------------------------------- o cadastro que a clínica já tem (pelo link) */
+
+/* O RadioButton e o Select não marcam a opção de valor nulo: "cadastro novo" e "ficha nova" são palavras. */
+const CADASTRO_NOVO = 'NOVO'
+const FICHA_NOVA = 'NOVA'
+
+const clientesDaCasa = ref<ClienteDaCasa[]>([])
+const buscandoCadastro = ref(false)
+const clienteEscolhido = ref<string>(CADASTRO_NOVO)
+/** A ficha de cada pet do pedido (`pedidoId` → `pacienteId`); `null`, ficha nova. */
+const fichas = ref<Record<string, string | null>>({})
+const leituraDoCadastro = criarUltimaLeitura()
+
+const procuraCadastro = computed(
+  () =>
+    pedido.value?.canal === 'LINK' &&
+    Boolean(pedido.value.telefone) &&
+    pendente.value &&
+    props.podeAceitar &&
+    acao.value !== 'recusar' &&
+    !resultado.value,
+)
+const clienteAtual = computed(
+  () => clientesDaCasa.value.find((cliente) => cliente.id === clienteEscolhido.value) ?? null,
+)
+
+async function buscarCadastro() {
+  const atual = pedido.value
+  if (!atual || atual.canal !== 'LINK' || !atual.telefone) return
+  if (atual.status !== 'PENDENTE' || !props.podeAceitar) return
+
+  const vez = leituraDoCadastro.nova()
+  buscandoCadastro.value = true
+
+  try {
+    const pagina = await listarPacientes({ q: atual.telefone, limit: 50 }, parceiroQuery())
+    if (!leituraDoCadastro.valendo(vez)) return
+    clientesDaCasa.value = clientesDoTelefone(pagina.itens, atual.telefone, atual.quemPede)
+    /* Achou: o primeiro já vem escolhido (o cadastro novo repetiria o cliente); dá para trocar. */
+    escolherCliente(clientesDaCasa.value[0]?.id ?? CADASTRO_NOVO)
+  } catch {
+    /* Sem a busca (sem permissão de ler pacientes, rede), o aceite segue como antes. */
+    if (leituraDoCadastro.valendo(vez)) clientesDaCasa.value = []
+  } finally {
+    if (leituraDoCadastro.valendo(vez)) buscandoCadastro.value = false
+  }
+}
+
+function escolherCliente(id: string) {
+  clienteEscolhido.value = id
+  const cliente = clientesDaCasa.value.find((item) => item.id === id)
+  fichas.value = cliente ? fichasParecidas(pedido.value?.pets ?? [], cliente.fichas) : {}
+}
+
+function escolherFicha(pedidoId: string, valor: string) {
+  fichas.value = { ...fichas.value, [pedidoId]: valor === FICHA_NOVA ? null : valor }
+}
+
+/** As fichas do cliente que nenhum outro pet do pedido já usa, e a ficha nova. */
+function opcoesDeFicha(pedidoId: string) {
+  const usadas = new Set(
+    Object.entries(fichas.value)
+      .filter(([outro, pacienteId]) => outro !== pedidoId && pacienteId)
+      .map(([, pacienteId]) => pacienteId),
+  )
+  const livres = (clienteAtual.value?.fichas ?? []).filter((ficha) => !usadas.has(ficha.id))
+
+  return [
+    ...livres.map((ficha) => ({ valor: ficha.id, rotulo: rotuloDaFicha(ficha), ficha })),
+    { valor: FICHA_NOVA, rotulo: t('pedidos.caixa.cadastro.fichaNova'), ficha: null },
+  ]
+}
+
+function rotuloDaFicha(ficha: FichaDaCasa) {
+  return `${ficha.nome} · ${t(`cadastro.especie.${ficha.especie}`)}`
+}
+
+function nomesDasFichas(cliente: ClienteDaCasa) {
+  return cliente.fichas.map((ficha) => ficha.nome).join(', ')
+}
+
 /* -------------------------------------------------------------------------------- aceitar */
 
 function corpoDoAceite(): Aceite | null {
   const texto = mensagem.value.trim() || undefined
+  const clienteId = procuraCadastro.value && clienteAtual.value ? clienteAtual.value.id : null
+  const vinculo = vinculoDoAceite(clienteId, fichas.value)
+  const comVinculo = vinculo ? { vincularA: vinculo } : {}
 
-  if (acao.value === 'escolhido') return { mensagem: texto }
+  if (acao.value === 'escolhido') return { mensagem: texto, ...comVinculo }
 
   const sugestao = escolhida.value === null ? null : sugestoes.value[escolhida.value]
   if (!sugestao) return null
 
-  return { inicio: sugestao.inicio, profissionalId: sugestao.profissionalId, mensagem: texto }
+  return {
+    inicio: sugestao.inicio,
+    profissionalId: sugestao.profissionalId,
+    mensagem: texto,
+    ...comVinculo,
+  }
 }
 
 async function aceitar(aceite: Aceite) {
@@ -586,8 +691,72 @@ const podeResponder = computed(
           <small class="eg__dica">{{ t('pedidos.caixa.mensagemDaRecusaDica') }}</small>
         </template>
 
+        <!-- Pedido pelo site: o cadastro que a clínica já tem, em vez de um novo. -->
+        <div v-if="procuraCadastro" class="rp__cadastro">
+          <span id="rp-cadastro" class="eg__rotulo">{{ t('pedidos.caixa.cadastro.rotulo') }}</span>
+          <Skeleton v-if="buscandoCadastro" height="2.25rem" />
+          <p v-else-if="!clientesDaCasa.length" class="rp__dica">
+            {{ t('pedidos.caixa.cadastro.semCliente') }}
+          </p>
+          <template v-else>
+            <div class="rp__opcoes" role="radiogroup" aria-labelledby="rp-cadastro">
+              <label v-for="cliente in clientesDaCasa" :key="cliente.id" class="rp__opcao">
+                <RadioButton
+                  :model-value="clienteEscolhido"
+                  :value="cliente.id"
+                  name="rp-cadastro"
+                  :disabled="enviando"
+                  @update:model-value="escolherCliente"
+                />
+                <span class="rp__opcao-texto">
+                  <span>{{ cliente.nome }}</span>
+                  <small>{{
+                    t('pedidos.caixa.cadastro.jaECliente', { pets: nomesDasFichas(cliente) })
+                  }}</small>
+                </span>
+              </label>
+              <label class="rp__opcao">
+                <RadioButton
+                  :model-value="clienteEscolhido"
+                  :value="CADASTRO_NOVO"
+                  name="rp-cadastro"
+                  :disabled="enviando"
+                  @update:model-value="escolherCliente"
+                />
+                <span class="rp__opcao-texto">
+                  <span>{{ t('pedidos.caixa.cadastro.novo') }}</span>
+                  <small>{{ t('pedidos.caixa.cadastro.novoDica') }}</small>
+                </span>
+              </label>
+            </div>
+            <template v-if="clienteAtual">
+              <div v-for="pet in pedido.pets" :key="pet.pedidoId" class="rp__ficha">
+                <label class="eg__rotulo" :for="`rp-ficha-${pet.pedidoId}`">
+                  {{ t('pedidos.caixa.cadastro.fichaDe', { nome: pet.nome }) }}
+                </label>
+                <Select
+                  :model-value="fichas[pet.pedidoId] ?? FICHA_NOVA"
+                  :input-id="`rp-ficha-${pet.pedidoId}`"
+                  :options="opcoesDeFicha(pet.pedidoId)"
+                  option-label="rotulo"
+                  option-value="valor"
+                  :disabled="enviando"
+                  @update:model-value="(valor: string) => escolherFicha(pet.pedidoId, valor)"
+                >
+                  <template #option="{ option }">
+                    <OpcaoDoPaciente v-if="option.ficha" :paciente="option.ficha">{{
+                      option.rotulo
+                    }}</OpcaoDoPaciente>
+                    <span v-else>{{ option.rotulo }}</span>
+                  </template>
+                </Select>
+              </div>
+            </template>
+          </template>
+        </div>
+
         <!-- A mensagem do aceite. -->
-        <template v-else>
+        <template v-if="acao !== 'recusar'">
           <label class="eg__rotulo" for="rp-mensagem">
             {{ t('pedidos.caixa.mensagem', { nome: pedido.quemPede }) }}
             <span class="eg__opcional">{{ t('cadastro.opcional') }}</span>
@@ -818,6 +987,41 @@ const podeResponder = computed(
 
 .rp__sugestao .ui-selo {
   margin-inline-start: 6px;
+}
+
+.rp__cadastro,
+.rp__ficha {
+  display: grid;
+  gap: 6px;
+}
+
+.rp__opcoes {
+  display: grid;
+  gap: 2px;
+}
+
+.rp__opcao {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.rp__opcao .p-radiobutton {
+  margin-top: 2px;
+}
+
+.rp__opcao-texto {
+  display: grid;
+  gap: 1px;
+  color: var(--tinta);
+  font-size: 14px;
+}
+
+.rp__opcao-texto small {
+  color: var(--tinta-2);
+  font-size: 12.5px;
 }
 
 .rp__confirmar {

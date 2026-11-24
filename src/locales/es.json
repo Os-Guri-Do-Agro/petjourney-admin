@@ -11130,6 +11130,15 @@
         "ACEITOS": "Las solicitudes aceptadas quedan aquí, con el horario que entró en la agenda.",
         "RECUSADOS": "Las solicitudes rechazadas quedan aquí, con el motivo que recibió el tutor.",
         "ENCERRADOS": "Aquí quedan las solicitudes que vencieron y las que el tutor retiró."
+      },
+      "cadastro": {
+        "rotulo": "Registro en la clínica",
+        "semCliente": "Ningún cliente de la clínica tiene este teléfono: al aceptar, se crea el registro con los datos de la solicitud.",
+        "jaECliente": "Ya es cliente · {pets}",
+        "novo": "Cliente nuevo",
+        "novoDica": "Crea otro cliente con los datos de la solicitud.",
+        "fichaDe": "Ficha de {nome}",
+        "fichaNova": "Ficha nueva"
       }
     },
     "config": {

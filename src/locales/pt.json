@@ -11130,6 +11130,15 @@
         "ACEITOS": "Os pedidos aceitos ficam aqui, com o horário que entrou na agenda.",
         "RECUSADOS": "Os pedidos recusados ficam aqui, com o motivo que o responsável recebeu.",
         "ENCERRADOS": "Ficam aqui os pedidos que perderam o prazo e os que o responsável desistiu de fazer."
+      },
+      "cadastro": {
+        "rotulo": "Cadastro na clínica",
+        "semCliente": "Nenhum cliente da clínica tem este telefone: o aceite cria o cadastro com os dados do pedido.",
+        "jaECliente": "Já é cliente · {pets}",
+        "novo": "Cliente novo",
+        "novoDica": "Cria outro cliente com os dados do pedido.",
+        "fichaDe": "Ficha de {nome}",
+        "fichaNova": "Ficha nova"
       }
     },
     "config": {
