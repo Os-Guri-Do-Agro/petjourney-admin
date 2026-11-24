@@ -179,6 +179,14 @@ function referencias(vacinaId: string | null) {
   }))
 }
 
+/**
+ * O número da meta a cada tecla: o `v-model` do InputNumber só grava quando o campo perde o foco de
+ * certos jeitos, e o Tab para o campo seguinte deixava o pedido com a conta do número anterior.
+ */
+function aoDigitar(linha: Linha, evento: { value: unknown }) {
+  linha.alvo = typeof evento.value === 'number' ? evento.value : null
+}
+
 function maximo(linha: Linha) {
   if (linha.tipo === 'COMPRAS') return COMPRAS_MAX_CENTAVOS / 100
   return linha.vacinaId ? ALVO_MAX_POR_VACINA : ALVO_MAX_DA_CLINICA
@@ -418,6 +426,7 @@ const titulo = computed(() =>
               :aria-label="t('estoque.plano.metaDe', { vacina: rotulos.nome(linha) })"
               :disabled="salvando"
               class="pg__campo"
+              @input="aoDigitar(linha, $event)"
             />
             <Button
               type="button"
