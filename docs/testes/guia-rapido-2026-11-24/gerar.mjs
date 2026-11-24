@@ -272,6 +272,7 @@ const pendencias = [
   ['M', '"Marcar mesmo assim" no horário que outro já tomou recebe 400: o DTO da API só aceita holiday-closed, embora o guia e o serviço esperem professional-overlap (lacuna N53).', 'API'],
   ['M', 'Depois de responder um pedido, os contadores ficam com o número velho: a API não limpa o cache de 30 s na resposta, e o selo "Pedidos" espera a próxima conferência do portal (lacuna N56).', 'API'],
   ['M', 'A página do pedido aceito no site não mostra a mensagem da clínica: a API não a manda (lacuna L1).', 'API'],
+  ['M', 'Na primeira resposta da pré-consulta, a API grava atualizadaEm 1 segundo depois de respondidaEm, e o portal (que segue o guia) já mostra "editada" (lacuna N57).', 'API'],
   ['L', 'Juntar dois pacientes (Paçoca C) deu 500 na API de dev duas vezes; juntar os clientes deu certo. O pet repetido do teste ficou inativo (lacuna N55).', 'API'],
   ['N, O', 'Algumas horas (entrada da internação, doses, "Salvo às", histórico da gaveta do horário) aparecem no fuso do computador, não no da clínica.', 'Em aberto (erro conhecido de fuso)'],
   ['K', 'No site de dev, o "Pedir horário" abria dizendo que o pedido estava indisponível (o captcha ficava desligado em todo build). Na produção, a main precisa da NEXT_PUBLIC_TURNSTILE_SITE_KEY de verdade no Amplify.', 'Corrigido no site (43c0e77); conferir a chave da produção'],
