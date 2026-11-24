@@ -13880,7 +13880,8 @@
           "texto": "Al final del turno, quien está de guardia lo entrega al siguiente, con lo pendiente."
         },
         "registrar": "Registrar dosis"
-      }
+      },
+      "ninguemRecebe": "Nadie más puede recibirla: la guardia solo pasa a quien tiene ficha de profesional con acceso y atiende la internación (dueño, veterinario o enfermería). Registre la ficha en Equipo › Profesionales."
     },
     "boletim": {
       "titulo": "Boletín al responsable",

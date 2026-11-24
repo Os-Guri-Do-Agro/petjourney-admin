@@ -13880,7 +13880,8 @@
           "texto": "No fim do turno, quem está de plantão entrega ao próximo, com o que ficou pendente."
         },
         "registrar": "Registrar dose"
-      }
+      },
+      "ninguemRecebe": "Ninguém mais pode receber: o plantão só passa para quem tem ficha de profissional com login e cuida da internação (dono, veterinário ou enfermagem). Cadastre a ficha em Equipe › Profissionais."
     },
     "boletim": {
       "titulo": "Boletim ao responsável",

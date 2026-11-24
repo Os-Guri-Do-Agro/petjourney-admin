@@ -13880,7 +13880,8 @@
           "texto": "Na kraju smene, dežurni predaje sledećem, sa onim što je ostalo."
         },
         "registrar": "Upišite dozu"
-      }
+      },
+      "ninguemRecebe": "Niko drugi ne može da primi smenu: ona prelazi samo na nekoga ko ima profil stručnjaka sa nalogom i radi na hospitalizaciji (vlasnik, veterinar ili nega). Dodajte profil u Tim › Stručnjaci."
     },
     "boletim": {
       "titulo": "Izveštaj vlasniku",

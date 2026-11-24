@@ -13880,7 +13880,8 @@
           "texto": "At the end of the shift, whoever is on duty hands over to the next, with what is pending."
         },
         "registrar": "Record dose"
-      }
+      },
+      "ninguemRecebe": "No one else can receive it: the shift only goes to someone with a professional profile and a login who works in hospitalization (owner, vet or nursing). Add the profile in Team › Professionals."
     },
     "boletim": {
       "titulo": "Update to the owner",

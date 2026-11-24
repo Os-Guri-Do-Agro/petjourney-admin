@@ -163,6 +163,11 @@ async function entregar() {
           :invalid="tentou && !recebidoPor"
           :disabled="salvando"
         />
+        <!-- Guia e5 16.3: só recebe quem executa a internação com ficha e login. Sem ninguém, a lista
+             vazia não diz o porquê nem o que fazer. -->
+        <small v-if="!opcoesDeQuemRecebe.length" class="eg__dica">{{
+          t('internacao.plantao.ninguemRecebe')
+        }}</small>
       </section>
 
       <section class="eg__secao">
