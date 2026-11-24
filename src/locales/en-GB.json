@@ -283,7 +283,8 @@
     "yes": "Yes",
     "no": "No",
     "selectAll": "All",
-    "feito": "Done"
+    "feito": "Done",
+    "documentoDaPessoa": "At least 4 characters, using only unaccented letters, numbers, full stop, hyphen, slash and space."
   },
   "nav": {
     "sections": {

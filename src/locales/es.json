@@ -283,7 +283,8 @@
     "yes": "Sí",
     "no": "No",
     "selectAll": "Todos",
-    "feito": "Hecho"
+    "feito": "Hecho",
+    "documentoDaPessoa": "Desde 4 caracteres, solo con letras sin tilde, números, punto, guion, barra y espacio."
   },
   "nav": {
     "sections": {

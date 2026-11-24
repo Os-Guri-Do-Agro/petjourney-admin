@@ -283,7 +283,8 @@
     "yes": "Da",
     "no": "Ne",
     "selectAll": "Sve",
-    "feito": "Urađeno"
+    "feito": "Urađeno",
+    "documentoDaPessoa": "Najmanje 4 znaka, samo slova bez kvačica, brojevi, tačka, crtica, kosa crta i razmak."
   },
   "nav": {
     "sections": {

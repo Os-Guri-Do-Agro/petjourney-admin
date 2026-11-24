@@ -21,6 +21,7 @@ import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { registrarPedidoDeCopia, type PedidoDeCopia } from '@/service/parceiro/copias-service'
 import { listarPacientes, type PacienteNaLista } from '@/service/parceiro/pacientes-service'
+import { documentoDaPessoaValido } from '@/utils/documento-da-pessoa'
 
 const aberta = defineModel<boolean>('visible', { default: false })
 const emit = defineEmits<{ registrado: [pedido: PedidoDeCopia, jaExistia: boolean] }>()
@@ -79,7 +80,7 @@ function rotuloDoPaciente(item: PacienteNaLista) {
 
 const pacienteValido = computed(() => Boolean(paciente.value && typeof paciente.value === 'object'))
 const nomeValido = computed(() => nome.value.trim().length >= 2)
-const documentoValido = computed(() => documento.value.trim().length >= 4)
+const documentoValido = computed(() => documentoDaPessoaValido(documento.value))
 const periodoValido = computed(
   () => alcance.value === 'TUDO' || Boolean(intervalo.value?.[0] && intervalo.value?.[1]),
 )
@@ -178,7 +179,10 @@ async function registrar() {
           />
         </section>
       </div>
-      <small class="eg__dica np__dica">{{ t('copias.novo.documentoDica') }}</small>
+      <small v-if="tentou && !documentoValido" class="eg__invalido np__dica">{{
+        t('common.documentoDaPessoa')
+      }}</small>
+      <small v-else class="eg__dica np__dica">{{ t('copias.novo.documentoDica') }}</small>
 
       <section class="eg__secao">
         <span id="np-alcance" class="eg__rotulo">{{ t('copias.fato.periodo') }}</span>

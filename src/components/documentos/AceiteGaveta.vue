@@ -17,6 +17,7 @@ import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { registrarAceiteNoBalcao, type Documento } from '@/service/parceiro/documentos-service'
+import { documentoDaPessoaValido } from '@/utils/documento-da-pessoa'
 
 const props = defineProps<{ documento: Documento | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -116,7 +117,10 @@ onBeforeUnmount(() => {
 })
 
 const valido = computed(
-  () => nome.value.trim().length > 1 && documentoDaPessoa.value.trim().length > 3 && assinou.value,
+  () =>
+    nome.value.trim().length > 1 &&
+    documentoDaPessoaValido(documentoDaPessoa.value) &&
+    assinou.value,
 )
 
 async function registrar() {
@@ -183,9 +187,14 @@ async function registrar() {
             id="ac-doc"
             v-model="documentoDaPessoa"
             autocomplete="off"
-            :invalid="tentou && documentoDaPessoa.trim().length < 4"
+            :invalid="tentou && !documentoDaPessoaValido(documentoDaPessoa)"
             :disabled="salvando"
           />
+          <small
+            v-if="tentou && !documentoDaPessoaValido(documentoDaPessoa)"
+            class="eg__invalido"
+            >{{ t('common.documentoDaPessoa') }}</small
+          >
         </section>
       </div>
 

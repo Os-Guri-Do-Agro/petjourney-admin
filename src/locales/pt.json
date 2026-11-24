@@ -283,7 +283,8 @@
     "yes": "Sim",
     "no": "Não",
     "selectAll": "Todos",
-    "feito": "Feito"
+    "feito": "Feito",
+    "documentoDaPessoa": "De 4 caracteres em diante, só com letras sem acento, números, ponto, hífen, barra e espaço."
   },
   "nav": {
     "sections": {
