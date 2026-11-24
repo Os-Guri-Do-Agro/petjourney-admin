@@ -109,6 +109,13 @@ function dicaDe(modulo: ModuloDoPortal, ligar: Linha['ligar']) {
     return ''
   }
 
+  /* Pedido em análise (o pedido refeito depois de uma recusa, por exemplo): "suspendeu, recusou ou
+     desligou" e "fale com a equipe" contradizem a frase do pedido. Só o cadastro não aprovado
+     continua, porque é ele que segura o pedido. */
+  if (modulo.status === 'SOLICITADO' && codigo !== 'PARCEIRO_NAO_OPERACIONAL') {
+    return ''
+  }
+
   return t(`inicio.modulos.bloqueio.${codigo}`)
 }
 

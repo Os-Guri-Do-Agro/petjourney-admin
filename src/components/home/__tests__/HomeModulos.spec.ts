@@ -281,6 +281,27 @@ describe('linha de cada módulo', () => {
     expect(hotel.findAll('button')).toHaveLength(0)
   })
 
+  it('pedido refeito depois de uma recusa: só "O pedido está com a equipe", sem o texto da recusa', () => {
+    const wrapper = montar([
+      modulo('HOTEL', { status: 'SOLICITADO', bloqueioAoLigar: 'MODULO_DECIDIDO_PELO_SUPORTE' }),
+    ])
+    const hotel = linha(wrapper, 'Hotel')
+
+    expect(hotel.text()).toContain('O pedido está com a equipe PetJourney.')
+    expect(hotel.text()).not.toContain('suspendeu, recusou ou desligou')
+    expect(hotel.findAll('button')).toHaveLength(0)
+  })
+
+  it('pedido em análise com o cadastro ainda não aprovado: o aviso do cadastro continua', () => {
+    const wrapper = montar([
+      modulo('HOTEL', { status: 'SOLICITADO', bloqueioAoLigar: 'PARCEIRO_NAO_OPERACIONAL' }),
+    ])
+
+    expect(linha(wrapper, 'Hotel').text()).toContain(
+      'Seu cadastro de parceiro ainda não está aprovado para operar.',
+    )
+  })
+
   it('OPERADOR: os estados aparecem sem nenhum botão, com "Só o dono liga ou desliga módulos."', () => {
     const wrapper = montar([
       modulo('CLINICA', {
