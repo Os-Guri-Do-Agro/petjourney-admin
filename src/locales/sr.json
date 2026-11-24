@@ -3175,6 +3175,11 @@
         "tratamento_da_clinica": "terapiju klinike",
         "turno_hotel": "smenu u hotelu",
         "turno_internacao": "smenu na odeljenju",
+        "carteirinha_do_app": "knjižicu iz aplikacije",
+        "foto_do_app": "fotografiju iz aplikacije",
+        "peso_do_app": "težinu kod kuće iz aplikacije",
+        "resumo_do_paciente": "sažetak o pacijentu",
+        "servico_realizado_do_app": "obavljenu uslugu za aplikaciju",
         "outro": "zapis ({tipo})"
       },
       "guia": {

@@ -3175,6 +3175,11 @@
         "tratamento_da_clinica": "a clinic treatment",
         "turno_hotel": "a hotel shift",
         "turno_internacao": "a ward shift",
+        "carteirinha_do_app": "the app vaccination card",
+        "foto_do_app": "a photo from the app",
+        "peso_do_app": "the home weight from the app",
+        "resumo_do_paciente": "a patient summary",
+        "servico_realizado_do_app": "a service record for the app",
         "outro": "a record ({tipo})"
       },
       "guia": {

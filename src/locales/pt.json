@@ -3175,6 +3175,11 @@
         "tratamento_da_clinica": "um tratamento da clínica",
         "turno_hotel": "um turno do hotel",
         "turno_internacao": "um turno da internação",
+        "carteirinha_do_app": "a carteirinha do app",
+        "foto_do_app": "uma foto do app",
+        "peso_do_app": "o peso de casa do app",
+        "resumo_do_paciente": "o resumo do paciente",
+        "servico_realizado_do_app": "um serviço realizado para o app",
         "outro": "um registro ({tipo})"
       },
       "guia": {

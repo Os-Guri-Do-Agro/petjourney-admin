@@ -3175,6 +3175,11 @@
         "tratamento_da_clinica": "علاجًا من العيادة",
         "turno_hotel": "نوبةً في الفندق",
         "turno_internacao": "نوبةً في التنويم",
+        "carteirinha_do_app": "بطاقةَ التطعيم في التطبيق",
+        "foto_do_app": "صورةً من التطبيق",
+        "peso_do_app": "الوزنَ المنزلي من التطبيق",
+        "resumo_do_paciente": "ملخصَ المريض",
+        "servico_realizado_do_app": "خدمةً منجزة للتطبيق",
         "outro": "سجلًا ({tipo})"
       },
       "guia": {

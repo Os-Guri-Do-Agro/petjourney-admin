@@ -59,7 +59,7 @@ const ICONE_DA_ACAO: Record<AcaoLida, string> = {
 
 /*
  * Os tipos de registro (`recursoTipo`, com hífen) têm o nome em `parceiro.auditoria.recurso`, com
- * sublinhado: os 66 que a API gravava em 24/11. Tipo novo, sem nome ainda, sai como "um registro (tipo)".
+ * sublinhado: os 71 que a API gravava em 24/11, inclusive os da leitura do app. Tipo novo, sem nome ainda, sai como "um registro (tipo)".
  */
 const { t, te, locale } = useI18n()
 const { store, bootstrapping, ensureContext, parceiroQuery } = useParceiroPortal()
