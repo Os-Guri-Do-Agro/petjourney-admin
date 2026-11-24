@@ -32,6 +32,7 @@ import {
   type ConversaDoBoletim,
   type PreferenciaDoBoletim,
 } from '@/service/parceiro/boletins-da-internacao-service'
+import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
 
 import BoletimGaveta from './BoletimGaveta.vue'
@@ -96,9 +97,9 @@ async function lerTelefones() {
   try {
     const fila = await listarBoletinsPendentes(parceiroQuery())
     const cliente = fila.itens.find((item) => item.internacaoId === props.internacaoId)?.cliente
-    telefones.value = [cliente?.telefone, cliente?.telefoneSecundario].filter(
-      (valor): valor is string => Boolean(valor),
-    )
+    telefones.value = [cliente?.telefone, cliente?.telefoneSecundario]
+      .filter((valor): valor is string => Boolean(valor))
+      .map(telefoneNaTela)
   } catch {
     telefones.value = []
   }

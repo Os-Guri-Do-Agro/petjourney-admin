@@ -28,6 +28,7 @@ import {
   type BoletimPendente,
   type BoletinsPendentes,
 } from '@/service/parceiro/boletins-da-internacao-service'
+import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
 
 import LigacaoGaveta, { type AlvoDaLigacao } from './LigacaoGaveta.vue'
@@ -74,10 +75,11 @@ function quando(valor: string | null) {
   })
 }
 
+/** Com a máscara da ficha ("(11) 97000-2411"): a API manda só os dígitos, com o 55. */
 function telefones(item: BoletimPendente) {
-  return [item.cliente?.telefone, item.cliente?.telefoneSecundario].filter(
-    (valor): valor is string => Boolean(valor),
-  )
+  return [item.cliente?.telefone, item.cliente?.telefoneSecundario]
+    .filter((valor): valor is string => Boolean(valor))
+    .map(telefoneNaTela)
 }
 
 function meta(item: BoletimPendente) {
