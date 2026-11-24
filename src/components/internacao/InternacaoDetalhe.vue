@@ -95,11 +95,21 @@ const executa = computed(() => clinicaEscreve.value && store.temPermissao('inter
 
 const checklist = ref<InstanceType<typeof ChecklistDaInternacao> | null>(null)
 const prescricoes = ref<InstanceType<typeof PrescricoesDaInternacao> | null>(null)
+const boletins = ref<InstanceType<typeof BoletinsDaInternacao> | null>(null)
 
 /** Prescrever muda as doses; a evolução pode mudar a gravidade: relê o que depende. */
 function cuidadoMudou() {
   void checklist.value?.carregar()
   void carregar()
+}
+
+/*
+ * Na piora (pela gravidade ou pela evolução), a API cria na hora o boletim retido que pede a
+ * ligação (guia e5 17.1): sem reler, a conversa seguia "Nenhum boletim ainda" até recarregar.
+ */
+function evolucaoMudou() {
+  void carregar()
+  void boletins.value?.carregar()
 }
 
 const podeAdministrativo = computed(
@@ -172,6 +182,7 @@ async function trocarGravidade(nova: Gravidade) {
     const resposta = await mudarGravidade(atual.id, nova, parceiroQuery())
     internacao.value = resposta
     invalidarPendenciasDoPortal()
+    void boletins.value?.carregar()
   } catch (err) {
     erroDaGravidade.value = lerErroDoCadastro(err, t('cadastro.erros.salvar')).mensagem
   } finally {
@@ -415,7 +426,7 @@ function encerrou(encerrada: Internacao) {
           :internacao-id="internacao.id"
           :gravidade-atual="internacao.gravidade"
           :pode-evoluir="aberta && executa"
-          @mudou="carregar"
+          @mudou="evolucaoMudou"
           @desatualizada="carregar"
         />
       </template>
@@ -423,6 +434,7 @@ function encerrou(encerrada: Internacao) {
       <!-- O boletim ao responsável (E5-03): a conversa, a ligação e o envio. -->
       <BoletinsDaInternacao
         v-if="store.temPermissao('boletim.compor') || store.temPermissao('boletim.enviar')"
+        ref="boletins"
         :internacao-id="internacao.id"
         :paciente="internacao.paciente.nome"
         :encerrada="internacao.encerrada"
