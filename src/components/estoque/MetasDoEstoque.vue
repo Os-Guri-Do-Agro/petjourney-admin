@@ -431,6 +431,19 @@ const historicoAberto = ref<string | null>(null)
   gap: 20px;
 }
 
+/*
+ * Com a gaveta de metas aberta, a coluna fica estreita e o botão do cabeçalho ("Combinar metas de
+ * novembro") cobria o título. O título pede pelo menos 12rem; sem esse espaço, o botão desce.
+ */
+.mt .ui-cartao__cabeca {
+  flex-wrap: wrap;
+}
+
+.mt .ui-cartao__titulos {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
 .mt__recado {
   display: flex;
   align-items: center;
