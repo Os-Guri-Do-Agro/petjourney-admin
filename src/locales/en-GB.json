@@ -545,6 +545,7 @@
       "invalidResponse": "The server replied in an unexpected format. Please try again in a moment.",
       "genericStatus": "Error {status}",
       "servidor": "The server couldn't handle this right now. Please try again in a moment.",
+      "semConexao": "No connection to the server. Check your internet and try again.",
       "dadosRecusados": "The server didn't accept the data sent. Please check it and try again."
     },
     "notFound": {

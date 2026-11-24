@@ -48,6 +48,25 @@ describe('apiFetch', () => {
     })
   })
 
+  it('sem rede: a frase da casa no lugar do "Failed to fetch" do navegador', async () => {
+    const { apiFetch, ApiError } = await loadApi('https://api.exemplo.test')
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockRejectedValue(new TypeError('Failed to fetch')))
+
+    const erro = await apiFetch('/clinica/pacientes').catch((e: unknown) => e)
+
+    expect(erro).toBeInstanceOf(ApiError)
+    expect(erro).toMatchObject({ statusCode: 0, reason: 'SEM_CONEXAO' })
+    expect((erro as Error).message).not.toContain('Failed to fetch')
+  })
+
+  it('cancelamento de propósito (AbortError) segue como veio', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    const abortado = new DOMException('The operation was aborted.', 'AbortError')
+    vi.stubGlobal('fetch', vi.fn<typeof fetch>().mockRejectedValue(abortado))
+
+    await expect(apiFetch('/clinica/pacientes')).rejects.toBe(abortado)
+  })
+
   it('remove barra final da base para não gerar // no path', async () => {
     const { apiFetch } = await loadApi('https://api.exemplo.test/')
     const fetchMock = mockFetch(new Response('{"ok":true}', { headers: JSON_HEADERS }))

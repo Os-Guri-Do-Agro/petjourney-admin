@@ -545,6 +545,7 @@
       "invalidResponse": "El servidor respondió en un formato inesperado. Vuelva a intentarlo en unos instantes.",
       "genericStatus": "Error {status}",
       "servidor": "El servidor no pudo atender ahora. Vuelva a intentarlo en unos instantes.",
+      "semConexao": "Sin conexión con el servidor. Revisa tu internet e inténtalo de nuevo.",
       "dadosRecusados": "El servidor no aceptó los datos enviados. Revíselos y vuelva a intentarlo."
     },
     "notFound": {

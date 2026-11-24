@@ -170,6 +170,25 @@ export function interceptarApi(responder: Interceptador | null) {
   interceptador = responder
 }
 
+/**
+ * A chamada em si. Sem rede (ou com o servidor fora), o `fetch` solta um `TypeError` com o texto do
+ * navegador em inglês ("Failed to fetch"), que as telas mostravam cru. Vira um `ApiError` com a frase
+ * da casa e `statusCode` 0. O cancelamento de propósito (`AbortError`) segue como veio.
+ */
+async function chamar(endpoint: string, init: RequestInit) {
+  if (interceptador) return interceptador(endpoint, init)
+
+  const url = `${requireApiUrl()}${endpoint}`
+
+  try {
+    return await fetch(url, init)
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') throw err
+
+    throw new ApiError(String(i18n.global.t('errors.api.semConexao')), 0, 'NETWORK_ERROR', 'SEM_CONEXAO')
+  }
+}
+
 export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit,
@@ -194,9 +213,7 @@ export async function apiFetch<T>(
   }
 
   const init: RequestInit = { ...options, headers }
-  const response = interceptador
-    ? await interceptador(endpoint, init)
-    : await fetch(`${requireApiUrl()}${endpoint}`, init)
+  const response = await chamar(endpoint, init)
 
   if (!response.ok) {
     const errorBody = isJsonResponse(response) ? await response.json().catch(() => null) : null
