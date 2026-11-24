@@ -493,9 +493,13 @@ function nomeDoItem(receita: Receita) {
                 }}
               </small>
             </span>
-            <span v-if="receita.status === 'ASSINADA'" class="rc__acoes">
+            <!-- A cancelada só repete: "cancele e faça outra" (a API repete a cancelada também). -->
+            <span
+              v-if="receita.status === 'ASSINADA' || (receita.status === 'CANCELADA' && podeRepetir)"
+              class="rc__acoes"
+            >
               <Button
-                v-if="receita.pdfDisponivel"
+                v-if="receita.status === 'ASSINADA' && receita.pdfDisponivel"
                 type="button"
                 size="small"
                 severity="secondary"
@@ -516,7 +520,7 @@ function nomeDoItem(receita: Receita) {
                 @click="abrirRepetir(receita)"
               />
               <Button
-                v-if="podeAssinar"
+                v-if="receita.status === 'ASSINADA' && podeAssinar"
                 type="button"
                 size="small"
                 severity="secondary"
