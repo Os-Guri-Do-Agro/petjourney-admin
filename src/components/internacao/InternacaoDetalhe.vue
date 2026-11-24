@@ -240,6 +240,9 @@ function encerrou(encerrada: Internacao) {
   recado.value = linhas
   internacao.value = encerrada
   invalidarPendenciasDoPortal()
+  /* O encerramento suspende as doses futuras: sem reler, o checklist seguia com Dei/Pulei nelas. */
+  void checklist.value?.carregar()
+  void prescricoes.value?.carregar()
 }
 </script>
 
