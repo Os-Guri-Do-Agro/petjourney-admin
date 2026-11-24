@@ -82,14 +82,19 @@ function aoTrocarDesde(valor: Date | Date[] | (Date | null)[] | null | undefined
 
 /* ----------------------------------------------------------------------------- a entrada */
 
-/** "Ter., 03/11" no título da entrada; "ter., 03/11" no meio da frase. */
+/**
+ * "Ter., 03/11" no título da entrada; "ter., 03/11" no meio da frase. O período (`desde`, `ate`)
+ * vem como dia, AAAA-MM-DD, e sai como veio. A entrada vem como instante: o dia é o do relógio de
+ * quem lê, porque cortar o instante em UTC levava o registro das 21h às 24h de Brasília ao dia seguinte.
+ */
 function dataLonga(dia: string, maiuscula = true) {
+  const soDia = /^\d{4}-\d{2}-\d{2}$/.test(dia)
   const texto = new Intl.DateTimeFormat(intl.value, {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
-    timeZone: 'UTC',
-  }).format(new Date(`${dia.slice(0, 10)}T12:00:00Z`))
+    ...(soDia ? { timeZone: 'UTC' } : {}),
+  }).format(soDia ? new Date(`${dia}T12:00:00Z`) : new Date(dia))
 
   return maiuscula ? texto.charAt(0).toLocaleUpperCase() + texto.slice(1) : texto
 }
