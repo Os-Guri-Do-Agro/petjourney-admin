@@ -187,7 +187,8 @@ const resumoDaPreferencia = computed(() => {
   if (!pref) return ''
   return [
     t('internacao.prescricao.aCada', { n: pref.frequenciaHoras }, pref.frequenciaHoras),
-    pref.proximoBoletimEm
+    // Encerrada, não há próximo boletim: a preferência ainda traz a data que valia antes da alta.
+    pref.proximoBoletimEm && !props.encerrada
       ? t('internacao.boletim.proximo', { quando: quando(pref.proximoBoletimEm) })
       : '',
     pref.silencioNoturno ? t('internacao.boletim.comSilencio') : '',

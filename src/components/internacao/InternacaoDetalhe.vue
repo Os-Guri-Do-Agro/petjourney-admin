@@ -254,6 +254,8 @@ function encerrou(encerrada: Internacao) {
   /* O encerramento suspende as doses futuras: sem reler, o checklist seguia com Dei/Pulei nelas. */
   void checklist.value?.carregar()
   void prescricoes.value?.carregar()
+  /* A alta gera o boletim de alta para o app: sem reler, ele só aparecia ao recarregar a tela. */
+  void boletins.value?.carregar()
 }
 </script>
 

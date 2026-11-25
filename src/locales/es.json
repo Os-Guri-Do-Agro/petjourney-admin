@@ -1419,7 +1419,8 @@
         "encerrado": "Acceso cerrado",
         "venceHoje": "Vence en menos de un día"
       },
-      "semDadosClinicos": "El responsable no liberó datos clínicos en este acceso, solo el mensaje."
+      "semDadosClinicos": "El responsable no liberó datos clínicos en este acceso, solo el mensaje.",
+      "pesoSemRegistro": "Sin registro"
     },
     "pet": {
       "castrado": "Castrado",
@@ -1702,6 +1703,7 @@
       "acessos": "{n} acceso | {n} accesos",
       "proximo": "el próximo {prazo}",
       "ultimoEncerrado": "el último finalizó el {data}",
+      "ultimoEncerradoAntes": "el último terminó antes del plazo",
       "encerradoEm": "finalizado el {data}",
       "venceLogo": "Un acceso vence en menos de un día",
       "recolher": "Contraer",

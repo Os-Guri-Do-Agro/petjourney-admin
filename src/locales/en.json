@@ -1419,7 +1419,8 @@
         "encerrado": "Access closed",
         "venceHoje": "Ends in less than a day"
       },
-      "semDadosClinicos": "The owner did not share clinical data in this access, only the message."
+      "semDadosClinicos": "The owner did not share clinical data in this access, only the message.",
+      "pesoSemRegistro": "Not recorded"
     },
     "pet": {
       "castrado": "Neutered",
@@ -1702,6 +1703,7 @@
       "acessos": "{n} access | {n} accesses",
       "proximo": "the next one {prazo}",
       "ultimoEncerrado": "last one ended on {data}",
+      "ultimoEncerradoAntes": "last one ended early",
       "encerradoEm": "ended on {data}",
       "venceLogo": "An access ends in less than a day",
       "recolher": "Collapse",

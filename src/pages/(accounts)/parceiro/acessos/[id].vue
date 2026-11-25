@@ -106,6 +106,7 @@ import {
   estadoTratamentosContinuos,
   montarBlocosLista,
   rotuloItem,
+  snapshotDisponivel,
 } from '@/utils/parceiro/snapshot-compartilhado'
 
 const DETALHE_TABS = ['resumo', 'anotacoes'] as const
@@ -1321,6 +1322,17 @@ function formatBytes(bytes: number) {
   return `${numero.format(Math.max(1, Math.round(bytes / 1024)))} KB`
 }
 
+/**
+ * Peso liberado sem nenhum registro: a capa diz "Não registrado" em vez de sumir com o dado, como
+ * alergias e vacinas dizem "O responsável não registrou".
+ */
+const pesoSemRegistro = computed(
+  () =>
+    pesoKg.value == null &&
+    snapshotDisponivel(fonteSnapshot.value) &&
+    (detalhe.value?.categorias ?? []).includes('PESO'),
+)
+
 /** Peso no formato numérico do idioma da tela (vírgula ou ponto decimal). */
 const pesoKgLegivel = computed(() =>
   pesoKg.value == null
@@ -1413,14 +1425,17 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
           </div>
 
           <dl class="capa__dados" :aria-label="t('acessos.detalhe.metaAria')">
-            <div v-if="pesoKg != null" class="capa__dado">
+            <div v-if="pesoKg != null || pesoSemRegistro" class="capa__dado">
               <dt>
                 <span class="ui-ladrilho ui-ladrilho--p" aria-hidden="true">
                   <i class="ph ph-scales" />
                 </span>
                 {{ t('acessos.snapshot.peso') }}
               </dt>
-              <dd class="capa__numero">
+              <dd v-if="pesoSemRegistro" class="capa__sem-registro">
+                {{ t('acessos.detalhe.pesoSemRegistro') }}
+              </dd>
+              <dd v-else class="capa__numero">
                 <strong class="ui-num">{{ pesoKgLegivel }}</strong>
                 <span>kg</span>
               </dd>
@@ -2540,6 +2555,11 @@ useRevalidarAoVoltar(() => void loadDetalhe(true))
   display: grid;
   gap: 6px;
   margin: 0;
+}
+
+.capa__sem-registro {
+  color: var(--tinta-2);
+  font-size: 14px;
 }
 
 .capa__numero {

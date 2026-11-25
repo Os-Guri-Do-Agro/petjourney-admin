@@ -1419,7 +1419,8 @@
         "encerrado": "Pristup zatvoren",
         "venceHoje": "Ističe za manje od jednog dana"
       },
-      "semDadosClinicos": "Vlasnik u ovom pristupu nije podelio kliničke podatke, samo poruku."
+      "semDadosClinicos": "Vlasnik u ovom pristupu nije podelio kliničke podatke, samo poruku.",
+      "pesoSemRegistro": "Nije upisano"
     },
     "pet": {
       "castrado": "Sterilisan",
@@ -1702,6 +1703,7 @@
       "acessos": "{n} pristup | {n} pristupa | {n} pristupa",
       "proximo": "sledeći {prazo}",
       "ultimoEncerrado": "poslednji završen: {data}",
+      "ultimoEncerradoAntes": "poslednji završen pre roka",
       "encerradoEm": "završeno: {data}",
       "venceLogo": "Jedan pristup ističe za manje od jednog dana",
       "recolher": "Skupi",

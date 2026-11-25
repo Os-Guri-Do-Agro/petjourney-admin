@@ -1508,11 +1508,14 @@ useRevalidarAoVoltar(() => {
                     </span>
                   </span>
                   <span v-else class="prazo prazo--fim">
+                    <!-- O revogado antes do prazo não tem a data na listagem: a do prazo ficaria no futuro. -->
                     <small>
                       {{
-                        t('acessos.grupo.ultimoEncerrado', {
-                          data: dataLegivel(acessoDeReferencia(grupo).expiraEm),
-                        })
+                        dataDoEncerramento(acessoDeReferencia(grupo))
+                          ? t('acessos.grupo.ultimoEncerrado', {
+                              data: dataDoEncerramento(acessoDeReferencia(grupo)),
+                            })
+                          : t('acessos.grupo.ultimoEncerradoAntes')
                       }}
                     </small>
                   </span>
