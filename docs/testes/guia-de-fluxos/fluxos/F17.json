@@ -1,0 +1,84 @@
+{
+  "id": "F17",
+  "titulo": "Acesso temporário: o responsável libera, a clínica lê e anota",
+  "sub": "O responsável gera um código no app; a clínica vincula, lê só o que foi liberado, anota à mão e perde o acesso quando ele encerra.",
+  "contas": "Portal: portal-demo · App: qa-premium (Luna)",
+  "antes": "Luna com algum registro no diário dos últimos 7 dias (a qa-premium tem dois: 20 e 22 de nov.). Luna não precisa ser paciente da clínica.",
+  "passos": [
+    {
+      "lado": "A",
+      "faz": "Início › \"Acessos temporários\" › \"Novo compartilhamento\": Luna › \"Consulta\" › marque Alergias, Vacinas, Peso e \"Diário do pet\" (\"Últimos 7 dias\"), desmarque o resto › prazo › \"Gerar código de acesso\".",
+      "ve": "\"Compartilhamento criado\" e o código de 6 dígitos em \"CÓDIGO DE ACESSO\".",
+      "print": "f17-01-app-codigo",
+      "recorte": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 600
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Portal › Acessos › \"Novo acesso temporário\" › os 6 dígitos › \"Vincular\".",
+      "ve": "O detalhe da Luna: \"Dados clínicos compartilhados\" (Alergias, Vacinas) e \"Diário do pet: Todos os registros de 19 de nov. a 25 de nov.\" com os 2 dias.",
+      "print": "f17-02-portal-liberado",
+      "recorte": {
+        "x": 200,
+        "y": 100,
+        "w": 1220,
+        "h": 800
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino.",
+      "ve": "\"Clínica e Hotel Demo abriu o prontuário\": \"O acesso ao prontuário de Luna foi aberto. Você pode revogar quando quiser.\"",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "No detalhe, \"Nova anotação\": \"Serviço realizado\" e \"Anotação\" escritos à mão (sem \"Ler receita com IA\") › \"Registrar anotação\".",
+      "ve": "A anotação em \"Histórico de anotações\" com Clínica e Hotel Demo, Portal Demo e a hora.",
+      "print": "f17-04-portal-anotar",
+      "recorte": {
+        "x": 760,
+        "y": 360,
+        "w": 660,
+        "h": 540
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Nova anotação sobre Luna\" › o acesso da Luna › aba \"Retorno\".",
+      "ve": "\"Anotações do prestador\" com o texto da clínica e \"Adicionar ao prontuário\"; em \"Quem abriu\", as aberturas com a hora.",
+      "print": "f17-05-app-anotacao",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Aba \"Acesso\" › \"Encerrar acesso agora\" › \"Encerrar acesso\".",
+      "ve": "\"Compartilhamento encerrado\"; o acesso sai dos ativos.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Acessos › o acesso da Luna (ou a aba \"Histórico\").",
+      "ve": "\"Acesso encerrado · Revogado\" com dia e hora e \"O responsável revogou o acesso.\"; a anotação da clínica continua.",
+      "print": "f17-07-portal-encerrado",
+      "recorte": {
+        "x": 300,
+        "y": 80,
+        "w": 1120,
+        "h": 600
+      }
+    }
+  ],
+  "naoConferido": [
+    "o push no celular",
+    "a leitura de receita com IA (fica fora: gasta tokens da rota)"
+  ],
+  "obs": "Corrigido em 25/11: com o peso liberado e nada registrado, o portal diz que o responsável não registrou (antes sumia); e o \"Histórico\" diz a data em que o acesso foi encerrado, não a data em que venceria. No app, o aviso de anotação abre a lista de acessos (o cartão diz \"1 anotação nova\"), não o acesso.",
+  "resultado": "PASSOU"
+}

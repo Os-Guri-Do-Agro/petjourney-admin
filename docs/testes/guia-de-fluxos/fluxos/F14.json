@@ -1,0 +1,71 @@
+{
+  "id": "F14",
+  "titulo": "Lista de espera: vaga oferecida e aceita pelo app",
+  "sub": "O responsável entra na fila pelo app; a clínica oferece a vaga que abriu e o aceite pelo app vira horário confirmado na agenda.",
+  "contas": "Portal: portal-demo · App: qa-marina (Pipoca, gato)",
+  "antes": "Pipoca fora da fila e um horário cancelado no futuro (aparece em \"Vagas para a fila\"). Nesta rodada: quinta 26/11 às 11:00, Dra. Helena. No app, escolha o dia e o período desse horário.",
+  "passos": [
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Fila de espera\" › \"Entrar na fila\": Pipoca, \"Consulta\", \"Qualquer profissional\", só \"qui\", só \"Manhã (08:00 às 12:00)\" › \"Entrar na fila\".",
+      "ve": "\"Pronto, o pet entrou na fila.\" e \"Consulta de Pipoca · qui, 08:00 às 12:00 · Primeiro da fila\".",
+      "print": "f14-01-entrar-na-fila",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Agenda › \"Lista de espera\" › \"Na fila\".",
+      "ve": "\"1º Pipoca · Consulta\", \"Marina Souza · Qualquer profissional · qui. 08:00 a 12:00\".",
+      "print": "f14-02-lista-de-espera",
+      "recorte": {
+        "x": 268,
+        "y": 0,
+        "w": 1172,
+        "h": 320
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "\"Vagas para a fila (2)\" › vaga \"Qui., 26/11 · 11:00–11:30\" › \"Ofertar\" da Pipoca › revise a mensagem › \"Ofertar\".",
+      "ve": "\"Vaga ofertada\" e \"O aviso sai no próximo minuto. A oferta vale até 17:59.\"",
+      "print": "f14-03-ofertar",
+      "recorte": {
+        "x": 896,
+        "y": 0,
+        "w": 544,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Abriu um horário para Pipoca\" (\"26/11 às 11:00. Responda até 17:59.\") › toque.",
+      "ve": "Abre a Fila de espera: \"Abriu um horário\", a mensagem da clínica, \"Responda em 28:19 (até hoje às 17:59)\".",
+      "print": "f14-04-oferta-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "\"Aceitar este horário\".",
+      "ve": "\"Horário marcado e confirmado.\" e o horário \"Consulta · Pipoca · 11:00 às 11:30 · Confirmado\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Avisos\" no menu.",
+      "ve": "\"Vaga da fila aceita: Um responsável aceitou a vaga oferecida pela fila. O horário já está na agenda.\" A Lista de espera fica vazia; na agenda de 26/11, Pipoca às 11:00 com a Dra. Helena, confirmada.",
+      "print": "f14-05-vaga-aceita-no-portal",
+      "recorte": {
+        "x": 1016,
+        "y": 0,
+        "w": 424,
+        "h": 320
+      }
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "A vaga veio de um horário já cancelado (a agenda não aceita horário sem paciente). A hora dos Avisos segue o fuso do computador. No fim, o horário da Pipoca foi cancelado sem aviso; ela saiu da fila sozinha ao aceitar.",
+  "resultado": "PASSOU"
+}

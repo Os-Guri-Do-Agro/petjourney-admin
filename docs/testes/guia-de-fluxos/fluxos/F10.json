@@ -1,0 +1,80 @@
+{
+  "id": "F10",
+  "titulo": "Receita vira lembrete e tratamento em casa",
+  "sub": "A receita assinada na clínica vira lembrete no app; as doses que a casa marca voltam para a ficha, e a queda em um remédio crítico avisa a equipe.",
+  "contas": "Portal: portal-demo · App: qa-marina (Mel)",
+  "antes": "Mel ligada à Clínica e Hotel Demo no app da qa-marina. O catálogo do dev só tem Tramadol (controlado: fica na clínica, não vai ao app) e Dipirona (a Mel tem alergia), por isso os remédios foram por \"Nome livre\". Para o alerta sair no mesmo dia: colírio a cada 4 horas, com a primeira dose 1 hora atrás.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Pacientes › Mel › \"Atendimento avulso\" › \"Receita e documentos\" › \"Prescrever\" › \"Nome livre\": Amoxicilina com clavulanato 250 mg (1 comprimido, Oral, a cada 12 horas, 7 dias) e Colírio lubrificante (1 gota, Oftálmica, a cada 4 horas, \"Uso contínuo\") › \"Salvar\".",
+      "ve": "\"1 comprimido · Oral · a cada 12 horas · por 7 dias\" e \"1 gota · Oftálmica · a cada 4 horas · Uso contínuo\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Fazer a receita\" › senha › \"Assinar\"; \"Revisar e finalizar\" › \"Finalizar\" › \"Liberar o resumo\".",
+      "ve": "\"Receita PGGPF7FXHM\" emitida e \"Resumo no app desde 25 de nov. de 2026.\"",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Resumo do atendimento de Mel\" (ou Minhas clínicas › Atendimentos › \"Consulta de Mel\") › \"Criar lembretes\" › \"Criar 2 lembretes\".",
+      "ve": "Os dois remédios com \"Primeira dose\" e \"A clínica vê o que vocês registrarem\" ligado; depois \"Lembretes criados\" e \"Lembretes ativos\".",
+      "print": "f10-02-criar-lembretes",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Remédios da clínica\": \"Dei\" na Amoxicilina; no Colírio, \"Pulei\" › \"Esqueci\" › \"Pular\".",
+      "ve": "\"Dada por Marina às 17:21\" e \"Pulada por Marina · Esqueci\" (\"Pulei\" não se desfaz).",
+      "print": "f10-03-dei-e-pulei",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Pacientes › Mel › \"Tratamentos em casa\": ligar \"Crítico: avisar a clínica se a adesão cair\" no Colírio.",
+      "ve": "O selo \"Crítico\", a faixa com a dose pulada em âmbar e a contagem \"Desde 25 de novembro de 2026: ...\" (nunca porcentagem).",
+      "print": "f10-04-ficha-alerta",
+      "recorte": {
+        "x": 305,
+        "y": 265,
+        "w": 565,
+        "h": 335
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "No app, \"Pulei\" também na dose seguinte (20:23). Passada a hora dela, abrir a ficha; depois \"Avisos\" (o aviso sai na rodada das :00 e :30). Na ficha, \"Registrar contato\" › nota › \"Salvar contato\".",
+      "ve": "\"Pede atenção\" e \"Pularam 2 doses nos últimos 3 dias · Motivo: esquecimento (2).\"; em Avisos, \"Um tratamento de Mel pede atenção\". Depois do contato: \"Contato registrado.\", o alerta sai e fica \"Contato em 25 de novembro de 2026: ...\".",
+      "print": "f10-05-aviso-da-clinica",
+      "recorte": {
+        "x": 980,
+        "y": 20,
+        "w": 460,
+        "h": 240
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "No atendimento, \"Receita e documentos\" › \"Cancelar a receita\" › motivo (10 letras ou mais) › \"Cancelar a receita\". No app, o sino.",
+      "ve": "Portal: \"Cancelada\" com o motivo. App: \"Receita de Mel cancelada pela clínica\", que abre a consulta com \"A clínica cancelou esta receita\"; em \"Remédios da clínica\", \"Os lembretes continuam até você encerrar\" e \"Encerrar os lembretes\".",
+      "print": "f10-06-receita-cancelada-no-app",
+      "recorte": {
+        "x": 0,
+        "y": 140,
+        "w": 390,
+        "h": 240
+      }
+    }
+  ],
+  "naoConferido": [
+    "o push no celular (aviso de dose, receita cancelada e o aviso da equipe)",
+    "o seletor de hora da primeira dose: no navegador ele não abre; a primeira dose do colírio foi posta 1 hora atrás no pedido, como o seletor faria",
+    "o alerta de queda por \"parou de registrar\", que pede uma semana de doses dadas antes: só a porta das 2 puladas em 3 dias foi vista"
+  ],
+  "obs": "O alerta só conta a dose pulada cuja hora já passou: com a menor frequência do portal (4 horas), a segunda pulada leva umas 3 horas para valer. Corrigido em 25/11: tocar no aviso \"Um tratamento de Mel pede atenção\" abre a ficha (antes só marcava como lido), e a faixa de doses abre no dia de hoje (antes abria no começo, com hoje escondido à direita). Não é bug: cancelar a receita não para os lembretes; o app pede \"Encerrar os lembretes\".",
+  "resultado": "PASSOU"
+}

@@ -1,0 +1,66 @@
+{
+  "id": "F12",
+  "titulo": "Vacina aplicada na clínica vai para a carteirinha do app",
+  "sub": "A dose que a clínica aplica com lote chega sozinha ao app do responsável, e a anulação tira a vacina de lá com aviso.",
+  "contas": "Portal: portal-demo · App: qa-marina (Pipoca, gato)",
+  "antes": "Pipoca sem V4 válida (a desta rodada ficou anulada) e o lote V4F-2611 no Estoque (10 doses; a anulação devolve a dose).",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Pacientes › Pipoca › Vacinas › \"Aplicar vacina\": \"V4 (quádrupla felina)\", o lote \"V4F-2611\", a observação › \"Aplicar e registrar\".",
+      "ve": "\"V4 (quádrupla felina): dose 1 de 2 registrada. Já está na carteirinha do app de Marina Souza.\"",
+      "print": "f12-01-aplicar-vacina",
+      "recorte": {
+        "x": 864,
+        "y": 0,
+        "w": 576,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › Notificações.",
+      "ve": "\"Vacina de Pipoca registrada\": \"A clínica registrou a vacina aplicada na carteirinha, e a próxima dose já está nos lembretes.\"",
+      "print": "f12-02-aviso-vacina",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Toque no aviso (abre o detalhe da vacina) ou Pipoca › \"Vacinas\".",
+      "ve": "A V4 com \"Aplicada · Clínica e Hotel Demo\", \"Dose 1 de 2 · Lote V4F-2611\"; no detalhe, \"Registrado pela clínica\" e \"Para corrigir, fale com a clínica.\"",
+      "print": "f12-03-vacina-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Vacinas › \"Lista de chamada\" › \"...\" da Pipoca › \"Editar registro\": nova observação e o motivo › \"Salvar\".",
+      "ve": "\"Registro corrigido.\" A observação fica só na clínica: no app nada muda e não chega aviso.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Ficha da Pipoca › Vacinas › \"Histórico (1)\" › \"Anular\": o motivo › \"Anular a aplicação\".",
+      "ve": "A dose fica riscada (\"Anulada: ...\") e a V4 volta a \"Não iniciada\".",
+      "print": "f12-04-anular",
+      "recorte": {
+        "x": 320,
+        "y": 110,
+        "w": 1120,
+        "h": 790
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › Notificações; depois Pipoca › \"Vacinas\".",
+      "ve": "\"Registro de Pipoca corrigido pela clínica\": \"... e ele saiu do app.\" Em Vacinas, \"Nenhuma vacina registrada\" e a V4 em \"Dose 1 de 2: ainda não começou\".",
+      "print": "f12-05-aviso-anulou",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Não é bug: \"Editar registro\" não avisa o responsável (a observação não vai para o app). Corrigido em 25/11: a gaveta \"Anular\" aberta pela ficha diz qual dose é. A aplicação do teste ficou anulada.",
+  "resultado": "PASSOU"
+}

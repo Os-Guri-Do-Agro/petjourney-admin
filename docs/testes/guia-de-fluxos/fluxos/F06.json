@@ -1,0 +1,84 @@
+{
+  "id": "F06",
+  "titulo": "Falta e retorno",
+  "sub": "A recepção marca a falta, o responsável conta o que houve pelo app e a clínica reagenda; o retorno vencido aparece nos dois lados.",
+  "contas": "Portal: portal-demo · App: qa-rafael (Nino)",
+  "antes": "Um horário do Nino de hoje que já passou: a agenda do portal não marca no passado, então marque um horário para daqui a pouco e espere a hora passar (no preparo, ele foi criado direto na API). Retorno: a consulta do Nino de 08/11, com retorno em 15 dias, publicada no app.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Agenda › hoje › o horário do Nino das 13:30 › \"Marcar falta\" › \"Marcar falta\".",
+      "ve": "Situação \"Falta\", \"Ninguém procurou ainda\", com \"Registrar contato\" e \"Reagendar\".",
+      "print": "f06-01-marcar-falta",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Falta na consulta de Nino\".",
+      "ve": "\"A clínica marcou falta hoje às 17:50.\" e só \"Contar o que houve\": o app não oferece remarcar.",
+      "print": "f06-02-falta-no-app",
+      "recorte": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 660
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "\"Contar o que houve\" › \"Tive um imprevisto\", texto › \"Enviar\".",
+      "ve": "\"Obrigado por contar. A clínica vai ver.\" e \"Você contou: Tive um imprevisto\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Agenda › hoje › o horário do Nino.",
+      "ve": "Falta \"Justificada\": \"Pelo app · Imprevisto · É o que vale\" e o texto do responsável.",
+      "print": "f06-03-falta-justificada-no-portal",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 900
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "\"Reagendar\" › \"Qui., 26/11 · 08:15\" › \"Reagendar\".",
+      "ve": "\"Já reagendada.\" O horário novo aparece no app em Agendamentos, sem aviso.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Pendências › \"Retornos\".",
+      "ve": "\"Nino · Venceu há 2 dias · Retorno · Portal Demo · consulta de 8 de nov.\" com \"Outro horário\" e \"Marcar\".",
+      "print": "f06-04-retorno-pendente-no-portal",
+      "recorte": {
+        "x": 290,
+        "y": 120,
+        "w": 1130,
+        "h": 530
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Depois da consulta\" › \"Consulta de Nino\" (8 de novembro).",
+      "ve": "\"Retorno em 15 dias, até 23 de novembro.\", \"O prazo passou e o retorno ainda não foi marcado.\" e \"Marcar o retorno\".",
+      "print": "f06-05-retorno-no-app",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular",
+    "o aviso de retorno pendente: sai uma vez por consulta, de hora em hora a partir das 10h do dia em que o retorno vence. Ver de novo pede uma consulta com retorno, sem outro horário do pet em aberto, e esperar o vencimento."
+  ],
+  "obs": "Não é bug: na falta, o app só oferece \"Contar o que houve\", e o \"Reagendar\" da falta não avisa o responsável. \"Fechar o turno\" dá falta em todos os horários do dia que já passaram. O aviso de retorno pendente não saiu para o Nino porque um horário antigo dele ficou esquecido em \"Confirmado\", e a API conta esse horário como retorno já marcado (lacuna N63).",
+  "resultado": "PARCIAL: falta, aviso da falta, justificativa pelo app, falta justificada no portal e reagendar passaram; o aviso de retorno pendente não deu para ver (lacuna N63 da API)."
+}

@@ -1,0 +1,78 @@
+{
+  "id": "F05",
+  "titulo": "Horário marcado pela clínica: marcar, remarcar e cancelar",
+  "sub": "A recepção marca, muda e cancela horários do Nino no portal com \"Avisar o responsável no app\"; o app recebe cada aviso com a mensagem e o responsável cancela pelo app.",
+  "contas": "Portal: portal-demo · App: qa-rafael (Nino)",
+  "antes": "Portal com o aviso ao responsável (develop de 25/11; no admin-dev depois da publicação). Nino sem horário amanhã. No fim, cancele os horários de teste.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Agenda › \"Marcar horário\": \"Nino · Rafael Lima\", \"Consulta\", \"Dra. Helena Duarte\", amanhã, 10:00, \"Avisar o responsável no app\" ligado, mensagem › \"Marcar\".",
+      "ve": "O horário entra na agenda. O interruptor já vem ligado (\"Sai no app em 1 a 2 minutos.\") e a mensagem conta até 500.",
+      "print": "f05-01-marcar-com-aviso",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Horário marcado para Nino\".",
+      "ve": "\"26/11 às 10:00. Veja os detalhes no app. A clínica deixou uma mensagem.\"; o horário abre com \"Mensagem da clínica\" e o texto citado.",
+      "print": "f05-02-marcado-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Agenda › o horário do Nino › \"Mais ações\" › \"Mudar horário\" › 11:00, aviso ligado, mensagem › \"Mudar horário\".",
+      "ve": "Remarcado para 11:00, com o aviso pedido.",
+      "print": "f05-03-mudar-com-aviso",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 900
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Gaveta do horário › \"Avisos ao responsável\" › \"Ver os 2 avisos\".",
+      "ve": "\"Horário mudado · Enviado\" (\"Saiu em 25/11, 18:48, pelo app · Só na caixa de avisos do app\") e \"Horário marcado · Enviado\" (saiu às 18:44), cada um com o horário avisado e a mensagem.",
+      "print": "f05-04-comprovante-no-portal",
+      "recorte": {
+        "x": 860,
+        "y": 450,
+        "w": 580,
+        "h": 390
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"O horário de Nino mudou\" › \"Cancelar horário\" › \"Não vou conseguir ir\" › \"Cancelar horário\".",
+      "ve": "\"Agora é 26/11 às 11:00.\" com a mensagem da clínica; depois \"Horário cancelado.\" e \"Você cancelou hoje às 18:50\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Agenda › o horário riscado do Nino; depois outro horário do Nino (27/11) › \"Mais ações\" › \"Cancelar horário\" › \"Outro motivo\", aviso ligado, mensagem › \"Cancelar o horário\".",
+      "ve": "No primeiro, \"Cancelado em 25/11, 18:50, pelo responsável no app: O responsável desmarcou\"; o segundo fica cancelado com o aviso pedido.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino: os três avisos da clínica.",
+      "ve": "\"Horário de Nino cancelado pela clínica · Era 27/11 às 14:00\", \"O horário de Nino mudou · Agora é 26/11 às 11:00\" e \"Horário marcado para Nino · 26/11 às 10:00\", todos com \"A clínica deixou uma mensagem.\"",
+      "print": "f05-05-avisos-no-app",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Novo em 25/11 (E3-06): a chave \"Avisar o responsável no app\" ao marcar, mudar e cancelar. Os avisos chegam à caixa do app em 1 a 2 minutos. Limite da API: 4 avisos de agenda por pet, por clínica, por dia (o cancelamento conta à parte); passou disso, o comprovante diz \"Limite de avisos do dia\". A véspera também sai sozinha às 18h: \"Amanhã às 15:00: Nino · Toque para confirmar a presença.\". A equipe não recebe aviso quando o responsável cancela pelo app (lacuna N62): só aparece no histórico do horário.",
+  "resultado": "PASSOU"
+}

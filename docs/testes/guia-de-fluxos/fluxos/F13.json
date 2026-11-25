@@ -1,0 +1,71 @@
+{
+  "id": "F13",
+  "titulo": "Lembrete de vacina pedido pela clínica",
+  "sub": "A recepção liga o lembrete da dose que falta na lista de chamada, e o responsável recebe o aviso que abre a carteirinha do pet.",
+  "contas": "Portal: portal-demo · App: qa-marina (Pipoca, gato)",
+  "antes": "A Pipoca precisa estar na lista de chamada: aplique antes a dose 1 da V4 (passo 1 do F12) e só anule depois deste fluxo.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Vacinas › \"Lista de chamada\" › cartão da Pipoca (V4, \"Vence em 28 dias · falta a dose 2\") › \"Ativar lembrete\".",
+      "ve": "Abre a gaveta \"Lembrete no app\", com \"Pipoca · próxima dose em 23 de dez. de 2026\".",
+      "print": "f13-01-lista-de-chamada",
+      "recorte": {
+        "x": 300,
+        "y": 130,
+        "w": 1140,
+        "h": 770
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Confira a prévia \"O que Marina Souza recebe no app\" › \"Ativar lembrete\".",
+      "ve": "\"Vacina de Pipoca chegando\" e \"Quando sai\": agora, de novo em 23/12 se a dose ainda faltar, para sozinho quando a dose for aplicada.",
+      "print": "f13-02-previa-do-lembrete",
+      "recorte": {
+        "x": 930,
+        "y": 0,
+        "w": 510,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › Notificações.",
+      "ve": "\"Vacina de Pipoca chegando\": \"Uma vacina registrada pela clínica vence em 23/12. Abra a carteirinha para ver.\"",
+      "print": "f13-03-aviso-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Toque no aviso.",
+      "ve": "Abre Vacinas da Pipoca: \"V4 (quádrupla felina)\", \"Dose 2 de 2: próxima dose em 23 de dezembro\".",
+      "print": "f13-04-destino-do-aviso",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Lista de chamada › \"Lembrete ativo\" da Pipoca.",
+      "ve": "\"Ativado em 25/11, 17:11\", \"Último envio em 25/11, 17:11: Só na caixa de entrada\", \"Próximo envio em 23/12, 09:00\".",
+      "print": "f13-05-lembrete-ativo",
+      "recorte": {
+        "x": 960,
+        "y": 0,
+        "w": 480,
+        "h": 900
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Na mesma gaveta, \"Desligar lembrete\".",
+      "ve": "O cartão volta a \"Ativar lembrete\".",
+      "print": null,
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular (a conta qa-marina não tem aparelho: o envio ficou \"Só na caixa de entrada\")"
+  ],
+  "obs": "Não é bug: o aviso não diz o nome da vacina nem o da clínica (a gaveta avisa). Conta sem celular cadastrado: o envio fica \"Só na caixa de entrada\". O lembrete ficou desligado no fim.",
+  "resultado": "PASSOU"
+}

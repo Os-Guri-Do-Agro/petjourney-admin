@@ -1,0 +1,64 @@
+{
+  "id": "F07",
+  "titulo": "Pré-consulta pelo app",
+  "sub": "O responsável conta pelo app como o pet está antes da consulta, com o que já está no diário; a clínica lê no horário e usa na anamnese.",
+  "contas": "Portal: portal-demo · App: qa-bruna (Fubá)",
+  "antes": "A Fubá ligada à clínica, com diário dos últimos dias no app.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "\"Agenda\" › \"Marcar horário\": Fubá, \"Consulta\", \"Portal Demo\", hoje, hora daqui a pouco › \"Marcar\".",
+      "ve": "\"Sem aviso neste horário.\" e o cartão da Fubá na coluna da Portal Demo.",
+      "print": "f07-01-marcar",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › o horário de hoje da Fubá › \"Responder a pré-consulta\" › \"Está com sintoma\", \"O que está acontecendo\", \"1 a 2 dias\", \"Igual\" › \"Enviar para a clínica\".",
+      "ve": "\"Já trouxemos o que está no seu diário\" e \"Comeu bem · do seu diário, 23/11\"; ao enviar, \"Pré-consulta enviada. A clínica lê antes da consulta.\"",
+      "print": "f07-02-pre-consulta",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Agenda\" › o horário da Fubá › \"Ver a pré-consulta\". No sino \"Avisos\", \"Pré-consulta respondida\".",
+      "ve": "\"Respondida em 25/11, 17:14\", a queixa, \"1 a 2 dias · Igual\" e \"do diário\" em Alimentação, Água, Disposição e Peso de casa.",
+      "print": "f07-03-ver-pre-consulta",
+      "recorte": {
+        "x": 880,
+        "y": 0,
+        "w": 560,
+        "h": 680
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Na mesma gaveta, \"Marcar chegada\" › \"Iniciar atendimento\" › Anamnese › \"Usar\" ao lado de \"No app: ...\".",
+      "ve": "O painel \"Pré-consulta do app\": \"Respondida em ... Nada entra sozinho na anamnese.\"; \"Usar\" copia a queixa para \"Queixa principal\".",
+      "print": "f07-04-anamnese-painel",
+      "recorte": {
+        "x": 290,
+        "y": 225,
+        "w": 1150,
+        "h": 650
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Horário marcado com mais de 24 h de antecedência (aqui, um segundo horário da Fubá para amanhã às 17:45): sino, 24 h antes do horário.",
+      "ve": "\"Como Fubá está?\": \"Responda antes da consulta de 26/11 às 17:45. Leva dois minutos.\" Tocar abre a pré-consulta daquele horário, já com o que veio do diário.",
+      "print": "f07-05-aviso-pre-consulta",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Não é bug: o lembrete \"Como Fubá está?\" só sai 24 horas antes, e só para horário marcado antes disso (das 22h às 8h ele vem às 20h); para horário de hoje, entre pelo cartão em Minhas clínicas. Para o app receber \"Horário marcado para Fubá\", marque com \"Avisar o responsável no app\" ligado (F05).",
+  "resultado": "PASSOU"
+}

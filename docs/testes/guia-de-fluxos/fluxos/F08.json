@@ -1,0 +1,66 @@
+{
+  "id": "F08",
+  "titulo": "Resumo da consulta no app",
+  "sub": "A clínica finaliza o atendimento e libera o resumo; o responsável lê no app, e o adendo da clínica chega como atualização.",
+  "contas": "Portal: portal-demo · App: qa-bruna (Fubá)",
+  "antes": "O atendimento da Fubá aberto no F07, com a queixa na Anamnese.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "No atendimento: \"Exame físico\" (peso, temperatura), \"Diagnóstico\" › \"Adicionar diagnóstico\" (busque \"Otite ext\"), \"Conduta\" (orientações e sinais de alerta) › \"Revisar e finalizar\" › \"Finalizar\" (na primeira vez pede \"Sua senha\") › \"Finalizar\".",
+      "ve": "\"Vai ao responsável quando o resumo for liberado\" com o diagnóstico e as orientações; depois, a janela \"Atendimento finalizado\".",
+      "print": "f08-01-revisar-e-finalizar",
+      "recorte": {
+        "x": 860,
+        "y": 0,
+        "w": 580,
+        "h": 900
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Na janela \"Atendimento finalizado\" › \"Liberar o resumo\".",
+      "ve": "No alto do atendimento: \"Resumo no app desde 25 de nov. de 2026.\"",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino (Notificações).",
+      "ve": "\"Resumo do atendimento de Fubá\": \"A clínica publicou o resumo do atendimento no app. Abra o prontuário para ver.\"",
+      "print": "f08-03-aviso-resumo",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Depois da consulta\" › \"Consulta de Fubá\" de hoje.",
+      "ve": "\"O que a clínica encontrou\": \"Suspeita: Otite externa bacteriana\"; \"O que fazer em casa\", \"Volte antes se\" e \"Quem atendeu\".",
+      "print": "f08-04-depois-da-consulta",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Adendo\" › o texto › ligar \"Para o responsável\" › \"Salvar adendo\".",
+      "ve": "\"Adendo salvo.\" e, em \"Registro\", \"Adendo para o responsável\" com o nome e a hora.",
+      "print": "f08-05-adendo",
+      "recorte": {
+        "x": 940,
+        "y": 0,
+        "w": 500,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino; depois Minhas clínicas › \"Depois da consulta\" › a consulta.",
+      "ve": "\"Resumo de Fubá atualizado\"; na consulta, \"A clínica acrescentou\" com o texto do adendo e \"hoje às 17:26\".",
+      "print": "f08-06-aviso-atualizado",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Tocar no aviso abre o registro da consulta no prontuário do pet, onde o adendo aparece como \"Correção em 25/11/2026\"; o resumo escrito para o responsável fica em Minhas clínicas › \"Depois da consulta\". Diagnóstico presuntivo chega ao app como \"Suspeita: ...\".",
+  "resultado": "PASSOU"
+}

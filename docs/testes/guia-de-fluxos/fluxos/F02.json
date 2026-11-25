@@ -1,0 +1,68 @@
+{
+  "id": "F02",
+  "titulo": "O que o app manda para a ficha da clínica",
+  "sub": "A foto, o diário e o peso de casa que o responsável registra no app chegam à ficha da clínica, e o app mostra quando a clínica viu.",
+  "contas": "Portal: portal-demo · App: luis.qa.tutor (Thor)",
+  "antes": "Thor ligado à Clínica e Hotel Demo (F01).",
+  "passos": [
+    {
+      "lado": "A",
+      "faz": "\"Minhas clínicas\" › \"Clínica e Hotel Demo\" › \"O que a clínica pode ver\": ligar \"Diário\" e \"Peso de casa\".",
+      "ve": "As duas chaves ligadas e \"Pets acompanhados: Thor\".",
+      "print": "f02-01-liberar-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Thor › \"Editar pet\" › \"Toque para alterar foto\" › escolher a foto › salvar.",
+      "ve": "A foto nova do Thor no app.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Diário do Thor › \"Como Thor está?\": Vitalidade \"Desanimado\", Alimentação \"Pouco\", Sintomas \"Espirro\" › \"Salvar\".",
+      "ve": "\"Entrada salva\".",
+      "print": "f02-02-diario-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "\"Registrar peso\" do Thor: digite 1890 (o campo põe a vírgula: 18,90), \"Quando pesou?\" hoje › \"Salvar peso\" › \"Não, só salvar\" › \"Salvar peso\".",
+      "ve": "O peso de 18,9 kg gravado.",
+      "print": "f02-03-peso-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Pacientes\" › Thor.",
+      "ve": "A foto do app em \"Dados do paciente\"; em \"Este pet em 30 segundos\": \"Registros no app: 1\", \"Alimentação: Pouco\", \"Disposição: Desanimado\", \"Sintomas: Espirro\" e \"25/11 18,9 kg em casa\".",
+      "print": "f02-04-ficha-com-o-app",
+      "recorte": {
+        "x": 290,
+        "y": 130,
+        "w": 1120,
+        "h": 690
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "\"Este pet em 30 segundos\" › \"Ver o diário\".",
+      "ve": "\"Diário de Thor\": Qua., 25/11, Disposição Desanimado, Alimentação Pouco, Sintomas Espirro.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "\"Minhas clínicas\" › \"Clínica e Hotel Demo\" › \"Quem viu\".",
+      "ve": "\"Viu o diário\" e \"Viu o resumo do pet\", com \"Portal Demo\" e a hora.",
+      "print": "f02-05-quem-viu",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "escolher a foto pela galeria ou pela câmera do celular (no navegador o seletor não abre: a foto foi pela API, como o app manda)"
+  ],
+  "obs": "O campo do peso enche da direita para a esquerda (os dois últimos números são os decimais): para 18,9 kg, digite 1890. Corrigido em 25/11: o exemplo do app agora mostra \"12,50\", e a ficha diz \"em 1 semana\" (antes \"1 semanas\"). A clínica só lê o diário e o peso de casa com \"Diário\" e \"Peso de casa\" liberados no app.",
+  "resultado": "PASSOU"
+}

@@ -1,0 +1,76 @@
+{
+  "id": "F11",
+  "titulo": "Reavaliação do uso contínuo",
+  "sub": "O prazo que o veterinário dá na receita chega ao app do responsável, que responde se continua; a resposta volta à ficha da clínica.",
+  "contas": "Portal: portal-demo · App: qa-marina (Mel)",
+  "antes": "Mel ligada à Clínica e Hotel Demo no app da qa-marina. Para ver a pergunta no mesmo dia, mude a data de reavaliação para hoje (no app: tratamento › \"Editar\" › \"Reavaliar em\"; aqui foi pela API, como o app faz) e espere o aviso das :05.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Pacientes › Mel › \"Atendimento avulso\" › \"Receita e documentos\" › \"Prescrever\" › \"Nome livre\": Enalapril 5 mg, 1 comprimido, Oral, uma vez ao dia, \"Uso contínuo\" e \"Reavaliar em\" 1 › \"Salvar\". Depois \"Fazer a receita\" › senha › \"Assinar\", \"Revisar e finalizar\" › \"Finalizar\" › \"Liberar o resumo\".",
+      "ve": "O campo \"Reavaliar em (opcional)\" só aparece com \"Uso contínuo\"; a linha fica \"Uso contínuo · Reavaliar em 1 dia\" e a receita diz \"uso contínuo. Reavaliar em 1 dia.\"",
+      "print": "f11-01-reavaliar-em-1-dia",
+      "recorte": {
+        "x": 865,
+        "y": 480,
+        "w": 575,
+        "h": 225
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Resumo do atendimento de Mel\" › \"Criar lembretes\" (o Enalapril vem com \"Uso contínuo, reavaliar em 1 dia\") › \"Criar 1 lembrete\". Depois Mel › Prontuário › \"Uso contínuo\".",
+      "ve": "\"Remédios de uso contínuo\" com o Enalapril 5 mg: \"1 comprimido · uma vez ao dia · Reavaliar em 26/11\".",
+      "print": "f11-02-reavaliar-em-data",
+      "recorte": {
+        "x": 0,
+        "y": 470,
+        "w": 390,
+        "h": 240
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "No dia da reavaliação, das 9h em diante, o app avisa (aqui a data foi trocada para hoje e o aviso chegou às 18:05).",
+      "ve": "No sino: \"Hora de reavaliar o Enalapril 5 mg de Mel\" · \"O veterinário mandou continuar? Toque para responder.\"",
+      "print": "f11-03-aviso-de-reavaliar",
+      "recorte": {
+        "x": 0,
+        "y": 150,
+        "w": 390,
+        "h": 235
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Tocar no aviso › \"Nova data\" › escolher o dia › \"Confirmar\".",
+      "ve": "A pergunta \"O veterinário mandou continuar?\" com \"Continuar sem data\", \"Nova data\" e \"Encerrar\"; depois dela, \"Reavaliação em 26/11/2026\" e \"Nova data marcada em 25/11\".",
+      "print": "f11-04-pergunta",
+      "recorte": {
+        "x": 0,
+        "y": 170,
+        "w": 390,
+        "h": 330
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Pacientes › Mel › \"Tratamentos em casa\" (recarregar a ficha).",
+      "ve": "No Enalapril 5 mg, o selo \"Nova data: 26/11\" (enquanto ninguém respondia, era \"Reavaliação vencida\").",
+      "print": "f11-05-selo-nova-data",
+      "recorte": {
+        "x": 330,
+        "y": 100,
+        "w": 540,
+        "h": 230
+      }
+    }
+  ],
+  "naoConferido": [
+    "o push no celular",
+    "o seletor de data da \"Nova data\" (no navegador ele não abre e \"Confirmar\" grava amanhã, o mínimo)",
+    "mudar a data pelo \"Editar\" do app (seletor nativo): feito pela API, como o app manda"
+  ],
+  "obs": "O Enalapril 5 mg da Mel ficou ativo, com reavaliação em 26/11: no dia, a pergunta volta sozinha (aviso das 9h). Corrigido em 25/11: o campo \"Reavaliar em\" diz \"1 dia\" (antes \"1 dias\").",
+  "resultado": "PASSOU"
+}

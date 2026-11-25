@@ -1,0 +1,78 @@
+{
+  "id": "F15",
+  "titulo": "Internação acompanhada pelo app",
+  "sub": "A clínica interna, manda boletins, liga na piora e dá alta; o responsável acompanha tudo no app.",
+  "contas": "Portal: portal-demo · App: qa-julia (Bisteca)",
+  "antes": "Bisteca ligado ao app (ficha do paciente com vínculo ativo) e um leito livre no mapa.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Internação › Mapa › leito livre (R2) › \"Internar\": paciente Bisteca, motivo e peso de entrada › \"Internar\".",
+      "ve": "A internação aberta: \"R2 · Geral · responsável: Portal Demo\".",
+      "print": "f15-01-internar",
+      "recorte": {
+        "x": 850,
+        "y": 0,
+        "w": 590,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Internações\" › aba \"Bisteca\".",
+      "ve": "\"Clínica e Hotel Demo\" com \"Na clínica desde 25 de novembro\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Na internação, \"Boletim ao responsável\" › \"Escrever boletim\" › texto › \"Salvar boletim\" › no rascunho, \"Enviar\".",
+      "ve": "\"Boletim enviado ao app.\" e o boletim \"Enviado ... a 1 pessoa\".",
+      "print": "f15-03-enviar-boletim",
+      "recorte": {
+        "x": 300,
+        "y": 360,
+        "w": 1120,
+        "h": 200
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Gravidade › \"Crítico\". Ligue para o telefone do cadastro › \"Registrar ligação\" (quem ligou, \"Agora\") › \"Registrar ligação\" › \"Enviar\".",
+      "ve": "O boletim automático nasce \"Retido · piorou: ligue antes\"; depois da ligação, \"Pronto para enviar\" e \"Enviado\".",
+      "print": "f15-04-retido-ligar",
+      "recorte": {
+        "x": 310,
+        "y": 290,
+        "w": 1100,
+        "h": 310
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Notícias de Bisteca\" (um aviso por boletim) › toque no mais novo.",
+      "ve": "A internação com os dois boletins; o novo traz \"Depois da conversa por telefone\".",
+      "print": "f15-05-app-boletins",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Encerrar internação\" › \"Alta\" › orientação de saída › \"Dar alta\".",
+      "ve": "\"Alta registrada.\" e o leito R2 livre de novo no mapa.",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Bisteca teve alta\".",
+      "ve": "\"Teve alta em 25 de novembro\" e o boletim \"Alta e orientações para casa\" com a orientação de saída.",
+      "print": "f15-07-app-alta",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Não é bug: na piora, o boletim já vem escrito pela clínica e só sai depois da ligação registrada. Corrigido em 25/11: depois de \"Dar alta\", o boletim de alta aparece no cartão sem recarregar, e a internação encerrada não mostra mais o \"próximo\" boletim.",
+  "resultado": "PASSOU"
+}

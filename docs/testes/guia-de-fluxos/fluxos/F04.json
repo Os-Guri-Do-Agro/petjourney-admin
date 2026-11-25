@@ -1,0 +1,67 @@
+{
+  "id": "F04",
+  "titulo": "Pedido de horário pelo app",
+  "sub": "O responsável pede horário pelo app; a recepção aceita, marca em outro horário ou recusa, e o app mostra cada resposta.",
+  "contas": "Portal: portal-demo · App: qa-rafael (Nino)",
+  "antes": "Portal com o \"Outro horário\" corrigido (develop de 25/11; no admin-dev depois da publicação). Nino ligado à Clínica e Hotel Demo, sem pedido em aberto. No fim, cancele os horários que os aceites criaram (Agenda › o horário › \"Mais ações\" › \"Cancelar horário\").",
+  "passos": [
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › Clínica e Hotel Demo › \"Pedir horário\": Nino, \"Check-up\", \"Dra. Helena Duarte\", \"Escolher o horário\", sex., 27 de nov., 14:00 › \"Enviar pedido\".",
+      "ve": "\"Pedido enviado. A clínica responde pelo app.\" e o pedido em \"Esperando a clínica\".",
+      "print": "f04-01-pedido-enviado",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Agenda › \"Pedidos\" › \"Esperando resposta\" › o pedido do Nino › \"Responder\" › \"Horário pedido\", mensagem › \"Aceitar\".",
+      "ve": "\"Marcado: sexta-feira, 27 de novembro, às 14:00. Quem pediu já foi avisado.\"",
+      "print": "f04-02-aceitar-no-portal",
+      "recorte": {
+        "x": 300,
+        "y": 180,
+        "w": 1140,
+        "h": 720
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Pedido de horário de Nino aceito\"; depois Minhas clínicas › \"Agendamentos\".",
+      "ve": "\"27/11 às 14:00. Veja os detalhes no app.\" e, em Próximos, \"Consulta de Nino · 27 de nov. às 14:00 · Marcado\".",
+      "print": "f04-03-horario-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Segundo pedido do app (27/11, 16:00, Dra. Helena) › \"Responder\" › \"Outro horário\" › \"Sex., 27/11, 16:00 a 16:30 · Portal Demo\", mensagem › \"Aceitar\".",
+      "ve": "A lista não traz mais o horário pedido (16:00 com a Dra. Helena): só a outra profissional no mesmo horário. Marcado; no app, \"Pedido de Nino marcado em outro horário\".",
+      "print": "f04-04-outro-horario-no-portal",
+      "recorte": {
+        "x": 300,
+        "y": 180,
+        "w": 1140,
+        "h": 720
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Terceiro pedido do app (\"A clínica escolhe o melhor horário\", Vacina, semana que vem, manhã) › \"Responder\" › \"Recusar\" › \"Sem horário\", mensagem › \"Enviar recusa\".",
+      "ve": "O pedido sai de \"Esperando resposta\" e vai para \"Recusados\".",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino: os três avisos; tocar em cada um abre o pedido.",
+      "ve": "\"Pedido de horário de Nino aceito\"; \"Pedido de Nino marcado em outro horário\" (\"A clínica marcou em outro horário.\" e a mensagem); \"Pedido de horário de Nino não aceito\" (\"Não havia horário\", a mensagem e \"Fazer novo pedido\").",
+      "print": "f04-05-avisos-no-app",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular",
+    "o e-mail da resposta ao responsável"
+  ],
+  "obs": "Os avisos chegam à caixa do app em 1 a 2 minutos; na equipe, \"Novo pedido de horário\" chega em Avisos do portal. Corrigido em 25/11: \"Outro horário\" não oferece mais o próprio horário pedido. A lista ainda é curta: a API só procura no dia pedido, um horário por profissional (lacuna N61); com a lista vazia, a gaveta diz que não há sugestão. O aviso de outro horário não diz a profissional nova: só a mensagem da clínica conta.",
+  "resultado": "PASSOU"
+}

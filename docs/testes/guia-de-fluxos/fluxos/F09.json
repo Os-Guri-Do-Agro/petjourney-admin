@@ -1,0 +1,47 @@
+{
+  "id": "F09",
+  "titulo": "Cópia do prontuário pedida pelo app",
+  "sub": "O responsável pede a cópia no app; a clínica gera no portal e o PDF chega ao app; um segundo pedido recusado avisa o app sem o motivo.",
+  "contas": "Portal: portal-demo · App: qa-bruna (Fubá)",
+  "antes": "Nenhum pedido de cópia da Fubá em aberto: o app só deixa um por vez (o antigo fecha em Prontuários › Cópias).",
+  "passos": [
+    {
+      "lado": "A",
+      "faz": "Minhas clínicas › \"Cópia do prontuário\" › Fubá › \"Pedir\".",
+      "ve": "\"Cópia pedida à clínica\"; em \"Pedidos\": \"Pedida em 25 de novembro\" e \"A clínica responde até 2 de dezembro\".",
+      "print": "f09-01-pedir",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Prontuários\" › \"Cópias\" › \"Abertos\" › Fubá (\"Pedido pelo app\") › \"Gerar cópia\" › \"Gerar cópia\".",
+      "ve": "Em poucos segundos, \"Pronto\" com \"Baixar PDF\" e \"Quando o dono baixar pelo app, a entrega se registra sozinha.\"",
+      "print": "f09-02-gerar",
+      "recorte": { "x": 290, "y": 0, "w": 1150, "h": 900 }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Cópia do prontuário de Fubá pronta\" › \"Baixar\". Depois, \"Pedir\" de novo para o passo 4.",
+      "ve": "O aviso abre \"Cópia do prontuário\" com \"Pronta: dá para baixar até 2 de dezembro\"; \"Baixar\" abre o PDF e a linha vira \"Baixada; o arquivo fica até 2 de dezembro\".",
+      "print": "f09-03-aviso-pronta",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Cópias › o pedido novo da Fubá › \"Gerar cópia\" (abre o pedido) › \"Recusar pedido\" › \"Motivo da recusa\" (20 letras ou mais) › \"Recusar pedido\".",
+      "ve": "O pedido sai de \"Abertos\" e fica em \"Encerrados\" como recusado, com o motivo.",
+      "print": "f09-04-recusar",
+      "recorte": { "x": 880, "y": 0, "w": 560, "h": 900 }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Pedido de cópia do prontuário de Fubá\".",
+      "ve": "\"A clínica não pôde atender o pedido de cópia. Fale com a clínica para saber mais.\"; em Cópias, \"A clínica recusou o pedido\". O motivo fica só na clínica.",
+      "print": "f09-05-aviso-recusada",
+      "recorte": null
+    }
+  ],
+  "naoConferido": ["o push no celular", "o PDF abrindo no celular (no navegador o link do PDF foi aberto e conferido)"],
+  "obs": "Baixar pelo app registra a entrega sozinho: no portal o pedido vai para \"Encerrados\" como entregue pelo app. Recusar é do responsável técnico com CRMV e pode pedir a senha.",
+  "resultado": "PASSOU"
+}

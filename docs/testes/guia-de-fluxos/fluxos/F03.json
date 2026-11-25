@@ -1,0 +1,52 @@
+{
+  "id": "F03",
+  "titulo": "Ficha de emergência pelo QR da coleira",
+  "sub": "A clínica abre a ficha curta do pet pelo QR da coleira e o responsável recebe o aviso no app na hora, com quem abriu e por quê.",
+  "contas": "Portal: portal-demo (CRMV conferido) · App: luis.qa.tutor (Thor)",
+  "antes": "Carteirinha do Thor: petjourney.health/carteirinha/2aeecbbedd50f1e7f35a226b02760668; no app, Thor com \"Ficha ligada\". Limite: 10 fichas por pessoa em 24 h.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "\"Portal\" › \"Acessos\" › \"Emergência pelo QR\" › \"Endereço do QR da coleira\": petjourney.health/carteirinha/2aeecbbedd50f1e7f35a226b02760668 › \"Motivo\" (10 a 300 caracteres) › \"Abrir ficha\".",
+      "ve": "O pedido preenchido, com \"O responsável lê este motivo no app.\"",
+      "print": "f03-01-emergencia-pedir",
+      "recorte": {
+        "x": 495,
+        "y": 75,
+        "w": 945,
+        "h": 825
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Espere a resposta na mesma gaveta.",
+      "ve": "\"O responsável foi avisado agora.\" e a ficha: Thor, Cachorro · Macho · Castrado · 5 anos, 18,9 kg, alergia Dipirona (Grave), remédios contínuos e condições, sem o contato do responsável.",
+      "print": "f03-02-emergencia-ficha",
+      "recorte": {
+        "x": 960,
+        "y": 0,
+        "w": 480,
+        "h": 520
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino (Notificações).",
+      "ve": "\"A ficha de emergência de Thor foi aberta\", \"Agora\".",
+      "print": "f03-03-aviso-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Toque no aviso.",
+      "ve": "\"Ficha de emergência\" do Thor › \"Quem abriu\": Clínica e Hotel Demo, \"Hoje às 17:29\", \"Portal Demo · CRMV-SP 12345\", o motivo, \"Ligar (11) 99999-0000\" e \"Bloquear clínica\".",
+      "print": "f03-04-quem-abriu-no-app",
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Não é bug: o aviso não diz a clínica (de propósito); o nome, o CRMV e o telefone ficam em \"Quem abriu\". A lista também mostra as aberturas dos testes anteriores.",
+  "resultado": "PASSOU"
+}

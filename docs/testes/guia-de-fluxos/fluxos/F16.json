@@ -1,0 +1,64 @@
+{
+  "id": "F16",
+  "titulo": "Termo de consentimento aceito no app",
+  "sub": "A clínica emite o termo e pede o aceite pelo app; o responsável lê e aceita com a senha da conta.",
+  "contas": "Portal: portal-demo · App: qa-julia (Bisteca)",
+  "antes": "Bisteca ligado ao app e quem emite com o CRMV conferido. Cada repetição pede um termo novo: o aceite não se desfaz.",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "Pacientes › ficha do Bisteca › Documentos › \"Novo documento\" › \"Termo de consentimento\": objeto, \"Pedir o aceite pelo app\" ligado, sua senha › \"Emitir\".",
+      "ve": "O termo na lista: \"Emitido em 25 de novembro de 2026 · ... · aceite pendente · esperando a resposta no app\".",
+      "print": "f16-01-emitir-termo",
+      "recorte": {
+        "x": 800,
+        "y": 0,
+        "w": 640,
+        "h": 900
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Documento de Bisteca para você\" › \"Termos para responder\" › toque no termo para ler o PDF.",
+      "ve": "O termo com \"Esperando a sua resposta\" e os botões \"Aceito\" e \"Recuso\"; o toque abre o PDF do termo.",
+      "print": "f16-02-app-termos",
+      "recorte": {
+        "x": 0,
+        "y": 0,
+        "w": 390,
+        "h": 460
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "\"Aceito\" › \"Senha da conta\" › \"Aceito\".",
+      "ve": "\"Termo aceito\" e, no termo, \"Aceito hoje às 17:30, pelo app\" com \"Ver o registro da resposta\".",
+      "print": "f16-03-app-senha",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Ficha do Bisteca › Documentos (recarregue a tela).",
+      "ve": "O termo com \"aceito\" no fim da linha, sem o \"esperando a resposta no app\".",
+      "print": "f16-04-portal-aceito",
+      "recorte": {
+        "x": 300,
+        "y": 620,
+        "w": 600,
+        "h": 250
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Para comparar: sem \"Pedir o aceite pelo app\", o termo pendente mostra \"Registrar aceite\" (aceite no balcão, com nome, documento e assinatura no quadro).",
+      "ve": "Vale a primeira resposta, do balcão ou do app; termo de eutanásia só se aceita no balcão.",
+      "print": null,
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular"
+  ],
+  "obs": "Quem respondeu e quando aparecem só no app (\"Ver o registro da resposta\"). A API não manda esses dados para a clínica (lacuna N60), e o \"Abrir PDF\" do portal devolve o PDF emitido, sem o registro do aceite.",
+  "resultado": "PARCIAL: o aceite pelo app funciona dos dois lados, mas o portal mostra só \"aceito\", sem quem aceitou nem quando (lacuna N60 da API)."
+}

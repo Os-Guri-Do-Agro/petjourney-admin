@@ -1,0 +1,79 @@
+{
+  "id": "F01",
+  "titulo": "Ligar o pet do app à clínica",
+  "sub": "A clínica convida pelo código ou pelo QR da carteirinha, o responsável aceita no app; quando ele encerra no app, a clínica é avisada.",
+  "contas": "Portal: portal-demo · App: luis.qa.tutor (Thor)",
+  "antes": "Thor no app do luis.qa.tutor, sem vínculo com a Clínica e Hotel Demo. Hoje ele já é paciente e está ligado: para repetir, comece pelo passo 4 (encerrar) e, no lugar do passo 1, abra a ficha do Thor › \"Convidar para o app\" › \"Mostrar QR\".",
+  "passos": [
+    {
+      "lado": "P",
+      "faz": "\"Pacientes\" › \"Cadastrar paciente\" › \"Cliente novo\" (Luís QA Tutor, (11) 95555-2411, luis.qa.tutor@petjourney.test) › \"Continuar\" › Thor, Cachorro › \"Continuar\" › \"Cadastrar paciente\" › \"Mostrar QR\".",
+      "ve": "\"Thor cadastrado\", \"Convidar para o app agora?\" e o QR em tela cheia com o código (7BFK-Q2V3) e \"Vale até 2 de dezembro\".",
+      "print": "f01-01-convite-codigo",
+      "recorte": {
+        "x": 420,
+        "y": 90,
+        "w": 640,
+        "h": 750
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "\"Minhas clínicas\" › \"Tenho um código da clínica\" › o código › \"Continuar\" › \"Ligar a Thor\" › ligar \"Diário\" e \"Peso de casa\" › \"Aceitar\".",
+      "ve": "\"Pedido da clínica\" com \"Como a clínica tem você\" (Luís T., telefone e e-mail mascarados) e, depois, \"Pronto. Clínica e Hotel Demo agora acompanha seus pets.\"",
+      "print": "f01-02-codigo-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "Ficha do Thor, cartão \"No app do responsável\".",
+      "ve": "\"No app\", \"Ligado desde 25 de novembro de 2026, por convite por link.\", \"Diário completo: liberado\", \"Peso de casa: liberado\" e a proposta \"Aceita\".",
+      "print": "f01-03-ficha-ligada",
+      "recorte": {
+        "x": 880,
+        "y": 340,
+        "w": 540,
+        "h": 400
+      }
+    },
+    {
+      "lado": "A",
+      "faz": "\"Minhas clínicas\" › \"Clínica e Hotel Demo\" (com o Thor, \"Desde 25 de novembro de 2026\") › \"Encerrar o vínculo\" › \"Encerrar\".",
+      "ve": "\"Encerrar o vínculo com Clínica e Hotel Demo?\" e, depois, \"Vínculo com Clínica e Hotel Demo encerrado.\" e \"Nenhuma clínica por aqui\".",
+      "print": "f01-04-encerrar-no-app",
+      "recorte": null
+    },
+    {
+      "lado": "P",
+      "faz": "\"Avisos\" (no pé do menu) › \"Vínculo encerrado pelo responsável\".",
+      "ve": "\"Um responsável encerrou o vínculo com a clínica.\"; tocar abre a ficha do Thor, que volta a \"Este paciente ainda não está ligado ao app.\"",
+      "print": "f01-05-aviso-encerrado",
+      "recorte": {
+        "x": 1010,
+        "y": 10,
+        "w": 430,
+        "h": 270
+      }
+    },
+    {
+      "lado": "P",
+      "faz": "Ficha do Thor › \"Convidar para o app\" › \"Outras formas\" › \"Endereço do QR da carteirinha do pet\": petjourney.health/carteirinha/2aeecbbedd50f1e7f35a226b02760668 › \"Enviar pedido\".",
+      "ve": "\"Pedido enviado. Se a carteirinha for de um pet no app, o responsável recebe o pedido para aceitar.\"",
+      "print": null,
+      "recorte": null
+    },
+    {
+      "lado": "A",
+      "faz": "Sino › \"Uma clínica quer acompanhar seus pets\" › \"Ligar a Thor\" › \"Aceitar\".",
+      "ve": "O aviso abre direto o \"Pedido da clínica\"; depois, \"Pronto. Clínica e Hotel Demo agora acompanha seus pets.\" e a ficha diz \"Ligado desde 25 de novembro de 2026, por QR da carteirinha.\"",
+      "print": null,
+      "recorte": null
+    }
+  ],
+  "naoConferido": [
+    "o push no celular (pedido da clínica)",
+    "a câmera do app lendo o QR do convite (no navegador, só o código digitado)"
+  ],
+  "obs": "Não é bug: depois que o responsável encerra, a ficha volta a \"ainda não está ligado\" e a proposta antiga segue \"Aceita\"; quem conta que foi o responsável é o aviso. Ao ligar de novo, as chaves do que a clínica vê começam desligadas: ligue \"Diário\" e \"Peso de casa\" outra vez (F02, passo 1). \"Convidar para o app\" já cria um convite por link; se ligar pelo QR da carteirinha, cancele o que sobrou em \"Propostas\". O código vale 7 dias, e o app aceita 5 tentativas por hora.",
+  "resultado": "PASSOU"
+}
