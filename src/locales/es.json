@@ -5449,7 +5449,7 @@
         "nadaFora": "Nada fuera de lo común desde la última consulta.",
         "perdaContinua": "Pérdida de peso continua",
         "perda": "Caída de peso",
-        "perdaDetalhe": "{de} → {para} kg ({percentual}) en {semanas} semanas",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) en {semanas} semana | {de} → {para} kg ({percentual}) en {semanas} semanas",
         "alarmeDetalhe": "registrado en casa el {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× desde la última consulta",
         "mais": "y {total} más en el resumen",

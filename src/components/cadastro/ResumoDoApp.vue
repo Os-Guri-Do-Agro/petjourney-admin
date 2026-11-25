@@ -148,12 +148,16 @@ function detalheDoSinal(sinal: SinalDoResumo) {
   switch (sinal.tipo) {
     case 'perda-de-peso':
       return sinal.variacao
-        ? t('clinico.resumoDoPaciente.sinais.perdaDetalhe', {
-            de: kg(sinal.variacao.deKg),
-            para: kg(sinal.variacao.paraKg),
-            percentual: percentual(sinal.variacao.percentual),
-            semanas: sinal.variacao.semanas,
-          })
+        ? t(
+            'clinico.resumoDoPaciente.sinais.perdaDetalhe',
+            {
+              de: kg(sinal.variacao.deKg),
+              para: kg(sinal.variacao.paraKg),
+              percentual: percentual(sinal.variacao.percentual),
+              semanas: sinal.variacao.semanas,
+            },
+            sinal.variacao.semanas,
+          )
         : ''
     case 'alarme':
       return sinal.em ? t('leituraApp.registradoEm', { data: data(sinal.em) }) : ''
@@ -362,12 +366,16 @@ const adesaoIndisponivel = computed(() => resumo.value?.naoDisponivel.includes('
         <h3 id="ra-peso" class="ra__subtitulo">{{ t('clinico.resumoDoPaciente.peso.titulo') }}</h3>
         <p v-if="variacao" class="ra__linha ra__linha--neutra">
           {{
-            t('clinico.resumoDoPaciente.sinais.perdaDetalhe', {
-              de: kg(variacao.deKg),
-              para: kg(variacao.paraKg),
-              percentual: percentual(variacao.percentual),
-              semanas: variacao.semanas,
-            })
+            t(
+              'clinico.resumoDoPaciente.sinais.perdaDetalhe',
+              {
+                de: kg(variacao.deKg),
+                para: kg(variacao.paraKg),
+                percentual: percentual(variacao.percentual),
+                semanas: variacao.semanas,
+              },
+              variacao.semanas,
+            )
           }}
         </p>
         <ul v-if="pesagens.length" class="ra__pesos">

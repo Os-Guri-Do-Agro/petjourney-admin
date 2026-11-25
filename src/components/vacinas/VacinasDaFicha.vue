@@ -123,6 +123,12 @@ async function abrirExterna() {
   gavetaExterna.value = true
 }
 
+/** "V4 · dose de 25/11": a gaveta diz qual dose está sendo anulada, como na lista de chamada. */
+function sobreADose(aplicacao: Aplicacao) {
+  const dia = rotulos.dia(aplicacao.aplicadaEm.slice(0, 10))
+  return `${aplicacao.vacina.nome} · ${t('vacinas.detalhes.doseDe', { dia })}`
+}
+
 function abrirAnular(aplicacao: Aplicacao) {
   aAnular.value = aplicacao
   gavetaAnular.value = true
@@ -413,7 +419,12 @@ function linhaDoHistorico(aplicacao: Aplicacao) {
       :profissionais="profissionais"
       @registrada="mudou"
     />
-    <AnularAplicacaoGaveta v-model:visible="gavetaAnular" :aplicacao="aAnular" @anulada="mudou" />
+    <AnularAplicacaoGaveta
+      v-model:visible="gavetaAnular"
+      :aplicacao="aAnular"
+      :sobre="aAnular ? sobreADose(aAnular) : ''"
+      @anulada="mudou"
+    />
   </section>
 </template>
 

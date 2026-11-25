@@ -76,12 +76,16 @@ const linhas = computed(() =>
           titulo: sinal.variacao.continua
             ? t('clinico.resumoDoPaciente.sinais.perdaContinua')
             : t('clinico.resumoDoPaciente.sinais.perda'),
-          detalhe: t('clinico.resumoDoPaciente.sinais.perdaDetalhe', {
-            de: kg(sinal.variacao.deKg),
-            para: kg(sinal.variacao.paraKg),
-            percentual: percentual(sinal.variacao.percentual),
-            semanas: sinal.variacao.semanas,
-          }),
+          detalhe: t(
+            'clinico.resumoDoPaciente.sinais.perdaDetalhe',
+            {
+              de: kg(sinal.variacao.deKg),
+              para: kg(sinal.variacao.paraKg),
+              percentual: percentual(sinal.variacao.percentual),
+              semanas: sinal.variacao.semanas,
+            },
+            sinal.variacao.semanas,
+          ),
           relato: '',
           citacao: '',
           complemento: '',

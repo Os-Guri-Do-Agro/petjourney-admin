@@ -5449,7 +5449,7 @@
         "nadaFora": "Nothing unusual since the last visit.",
         "perdaContinua": "Continuous weight loss",
         "perda": "Weight drop",
-        "perdaDetalhe": "{de} → {para} kg ({percentual}) in {semanas} weeks",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) in {semanas} week | {de} → {para} kg ({percentual}) in {semanas} weeks",
         "alarmeDetalhe": "logged at home on {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× since the last visit",
         "mais": "and {total} more in the summary",
