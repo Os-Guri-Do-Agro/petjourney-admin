@@ -8,7 +8,7 @@
  * O leitor de tela recebe a frase inteira pelo `rotulo`; cada bolinha diz o dia, a hora e quem
  * registrou ao passar o ponteiro.
  */
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import '@/features/clinico/components/tratamento/faixa-cores.css'
@@ -21,6 +21,37 @@ const { t, locale } = useI18n()
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
 const dias = computed(() => diasDaFaixa(props.faixa))
+
+/**
+ * A faixa abre no fim: o dia de hoje é o que a equipe procura, e numa caixa estreita os 42 dias
+ * passam da largura. Em árabe o fim fica à esquerda (`scrollLeft` negativo); o navegador limita.
+ * Numa aba ainda escondida a caixa não tem largura: rola quando ela aparecer, uma vez, para não
+ * brigar com quem rolou para trás.
+ */
+const caixa = ref<HTMLElement | null>(null)
+let falta = true
+let observador: ResizeObserver | null = null
+
+function irParaHoje() {
+  const el = caixa.value
+  if (!el || !falta || el.clientWidth === 0) return
+  const rtl = getComputedStyle(el).direction === 'rtl'
+  el.scrollLeft = rtl ? -el.scrollWidth : el.scrollWidth
+  falta = false
+}
+
+onMounted(() => {
+  irParaHoje()
+  if (caixa.value && typeof ResizeObserver !== 'undefined') {
+    observador = new ResizeObserver(irParaHoje)
+    observador.observe(caixa.value)
+  }
+})
+onBeforeUnmount(() => observador?.disconnect())
+watch(dias, () => {
+  falta = true
+  nextTick(irParaHoje)
+})
 
 /** O dia civil de cada coluna: `desde` é a meia-noite da clínica. */
 function dataDoDia(dia: number) {
@@ -69,7 +100,7 @@ function legendaDoDia(dia: number) {
 </script>
 
 <template>
-  <figure class="fa faixa-cores" :aria-label="rotulo" role="img">
+  <figure ref="caixa" class="fa faixa-cores" :aria-label="rotulo" role="img">
     <div class="fa__dias">
       <div v-for="item in dias" :key="item.dia" class="fa__dia">
         <span

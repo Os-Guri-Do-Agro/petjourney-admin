@@ -12754,6 +12754,7 @@
       "retornoDica": "Vi određujete dane; recepcija zakazuje termin.",
       "emDias": "Za koliko dana",
       "dias": "dana",
+      "diasNoCampo": "dan | dana | dana",
       "semRetorno": "Bez kontrole",
       "vence": "Ističe {dia}.",
       "tipoDoRetorno": "Vrsta kontrole",

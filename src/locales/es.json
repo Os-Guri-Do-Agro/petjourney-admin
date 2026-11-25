@@ -12754,6 +12754,7 @@
       "retornoDica": "Usted define los días; la recepción agenda el horario.",
       "emDias": "En cuántos días",
       "dias": "días",
+      "diasNoCampo": "día | días",
       "semRetorno": "Sin control",
       "vence": "Vence el {dia}.",
       "tipoDoRetorno": "Tipo de control",

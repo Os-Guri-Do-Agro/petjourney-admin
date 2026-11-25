@@ -12754,6 +12754,7 @@
       "retornoDica": "Você define os dias; a recepção marca o horário.",
       "emDias": "Em quantos dias",
       "dias": "dias",
+      "diasNoCampo": "dia | dias",
       "semRetorno": "Sem retorno",
       "vence": "Vence em {dia}.",
       "tipoDoRetorno": "Tipo do retorno",

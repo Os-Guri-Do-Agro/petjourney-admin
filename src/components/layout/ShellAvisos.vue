@@ -40,7 +40,16 @@ const ROTA_DO_AVISO: Record<string, string> = {
  */
 const AVISOS_DO_VINCULO = new Set(['VINCULO_RESPONDIDO', 'VINCULO_ENCERRADO_PELO_RESPONSAVEL'])
 
+/** Tratamento que pede atenção (E4-05b, guia e4 7b.4): o aviso traz `dados.pacienteId` e abre a ficha. */
+const AVISOS_DO_TRATAMENTO = new Set(['ADESAO_EM_QUEDA'])
+
 function rotaDoAviso(aviso: Aviso): string | null {
+  if (AVISOS_DO_TRATAMENTO.has(aviso.tipo)) {
+    const id = aviso.dados.pacienteId
+
+    return typeof id === 'string' && id ? `/clinica/ficha/${id}` : '/clinica/tratamentos'
+  }
+
   if (AVISOS_DO_VINCULO.has(aviso.tipo)) {
     const ids = aviso.dados.pacienteIds
     const primeiro = Array.isArray(ids) && typeof ids[0] === 'string' ? ids[0] : null
@@ -57,6 +66,7 @@ const ICONE_DO_AVISO: Record<string, string> = {
   PARCEIRO_CONVITE_EQUIPE: 'ph ph-envelope-simple',
   VINCULO_RESPONDIDO: 'ph ph-device-mobile',
   VINCULO_ENCERRADO_PELO_RESPONSAVEL: 'ph ph-link-break',
+  ADESAO_EM_QUEDA: 'ph ph-pill',
 }
 
 const { t, locale } = useI18n()

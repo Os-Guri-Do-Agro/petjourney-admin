@@ -598,7 +598,7 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
             v-model="duracaoDias"
             input-id="pg-dias"
             :min="1"
-            :suffix="` ${t('atendimento.conduta.dias')}`"
+            :suffix="` ${t('atendimento.conduta.diasNoCampo', duracaoDias ?? 2)}`"
             :disabled="salvando || continuo"
           />
           <label class="pg__check" for="pg-continuo">
@@ -620,7 +620,7 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
           class="pg__reavaliar"
           :max-fraction-digits="0"
           :use-grouping="false"
-          :suffix="` ${t('atendimento.conduta.dias')}`"
+          :suffix="` ${t('atendimento.conduta.diasNoCampo', reavaliarEmDias ?? 2)}`"
           :invalid="reavaliacaoInvalida"
           :aria-describedby="reavaliacaoInvalida ? 'pg-reavaliar-erro' : 'pg-reavaliar-dica'"
           :disabled="salvando"

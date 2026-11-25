@@ -12754,6 +12754,7 @@
       "retornoDica": "You set the days; reception books the time.",
       "emDias": "In how many days",
       "dias": "days",
+      "diasNoCampo": "day | days",
       "semRetorno": "No follow-up",
       "vence": "Due on {dia}.",
       "tipoDoRetorno": "Follow-up type",

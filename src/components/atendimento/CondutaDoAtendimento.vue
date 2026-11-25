@@ -152,7 +152,7 @@ function rotuloDoAto(ato: AtoNaLista) {
                 input-id="ct-dias"
                 :min="1"
                 :max="RETORNO_DIAS_MAX"
-                :suffix="` ${t('atendimento.conduta.dias')}`"
+                :suffix="` ${t('atendimento.conduta.diasNoCampo', model.retornoEmDias ?? 2)}`"
                 :placeholder="t('atendimento.conduta.semRetorno')"
                 :readonly="somenteLeitura"
               />
