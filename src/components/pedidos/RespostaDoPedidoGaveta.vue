@@ -232,6 +232,13 @@ const buscaInterrompida = ref(false)
 const buscando = ref(false)
 const escolhida = ref<number | null>(null)
 
+function eOProprioPedido(sugestao: SugestaoDoPedido) {
+  const atual = pedido.value
+  if (!atual || !escolhido.value) return false
+  const mesmoInicio = Date.parse(sugestao.inicio) === Date.parse(escolhido.value.inicio)
+  return mesmoInicio && (!atual.profissionalId || sugestao.profissionalId === atual.profissionalId)
+}
+
 async function buscarSugestoes() {
   /* As sugestões são do pedido que está na tela, nunca de um que a gaveta já deixou. */
   const id = pedido.value?.id ?? props.pedidoId
@@ -244,7 +251,12 @@ async function buscarSugestoes() {
   try {
     const resposta = await sugestoesDoPedido(id, LIMITE_DE_SUGESTOES, parceiroQuery())
     if (!leituraDasSugestoes.valendo(vez)) return
-    sugestoes.value = resposta.sugestoes
+    /*
+     * "Outro horário" nunca oferece o próprio horário pedido (mesmo início e mesma profissional): a
+     * busca da API pega o mais perto do pedido, que é ele mesmo (lacuna N61), e a opção "o horário
+     * escolhido" já existe. Outra profissional no mesmo horário continua valendo.
+     */
+    sugestoes.value = resposta.sugestoes.filter((sugestao) => !eOProprioPedido(sugestao))
     buscaInterrompida.value = resposta.buscaInterrompida
   } catch (err) {
     if (!leituraDasSugestoes.valendo(vez)) return
