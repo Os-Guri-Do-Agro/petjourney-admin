@@ -121,7 +121,10 @@ function meta(item: Prescricao) {
     t(`clinico.bulario.api.via.${item.via}`),
     receitaNaTela.frequencia(item.frequenciaHoras),
     receitaNaTela.duracao(item.duracaoDias),
-  ].join(' · ')
+    receitaNaTela.reavaliacao(item.duracaoDias, item.reavaliarEmDias),
+  ]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 function avisos(item: Prescricao) {
@@ -495,7 +498,9 @@ function nomeDoItem(receita: Receita) {
             </span>
             <!-- A cancelada só repete: "cancele e faça outra" (a API repete a cancelada também). -->
             <span
-              v-if="receita.status === 'ASSINADA' || (receita.status === 'CANCELADA' && podeRepetir)"
+              v-if="
+                receita.status === 'ASSINADA' || (receita.status === 'CANCELADA' && podeRepetir)
+              "
               class="rc__acoes"
             >
               <Button

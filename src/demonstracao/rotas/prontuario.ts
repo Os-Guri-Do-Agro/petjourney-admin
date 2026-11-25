@@ -515,6 +515,7 @@ function entradaDe(corpo: Record<string, unknown>, base?: Prescricao): EntradaDa
     unidade: vale('unidade', base?.unidade),
     frequenciaHoras: vale('frequenciaHoras', base?.frequenciaHoras ?? 24),
     duracaoDias: vale('duracaoDias', base?.duracaoDias ?? null),
+    reavaliarEmDias: vale('reavaliarEmDias', base?.reavaliarEmDias ?? null),
     instrucoes: vale('instrucoes', base?.instrucoes ?? undefined),
     alergiaConfirmada: vale('alergiaConfirmada', base?.alergiaConfirmada),
     proibidoConfirmado: vale('proibidoConfirmado', base?.proibidoConfirmado),

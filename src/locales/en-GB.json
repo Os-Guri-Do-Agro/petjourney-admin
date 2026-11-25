@@ -12889,6 +12889,7 @@
       "abrirPdf": "Open the PDF",
       "foraDoPdf": "Stays in the clinic only",
       "duracao": "for {n} day | for {n} days",
+      "reavaliarEm": "Recheck in {n} day | Recheck in {n} days",
       "frequencia": {
         "horas": "every {n} hours",
         "dia": "once a day",
@@ -12941,6 +12942,9 @@
         "frequencia": "Frequency",
         "duracao": "Duration",
         "continuo": "Ongoing use",
+        "reavaliar": "Recheck in",
+        "reavaliarDica": "It does not end the medicine: it goes on the prescription and, on that day, the app asks the owner whether the vet said to continue.",
+        "reavaliarInvalida": "The recheck must be between {min} and {max} days.",
         "instrucoes": "Instructions for the owner",
         "critico": "Critical treatment",
         "criticoDica": "The clinic is alerted if the owner stops giving the doses at home.",
@@ -13029,6 +13033,13 @@
     "desde": "Since {data}: {contagens}",
     "inicio": "started on {data}",
     "encerradoEm": "ended on {data}",
+    "reavaliacao": {
+      "em": "Recheck on {data}",
+      "vencida": "Recheck overdue",
+      "novaData": "New date: {data}",
+      "continuou": "Owner continued without a date ({data})",
+      "encerrado": "Ended by the owner ({data})"
+    },
     "encerrados": "Ended ({n})",
     "truncado": "There are more treatments; open them from the clinic's list.",
     "verMaisDias": "See the last 42 days",

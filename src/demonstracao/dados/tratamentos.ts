@@ -588,6 +588,10 @@ export function adesaoDto(t: TratamentoDaDemo): Tratamento {
     encerradoEm: t.encerradoEm,
     critico: t.critico,
     contato: t.contato,
+    /* A reavaliação do contínuo (PJ-HC2AKL): a demonstração não marca data. */
+    reavaliarEm: null,
+    reavaliacaoPendente: false,
+    ultimaReavaliacao: null,
   }
   if (t.situacao === 'NAO_COMPARTILHADO') {
     return { ...base, faixa: null, resumo: null, horarioQueDestoa: null, alerta: null }
@@ -631,6 +635,9 @@ function naLista(t: TratamentoDaDemo): TratamentoNaLista {
     alerta: alerta?.motivo ?? null,
     alertaDesde: alerta?.desde ?? null,
     contatoEm: t.contato?.em ?? null,
+    reavaliarEm: null,
+    reavaliacaoPendente: false,
+    ultimaReavaliacao: null,
   }
 }
 

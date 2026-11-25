@@ -152,6 +152,7 @@ const CONFERIVEIS: readonly CampoPrescricaoConferivel[] = [
   'dose',
   'frequencia',
   'duracaoDias',
+  'instrucoes',
 ]
 
 function ehConferivel(campo: string): campo is CampoPrescricaoConferivel {
@@ -775,7 +776,16 @@ function removeExame(indice: number) {
               @click="removePrescricao(index)"
             />
 
-            <div class="presc__c presc__c--instr">
+            <!-- Marcada só quando leva o prazo de reavaliação lido sem certeza (PJ-HC2AKL). -->
+            <div
+              class="presc__c presc__c--instr"
+              :class="{ 'presc__c--conferir': aConferir(item, 'instrucoes') }"
+            >
+              <i
+                v-if="aConferir(item, 'instrucoes')"
+                class="ph ph-eye presc__olho"
+                aria-hidden="true"
+              />
               <label class="presc__lbl" :for="`est-presc-instr-${index}`">
                 {{ t('acessos.estruturada.prescricao.instrucoes') }}
               </label>
@@ -789,6 +799,7 @@ function removeExame(indice: number) {
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.instrucoes`))"
                 :aria-describedby="descricaoPresc(item, index, 'instrucoes')"
                 :placeholder="`${t('acessos.estruturada.prescricao.instrucoes')} · ${t('acessos.estruturada.prescricao.instrucoesPlaceholder')}`"
+                @update:model-value="conferido(item, 'instrucoes')"
               />
             </div>
 

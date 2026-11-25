@@ -274,7 +274,10 @@ const leituraReceita = useLeituraReceitaParceiro({
   parceiroQuery,
   anexosDoFormulario: () => anexosForm.value.length,
   aoLer: (leitura) => {
-    const mescla = mesclarPrescricaoLida(estruturadaForm.value.prescricaoItens, leitura)
+    /* O prazo de reavaliação lido vai nas instruções: a anotação não tem campo para ele. */
+    const mescla = mesclarPrescricaoLida(estruturadaForm.value.prescricaoItens, leitura, {
+      reavaliarEm: (dias) => t('atendimento.receita.reavaliarEm', { n: dias }, dias),
+    })
     estruturadaForm.value.prescricaoItens = mescla.itens
 
     return {

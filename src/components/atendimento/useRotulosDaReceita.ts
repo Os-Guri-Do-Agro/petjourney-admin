@@ -1,6 +1,7 @@
 /**
  * Os rótulos da receita na tela: a frequência ("a cada 12 horas", "uma vez ao dia"), a duração
- * ("7 dias", "uso contínuo") e os avisos que o servidor guardou no ato. A dose vem pronta da API
+ * ("7 dias", "uso contínuo"), a reavaliação do contínuo ("Reavaliar em 90 dias") e os avisos que
+ * o servidor guardou no ato. A dose vem pronta da API
  * ("meio comprimido"): a tela não monta.
  */
 import { useI18n } from 'vue-i18n'
@@ -20,11 +21,18 @@ export function useRotulosDaReceita() {
       : t('atendimento.receita.duracao', { n: dias }, dias)
   }
 
+  /** "Reavaliar em 90 dias": só no uso contínuo (PJ-HC2AKL); vazio sem a data. */
+  function reavaliacao(duracaoDias: number | null, reavaliarEmDias: number | null | undefined) {
+    return duracaoDias === null && reavaliarEmDias
+      ? t('atendimento.receita.reavaliarEm', { n: reavaliarEmDias }, reavaliarEmDias)
+      : ''
+  }
+
   function avisoNoAto(codigo: string) {
     return te(`atendimento.receita.avisoNoAto.${codigo}`)
       ? t(`atendimento.receita.avisoNoAto.${codigo}`)
       : null
   }
 
-  return { frequencia, duracao, avisoNoAto }
+  return { frequencia, duracao, reavaliacao, avisoNoAto }
 }

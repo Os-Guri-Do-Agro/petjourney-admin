@@ -89,6 +89,15 @@ const unidade = ref<UnidadeDaDose>('COMPRIMIDO')
 const frequenciaHoras = ref<number>(12)
 const duracaoDias = ref<number | null>(7)
 const continuo = ref(false)
+/*
+ * Reavaliação do uso contínuo (PJ-HC2AKL, guia 7): "reavaliar em N dias" sai na frase e no PDF da
+ * receita, e o tratamento do app nasce com a data. Não encerra nada; só vale sem duração.
+ */
+const reavaliarEmDias = ref<number | null>(null)
+/** A faixa da API (`PRESCRICAO_REAVALIACAO_INVALIDA`): de 1 a 730 dias, inteiro. */
+const REAVALIACAO_MIN_DIAS = 1
+const REAVALIACAO_MAX_DIAS = 730
+const faixaDaReavaliacao = ref({ min: REAVALIACAO_MIN_DIAS, max: REAVALIACAO_MAX_DIAS })
 const instrucoes = ref('')
 const critico = ref(false)
 
@@ -121,6 +130,7 @@ watch([aberta, () => props.prescricao?.id] as const, ([agora]) => {
   frequenciaHoras.value = p?.frequenciaHoras ?? 12
   continuo.value = Boolean(p && p.duracaoDias === null)
   duracaoDias.value = p ? p.duracaoDias : 7
+  reavaliarEmDias.value = p?.reavaliarEmDias ?? null
   instrucoes.value = p?.instrucoes ?? ''
   critico.value = p?.critico ?? false
   pendencias.value = []
@@ -128,6 +138,7 @@ watch([aberta, () => props.prescricao?.id] as const, ([agora]) => {
   faltaPeso.value = false
   tentou.value = false
   erro.value = ''
+  faixaDaReavaliacao.value = { min: REAVALIACAO_MIN_DIAS, max: REAVALIACAO_MAX_DIAS }
 })
 
 /* ------------------------------------------------------------------------------ opções */
@@ -195,8 +206,16 @@ const opcoesDeFrequencia = computed(() =>
 /** Por peso só do catálogo (P3: o nome livre não tem conta). */
 const porPeso = computed(() => origem.value === 'CATALOGO' && modo.value === 'PESO')
 
+const reavaliacaoInvalida = computed(() => {
+  const dias = reavaliarEmDias.value
+  if (!continuo.value || dias === null) return false
+  const { min, max } = faixaDaReavaliacao.value
+  return !Number.isInteger(dias) || dias < min || dias > max
+})
+
 const valido = computed(() => {
   if (!via.value) return false
+  if (reavaliacaoInvalida.value) return false
   if (!editando.value && origem.value === 'CATALOGO' && !escolhido.value) return false
   if (origem.value === 'LIVRE' && (!nomeLivre.value.trim() || !declaraNaoControlado.value)) {
     return false
@@ -284,6 +303,11 @@ function corpoDaDose() {
     ...(pesoKg.value ? { pesoKg: pesoKg.value } : {}),
     frequenciaHoras: frequenciaHoras.value,
     duracaoDias: continuo.value ? null : duracaoDias.value,
+    /*
+     * Só no uso contínuo: o campo vazio manda `null` (no PATCH, apaga a data). Com duração, a
+     * chave fica de fora, e a API apaga a reavaliação sozinha.
+     */
+    ...(continuo.value ? { reavaliarEmDias: reavaliarEmDias.value } : {}),
     ...(instrucoes.value.trim() ? { instrucoes: instrucoes.value.trim() as never } : {}),
     critico: critico.value,
     ...confirmacoes,
@@ -349,6 +373,16 @@ async function gravar() {
     if (lido.codigo === 'ATENDIMENTO_ALTERADO') {
       emit('alterado')
       erro.value = t('atendimento.receita.prescrever.alterado')
+      return
+    }
+    if (lido.codigo === 'PRESCRICAO_REAVALIACAO_INVALIDA') {
+      const min = Number(detalhes.minimo)
+      const max = Number(detalhes.maximo)
+      faixaDaReavaliacao.value = {
+        min: Number.isFinite(min) ? min : REAVALIACAO_MIN_DIAS,
+        max: Number.isFinite(max) ? max : REAVALIACAO_MAX_DIAS,
+      }
+      erro.value = t('atendimento.receita.prescrever.reavaliarInvalida', faixaDaReavaliacao.value)
       return
     }
     erro.value = lido.mensagem
@@ -574,6 +608,34 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
         </div>
       </section>
 
+      <!-- Só no uso contínuo: a data de voltar ao veterinário, que não encerra o remédio. -->
+      <section v-if="continuo" class="eg__secao">
+        <label class="eg__rotulo" for="pg-reavaliar">
+          {{ t('atendimento.receita.prescrever.reavaliar') }}
+          <span class="eg__opcional">{{ t('cadastro.opcional') }}</span>
+        </label>
+        <InputNumber
+          v-model="reavaliarEmDias"
+          input-id="pg-reavaliar"
+          class="pg__reavaliar"
+          :max-fraction-digits="0"
+          :use-grouping="false"
+          :suffix="` ${t('atendimento.conduta.dias')}`"
+          :invalid="reavaliacaoInvalida"
+          :aria-describedby="reavaliacaoInvalida ? 'pg-reavaliar-erro' : 'pg-reavaliar-dica'"
+          :disabled="salvando"
+        />
+        <small v-if="reavaliacaoInvalida" id="pg-reavaliar-erro" class="eg__erro" role="alert">
+          <i class="ph ph-warning-circle" aria-hidden="true" />
+          <span>{{
+            t('atendimento.receita.prescrever.reavaliarInvalida', faixaDaReavaliacao)
+          }}</span>
+        </small>
+        <small v-else id="pg-reavaliar-dica" class="eg__dica">{{
+          t('atendimento.receita.prescrever.reavaliarDica')
+        }}</small>
+      </section>
+
       <section class="eg__secao">
         <label class="eg__rotulo" for="pg-instrucoes">
           {{ t('atendimento.receita.prescrever.instrucoes') }}
@@ -684,6 +746,10 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 16px;
+}
+
+.pg__reavaliar {
+  max-width: 12rem;
 }
 
 .pg__critico {

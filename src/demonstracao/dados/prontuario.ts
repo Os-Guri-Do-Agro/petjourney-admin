@@ -875,13 +875,18 @@ function frequenciaNaFrase(horas: number) {
 }
 
 export function fraseDaPrescricao(
-  p: Pick<Prescricao, 'dose' | 'via' | 'frequenciaHoras' | 'duracaoDias'>,
+  p: Pick<Prescricao, 'dose' | 'via' | 'frequenciaHoras' | 'duracaoDias' | 'reavaliarEmDias'>,
 ) {
   const [verbo, via] = VIA_NA_FRASE[p.via]
   const duracao = p.duracaoDias
     ? `durante ${p.duracaoDias} ${p.duracaoDias === 1 ? 'dia' : 'dias'}`
     : 'em uso contínuo'
-  return `${verbo} ${p.dose} ${via}, ${frequenciaNaFrase(p.frequenciaHoras)}, ${duracao}.`
+  /* Como a API (PJ-HC2AKL): "..., em uso contínuo. Reavaliar em 90 dias." */
+  const reavaliar =
+    !p.duracaoDias && p.reavaliarEmDias
+      ? ` Reavaliar em ${p.reavaliarEmDias} ${p.reavaliarEmDias === 1 ? 'dia' : 'dias'}.`
+      : ''
+  return `${verbo} ${p.dose} ${via}, ${frequenciaNaFrase(p.frequenciaHoras)}, ${duracao}.${reavaliar}`
 }
 
 export type EntradaDaPrescricao = Partial<
@@ -894,6 +899,7 @@ export type EntradaDaPrescricao = Partial<
     | 'quantidade'
     | 'unidade'
     | 'duracaoDias'
+    | 'reavaliarEmDias'
     | 'alergiaConfirmada'
     | 'proibidoConfirmado'
     | 'arredondamentoConfirmado'
@@ -1047,6 +1053,8 @@ export function montarPrescricao(
     dose: textoDaDose(quantidade, unidade),
     frequenciaHoras: e.frequenciaHoras,
     duracaoDias: e.duracaoDias ?? null,
+    /* Só no uso contínuo; passar a ter duração apaga (como a API). */
+    reavaliarEmDias: e.duracaoDias == null ? (e.reavaliarEmDias ?? null) : null,
     instrucoes,
     alergiaConfirmada: Boolean(e.alergiaConfirmada),
     proibidoConfirmado: Boolean(e.proibidoConfirmado),

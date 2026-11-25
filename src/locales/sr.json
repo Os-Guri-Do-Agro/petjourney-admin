@@ -12889,6 +12889,7 @@
       "abrirPdf": "Otvori PDF",
       "foraDoPdf": "Ostaje samo u klinici",
       "duracao": "{n} dan | {n} dana | {n} dana",
+      "reavaliarEm": "Ponovna procena za {n} dan | Ponovna procena za {n} dana | Ponovna procena za {n} dana",
       "frequencia": {
         "horas": "na svakih {n} sati",
         "dia": "jednom dnevno",
@@ -12941,6 +12942,9 @@
         "frequencia": "Učestalost",
         "duracao": "Trajanje",
         "continuo": "Trajna primena",
+        "reavaliar": "Ponovna procena za",
+        "reavaliarDica": "Ne završava lek: ide na recept, a tog dana aplikacija pita vlasnika da li je veterinar rekao da se nastavi.",
+        "reavaliarInvalida": "Ponovna procena mora biti od {min} do {max} dana.",
         "instrucoes": "Uputstva za vlasnika",
         "critico": "Kritična terapija",
         "criticoDica": "Klinika dobija obaveštenje ako vlasnik prestane da daje doze kod kuće.",
@@ -13029,6 +13033,13 @@
     "desde": "Od {data}: {contagens}",
     "inicio": "početak {data}",
     "encerradoEm": "završeno {data}",
+    "reavaliacao": {
+      "em": "Ponovna procena {data}",
+      "vencida": "Ponovna procena je istekla",
+      "novaData": "Novi datum: {data}",
+      "continuou": "Vlasnik je nastavio bez datuma ({data})",
+      "encerrado": "Vlasnik je završio ({data})"
+    },
     "encerrados": "Završene ({n})",
     "truncado": "Ima još terapija; otvorite ih sa liste klinike.",
     "verMaisDias": "Prikaži poslednja 42 dana",

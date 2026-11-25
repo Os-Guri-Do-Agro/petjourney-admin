@@ -158,17 +158,51 @@ function textoLido(valor: unknown, limite: number): string {
   return valor == null ? '' : String(valor).trim().slice(0, limite)
 }
 
+/** A faixa do prazo de reavaliação da prescrição (1 a 730 dias, API: `reavaliarEmDias`). */
+export const REAVALIACAO_MAX_DIAS = 730
+
+/**
+ * Como a tela escreve o prazo de reavaliação lido ("Reavaliar em 90 dias"), no idioma dela. Sem
+ * ele, o prazo não entra no formulário.
+ */
+export type OpcoesDaLeitura = { reavaliarEm?: (dias: number) => string }
+
+function prazoDeReavaliacao(valor: unknown): number | null {
+  return typeof valor === 'number' &&
+    Number.isInteger(valor) &&
+    valor >= 1 &&
+    valor <= REAVALIACAO_MAX_DIAS
+    ? valor
+    : null
+}
+
 /**
  * Item lido no formato do formulário, com "Confira" em todo campo cuja confiança não é ALTA
  * (média, baixa ou não lido). Sem a confiança do item, tudo fica marcado. Os textos respeitam
  * os tetos do formulário: o que passa seria 400 no envio.
+ *
+ * O prazo de reavaliação do uso contínuo (PJ-HC2AKL) não tem campo na anotação do parceiro (a
+ * API não guarda): ele vai no fim das instruções, que a pessoa recebe no app, e as instruções
+ * ficam para conferir quando a IA não tem certeza do prazo.
  */
 export function prescricaoItemDaLeitura(
   item: ItemFormularioLeitura,
   confianca: ConfiancaItemLido | null | undefined,
+  opcoes: OpcoesDaLeitura = {},
 ): PrescricaoItemForm {
-  const marcar = (campo: CampoPrescricaoConferivel) => confianca?.[campo] !== 'ALTA'
+  const marcar = (campo: Exclude<CampoPrescricaoConferivel, 'instrucoes'>) =>
+    confianca?.[campo] !== 'ALTA'
   const dias = item.duracaoDias
+  const reavaliar = opcoes.reavaliarEm ? prazoDeReavaliacao(item.reavaliarEmDias) : null
+  const lidas = textoLido(item.instrucoes, LIMITES_PRESCRICAO.instrucoes)
+  /* "Oral. Uso contínuo" + "Reavaliar em 90 dias": o ponto final das lidas não dobra. */
+  const instrucoes =
+    reavaliar === null || !opcoes.reavaliarEm
+      ? lidas
+      : [lidas.replace(/[.\s]+$/, ''), opcoes.reavaliarEm(reavaliar)]
+          .filter(Boolean)
+          .join('. ')
+          .slice(0, LIMITES_PRESCRICAO.instrucoes)
 
   return {
     ...criarPrescricaoItemForm(),
@@ -180,12 +214,13 @@ export function prescricaoItemDaLeitura(
       typeof dias === 'number' && Number.isFinite(dias) && dias >= 1
         ? Math.min(Math.trunc(dias), DURACAO_MAX_DIAS)
         : null,
-    instrucoes: textoLido(item.instrucoes, LIMITES_PRESCRICAO.instrucoes),
+    instrucoes,
     conferir: {
       nome: marcar('nome'),
       dose: marcar('dose'),
       frequencia: marcar('frequencia'),
       duracaoDias: marcar('duracaoDias'),
+      ...(reavaliar !== null ? { instrucoes: confianca?.reavaliarEmDias !== 'ALTA' } : {}),
     },
   }
 }
@@ -205,6 +240,7 @@ export type ResultadoMescla = {
 export function mesclarPrescricaoLida(
   atuais: PrescricaoItemForm[],
   leitura: Pick<LeituraReceitaParceiro, 'itensFormulario' | 'confianca'>,
+  opcoes: OpcoesDaLeitura = {},
 ): ResultadoMescla {
   const lidos = Array.isArray(leitura.itensFormulario) ? leitura.itensFormulario : []
   const confiancas = Array.isArray(leitura.confianca) ? leitura.confianca : []
@@ -212,7 +248,7 @@ export function mesclarPrescricaoLida(
   const espaco = Math.max(0, MAX_ITENS_LISTA - mantidos.length)
   const novos = lidos
     .slice(0, espaco)
-    .map((item, indice) => prescricaoItemDaLeitura(item, confiancas[indice]))
+    .map((item, indice) => prescricaoItemDaLeitura(item, confiancas[indice], opcoes))
 
   return {
     itens: [...mantidos, ...novos],

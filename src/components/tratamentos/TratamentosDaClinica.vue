@@ -21,6 +21,7 @@ import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { listarTratamentos, type TratamentoNaLista } from '@/service/parceiro/adesao-service'
 
+import SeloDaReavaliacao from './SeloDaReavaliacao.vue'
 import { useFrasesDaAdesao } from './useFrasesDaAdesao'
 
 const { t } = useI18n()
@@ -177,6 +178,7 @@ const resumo = computed(() => {
                   <span v-if="item.critico" class="ui-selo ui-selo--atencao">{{
                     t('clinico.adesao.critico.selo')
                   }}</span>
+                  <SeloDaReavaliacao :item="item" />
                 </strong>
                 <span class="ui-linha__meta">{{ meta(item) }}</span>
                 <span v-if="item.alerta" class="tc__alerta">

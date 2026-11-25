@@ -975,6 +975,25 @@ function registrarIdentidade() {
 /* ===================================================================== emergência */
 
 type FichaDaTabela = Pick<FichaDeEmergenciaDto, 'alergias' | 'tratamentosContinuos' | 'condicoes'>
+type CondicaoDaFicha = FichaDeEmergenciaDto['condicoes'][number]
+
+/** O título que a API monta (contrato de 24/11): "Rótulo: subtipo"; nunca "Outra". */
+const ROTULO_DA_CONDICAO: Partial<Record<CondicaoDaFicha['categoria'], string>> = {
+  DERMATOLOGICA: 'Dermatológica',
+  RENAL: 'Renal',
+  CARDIO: 'Cardíaca',
+  FIV: 'FIV',
+  ENDOCRINA: 'Endócrina',
+}
+
+function condicao(
+  categoria: CondicaoDaFicha['categoria'],
+  subtipo: string | null,
+): CondicaoDaFicha {
+  const rotulo = ROTULO_DA_CONDICAO[categoria]
+  const titulo = rotulo && subtipo ? `${rotulo}: ${subtipo}` : (subtipo ?? rotulo ?? '')
+  return { categoria, subtipo, tituloCompleto: titulo, tituloCurto: titulo.slice(0, 48) }
+}
 
 /** A ficha curta dos pets com o que importa numa emergência. */
 const FICHAS: Record<string, FichaDaTabela> = {
@@ -989,7 +1008,7 @@ const FICHAS: Record<string, FichaDaTabela> = {
       { gatilho: 'Picada de pulga', categoria: 'INSETO', reacao: 'Dermatite', severidade: 'LEVE' },
     ],
     tratamentosContinuos: [],
-    condicoes: [{ categoria: 'DERMATOLOGICA', subtipo: 'Dermatite atópica' }],
+    condicoes: [condicao('DERMATOLOGICA', 'Dermatite atópica')],
   },
   'demo-pac-007-2': {
     alergias: [],
@@ -1009,7 +1028,7 @@ const FICHAS: Record<string, FichaDaTabela> = {
         via: 'Oral',
       },
     ],
-    condicoes: [{ categoria: 'RENAL', subtipo: 'Doença renal crônica, estágio 2' }],
+    condicoes: [condicao('RENAL', 'Doença renal crônica, estágio 2')],
   },
   'demo-pac-010': {
     alergias: [
@@ -1029,15 +1048,12 @@ const FICHAS: Record<string, FichaDaTabela> = {
         via: 'Oral',
       },
     ],
-    condicoes: [{ categoria: 'CARDIO', subtipo: 'Doença da valva mitral, estágio B2' }],
+    condicoes: [condicao('CARDIO', 'Doença da valva mitral, estágio B2')],
   },
   'demo-pac-024': {
     alergias: [],
     tratamentosContinuos: [],
-    condicoes: [
-      { categoria: 'FIV', subtipo: null },
-      { categoria: 'OUTRA', subtipo: 'Gengivoestomatite crônica' },
-    ],
+    condicoes: [condicao('FIV', null), condicao('OUTRA', 'Gengivoestomatite crônica')],
   },
   'demo-pac-039': {
     alergias: [],
@@ -1050,12 +1066,12 @@ const FICHAS: Record<string, FichaDaTabela> = {
         via: 'Oral',
       },
     ],
-    condicoes: [{ categoria: 'ENDOCRINA', subtipo: 'Hipertireoidismo' }],
+    condicoes: [condicao('ENDOCRINA', 'Hipertireoidismo')],
   },
   'demo-pac-008': {
     alergias: [],
     tratamentosContinuos: [],
-    condicoes: [{ categoria: 'OUTRA', subtipo: 'Síndrome braquicefálica: cuidado na sedação' }],
+    condicoes: [condicao('OUTRA', 'Síndrome braquicefálica: cuidado na sedação')],
   },
 }
 
@@ -1088,6 +1104,9 @@ function registrarEmergencia() {
       nascimento: p.nascimento,
       peso: p.pesoKg ? { kg: p.pesoKg, em: somarMinutos(agoraIso(), -21 * 24 * 60) } : null,
       ...ficha,
+      avisosDeManejo: [],
+      avisosDeManejoLabels: [],
+      avisoDeManejoObs: null,
     })
   })
 }

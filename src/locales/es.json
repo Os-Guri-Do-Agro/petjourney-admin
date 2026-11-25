@@ -12889,6 +12889,7 @@
       "abrirPdf": "Abrir el PDF",
       "foraDoPdf": "Queda solo en la clínica",
       "duracao": "por {n} día | por {n} días",
+      "reavaliarEm": "Reevaluar en {n} día | Reevaluar en {n} días",
       "frequencia": {
         "horas": "cada {n} horas",
         "dia": "una vez al día",
@@ -12941,6 +12942,9 @@
         "frequencia": "Frecuencia",
         "duracao": "Duración",
         "continuo": "Uso continuo",
+        "reavaliar": "Reevaluar en",
+        "reavaliarDica": "No termina el medicamento: sale en la receta y, ese día, la app le pregunta al responsable si el veterinario indicó continuar.",
+        "reavaliarInvalida": "La reevaluación debe ser de {min} a {max} días.",
         "instrucoes": "Indicaciones para el responsable",
         "critico": "Tratamiento crítico",
         "criticoDica": "La clínica recibe un aviso si el responsable deja de dar las dosis en casa.",
@@ -13029,6 +13033,13 @@
     "desde": "Desde el {data}: {contagens}",
     "inicio": "inicio el {data}",
     "encerradoEm": "terminado el {data}",
+    "reavaliacao": {
+      "em": "Reevaluar el {data}",
+      "vencida": "Reevaluación vencida",
+      "novaData": "Nueva fecha: {data}",
+      "continuou": "El responsable siguió sin fecha ({data})",
+      "encerrado": "Terminado por el responsable ({data})"
+    },
     "encerrados": "Terminados ({n})",
     "truncado": "Hay más tratamientos; ábralos desde la lista de la clínica.",
     "verMaisDias": "Ver los últimos 42 días",

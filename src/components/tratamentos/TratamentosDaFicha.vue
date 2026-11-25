@@ -31,6 +31,7 @@ import {
 
 import ContatoGaveta from './ContatoGaveta.vue'
 import FaixaDaAdesao from './FaixaDaAdesao.vue'
+import SeloDaReavaliacao from './SeloDaReavaliacao.vue'
 import { useFrasesDaAdesao } from './useFrasesDaAdesao'
 
 const props = defineProps<{ pacienteId: string }>()
@@ -195,6 +196,7 @@ function contatoRegistrado() {
               <i class="ph ph-warning" aria-hidden="true" />
               {{ t('adesao.pedeAtencao') }}
             </span>
+            <SeloDaReavaliacao :item="item" />
           </span>
           <label
             v-if="podeMarcarCritico && item.situacao === 'ACOMPANHANDO'"
@@ -307,7 +309,10 @@ function contatoRegistrado() {
       <ul v-if="verEncerrados" class="ui-lista">
         <li v-for="item in encerrados" :key="item.tratamentoId" class="ui-linha">
           <span class="ui-linha__texto">
-            <strong class="ui-linha__titulo">{{ item.medicamento }}</strong>
+            <strong class="ui-linha__titulo td__titulo">
+              {{ item.medicamento }}
+              <SeloDaReavaliacao :item="item" />
+            </strong>
             <span class="ui-linha__meta">
               {{
                 [
@@ -372,6 +377,14 @@ function contatoRegistrado() {
   gap: 6px;
   color: var(--tinta);
   font-size: 14.5px;
+}
+
+/* O encerrado com o selo da resposta ("Encerrado pelo responsável"). */
+.td__titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
 }
 
 .td__critico {

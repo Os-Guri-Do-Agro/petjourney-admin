@@ -795,7 +795,10 @@ export type StatusLeituraReceita =
 export type ConfiancaLeitura = 'ALTA' | 'MEDIA' | 'BAIXA'
 
 export type ConfiancaItemLido = Partial<
-  Record<'nome' | 'dose' | 'frequencia' | 'duracaoDias', ConfiancaLeitura | null>
+  Record<
+    'nome' | 'dose' | 'frequencia' | 'duracaoDias' | 'reavaliarEmDias',
+    ConfiancaLeitura | null
+  >
 >
 
 /** Remédio lido, já no formato do formulário de prescrição (`unidade` e via no idioma do pedido). */
@@ -804,8 +807,14 @@ export type ItemFormularioLeitura = {
   dose: string | null
   unidade: string | null
   frequencia: string | null
+  /** Nulo no uso contínuo: o prazo escrito no contínuo vem em `reavaliarEmDias`. */
   duracaoDias: number | null
   instrucoes: string | null
+  /**
+   * Uso contínuo com prazo escrito ("reavaliar em 90 dias", "por 6 meses"). Opcional: a API de
+   * produção ainda não manda.
+   */
+  reavaliarEmDias?: number | null
 }
 
 /** `POST .../leitura-receita`: 201 nova, ou 200 com `reaproveitada` (mesmo arquivo, mesmo acesso). */

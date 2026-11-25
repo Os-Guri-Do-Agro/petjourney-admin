@@ -121,8 +121,16 @@ export function tipoAceitaEstruturado(tipo: TipoServicoPrestador): boolean {
 
 // ------------------------------------------------------------------ formulário
 
-/** Campos que a leitura de receita com IA marca para conferir quando não leu com confiança alta. */
-export type CampoPrescricaoConferivel = 'nome' | 'dose' | 'frequencia' | 'duracaoDias'
+/**
+ * Campos que a leitura de receita com IA marca para conferir quando não leu com confiança alta.
+ * As instruções só quando levam o prazo de reavaliação lido sem certeza.
+ */
+export type CampoPrescricaoConferivel =
+  | 'nome'
+  | 'dose'
+  | 'frequencia'
+  | 'duracaoDias'
+  | 'instrucoes'
 
 export type PrescricaoItemForm = {
   nome: string

@@ -185,6 +185,79 @@ describe('itens lidos', () => {
   })
 })
 
+/*
+ * PJ-HC2AKL: o prazo de reavaliação do contínuo ("reavaliar em 90 dias") não tem campo na
+ * anotação do parceiro; vai no fim das instruções, que a pessoa recebe no app.
+ */
+describe('prazo de reavaliação do uso contínuo', () => {
+  const continuo = (overrides: Partial<ItemFormularioLeitura> = {}) =>
+    lido({
+      nome: 'Enalapril 5 mg',
+      dose: '1',
+      unidade: 'comprimido',
+      frequencia: '1x ao dia',
+      duracaoDias: null,
+      instrucoes: 'Via oral. Uso contínuo',
+      reavaliarEmDias: 90,
+      ...overrides,
+    })
+  const opcoes = { reavaliarEm: (dias: number) => `Reavaliar em ${dias} dias` }
+
+  it('vai no fim das instruções, sem virar duração', () => {
+    const item = prescricaoItemDaLeitura(continuo(), { ...ALTA, reavaliarEmDias: 'ALTA' }, opcoes)
+
+    expect(item.duracaoDias).toBeNull()
+    expect(item.instrucoes).toBe('Via oral. Uso contínuo. Reavaliar em 90 dias')
+    expect(item.conferir?.instrucoes).toBe(false)
+  })
+
+  it('sem certeza do prazo, as instruções ficam para conferir', () => {
+    const media = prescricaoItemDaLeitura(continuo(), { ...ALTA, reavaliarEmDias: 'MEDIA' }, opcoes)
+    const semConfianca = prescricaoItemDaLeitura(continuo(), undefined, opcoes)
+
+    expect(media.conferir?.instrucoes).toBe(true)
+    expect(semConfianca.conferir?.instrucoes).toBe(true)
+    expect(temCampoAConferir([media])).toBe(true)
+  })
+
+  it('o ponto final das instruções lidas não dobra; sem instruções, só o prazo', () => {
+    expect(
+      prescricaoItemDaLeitura(continuo({ instrucoes: 'Uso contínuo.' }), ALTA, opcoes).instrucoes,
+    ).toBe('Uso contínuo. Reavaliar em 90 dias')
+    expect(prescricaoItemDaLeitura(continuo({ instrucoes: null }), ALTA, opcoes).instrucoes).toBe(
+      'Reavaliar em 90 dias',
+    )
+  })
+
+  it('sem prazo, fora da faixa ou sem o texto da tela, as instruções ficam como vieram', () => {
+    for (const reavaliarEmDias of [null, undefined, 0, 731, 12.5]) {
+      const item = prescricaoItemDaLeitura(continuo({ reavaliarEmDias }), ALTA, opcoes)
+      expect(item.instrucoes).toBe('Via oral. Uso contínuo')
+      expect(item.conferir).not.toHaveProperty('instrucoes')
+    }
+    expect(prescricaoItemDaLeitura(continuo(), ALTA).instrucoes).toBe('Via oral. Uso contínuo')
+  })
+
+  it('o texto com o prazo respeita o teto das instruções', () => {
+    const item = prescricaoItemDaLeitura(continuo({ instrucoes: 'x'.repeat(1200) }), ALTA, opcoes)
+
+    expect(item.instrucoes).toHaveLength(1000)
+  })
+
+  it('a mescla passa o texto da tela para cada remédio lido', () => {
+    const mescla = mesclarPrescricaoLida(
+      [],
+      { itensFormulario: [continuo(), lido()], confianca: [ALTA, ALTA] },
+      opcoes,
+    )
+
+    expect(mescla.itens.map((item) => item.instrucoes)).toEqual([
+      'Via oral. Uso contínuo. Reavaliar em 90 dias',
+      'Via oral. Dar após a refeição',
+    ])
+  })
+})
+
 describe('mesclar com a prescrição do formulário', () => {
   const digitado = (nome: string): PrescricaoItemForm => ({ ...criarPrescricaoItemForm(), nome })
 
