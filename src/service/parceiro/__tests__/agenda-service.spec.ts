@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { acoesDaSituacao, outrosNoConflito, type Conflito } from '@/service/parceiro/agenda-service'
+import {
+  acoesDaSituacao,
+  MENSAGEM_DO_AVISO_MAX,
+  moverMudaParaOResponsavel,
+  outrosNoConflito,
+  pedidoDoAviso,
+  tamanhoDaMensagem,
+  type Conflito,
+} from '@/service/parceiro/agenda-service'
 
 describe('acoesDaSituacao (guia e3, 2.7)', () => {
   it('antes de chegar, tudo; confirmar só o que ainda não foi confirmado', () => {
@@ -53,5 +61,33 @@ describe('outrosNoConflito', () => {
     ).toBe(8)
     expect(outrosNoConflito(conflito({ quantidade: 1, agendamentoIds: ['a'] }))).toBe(0)
     expect(outrosNoConflito(conflito({ minutos: 30 }))).toBe(0)
+  })
+})
+
+describe('avisar o responsável (guia e3, 4.1)', () => {
+  it('conta a mensagem como a API: code points, depois de aparar', () => {
+    expect(tamanhoDaMensagem('  Oi  ')).toBe(2)
+    expect(tamanhoDaMensagem('❤️')).toBe(2)
+    expect(tamanhoDaMensagem('😀')).toBe(1)
+    expect(tamanhoDaMensagem('a'.repeat(499) + '❤️')).toBe(MENSAGEM_DO_AVISO_MAX + 1)
+  })
+
+  it('o pedido do aviso: nada sem o interruptor; a mensagem só com texto', () => {
+    expect(pedidoDoAviso(false, 'Traga a carteira')).toEqual({})
+    expect(pedidoDoAviso(true, '   ')).toEqual({ avisarResponsavel: true })
+    expect(pedidoDoAviso(true, ' Traga a carteira ')).toEqual({
+      avisarResponsavel: true,
+      mensagem: 'Traga a carteira',
+    })
+  })
+
+  it('o mover só avisa quando muda dia, hora ou profissional', () => {
+    const atual = { inicio: '2026-11-26T16:00:00-03:00', profissionalId: 'p1' }
+    expect(moverMudaParaOResponsavel(atual, '2026-11-26T16:00:00-03:00')).toBe(false)
+    expect(moverMudaParaOResponsavel(atual, '2026-11-26T16:00:00-03:00', 'p1')).toBe(false)
+    expect(moverMudaParaOResponsavel(atual, '2026-11-26T16:30:00-03:00')).toBe(true)
+    expect(moverMudaParaOResponsavel(atual, '2026-11-26T16:00:00-03:00', 'p2')).toBe(true)
+    /* O mesmo instante com outro offset não é mudança. */
+    expect(moverMudaParaOResponsavel(atual, '2026-11-26T19:00:00Z')).toBe(false)
   })
 })

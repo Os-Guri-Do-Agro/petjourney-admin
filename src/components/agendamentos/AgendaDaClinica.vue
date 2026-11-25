@@ -9,6 +9,11 @@
  *
  * Ler é `agenda.ler`; marcar, mexer e desfazer, `agenda.escrever` com a Clínica escrevendo (a
  * enfermagem lê e não marca: os botões nem aparecem).
+ *
+ * Avisar o responsável (E3-06, guia e3 4.1): o arrastar que troca a hora ou o profissional pede a
+ * confirmação com o interruptor e a mensagem; o que só troca de sala grava direto, sem aviso.
+ * Depois de gravar, a faixa do "Desfazer" diz que o aviso sai em 1 a 2 minutos ou, sem canal no
+ * app, o aviso pede para ligar, com o telefone do cadastro.
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
@@ -23,6 +28,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import AgendamentoGaveta from '@/components/agendamentos/AgendamentoGaveta.vue'
+import AvisoAoResponsavelCampos from '@/components/agendamentos/AvisoAoResponsavelCampos.vue'
 import DesfazerNaAgenda from '@/components/agendamentos/DesfazerNaAgenda.vue'
 import GradeDoDia from '@/components/agendamentos/GradeDoDia.vue'
 import {
@@ -37,9 +43,17 @@ import {
   STATUS_RISCADOS,
   tocaODia,
 } from '@/components/agendamentos/leitura-da-agenda'
-import MarcarGaveta, { type InicioDaMarcacao } from '@/components/agendamentos/MarcarGaveta.vue'
+import MarcarGaveta, {
+  type ContatoDoResponsavel,
+  type InicioDaMarcacao,
+} from '@/components/agendamentos/MarcarGaveta.vue'
 import SemanaDaAgenda from '@/components/agendamentos/SemanaDaAgenda.vue'
-import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
+import { useAvisoAoResponsavel } from '@/components/agendamentos/useAvisoAoResponsavel'
+import {
+  erroDoAviso,
+  lerErroDaAgenda,
+  useFrasesDaAgenda,
+} from '@/components/agendamentos/useFrasesDaAgenda'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { hojeNoFuso } from '@/components/parceiro/estabelecimento/horario'
 import UiPagina from '@/components/ui/UiPagina.vue'
@@ -63,6 +77,7 @@ import {
   DESFAZER_NA_TELA_MS,
   desfazerNaAgenda,
   moverAgendamento,
+  moverMudaParaOResponsavel,
   obterDia,
   obterSemana,
   type AgendaDaSemana,
@@ -78,6 +93,7 @@ import {
   type IgnoradoNoLote,
   type Obito,
 } from '@/service/parceiro/faltas-service'
+import { obterCliente, obterPaciente, telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import { listarProfissionais } from '@/service/parceiro/profissionais-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
@@ -344,7 +360,7 @@ const paraEncher = computed(() =>
 
 const tipos = ref<TipoDeAtendimento[]>([])
 const salas = ref<Sala[]>([])
-const equipe = ref<{ id: string; nome: string }[]>([])
+const equipe = ref<{ id: string; nome: string; usuarioId: string | null }[]>([])
 /** A equipe que atende na agenda foi lida de fato (a falha não conta como "ninguém"). */
 const equipeLida = ref(false)
 const passo = ref(15)
@@ -360,7 +376,11 @@ async function carregarApoio() {
   ])
   tipos.value = listaDeTipos
   salas.value = listaDeSalas
-  equipe.value = (listaDeProfissionais ?? []).map((item) => ({ id: item.id, nome: item.nome }))
+  equipe.value = (listaDeProfissionais ?? []).map((item) => ({
+    id: item.id,
+    nome: item.nome,
+    usuarioId: item.usuarioId ?? null,
+  }))
   equipeLida.value = listaDeProfissionais !== null
   if (politica?.granularidadeMinutos) passo.value = politica.granularidadeMinutos
 }
@@ -369,16 +389,23 @@ function nomeDoTipo(id: string) {
   return tipos.value.find((tipo) => tipo.id === id)?.nome ?? ''
 }
 
+/** Quem pediu um aviso ao responsável (o comprovante traz o usuário da equipe). */
+function nomeDoUsuario(usuarioId: string) {
+  return equipe.value.find((pessoa) => pessoa.usuarioId === usuarioId)?.nome ?? ''
+}
+
 /** Quem atende na agenda e, para dizer o nome, quem tem horário no dia mesmo inativo. */
 const profissionais = computed(() => {
-  const lista = [...equipe.value]
+  const lista = equipe.value.map((pessoa) => ({ id: pessoa.id, nome: pessoa.nome }))
   for (const item of dia.value?.profissionais ?? []) {
     if (!lista.some((outro) => outro.id === item.id)) lista.push({ id: item.id, nome: item.nome })
   }
   return lista
 })
 
-const profissionaisQueMarcam = computed(() => equipe.value)
+const profissionaisQueMarcam = computed(() =>
+  equipe.value.map((pessoa) => ({ id: pessoa.id, nome: pessoa.nome })),
+)
 
 /* ------------------------------------------------------------------------------ relógio */
 
@@ -447,13 +474,24 @@ function aplicarNaTela(mutacao: Pick<Mutacao, 'agendamentos' | 'removidos'>) {
 /**
  * Depois de gravar: aplica, oferece o "Desfazer" e relê. Os avisos do horário gravado aparecem
  * depois (guia 2.6: mostra, não impede), só em quem acabou de marcar, mover ou editar.
+ *
+ * O aviso ao responsável (guia e3 4.1): a faixa diz que ele sai em 1 a 2 minutos; sem canal no app,
+ * o aviso pede para ligar, com o telefone (`contato`; a gaveta do horário mostra o dela).
  */
-function depoisDeMudar(mutacao: Mutacao, texto: string, avisar = false) {
+function depoisDeMudar(
+  mutacao: Mutacao,
+  texto: string,
+  avisar = false,
+  contato: ContatoDoResponsavel | null = null,
+) {
   aplicarNaTela(mutacao)
+  const comAviso = mutacao.aviso && !mutacao.aviso.semCanalNoApp
+  const frase = comAviso ? t('agendamentos.aviso.feitoComAviso', { feito: texto }) : texto
   feito.value = mutacao.desfazerToken
-    ? { texto, token: mutacao.desfazerToken, ate: Date.now() + DESFAZER_NA_TELA_MS }
+    ? { texto: frase, token: mutacao.desfazerToken, ate: Date.now() + DESFAZER_NA_TELA_MS }
     : null
   invalidarPendenciasDoPortal()
+  if (mutacao.aviso?.semCanalNoApp && contato) void avisarSemCanal(contato)
 
   const alvo = mutacao.agendamentos.find((item) => item.id === mutacao.id)
   const avisos = ordenarConflitos(alvo?.conflitos ?? []).filter((item) => item.severity !== 'info')
@@ -467,6 +505,36 @@ function depoisDeMudar(mutacao: Mutacao, texto: string, avisar = false) {
   }
 
   void carregar(true)
+}
+
+/** O nome e o telefone do cadastro de quem ligar: o que já se tem, ou o cliente lido agora. */
+async function contatoCompleto(contato: ContatoDoResponsavel) {
+  if (contato.telefone) return { nome: contato.nome ?? '', telefone: contato.telefone }
+  try {
+    if (contato.clienteId) {
+      const cliente = await obterCliente(contato.clienteId, parceiroQuery())
+      return { nome: cliente.nome || contato.nome || '', telefone: cliente.telefone }
+    }
+    const paciente = await obterPaciente(contato.pacienteId, parceiroQuery())
+    return {
+      nome: paciente.cliente.nome || contato.nome || '',
+      telefone: paciente.cliente.telefone ?? null,
+    }
+  } catch {
+    return { nome: contato.nome ?? '', telefone: null }
+  }
+}
+
+/** Sem canal no app: "ligue para o responsável", com o número (sem botão de ligar). */
+async function avisarSemCanal(contato: ContatoDoResponsavel) {
+  const { nome, telefone } = await contatoCompleto(contato)
+  const numero = telefoneNaTela(telefone)
+  toast.add({
+    severity: 'warn',
+    summary: t('agendamentos.aviso.semCanal'),
+    detail: [nome, numero].filter(Boolean).join(' · ') || undefined,
+    life: 20000,
+  })
 }
 
 async function desfazer() {
@@ -689,6 +757,7 @@ function marcarRetorno(agendamento: Agendamento) {
       id: agendamento.paciente.id,
       nome: agendamento.paciente.nome,
       responsavel: agendamento.paciente.clienteNome,
+      clienteId: agendamento.paciente.clienteId,
     },
     tipoId: retorno?.id ?? agendamento.tipoId,
     retorno: true,
@@ -743,8 +812,8 @@ watch(
   { immediate: true },
 )
 
-function marcado(mutacao: Mutacao) {
-  depoisDeMudar(mutacao, t('agendamentos.feito.criar'), true)
+function marcado(mutacao: Mutacao, contato: ContatoDoResponsavel) {
+  depoisDeMudar(mutacao, t('agendamentos.feito.criar'), true, contato)
   const novo = mutacao.agendamentos.find((item) => item.id === mutacao.id)
   const outroDia = novo ? novo.inicio.slice(0, 10) : null
   if (visao.value === 'dia' && outroDia && outroDia !== data.value) irPara({ data: outroDia })
@@ -763,11 +832,63 @@ const movendo = ref(false)
 /** O arraste que esbarrou no dia especial fechado: espera o "mudar mesmo assim". */
 const aConfirmar = ref<{ movimento: Movimento; frase: string } | null>(null)
 
-async function moverPelaGrade(movimento: Movimento, confirmar = false) {
+/**
+ * O arraste que troca a hora ou o profissional (guia e3 4.1): espera a confirmação com o aviso ao
+ * responsável. `frase` é o dia especial fechado, que vira o "mudar mesmo assim" no mesmo diálogo.
+ */
+const aMover = ref<{ movimento: Movimento; frase: string | null } | null>(null)
+const avisoDoArraste = useAvisoAoResponsavel()
+const erroDoArraste = ref('')
+
+function inicioDoArraste(movimento: Movimento) {
+  const lido = diaNaTela.value
+  return lido ? instanteNoFuso(lido.fuso, lido.data, horaDe(movimento.inicioMin)) : null
+}
+
+/** Soltou o cartão: só a sala grava direto (nada muda para o responsável); o resto confirma. */
+function soltouNaGrade(movimento: Movimento) {
+  const inicio = inicioDoArraste(movimento)
+  if (!inicio) return
+  const destino = destinoDoArraste(movimento.agendamento, movimento.origem, movimento.destino)
+  if (!moverMudaParaOResponsavel(movimento.agendamento, inicio, destino?.profissionalId)) {
+    void moverPelaGrade(movimento)
+    return
+  }
+  avisoDoArraste.reiniciar()
+  void avisoDoArraste.lerVinculo(movimento.agendamento.paciente.id, parceiroQuery())
+  erroDoArraste.value = ''
+  aMover.value = { movimento, frase: null }
+}
+
+/** "Bolinha: de 09:00 para 10:30, com Dra. Helena." */
+function fraseDoArraste(movimento: Movimento) {
+  const destino = destinoDoArraste(movimento.agendamento, movimento.origem, movimento.destino)
+  const params = {
+    paciente: movimento.agendamento.paciente.nome,
+    de: movimento.agendamento.inicio.slice(11, 16),
+    para: horaDe(movimento.inicioMin),
+  }
+  if (!destino?.profissionalId) return t('agendamentos.aviso.arraste', params)
+  const profissional =
+    profissionais.value.find((item) => item.id === destino.profissionalId)?.nome ?? ''
+  /* Só o profissional muda: a hora fica, e a frase não repete "de 14:45 para 14:45". */
+  return params.de === params.para
+    ? t('agendamentos.aviso.arrasteSoProfissional', { ...params, profissional })
+    : t('agendamentos.aviso.arrasteCom', { ...params, profissional })
+}
+
+function confirmarArraste() {
+  const atual = aMover.value
+  if (!atual || avisoDoArraste.longa.value || avisoDoArraste.lendo.value) return
+  void moverPelaGrade(atual.movimento, Boolean(atual.frase), true)
+}
+
+async function moverPelaGrade(movimento: Movimento, confirmar = false, comAviso = false) {
   const lido = diaNaTela.value
   if (!lido) return
   const destino = destinoDoArraste(movimento.agendamento, movimento.origem, movimento.destino)
   movendo.value = true
+  erroDoArraste.value = ''
 
   try {
     const mutacao = await moverAgendamento(
@@ -777,24 +898,41 @@ async function moverPelaGrade(movimento: Movimento, confirmar = false) {
         versao: movimento.agendamento.versao,
         ...(destino ? { destino } : {}),
         ...(confirmar ? { confirmarConflitos: ['holiday-closed' as const] } : {}),
+        ...(comAviso ? avisoDoArraste.corpo() : {}),
       },
       parceiroQuery(),
     )
     aConfirmar.value = null
-    depoisDeMudar(mutacao, t('agendamentos.feito.mover'), true)
+    aMover.value = null
+    const { paciente } = movimento.agendamento
+    depoisDeMudar(mutacao, t('agendamentos.feito.mover'), true, {
+      pacienteId: paciente.id,
+      clienteId: paciente.clienteId,
+      nome: paciente.clienteNome,
+    })
   } catch (err) {
     const erroLido = lerErroDaAgenda(err, t('agendamentos.erros.salvar'))
     if (erroLido.codigo === 'CONFLITO_BLOQUEANTE') {
       const fechado = erroLido.conflitos.find((item) => item.severity === 'blocking')
-      aConfirmar.value = { movimento, frase: fechado ? frases.frase(fechado) : erroLido.mensagem }
+      const frase = fechado ? frases.frase(fechado) : erroLido.mensagem
+      /* Com o diálogo do aviso aberto, o "mudar mesmo assim" fica nele (nada de diálogo em cima). */
+      if (comAviso && aMover.value) aMover.value = { movimento, frase }
+      else aConfirmar.value = { movimento, frase }
+      return
+    }
+    /* O erro do aviso (a mensagem) fica no diálogo, para corrigir sem perder o arraste. */
+    const doAviso = erroDoAviso(erroLido, t)
+    if (doAviso && comAviso && aMover.value) {
+      erroDoArraste.value = doAviso
       return
     }
     aConfirmar.value = null
+    aMover.value = null
     if (erroLido.codigo === 'AGENDAMENTO_ALTERADO') {
       alterado(t('agendamentos.erros.alterado'))
       return
     }
-    toast.add({ severity: 'error', summary: erroLido.mensagem, life: 6000 })
+    toast.add({ severity: 'error', summary: doAviso ?? erroLido.mensagem, life: 6000 })
     void carregar(true)
   } finally {
     movendo.value = false
@@ -1166,7 +1304,7 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
             :nome-do-tipo="nomeDoTipo"
             @abrir="abrir"
             @criar="marcarNaGrade"
-            @mover="(movimento) => moverPelaGrade(movimento)"
+            @mover="soltouNaGrade"
           />
         </div>
       </template>
@@ -1199,6 +1337,7 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
         :pode-obito="podeObito"
         :hoje="hoje"
         :relogio="relogio"
+        :nome-do-usuario="nomeDoUsuario"
         @mudou="mudouNaGaveta"
         @alterado="alterado"
         @retorno="marcarRetorno"
@@ -1276,6 +1415,52 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
             :label="t('agendamentos.mudar.mesmoAssim')"
             :loading="movendo"
             @click="aConfirmar && moverPelaGrade(aConfirmar.movimento, true)"
+          />
+        </template>
+      </Dialog>
+
+      <!-- O arraste que muda a hora ou o profissional: confirmar, com o aviso ao responsável. -->
+      <Dialog
+        :visible="Boolean(aMover)"
+        modal
+        :header="t('agendamentos.mudar.titulo')"
+        :style="{ width: 'min(30rem, calc(100vw - 32px))' }"
+        @update:visible="(valor: boolean) => !valor && !movendo && (aMover = null)"
+      >
+        <div v-if="aMover" class="ag__mover">
+          <p class="ag__confirmar">{{ fraseDoArraste(aMover.movimento) }}</p>
+          <AvisoAoResponsavelCampos
+            :aviso="avisoDoArraste"
+            prefixo="arraste-aviso"
+            :desabilitado="movendo"
+          />
+          <p v-if="aMover.frase" class="eg__aviso" role="alert">
+            <i class="ph ph-prohibit" aria-hidden="true" />
+            <span>{{ aMover.frase }}</span>
+          </p>
+          <p v-if="erroDoArraste" class="eg__erro" role="alert">
+            <i class="ph ph-warning-circle" aria-hidden="true" />
+            <span>{{ erroDoArraste }}</span>
+          </p>
+        </div>
+        <template #footer>
+          <Button
+            type="button"
+            severity="secondary"
+            outlined
+            :label="t('agendamentos.voltar')"
+            :disabled="movendo"
+            @click="aMover = null"
+          />
+          <Button
+            type="button"
+            icon="ph ph-check"
+            :label="
+              aMover?.frase ? t('agendamentos.mudar.mesmoAssim') : t('agendamentos.mudar.salvar')
+            "
+            :loading="movendo"
+            :disabled="avisoDoArraste.lendo.value"
+            @click="confirmarArraste"
           />
         </template>
       </Dialog>
@@ -1402,6 +1587,15 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
   margin: 0;
   color: var(--tinta);
   font-size: 14px;
+}
+
+.ag__mover {
+  display: grid;
+  gap: 18px;
+}
+
+.ag__mover .eg__aviso i {
+  color: var(--risco-tinta);
 }
 
 @media (prefers-reduced-motion: reduce) {

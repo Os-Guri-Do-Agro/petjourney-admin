@@ -9,6 +9,9 @@
  * pede o segundo passo e vai com `confirmarConflitos`.
  *
  * O clique duplo não cria dois horários: a mesma `Idempotency-Key` enquanto o corpo for o mesmo.
+ *
+ * Avisar o responsável (E3-06, guia e3 4.1): o interruptor vem ligado com o pet ligado ao app e vai
+ * só no marcar (a simulação não o conhece). A resposta diz se o aviso sai ou se é preciso ligar.
  */
 import AutoComplete from 'primevue/autocomplete'
 import Button from 'primevue/button'
@@ -24,8 +27,14 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import AvisoAoResponsavelCampos from '@/components/agendamentos/AvisoAoResponsavelCampos.vue'
 import { ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
-import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
+import { useAvisoAoResponsavel } from '@/components/agendamentos/useAvisoAoResponsavel'
+import {
+  erroDoAviso,
+  lerErroDaAgenda,
+  useFrasesDaAgenda,
+} from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
 import { useListaAoClicar } from '@/components/cadastro/useListaAoClicar'
@@ -61,6 +70,17 @@ export type PacienteEscolhido = {
   /** O rosto na lista da busca; quem abre a gaveta com o paciente já escolhido não precisa dele. */
   especie?: PacienteNaLista['especie']
   fotoUrl?: string | null
+  /** O cliente e o telefone do cadastro: o "sem canal no app, ligue" mostra o número. */
+  clienteId?: string
+  telefone?: string | null
+}
+
+/** Quem ligar quando o aviso não tem canal no app (o telefone do cliente, sem botão de ligar). */
+export type ContatoDoResponsavel = {
+  pacienteId: string
+  clienteId?: string
+  nome?: string
+  telefone?: string | null
 }
 
 export type InicioDaMarcacao = {
@@ -84,7 +104,7 @@ const props = defineProps<{
   salas: Sala[]
   tipos: TipoDeAtendimento[]
 }>()
-const emit = defineEmits<{ marcado: [mutacao: Mutacao] }>()
+const emit = defineEmits<{ marcado: [mutacao: Mutacao, contato: ContatoDoResponsavel] }>()
 const visible = defineModel<boolean>('visible', { default: false })
 
 const { t } = useI18n()
@@ -92,6 +112,7 @@ const rotulos = useRotulosDoCadastro()
 const frases = useFrasesDaAgenda()
 const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
+const aviso = useAvisoAoResponsavel()
 
 const paciente = ref<PacienteEscolhido | null>(null)
 const sugestoesDePaciente = ref<PacienteEscolhido[]>([])
@@ -115,6 +136,15 @@ const bloqueante = ref<string | null>(null)
 function dataDe(texto: string) {
   const [ano, mes, d] = texto.split('-').map(Number)
   return new Date(ano!, mes! - 1, d!)
+}
+
+/* O padrão do interruptor de avisar: ligado com o pet ligado ao app (uma leitura por paciente). */
+let vinculoDe: string | null | undefined
+function lerVinculo(id: string | undefined) {
+  const alvo = id ?? null
+  if (alvo === vinculoDe) return
+  vinculoDe = alvo
+  void aviso.lerVinculo(alvo, parceiroQuery())
 }
 
 watch(visible, (aberta) => {
@@ -142,9 +172,19 @@ watch(visible, (aberta) => {
   sugestoes.value = null
   erroDasSugestoes.value = ''
   chaveador.concluir()
+  aviso.reiniciar()
+  vinculoDe = undefined
+  lerVinculo(paciente.value?.id)
 
   if (inicio.retorno && paciente.value && tipoId.value) void sugerir()
 })
+
+watch(
+  () => paciente.value?.id,
+  (id) => {
+    if (visible.value) lerVinculo(id)
+  },
+)
 
 /* ---------------------------------------------------------------------------- opções */
 
@@ -162,6 +202,8 @@ async function buscarPaciente(evento: { query: string }) {
         responsavel: item.cliente.nome,
         especie: item.especie,
         fotoUrl: item.fotoUrl,
+        clienteId: item.cliente.id,
+        telefone: item.cliente.telefone,
       }))
   } catch {
     sugestoesDePaciente.value = []
@@ -364,6 +406,7 @@ async function marcar(confirmar = false) {
   mescladoEmId.value = null
   const pronto = corpo(confirmar)
   if (!pronto) return
+  if (aviso.longa.value) return
 
   /* O dia fechado já apareceu na simulação: o primeiro clique só mostra o aviso. */
   if (!confirmar && simulacao.value?.bloqueante) {
@@ -372,11 +415,19 @@ async function marcar(confirmar = false) {
     return
   }
 
+  /* O aviso ao responsável vai só no marcar (a simulação não o conhece). */
+  const comAviso: NovoAgendamento = { ...pronto, ...aviso.corpo() }
   salvando.value = true
   try {
-    const mutacao = await criarAgendamento(pronto, chaveador.para(pronto), parceiroQuery())
+    const mutacao = await criarAgendamento(comAviso, chaveador.para(comAviso), parceiroQuery())
     chaveador.concluir()
-    emit('marcado', mutacao)
+    const escolhido = paciente.value
+    emit('marcado', mutacao, {
+      pacienteId: comAviso.pacienteId,
+      clienteId: escolhido?.clienteId,
+      nome: escolhido?.responsavel || undefined,
+      telefone: escolhido?.telefone,
+    })
     visible.value = false
   } catch (err) {
     const lido = lerErroDaAgenda(err, t('agendamentos.erros.salvar'))
@@ -384,7 +435,7 @@ async function marcar(confirmar = false) {
       const fechado = lido.conflitos.find((conflito) => conflito.severity === 'blocking')
       bloqueante.value = fechado ? frases.frase(fechado) : lido.mensagem
     } else {
-      erro.value = lido.mensagem
+      erro.value = erroDoAviso(lido, t) ?? lido.mensagem
       mescladoEmId.value = lido.codigo === 'PACIENTE_INATIVO' ? lido.mescladoEmId : null
     }
   } finally {
@@ -714,6 +765,9 @@ const nomeDoProfissional = (id: string) =>
         />
         <small class="eg__dica">{{ t('agendamentos.marcar.observacaoDica') }}</small>
       </section>
+
+      <!-- Avisar o responsável (E3-06): o interruptor e a mensagem que aparece no app. -->
+      <AvisoAoResponsavelCampos :aviso="aviso" prefixo="marcar-aviso" :desabilitado="salvando" />
 
       <p v-if="(tentou && problema) || erro" class="eg__erro" role="alert">
         <i class="ph ph-warning-circle" aria-hidden="true" />

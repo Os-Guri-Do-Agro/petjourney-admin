@@ -11783,6 +11783,77 @@
       "recorte": "الباقي لمن يقرأ السجل الطبي.",
       "observacao": "شيء آخر، بكلمات المسؤول"
     },
+    "aviso": {
+      "titulo": "إبلاغ المسؤول في التطبيق",
+      "comApp": "يُرسَل في التطبيق خلال دقيقة إلى دقيقتين.",
+      "semApp": "هذا الحيوان غير مرتبط بالتطبيق: أبلغ عبر الهاتف.",
+      "mensagem": "رسالة إلى المسؤول",
+      "mensagemDica": "تظهر الرسالة في التطبيق، لا في الإشعار.",
+      "mensagemLonga": "الرسالة أطول من {max} حرف.",
+      "feitoComAviso": "{feito}. إشعار في التطبيق خلال دقيقة إلى دقيقتين.",
+      "semCanal": "لا قناة في التطبيق: اتصل بالمسؤول",
+      "semCanalSelo": "لا قناة في التطبيق",
+      "arraste": "{paciente}: من {de} إلى {para}.",
+      "arrasteCom": "{paciente}: من {de} إلى {para}، مع {profissional}.",
+      "arrasteSoProfissional": "{paciente}: الساعة {de}، الآن مع {profissional}.",
+      "erros": {
+        "MENSAGEM_SEM_AVISO": "لا تُرسَل الرسالة إلا مع تفعيل الإشعار.",
+        "SEM_MUDANCA_A_AVISAR": "تغيير الغرفة فقط لا يغيّر شيئًا للمسؤول: احذف الرسالة."
+      },
+      "comprovante": {
+        "titulo": "الإشعارات إلى المسؤول",
+        "vazio": "لا توجد إشعارات إلى المسؤول.",
+        "ver": "عرض الإشعارات | عرض الإشعار | عرض الإشعارين | عرض الإشعارات ({n}) | عرض الإشعارات ({n}) | عرض الإشعارات ({n})",
+        "verTodos": "عرض الإشعارات",
+        "mais": "عرض المزيد",
+        "recolher": "طي",
+        "erro": "تعذّرت قراءة الإشعارات.",
+        "voce": "أنت",
+        "pedido": "طُلب في {quando}",
+        "pedidoPor": "طلبه {quem} في {quando}",
+        "automatico": "تلقائي، {quando}",
+        "saiAs": "يُرسَل الساعة {hora}",
+        "saiu": "أُرسل في {quando}، {canal}",
+        "horario": "الموعد المُبلَّغ: {quando}",
+        "horarioAntes": "الموعد المُبلَّغ: {quando} (قبل ذلك، {antes})",
+        "tipo": {
+          "AGENDAMENTO_CRIADO_PELA_CLINICA": "تم حجز الموعد",
+          "AGENDAMENTO_REMARCADO": "تم تغيير الموعد",
+          "AGENDAMENTO_CANCELADO_PELA_CLINICA": "تم إلغاء الموعد",
+          "AGENDAMENTO_LEMBRETE_VESPERA": "تذكير اليوم السابق",
+          "AGENDAMENTO_FALTA": "غياب",
+          "FILA_VAGA_OFERECIDA": "مكان من قائمة الانتظار",
+          "PRE_CONSULTA_PENDENTE": "ما قبل الاستشارة",
+          "VACINA_LEMBRETE_DA_CLINICA": "تذكير باللقاح"
+        },
+        "situacao": {
+          "PENDENTE": "في الانتظار",
+          "ENVIADO": "أُرسل",
+          "NAO_ENVIADO": "لم يُرسَل"
+        },
+        "motivo": {
+          "SEM_CANAL_NO_APP": "لا قناة في التطبيق: اتصل",
+          "NAO_AVISAR": "لم يُبلَّغ: وفاة أو مريض غير نشط",
+          "TETO_DO_DIA": "حد الإشعارات اليومي",
+          "SUPERADO": "أُلغي أو تغيّر قبل الإرسال",
+          "FORA_DO_PRAZO": "كان الموعد قد مضى",
+          "FALHOU": "تعذّر الإبلاغ"
+        },
+        "canal": {
+          "PUSH_INBOX": "عبر التطبيق",
+          "EMAIL": "عبر البريد الإلكتروني",
+          "PAGINA_TOKEN": "عبر صفحة الرابط",
+          "NENHUM": "بلا قناة"
+        },
+        "entrega": {
+          "PENDENTE": "الإشعار قيد الإرسال",
+          "SO_NA_CAIXA": "في صندوق إشعارات التطبيق فقط",
+          "ENVIADO": "أُرسل الإشعار",
+          "ENTREGUE": "وصل الإشعار",
+          "FALHOU": "فشل الإشعار"
+        }
+      }
+    },
     "guia": {
       "titulo": "كيف يُبنى جدول المواعيد",
       "vazioTitulo": "لا أحد ضمن جدول المواعيد بعد",

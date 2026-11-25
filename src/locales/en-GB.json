@@ -11783,6 +11783,77 @@
       "recorte": "The rest is for whoever reads the medical record.",
       "observacao": "Anything else, in the owner's words"
     },
+    "aviso": {
+      "titulo": "Notify the owner in the app",
+      "comApp": "Goes out in the app in 1 to 2 minutes.",
+      "semApp": "This pet is not linked to the app: let them know by phone.",
+      "mensagem": "Message to the owner",
+      "mensagemDica": "The message shows in the app, not in the notification.",
+      "mensagemLonga": "The message is longer than {max} characters.",
+      "feitoComAviso": "{feito}. App notice in 1 to 2 minutes.",
+      "semCanal": "No app channel: call the owner",
+      "semCanalSelo": "No app channel",
+      "arraste": "{paciente}: from {de} to {para}.",
+      "arrasteCom": "{paciente}: from {de} to {para}, with {profissional}.",
+      "arrasteSoProfissional": "{paciente}: at {de}, now with {profissional}.",
+      "erros": {
+        "MENSAGEM_SEM_AVISO": "The message only goes with the notice turned on.",
+        "SEM_MUDANCA_A_AVISAR": "Changing only the room changes nothing for the owner: delete the message."
+      },
+      "comprovante": {
+        "titulo": "Notices to the owner",
+        "vazio": "No notices to the owner.",
+        "ver": "See the notice | See the {n} notices",
+        "verTodos": "See the notices",
+        "mais": "See more",
+        "recolher": "Collapse",
+        "erro": "Could not load the notices.",
+        "voce": "you",
+        "pedido": "Requested on {quando}",
+        "pedidoPor": "Requested by {quem} on {quando}",
+        "automatico": "Automatic, {quando}",
+        "saiAs": "Goes out at {hora}",
+        "saiu": "Sent on {quando}, {canal}",
+        "horario": "Time notified: {quando}",
+        "horarioAntes": "Time notified: {quando} (before, {antes})",
+        "tipo": {
+          "AGENDAMENTO_CRIADO_PELA_CLINICA": "Appointment booked",
+          "AGENDAMENTO_REMARCADO": "Appointment changed",
+          "AGENDAMENTO_CANCELADO_PELA_CLINICA": "Appointment cancelled",
+          "AGENDAMENTO_LEMBRETE_VESPERA": "Day-before reminder",
+          "AGENDAMENTO_FALTA": "No-show",
+          "FILA_VAGA_OFERECIDA": "Waiting list slot",
+          "PRE_CONSULTA_PENDENTE": "Pre-visit form",
+          "VACINA_LEMBRETE_DA_CLINICA": "Vaccine reminder"
+        },
+        "situacao": {
+          "PENDENTE": "Queued",
+          "ENVIADO": "Sent",
+          "NAO_ENVIADO": "Not sent"
+        },
+        "motivo": {
+          "SEM_CANAL_NO_APP": "No app channel: call",
+          "NAO_AVISAR": "Not notified: death or inactive patient",
+          "TETO_DO_DIA": "Daily notice limit",
+          "SUPERADO": "Undone or changed before going out",
+          "FORA_DO_PRAZO": "The time had already passed",
+          "FALHOU": "Could not notify"
+        },
+        "canal": {
+          "PUSH_INBOX": "through the app",
+          "EMAIL": "by email",
+          "PAGINA_TOKEN": "through the link page",
+          "NENHUM": "no channel"
+        },
+        "entrega": {
+          "PENDENTE": "Notification still going out",
+          "SO_NA_CAIXA": "Only in the app inbox",
+          "ENVIADO": "Notification sent",
+          "ENTREGUE": "Notification delivered",
+          "FALHOU": "The notification failed"
+        }
+      }
+    },
     "guia": {
       "titulo": "How the schedule is built",
       "vazioTitulo": "No one is on the schedule yet",

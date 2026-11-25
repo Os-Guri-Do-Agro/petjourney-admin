@@ -22,6 +22,8 @@ export type ErroDaAgenda = {
   conflitos: Conflito[]
   /** `PACIENTE_INATIVO` de paciente mesclado: o cadastro que ficou. */
   mescladoEmId: string | null
+  /** O porquê de um 400 `AGENDAMENTO_INVALIDO` (ex.: `MENSAGEM_SEM_AVISO`). */
+  reason: string | null
 }
 
 export function lerErroDaAgenda(err: unknown, generico: string): ErroDaAgenda {
@@ -33,7 +35,19 @@ export function lerErroDaAgenda(err: unknown, generico: string): ErroDaAgenda {
     mensagem: lido.mensagem,
     conflitos: Array.isArray(detalhes.conflitos) ? (detalhes.conflitos as Conflito[]) : [],
     mescladoEmId: typeof detalhes.mescladoEmId === 'string' ? detalhes.mescladoEmId : null,
+    reason: err instanceof ApiError ? (err.reason ?? null) : null,
   }
+}
+
+/**
+ * Os 400 do aviso ao responsável (guia e3 4.6) na frase da tela: a mensagem sem o pedido e o mover
+ * que só troca de sala com mensagem (nada gravado). `null` quando o erro é outro.
+ */
+export function erroDoAviso(lido: ErroDaAgenda, t: (chave: string) => string): string | null {
+  if (lido.reason === 'MENSAGEM_SEM_AVISO' || lido.reason === 'SEM_MUDANCA_A_AVISAR') {
+    return t(`agendamentos.aviso.erros.${lido.reason}`)
+  }
+  return null
 }
 
 export function useFrasesDaAgenda() {

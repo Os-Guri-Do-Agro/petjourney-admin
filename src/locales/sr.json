@@ -11783,6 +11783,77 @@
       "recorte": "Ostalo vidi samo onaj ko čita karton.",
       "observacao": "Još nešto, rečima odgovorne osobe"
     },
+    "aviso": {
+      "titulo": "Obavesti vlasnika u aplikaciji",
+      "comApp": "Stiže u aplikaciju za 1 do 2 minuta.",
+      "semApp": "Ovaj ljubimac nije povezan sa aplikacijom: javite telefonom.",
+      "mensagem": "Poruka vlasniku",
+      "mensagemDica": "Poruka se vidi u aplikaciji, ne u obaveštenju.",
+      "mensagemLonga": "Poruka ima više od {max} znakova.",
+      "feitoComAviso": "{feito}. Obaveštenje u aplikaciji za 1 do 2 minuta.",
+      "semCanal": "Bez kanala u aplikaciji: pozovite vlasnika",
+      "semCanalSelo": "Bez kanala u aplikaciji",
+      "arraste": "{paciente}: sa {de} na {para}.",
+      "arrasteCom": "{paciente}: sa {de} na {para}, kod {profissional}.",
+      "arrasteSoProfissional": "{paciente}: u {de}, sada kod {profissional}.",
+      "erros": {
+        "MENSAGEM_SEM_AVISO": "Poruka ide samo uz uključeno obaveštenje.",
+        "SEM_MUDANCA_A_AVISAR": "Promena samo sobe ne menja ništa za vlasnika: obrišite poruku."
+      },
+      "comprovante": {
+        "titulo": "Obaveštenja vlasniku",
+        "vazio": "Nema obaveštenja vlasniku.",
+        "ver": "Prikaži obaveštenje | Prikaži obaveštenja ({n}) | Prikaži obaveštenja ({n})",
+        "verTodos": "Prikaži obaveštenja",
+        "mais": "Prikaži još",
+        "recolher": "Skupi",
+        "erro": "Obaveštenja nije moguće učitati.",
+        "voce": "vi",
+        "pedido": "Zatraženo {quando}",
+        "pedidoPor": "Zatražio/la {quem}, {quando}",
+        "automatico": "Automatski, {quando}",
+        "saiAs": "Polazi u {hora}",
+        "saiu": "Poslato {quando}, {canal}",
+        "horario": "Javljeno vreme: {quando}",
+        "horarioAntes": "Javljeno vreme: {quando} (pre toga, {antes})",
+        "tipo": {
+          "AGENDAMENTO_CRIADO_PELA_CLINICA": "Termin zakazan",
+          "AGENDAMENTO_REMARCADO": "Termin promenjen",
+          "AGENDAMENTO_CANCELADO_PELA_CLINICA": "Termin otkazan",
+          "AGENDAMENTO_LEMBRETE_VESPERA": "Podsetnik dan ranije",
+          "AGENDAMENTO_FALTA": "Nedolazak",
+          "FILA_VAGA_OFERECIDA": "Mesto sa liste čekanja",
+          "PRE_CONSULTA_PENDENTE": "Pre pregleda",
+          "VACINA_LEMBRETE_DA_CLINICA": "Podsetnik za vakcinu"
+        },
+        "situacao": {
+          "PENDENTE": "U redu",
+          "ENVIADO": "Poslato",
+          "NAO_ENVIADO": "Nije poslato"
+        },
+        "motivo": {
+          "SEM_CANAL_NO_APP": "Bez kanala u aplikaciji: pozovite",
+          "NAO_AVISAR": "Nije javljeno: uginuće ili neaktivan pacijent",
+          "TETO_DO_DIA": "Dnevno ograničenje obaveštenja",
+          "SUPERADO": "Poništeno ili promenjeno pre slanja",
+          "FORA_DO_PRAZO": "Termin je već prošao",
+          "FALHOU": "Obaveštavanje nije uspelo"
+        },
+        "canal": {
+          "PUSH_INBOX": "kroz aplikaciju",
+          "EMAIL": "e-poštom",
+          "PAGINA_TOKEN": "kroz stranicu linka",
+          "NENHUM": "bez kanala"
+        },
+        "entrega": {
+          "PENDENTE": "Obaveštenje se još šalje",
+          "SO_NA_CAIXA": "Samo u sandučetu aplikacije",
+          "ENVIADO": "Obaveštenje poslato",
+          "ENTREGUE": "Obaveštenje isporučeno",
+          "FALHOU": "Obaveštenje nije uspelo"
+        }
+      }
+    },
     "guia": {
       "titulo": "Kako se raspored slaže",
       "vazioTitulo": "Još niko ne radi po rasporedu",

@@ -11783,6 +11783,77 @@
       "recorte": "O restante fica com quem lê o prontuário.",
       "observacao": "Mais alguma coisa, nas palavras do responsável"
     },
+    "aviso": {
+      "titulo": "Avisar o responsável no app",
+      "comApp": "Sai no app em 1 a 2 minutos.",
+      "semApp": "Este pet não está ligado ao app: avise por telefone.",
+      "mensagem": "Mensagem ao responsável",
+      "mensagemDica": "A mensagem aparece no app, não na notificação.",
+      "mensagemLonga": "A mensagem passa de {max} caracteres.",
+      "feitoComAviso": "{feito}. Aviso no app em 1 a 2 minutos.",
+      "semCanal": "Sem canal no app: ligue para o responsável",
+      "semCanalSelo": "Sem canal no app",
+      "arraste": "{paciente}: de {de} para {para}.",
+      "arrasteCom": "{paciente}: de {de} para {para}, com {profissional}.",
+      "arrasteSoProfissional": "{paciente}: às {de}, agora com {profissional}.",
+      "erros": {
+        "MENSAGEM_SEM_AVISO": "A mensagem só vai com o aviso ligado.",
+        "SEM_MUDANCA_A_AVISAR": "Trocar só a sala não muda nada para o responsável: apague a mensagem."
+      },
+      "comprovante": {
+        "titulo": "Avisos ao responsável",
+        "vazio": "Nenhum aviso ao responsável.",
+        "ver": "Ver o aviso | Ver os {n} avisos",
+        "verTodos": "Ver os avisos",
+        "mais": "Ver mais",
+        "recolher": "Recolher",
+        "erro": "Não deu para ler os avisos.",
+        "voce": "você",
+        "pedido": "Pedido em {quando}",
+        "pedidoPor": "Pedido por {quem} em {quando}",
+        "automatico": "Automático, {quando}",
+        "saiAs": "Sai às {hora}",
+        "saiu": "Saiu em {quando}, {canal}",
+        "horario": "Horário avisado: {quando}",
+        "horarioAntes": "Horário avisado: {quando} (antes, {antes})",
+        "tipo": {
+          "AGENDAMENTO_CRIADO_PELA_CLINICA": "Horário marcado",
+          "AGENDAMENTO_REMARCADO": "Horário mudado",
+          "AGENDAMENTO_CANCELADO_PELA_CLINICA": "Horário cancelado",
+          "AGENDAMENTO_LEMBRETE_VESPERA": "Lembrete da véspera",
+          "AGENDAMENTO_FALTA": "Falta",
+          "FILA_VAGA_OFERECIDA": "Vaga da lista de espera",
+          "PRE_CONSULTA_PENDENTE": "Pré-consulta",
+          "VACINA_LEMBRETE_DA_CLINICA": "Lembrete de vacina"
+        },
+        "situacao": {
+          "PENDENTE": "Na fila",
+          "ENVIADO": "Enviado",
+          "NAO_ENVIADO": "Não enviado"
+        },
+        "motivo": {
+          "SEM_CANAL_NO_APP": "Sem canal no app: ligue",
+          "NAO_AVISAR": "Não avisado: óbito ou paciente inativo",
+          "TETO_DO_DIA": "Limite de avisos do dia",
+          "SUPERADO": "Desfeito ou mudou antes de sair",
+          "FORA_DO_PRAZO": "O horário já tinha passado",
+          "FALHOU": "Não foi possível avisar"
+        },
+        "canal": {
+          "PUSH_INBOX": "pelo app",
+          "EMAIL": "por e-mail",
+          "PAGINA_TOKEN": "pela página do link",
+          "NENHUM": "sem canal"
+        },
+        "entrega": {
+          "PENDENTE": "Notificação ainda saindo",
+          "SO_NA_CAIXA": "Só na caixa de avisos do app",
+          "ENVIADO": "Notificação enviada",
+          "ENTREGUE": "Notificação entregue",
+          "FALHOU": "A notificação falhou"
+        }
+      }
+    },
     "guia": {
       "titulo": "Como a agenda se monta",
       "vazioTitulo": "Ninguém atende na agenda ainda",

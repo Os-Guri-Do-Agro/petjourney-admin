@@ -11783,6 +11783,77 @@
       "recorte": "El resto queda para quien lee la historia clínica.",
       "observacao": "Algo más, en palabras del responsable"
     },
+    "aviso": {
+      "titulo": "Avisar al responsable en la app",
+      "comApp": "Sale en la app en 1 a 2 minutos.",
+      "semApp": "Esta mascota no está vinculada a la app: avisa por teléfono.",
+      "mensagem": "Mensaje al responsable",
+      "mensagemDica": "El mensaje aparece en la app, no en la notificación.",
+      "mensagemLonga": "El mensaje pasa de {max} caracteres.",
+      "feitoComAviso": "{feito}. Aviso en la app en 1 a 2 minutos.",
+      "semCanal": "Sin canal en la app: llama al responsable",
+      "semCanalSelo": "Sin canal en la app",
+      "arraste": "{paciente}: de {de} a {para}.",
+      "arrasteCom": "{paciente}: de {de} a {para}, con {profissional}.",
+      "arrasteSoProfissional": "{paciente}: a las {de}, ahora con {profissional}.",
+      "erros": {
+        "MENSAGEM_SEM_AVISO": "El mensaje solo va con el aviso activado.",
+        "SEM_MUDANCA_A_AVISAR": "Cambiar solo la sala no cambia nada para el responsable: borra el mensaje."
+      },
+      "comprovante": {
+        "titulo": "Avisos al responsable",
+        "vazio": "Ningún aviso al responsable.",
+        "ver": "Ver el aviso | Ver los {n} avisos",
+        "verTodos": "Ver los avisos",
+        "mais": "Ver más",
+        "recolher": "Contraer",
+        "erro": "No se pudieron leer los avisos.",
+        "voce": "ti",
+        "pedido": "Pedido el {quando}",
+        "pedidoPor": "Pedido por {quem} el {quando}",
+        "automatico": "Automático, {quando}",
+        "saiAs": "Sale a las {hora}",
+        "saiu": "Salió el {quando}, {canal}",
+        "horario": "Horario avisado: {quando}",
+        "horarioAntes": "Horario avisado: {quando} (antes, {antes})",
+        "tipo": {
+          "AGENDAMENTO_CRIADO_PELA_CLINICA": "Horario reservado",
+          "AGENDAMENTO_REMARCADO": "Horario cambiado",
+          "AGENDAMENTO_CANCELADO_PELA_CLINICA": "Horario cancelado",
+          "AGENDAMENTO_LEMBRETE_VESPERA": "Recordatorio de la víspera",
+          "AGENDAMENTO_FALTA": "Falta",
+          "FILA_VAGA_OFERECIDA": "Plaza de la lista de espera",
+          "PRE_CONSULTA_PENDENTE": "Preconsulta",
+          "VACINA_LEMBRETE_DA_CLINICA": "Recordatorio de vacuna"
+        },
+        "situacao": {
+          "PENDENTE": "En cola",
+          "ENVIADO": "Enviado",
+          "NAO_ENVIADO": "No enviado"
+        },
+        "motivo": {
+          "SEM_CANAL_NO_APP": "Sin canal en la app: llama",
+          "NAO_AVISAR": "No avisado: fallecimiento o paciente inactivo",
+          "TETO_DO_DIA": "Límite de avisos del día",
+          "SUPERADO": "Deshecho o cambió antes de salir",
+          "FORA_DO_PRAZO": "El horario ya había pasado",
+          "FALHOU": "No se pudo avisar"
+        },
+        "canal": {
+          "PUSH_INBOX": "por la app",
+          "EMAIL": "por correo",
+          "PAGINA_TOKEN": "por la página del enlace",
+          "NENHUM": "sin canal"
+        },
+        "entrega": {
+          "PENDENTE": "Notificación todavía saliendo",
+          "SO_NA_CAIXA": "Solo en la bandeja de avisos de la app",
+          "ENVIADO": "Notificación enviada",
+          "ENTREGUE": "Notificación entregada",
+          "FALHOU": "La notificación falló"
+        }
+      }
+    },
     "guia": {
       "titulo": "Cómo se arma la agenda",
       "vazioTitulo": "Todavía nadie atiende en la agenda",

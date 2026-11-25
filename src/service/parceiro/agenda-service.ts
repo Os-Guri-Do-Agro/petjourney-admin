@@ -14,6 +14,9 @@ import type {
   AgendaSemanaDto,
   AgendamentoDaAgendaDto,
   AlternativaDto,
+  AvisoAoResponsavelDto,
+  AvisoPedidoDto,
+  AvisosDoAgendamentoDto,
   CancelarAgendamentoDto,
   ColunaDaAgendaDto,
   ConflitoDto,
@@ -68,6 +71,10 @@ export type Destino = DestinoDto
 export type Cancelamento = CancelarAgendamentoDto
 export type MotivoDoCancelamento = CancelarAgendamentoDto['motivo']
 export type Agrupamento = AgendaDiaDto['agrupar']
+export type AvisoPedido = AvisoPedidoDto
+export type AvisoAoResponsavel = AvisoAoResponsavelDto
+export type AvisosDoAgendamento = AvisosDoAgendamentoDto
+export type MotivoSemAviso = NonNullable<AvisoAoResponsavelDto['motivoSemAviso']>
 
 export const MOTIVOS_DE_CANCELAMENTO: readonly MotivoDoCancelamento[] = [
   'RESPONSAVEL_DESMARCOU',
@@ -85,6 +92,12 @@ export const DIAS_POR_INTERVALO = 31
 
 /** Quantas sugestões pedir: o padrão da rota é 6, até 20. */
 export const SUGESTOES_PADRAO = 6
+
+/** A mensagem do aviso ao responsável: até 500, contados como a API conta (guia e3 4.1). */
+export const MENSAGEM_DO_AVISO_MAX = 500
+
+/** Até 20 avisos por página no comprovante de um agendamento (guia e3 4.2). */
+export const AVISOS_POR_PAGINA = 20
 
 type ParceiroQuery = { parceiroId?: string | null }
 
@@ -264,6 +277,64 @@ export function desfazerNaAgenda(token: string, params?: ParceiroQuery) {
       json('POST', { token }),
     ),
   )
+}
+
+/**
+ * O comprovante dos avisos ao responsável de um agendamento (E3-06, guia e3 4.2), do mais recente.
+ * Os avisos são do atendimento: no grupo, qualquer perna devolve os da principal. `semCanalNoApp` é
+ * o estado de agora (o selo da gaveta). Soma 300 leituras por pessoa por hora com o rastro da
+ * clínica: lê ao abrir a gaveta e depois de uma escrita com aviso, nunca em laço.
+ */
+export function listarAvisosDoAgendamento(
+  id: string,
+  pagina: { cursor?: string | null } = {},
+  params?: ParceiroQuery,
+) {
+  return dados(
+    apiFetch<ApiEnvelope<AvisosDoAgendamento>>(
+      comQuery(doAgendamento(id, '/avisos'), {
+        parceiroId: params?.parceiroId,
+        cursor: pagina.cursor,
+        limit: AVISOS_POR_PAGINA,
+      }),
+    ),
+  )
+}
+
+/* ------------------------------------------------------------------- avisar o responsável */
+
+/**
+ * O tamanho da mensagem como a API conta (guia e3 4.1, revisão v0.3): em code points, depois de
+ * aparar. Nunca `texto.length`, que erra para os dois lados ("❤️" conta 2, "😀" conta 1).
+ */
+export function tamanhoDaMensagem(texto: string) {
+  return [...texto.trim()].length
+}
+
+/**
+ * O pedido do aviso no corpo do criar, do mover e do cancelar: nada sem o interruptor (mensagem sem
+ * o pedido é 400 `MENSAGEM_SEM_AVISO`); a mensagem só quando tem texto.
+ */
+export function pedidoDoAviso(
+  avisar: boolean,
+  mensagem: string,
+): { avisarResponsavel?: true; mensagem?: string } {
+  if (!avisar) return {}
+  const texto = mensagem.trim()
+  return texto ? { avisarResponsavel: true, mensagem: texto } : { avisarResponsavel: true }
+}
+
+/**
+ * O mover muda algo para o responsável quando troca o dia, a hora ou o profissional. O que só troca
+ * de sala esconde o aviso: com mensagem, seria 400 `SEM_MUDANCA_A_AVISAR` (guia e3 4.1).
+ */
+export function moverMudaParaOResponsavel(
+  atual: Pick<Agendamento, 'inicio' | 'profissionalId'>,
+  inicio: string,
+  profissionalId?: string | null,
+) {
+  const outroProfissional = Boolean(profissionalId && profissionalId !== atual.profissionalId)
+  return outroProfissional || Date.parse(inicio) !== Date.parse(atual.inicio)
 }
 
 /* -------------------------------------------------------------------------------- leitura */

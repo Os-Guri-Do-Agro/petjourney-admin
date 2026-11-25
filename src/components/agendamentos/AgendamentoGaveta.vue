@@ -8,6 +8,11 @@
  * Toda ação manda a `versao` que a tela tem. Mudou no meio do caminho (409 `AGENDAMENTO_ALTERADO`):
  * a página relê o dia e a gaveta mostra o horário novo. Dia especial fechado ao mudar o horário:
  * o 409 `CONFLITO_BLOQUEANTE` pede o segundo passo.
+ *
+ * Avisar o responsável (E3-06, guia e3 4.1 e 4.2): mudar e cancelar têm o interruptor e a mensagem,
+ * ligado quando o comprovante diz que há canal no app. Mudar sem trocar dia, hora nem profissional
+ * esconde os dois. Sem canal, a gaveta diz na hora para ligar, com o telefone do cadastro. O
+ * comprovante (recolhido) lista o que saiu e dá o selo "sem canal no app".
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
@@ -23,8 +28,15 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink, useRouter } from 'vue-router'
 
+import AvisoAoResponsavelCampos from '@/components/agendamentos/AvisoAoResponsavelCampos.vue'
+import AvisosDoHorario from '@/components/agendamentos/AvisosDoHorario.vue'
 import { horaNoFuso, ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
-import { lerErroDaAgenda, useFrasesDaAgenda } from '@/components/agendamentos/useFrasesDaAgenda'
+import { useAvisoAoResponsavel } from '@/components/agendamentos/useAvisoAoResponsavel'
+import {
+  erroDoAviso,
+  lerErroDaAgenda,
+  useFrasesDaAgenda,
+} from '@/components/agendamentos/useFrasesDaAgenda'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import PreConsultaDoHorario from '@/components/agendamentos/PreConsultaDoHorario.vue'
@@ -46,6 +58,7 @@ import {
   cancelarAgendamento,
   editarAgendamento,
   moverAgendamento,
+  moverMudaParaOResponsavel,
   MOTIVOS_DE_CANCELAMENTO,
   type Agendamento,
   type EdicaoDoAgendamento,
@@ -59,6 +72,7 @@ import {
   type NovaJustificativa,
   type Obito,
 } from '@/service/parceiro/faltas-service'
+import { obterCliente, telefoneNaTela } from '@/service/parceiro/pacientes-service'
 
 const OBSERVACAO_MAX = 500
 
@@ -74,6 +88,8 @@ const props = defineProps<{
   /** `AAAA-MM-DD` de hoje na clínica e o relógio da página (a falta só depois do início). */
   hoje: string
   relogio: Date
+  /** Quem pediu um aviso (o `enviadoPorId` do comprovante é o usuário da equipe). */
+  nomeDoUsuario?: (usuarioId: string) => string
 }>()
 const emit = defineEmits<{
   mudou: [mutacao: Mutacao, texto: string]
@@ -230,6 +246,55 @@ const rastro = computed(() => {
   return linhas
 })
 
+/* --------------------------------------------------------------- avisar o responsável */
+
+/** O canal de agora, pelo comprovante (`null` enquanto não se sabe): o selo e o padrão do aviso. */
+const semCanalAgora = ref<boolean | null>(null)
+
+const aviso = useAvisoAoResponsavel()
+const comprovante = ref<InstanceType<typeof AvisosDoHorario> | null>(null)
+/** Gravou com aviso e não há canal no app: quem ligar, com o telefone do cadastro. */
+const ligar = ref<{ nome: string; telefone: string } | null>(null)
+
+/*
+ * Outro horário, ou a gaveta reaberta: some o canal e o "ligue". Só pelo id (o horário que a
+ * página aplica depois de gravar é outro objeto do mesmo id, e o "ligue" tem de ficar à vista).
+ */
+watch(
+  () => [visible.value, props.agendamento?.id ?? null] as const,
+  ([aberta, id], antes) => {
+    if (!aberta || (antes && antes[0] && antes[1] === id)) return
+    semCanalAgora.value = null
+    ligar.value = null
+  },
+)
+
+function prepararAviso() {
+  aviso.reiniciar(semCanalAgora.value === null ? null : !semCanalAgora.value)
+}
+
+function nomeDeQuemPediu(usuarioId: string) {
+  return props.nomeDoUsuario?.(usuarioId) ?? ''
+}
+
+/** Depois de mudar ou cancelar com aviso: relê o comprovante e, sem canal, mostra quem ligar. */
+async function depoisDoAviso(mutacao: Mutacao) {
+  if (!mutacao.aviso) return
+  comprovante.value?.reler()
+  const atual = ag.value
+  if (!mutacao.aviso.semCanalNoApp || !atual) return
+  const nome = atual.paciente.clienteNome
+  ligar.value = { nome, telefone: '' }
+  try {
+    const cliente = await obterCliente(atual.paciente.clienteId, parceiroQuery())
+    if (ligar.value) {
+      ligar.value = { nome: cliente.nome || nome, telefone: telefoneNaTela(cliente.telefone) }
+    }
+  } catch {
+    /* Sem o cadastro, fica o nome: o número está na ficha. */
+  }
+}
+
 /* ------------------------------------------------------------------------------ escrever */
 
 /**
@@ -248,7 +313,7 @@ function falhou(err: unknown) {
     emit('alterado', lido.mensagem)
     return
   }
-  erro.value = lido.mensagem
+  erro.value = erroDoAviso(lido, t) ?? lido.mensagem
 }
 
 async function agir(acao: 'confirmar-presenca' | 'chegada' | 'iniciar') {
@@ -375,10 +440,19 @@ function abrirMudanca() {
   bloqueante.value = null
   erro.value = ''
   tentou.value = false
+  prepararAviso()
   modo.value = 'mudar'
 }
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/
+
+/** O mudar que troca dia, hora ou profissional muda algo para o responsável: aí cabe avisar. */
+const mudancaAvisavel = computed(() => {
+  const atual = ag.value
+  if (!atual || !HORA.test(novaHora.value)) return false
+  const inicio = instanteNoFuso(props.fuso, diaLocal(novoDia.value), novaHora.value)
+  return moverMudaParaOResponsavel(atual, inicio, novoProfissional.value)
+})
 
 async function salvarMudanca(confirmar = false) {
   const atual = ag.value
@@ -389,10 +463,11 @@ async function salvarMudanca(confirmar = false) {
 
   const inicio = instanteNoFuso(props.fuso, diaLocal(novoDia.value), novaHora.value)
   const outroProfissional = novoProfissional.value !== atual.profissionalId
-  if (inicio.slice(0, 16) === atual.inicio.slice(0, 16) && !outroProfissional) {
+  if (!moverMudaParaOResponsavel(atual, inicio, novoProfissional.value)) {
     modo.value = 'ver'
     return
   }
+  if (aviso.longa.value) return
 
   enviando.value = 'mudar'
   try {
@@ -403,12 +478,14 @@ async function salvarMudanca(confirmar = false) {
         versao: atual.versao,
         ...(outroProfissional ? { destino: { profissionalId: novoProfissional.value } } : {}),
         ...(confirmar ? { confirmarConflitos: ['holiday-closed' as const] } : {}),
+        ...aviso.corpo(),
       },
       parceiroQuery(),
     )
     modo.value = 'ver'
     bloqueante.value = null
     emit('mudou', mutacao, t('agendamentos.feito.mover'))
+    void depoisDoAviso(mutacao)
   } catch (err) {
     const lido = lerErroDaAgenda(err, t('agendamentos.erros.salvar'))
     if (lido.codigo === 'CONFLITO_BLOQUEANTE') {
@@ -437,6 +514,7 @@ function abrirCancelamento() {
   motivo.value = null
   erro.value = ''
   tentou.value = false
+  prepararAviso()
   modo.value = 'cancelar'
 }
 
@@ -445,17 +523,18 @@ async function cancelar() {
   if (!atual) return
   tentou.value = true
   erro.value = ''
-  if (!motivo.value) return
+  if (!motivo.value || aviso.longa.value) return
 
   enviando.value = 'cancelar'
   try {
     const mutacao = await cancelarAgendamento(
       atual.id,
-      { versao: atual.versao, motivo: motivo.value },
+      { versao: atual.versao, motivo: motivo.value, ...aviso.corpo() },
       parceiroQuery(),
     )
     modo.value = 'ver'
     emit('mudou', mutacao, t('agendamentos.feito.cancelar'))
+    void depoisDoAviso(mutacao)
   } catch (err) {
     falhou(err)
   } finally {
@@ -630,11 +709,26 @@ const itensDoMenu = computed<MenuItem[]>(() => {
     <template v-if="ag">
       <!-- Ver -->
       <template v-if="modo === 'ver'">
+        <!-- Gravou com aviso e não há canal no app: ligar, com o número do cadastro (sem botão). -->
+        <p v-if="ligar" class="agv__ligar" role="status">
+          <i class="ph ph-phone" aria-hidden="true" />
+          <span>
+            <strong>{{ t('agendamentos.aviso.semCanal') }}</strong>
+            <span class="ui-num">{{
+              ligar.telefone ? `${ligar.nome} · ${ligar.telefone}` : ligar.nome
+            }}</span>
+          </span>
+        </p>
+
         <section class="eg__secao">
           <p class="agv__quem">
-            <span>{{
-              t('agendamentos.detalhe.responsavel', { nome: ag.paciente.clienteNome })
-            }}</span>
+            <span class="agv__responsavel">
+              {{ t('agendamentos.detalhe.responsavel', { nome: ag.paciente.clienteNome }) }}
+              <span v-if="semCanalAgora" class="ui-selo ui-selo--atencao">
+                <i class="ph ph-phone" aria-hidden="true" />
+                {{ t('agendamentos.aviso.semCanalSelo') }}
+              </span>
+            </span>
             <RouterLink class="agv__ficha" :to="`/clinica/ficha/${ag.paciente.id}`">
               {{ t('agendamentos.detalhe.abrirFicha') }}
               <i class="ph ph-arrow-right" aria-hidden="true" />
@@ -862,6 +956,12 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             />
           </section>
         </div>
+        <AvisoAoResponsavelCampos
+          v-if="mudancaAvisavel"
+          :aviso="aviso"
+          :prefixo="`ag-mudar-aviso-${ag.id}`"
+          :desabilitado="Boolean(enviando)"
+        />
         <div v-if="bloqueante" class="agv__confirmar" role="alert">
           <p>
             <i class="ph ph-prohibit" aria-hidden="true" />
@@ -941,7 +1041,24 @@ const itensDoMenu = computed<MenuItem[]>(() => {
             t('agendamentos.cancelar.semMotivo')
           }}</small>
         </section>
+        <AvisoAoResponsavelCampos
+          :aviso="aviso"
+          :prefixo="`ag-cancelar-aviso-${ag.id}`"
+          :desabilitado="Boolean(enviando)"
+        />
       </form>
+
+      <!--
+        O comprovante dos avisos (E3-06): montado em todos os modos para ler uma vez ao abrir e
+        reler depois de uma escrita com aviso; à vista só no "ver", depois do histórico.
+      -->
+      <AvisosDoHorario
+        v-show="modo === 'ver'"
+        ref="comprovante"
+        :agendamento-id="ag.id"
+        :nome-do-usuario="nomeDeQuemPediu"
+        @canal="(valor) => (semCanalAgora = valor)"
+      />
 
       <p
         v-if="erro || (tentou && modo === 'editar' && problemaDaEdicao)"
@@ -1067,6 +1184,39 @@ const itensDoMenu = computed<MenuItem[]>(() => {
   margin: 0;
   color: var(--tinta-2);
   font-size: 13.5px;
+}
+
+.agv__responsavel {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.agv__ligar {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+}
+
+.agv__ligar i {
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.agv__ligar > span {
+  display: grid;
+  gap: 2px;
+}
+
+.agv__ligar strong {
+  font-weight: 650;
 }
 
 .agv__ficha {
