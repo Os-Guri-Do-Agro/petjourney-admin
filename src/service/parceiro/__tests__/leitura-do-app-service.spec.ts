@@ -56,6 +56,22 @@ describe('rotas', () => {
       '/parceiro/portal/pacientes/pac1/app/fotos/f1/url?parceiroId=p1',
     ])
   })
+
+  it('o resumo dos documentos por IA só lê (PJ-87WIZU): um GET, sem corpo', async () => {
+    const servico = await loadService()
+    const fetchMock = responder({ estado: 'SEM_RESUMO', conteudo: null, documentos: [] })
+
+    const lido = await servico.lerResumoDosDocumentos('pac 1', { parceiroId: 'p1' })
+
+    expect(lido.estado).toBe('SEM_RESUMO')
+    const [url, init] = fetchMock.mock.calls[0]!
+    const endereco = new URL(String(url))
+    expect(`${endereco.pathname}${endereco.search}`).toBe(
+      '/parceiro/portal/pacientes/pac%201/app/resumo-documentos?parceiroId=p1',
+    )
+    expect(init?.method ?? 'GET').toBe('GET')
+    expect(init?.body).toBeUndefined()
+  })
 })
 
 describe('lerRecusa', () => {
@@ -76,6 +92,12 @@ describe('lerRecusa', () => {
       lerRecusa(erro(429, { codigo: 'LEITURA_APP_TAXA_EXCEDIDA', tenteDeNovoEmSegundos: 30 }), 'g'),
     ).toEqual({ tipo: 'taxa', segundos: 30 })
     expect(lerRecusa(erro(403, {}), 'g')).toEqual({ tipo: 'semAcesso' })
+    expect(lerRecusa(erro(403, { codigo: 'OWNERSHIP_FORBIDDEN' }), 'g')).toEqual({
+      tipo: 'semAcesso',
+    })
+    expect(lerRecusa(erro(403, { codigo: 'SEM_CONSENTIMENTO', chave: 'documentos' }), 'g')).toEqual(
+      { tipo: 'semConsentimento', chave: 'documentos' },
+    )
     expect(lerRecusa(new Error(''), 'genérico')).toEqual({ tipo: 'outro', mensagem: 'genérico' })
   })
 

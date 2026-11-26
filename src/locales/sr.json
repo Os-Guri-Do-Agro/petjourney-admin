@@ -3189,7 +3189,8 @@
         "peso_do_app": "težinu kod kuće iz aplikacije",
         "resumo_do_paciente": "sažetak o pacijentu",
         "servico_realizado_do_app": "obavljenu uslugu za aplikaciju",
-        "outro": "zapis ({tipo})"
+        "outro": "zapis ({tipo})",
+        "resumo_de_documentos": "sažetak dokumenata iz aplikacije"
       },
       "guia": {
         "titulo": "Kako revizija funkcioniše",
@@ -10681,7 +10682,8 @@
       "consentimento": {
         "diarioCompleto": "Ceo dnevnik",
         "peso": "Težina kod kuće",
-        "notas": "Beleške"
+        "notas": "Beleške",
+        "documentos": "Sažetak dokumenata"
       },
       "liberado": "podeljeno",
       "naoLiberado": "nije podeljeno",
@@ -11252,6 +11254,52 @@
       "formato": "Ova fotografija je u formatu koji portal ne otvara.",
       "indisponivel": "Fotografija nije dostupna.",
       "erro": "Trenutno nije moguće otvoriti fotografiju. Pokušajte ponovo za nekoliko minuta."
+    },
+    "resumoDocumentos": {
+      "titulo": "Sažetak dokumenata (napravila veštačka inteligencija)",
+      "feitoEm": "Napravljen {data}",
+      "semResumo": "Vlasnik još nije napravio sažetak dokumenata.",
+      "semConsentimento": "Vlasnik nije podelio sažetak dokumenata sa ovom klinikom.",
+      "semVinculo": "Nema pristupa aplikaciji ovog pacijenta.",
+      "desatualizado": "Postoji {n} dokument noviji od ovog sažetka. | Postoje {n} dokumenta novija od ovog sažetka. | Postoji {n} dokumenata novijih od ovog sažetka.",
+      "mudou": "Dokumenti su se promenili posle ovog sažetka.",
+      "achados": "Nalazi",
+      "nenhumAchado": "Nema zabeleženih nalaza u dokumentima.",
+      "verMais": "Prikaži ponovljene analize, lekove i vremensku liniju",
+      "verMenos": "Sakrij ponovljene analize, lekove i vremensku liniju",
+      "series": "Ponovljene analize",
+      "remedios": "Pomenuti lekovi",
+      "remediosDica": "Samo naziv: doza je u dokumentu.",
+      "linhaDoTempo": "Vremenska linija",
+      "documentoNovo": "Novi dokument",
+      "foraDoResumo": "Nije u ovom sažetku",
+      "naoEntraram": "{n} dokument nije ušao u sažetak (nije pročitan, nije klinički ili je druge životinje). | {n} dokumenta nisu ušla u sažetak (nisu pročitana, nisu klinička ili su druge životinje). | {n} dokumenata nije ušlo u sažetak (nisu pročitani, nisu klinički ili su druge životinje).",
+      "faixa": "opseg {faixa}",
+      "categoria": {
+        "FORA_DA_FAIXA": "Van opsega",
+        "IMAGEM": "Snimak",
+        "LAUDO": "Izveštaj",
+        "PRESCRICAO": "Recept",
+        "PROCEDIMENTO": "Procedura",
+        "OUTRO": "Ostalo"
+      },
+      "situacao": {
+        "ACIMA": "iznad opsega",
+        "ABAIXO": "ispod opsega",
+        "DENTRO": "u opsegu",
+        "SEM_REFERENCIA": "bez opsega u dokumentu"
+      },
+      "tipo": {
+        "EXAME_LABORATORIAL": "Laboratorijska analiza",
+        "EXAME_DE_IMAGEM": "Snimanje",
+        "LAUDO": "Izveštaj",
+        "RECEITA": "Recept",
+        "ATESTADO": "Potvrda",
+        "RESUMO_DE_ALTA": "Otpusna lista",
+        "CARTEIRA_DE_VACINA": "Knjižica vakcinacije",
+        "ENCAMINHAMENTO": "Uput",
+        "OUTRO": "Drugi dokument"
+      }
     }
   },
   "fila": {

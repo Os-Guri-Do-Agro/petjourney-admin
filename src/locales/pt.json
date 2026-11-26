@@ -3189,7 +3189,8 @@
         "peso_do_app": "o peso de casa do app",
         "resumo_do_paciente": "o resumo do paciente",
         "servico_realizado_do_app": "um serviço realizado para o app",
-        "outro": "um registro ({tipo})"
+        "outro": "um registro ({tipo})",
+        "resumo_de_documentos": "o resumo dos documentos do app"
       },
       "guia": {
         "titulo": "Como a auditoria funciona",
@@ -10681,7 +10682,8 @@
       "consentimento": {
         "diarioCompleto": "Diário completo",
         "peso": "Peso de casa",
-        "notas": "Notas"
+        "notas": "Notas",
+        "documentos": "Resumo dos documentos"
       },
       "liberado": "liberado",
       "naoLiberado": "não liberado",
@@ -11252,6 +11254,52 @@
       "formato": "Esta foto está num formato que o portal não abre.",
       "indisponivel": "Foto indisponível.",
       "erro": "Não foi possível abrir a foto agora. Tente de novo em alguns minutos."
+    },
+    "resumoDocumentos": {
+      "titulo": "Resumo dos documentos (feito por IA)",
+      "feitoEm": "Feito em {data}",
+      "semResumo": "O responsável ainda não gerou o resumo dos documentos.",
+      "semConsentimento": "O responsável não liberou o resumo dos documentos para esta clínica.",
+      "semVinculo": "Sem acesso ao app deste paciente.",
+      "desatualizado": "Há {n} documento mais novo que este resumo. | Há {n} documentos mais novos que este resumo.",
+      "mudou": "Os documentos mudaram depois deste resumo.",
+      "achados": "Achados",
+      "nenhumAchado": "Nenhum achado anotado nos documentos.",
+      "verMais": "Ver exames repetidos, remédios e linha do tempo",
+      "verMenos": "Esconder exames repetidos, remédios e linha do tempo",
+      "series": "Exames repetidos",
+      "remedios": "Remédios citados",
+      "remediosDica": "Só o nome: a dose está no documento.",
+      "linhaDoTempo": "Linha do tempo",
+      "documentoNovo": "Documento novo",
+      "foraDoResumo": "Fora deste resumo",
+      "naoEntraram": "{n} documento não entrou no resumo (não lido, não clínico ou de outro animal). | {n} documentos não entraram no resumo (não lidos, não clínicos ou de outro animal).",
+      "faixa": "faixa {faixa}",
+      "categoria": {
+        "FORA_DA_FAIXA": "Fora da faixa",
+        "IMAGEM": "Imagem",
+        "LAUDO": "Laudo",
+        "PRESCRICAO": "Prescrição",
+        "PROCEDIMENTO": "Procedimento",
+        "OUTRO": "Outro"
+      },
+      "situacao": {
+        "ACIMA": "acima da faixa",
+        "ABAIXO": "abaixo da faixa",
+        "DENTRO": "dentro da faixa",
+        "SEM_REFERENCIA": "sem faixa no documento"
+      },
+      "tipo": {
+        "EXAME_LABORATORIAL": "Exame laboratorial",
+        "EXAME_DE_IMAGEM": "Exame de imagem",
+        "LAUDO": "Laudo",
+        "RECEITA": "Receita",
+        "ATESTADO": "Atestado",
+        "RESUMO_DE_ALTA": "Resumo de alta",
+        "CARTEIRA_DE_VACINA": "Carteira de vacina",
+        "ENCAMINHAMENTO": "Encaminhamento",
+        "OUTRO": "Outro documento"
+      }
     }
   },
   "fila": {

@@ -1,8 +1,8 @@
 /**
  * Cadastro de clientes e pacientes: a lista e a ficha, as gavetas de edição (alerta, autorizado,
  * inativar, mesclar, excluir a pedido do titular, foto), o vínculo com o app e as propostas, os
- * pedidos de correção, a leitura do app (resumo, diário, peso, carteirinha), a auditoria e a
- * importação da base.
+ * pedidos de correção, a leitura do app (resumo, diário, peso, carteirinha, resumo dos
+ * documentos), a auditoria e a importação da base.
  *
  * As escritas mexem nos registros de `base/cadastro.ts` (o paciente novo entra na lista, a
  * inativação por óbito cancela os horários futuros, o mesclar leva a agenda junto) e anotam na
@@ -46,6 +46,7 @@ import type {
   DiarioParaClinica,
   PesosParaClinica,
   ResumoDoPaciente,
+  ResumoDosDocumentos,
   UrlDaFoto,
 } from '@/service/parceiro/leitura-do-app-service'
 import type {
@@ -98,6 +99,7 @@ import {
   pesosDeCasa,
   resumoDe,
 } from '../dados/cadastro-app'
+import { resumoDosDocumentosDe } from '../dados/cadastro-resumo-documentos'
 import {
   confirmar,
   continuar,
@@ -903,7 +905,7 @@ function leitura(pedido: Pedido): { p: PacienteDaDemo; vinculo: Vinculo } | Resp
   return { p, vinculo }
 }
 
-function semConsentimento(chave: 'diarioCompleto' | 'peso') {
+function semConsentimento(chave: 'diarioCompleto' | 'peso' | 'documentos') {
   return erro(403, 'SEM_CONSENTIMENTO', 'O responsável não liberou esta leitura.', { chave })
 }
 
@@ -958,6 +960,16 @@ function registrarLeituraDoApp() {
     const lido = leitura(pedido)
     if (ehResposta(lido)) return lido
     return ok<CarteirinhaParaClinica>(carteirinhaDe(lido.p.id))
+  })
+
+  /* Resumo dos documentos por IA (PJ-87WIZU): pede a chave `documentos`; trilha com conteúdo. */
+  rota('GET', `${PORTAL}/pacientes/:id/app/resumo-documentos`, (pedido) => {
+    const lido = leitura(pedido)
+    if (ehResposta(lido)) return lido
+    if (!lido.vinculo.consentimento.documentos) return semConsentimento('documentos')
+    const resumo = resumoDosDocumentosDe(lido.p.id)
+    if (resumo.conteudo) anotar('LER_DADO_DO_APP', 'resumo-de-documentos', lido.p.id, lido.p.id)
+    return ok<ResumoDosDocumentos>(resumo)
   })
 
   rota('GET', `${PORTAL}/pacientes/:id/app/fotos/:fotoId/url`, (pedido) => {

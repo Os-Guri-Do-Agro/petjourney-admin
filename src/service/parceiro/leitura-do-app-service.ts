@@ -14,6 +14,7 @@ import type {
   DiarioParaClinicaDto,
   EntradaDoDiarioParaClinicaDto,
   PesosParaClinicaDto,
+  ResumoDeDocumentosParaClinicaDto,
   ResumoDoPacienteDto,
   SinalDoResumoDto,
   UrlDaFotoDto,
@@ -26,6 +27,8 @@ export type EntradaDoDiario = EntradaDoDiarioParaClinicaDto
 export type PesosParaClinica = PesosParaClinicaDto
 export type CarteirinhaParaClinica = CarteirinhaParaClinicaDto
 export type UrlDaFoto = UrlDaFotoDto
+export type ResumoDosDocumentos = ResumoDeDocumentosParaClinicaDto
+export type ConteudoDoResumoDosDocumentos = NonNullable<ResumoDosDocumentos['conteudo']>
 
 /** O diário se lê até 90 dias para trás (`LEITURA_APP_PERIODO_INVALIDO` com `minimo` e `maximo`). */
 export const DIARIO_DIAS_MAX = 90
@@ -95,6 +98,19 @@ export function urlDaFoto(pacienteId: string, fotoId: string, params?: ParceiroQ
   )
 }
 
+/**
+ * O resumo dos documentos por IA, a versão do veterinário (PJ-87WIZU, guia do resumo, parte 2): a
+ * clínica só lê a última versão, nunca pede a geração. Pede a chave `documentos` do consentimento
+ * (`SEM_CONSENTIMENTO` com `chave: 'documentos'`); `SEM_RESUMO` não diz por quê.
+ */
+export function lerResumoDosDocumentos(pacienteId: string, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<ResumoDosDocumentos>>(
+      comQuery(`${base(pacienteId)}/app/resumo-documentos`, { parceiroId: params?.parceiroId }),
+    ),
+  )
+}
+
 /** Por que a leitura foi recusada, do jeito que a tela mostra. */
 export type RecusaDaLeitura =
   | { tipo: 'semVinculo' }
@@ -121,6 +137,9 @@ export function lerRecusa(err: unknown, generico: string): RecusaDaLeitura {
       }
     case 'SEM_PERMISSAO':
       return { tipo: 'semPermissao' }
+    /* Paciente de outra clínica ou inexistente: o mesmo 403, sem dizer qual. */
+    case 'OWNERSHIP_FORBIDDEN':
+      return { tipo: 'semAcesso' }
     case 'LEITURA_APP_TAXA_EXCEDIDA':
       return {
         tipo: 'taxa',

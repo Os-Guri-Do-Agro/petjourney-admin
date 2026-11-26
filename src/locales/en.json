@@ -3189,7 +3189,8 @@
         "peso_do_app": "the home weight from the app",
         "resumo_do_paciente": "a patient summary",
         "servico_realizado_do_app": "a service record for the app",
-        "outro": "a record ({tipo})"
+        "outro": "a record ({tipo})",
+        "resumo_de_documentos": "the app document summary"
       },
       "guia": {
         "titulo": "How the audit log works",
@@ -10681,7 +10682,8 @@
       "consentimento": {
         "diarioCompleto": "Full diary",
         "peso": "Home weight",
-        "notas": "Notes"
+        "notas": "Notes",
+        "documentos": "Document summary"
       },
       "liberado": "shared",
       "naoLiberado": "not shared",
@@ -11252,6 +11254,52 @@
       "formato": "This photo is in a format the portal cannot open.",
       "indisponivel": "Photo unavailable.",
       "erro": "Could not open the photo right now. Try again in a few minutes."
+    },
+    "resumoDocumentos": {
+      "titulo": "Document summary (made by AI)",
+      "feitoEm": "Made on {data}",
+      "semResumo": "The owner has not created the document summary yet.",
+      "semConsentimento": "The owner has not shared the document summary with this clinic.",
+      "semVinculo": "No access to this patient in the app.",
+      "desatualizado": "There is {n} document newer than this summary. | There are {n} documents newer than this summary.",
+      "mudou": "The documents changed after this summary.",
+      "achados": "Findings",
+      "nenhumAchado": "No findings noted in the documents.",
+      "verMais": "Show repeated tests, medicines and timeline",
+      "verMenos": "Hide repeated tests, medicines and timeline",
+      "series": "Repeated tests",
+      "remedios": "Medicines mentioned",
+      "remediosDica": "Name only: the dose is in the document.",
+      "linhaDoTempo": "Timeline",
+      "documentoNovo": "New document",
+      "foraDoResumo": "Not in this summary",
+      "naoEntraram": "{n} document was left out of the summary (not read, not clinical or from another animal). | {n} documents were left out of the summary (not read, not clinical or from another animal).",
+      "faixa": "range {faixa}",
+      "categoria": {
+        "FORA_DA_FAIXA": "Out of range",
+        "IMAGEM": "Imaging",
+        "LAUDO": "Report",
+        "PRESCRICAO": "Prescription",
+        "PROCEDIMENTO": "Procedure",
+        "OUTRO": "Other"
+      },
+      "situacao": {
+        "ACIMA": "above range",
+        "ABAIXO": "below range",
+        "DENTRO": "within range",
+        "SEM_REFERENCIA": "no range in the document"
+      },
+      "tipo": {
+        "EXAME_LABORATORIAL": "Lab test",
+        "EXAME_DE_IMAGEM": "Imaging test",
+        "LAUDO": "Report",
+        "RECEITA": "Prescription",
+        "ATESTADO": "Certificate",
+        "RESUMO_DE_ALTA": "Discharge summary",
+        "CARTEIRA_DE_VACINA": "Vaccination card",
+        "ENCAMINHAMENTO": "Referral",
+        "OUTRO": "Other document"
+      }
     }
   },
   "fila": {

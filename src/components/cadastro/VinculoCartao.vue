@@ -222,7 +222,7 @@ async function resolver(pedido: PedidoDeCorrecao) {
 
 const liberado = computed(() =>
   vinculo.value
-    ? (['diarioCompleto', 'peso', 'notas'] as const).map((chave) => ({
+    ? (['diarioCompleto', 'peso', 'notas', 'documentos'] as const).map((chave) => ({
         chave,
         rotulo: t(`cadastro.vinculo.consentimento.${chave}`),
         sim: vinculo.value!.consentimento[chave],

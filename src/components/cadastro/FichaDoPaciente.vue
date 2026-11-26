@@ -37,6 +37,7 @@ import {
   useRotulosDoCadastro,
 } from '@/components/cadastro/useRotulosDoCadastro'
 import ResumoDoApp from '@/components/cadastro/ResumoDoApp.vue'
+import ResumoDosDocumentos from '@/components/cadastro/ResumoDosDocumentos.vue'
 import LinhaDoTempoDaFicha from '@/components/atendimento/LinhaDoTempoDaFicha.vue'
 import TratamentosDaFicha from '@/components/tratamentos/TratamentosDaFicha.vue'
 import DocumentosDoPaciente from '@/components/documentos/DocumentosDoPaciente.vue'
@@ -842,6 +843,9 @@ watch(excluindo, (aberta) => {
             :paciente-id="paciente.id"
             :nome="paciente.nome"
           />
+
+          <!-- O resumo dos documentos por IA, com a chave `documentos` ligada (PJ-87WIZU). -->
+          <ResumoDosDocumentos v-if="!clienteAnonimizado && leOApp" :paciente-id="paciente.id" />
 
           <!-- O app: o vínculo, as propostas e os pedidos de correção (E2-02). -->
           <VinculoCartao
