@@ -100,6 +100,7 @@ function efeito(campos: Partial<EfeitoDoDesligar> = {}): EfeitoDoDesligar {
     internacoesAbertas: 0,
     reservasFuturas: 0,
     hospedagensAbertas: 0,
+    animaisEmCuidado: 0,
     ...campos,
   }
 
