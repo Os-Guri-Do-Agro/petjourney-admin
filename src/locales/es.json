@@ -15205,7 +15205,9 @@
           "titulo": "La estadía empieza",
           "texto": "La mascota aparece aquí con el alojamiento, la salida prevista y las alertas. La fila abre la estadía."
         }
-      }
+      },
+      "boletimRetido": "Boletín en espera",
+      "boletimRetidoDica": "El boletín del día espera al hotel: el contacto con el responsable o el envío."
     },
     "alerta": {
       "ATRASADO": "Pasó la salida",

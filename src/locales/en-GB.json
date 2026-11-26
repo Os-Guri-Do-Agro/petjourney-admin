@@ -15205,7 +15205,9 @@
           "titulo": "The stay begins",
           "texto": "The pet shows up here with the room, the expected departure and the alerts. The row opens the stay."
         }
-      }
+      },
+      "boletimRetido": "Update waiting",
+      "boletimRetidoDica": "Today's update is waiting on the team: the call to the owner or sending it."
     },
     "alerta": {
       "ATRASADO": "Past check-out",

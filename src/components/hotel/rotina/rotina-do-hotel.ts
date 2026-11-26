@@ -139,17 +139,17 @@ export function pedeRegistro(tarefa: Pick<TarefaDaPrancheta, 'status'>) {
 }
 
 /**
- * Quem pode desfazer: só quem registrou, em até 12 h (o turno a API confere). A linha da prancheta
- * traz o nome da ficha de quem registrou e não o id (lacuna N38): a tela compara com o nome da
- * ficha da sessão e deixa a API dizer `DESFAZER_NEGADO` no caso raro de dois nomes iguais.
+ * Quem pode desfazer: só quem registrou, em até 12 h (o turno a API confere). Decide pelo id da
+ * ficha de quem registrou (`executadaPorId`, N38), não pelo nome: dois profissionais com o mesmo
+ * nome não se confundem. O nome continua aparecendo na linha.
  */
 export function podeDesfazerTarefa(
-  tarefa: Pick<TarefaDaPrancheta, 'status' | 'executadaPorNome' | 'executadaEm'>,
-  meuNome: string | null | undefined,
+  tarefa: Pick<TarefaDaPrancheta, 'status' | 'executadaPorId' | 'executadaEm'>,
+  meuId: string | null | undefined,
   agoraMs: number,
 ) {
   if (!REGISTRADAS.has(tarefa.status)) return false
-  if (!meuNome || tarefa.executadaPorNome !== meuNome) return false
+  if (!meuId || tarefa.executadaPorId !== meuId) return false
   if (!tarefa.executadaEm) return false
   const quando = Date.parse(tarefa.executadaEm)
   return Number.isFinite(quando) && agoraMs - quando < 12 * 3600 * 1000

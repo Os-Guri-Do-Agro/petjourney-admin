@@ -22,7 +22,8 @@ const props = defineProps<{
   /** "ontem", "amanhã" ou a data, quando a ronda não é do dia da prancheta. */
   outroDia: string
   podeMarcar: boolean
-  meuNome: string | null
+  /** A ficha da sessão: o Desfazer compara pelo id de quem registrou (N38). */
+  meuId: string | null
   agoraMs: number
   ocupada: string | null
 }>()
@@ -163,7 +164,7 @@ function meta(linha: TarefaDaPrancheta) {
             />
           </span>
           <span
-            v-else-if="podeMarcar && podeDesfazerTarefa(linha, meuNome, agoraMs)"
+            v-else-if="podeMarcar && podeDesfazerTarefa(linha, meuId, agoraMs)"
             class="ui-linha__fim"
           >
             <Button

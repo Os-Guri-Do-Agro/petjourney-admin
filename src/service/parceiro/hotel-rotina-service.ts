@@ -26,11 +26,13 @@ import type {
   PendenciaRecebidaDoHotelDto,
   PranchetaDto,
   PrevisaoDaRotinaDto,
+  ProgressoDaPranchetaDto,
   PropostaDeRotinaDto,
   PublicacaoDaRotinaDto,
   RondaDaPranchetaDto,
   RondaFeitaDto,
   RotinaPadraoDto,
+  StatusAgoraDaPendencia,
   SugestaoDeRotinaDto,
   TarefaDaPranchetaDto,
   TarefaKind,
@@ -39,20 +41,11 @@ import type {
 } from '../contrato/openapi'
 import { comIdempotencia } from '../idempotencia'
 
-/**
- * O progresso da prancheta, como o guia 42 descreve (`{ total, resolvidas }`). No contrato o nome
- * `ProgressoDto` colide com o progresso das metas do estoque (E6-02) e o tipo gerado é o outro
- * (lacuna N37): o tipo local fica até o schema ganhar nome próprio.
- */
-export type ProgressoDaPrancheta = { total: number; resolvidas: number }
-
-export type HospedeDaPrancheta = Omit<HospedeDaPranchetaDto, 'progresso'> & {
-  progresso: ProgressoDaPrancheta
-}
-export type Prancheta = Omit<PranchetaDto, 'progresso' | 'hospedes'> & {
-  progresso: ProgressoDaPrancheta
-  hospedes: HospedeDaPrancheta[]
-}
+/** O progresso da prancheta (`{ total, resolvidas }`), com nome próprio no contrato desde a N37. */
+export type ProgressoDaPrancheta = ProgressoDaPranchetaDto
+export type HospedeDaPrancheta = HospedeDaPranchetaDto
+export type Prancheta = PranchetaDto
+/** `executadaPorId` é a ficha de quem registrou (N38): o Desfazer compara por ele, não pelo nome. */
 export type TarefaDaPrancheta = TarefaDaPranchetaDto
 export type RondaDaPrancheta = RondaDaPranchetaDto
 export type RondaFeita = RondaFeitaDto
@@ -75,19 +68,11 @@ export type PropostaDeRotina = PropostaDeRotinaDto
 export type SugestaoDeRotina = SugestaoDeRotinaDto
 export type AprovacaoDaProposta = AprovacaoDaPropostaDto
 
-/**
- * O `statusAgora` da passagem recebida vem como objeto vazio no contrato gerado (lacuna N37); o
- * guia 43 diz que é o status da tarefa, `RETIRADA` ou `NAO_REGISTRADA`.
- */
-export type PendenciaRecebida = Omit<PendenciaRecebidaDoHotelDto, 'statusAgora'> & {
-  statusAgora: string
-}
-export type PassagemRecebida = Omit<PassagemRecebidaDoHotelDto, 'pendencias'> & {
-  pendencias: PendenciaRecebida[]
-}
-export type TurnoAtual = Omit<TurnoAtualDoHotelDto, 'passagemRecebida'> & {
-  passagemRecebida: PassagemRecebida | null
-}
+/** `statusAgora` da passagem recebida: os 5 de `StatusTarefa`, `RETIRADA` ou `NAO_REGISTRADA` (N37). */
+export type StatusAgora = StatusAgoraDaPendencia
+export type PendenciaRecebida = PendenciaRecebidaDoHotelDto
+export type PassagemRecebida = PassagemRecebidaDoHotelDto
+export type TurnoAtual = TurnoAtualDoHotelDto
 export type TurnoDoHotel = TurnoDoHotelDto
 export type PendenciaDoTurno = TurnoAtualDoHotelDto['pendencias'][number]
 export type EntregaDoTurno = EntregaDoTurnoDoHotelDto

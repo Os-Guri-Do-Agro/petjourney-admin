@@ -195,7 +195,7 @@ const resolvidasNoPassado = computed(() =>
 
 const escreve = computed(() => Boolean(store.modulo('HOTEL')?.podeEscrever))
 const podeMarcar = computed(() => escreve.value && store.temPermissao('hotel.rotina'))
-const meuNome = computed(() => store.eu?.profissional?.nome ?? null)
+const meuId = computed(() => store.eu?.profissional?.id ?? null)
 const agoraMs = computed(() => (prancheta.value ? Date.parse(prancheta.value.agora) : Date.now()))
 
 function ronda(chave: string, ids: string[]) {
@@ -415,7 +415,7 @@ function metaDoHospede(hospede: HospedeDaPrancheta) {
                 :ronda="item"
                 :outro-dia="outroDia(item)"
                 :pode-marcar="podeMarcar"
-                :meu-nome="meuNome"
+                :meu-id="meuId"
                 :agora-ms="agoraMs"
                 :ocupada="marcacao.ocupada.value"
                 @feito="marcacao.feito"
@@ -458,7 +458,7 @@ function metaDoHospede(hospede: HospedeDaPrancheta) {
               :ronda="item"
               :outro-dia="outroDia(item)"
               :pode-marcar="podeMarcar"
-              :meu-nome="meuNome"
+              :meu-id="meuId"
               :agora-ms="agoraMs"
               :ocupada="marcacao.ocupada.value"
               @feito="marcacao.feito"
@@ -508,7 +508,7 @@ function metaDoHospede(hospede: HospedeDaPrancheta) {
                 :ronda="item"
                 :outro-dia="outroDia(item)"
                 :pode-marcar="podeMarcar"
-                :meu-nome="meuNome"
+                :meu-id="meuId"
                 :agora-ms="agoraMs"
                 :ocupada="marcacao.ocupada.value"
                 @feito="marcacao.feito"

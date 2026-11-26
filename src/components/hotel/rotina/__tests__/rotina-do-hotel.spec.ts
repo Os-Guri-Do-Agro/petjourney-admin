@@ -41,6 +41,7 @@ function tarefa(parcial: Partial<TarefaDaPrancheta> = {}): TarefaDaPrancheta {
     motivo: null,
     observacao: null,
     executadaEm: null,
+    executadaPorId: null,
     executadaPorNome: null,
     ...parcial,
   }
@@ -183,20 +184,30 @@ describe('desfazer', () => {
   const feita = tarefa({
     status: 'FEITA',
     situacao: 'FEITA',
+    executadaPorId: 'prof-daniel',
     executadaPorNome: 'Daniel',
     executadaEm: '2026-11-09T12:05:00-03:00',
   })
 
-  it('só quem registrou, em até 12 h', () => {
-    expect(podeDesfazerTarefa(feita, 'Daniel', agora)).toBe(true)
-    expect(podeDesfazerTarefa(feita, 'Ana', agora)).toBe(false)
+  it('só quem registrou (pelo id da ficha), em até 12 h', () => {
+    expect(podeDesfazerTarefa(feita, 'prof-daniel', agora)).toBe(true)
+    expect(podeDesfazerTarefa(feita, 'prof-ana', agora)).toBe(false)
     expect(podeDesfazerTarefa(feita, null, agora)).toBe(false)
-    expect(podeDesfazerTarefa(feita, 'Daniel', agora + 12 * 3600 * 1000)).toBe(false)
+    expect(podeDesfazerTarefa(feita, 'prof-daniel', agora + 12 * 3600 * 1000)).toBe(false)
+  })
+
+  it('dois profissionais com o mesmo nome não se confundem (N38)', () => {
+    const doOutroDaniel = { ...feita, executadaPorId: 'prof-daniel-2' }
+    expect(podeDesfazerTarefa(doOutroDaniel, 'prof-daniel', agora)).toBe(false)
+  })
+
+  it('ficha de outro parceiro (executadaPorId nulo) não se desfaz por aqui', () => {
+    expect(podeDesfazerTarefa({ ...feita, executadaPorId: null }, 'prof-daniel', agora)).toBe(false)
   })
 
   it('pendente e suspensa não se desfazem', () => {
-    expect(podeDesfazerTarefa(tarefa(), 'Daniel', agora)).toBe(false)
-    expect(podeDesfazerTarefa({ ...feita, status: 'SUSPENSA' }, 'Daniel', agora)).toBe(false)
+    expect(podeDesfazerTarefa(tarefa(), 'prof-daniel', agora)).toBe(false)
+    expect(podeDesfazerTarefa({ ...feita, status: 'SUSPENSA' }, 'prof-daniel', agora)).toBe(false)
   })
 })
 

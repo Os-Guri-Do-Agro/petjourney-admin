@@ -15205,7 +15205,9 @@
           "titulo": "A estadia começa",
           "texto": "O pet aparece aqui com a acomodação, a saída prevista e os alertas. A linha abre a estadia."
         }
-      }
+      },
+      "boletimRetido": "Boletim esperando",
+      "boletimRetidoDica": "O boletim do dia espera a casa: o contato com o responsável ou o envio."
     },
     "alerta": {
       "ATRASADO": "Passou da saída",

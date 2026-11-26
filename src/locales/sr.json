@@ -15205,7 +15205,9 @@
           "titulo": "Boravak počinje",
           "texto": "Ljubimac se pojavljuje ovde sa smeštajem, planiranim odlaskom i upozorenjima. Red otvara boravak."
         }
-      }
+      },
+      "boletimRetido": "Izveštaj čeka",
+      "boletimRetidoDica": "Dnevni izveštaj čeka hotel: kontakt sa vlasnikom ili slanje."
     },
     "alerta": {
       "ATRASADO": "Prošao odlazak",

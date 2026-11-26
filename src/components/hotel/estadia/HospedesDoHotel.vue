@@ -3,6 +3,9 @@
  * Quem está na casa pela API (E7-04a, guia e7 27): o animal, a baia, a entrada e a saída prevista,
  * a adaptação e os alertas (passou da saída, estressado, medicação, tarefas atrasadas), com o tom
  * da API (o que pede atenção primeiro). A linha abre a estadia.
+ *
+ * O hóspede com boletim do dia esperando a casa (`boletimRetido`, N39, o mesmo critério do selo de
+ * boletins retidos do menu) ganha a marca "Boletim esperando"; os outros, não.
  */
 import Button from 'primevue/button'
 import { computed, onMounted, ref } from 'vue'
@@ -51,7 +54,15 @@ async function carregar(mais = false) {
 onMounted(() => void carregar())
 
 const ORDEM = { RISCO: 0, ATENCAO: 1, OK: 2 } as const
-const ordenados = computed(() => [...hospedes.value].sort((a, b) => ORDEM[a.tom] - ORDEM[b.tom]))
+/*
+ * O selo de boletins retidos do menu traz para cá (N39: não há lista de boletins da casa): no mesmo
+ * tom, quem tem boletim esperando vem antes, com a marca na linha.
+ */
+const ordenados = computed(() =>
+  [...hospedes.value].sort(
+    (a, b) => ORDEM[a.tom] - ORDEM[b.tom] || Number(b.boletimRetido) - Number(a.boletimRetido),
+  ),
+)
 
 const resumo = computed(() =>
   carregando.value && !hospedes.value.length
@@ -141,6 +152,12 @@ const passosDoHospede = computed<PassoDoGuia[]>(() => {
                   <span v-for="a in h.alertas" :key="a" class="ui-selo" :class="TOM[h.tom]">{{
                     t(`estadiaDoHotel.alerta.${a}`)
                   }}</span>
+                  <span
+                    v-if="h.boletimRetido"
+                    class="ui-selo ui-selo--risco"
+                    :title="t('estadiaDoHotel.hospedes.boletimRetidoDica')"
+                    >{{ t('estadiaDoHotel.hospedes.boletimRetido') }}</span
+                  >
                 </span>
                 <span class="ui-linha__meta">{{ meta(h) }}</span>
               </span>
