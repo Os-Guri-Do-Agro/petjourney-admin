@@ -887,7 +887,9 @@
         "MODULO_SUSPENSO": "Módulo suspendido: puede consultar lo que ya se registró, pero no crear ni modificar.",
         "MODULO_DESLIGADO": "Módulo desactivado: puede consultar lo que ya se registró, pero no crear ni modificar.",
         "PRAZO_VENCIDO": "El período del módulo terminó: puede consultar lo que ya se registró, pero no crear ni modificar.",
-        "PARCEIRO_NAO_OPERACIONAL": "El registro de la empresa no está habilitado: puede consultar lo que ya se registró, pero no crear ni modificar."
+        "PARCEIRO_NAO_OPERACIONAL": "El registro de la empresa no está habilitado: puede consultar lo que ya se registró, pero no crear ni modificar.",
+        "CNPJ_ENCERRADO": "El CNPJ figura como cerrado en la Receita. Habla con soporte. Puedes consultar lo que ya se registró, y la invitación ya enviada todavía puede aceptarse.",
+        "SEM_CATEGORIA": "El registro está sin la categoría ONG: puedes consultar lo que ya se registró, pero no crear ni modificar."
       },
       "pedidoEnviado": "Solicitud enviada",
       "pedidoEnviadoDetalhe": "El equipo PetJourney analizará la solicitud.",
@@ -10293,6 +10295,12 @@
       "campanhas": "Campañas",
       "ongs": "ONG y adopción",
       "relatorio": "Informe"
+    },
+    "ong": {
+      "rotulo": "ONG",
+      "animais": "Animales",
+      "entregas": "Entregas",
+      "perfil": "Perfil de la ONG"
     }
   },
   "pendencias": {
@@ -16043,6 +16051,338 @@
   "avisosDaClinica": {
     "tipo": {
       "VACINA_LEMBRETE_DA_CLINICA": "Recordatorio de vacuna"
+    }
+  },
+  "ong": {
+    "status": {
+      "EM_CUIDADO": "Bajo cuidado",
+      "ENTREGUE": "Entregado",
+      "ENCERRADO": "Cerrado"
+    },
+    "origem": {
+      "RESGATE": "Rescate",
+      "DOACAO_DE_RESPONSAVEL": "Donación de un responsable",
+      "NASCIDO_NA_ONG": "Nació en la ONG",
+      "TRANSFERENCIA": "Traslado desde otra entidad",
+      "RETORNO_DE_ADOCAO": "Volvió de una adopción",
+      "OUTRO": "Otra forma"
+    },
+    "manejo": {
+      "MORDE": "Muerde",
+      "PRECISA_FOCINHEIRA": "Necesita bozal",
+      "PRECISA_SEDACAO": "Necesita sedación",
+      "AGRESSIVO_COM_ANIMAIS": "Agresivo con otros animales",
+      "MEDROSO": "Miedoso"
+    },
+    "encerramento": {
+      "OBITO": "Fallecimiento",
+      "FUGA": "Fuga",
+      "TRANSFERIDO": "Trasladado",
+      "OUTRO": "Otro motivo"
+    },
+    "animais": {
+      "contador": "{emCuidado} de {limite} bajo cuidado",
+      "cadastrar": "Registrar animal",
+      "buscar": "Buscar por nombre",
+      "filtro": {
+        "rotulo": "Situación",
+        "EM_CUIDADO": "Bajo cuidado",
+        "ENTREGUE": "Entregados",
+        "ENCERRADO": "Cerrados"
+      },
+      "chegouEm": "Llegó el {data}",
+      "entregueEm": "Entregado el {data}",
+      "carregarMais": "Cargar más",
+      "erro": "No se pudieron cargar los animales.",
+      "vazio": {
+        "busca": "Ningún animal con ese nombre",
+        "EM_CUIDADO": {
+          "titulo": "Ningún animal bajo cuidado",
+          "texto": "Registra los animales que están con la ONG. La salud que registres aquí va junto en la adopción."
+        },
+        "ENTREGUE": {
+          "titulo": "Ningún animal entregado",
+          "texto": "Cuando alguien acepta la invitación de adopción en la app, el animal aparece aquí."
+        },
+        "ENCERRADO": {
+          "titulo": "Ningún registro cerrado",
+          "texto": "Fallecimientos, fugas y traslados a otra entidad quedan aquí."
+        }
+      },
+      "guia": {
+        "titulo": "Cómo funciona",
+        "cadastrar": {
+          "titulo": "Registra el animal",
+          "texto": "Nombre, especie, la llegada a la ONG y las observaciones."
+        },
+        "saude": {
+          "titulo": "Registra la salud",
+          "texto": "Vacunas, desparasitantes y pesos, en la ficha del animal."
+        },
+        "convite": {
+          "titulo": "Genera la invitación de adopción",
+          "texto": "Quien adopta recibe el animal en la app, con el historial de salud."
+        }
+      }
+    },
+    "entregas": {
+      "pendentes": "Ninguna invitación esperando | 1 invitación esperando respuesta | {n} invitaciones esperando respuesta",
+      "noMes": "ninguno entregado este mes | 1 entregado este mes | {n} entregados este mes",
+      "dica": "Las invitaciones de adopción están en la ficha de cada animal.",
+      "vazio": {
+        "titulo": "Ningún animal entregado todavía",
+        "texto": "Genera la invitación de adopción en la ficha del animal. Cuando la persona la acepte en la app, el animal aparece aquí.",
+        "acao": "Ver los animales"
+      }
+    },
+    "campos": {
+      "nome": "Nombre",
+      "cor": "Color del pelaje",
+      "entradaEm": "Llegada a la ONG",
+      "origem": "Cómo llegó",
+      "nascimentoDica": "Si no sabes el día, elige una fecha aproximada.",
+      "manejo": "Avisos de manejo",
+      "manejoNenhum": "Ninguno",
+      "observacaoInterna": "Observación interna (queda solo con la ONG)",
+      "observacaoInternaDica": "Nunca llega a quien adopta.",
+      "recado": "Mensaje para quien adopte (va a la app)",
+      "recadoDica": "Aparece en la pantalla de aceptación y en el perfil de la mascota en la app.",
+      "especieNaoMuda": "La especie no cambia después del registro.",
+      "nomeObrigatorio": "Escribe el nombre del animal.",
+      "especieObrigatoria": "Elige la especie.",
+      "especieOutraObrigatoria": "Indica qué animal es.",
+      "entradaObrigatoria": "Elige el día en que llegó el animal.",
+      "origemObrigatoria": "Elige cómo llegó el animal."
+    },
+    "novo": {
+      "titulo": "Registrar animal",
+      "passos": {
+        "rotulo": "Pasos del registro",
+        "animal": "Animal",
+        "chegada": "Llegada",
+        "observacoes": "Observaciones"
+      },
+      "dicas": {
+        "animal": "Quién es el animal. Nombre y especie son obligatorios.",
+        "chegada": "Cuándo y cómo llegó el animal a la ONG. El resto es opcional.",
+        "observacoes": "Los dos textos son opcionales y van a lugares distintos."
+      },
+      "avancar": "Continuar",
+      "voltar": "Volver",
+      "cadastrar": "Registrar",
+      "cadastrado": "{nome} registrado."
+    },
+    "editar": {
+      "titulo": "Editar ficha",
+      "salvo": "Ficha guardada."
+    },
+    "ficha": {
+      "voltar": "Animales",
+      "entregar": "Entregar en adopción",
+      "editar": "Editar",
+      "mais": "Más",
+      "trocarFoto": "Cambiar foto",
+      "porFoto": "Poner foto",
+      "fotoAlt": "Foto de {nome}",
+      "fotoGrande": "La foto supera los 10 MB. Elige una más pequeña.",
+      "encerrar": "Cerrar registro",
+      "resumo": {
+        "EM_CUIDADO": "Bajo cuidado desde el {data}",
+        "ENTREGUE": "Entregado el {data}",
+        "ENCERRADO": "Cerrado el {data}: {motivo}"
+      },
+      "identidade": {
+        "titulo": "Identidad",
+        "descricao": "Quién es el animal y cómo llegó a la ONG."
+      },
+      "observacoes": {
+        "titulo": "Observaciones",
+        "descricao": "Lo que queda con la ONG y lo que va a quien adopte.",
+        "vazia": "Nada escrito."
+      },
+      "retornoDe": "Este registro es el regreso de una adopción.",
+      "verAnterior": "Ver la ficha anterior",
+      "naoEncontrado": {
+        "titulo": "No encontramos este animal",
+        "texto": "Puede ser de otra ONG, o la dirección está equivocada.",
+        "voltar": "Volver a los animales"
+      },
+      "entregue": {
+        "titulo": "Lo que se entregó el {data}",
+        "para": "Entregado a {nome}",
+        "semNome": "Entregado por la app",
+        "descricao": "La ficha como estaba en la entrega. Después, la ONG ya no ve la mascota."
+      },
+      "retorno": {
+        "botao": "Registrar regreso",
+        "titulo": "Registrar el regreso",
+        "texto": "¿{nome} volvió a la ONG? Se crea una ficha nueva bajo cuidado, con la identidad y la salud de lo que se entregó. La cuenta de quien adoptó no cambia.",
+        "limite": "La ficha nueva cuenta en el límite de animales bajo cuidado.",
+        "confirmar": "Registrar regreso",
+        "feito": "Regreso registrado. Esta es la ficha nueva.",
+        "microchipFora": "El microchip quedó solo en la ficha: otro animal de la app ya usa este número."
+      }
+    },
+    "saude": {
+      "titulo": "Salud",
+      "descricao": "Vacunas, desparasitantes y pesos registrados por la ONG. Van junto en la adopción.",
+      "descricaoEntregue": "Lo que la ONG registró hasta la entrega.",
+      "vacinas": "Vacunas",
+      "vermifugos": "Desparasitantes",
+      "pesos": "Pesos",
+      "adicionar": {
+        "vacinas": "Agregar vacuna",
+        "vermifugos": "Agregar desparasitante",
+        "pesos": "Agregar peso"
+      },
+      "nenhum": {
+        "vacinas": "Ninguna vacuna registrada.",
+        "vermifugos": "Ningún desparasitante registrado.",
+        "pesos": "Ningún peso registrado."
+      },
+      "aplicadaEm": "Aplicada el {data}",
+      "administradoEm": "Dado el {data}",
+      "dose": "Dosis {dose} de {total}",
+      "doseSo": "Dosis {dose}",
+      "lote": "Lote {lote}",
+      "remover": "Quitar",
+      "removerDe": "Quitar {nome}",
+      "confirmarRemocao": "¿Quitar este registro?",
+      "manter": "Mantener",
+      "removido": "Registro quitado.",
+      "descricaoEncerrado": "Lo que la ONG registró hasta el cierre."
+    },
+    "registro": {
+      "titulo": {
+        "vacinas": "Registrar vacuna",
+        "vermifugos": "Registrar desparasitante",
+        "pesos": "Registrar peso"
+      },
+      "nomeVacina": "Vacuna",
+      "nomeVermifugo": "Producto",
+      "aplicadaEm": "Día de la aplicación",
+      "administradoEm": "Día en que se dio",
+      "data": "Día del pesaje",
+      "peso": "Peso",
+      "lote": "Lote",
+      "fabricante": "Fabricante",
+      "dose": "Dosis",
+      "dosesNaSerie": "Dosis de la serie",
+      "proxima": "Marcar la próxima dosis",
+      "proximaDica": "Se convierte en el recordatorio de quien adopte. Mientras el animal está con la ONG, no avisa a nadie.",
+      "proximaEm": "Próxima dosis",
+      "salvar": "Registrar",
+      "registrado": "Registrado.",
+      "nomeObrigatorio": "Escribe el nombre.",
+      "dataObrigatoria": "Elige el día.",
+      "pesoObrigatorio": "Indica el peso, de 0,01 a 200 kg."
+    },
+    "encerrar": {
+      "titulo": "Cerrar registro",
+      "texto": "Úsalo cuando {nome} ya no vaya a ser entregado por la ONG. La invitación vigente se cancela y se libera el lugar.",
+      "motivo": "Motivo",
+      "escolha": "Elige el motivo.",
+      "irreversivel": "No se puede deshacer: la ficha queda solo para consulta.",
+      "confirmar": "Cerrar",
+      "feito": "Registro cerrado."
+    },
+    "convites": {
+      "titulo": "Invitaciones de adopción",
+      "descricao": "Vale 7 días, y vale la última: generar otra cancela la que esté esperando.",
+      "descricaoEntregue": "Las invitaciones que tuvo este animal.",
+      "gerar": "Generar invitación",
+      "gerarOutro": "Generar otra",
+      "nenhum": "Ninguna invitación generada",
+      "status": {
+        "PENDENTE": "Esperando",
+        "ACEITA": "Aceptada",
+        "RECUSADA": "Rechazada",
+        "EXPIRADA": "Vencida",
+        "CANCELADA": "Cancelada",
+        "OUTRO": "Otro"
+      },
+      "para": "Para {nome}",
+      "geradoPor": "Generada el {data} por {nome}",
+      "geradoEm": "Generada el {data}",
+      "venceEm": "Vence el {data}",
+      "vencidoEm": "Venció el {data}",
+      "respondidoEm": "Respondida el {data}",
+      "cancelar": "Cancelar invitación",
+      "confirmarCancelar": "¿Cancelar esta invitación?",
+      "manter": "Mantener",
+      "cancelado": "Invitación cancelada. El enlace y el código ya no valen.",
+      "erro": "No se pudieron cargar las invitaciones."
+    },
+    "convite": {
+      "titulo": "Entregar en adopción",
+      "lede": "La invitación de {nome}: quien adopta abre el enlace en la app y recibe el animal con la salud registrada por la ONG.",
+      "adotanteNome": "Nombre de quien va a adoptar",
+      "adotanteTelefone": "WhatsApp de quien va a adoptar",
+      "telefoneExemplo": "(11) 98765-4321",
+      "opcionalDica": "Los dos son opcionales: sirven para el saludo y para abrir WhatsApp.",
+      "anteriorDeixaDeValer": "La invitación anterior deja de valer.",
+      "quemGeraNaoAceita": "Quien genera la invitación no puede aceptarla. Si alguien del equipo va a adoptar, otra persona la genera.",
+      "gerar": "Generar invitación",
+      "pronto": "Invitación de {nome} lista.",
+      "anteriorCancelado": "La invitación anterior dejó de valer.",
+      "whatsapp": "Enviar por WhatsApp",
+      "copiarMensagem": "Copiar mensaje",
+      "copiarLink": "Copiar enlace",
+      "copiado": "Copiado.",
+      "telaCheia": "QR en pantalla completa",
+      "qrAlt": "QR de la invitación de adopción de {nome}",
+      "qrComo": "En la app, toca Tengo un código de adopción y escribe {codigo}, o lee el QR con la cámara del celular.",
+      "codigo": "Código para escribir en la app",
+      "validade": "Vale hasta el {data}",
+      "link": "Enlace",
+      "mensagem": "Mensaje",
+      "soAgora": "El enlace solo aparece ahora. Envíalo o cópialo antes de cerrar.",
+      "fechar": "Cerrar"
+    },
+    "perfil": {
+      "resumo": "El límite de animales y lo que dice la Receita sobre el CNPJ.",
+      "gratis": "El módulo ONG es gratuito, sin plazo, y viene activado con la categoría ONG.",
+      "numeros": {
+        "titulo": "Animales",
+        "emCuidado": "Bajo cuidado",
+        "entreguesNoMes": "Entregados este mes",
+        "pendentes": "Invitaciones esperando",
+        "deLimite": "{emCuidado} de {limite}"
+      },
+      "limiteDica": "Para aumentar el límite, habla con soporte.",
+      "cnpj": {
+        "titulo": "CNPJ",
+        "descricao": "Lo que trajo la consulta a la Receita.",
+        "natureza": "Naturaleza jurídica",
+        "situacao": "Situación en la Receita",
+        "naoLida": "Todavía no consultada",
+        "trocar": "Para cambiar el CNPJ de la ONG, habla con soporte."
+      },
+      "natureza": {
+        "n3999": "Asociación privada",
+        "n3069": "Fundación privada",
+        "n3301": "Organización social",
+        "n3204": "Fundación o asociación extranjera"
+      },
+      "situacao": {
+        "ATIVA": "Activa",
+        "SUSPENSA": "Suspendida",
+        "INAPTA": "Inapta",
+        "BAIXADA": "Dada de baja",
+        "NULA": "Nula"
+      },
+      "suporte": "Hablar con soporte"
+    },
+    "cnpj": {
+      "irregular": "El CNPJ figura como inapto o suspendido en la Receita. No se bloqueó nada, pero regularízalo.",
+      "encerrado": "El CNPJ figura como cerrado en la Receita. Habla con soporte."
+    },
+    "erros": {
+      "taxa": "Demasiados cambios en poco tiempo. Intenta de nuevo en unos minutos.",
+      "microchipDica": "Lee el QR del collar o busca el número en la base de microchips.",
+      "naoEncontrado": "No encontramos este animal en esta ONG.",
+      "salvar": "No se pudo guardar. Intenta de nuevo.",
+      "carregar": "No se pudo cargar. Intenta de nuevo."
     }
   }
 }

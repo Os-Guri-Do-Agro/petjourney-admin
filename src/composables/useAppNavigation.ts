@@ -315,6 +315,16 @@ const PATIENT_ROUTES = [
   },
 ] as const satisfies readonly RotaDeModulo[]
 
+/**
+ * O módulo ONG (PJ-TJ07TW): os animais sob cuidado, as entregas e o perfil da ONG. Aparece com o
+ * módulo ONG lendo (`GET /parceiro/portal/modulos`), que vem ligado com a categoria ONG.
+ */
+const ONG_ROUTES = [
+  { key: 'espacos.ong.animais', to: '/ong/animais', icon: 'ph ph-paw-print' },
+  { key: 'espacos.ong.entregas', to: '/ong/entregas', icon: 'ph ph-hand-heart' },
+  { key: 'espacos.ong.perfil', to: '/ong/perfil', icon: 'ph ph-identification-card' },
+] as const satisfies readonly RotaDeModulo[]
+
 export function useAppNavigation() {
   const { t, te, locale } = useI18n()
   const parceiroStore = useParceiroStore()
@@ -358,6 +368,12 @@ export function useAppNavigation() {
   const hasHotelProfile = computed(() =>
     HOTEL_BLOCKS.some((bloco) => bloco.rotas.some((rota) => podeAbrir(rota.to))),
   )
+
+  const ongItems = computed<AppNavigationItem[]>(() => {
+    void locale.value
+
+    return ONG_ROUTES.filter((rota) => podeAbrir(rota.to)).map(decorarRota)
+  })
 
   const hotelItems = computed<AppNavigationItem[]>(() =>
     hotelBlocos.value.flatMap((bloco) => bloco.items),
@@ -596,6 +612,15 @@ export function useAppNavigation() {
       })
     }
 
+    if (ongItems.value.length) {
+      sections.push({
+        id: 'ong',
+        label: t('espacos.ong.rotulo'),
+        icon: 'ph ph-hand-heart',
+        items: ongItems.value,
+      })
+    }
+
     sections.push({
       id: 'account',
       label: t('nav.sections.account'),
@@ -642,6 +667,10 @@ export function resolveActiveSectionId(path: string, hasClinical: boolean) {
    */
   if (path.startsWith('/hotel')) {
     return 'hotel'
+  }
+
+  if (path === '/ong' || path.startsWith('/ong/')) {
+    return 'ong'
   }
 
   if (path === '/inicio') {

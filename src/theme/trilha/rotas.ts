@@ -23,6 +23,8 @@ const LUGAR_DA_SECAO: Record<string, LugarDoTrilha> = {
   clinical: 'clinica',
   patients: 'pets',
   hotel: 'hotel',
+  /* A ONG (PJ-TJ07TW) veste a cor de Pets: o trabalho dela é o animal. */
+  ong: 'pets',
   account: 'conta',
 }
 

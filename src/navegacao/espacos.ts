@@ -25,7 +25,7 @@ import type { LugarDoTrilha } from '@/theme/trilha/rotas'
  * pendência —, e este arquivo só reorganiza.
  */
 
-export type IdDoEspaco = 'inicio' | 'clinica' | 'hotel' | 'portal' | 'saude' | 'conta'
+export type IdDoEspaco = 'inicio' | 'clinica' | 'hotel' | 'ong' | 'portal' | 'saude' | 'conta'
 
 export type TomDoSelo = 'neutro' | 'atencao' | 'risco'
 
@@ -278,6 +278,35 @@ const RECEITA_DO_HOTEL: ReceitaDeDestino[] = [
   },
 ]
 
+/*
+ * A ONG (PJ-TJ07TW): os animais sob cuidado e a ficha de cada um, as entregas e o perfil da ONG. O
+ * dia a dia é cuidar e entregar; o perfil (limite e CNPJ) é gestão.
+ */
+const RECEITA_DA_ONG: ReceitaDeDestino[] = [
+  {
+    id: 'animais',
+    chave: 'espacos.ong.animais',
+    icone: 'ph ph-paw-print',
+    secao: 'dia',
+    abas: [{ rota: '/ong/animais', chave: 'espacos.ong.animais' }],
+    prefixos: ['/ong/animal/'],
+  },
+  {
+    id: 'entregas',
+    chave: 'espacos.ong.entregas',
+    icone: 'ph ph-hand-heart',
+    secao: 'dia',
+    abas: [{ rota: '/ong/entregas', chave: 'espacos.ong.entregas' }],
+  },
+  {
+    id: 'perfil',
+    chave: 'espacos.ong.perfil',
+    icone: 'ph ph-identification-card',
+    secao: 'gestao',
+    abas: [{ rota: '/ong/perfil', chave: 'espacos.ong.perfil' }],
+  },
+]
+
 const ICONE_DO_PORTAL: Record<string, string> = {
   '/parceiro/programas': 'ph ph-squares-four',
   '/parceiro/divulgacao': 'ph ph-megaphone-simple',
@@ -527,6 +556,21 @@ export function montarEspacos(
     )
   }
 
+  const ong = secao('ong')
+
+  if (ong) {
+    espacos.push(
+      espacoDe(
+        'ong',
+        t('espacos.ong.rotulo'),
+        'ph ph-hand-heart',
+        'pets',
+        montarPelaReceita(RECEITA_DA_ONG, ong.items, t),
+        t,
+      ),
+    )
+  }
+
   const portal = secao('portal')
 
   if (portal) {
@@ -612,6 +656,10 @@ export function lugarDaRota(caminho: string): LugarDoTrilha {
 
   if (caminho.startsWith('/parceiro')) {
     return 'portal'
+  }
+
+  if (caminho === '/ong' || caminho.startsWith('/ong/')) {
+    return 'pets'
   }
 
   if (caminho.startsWith('/saude-publica')) {

@@ -1,5 +1,5 @@
 /**
- * Quem abre cada tela da Clínica e do Hotel.
+ * Quem abre cada tela da Clínica, do Hotel e da ONG.
  *
  * Uma tela de módulo abre quando:
  * - o módulo dela tem `podeLer` no `GET /parceiro/portal/eu` (E1-02);
@@ -241,12 +241,23 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     integrada: true,
   },
   { prefixo: '/hotel', modulo: 'HOTEL', permissao: 'hotel.ler', integrada: false },
+
+  /*
+   * ONG (PJ-TJ07TW): os animais sob cuidado, a ficha, as entregas e o perfil. O módulo vem ligado
+   * com a categoria ONG (regra de 26/11/2026); ler é `ong.ler` em todas, e a escrita a tela decide
+   * por `ong.escrever` e `ong.entregar`.
+   */
+  { prefixo: '/ong/animais', modulo: 'ONG', permissao: 'ong.ler', integrada: true },
+  { prefixo: '/ong/animal', modulo: 'ONG', permissao: 'ong.ler', integrada: true },
+  { prefixo: '/ong/entregas', modulo: 'ONG', permissao: 'ong.ler', integrada: true },
+  { prefixo: '/ong/perfil', modulo: 'ONG', permissao: 'ong.ler', integrada: true },
 ]
 
 /** Caminhos de módulo que não têm entrada própria caem no prefixo do módulo. */
 const PREFIXOS_DO_MODULO: ReadonlyArray<[string, NomeDoModulo]> = [
   ['/clinica', 'CLINICA'],
   ['/hotel', 'HOTEL'],
+  ['/ong', 'ONG'],
 ]
 
 function casa(caminho: string, prefixo: string) {

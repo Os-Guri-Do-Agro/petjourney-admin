@@ -15,6 +15,7 @@ import { computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
+import { ICONE_DOS_AVISOS_DA_ONG, rotaDoAvisoDaOng } from '@/components/ong/regras-da-ong'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useAvisosDoParceiro } from '@/composables/useAvisosDoParceiro'
 import { useSidePanelOffset } from '@/composables/useSidePanelOffset'
@@ -61,7 +62,8 @@ function rotaDoAviso(aviso: Aviso): string | null {
     return primeiro ? `/clinica/ficha/${primeiro}` : '/clinica/pacientes'
   }
 
-  return ROTA_DO_AVISO[aviso.tipo] ?? null
+  /* A ONG (PJ-TJ07TW): o aceite e a recusa abrem a ficha do animal; o CNPJ irregular, o perfil. */
+  return rotaDoAvisoDaOng(aviso) ?? ROTA_DO_AVISO[aviso.tipo] ?? null
 }
 
 const ICONE_DO_AVISO: Record<string, string> = {
@@ -71,6 +73,7 @@ const ICONE_DO_AVISO: Record<string, string> = {
   VINCULO_RESPONDIDO: 'ph ph-device-mobile',
   VINCULO_ENCERRADO_PELO_RESPONSAVEL: 'ph ph-link-break',
   ADESAO_EM_QUEDA: 'ph ph-pill',
+  ...ICONE_DOS_AVISOS_DA_ONG,
 }
 
 const { t, locale } = useI18n()

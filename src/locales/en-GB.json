@@ -887,7 +887,9 @@
         "MODULO_SUSPENSO": "Module suspended: you can view what has already been recorded, but not create or change anything.",
         "MODULO_DESLIGADO": "Module switched off: you can view what has already been recorded, but not create or change anything.",
         "PRAZO_VENCIDO": "The module period has ended: you can view what has already been recorded, but not create or change anything.",
-        "PARCEIRO_NAO_OPERACIONAL": "The company registration has not been cleared: you can view what has already been recorded, but not create or change anything."
+        "PARCEIRO_NAO_OPERACIONAL": "The company registration has not been cleared: you can view what has already been recorded, but not create or change anything.",
+        "CNPJ_ENCERRADO": "The CNPJ shows as closed at the tax office. Please contact support. You can still view what was recorded, and an invitation already sent can still be accepted.",
+        "SEM_CATEGORIA": "The registration no longer has the charity category: you can view what was recorded, but not create or change anything."
       },
       "pedidoEnviado": "Request sent",
       "pedidoEnviadoDetalhe": "The PetJourney team will review it.",
@@ -10293,6 +10295,12 @@
       "campanhas": "Campaigns",
       "ongs": "Shelters and adoption",
       "relatorio": "Report"
+    },
+    "ong": {
+      "rotulo": "Charity",
+      "animais": "Animals",
+      "entregas": "Handovers",
+      "perfil": "Charity profile"
     }
   },
   "pendencias": {
@@ -16043,6 +16051,338 @@
   "avisosDaClinica": {
     "tipo": {
       "VACINA_LEMBRETE_DA_CLINICA": "Vaccine reminder"
+    }
+  },
+  "ong": {
+    "status": {
+      "EM_CUIDADO": "In care",
+      "ENTREGUE": "Handed over",
+      "ENCERRADO": "Closed"
+    },
+    "origem": {
+      "RESGATE": "Rescue",
+      "DOACAO_DE_RESPONSAVEL": "Given up by an owner",
+      "NASCIDO_NA_ONG": "Born at the charity",
+      "TRANSFERENCIA": "Transfer from another organisation",
+      "RETORNO_DE_ADOCAO": "Came back from an adoption",
+      "OUTRO": "Other"
+    },
+    "manejo": {
+      "MORDE": "Bites",
+      "PRECISA_FOCINHEIRA": "Needs a muzzle",
+      "PRECISA_SEDACAO": "Needs sedation",
+      "AGRESSIVO_COM_ANIMAIS": "Aggressive with other animals",
+      "MEDROSO": "Fearful"
+    },
+    "encerramento": {
+      "OBITO": "Death",
+      "FUGA": "Ran away",
+      "TRANSFERIDO": "Transferred",
+      "OUTRO": "Other reason"
+    },
+    "animais": {
+      "contador": "{emCuidado} of {limite} in care",
+      "cadastrar": "Add animal",
+      "buscar": "Search by name",
+      "filtro": {
+        "rotulo": "Status",
+        "EM_CUIDADO": "In care",
+        "ENTREGUE": "Handed over",
+        "ENCERRADO": "Closed"
+      },
+      "chegouEm": "Arrived on {data}",
+      "entregueEm": "Handed over on {data}",
+      "carregarMais": "Load more",
+      "erro": "Could not load the animals.",
+      "vazio": {
+        "busca": "No animal with that name",
+        "EM_CUIDADO": {
+          "titulo": "No animals in care",
+          "texto": "Add the animals the charity is looking after. The health records you add here go with them at adoption."
+        },
+        "ENTREGUE": {
+          "titulo": "No animals handed over",
+          "texto": "When someone accepts the adoption invitation in the app, the animal shows up here."
+        },
+        "ENCERRADO": {
+          "titulo": "No closed records",
+          "texto": "Deaths, animals that ran away and transfers to another organisation stay here."
+        }
+      },
+      "guia": {
+        "titulo": "How it works",
+        "cadastrar": {
+          "titulo": "Add the animal",
+          "texto": "Name, species, arrival at the charity and the notes."
+        },
+        "saude": {
+          "titulo": "Record its health",
+          "texto": "Vaccines, dewormers and weights, on the animal record."
+        },
+        "convite": {
+          "titulo": "Create the adoption invitation",
+          "texto": "The adopter receives the animal in the app, with its health history."
+        }
+      }
+    },
+    "entregas": {
+      "pendentes": "No invitations waiting | 1 invitation waiting for an answer | {n} invitations waiting for an answer",
+      "noMes": "none handed over this month | 1 handed over this month | {n} handed over this month",
+      "dica": "Adoption invitations live on each animal record.",
+      "vazio": {
+        "titulo": "No animals handed over yet",
+        "texto": "Create the adoption invitation on the animal record. When the person accepts it in the app, the animal shows up here.",
+        "acao": "See the animals"
+      }
+    },
+    "campos": {
+      "nome": "Name",
+      "cor": "Coat colour",
+      "entradaEm": "Arrival at the charity",
+      "origem": "How it arrived",
+      "nascimentoDica": "If you don't know the day, pick an approximate date.",
+      "manejo": "Handling notes",
+      "manejoNenhum": "None",
+      "observacaoInterna": "Internal note (stays with the charity)",
+      "observacaoInternaDica": "Never goes to the adopter.",
+      "recado": "Message for the adopter (goes to the app)",
+      "recadoDica": "Shows on the acceptance screen and on the pet profile in the app.",
+      "especieNaoMuda": "The species cannot change after the animal is added.",
+      "nomeObrigatorio": "Enter the animal name.",
+      "especieObrigatoria": "Choose the species.",
+      "especieOutraObrigatoria": "Say what animal it is.",
+      "entradaObrigatoria": "Choose the day the animal arrived.",
+      "origemObrigatoria": "Choose how the animal arrived."
+    },
+    "novo": {
+      "titulo": "Add animal",
+      "passos": {
+        "rotulo": "Steps",
+        "animal": "Animal",
+        "chegada": "Arrival",
+        "observacoes": "Notes"
+      },
+      "dicas": {
+        "animal": "Who the animal is. Name and species are required.",
+        "chegada": "When and how the animal arrived at the charity. The rest is optional.",
+        "observacoes": "Both texts are optional and go to different places."
+      },
+      "avancar": "Continue",
+      "voltar": "Back",
+      "cadastrar": "Add",
+      "cadastrado": "{nome} added."
+    },
+    "editar": {
+      "titulo": "Edit record",
+      "salvo": "Record saved."
+    },
+    "ficha": {
+      "voltar": "Animals",
+      "entregar": "Hand over for adoption",
+      "editar": "Edit",
+      "mais": "More",
+      "trocarFoto": "Change photo",
+      "porFoto": "Add photo",
+      "fotoAlt": "Photo of {nome}",
+      "fotoGrande": "The photo is over 10 MB. Choose a smaller one.",
+      "encerrar": "Close record",
+      "resumo": {
+        "EM_CUIDADO": "In care since {data}",
+        "ENTREGUE": "Handed over on {data}",
+        "ENCERRADO": "Closed on {data}: {motivo}"
+      },
+      "identidade": {
+        "titulo": "Identity",
+        "descricao": "Who the animal is and how it arrived at the charity."
+      },
+      "observacoes": {
+        "titulo": "Notes",
+        "descricao": "What stays with the charity and what goes to the adopter.",
+        "vazia": "Nothing written."
+      },
+      "retornoDe": "This record is the return of an adoption.",
+      "verAnterior": "See the previous record",
+      "naoEncontrado": {
+        "titulo": "We could not find this animal",
+        "texto": "It may belong to another charity, or the address is wrong.",
+        "voltar": "Back to the animals"
+      },
+      "entregue": {
+        "titulo": "What was handed over on {data}",
+        "para": "Handed over to {nome}",
+        "semNome": "Handed over through the app",
+        "descricao": "The record as it was at the handover. After that, the charity no longer sees the pet."
+      },
+      "retorno": {
+        "botao": "Record return",
+        "titulo": "Record the return",
+        "texto": "Did {nome} come back to the charity? A new record in care is created, with the identity and health that were handed over. The adopter account does not change.",
+        "limite": "The new record counts toward the limit of animals in care.",
+        "confirmar": "Record return",
+        "feito": "Return recorded. This is the new record.",
+        "microchipFora": "The microchip stayed only on the record: another animal in the app already uses this number."
+      }
+    },
+    "saude": {
+      "titulo": "Health",
+      "descricao": "Vaccines, dewormers and weights recorded by the charity. They go with the animal at adoption.",
+      "descricaoEntregue": "What the charity recorded up to the handover.",
+      "vacinas": "Vaccines",
+      "vermifugos": "Dewormers",
+      "pesos": "Weights",
+      "adicionar": {
+        "vacinas": "Add vaccine",
+        "vermifugos": "Add dewormer",
+        "pesos": "Add weight"
+      },
+      "nenhum": {
+        "vacinas": "No vaccines recorded.",
+        "vermifugos": "No dewormers recorded.",
+        "pesos": "No weights recorded."
+      },
+      "aplicadaEm": "Given on {data}",
+      "administradoEm": "Given on {data}",
+      "dose": "Dose {dose} of {total}",
+      "doseSo": "Dose {dose}",
+      "lote": "Batch {lote}",
+      "remover": "Remove",
+      "removerDe": "Remove {nome}",
+      "confirmarRemocao": "Remove this record?",
+      "manter": "Keep",
+      "removido": "Record removed.",
+      "descricaoEncerrado": "What the charity recorded up to the closing."
+    },
+    "registro": {
+      "titulo": {
+        "vacinas": "Record vaccine",
+        "vermifugos": "Record dewormer",
+        "pesos": "Record weight"
+      },
+      "nomeVacina": "Vaccine",
+      "nomeVermifugo": "Product",
+      "aplicadaEm": "Day it was given",
+      "administradoEm": "Day it was given",
+      "data": "Day of weighing",
+      "peso": "Weight",
+      "lote": "Batch",
+      "fabricante": "Manufacturer",
+      "dose": "Dose",
+      "dosesNaSerie": "Doses in the series",
+      "proxima": "Set the next dose",
+      "proximaDica": "It becomes a reminder for the adopter. While the animal is with the charity, nobody is notified.",
+      "proximaEm": "Next dose",
+      "salvar": "Record",
+      "registrado": "Recorded.",
+      "nomeObrigatorio": "Enter the name.",
+      "dataObrigatoria": "Choose the day.",
+      "pesoObrigatorio": "Enter the weight, from 0.01 to 200 kg."
+    },
+    "encerrar": {
+      "titulo": "Close record",
+      "texto": "Use this when {nome} will no longer be handed over by the charity. Any open invitation is cancelled and the place is freed.",
+      "motivo": "Reason",
+      "escolha": "Choose the reason.",
+      "irreversivel": "This cannot be undone: the record becomes view only.",
+      "confirmar": "Close",
+      "feito": "Record closed."
+    },
+    "convites": {
+      "titulo": "Adoption invitations",
+      "descricao": "Valid for 7 days, and only the latest counts: creating another cancels the one that is waiting.",
+      "descricaoEntregue": "The invitations this animal had.",
+      "gerar": "Create invitation",
+      "gerarOutro": "Create another",
+      "nenhum": "No invitations created",
+      "status": {
+        "PENDENTE": "Waiting",
+        "ACEITA": "Accepted",
+        "RECUSADA": "Declined",
+        "EXPIRADA": "Expired",
+        "CANCELADA": "Cancelled",
+        "OUTRO": "Other"
+      },
+      "para": "For {nome}",
+      "geradoPor": "Created on {data} by {nome}",
+      "geradoEm": "Created on {data}",
+      "venceEm": "Expires on {data}",
+      "vencidoEm": "Expired on {data}",
+      "respondidoEm": "Answered on {data}",
+      "cancelar": "Cancel invitation",
+      "confirmarCancelar": "Cancel this invitation?",
+      "manter": "Keep",
+      "cancelado": "Invitation cancelled. The link and the code no longer work.",
+      "erro": "Could not load the invitations."
+    },
+    "convite": {
+      "titulo": "Hand over for adoption",
+      "lede": "The invitation for {nome}: the adopter opens the link in the app and receives the animal with the health records the charity made.",
+      "adotanteNome": "Name of the adopter",
+      "adotanteTelefone": "WhatsApp of the adopter",
+      "telefoneExemplo": "(11) 98765-4321",
+      "opcionalDica": "Both are optional: they are used for the greeting and to open WhatsApp.",
+      "anteriorDeixaDeValer": "The previous invitation will stop working.",
+      "quemGeraNaoAceita": "Whoever creates the invitation cannot accept it. If someone on the team is adopting, another person creates it.",
+      "gerar": "Create invitation",
+      "pronto": "Invitation for {nome} ready.",
+      "anteriorCancelado": "The previous invitation stopped working.",
+      "whatsapp": "Send on WhatsApp",
+      "copiarMensagem": "Copy message",
+      "copiarLink": "Copy link",
+      "copiado": "Copied.",
+      "telaCheia": "Full-screen QR",
+      "qrAlt": "QR code of the adoption invitation for {nome}",
+      "qrComo": "In the app, tap I have an adoption code and type {codigo}, or scan the QR code with the phone camera.",
+      "codigo": "Code to type in the app",
+      "validade": "Valid until {data}",
+      "link": "Link",
+      "mensagem": "Message",
+      "soAgora": "The link is only shown now. Send or copy it before closing.",
+      "fechar": "Close"
+    },
+    "perfil": {
+      "resumo": "The limit of animals and what the tax office says about the CNPJ.",
+      "gratis": "The charity module is free, with no end date, and comes on with the charity category.",
+      "numeros": {
+        "titulo": "Animals",
+        "emCuidado": "In care",
+        "entreguesNoMes": "Handed over this month",
+        "pendentes": "Invitations waiting",
+        "deLimite": "{emCuidado} of {limite}"
+      },
+      "limiteDica": "To raise the limit, please contact support.",
+      "cnpj": {
+        "titulo": "CNPJ",
+        "descricao": "What the tax office lookup returned.",
+        "natureza": "Legal form",
+        "situacao": "Status at the tax office",
+        "naoLida": "Not looked up yet",
+        "trocar": "To change the charity's CNPJ, please contact support."
+      },
+      "natureza": {
+        "n3999": "Private association",
+        "n3069": "Private foundation",
+        "n3301": "Social organisation",
+        "n3204": "Foreign foundation or association"
+      },
+      "situacao": {
+        "ATIVA": "Active",
+        "SUSPENSA": "Suspended",
+        "INAPTA": "Unfit",
+        "BAIXADA": "Closed",
+        "NULA": "Void"
+      },
+      "suporte": "Contact support"
+    },
+    "cnpj": {
+      "irregular": "The CNPJ shows as unfit or suspended at the tax office. Nothing was blocked, but please sort it out.",
+      "encerrado": "The CNPJ shows as closed at the tax office. Please contact support."
+    },
+    "erros": {
+      "taxa": "Too many changes in a short time. Try again in a few minutes.",
+      "microchipDica": "Scan the QR code on the collar or look the number up in the microchip database.",
+      "naoEncontrado": "We could not find this animal at this charity.",
+      "salvar": "Could not save. Try again.",
+      "carregar": "Could not load. Try again."
     }
   }
 }

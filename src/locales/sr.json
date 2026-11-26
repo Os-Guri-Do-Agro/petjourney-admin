@@ -887,7 +887,9 @@
         "MODULO_SUSPENSO": "Modul je suspendovan: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
         "MODULO_DESLIGADO": "Modul je isključen: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
         "PRAZO_VENCIDO": "Period modula je istekao: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
-        "PARCEIRO_NAO_OPERACIONAL": "Registracija firme nije odobrena: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate."
+        "PARCEIRO_NAO_OPERACIONAL": "Registracija firme nije odobrena: možete da pregledate ono što je već zabeleženo, ali ne i da kreirate ili menjate.",
+        "CNPJ_ENCERRADO": "CNPJ je u poreskoj upravi označen kao ugašen. Obratite se podršci. Možete da pregledate ono što je uneto, a već poslat poziv i dalje može da se prihvati.",
+        "SEM_CATEGORIA": "Registracija je bez kategorije udruženja: možete da pregledate ono što je uneto, ali ne i da pravite ili menjate."
       },
       "pedidoEnviado": "Zahtev je poslat",
       "pedidoEnviadoDetalhe": "Tim PetJourney će razmotriti zahtev.",
@@ -10293,6 +10295,12 @@
       "campanhas": "Kampanje",
       "ongs": "Udruženja i udomljavanje",
       "relatorio": "Izveštaj"
+    },
+    "ong": {
+      "rotulo": "Udruženje",
+      "animais": "Životinje",
+      "entregas": "Predaje",
+      "perfil": "Profil udruženja"
     }
   },
   "pendencias": {
@@ -16043,6 +16051,338 @@
   "avisosDaClinica": {
     "tipo": {
       "VACINA_LEMBRETE_DA_CLINICA": "Podsetnik za vakcinu"
+    }
+  },
+  "ong": {
+    "status": {
+      "EM_CUIDADO": "Pod brigom",
+      "ENTREGUE": "Predata",
+      "ENCERRADO": "Zatvoreno"
+    },
+    "origem": {
+      "RESGATE": "Spasavanje",
+      "DOACAO_DE_RESPONSAVEL": "Predao vlasnik",
+      "NASCIDO_NA_ONG": "Rođena u udruženju",
+      "TRANSFERENCIA": "Premeštaj iz druge organizacije",
+      "RETORNO_DE_ADOCAO": "Vratila se sa usvajanja",
+      "OUTRO": "Drugo"
+    },
+    "manejo": {
+      "MORDE": "Ujeda",
+      "PRECISA_FOCINHEIRA": "Potrebna brnjica",
+      "PRECISA_SEDACAO": "Potrebna sedacija",
+      "AGRESSIVO_COM_ANIMAIS": "Agresivna prema drugim životinjama",
+      "MEDROSO": "Plašljiva"
+    },
+    "encerramento": {
+      "OBITO": "Uginuće",
+      "FUGA": "Bekstvo",
+      "TRANSFERIDO": "Premeštena",
+      "OUTRO": "Drugi razlog"
+    },
+    "animais": {
+      "contador": "{emCuidado} od {limite} pod brigom",
+      "cadastrar": "Dodaj životinju",
+      "buscar": "Pretraga po imenu",
+      "filtro": {
+        "rotulo": "Stanje",
+        "EM_CUIDADO": "Pod brigom",
+        "ENTREGUE": "Predate",
+        "ENCERRADO": "Zatvorene"
+      },
+      "chegouEm": "Stigla {data}",
+      "entregueEm": "Predata {data}",
+      "carregarMais": "Učitaj još",
+      "erro": "Nije moguće učitati životinje.",
+      "vazio": {
+        "busca": "Nema životinje sa tim imenom",
+        "EM_CUIDADO": {
+          "titulo": "Nema životinja pod brigom",
+          "texto": "Dodajte životinje koje su kod udruženja. Zdravstveni podaci koje ovde unesete idu uz njih pri usvajanju."
+        },
+        "ENTREGUE": {
+          "titulo": "Nema predatih životinja",
+          "texto": "Kada neko prihvati poziv za usvajanje u aplikaciji, životinja se pojavljuje ovde."
+        },
+        "ENCERRADO": {
+          "titulo": "Nema zatvorenih zapisa",
+          "texto": "Uginuća, bekstva i premeštaji u drugu organizaciju ostaju ovde."
+        }
+      },
+      "guia": {
+        "titulo": "Kako funkcioniše",
+        "cadastrar": {
+          "titulo": "Dodajte životinju",
+          "texto": "Ime, vrsta, dolazak u udruženje i napomene."
+        },
+        "saude": {
+          "titulo": "Unesite zdravlje",
+          "texto": "Vakcine, sredstva protiv parazita i težine, u kartonu životinje."
+        },
+        "convite": {
+          "titulo": "Napravite poziv za usvajanje",
+          "texto": "Osoba koja usvaja prima životinju u aplikaciji, sa zdravstvenom istorijom."
+        }
+      }
+    },
+    "entregas": {
+      "pendentes": "Nijedan poziv ne čeka | {n} poziv čeka odgovor | {n} poziva čekaju odgovor | {n} poziva čeka odgovor",
+      "noMes": "nijedna predata ovog meseca | {n} predata ovog meseca | {n} predate ovog meseca | {n} predatih ovog meseca",
+      "dica": "Pozivi za usvajanje su u kartonu svake životinje.",
+      "vazio": {
+        "titulo": "Još nema predatih životinja",
+        "texto": "Napravite poziv za usvajanje u kartonu životinje. Kada ga osoba prihvati u aplikaciji, životinja se pojavljuje ovde.",
+        "acao": "Pogledaj životinje"
+      }
+    },
+    "campos": {
+      "nome": "Ime",
+      "cor": "Boja dlake",
+      "entradaEm": "Dolazak u udruženje",
+      "origem": "Kako je stigla",
+      "nascimentoDica": "Ako ne znate dan, izaberite približan datum.",
+      "manejo": "Upozorenja za rukovanje",
+      "manejoNenhum": "Nijedno",
+      "observacaoInterna": "Interna napomena (ostaje samo u udruženju)",
+      "observacaoInternaDica": "Nikad ne ide osobi koja usvaja.",
+      "recado": "Poruka za osobu koja usvaja (ide u aplikaciju)",
+      "recadoDica": "Pojavljuje se na ekranu prihvatanja i na profilu ljubimca u aplikaciji.",
+      "especieNaoMuda": "Vrsta se ne menja posle dodavanja.",
+      "nomeObrigatorio": "Upišite ime životinje.",
+      "especieObrigatoria": "Izaberite vrstu.",
+      "especieOutraObrigatoria": "Navedite koja je životinja.",
+      "entradaObrigatoria": "Izaberite dan kada je životinja stigla.",
+      "origemObrigatoria": "Izaberite kako je životinja stigla."
+    },
+    "novo": {
+      "titulo": "Dodaj životinju",
+      "passos": {
+        "rotulo": "Koraci",
+        "animal": "Životinja",
+        "chegada": "Dolazak",
+        "observacoes": "Napomene"
+      },
+      "dicas": {
+        "animal": "Ko je životinja. Ime i vrsta su obavezni.",
+        "chegada": "Kada i kako je životinja stigla u udruženje. Ostalo nije obavezno.",
+        "observacoes": "Oba teksta nisu obavezna i idu na različita mesta."
+      },
+      "avancar": "Nastavi",
+      "voltar": "Nazad",
+      "cadastrar": "Dodaj",
+      "cadastrado": "{nome} je dodata."
+    },
+    "editar": {
+      "titulo": "Izmeni karton",
+      "salvo": "Karton je sačuvan."
+    },
+    "ficha": {
+      "voltar": "Životinje",
+      "entregar": "Predaj na usvajanje",
+      "editar": "Izmeni",
+      "mais": "Još",
+      "trocarFoto": "Promeni fotografiju",
+      "porFoto": "Dodaj fotografiju",
+      "fotoAlt": "Fotografija: {nome}",
+      "fotoGrande": "Fotografija je veća od 10 MB. Izaberite manju.",
+      "encerrar": "Zatvori zapis",
+      "resumo": {
+        "EM_CUIDADO": "Pod brigom od {data}",
+        "ENTREGUE": "Predata {data}",
+        "ENCERRADO": "Zatvoreno {data}: {motivo}"
+      },
+      "identidade": {
+        "titulo": "Identitet",
+        "descricao": "Ko je životinja i kako je stigla u udruženje."
+      },
+      "observacoes": {
+        "titulo": "Napomene",
+        "descricao": "Šta ostaje u udruženju, a šta ide osobi koja usvaja.",
+        "vazia": "Ništa nije upisano."
+      },
+      "retornoDe": "Ovaj zapis je povratak sa usvajanja.",
+      "verAnterior": "Pogledaj prethodni karton",
+      "naoEncontrado": {
+        "titulo": "Nismo pronašli ovu životinju",
+        "texto": "Možda pripada drugom udruženju, ili je adresa pogrešna.",
+        "voltar": "Nazad na životinje"
+      },
+      "entregue": {
+        "titulo": "Šta je predato {data}",
+        "para": "Predata osobi: {nome}",
+        "semNome": "Predata preko aplikacije",
+        "descricao": "Karton kakav je bio pri predaji. Posle toga udruženje više ne vidi ljubimca."
+      },
+      "retorno": {
+        "botao": "Zabeleži povratak",
+        "titulo": "Zabeleži povratak",
+        "texto": "Da li se {nome} vratila u udruženje? Pravi se novi karton pod brigom, sa identitetom i zdravljem koji su predati. Nalog osobe koja je usvojila se ne menja.",
+        "limite": "Novi karton se računa u limit životinja pod brigom.",
+        "confirmar": "Zabeleži povratak",
+        "feito": "Povratak je zabeležen. Ovo je novi karton.",
+        "microchipFora": "Mikročip je ostao samo u kartonu: druga životinja u aplikaciji već koristi ovaj broj."
+      }
+    },
+    "saude": {
+      "titulo": "Zdravlje",
+      "descricao": "Vakcine, sredstva protiv parazita i težine koje je udruženje unelo. Idu uz životinju pri usvajanju.",
+      "descricaoEntregue": "Ono što je udruženje unelo do predaje.",
+      "vacinas": "Vakcine",
+      "vermifugos": "Sredstva protiv parazita",
+      "pesos": "Težine",
+      "adicionar": {
+        "vacinas": "Dodaj vakcinu",
+        "vermifugos": "Dodaj sredstvo protiv parazita",
+        "pesos": "Dodaj težinu"
+      },
+      "nenhum": {
+        "vacinas": "Nema unetih vakcina.",
+        "vermifugos": "Nema unetih sredstava protiv parazita.",
+        "pesos": "Nema unetih težina."
+      },
+      "aplicadaEm": "Data {data}",
+      "administradoEm": "Dato {data}",
+      "dose": "Doza {dose} od {total}",
+      "doseSo": "Doza {dose}",
+      "lote": "Serija {lote}",
+      "remover": "Ukloni",
+      "removerDe": "Ukloni: {nome}",
+      "confirmarRemocao": "Ukloniti ovaj zapis?",
+      "manter": "Zadrži",
+      "removido": "Zapis je uklonjen.",
+      "descricaoEncerrado": "Ono što je udruženje unelo do zatvaranja."
+    },
+    "registro": {
+      "titulo": {
+        "vacinas": "Unesi vakcinu",
+        "vermifugos": "Unesi sredstvo protiv parazita",
+        "pesos": "Unesi težinu"
+      },
+      "nomeVacina": "Vakcina",
+      "nomeVermifugo": "Proizvod",
+      "aplicadaEm": "Dan davanja",
+      "administradoEm": "Dan davanja",
+      "data": "Dan merenja",
+      "peso": "Težina",
+      "lote": "Serija",
+      "fabricante": "Proizvođač",
+      "dose": "Doza",
+      "dosesNaSerie": "Broj doza u seriji",
+      "proxima": "Zakaži sledeću dozu",
+      "proximaDica": "Postaje podsetnik za osobu koja usvoji. Dok je životinja u udruženju, niko ne dobija obaveštenje.",
+      "proximaEm": "Sledeća doza",
+      "salvar": "Unesi",
+      "registrado": "Uneto.",
+      "nomeObrigatorio": "Upišite naziv.",
+      "dataObrigatoria": "Izaberite dan.",
+      "pesoObrigatorio": "Unesite težinu, od 0,01 do 200 kg."
+    },
+    "encerrar": {
+      "titulo": "Zatvori zapis",
+      "texto": "Koristite kada udruženje više neće predati: {nome}. Važeći poziv se otkazuje i mesto se oslobađa.",
+      "motivo": "Razlog",
+      "escolha": "Izaberite razlog.",
+      "irreversivel": "Ne može da se poništi: karton ostaje samo za pregled.",
+      "confirmar": "Zatvori",
+      "feito": "Zapis je zatvoren."
+    },
+    "convites": {
+      "titulo": "Pozivi za usvajanje",
+      "descricao": "Važi 7 dana, i važi poslednji: novi poziv otkazuje onaj koji čeka.",
+      "descricaoEntregue": "Pozivi koje je ova životinja imala.",
+      "gerar": "Napravi poziv",
+      "gerarOutro": "Napravi novi",
+      "nenhum": "Nijedan poziv nije napravljen",
+      "status": {
+        "PENDENTE": "Čeka",
+        "ACEITA": "Prihvaćen",
+        "RECUSADA": "Odbijen",
+        "EXPIRADA": "Istekao",
+        "CANCELADA": "Otkazan",
+        "OUTRO": "Drugo"
+      },
+      "para": "Za: {nome}",
+      "geradoPor": "Napravljen {data}, napravio/la: {nome}",
+      "geradoEm": "Napravljen {data}",
+      "venceEm": "Ističe {data}",
+      "vencidoEm": "Istekao {data}",
+      "respondidoEm": "Odgovoreno {data}",
+      "cancelar": "Otkaži poziv",
+      "confirmarCancelar": "Otkazati ovaj poziv?",
+      "manter": "Zadrži",
+      "cancelado": "Poziv je otkazan. Link i kod više ne važe.",
+      "erro": "Nije moguće učitati pozive."
+    },
+    "convite": {
+      "titulo": "Predaj na usvajanje",
+      "lede": "Poziv za: {nome}. Osoba koja usvaja otvara link u aplikaciji i prima životinju sa zdravstvenim podacima koje je unelo udruženje.",
+      "adotanteNome": "Ime osobe koja usvaja",
+      "adotanteTelefone": "WhatsApp osobe koja usvaja",
+      "telefoneExemplo": "(11) 98765-4321",
+      "opcionalDica": "Oba polja nisu obavezna: služe za pozdrav i za otvaranje WhatsAppa.",
+      "anteriorDeixaDeValer": "Prethodni poziv prestaje da važi.",
+      "quemGeraNaoAceita": "Ko napravi poziv ne može da ga prihvati. Ako neko iz tima usvaja, poziv pravi druga osoba.",
+      "gerar": "Napravi poziv",
+      "pronto": "Poziv za: {nome} je spreman.",
+      "anteriorCancelado": "Prethodni poziv je prestao da važi.",
+      "whatsapp": "Pošalji preko WhatsAppa",
+      "copiarMensagem": "Kopiraj poruku",
+      "copiarLink": "Kopiraj link",
+      "copiado": "Kopirano.",
+      "telaCheia": "QR preko celog ekrana",
+      "qrAlt": "QR kod poziva za usvajanje: {nome}",
+      "qrComo": "U aplikaciji dodirnite Imam kod za usvajanje i upišite {codigo}, ili skenirajte QR kamerom telefona.",
+      "codigo": "Kod za upis u aplikaciji",
+      "validade": "Važi do {data}",
+      "link": "Link",
+      "mensagem": "Poruka",
+      "soAgora": "Link se prikazuje samo sada. Pošaljite ga ili kopirajte pre zatvaranja.",
+      "fechar": "Zatvori"
+    },
+    "perfil": {
+      "resumo": "Limit životinja i šta poreska uprava kaže o CNPJ.",
+      "gratis": "Modul za udruženja je besplatan, bez roka, i uključen je uz kategoriju udruženja.",
+      "numeros": {
+        "titulo": "Životinje",
+        "emCuidado": "Pod brigom",
+        "entreguesNoMes": "Predate ovog meseca",
+        "pendentes": "Pozivi koji čekaju",
+        "deLimite": "{emCuidado} od {limite}"
+      },
+      "limiteDica": "Da biste povećali limit, obratite se podršci.",
+      "cnpj": {
+        "titulo": "CNPJ",
+        "descricao": "Šta je vratila provera u poreskoj upravi.",
+        "natureza": "Pravni oblik",
+        "situacao": "Stanje u poreskoj upravi",
+        "naoLida": "Još nije provereno",
+        "trocar": "Da biste promenili CNPJ udruženja, obratite se podršci."
+      },
+      "natureza": {
+        "n3999": "Privatno udruženje",
+        "n3069": "Privatna fondacija",
+        "n3301": "Društvena organizacija",
+        "n3204": "Strana fondacija ili udruženje"
+      },
+      "situacao": {
+        "ATIVA": "Aktivan",
+        "SUSPENSA": "Suspendovan",
+        "INAPTA": "Neispravan",
+        "BAIXADA": "Ugašen",
+        "NULA": "Ništav"
+      },
+      "suporte": "Obrati se podršci"
+    },
+    "cnpj": {
+      "irregular": "CNPJ je u poreskoj upravi označen kao neispravan ili suspendovan. Ništa nije blokirano, ali ga sredite.",
+      "encerrado": "CNPJ je u poreskoj upravi označen kao ugašen. Obratite se podršci."
+    },
+    "erros": {
+      "taxa": "Previše izmena za kratko vreme. Pokušajte ponovo za nekoliko minuta.",
+      "microchipDica": "Skenirajte QR sa ogrlice ili potražite broj u bazi mikročipova.",
+      "naoEncontrado": "Nismo pronašli ovu životinju u ovom udruženju.",
+      "salvar": "Čuvanje nije uspelo. Pokušajte ponovo.",
+      "carregar": "Učitavanje nije uspelo. Pokušajte ponovo."
     }
   }
 }
