@@ -11124,8 +11124,12 @@
       },
       "verOutros": "Ver outros horários",
       "marcarMesmoAssim": "Marcar mesmo assim",
-      "aceito": "Pedido aceito",
-      "marcado": "Marcado: {quando}. Quem pediu já foi avisado.",
+      "pronto": {
+        "titulo": "Pronto, {pets} já está na agenda | Pronto, {pets} já estão na agenda",
+        "avisadoNoApp": "Já avisamos {nome} pelo app que está tudo certo.",
+        "avisado": "Já avisamos {nome} que está tudo certo.",
+        "verNaAgenda": "Ver na agenda"
+      },
       "desfecho": "Resposta",
       "aviso": {
         "PENDENTE": "Aviso {canal} saindo",

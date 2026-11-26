@@ -33,7 +33,7 @@ import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, type RouteLocationRaw } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
@@ -112,8 +112,16 @@ const aConfirmar = ref<{
   conflito: 'professional-overlap' | 'holiday-closed'
   aceite: Aceite
 } | null>(null)
-/** Depois do aceite: o que ficou marcado e os avisos que sobraram. */
-const resultado = ref<{ quando: string; conflitos: Conflito[] } | null>(null)
+/**
+ * Depois do aceite: quando ficou marcado, com quem, os avisos que sobraram e o caminho para a agenda
+ * (o agendamento aberto, quando a resposta o traz; senão, o dia).
+ */
+const resultado = ref<{
+  quando: string
+  profissional: string | null
+  conflitos: Conflito[]
+  rota: RouteLocationRaw | null
+} | null>(null)
 
 /* Trocar de pedido com a gaveta aberta: a resposta do anterior que chegar depois não vale. */
 const leituraDoPedido = criarUltimaLeitura()
@@ -177,6 +185,23 @@ const pendente = computed(() => pedido.value?.status === 'PENDENTE')
 const escolhido = computed(() => (pedido.value ? horarioEscolhido(pedido.value) : null))
 const sumiu = computed(() => (pedido.value ? horarioSumiu(pedido.value) : false))
 const nomesDosPets = computed(() => pedido.value?.pets.map((pet) => pet.nome).join(', ') ?? '')
+
+/*
+ * `Intl.ListFormat` é ES2021, fora do `lib` do tsconfig dos testes: o tipo vem daqui (como no convite
+ * ao app); o navegador tem a classe.
+ */
+type ListaDoIntl = new (
+  idioma: string,
+  opcoes: { type: 'conjunction' },
+) => { format(itens: string[]): string }
+
+/** Os pets numa frase: "Nino e Mel", não "Nino, Mel". */
+const petsNaFrase = computed(() => {
+  const nomes = pedido.value?.pets.map((pet) => pet.nome) ?? []
+  const { ListFormat } = Intl as unknown as { ListFormat: ListaDoIntl }
+
+  return new ListFormat(intl.value, { type: 'conjunction' }).format(nomes)
+})
 
 function quando(inicio: string) {
   return t('pedidos.caixa.quando', {
@@ -415,18 +440,35 @@ async function aceitar(aceite: Aceite) {
 
   try {
     const resposta = await aceitarPedido(id, aceite, parceiroQuery())
+    const marcado = horarioMarcado(resposta.pedido)
+    const sugerida = aceite.inicio
+      ? sugestoes.value.find(
+          (sugestao) =>
+            sugestao.inicio === aceite.inicio && sugestao.profissionalId === aceite.profissionalId,
+        )
+      : undefined
     const inicio =
-      horarioMarcado(resposta.pedido)?.inicio ??
+      marcado?.inicio ??
       aceite.inicio ??
       resposta.pedido.pets.find((pet) => pet.inicio)?.inicio ??
       null
     pedido.value = resposta.pedido
     aConfirmar.value = null
     resultado.value = {
-      quando: inicio ? quando(inicio) : '',
+      quando: inicio ? comMaiuscula(quando(inicio), intl.value) : '',
+      profissional:
+        marcado?.profissionalNome ??
+        sugerida?.profissionalNome ??
+        resposta.pedido.profissionalNome ??
+        null,
       conflitos: conflitosQueAvisam(resposta.conflitos),
+      rota: marcado
+        ? rotaNaAgenda(marcado)
+        : inicio
+          ? { path: '/clinica/agenda', query: { data: inicio.slice(0, 10) } }
+          : null,
     }
-    toast.add({ severity: 'success', summary: t('pedidos.caixa.aceito'), life: 3000 })
+    /* Sem toast: o bloco "Pronto" da gaveta já diz que deu certo, e o toast cobriria o título dela. */
     emit('respondido')
   } catch (err) {
     const lido = lerErroDoCadastro(err, t('cadastro.erros.salvar'))
@@ -869,18 +911,58 @@ const podeResponder = computed(
         </div>
       </section>
 
-      <!-- Depois do aceite. -->
-      <section v-if="resultado" class="eg__secao rp__resultado" role="status">
-        <p class="rp__feito">
-          <i class="ph ph-check-circle" aria-hidden="true" />
-          {{ t('pedidos.caixa.marcado', { quando: resultado.quando }) }}
-        </p>
-        <ul v-if="resultado.conflitos.length" class="rp__conflitos">
-          <li v-for="(conflito, indice) in resultado.conflitos" :key="indice">
+      <!-- Depois do aceite: o que ficou marcado, quem já sabe e o caminho para a agenda. -->
+      <section v-if="resultado" class="rp__pronto" role="status">
+        <div class="rp__pronto-cabeca">
+          <span class="rp__pronto-selo" aria-hidden="true">
+            <i class="ph ph-calendar-check" />
+          </span>
+          <span class="rp__pronto-titulos">
+            <strong>{{
+              t('pedidos.caixa.pronto.titulo', { pets: petsNaFrase }, pedido.pets.length)
+            }}</strong>
+            <span v-if="resultado.quando" class="ui-num">
+              {{ resultado.quando
+              }}<template v-if="resultado.profissional">
+                · {{ t('clinico.pedidos.comProfissional', { nome: resultado.profissional }) }}
+              </template>
+            </span>
+          </span>
+        </div>
+
+        <ul class="rp__pronto-notas">
+          <li>
+            <i class="ph ph-bell-ringing" aria-hidden="true" />
+            <span>{{
+              t(
+                pedido.canal === 'APP'
+                  ? 'pedidos.caixa.pronto.avisadoNoApp'
+                  : 'pedidos.caixa.pronto.avisado',
+                { nome: pedido.quemPede },
+              )
+            }}</span>
+          </li>
+          <li
+            v-for="(conflito, indice) in resultado.conflitos"
+            :key="indice"
+            class="rp__pronto-atencao"
+          >
             <i class="ph ph-warning" aria-hidden="true" />
-            {{ t(chaveDoConflito(conflito)) }}
+            <span>{{ t(chaveDoConflito(conflito)) }}</span>
           </li>
         </ul>
+
+        <Button
+          v-if="resultado.rota && leAgenda"
+          :as="RouterLink"
+          :to="resultado.rota"
+          size="small"
+          severity="secondary"
+          outlined
+          icon="ph ph-calendar-dots"
+          :label="t('pedidos.caixa.pronto.verNaAgenda')"
+          class="rp__pronto-acao"
+        />
       </section>
 
       <!-- Já respondido. -->
@@ -904,7 +986,7 @@ const podeResponder = computed(
       </section>
 
       <!-- Aceito: o horário que ficou marcado, que pode ser outro que o pedido (N24). -->
-      <section v-if="pedido.status === 'ACEITO' && marcados.length" class="eg__secao">
+      <section v-if="!resultado && pedido.status === 'ACEITO' && marcados.length" class="eg__secao">
         <span class="eg__rotulo">{{ t('pedidos.caixa.horarioMarcado') }}</span>
         <ul class="rp__marcados">
           <li v-for="marcado in marcados" :key="marcado.id">
@@ -995,8 +1077,7 @@ const podeResponder = computed(
 }
 
 .rp__alerta,
-.rp__nota,
-.rp__feito {
+.rp__nota {
   display: flex;
   align-items: flex-start;
   gap: 8px;
@@ -1010,14 +1091,8 @@ const podeResponder = computed(
   color: var(--risco-tinta);
 }
 
-.rp__nota i,
-.rp__feito i {
+.rp__nota i {
   margin-top: 2px;
-}
-
-.rp__feito {
-  color: var(--tinta);
-  font-size: 14px;
 }
 
 .rp__dados {
@@ -1141,12 +1216,87 @@ const podeResponder = computed(
   gap: 8px;
 }
 
-.rp__resultado {
-  padding-top: 14px;
-  border-top: 1px solid var(--linha-suave);
+/*
+ * Depois do aceite: uma caixa só, no papel do véu, com o verde de "ok" só no disco do selo (como o
+ * fim do atendimento). O que ficou marcado no alto; quem já sabe e o que pede atenção abaixo do fio.
+ */
+.rp__pronto {
+  display: grid;
+  justify-items: start;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 16px;
+  background: var(--superficie-2);
 }
 
-.rp__conflitos,
+.rp__pronto-cabeca {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.rp__pronto-selo {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ok-fundo);
+  color: var(--ok-tinta);
+  font-size: 20px;
+}
+
+.rp__pronto-titulos {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.rp__pronto-titulos strong {
+  color: var(--tinta);
+  font-size: 15.5px;
+  font-weight: 650;
+}
+
+.rp__pronto-titulos span {
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.rp__pronto-notas {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--linha-suave);
+  list-style: none;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.rp__pronto-notas li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.rp__pronto-notas i {
+  margin-top: 2px;
+  color: var(--ok-tinta);
+}
+
+.rp__pronto-notas .rp__pronto-atencao {
+  color: var(--tinta);
+}
+
+.rp__pronto-notas .rp__pronto-atencao i {
+  color: var(--atencao-tinta);
+}
+
 .rp__avisos {
   display: grid;
   gap: 6px;
@@ -1157,13 +1307,11 @@ const podeResponder = computed(
   font-size: 13px;
 }
 
-.rp__conflitos li,
 .rp__avisos li {
   display: flex;
   gap: 8px;
 }
 
-.rp__conflitos i,
 .rp__avisos i {
   margin-top: 2px;
 }

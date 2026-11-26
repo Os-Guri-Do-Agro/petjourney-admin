@@ -11124,8 +11124,12 @@
       },
       "verOutros": "Ver otros horarios",
       "marcarMesmoAssim": "Reservar igual",
-      "aceito": "Solicitud aceptada",
-      "marcado": "Reservado: {quando}. Quien pidió ya fue avisado.",
+      "pronto": {
+        "titulo": "Listo, {pets} ya está en la agenda | Listo, {pets} ya están en la agenda",
+        "avisadoNoApp": "Ya le avisamos a {nome} por la app que todo está listo.",
+        "avisado": "Ya le avisamos a {nome} que todo está listo.",
+        "verNaAgenda": "Ver en la agenda"
+      },
       "desfecho": "Respuesta",
       "aviso": {
         "PENDENTE": "Aviso {canal} saliendo",

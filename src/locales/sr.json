@@ -11124,8 +11124,12 @@
       },
       "verOutros": "Pogledaj druge termine",
       "marcarMesmoAssim": "Ipak zakaži",
-      "aceito": "Zahtev prihvaćen",
-      "marcado": "Zakazano: {quando}. Podnosilac je obavešten.",
+      "pronto": {
+        "titulo": "Gotovo, {pets} je u rasporedu | Gotovo, {pets} su u rasporedu | Gotovo, {pets} su u rasporedu",
+        "avisadoNoApp": "Poslali smo potvrdu u aplikaciju: {nome}.",
+        "avisado": "Poslali smo potvrdu: {nome}.",
+        "verNaAgenda": "Pogledaj u rasporedu"
+      },
       "desfecho": "Odgovor",
       "aviso": {
         "PENDENTE": "Obaveštenje {canal} se šalje",

@@ -11124,8 +11124,12 @@
       },
       "verOutros": "See other times",
       "marcarMesmoAssim": "Book anyway",
-      "aceito": "Request accepted",
-      "marcado": "Booked: {quando}. The requester has been notified.",
+      "pronto": {
+        "titulo": "All set, {pets} is in the schedule | All set, {pets} are in the schedule",
+        "avisadoNoApp": "We've let {nome} know in the app that it's all set.",
+        "avisado": "We've let {nome} know that it's all set.",
+        "verNaAgenda": "View in the schedule"
+      },
       "desfecho": "Reply",
       "aviso": {
         "PENDENTE": "Notice {canal} on its way",
