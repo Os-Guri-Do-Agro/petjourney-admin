@@ -48,7 +48,8 @@ const ICONE_DO_BLOQUEIO: Record<Bloqueio, string> = {
   indisponivel: 'ph ph-hourglass-medium',
 }
 
-const SELO_DO_STATUS: Record<StatusDoIndicado, { classe: string; icone: string }> = {
+/** O status vem nulo só numa ONG sem o modo afiliado ativo: a linha fica sem selo. */
+const SELO_DO_STATUS: Record<NonNullable<StatusDoIndicado>, { classe: string; icone: string }> = {
   COM_ASSINATURA: { classe: 'ui-selo--ok', icone: 'ph ph-check-circle' },
   SEM_ASSINATURA: { classe: '', icone: 'ph ph-circle-dashed' },
   CANCELADO: { classe: 'ui-selo--contorno', icone: 'ph ph-x-circle' },
@@ -364,7 +365,11 @@ onMounted(async () => {
           </span>
 
           <span class="ui-linha__fim">
-            <span class="ui-selo" :class="SELO_DO_STATUS[indicado.status].classe">
+            <span
+              v-if="indicado.status"
+              class="ui-selo"
+              :class="SELO_DO_STATUS[indicado.status].classe"
+            >
               <i :class="SELO_DO_STATUS[indicado.status].icone" aria-hidden="true" />
               {{ t(`parceiro.indicados.status.${indicado.status}`) }}
             </span>

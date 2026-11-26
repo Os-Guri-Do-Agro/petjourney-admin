@@ -350,6 +350,7 @@ function semear(s: Semente, resto: Partial<PedidoDaDemo> = {}): PedidoDaDemo {
       inicio,
       fim: inicio ? somarMinutos(inicio, servico.duracaoMinutos) : null,
       agendamentoId: null,
+      agendamento: null,
     }
   })
   const pedido: PedidoDaDemo = {

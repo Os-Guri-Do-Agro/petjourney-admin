@@ -50,7 +50,10 @@ type Linha = {
   pedir: boolean
 }
 
-const ICONE: Record<NomeDoModulo, Component> = { CLINICA: PhStethoscope, HOTEL: PhBed }
+/** O módulo ONG vem ligado com a categoria ONG e não se pede, liga nem desliga aqui: a lista mostra os outros. */
+type ModuloDaLista = Exclude<NomeDoModulo, 'ONG'>
+
+const ICONE: Record<ModuloDaLista, Component> = { CLINICA: PhStethoscope, HOTEL: PhBed }
 
 type ItemDoEfeito =
   | 'agendamentosFuturos'
@@ -59,7 +62,7 @@ type ItemDoEfeito =
   | 'hospedagensAbertas'
 
 /** O que a prévia do desligar conta em cada módulo, na ordem da frase. */
-const ITENS_DO_EFEITO: Record<NomeDoModulo, ItemDoEfeito[]> = {
+const ITENS_DO_EFEITO: Record<ModuloDaLista, ItemDoEfeito[]> = {
   CLINICA: ['agendamentosFuturos', 'internacoesAbertas'],
   HOTEL: ['reservasFuturas', 'hospedagensAbertas'],
 }
@@ -120,6 +123,10 @@ function dicaDe(modulo: ModuloDoPortal, ligar: Linha['ligar']) {
 }
 
 function linhaDe(modulo: ModuloDoPortal): Linha | null {
+  if (modulo.modulo === 'ONG') {
+    return null
+  }
+
   const ligar = modulo.podeLigar ? modulo.ligarVira : null
   const pedir = modulo.podeSolicitar && !ligar
   const base = {
@@ -323,7 +330,7 @@ const fraseDoEfeito = computed(() => {
     return ''
   }
 
-  const partes = ITENS_DO_EFEITO[efeito.modulo]
+  const partes = (efeito.modulo === 'ONG' ? ([] as ItemDoEfeito[]) : ITENS_DO_EFEITO[efeito.modulo])
     .filter((campo) => efeito[campo] > 0)
     .map((campo) =>
       t(`inicio.modulos.confirmarDesligar.itens.${campo}`, { n: efeito[campo] }, efeito[campo]),

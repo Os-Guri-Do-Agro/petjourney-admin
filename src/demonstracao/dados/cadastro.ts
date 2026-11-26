@@ -135,7 +135,9 @@ function montarVinculos() {
         diarioCompleto: tudo || sorte.chance(0.82),
         peso: tudo || sorte.chance(0.88),
         notas: tudo || sorte.chance(0.7),
+        documentos: tudo,
       },
+      doDonoAtual: true,
     })
   }
 }
@@ -162,7 +164,8 @@ export function ligarAoApp(p: PacienteDaDemo, origem: Vinculo['origem']) {
     pacienteId: p.id,
     origem,
     ativadoEm: agoraIso(),
-    consentimento: { diarioCompleto: true, peso: true, notas: true },
+    consentimento: { diarioCompleto: true, peso: true, notas: true, documentos: true },
+    doDonoAtual: true,
   })
   p.noApp = true
 }

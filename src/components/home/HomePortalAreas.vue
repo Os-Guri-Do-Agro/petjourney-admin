@@ -60,7 +60,11 @@ const SELO_DO_PAPEL: Record<PapelParceiro, { classe: string; icone: string }> = 
   OPERADOR: { classe: '', icone: 'ph ph-user' },
 }
 
-const SELO_DO_INDICADO: Record<Indicado['status'], { classe: string; icone: string }> = {
+/** O status vem nulo só numa ONG sem o modo afiliado ativo: a linha fica sem selo. */
+const SELO_DO_INDICADO: Record<
+  NonNullable<Indicado['status']>,
+  { classe: string; icone: string }
+> = {
   COM_ASSINATURA: { classe: 'ui-selo--ok', icone: 'ph ph-check-circle' },
   SEM_ASSINATURA: { classe: '', icone: 'ph ph-circle-dashed' },
   CANCELADO: { classe: 'ui-selo--contorno', icone: 'ph ph-x-circle' },
@@ -577,7 +581,11 @@ const valorDasLeituras = computed(() => {
               </span>
               <span class="linha__meta">{{ dataCurta(indicado.cadastradoEm) }}</span>
             </span>
-            <span class="ui-selo" :class="SELO_DO_INDICADO[indicado.status].classe">
+            <span
+              v-if="indicado.status"
+              class="ui-selo"
+              :class="SELO_DO_INDICADO[indicado.status].classe"
+            >
               <i :class="SELO_DO_INDICADO[indicado.status].icone" aria-hidden="true" />
               {{ t(`parceiro.indicados.status.${indicado.status}`) }}
             </span>

@@ -808,6 +808,7 @@ function efeitoDoDesligar(modulo: NomeDoModulo): EfeitoDoDesligarDto {
       internacoesAbertas: 0,
       reservasFuturas: 0,
       hospedagensAbertas: 0,
+      animaisEmCuidado: 0,
       total: 0,
     }
   }
@@ -826,6 +827,7 @@ function efeitoDoDesligar(modulo: NomeDoModulo): EfeitoDoDesligarDto {
     internacoesAbertas,
     reservasFuturas: 0,
     hospedagensAbertas: 0,
+    animaisEmCuidado: 0,
     total: agendamentosFuturos + internacoesAbertas,
   }
 }

@@ -236,14 +236,9 @@ const grupos = computed<Grupo[]>(() => {
     })
 })
 
+/** A chamada traz só nome, espécie e foto do paciente (N52: a foto basta); a espécie "Outro" sai genérica. */
 function sobreOPet(paciente: Chamada['paciente']) {
-  return [
-    rotulos.especie(paciente),
-    paciente.raca,
-    rotulos.idade(paciente.nascimento, paciente.nascimentoEstimado),
-  ]
-    .filter(Boolean)
-    .join(' · ')
+  return rotulos.especie({ especie: paciente.especie, especieOutra: null })
 }
 
 /**
