@@ -4,8 +4,9 @@
  * lista numa gaveta ao lado.
  *
  * Só os avisos do parceiro aberto: quem é membro de dois vê em cada um só o que é dele. Abrir um
- * aviso marca como lido; o que leva a uma tela do portal leva até ela. "Marcar como lidos" marca os
- * da lista um por um, porque o "marcar todas" da API marcaria também os avisos dos pets no app.
+ * aviso marca como lido; o que leva a uma tela do portal leva até ela, e o resto (a `dados.url`
+ * dos avisos é rota do app, N8) só fica lido. "Marcar como lidos" marca todos os deste parceiro
+ * na API (`read-all?parceiroId=`), mesmo os que a lista ainda não carregou.
  */
 import Button from 'primevue/button'
 import Drawer from 'primevue/drawer'
@@ -28,7 +29,10 @@ const aberta = defineModel<boolean>('aberta', { default: false })
 
 const LARGURA = '26.5rem'
 
-/** A tela do portal que resolve o aviso. Tipo sem entrada aqui só se lê. */
+/**
+ * A tela do portal que resolve o aviso, pelo tipo. Tipo sem entrada aqui só se lê: a `dados.url`
+ * que a API manda é a rota do app, e o portal não navega por ela.
+ */
 const ROTA_DO_AVISO: Record<string, string> = {
   PARCEIRO_MODULO_VENCENDO: '/inicio',
   PARCEIRO_MODULO_SUSPENSO: '/inicio',
@@ -174,7 +178,7 @@ function irPara(aviso: Aviso) {
     </template>
 
     <div class="avisos">
-      <div v-if="naoLidasNaLista > 0" class="avisos__barra">
+      <div v-if="naoLidasNaLista > 0 || (naoLidas ?? 0) > 0" class="avisos__barra">
         <Button
           type="button"
           size="small"

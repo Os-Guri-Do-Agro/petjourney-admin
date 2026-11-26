@@ -13,7 +13,7 @@ import { criarReconferencia } from '@/composables/conferencia'
 import {
   abrirAviso,
   listarAvisos,
-  marcarAvisoComoLido,
+  marcarAvisosDoParceiroComoLidos,
   type Aviso,
 } from '@/service/parceiro/avisos-service'
 import { useParceiroStore } from '@/stores/parceiro'
@@ -133,20 +133,27 @@ export function useAvisosDoParceiro(ativo: () => boolean) {
     void abrirAviso(aviso.id).catch(() => contar())
   }
 
-  /** Marca como lidos os avisos não lidos que estão na lista, um por um (ver `avisos-service`). */
+  /**
+   * Marca como lidos todos os avisos deste parceiro na API (N8), os da lista e os que ela ainda não
+   * carregou; os de outra empresa e os do app ficam como estavam. O número volta da resposta.
+   */
   async function marcarTodasComoLidas() {
-    const pendentes = avisos.value.filter((aviso) => !aviso.lidaEm).map((aviso) => aviso.id)
+    const parceiroId = parceiroQuery()
 
-    if (pendentes.length === 0) return
+    if (!parceiroId || marcandoTodas.value) return
 
     marcandoTodas.value = true
 
     try {
-      const resultados = await Promise.allSettled(pendentes.map((id) => marcarAvisoComoLido(id)))
-      const lidos = pendentes.filter((_, indice) => resultados[indice]?.status === 'fulfilled')
+      const resposta = await marcarAvisosDoParceiroComoLidos(parceiroId)
 
-      marcarNaTela(new Set(lidos))
-      /* Pode haver não lidas além da página carregada: o número volta do servidor. */
+      if (parceiroQuery() !== parceiroId) return
+
+      marcarNaTela(new Set(avisos.value.map((aviso) => aviso.id)))
+      naoLidas.value = resposta.naoLidasDoParceiro ?? 0
+      conferidoEm.value = new Date()
+    } catch {
+      /* Nada mudou na tela; a próxima conferência traz o número do servidor. */
       await contar()
     } finally {
       marcandoTodas.value = false

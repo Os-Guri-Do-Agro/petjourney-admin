@@ -22,6 +22,10 @@ const servico = vi.hoisted(() => ({
   pacientesDoConvite: vi.fn<Servico['pacientesDoConvite']>(),
   proporPorQr: vi.fn<Servico['proporPorQr']>(),
 }))
+const carteirinha = vi.hoisted(() => ({
+  resolverCarteirinha:
+    vi.fn<typeof import('@/service/parceiro/carteirinha-service').resolverCarteirinha>(),
+}))
 const toast = vi.hoisted(() => ({ add: vi.fn() }))
 
 /* Só as idas à rede viram dublê; o código em dois blocos continua o de verdade. */
@@ -35,6 +39,7 @@ vi.mock('@/composables/useParceiroPortal', () => ({
     parceiroQuery: () => ({ parceiroId: 'p1' }),
   }),
 }))
+vi.mock('@/service/parceiro/carteirinha-service', () => carteirinha)
 vi.mock('primevue/usetoast', () => ({ useToast: () => toast }))
 
 i18n.global.locale.value = 'pt'
@@ -81,6 +86,7 @@ beforeEach(() => {
   servico.proporVinculo.mockReset()
   servico.pacientesDoConvite.mockReset()
   servico.proporPorQr.mockReset()
+  carteirinha.resolverCarteirinha.mockReset()
   toast.add.mockReset()
   servico.pacientesDoConvite.mockResolvedValue([
     { id: 'pac1', nome: 'Bolota' },
@@ -165,7 +171,11 @@ describe('convite para o app', () => {
 
     expect(wrapper.find('.cv-qr__codigo').text()).toBe('K7MQ-X3PA')
     expect(wrapper.find('.cv-qr__imagem').attributes('src')).toMatch(/^data:image\/png;base64,/)
-    expect(wrapper.find('.cv-qr__como').text()).toContain('Ou digite o código K7MQ-X3PA.')
+    /* N49: o app não lê QR em Minhas clínicas; a folha manda digitar o código. */
+    expect(wrapper.find('.cv-qr__como').text()).toContain(
+      'abra Minhas clínicas e digite o código K7MQ-X3PA.',
+    )
+    expect(wrapper.find('.cv-qr__como').text()).not.toContain('toque em Minhas clínicas e aponte')
   })
 
   it('Escape com o QR aberto fecha só o QR: a gaveta de baixo não recebe a tecla', async () => {
@@ -318,5 +328,193 @@ describe('convite para o app', () => {
 
     expect(wrapper.text()).toContain('Este pet já está vinculado a esta clínica.')
     expect(wrapper.text()).not.toContain('Tentar de novo')
+  })
+})
+
+/*
+ * N19: o texto do QR da coleira (link curto, só o código ou o link antigo) vai como veio para a
+ * API, que devolve o slug; o slug segue para a proposta pelo QR.
+ */
+describe('QR da carteirinha, em "Outras formas"', () => {
+  const LINK_CURTO = 'https://srhub.up.railway.app/q/wINmrnv8'
+  const SLUG = '63e2edef6b2d6f98858a06943c571ff8'
+
+  async function abrirOutras() {
+    servico.proporVinculo.mockResolvedValue(CONVITE)
+    const wrapper = montar({ criarAoAbrir: true })
+    await flushPromises()
+    await botao(wrapper, 'Outras formas').trigger('click')
+
+    return wrapper
+  }
+
+  it('manda o texto lido para o resolver e o slug devolvido para a proposta', async () => {
+    carteirinha.resolverCarteirinha.mockResolvedValue({ publicSlug: SLUG })
+    servico.proporPorQr.mockResolvedValue({ propostaId: 'pq1' })
+
+    const wrapper = await abrirOutras()
+    await wrapper.find('#cv-qr').setValue(`  ${LINK_CURTO} `)
+    await botao(wrapper, 'Enviar pedido').trigger('click')
+    await flushPromises()
+
+    expect(carteirinha.resolverCarteirinha).toHaveBeenCalledExactlyOnceWith(`  ${LINK_CURTO} `, {
+      parceiroId: 'p1',
+    })
+    expect(servico.proporPorQr).toHaveBeenCalledExactlyOnceWith(SLUG, 'pac1', { parceiroId: 'p1' })
+    expect(wrapper.text()).toContain('Pedido enviado.')
+  })
+
+  it('o Enter do leitor de QR de mão manda o pedido', async () => {
+    carteirinha.resolverCarteirinha.mockResolvedValue({ publicSlug: SLUG })
+    servico.proporPorQr.mockResolvedValue({ propostaId: 'pq1' })
+
+    const wrapper = await abrirOutras()
+    await wrapper.find('#cv-qr').setValue('wINmrnv8')
+    await wrapper.find('#cv-qr').trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+
+    expect(carteirinha.resolverCarteirinha).toHaveBeenCalledWith('wINmrnv8', { parceiroId: 'p1' })
+    expect(servico.proporPorQr).toHaveBeenCalledOnce()
+  })
+
+  it('campo vazio não chama a API', async () => {
+    const wrapper = await abrirOutras()
+    await botao(wrapper, 'Enviar pedido').trigger('click')
+    await flushPromises()
+
+    expect(carteirinha.resolverCarteirinha).not.toHaveBeenCalled()
+    expect(wrapper.text()).toContain('Cole o endereço da carteirinha do pet.')
+  })
+
+  it('QR que não é de carteirinha (404) mostra a message da API e não propõe nada', async () => {
+    carteirinha.resolverCarteirinha.mockRejectedValue(
+      new ApiError(
+        'Não encontramos uma carteirinha ativa para este QR.',
+        404,
+        undefined,
+        undefined,
+        {
+          codigo: 'CARTEIRINHA_NAO_ENCONTRADA',
+        },
+      ),
+    )
+
+    const wrapper = await abrirOutras()
+    await wrapper.find('#cv-qr').setValue('https://exemplo.test/qualquer')
+    await botao(wrapper, 'Enviar pedido').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Não encontramos uma carteirinha ativa para este QR.')
+    expect(servico.proporPorQr).not.toHaveBeenCalled()
+  })
+
+  it('muitas leituras no minuto (429) dizem quanto esperar', async () => {
+    carteirinha.resolverCarteirinha.mockRejectedValue(
+      new ApiError('Muitas leituras de QR em pouco tempo.', 429, undefined, undefined, {
+        codigo: 'CARTEIRINHA_TAXA_EXCEDIDA',
+        detalhes: { limite: 30, tenteDeNovoEmSegundos: 42 },
+      }),
+    )
+
+    const wrapper = await abrirOutras()
+    await wrapper.find('#cv-qr').setValue(LINK_CURTO)
+    await botao(wrapper, 'Enviar pedido').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Tente de novo em 42 segundos.')
+  })
+
+  describe('pela câmera', () => {
+    const parar = vi.fn()
+    const detectar = vi.fn()
+    let pedirCamera: ReturnType<typeof vi.fn>
+
+    beforeEach(() => {
+      parar.mockReset()
+      detectar.mockReset()
+      pedirCamera = vi.fn().mockResolvedValue({ getTracks: () => [{ stop: parar }] })
+
+      class DetectorFalso {
+        static getSupportedFormats = () => Promise.resolve(['qr_code', 'ean_13'])
+        detect = detectar
+      }
+
+      vi.stubGlobal('BarcodeDetector', DetectorFalso)
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: { getUserMedia: pedirCamera },
+      })
+      Object.defineProperty(HTMLMediaElement.prototype, 'readyState', {
+        configurable: true,
+        get: () => 4,
+      })
+      vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue(undefined)
+    })
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, 'mediaDevices')
+      Reflect.deleteProperty(HTMLMediaElement.prototype, 'readyState')
+      vi.restoreAllMocks()
+    })
+
+    it('o QR lido entra no campo, a câmera desliga e o pedido segue pelo resolver', async () => {
+      detectar.mockResolvedValueOnce([]).mockResolvedValue([{ rawValue: LINK_CURTO }])
+      carteirinha.resolverCarteirinha.mockResolvedValue({ publicSlug: SLUG })
+      servico.proporPorQr.mockResolvedValue({ propostaId: 'pq1' })
+
+      const wrapper = await abrirOutras()
+      await flushPromises()
+      await botao(wrapper, 'Ler com a câmera').trigger('click')
+      await flushPromises()
+
+      expect(pedirCamera).toHaveBeenCalledWith({
+        video: { facingMode: { ideal: 'environment' } },
+        audio: false,
+      })
+      expect(wrapper.find('video').exists()).toBe(true)
+
+      await vi.waitFor(() => expect(servico.proporPorQr).toHaveBeenCalledOnce(), { timeout: 2000 })
+
+      expect(carteirinha.resolverCarteirinha).toHaveBeenCalledWith(LINK_CURTO, { parceiroId: 'p1' })
+      expect(servico.proporPorQr).toHaveBeenCalledWith(SLUG, 'pac1', { parceiroId: 'p1' })
+      expect(parar).toHaveBeenCalled()
+      expect((wrapper.find('#cv-qr').element as HTMLInputElement).value).toBe(LINK_CURTO)
+      await flushPromises()
+      expect(wrapper.find('video').exists()).toBe(false)
+    })
+
+    it('sem permissão da câmera, explica e deixa o campo para colar', async () => {
+      pedirCamera.mockRejectedValue(new DOMException('negado', 'NotAllowedError'))
+
+      const wrapper = await abrirOutras()
+      await flushPromises()
+      await botao(wrapper, 'Ler com a câmera').trigger('click')
+      await flushPromises()
+
+      expect(wrapper.text()).toContain('O navegador não liberou a câmera.')
+      expect(wrapper.find('video').exists()).toBe(false)
+      expect(wrapper.find('#cv-qr').exists()).toBe(true)
+    })
+
+    it('fechar "Outras formas" desliga a câmera', async () => {
+      detectar.mockResolvedValue([])
+
+      const wrapper = await abrirOutras()
+      await flushPromises()
+      await botao(wrapper, 'Ler com a câmera').trigger('click')
+      await flushPromises()
+      await botao(wrapper, 'Outras formas').trigger('click')
+      await flushPromises()
+
+      expect(parar).toHaveBeenCalled()
+    })
+  })
+
+  it('sem o leitor de QR no navegador, a câmera não aparece', async () => {
+    const wrapper = await abrirOutras()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Ler com a câmera')
+    expect(wrapper.text()).toContain('Cole o endereço que o QR da coleira traz')
   })
 })

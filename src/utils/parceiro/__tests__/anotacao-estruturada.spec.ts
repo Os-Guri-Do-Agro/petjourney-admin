@@ -148,6 +148,23 @@ describe('montarAnotacaoEstruturada', () => {
     expect(montado?.examesSolicitados).toEqual([{ nome: 'Hemograma', observacao: 'Em jejum' }])
   })
 
+  it('manda "Reavaliar em" só no uso contínuo, nunca junto da duração (N58)', () => {
+    const montado = montarAnotacaoEstruturada(
+      'CONSULTA',
+      form({
+        prescricaoItens: [
+          prescricao({ nome: 'Enalapril', frequencia: '1x ao dia', reavaliarEmDias: 90 }),
+          prescricao({ nome: 'Amoxicilina', duracaoDias: 10, reavaliarEmDias: 90 }),
+        ],
+      }),
+    )
+    const itens = montado?.prescricaoItens ?? []
+
+    expect(itens[0]).toEqual({ nome: 'Enalapril', frequencia: '1x ao dia', reavaliarEmDias: 90 })
+    expect(itens[1]).toEqual({ nome: 'Amoxicilina', duracaoDias: 10 })
+    expect(JSON.parse(JSON.stringify(itens[1]))).not.toHaveProperty('reavaliarEmDias')
+  })
+
   it('omite lista vazia em vez de mandar array vazio', () => {
     const montado = montarAnotacaoEstruturada('CONSULTA', form({ motivo: 'Rotina' }))
 
@@ -256,6 +273,32 @@ describe('validarAnotacaoEstruturada', () => {
         params: { min: 1, max: 3650 },
       },
     ])
+  })
+
+  it('acusa "Reavaliar em" fora de 1 a 730 dias no uso contínuo (N58)', () => {
+    for (const reavaliarEmDias of [0, 731, 800, 12.5]) {
+      const erros = validarAnotacaoEstruturada(
+        'CONSULTA',
+        form({ prescricaoItens: [prescricao({ nome: 'Enalapril', reavaliarEmDias })] }),
+      )
+
+      expect(erros).toEqual([
+        {
+          id: 'prescricaoItens.0.reavaliarEmDias',
+          chave: 'reavaliacaoFaixa',
+          params: { min: 1, max: 730 },
+        },
+      ])
+    }
+
+    for (const reavaliarEmDias of [1, 90, 730, null]) {
+      expect(
+        validarAnotacaoEstruturada(
+          'CONSULTA',
+          form({ prescricaoItens: [prescricao({ nome: 'Enalapril', reavaliarEmDias })] }),
+        ),
+      ).toEqual([])
+    }
   })
 
   it('acusa mais itens do que o backend aceita', () => {
@@ -367,6 +410,10 @@ describe('duracaoSemExemplo', () => {
 
   it('remédio lido da receita sem duração fica sem exemplo', () => {
     expect(duracaoSemExemplo(prescricao({ conferir: { duracaoDias: false } }))).toBe(true)
+  })
+
+  it('"Reavaliar em" preenchido já diz que é contínuo', () => {
+    expect(duracaoSemExemplo(prescricao({ reavaliarEmDias: 90 }))).toBe(true)
   })
 
   it('remédio novo, à mão e com prazo, mantém o exemplo', () => {

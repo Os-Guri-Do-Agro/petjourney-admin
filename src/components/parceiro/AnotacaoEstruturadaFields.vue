@@ -140,6 +140,19 @@ function conferido(item: PrescricaoItemForm, campo: CampoPrescricaoConferivel) {
 }
 
 /**
+ * Duração e "Reavaliar em" se excluem (N58): o prazo é do uso contínuo, que não tem duração, e
+ * os dois juntos a API recusa. Com duração, o campo do prazo some e o valor dele vai embora.
+ */
+function aoMudarDuracao(item: PrescricaoItemForm, valor: number | null) {
+  conferido(item, 'duracaoDias')
+
+  if (valor != null && item.reavaliarEmDias != null) {
+    item.reavaliarEmDias = null
+    conferido(item, 'reavaliarEmDias')
+  }
+}
+
+/**
  * O aviso de frequência aparece só onde faz falta: item com nome e sem frequência. Fixo embaixo
  * de todo campo, ele virava papel de parede e ninguém lia.
  */
@@ -152,7 +165,7 @@ const CONFERIVEIS: readonly CampoPrescricaoConferivel[] = [
   'dose',
   'frequencia',
   'duracaoDias',
-  'instrucoes',
+  'reavaliarEmDias',
 ]
 
 function ehConferivel(campo: string): campo is CampoPrescricaoConferivel {
@@ -760,7 +773,7 @@ function removeExame(indice: number) {
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.duracaoDias`))"
                 :aria-describedby="descricaoPresc(item, index, 'duracaoDias')"
                 :placeholder="exemploDeDuracao(item)"
-                @update:model-value="conferido(item, 'duracaoDias')"
+                @update:model-value="(valor: number | null) => aoMudarDuracao(item, valor)"
               />
             </div>
 
@@ -776,16 +789,7 @@ function removeExame(indice: number) {
               @click="removePrescricao(index)"
             />
 
-            <!-- Marcada só quando leva o prazo de reavaliação lido sem certeza (PJ-HC2AKL). -->
-            <div
-              class="presc__c presc__c--instr"
-              :class="{ 'presc__c--conferir': aConferir(item, 'instrucoes') }"
-            >
-              <i
-                v-if="aConferir(item, 'instrucoes')"
-                class="ph ph-eye presc__olho"
-                aria-hidden="true"
-              />
+            <div class="presc__c presc__c--instr">
               <label class="presc__lbl" :for="`est-presc-instr-${index}`">
                 {{ t('acessos.estruturada.prescricao.instrucoes') }}
               </label>
@@ -799,8 +803,38 @@ function removeExame(indice: number) {
                 :invalid="Boolean(erroDe(`prescricaoItens.${index}.instrucoes`))"
                 :aria-describedby="descricaoPresc(item, index, 'instrucoes')"
                 :placeholder="`${t('acessos.estruturada.prescricao.instrucoes')} · ${t('acessos.estruturada.prescricao.instrucoesPlaceholder')}`"
-                @update:model-value="conferido(item, 'instrucoes')"
               />
+            </div>
+
+            <!--
+              Só no uso contínuo, sem duração (N58): a data de voltar ao veterinário, que o app
+              propõe ao responsável ao importar. O prazo nunca vai escrito nas instruções.
+            -->
+            <div v-if="item.duracaoDias == null" class="presc__reav">
+              <label class="presc__reav-lbl" :for="`est-presc-reav-${index}`">
+                {{ t('acessos.estruturada.prescricao.reavaliarEmDias') }}
+              </label>
+              <div
+                class="presc__c presc__c--reav"
+                :class="{ 'presc__c--conferir': aConferir(item, 'reavaliarEmDias') }"
+              >
+                <i
+                  v-if="aConferir(item, 'reavaliarEmDias')"
+                  class="ph ph-eye presc__olho"
+                  aria-hidden="true"
+                />
+                <InputNumber
+                  v-model="item.reavaliarEmDias"
+                  :input-id="`est-presc-reav-${index}`"
+                  :disabled="disabled"
+                  :locale="numberLocale"
+                  :max-fraction-digits="0"
+                  :use-grouping="false"
+                  :invalid="Boolean(erroDe(`prescricaoItens.${index}.reavaliarEmDias`))"
+                  :aria-describedby="descricaoPresc(item, index, 'reavaliarEmDias')"
+                  @update:model-value="conferido(item, 'reavaliarEmDias')"
+                />
+              </div>
             </div>
 
             <!-- Descrições para o leitor de tela; na tela a marca é a cor do campo. -->
@@ -1282,9 +1316,28 @@ function removeExame(indice: number) {
 }
 
 .presc__c--instr,
+.presc__reav,
 .presc__aviso,
 .presc__erros {
   grid-column: 2 / -2;
+}
+
+/* "Reavaliar em (dias)" do contínuo: rótulo e campo na mesma linha, embaixo das instruções. */
+.presc__reav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.presc__reav-lbl {
+  color: var(--tinta-2);
+  font-size: 12.5px;
+  font-weight: 550;
+}
+
+.presc__c--reav {
+  width: 6.5rem;
 }
 
 /* Instrução é complemento: o campo recua de tom até alguém escrever nele. */
@@ -1446,6 +1499,7 @@ function removeExame(indice: number) {
   }
 
   .presc__c--instr,
+  .presc__reav,
   .presc__aviso,
   .presc__erros {
     grid-column: 2 / 6;
@@ -1486,6 +1540,7 @@ function removeExame(indice: number) {
 
   .presc__c--nome,
   .presc__c--instr,
+  .presc__reav,
   .presc__aviso,
   .presc__erros {
     grid-column: 2 / 4;

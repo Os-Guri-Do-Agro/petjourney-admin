@@ -1654,7 +1654,8 @@
         "frequenciaHint": "Without a frequency, the pet parent cannot turn this item into a pet medication.",
         "duracaoDias": "Duration (days)",
         "instrucoes": "Instructions",
-        "instrucoesPlaceholder": "Give with food"
+        "instrucoesPlaceholder": "Give with food",
+        "reavaliarEmDias": "Recheck in (days)"
       },
       "exames": {
         "title": "Requested exams",
@@ -1675,12 +1676,14 @@
         "duracaoFaixa": "Duration must be between {min} and {max} days.",
         "maxItens": "At most {max} items.",
         "dataInvalida": "Invalid date.",
-        "intervaloData": "Check-out cannot be before check-in."
+        "intervaloData": "Check-out cannot be before check-in.",
+        "reavaliacaoFaixa": "The recheck must be between {min} and {max} days."
       },
       "view": {
         "title": "Structured note data",
         "duracao": "{n} day | {n} days",
-        "semFrequencia": "No frequency: it will not become a pet medication."
+        "semFrequencia": "No frequency: it will not become a pet medication.",
+        "reavaliar": "Recheck in {n} day | Recheck in {n} days"
       }
     },
     "anexo": {
@@ -10630,12 +10633,13 @@
       "desde": "Linked since {data}, via {origem}.",
       "emailEnviado": "Request sent. The link went to {email}.",
       "qrRotulo": "Address of the pet's card QR",
-      "qrDica": "Scan the collar QR with a phone and paste the address of the page that opens.",
+      "qrDica": "Paste the address in the collar QR code, or just the code at the end of it.",
       "enviarPedido": "Send request",
       "qrEnviado": "Request sent. If the card belongs to a pet in the app, the guardian gets the request to accept.",
       "erros": {
         "jaLigado": "This patient is already linked to a pet in the app.",
-        "teto": "Limit of 50 requests per day reached. Try tomorrow."
+        "teto": "Limit of 50 requests per day reached. Try tomorrow.",
+        "taxaDoQr": "Too many QR code scans in a short time. Try again in {segundos} second. | Too many QR code scans in a short time. Try again in {segundos} seconds."
       },
       "propostas": "Requests",
       "status": {
@@ -10679,7 +10683,16 @@
       "encerrarLede": "The patient is no longer linked to the app. The guardian is notified and can link again later.",
       "motivo": "Reason",
       "motivoTamanho": "Write {min} to {max} characters.",
-      "encerrado": "Link ended"
+      "encerrado": "Link ended",
+      "qrDicaCamera": "Scan the collar QR code with the camera, or paste the address it contains.",
+      "camera": {
+        "ler": "Scan with the camera",
+        "fechar": "Close the camera",
+        "mire": "Hold the collar QR code up to the camera.",
+        "semPermissao": "The browser did not allow the camera. Allow it in the site permissions or paste the QR code address.",
+        "semCamera": "No camera found. Paste the QR code address.",
+        "falhou": "Could not open the camera. Close any other programme using the camera or paste the QR code address."
+      }
     },
     "convite": {
       "titulo": "Invite to the app",
@@ -10693,7 +10706,7 @@
       "anteriorCancelado": "The previous invitation is no longer valid.",
       "outrasFormas": "Other ways",
       "imprimir": "Print",
-      "folha": "Download the PetJourney app from the App Store or Google Play, tap My clinics and point the camera at the QR code. Or enter the code {codigo}.",
+      "folha": "Point your phone's camera at the QR code. Or download the PetJourney app from the App Store or Google Play, open My clinics and enter the code {codigo}.",
       "agora": "Invite to the app now?",
       "agoraNao": "Not now",
       "reenviar": "Resend"

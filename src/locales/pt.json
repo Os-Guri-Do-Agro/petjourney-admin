@@ -1654,7 +1654,8 @@
         "frequenciaHint": "Sem frequência, o responsável não consegue transformar o item em medicamento do pet.",
         "duracaoDias": "Duração (dias)",
         "instrucoes": "Instruções",
-        "instrucoesPlaceholder": "Dar junto com a comida"
+        "instrucoesPlaceholder": "Dar junto com a comida",
+        "reavaliarEmDias": "Reavaliar em (dias)"
       },
       "exames": {
         "title": "Exames solicitados",
@@ -1675,12 +1676,14 @@
         "duracaoFaixa": "A duração precisa ficar entre {min} e {max} dias.",
         "maxItens": "No máximo {max} itens.",
         "dataInvalida": "Data inválida.",
-        "intervaloData": "A saída não pode ser antes da entrada."
+        "intervaloData": "A saída não pode ser antes da entrada.",
+        "reavaliacaoFaixa": "A reavaliação precisa ficar entre {min} e {max} dias."
       },
       "view": {
         "title": "Dados estruturados da anotação",
         "duracao": "{n} dia | {n} dias",
-        "semFrequencia": "Sem frequência: não vira medicamento do pet."
+        "semFrequencia": "Sem frequência: não vira medicamento do pet.",
+        "reavaliar": "Reavaliar em {n} dia | Reavaliar em {n} dias"
       }
     },
     "anexo": {
@@ -10630,12 +10633,13 @@
       "desde": "Ligado desde {data}, por {origem}.",
       "emailEnviado": "Pedido enviado. O link foi para {email}.",
       "qrRotulo": "Endereço do QR da carteirinha do pet",
-      "qrDica": "Leia o QR da coleira com o celular e cole o endereço da página que abrir.",
+      "qrDica": "Cole o endereço que o QR da coleira traz, ou só o código do fim dele.",
       "enviarPedido": "Enviar pedido",
       "qrEnviado": "Pedido enviado. Se a carteirinha for de um pet no app, o responsável recebe o pedido para aceitar.",
       "erros": {
         "jaLigado": "Este paciente já está ligado a um pet do app.",
-        "teto": "Limite de 50 propostas por dia atingido. Tente amanhã."
+        "teto": "Limite de 50 propostas por dia atingido. Tente amanhã.",
+        "taxaDoQr": "Muitas leituras de QR em pouco tempo. Tente de novo em {segundos} segundo. | Muitas leituras de QR em pouco tempo. Tente de novo em {segundos} segundos."
       },
       "propostas": "Propostas",
       "status": {
@@ -10679,7 +10683,16 @@
       "encerrarLede": "O paciente deixa de estar ligado ao app. O responsável é avisado e pode ligar de novo depois.",
       "motivo": "Motivo",
       "motivoTamanho": "Escreva de {min} a {max} caracteres.",
-      "encerrado": "Vínculo encerrado"
+      "encerrado": "Vínculo encerrado",
+      "qrDicaCamera": "Leia o QR da coleira com a câmera, ou cole o endereço que ele traz.",
+      "camera": {
+        "ler": "Ler com a câmera",
+        "fechar": "Fechar a câmera",
+        "mire": "Mostre o QR da coleira para a câmera.",
+        "semPermissao": "O navegador não liberou a câmera. Libere nas permissões do site ou cole o endereço do QR.",
+        "semCamera": "Nenhuma câmera encontrada. Cole o endereço do QR.",
+        "falhou": "Não foi possível abrir a câmera. Feche outro programa que esteja usando a câmera ou cole o endereço do QR."
+      }
     },
     "convite": {
       "titulo": "Convidar para o app",
@@ -10693,7 +10706,7 @@
       "anteriorCancelado": "O convite anterior deixou de valer.",
       "outrasFormas": "Outras formas",
       "imprimir": "Imprimir",
-      "folha": "Baixe o app PetJourney na App Store ou no Google Play, toque em Minhas clínicas e aponte a câmera para o QR. Ou digite o código {codigo}.",
+      "folha": "Aponte a câmera do celular para o QR. Ou baixe o app PetJourney na App Store ou no Google Play, abra Minhas clínicas e digite o código {codigo}.",
       "agora": "Convidar para o app agora?",
       "agoraNao": "Agora não",
       "reenviar": "Reenviar"

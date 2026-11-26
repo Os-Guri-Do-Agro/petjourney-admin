@@ -516,6 +516,11 @@ export type AnotacaoPrescricaoItem = {
   /** Sem frequência o responsável não consegue derivar Medicamento do pet na importação. */
   frequencia: string | null
   duracaoDias: number | null
+  /**
+   * Uso contínuo: reavaliar em N dias, de 1 a 730 (N58, `PrescricaoItemDaAnotacaoDto`). Nulo com
+   * duração e na anotação sem prazo; ausente só na anotação montada fora da API (demonstração).
+   */
+  reavaliarEmDias?: number | null
   instrucoes: string | null
 }
 
@@ -727,6 +732,8 @@ export type AnotacaoPrescricaoItemInput = {
   unidade?: string
   frequencia?: string
   duracaoDias?: number
+  /** Só sem `duracaoDias` (N58): os dois juntos são 400 `PRESCRICAO_REAVALIACAO_SO_NO_USO_CONTINUO`. */
+  reavaliarEmDias?: number
   instrucoes?: string
 }
 
@@ -811,8 +818,9 @@ export type ItemFormularioLeitura = {
   duracaoDias: number | null
   instrucoes: string | null
   /**
-   * Uso contínuo com prazo escrito ("reavaliar em 90 dias", "por 6 meses"). Opcional: a API de
-   * produção ainda não manda.
+   * Uso contínuo com prazo escrito ("reavaliar em 90 dias", "por 6 meses"): preenche o
+   * "Reavaliar em" do item da anotação (N58), nunca o texto das instruções. Opcional: leitura de
+   * antes do campo não manda.
    */
   reavaliarEmDias?: number | null
 }

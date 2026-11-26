@@ -50,6 +50,13 @@ export const PESO_MAX_KG = 500
 export const DURACAO_MIN_DIAS = 1
 export const DURACAO_MAX_DIAS = 3650
 
+/**
+ * O prazo de reavaliação do uso contínuo (N58): de 1 a 730 dias, a mesma faixa da prescrição do
+ * atendimento (API: `PRESCRICAO_REAVALIACAO_MIN_DIAS`/`MAX_DIAS`). Só vale sem duração.
+ */
+export const REAVALIACAO_MIN_DIAS = 1
+export const REAVALIACAO_MAX_DIAS = 730
+
 /** `@MaxLength` de cada campo no DTO do backend. Aceitar aqui o que lá é recusado vira 400. */
 export const LIMITES_ESCALARES: Record<
   Exclude<CampoEscalar, 'pesoKg' | 'dataResultado' | 'dataEntrada' | 'dataSaida'>,
@@ -121,16 +128,13 @@ export function tipoAceitaEstruturado(tipo: TipoServicoPrestador): boolean {
 
 // ------------------------------------------------------------------ formulário
 
-/**
- * Campos que a leitura de receita com IA marca para conferir quando não leu com confiança alta.
- * As instruções só quando levam o prazo de reavaliação lido sem certeza.
- */
+/** Campos que a leitura de receita com IA marca para conferir quando não leu com confiança alta. */
 export type CampoPrescricaoConferivel =
   | 'nome'
   | 'dose'
   | 'frequencia'
   | 'duracaoDias'
-  | 'instrucoes'
+  | 'reavaliarEmDias'
 
 export type PrescricaoItemForm = {
   nome: string
@@ -138,6 +142,12 @@ export type PrescricaoItemForm = {
   unidade: string
   frequencia: string
   duracaoDias: number | null
+  /**
+   * "Reavaliar em N dias" do uso contínuo (N58): só sem duração. Preencher a duração apaga o
+   * prazo, e o prazo nunca vai escrito nas instruções. Opcional no tipo para quem monta o item
+   * por fora do formulário (o prontuário da demonstração).
+   */
+  reavaliarEmDias?: number | null
   instrucoes: string
   /**
    * Item vindo da leitura com IA: campos que a máquina propôs sem confiança alta. Editar o
@@ -173,7 +183,15 @@ export type AnotacaoEstruturadaForm = {
 }
 
 export function criarPrescricaoItemForm(): PrescricaoItemForm {
-  return { nome: '', dose: '', unidade: '', frequencia: '', duracaoDias: null, instrucoes: '' }
+  return {
+    nome: '',
+    dose: '',
+    unidade: '',
+    frequencia: '',
+    duracaoDias: null,
+    reavaliarEmDias: null,
+    instrucoes: '',
+  }
 }
 
 export function criarExameSolicitadoForm(): ExameSolicitadoForm {
@@ -246,6 +264,7 @@ export type ChaveErroEstruturado =
   | 'maxLength'
   | 'pesoFaixa'
   | 'duracaoFaixa'
+  | 'reavaliacaoFaixa'
   | 'maxItens'
   | 'dataInvalida'
   | 'intervaloData'
@@ -358,6 +377,21 @@ export function validarAnotacaoEstruturada(
           params: { min: DURACAO_MIN_DIAS, max: DURACAO_MAX_DIAS },
         })
       }
+
+      /* Com duração o prazo não vai (`montarAnotacaoEstruturada`): só o do contínuo se confere. */
+      const prazo = item.reavaliarEmDias
+
+      if (
+        item.duracaoDias == null &&
+        prazo != null &&
+        (!Number.isInteger(prazo) || prazo < REAVALIACAO_MIN_DIAS || prazo > REAVALIACAO_MAX_DIAS)
+      ) {
+        erros.push({
+          id: `prescricaoItens.${indice}.reavaliarEmDias`,
+          chave: 'reavaliacaoFaixa',
+          params: { min: REAVALIACAO_MIN_DIAS, max: REAVALIACAO_MAX_DIAS },
+        })
+      }
     })
   }
 
@@ -455,18 +489,22 @@ export function doseComUnidade(dose?: string | null, unidade?: string | null): s
 
 /**
  * Remédio sem prazo: o formulário não tem chave de "uso contínuo", então vale o que o item diz.
- * Item lido da receita (tem `conferir`) com duração vazia é "a receita não fixou prazo", e quem
- * escreve "uso contínuo" nas instruções ou na frequência quer o mesmo. Nos dois casos o exemplo
- * cinza "7" parece "7 dias", e o campo fica sem exemplo.
+ * Item lido da receita (tem `conferir`) com duração vazia é "a receita não fixou prazo", quem
+ * preencheu "Reavaliar em" disse que é contínuo, e quem escreve "uso contínuo" nas instruções ou
+ * na frequência quer o mesmo. Nesses casos o exemplo cinza "7" parece "7 dias", e o campo fica
+ * sem exemplo.
  */
 export function duracaoSemExemplo(
-  item: Pick<PrescricaoItemForm, 'duracaoDias' | 'instrucoes' | 'frequencia' | 'conferir'>,
+  item: Pick<
+    PrescricaoItemForm,
+    'duracaoDias' | 'reavaliarEmDias' | 'instrucoes' | 'frequencia' | 'conferir'
+  >,
 ): boolean {
   if (item.duracaoDias != null) {
     return false
   }
 
-  if (item.conferir !== undefined) {
+  if (item.conferir !== undefined || item.reavaliarEmDias != null) {
     return true
   }
 
@@ -481,7 +519,8 @@ export function itemPrescricaoPreenchido(item: PrescricaoItemForm): boolean {
     item.unidade.trim() ||
     item.frequencia.trim() ||
     item.instrucoes.trim() ||
-    item.duracaoDias != null,
+    item.duracaoDias != null ||
+    item.reavaliarEmDias != null,
   )
 }
 
@@ -551,6 +590,8 @@ export function montarAnotacaoEstruturada(
         unidade: textoOuUndefined(item.unidade),
         frequencia: textoOuUndefined(item.frequencia),
         duracaoDias: item.duracaoDias ?? undefined,
+        /* Prazo e duração juntos são 400 (`PRESCRICAO_REAVALIACAO_SO_NO_USO_CONTINUO`). */
+        reavaliarEmDias: item.duracaoDias == null ? (item.reavaliarEmDias ?? undefined) : undefined,
         instrucoes: textoOuUndefined(item.instrucoes),
       }))
 

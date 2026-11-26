@@ -10,7 +10,9 @@
  *   na primeira ação: "Agora não" não deixa convite à toa nem cancela o que o cliente já tinha.
  * - "Enviar por e-mail" é outro convite (`EMAIL`): o link aberto aqui deixa de valer.
  * - O QR é desenhado no navegador a partir do `link`. O portal não monta a mensagem.
- * - "Outras formas", recolhido: o QR da carteirinha do pet, como antes.
+ * - "Outras formas", recolhido: o QR da carteirinha do pet. O texto do QR (lido pela câmera,
+ *   pelo leitor de mão ou colado) vai como veio para a API, que devolve o slug da carteirinha
+ *   (`resolverCarteirinha`, N19), e o slug segue para a proposta pelo QR.
  *
  * Erros: a `message` da API, que já vem traduzida; o `codigo` só decide o que fazer.
  */
@@ -25,8 +27,10 @@ import { useI18n } from 'vue-i18n'
 import { lerErroDoCadastro, type ErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import { imagemDoQr } from '@/components/parceiro/estabelecimento/qr-da-pagina'
+import { useLeitorDeQr } from '@/composables/useLeitorDeQr'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { lerQr } from '@/service/parceiro/emergencia-service'
+import { ApiError } from '@/service/api'
+import { resolverCarteirinha } from '@/service/parceiro/carteirinha-service'
 import type { Paciente } from '@/service/parceiro/pacientes-service'
 import {
   codigoEmBlocos,
@@ -305,31 +309,64 @@ const enviandoQr = ref(false)
 const qrEnviado = ref(false)
 const erroDoQr = ref('')
 
-const leituraDoQr = computed(() => lerQr(qr.value))
-const problemaDoQr = computed(() =>
-  'problema' in leituraDoQr.value ? leituraDoQr.value.problema : null,
-)
+const qrVazio = computed(() => !qr.value.trim())
 
+/** O 429 da leitura do QR diz quanto esperar; a `message` da API só diz "daqui a pouco". */
+function mensagemDoQr(err: unknown, lido: ErroDoCadastro) {
+  if (err instanceof ApiError && err.codigo === 'CARTEIRINHA_TAXA_EXCEDIDA') {
+    const segundos = Math.ceil(Number(err.detalhes.tenteDeNovoEmSegundos))
+
+    if (segundos > 0) return t('cadastro.vinculo.erros.taxaDoQr', { segundos }, segundos)
+  }
+
+  return lido.mensagem
+}
+
+/**
+ * O texto do QR vai como veio: a API sabe ler o link curto, só o código e o link antigo, e
+ * devolve o slug da carteirinha. QR que não é de carteirinha (ou de pet inativo, de ONG) volta
+ * 404 com a `message` traduzida, o mesmo para todos.
+ */
 async function enviarPeloQr() {
   tentouQr.value = true
   erroDoQr.value = ''
-  if (!('slug' in leituraDoQr.value)) return
+  if (qrVazio.value || enviandoQr.value) return
 
   enviandoQr.value = true
 
   try {
-    await proporPorQr(leituraDoQr.value.slug, props.paciente.id, parceiroQuery())
+    const { publicSlug } = await resolverCarteirinha(qr.value, parceiroQuery())
+
+    await proporPorQr(publicSlug, props.paciente.id, parceiroQuery())
     qrEnviado.value = true
     emit('mudou')
   } catch (err) {
     const lido = lerErroDoCadastro(err, t('cadastro.erros.salvar'))
 
-    erroDoQr.value = lido.mensagem
+    erroDoQr.value = mensagemDoQr(err, lido)
     avisarSeMudou(lido)
   } finally {
     enviandoQr.value = false
   }
 }
+
+/* A câmera, onde o navegador lê QR: o que ela leu entra no campo e segue para o pedido. */
+const {
+  disponivel: cameraDisponivel,
+  ligada: cameraLigada,
+  abrindo: cameraAbrindo,
+  problema: problemaDaCamera,
+  video: videoDaCamera,
+  ligar: ligarCamera,
+  desligar: desligarCamera,
+} = useLeitorDeQr((texto) => {
+  qr.value = texto
+  void enviarPeloQr()
+})
+
+watch(outrasAbertas, (abertas) => {
+  if (!abertas) desligarCamera()
+})
 </script>
 
 <template>
@@ -452,19 +489,62 @@ async function enviarPeloQr() {
 
       <div v-if="outrasAbertas" id="cv-outras" class="eg__secao">
         <label class="eg__rotulo" for="cv-qr">{{ t('cadastro.vinculo.qrRotulo') }}</label>
-        <InputText
-          id="cv-qr"
-          v-model="qr"
-          autocomplete="off"
-          spellcheck="false"
-          :placeholder="t('acessos.emergencia.qrExemplo')"
-          :invalid="tentouQr && problemaDoQr !== null"
-          :disabled="enviandoQr || qrEnviado"
-        />
-        <small v-if="tentouQr && problemaDoQr" class="eg__invalido">
-          {{ t(`acessos.emergencia.qrProblema.${problemaDoQr}`) }}
+        <div class="cv__qr-campo">
+          <!-- O leitor de QR de mão digita o texto e um Enter: o Enter manda o pedido. -->
+          <InputText
+            id="cv-qr"
+            v-model="qr"
+            autocomplete="off"
+            spellcheck="false"
+            :invalid="tentouQr && qrVazio"
+            :disabled="enviandoQr || qrEnviado"
+            @keydown.enter.prevent="enviarPeloQr"
+          />
+          <Button
+            v-if="cameraDisponivel && !qrEnviado"
+            type="button"
+            severity="secondary"
+            outlined
+            icon="ph ph-camera"
+            :label="t('cadastro.vinculo.camera.ler')"
+            :loading="cameraAbrindo"
+            :disabled="enviandoQr || cameraLigada"
+            @click="ligarCamera"
+          />
+        </div>
+        <small v-if="tentouQr && qrVazio" class="eg__invalido">
+          {{ t('acessos.emergencia.qrProblema.vazio') }}
         </small>
-        <small v-else class="eg__dica">{{ t('cadastro.vinculo.qrDica') }}</small>
+        <small v-else class="eg__dica">{{
+          cameraDisponivel ? t('cadastro.vinculo.qrDicaCamera') : t('cadastro.vinculo.qrDica')
+        }}</small>
+
+        <div v-if="cameraLigada" class="cv__camera">
+          <video
+            ref="videoDaCamera"
+            class="cv__video"
+            muted
+            playsinline
+            :aria-label="t('cadastro.vinculo.camera.mire')"
+          />
+          <p class="cv__mire">
+            <i class="ph ph-scan" aria-hidden="true" />
+            <span>{{ t('cadastro.vinculo.camera.mire') }}</span>
+          </p>
+          <Button
+            type="button"
+            size="small"
+            severity="secondary"
+            outlined
+            icon="ph ph-x"
+            :label="t('cadastro.vinculo.camera.fechar')"
+            @click="desligarCamera"
+          />
+        </div>
+        <p v-if="problemaDaCamera" class="eg__aviso" role="status">
+          <i class="ph ph-video-camera-slash" aria-hidden="true" />
+          <span>{{ t(`cadastro.vinculo.camera.${problemaDaCamera}`) }}</span>
+        </p>
 
         <p v-if="qrEnviado" class="cv__feito" role="status">
           <i class="ph ph-check-circle" aria-hidden="true" />
@@ -587,6 +667,47 @@ async function enviarPeloQr() {
 .cv__recolher,
 .cv__enviar-qr {
   justify-self: start;
+}
+
+.cv__qr-campo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cv__qr-campo .p-inputtext {
+  min-width: 0;
+  flex: 1 1 12rem;
+}
+
+/* O vídeo da câmera: fundo escuro nos dois temas, que é a cor de câmera ligada sem imagem. */
+.cv__camera {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+}
+
+.cv__video {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  background: #10302a;
+  object-fit: cover;
+}
+
+.cv__mire {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--tinta-2);
+  font-size: 13.5px;
+}
+
+.cv__mire i {
+  font-size: 16px;
 }
 
 /* O QR em tela cheia: o cartão branco segura o contraste do QR nos dois temas. */

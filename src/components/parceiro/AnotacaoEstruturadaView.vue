@@ -73,14 +73,16 @@ function formatarData(valor: string, options: Intl.DateTimeFormatOptions) {
   return Number.isNaN(data.getTime()) ? valor : data.toLocaleString(intlLocale.value, options)
 }
 
-/** Linha compacta do item: só os campos que o prestador preencheu. */
+/** Linha compacta do item: só os campos que o prestador preencheu. O prazo vem do campo (N58). */
 function detalhesPrescricao(item: Anotacao['prescricaoItens'][number]) {
   const dose = doseComUnidade(item.dose, item.unidade)
+  const prazo = item.reavaliarEmDias
 
   return [
     dose,
     item.frequencia,
     item.duracaoDias != null ? t('acessos.estruturada.view.duracao', item.duracaoDias) : '',
+    prazo != null ? t('acessos.estruturada.view.reavaliar', { n: prazo }, prazo) : '',
   ].filter(Boolean)
 }
 </script>

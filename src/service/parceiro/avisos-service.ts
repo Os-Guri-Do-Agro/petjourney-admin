@@ -3,35 +3,29 @@
  * pelos avisos daquele parceiro (`?parceiroId=`).
  *
  * O contador do sino é `naoLidasDoParceiro`; `naoLidas` é o total da conta, que é o selo do app.
- * O "marcar todas" da API (`PATCH /notificacao/read-all`) marca a conta inteira, inclusive os avisos
- * dos pets no app, por isso o portal marca um por um.
+ * "Marcar todas" vai com o mesmo recorte (`PATCH /notificacao/read-all?parceiroId=`, N8): marca só
+ * os avisos daquele parceiro, nunca os de outra empresa nem os dos pets no app.
  *
- * A lista não tem schema no contrato (`docs/integracao-portal-parceiro/novembro/lacunas.md`, N8): o
- * formato abaixo é o de `NotificacaoLista` em `notificacao-inbox.service.ts` da API.
+ * Os formatos são os do contrato (`InboxDeNotificacoesDto`, `TodasLidasDto`, N8). A rota do
+ * aviso vem em `dados.url` e é rota do app (`/screens/...`): o portal não navega por ela.
  */
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
+import type {
+  InboxDeNotificacoesDto,
+  NotificacaoDoInboxDto,
+  TodasLidasDto,
+} from '../contrato/openapi'
 
-export type Aviso = {
-  id: string
-  tipo: string
-  /** Título e corpo já no idioma da sessão. */
-  titulo: string
-  corpo: string
-  /** O retrato do evento. Sempre traz `parceiroId`; o resto depende do tipo. */
-  dados: Record<string, unknown>
-  criadoEm: string
-  lidaEm: string | null
-}
+/**
+ * Um aviso da lista. O `tipo` fica aberto: um tipo novo da API, antes de os tipos do contrato
+ * serem gerados de novo, aparece no sino com o título e o corpo que vieram.
+ */
+export type Aviso = Omit<NotificacaoDoInboxDto, 'tipo'> & { tipo: string }
 
-export type PaginaDeAvisos = {
-  itens: Aviso[]
-  proximoCursor: string | null
-  /** Não lidas da conta inteira (o selo do app). */
-  naoLidas: number
-  /** Não lidas deste parceiro: o número do sino. Só vem com `?parceiroId=`. */
-  naoLidasDoParceiro?: number
-}
+export type PaginaDeAvisos = Omit<InboxDeNotificacoesDto, 'itens'> & { itens: Aviso[] }
+
+export type AvisosLidos = TodasLidasDto
 
 export async function listarAvisos(params: {
   parceiroId?: string | null
@@ -62,10 +56,13 @@ export async function abrirAviso(id: string) {
   return response.data
 }
 
-/** Marca um aviso como lido sem contar como toque. Idempotente. */
-export async function marcarAvisoComoLido(id: string) {
-  const response = await apiFetch<ApiEnvelope<{ id: string; lidaEm: string; naoLidas: number }>>(
-    `/notificacao/${encodeURIComponent(id)}/read`,
+/**
+ * Marca como lidos todos os avisos deste parceiro, inclusive os que a lista ainda não carregou.
+ * Sem o parceiro, a rota marcaria a conta inteira: o portal nunca chama sem ele.
+ */
+export async function marcarAvisosDoParceiroComoLidos(parceiroId: string): Promise<AvisosLidos> {
+  const response = await apiFetch<ApiEnvelope<AvisosLidos>>(
+    `/notificacao/read-all?${new URLSearchParams({ parceiroId }).toString()}`,
     { method: 'PATCH' },
   )
 

@@ -1654,7 +1654,8 @@
         "frequenciaHint": "Sin frecuencia, el tutor no puede convertir el ítem en medicamento de la mascota.",
         "duracaoDias": "Duración (días)",
         "instrucoes": "Instrucciones",
-        "instrucoesPlaceholder": "Dar junto con la comida"
+        "instrucoesPlaceholder": "Dar junto con la comida",
+        "reavaliarEmDias": "Reevaluar en (días)"
       },
       "exames": {
         "title": "Exámenes solicitados",
@@ -1675,12 +1676,14 @@
         "duracaoFaixa": "La duración debe estar entre {min} y {max} días.",
         "maxItens": "Máximo {max} ítems.",
         "dataInvalida": "Fecha inválida.",
-        "intervaloData": "La salida no puede ser anterior a la entrada."
+        "intervaloData": "La salida no puede ser anterior a la entrada.",
+        "reavaliacaoFaixa": "La reevaluación debe estar entre {min} y {max} días."
       },
       "view": {
         "title": "Datos estructurados de la nota",
         "duracao": "{n} día | {n} días",
-        "semFrequencia": "Sin frecuencia: no se convierte en medicamento de la mascota."
+        "semFrequencia": "Sin frecuencia: no se convierte en medicamento de la mascota.",
+        "reavaliar": "Reevaluar en {n} día | Reevaluar en {n} días"
       }
     },
     "anexo": {
@@ -10630,12 +10633,13 @@
       "desde": "Vinculado desde el {data}, por {origem}.",
       "emailEnviado": "Pedido enviado. El enlace fue a {email}.",
       "qrRotulo": "Dirección del QR de la credencial de la mascota",
-      "qrDica": "Lea el QR del collar con el celular y pegue la dirección de la página que se abra.",
+      "qrDica": "Pegue la dirección que trae el QR del collar, o solo el código del final.",
       "enviarPedido": "Enviar pedido",
       "qrEnviado": "Pedido enviado. Si la credencial es de una mascota en la app, el responsable recibe el pedido para aceptar.",
       "erros": {
         "jaLigado": "Este paciente ya está vinculado a una mascota de la app.",
-        "teto": "Límite de 50 propuestas por día alcanzado. Intente mañana."
+        "teto": "Límite de 50 propuestas por día alcanzado. Intente mañana.",
+        "taxaDoQr": "Demasiadas lecturas de QR en poco tiempo. Intente de nuevo en {segundos} segundo. | Demasiadas lecturas de QR en poco tiempo. Intente de nuevo en {segundos} segundos."
       },
       "propostas": "Propuestas",
       "status": {
@@ -10679,7 +10683,16 @@
       "encerrarLede": "El paciente deja de estar vinculado a la app. El responsable recibe el aviso y puede vincular de nuevo después.",
       "motivo": "Motivo",
       "motivoTamanho": "Escriba de {min} a {max} caracteres.",
-      "encerrado": "Vínculo terminado"
+      "encerrado": "Vínculo terminado",
+      "qrDicaCamera": "Lea el QR del collar con la cámara, o pegue la dirección que trae.",
+      "camera": {
+        "ler": "Leer con la cámara",
+        "fechar": "Cerrar la cámara",
+        "mire": "Muestre el QR del collar a la cámara.",
+        "semPermissao": "El navegador no habilitó la cámara. Habilítela en los permisos del sitio o pegue la dirección del QR.",
+        "semCamera": "No se encontró ninguna cámara. Pegue la dirección del QR.",
+        "falhou": "No se pudo abrir la cámara. Cierre otro programa que esté usando la cámara o pegue la dirección del QR."
+      }
     },
     "convite": {
       "titulo": "Invitar a la app",
@@ -10693,7 +10706,7 @@
       "anteriorCancelado": "La invitación anterior dejó de valer.",
       "outrasFormas": "Otras formas",
       "imprimir": "Imprimir",
-      "folha": "Descargue la app PetJourney en la App Store o en Google Play, toque en Mis clínicas y apunte la cámara al QR. O escriba el código {codigo}.",
+      "folha": "Apunte la cámara del celular al QR. O descargue la app PetJourney en la App Store o en Google Play, abra Mis clínicas e ingrese el código {codigo}.",
       "agora": "¿Invitar a la app ahora?",
       "agoraNao": "Ahora no",
       "reenviar": "Reenviar"

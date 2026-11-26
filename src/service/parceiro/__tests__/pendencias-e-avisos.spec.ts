@@ -119,15 +119,16 @@ describe('avisos-service', () => {
     expect(JSON.parse(String(body))).toEqual({ origem: 'INBOX' })
   })
 
-  it('marca um por um, nunca pela rota que marca a conta inteira', async () => {
-    const { marcarAvisoComoLido } = await loadServices()
-    const fetchMock = mockFetch({ id: 'n1', lidaEm: '2026-10-22T10:00:00Z', naoLidas: 0 })
+  it('"marcar todas" vai sempre com o parceiro, para não marcar a conta inteira (N8)', async () => {
+    const { marcarAvisosDoParceiroComoLidos } = await loadServices()
+    const fetchMock = mockFetch({ atualizadas: 3, naoLidas: 2, naoLidasDoParceiro: 0 })
 
-    await marcarAvisoComoLido('n1')
+    const lidos = await marcarAvisosDoParceiroComoLidos('p1')
 
     expect(chamada(fetchMock)).toMatchObject({
-      url: 'https://api.exemplo.test/notificacao/n1/read',
+      url: 'https://api.exemplo.test/notificacao/read-all?parceiroId=p1',
       method: 'PATCH',
     })
+    expect(lidos).toEqual({ atualizadas: 3, naoLidas: 2, naoLidasDoParceiro: 0 })
   })
 })

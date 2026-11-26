@@ -34,7 +34,7 @@ import type {
 } from '@/service/contrato/openapi'
 import type { NomeDoModulo } from '@/service/parceiro/acesso-service'
 import type { Expediente } from '@/service/parceiro/agenda-config-service'
-import type { PaginaDeAvisos } from '@/service/parceiro/avisos-service'
+import type { AvisosLidos, PaginaDeAvisos } from '@/service/parceiro/avisos-service'
 import type { PapelOperacional } from '@/service/parceiro/equipe-service'
 import type {
   DadosDoEstabelecimento,
@@ -1285,6 +1285,19 @@ function registrarAcessos() {
     ok<PropostaEnviadaDto>({ propostaId: idDe('demo-proposta-qr', ++propostas) }, 201),
   )
 
+  /* O QR da coleira (N19): na demonstração, qualquer texto lido é uma carteirinha. */
+  rota('GET', `${P}/carteirinha/resolver`, ({ query }) => {
+    const lido = (query.get('qr') ?? '').trim()
+    if (!lido) {
+      return erro(
+        404,
+        'CARTEIRINHA_NAO_ENCONTRADA',
+        'Não encontramos uma carteirinha para este QR.',
+      )
+    }
+    return ok({ publicSlug: lido.split('/').filter(Boolean).pop() ?? lido })
+  })
+
   rota('GET', '/diario-pet/enums', () => ok<CatalogoDiario>(CATALOGO_DO_DIARIO))
 }
 
@@ -1388,6 +1401,13 @@ function registrarAvisos() {
     const aviso = lerAviso(params.id ?? '')
     if (!aviso) return erro(404, 'NOTIFICACAO_NAO_ENCONTRADA', 'Aviso não encontrado.')
     return ok({ id: aviso.id, lidaEm: aviso.lidaEm as string, naoLidas: naoLidas() })
+  })
+
+  /* "Marcar todas" do sino (N8): todos os avisos são desta clínica. */
+  rota('PATCH', '/notificacao/read-all', () => {
+    const pendentes = AVISOS.filter((a) => !a.lidaEm)
+    pendentes.forEach((a) => lerAviso(a.id))
+    return ok<AvisosLidos>({ atualizadas: pendentes.length, naoLidas: 0, naoLidasDoParceiro: 0 })
   })
 }
 

@@ -1654,7 +1654,8 @@
         "frequenciaHint": "Bez učestalosti staratelj ne može da pretvori ovu stavku u lek ljubimca.",
         "duracaoDias": "Trajanje (dani)",
         "instrucoes": "Uputstva",
-        "instrucoesPlaceholder": "Davati uz hranu"
+        "instrucoesPlaceholder": "Davati uz hranu",
+        "reavaliarEmDias": "Ponovna procena za (dana)"
       },
       "exames": {
         "title": "Zatražene analize",
@@ -1675,12 +1676,14 @@
         "duracaoFaixa": "Trajanje u danima mora biti između {min} i {max}.",
         "maxItens": "Najveći broj stavki: {max}.",
         "dataInvalida": "Neispravan datum.",
-        "intervaloData": "Odlazak ne može biti pre dolaska."
+        "intervaloData": "Odlazak ne može biti pre dolaska.",
+        "reavaliacaoFaixa": "Ponovna procena mora biti između {min} i {max} dana."
       },
       "view": {
         "title": "Strukturirani podaci beleške",
         "duracao": "{n} dan | {n} dana | {n} dana",
-        "semFrequencia": "Bez učestalosti: neće postati lek ljubimca."
+        "semFrequencia": "Bez učestalosti: neće postati lek ljubimca.",
+        "reavaliar": "Ponovna procena za {n} dan | Ponovna procena za {n} dana | Ponovna procena za {n} dana"
       }
     },
     "anexo": {
@@ -10630,12 +10633,13 @@
       "desde": "Povezan od {data}, preko: {origem}.",
       "emailEnviado": "Zahtev je poslat. Link je otišao na {email}.",
       "qrRotulo": "Adresa QR koda kartice ljubimca",
-      "qrDica": "Skenirajte QR kod sa ogrlice telefonom i nalepite adresu stranice koja se otvori.",
+      "qrDica": "Nalepite adresu iz QR koda sa ogrlice ili samo kod sa njenog kraja.",
       "enviarPedido": "Pošalji zahtev",
       "qrEnviado": "Zahtev je poslat. Ako je kartica ljubimca iz aplikacije, vlasnik dobija zahtev da ga prihvati.",
       "erros": {
         "jaLigado": "Ovaj pacijent je već povezan sa ljubimcem iz aplikacije.",
-        "teto": "Dostignuto je ograničenje od 50 predloga dnevno. Pokušajte sutra."
+        "teto": "Dostignuto je ograničenje od 50 predloga dnevno. Pokušajte sutra.",
+        "taxaDoQr": "Previše skeniranja QR koda za kratko vreme. Pokušajte ponovo za {segundos} sekundu. | Previše skeniranja QR koda za kratko vreme. Pokušajte ponovo za {segundos} sekunde. | Previše skeniranja QR koda za kratko vreme. Pokušajte ponovo za {segundos} sekundi."
       },
       "propostas": "Predlozi",
       "status": {
@@ -10679,7 +10683,16 @@
       "encerrarLede": "Pacijent više nije povezan sa aplikacijom. Vlasnik dobija obaveštenje i može kasnije ponovo da poveže.",
       "motivo": "Razlog",
       "motivoTamanho": "Napišite od {min} do {max} znakova.",
-      "encerrado": "Povezivanje je prekinuto"
+      "encerrado": "Povezivanje je prekinuto",
+      "qrDicaCamera": "Skenirajte QR kod sa ogrlice kamerom ili nalepite adresu koju sadrži.",
+      "camera": {
+        "ler": "Skeniraj kamerom",
+        "fechar": "Zatvori kameru",
+        "mire": "Pokažite QR kod sa ogrlice kameri.",
+        "semPermissao": "Pregledač nije dozvolio kameru. Dozvolite je u dozvolama sajta ili nalepite adresu QR koda.",
+        "semCamera": "Kamera nije pronađena. Nalepite adresu QR koda.",
+        "falhou": "Kamera nije mogla da se otvori. Zatvorite drugi program koji koristi kameru ili nalepite adresu QR koda."
+      }
     },
     "convite": {
       "titulo": "Pozovi u aplikaciju",
@@ -10693,7 +10706,7 @@
       "anteriorCancelado": "Prethodna pozivnica više ne važi.",
       "outrasFormas": "Drugi načini",
       "imprimir": "Štampaj",
-      "folha": "Preuzmite aplikaciju PetJourney sa App Store-a ili Google Play-a, dodirnite Moje klinike i usmerite kameru na QR. Ili unesite kod {codigo}.",
+      "folha": "Usmerite kameru telefona na QR kod. Ili preuzmite aplikaciju PetJourney sa App Store-a ili Google Play-a, otvorite Moje klinike i unesite kod {codigo}.",
       "agora": "Pozvati u aplikaciju sada?",
       "agoraNao": "Ne sada",
       "reenviar": "Pošalji ponovo"

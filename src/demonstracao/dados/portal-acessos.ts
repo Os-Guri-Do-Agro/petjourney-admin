@@ -1487,6 +1487,7 @@ export function criarAnotacaoDoFormulario(a: AcessoDaDemo, form: FormData): Anot
       unidade: item.unidade ?? null,
       frequencia: item.frequencia ?? null,
       duracaoDias: item.duracaoDias ?? null,
+      reavaliarEmDias: item.reavaliarEmDias ?? null,
       instrucoes: item.instrucoes ?? null,
     })),
     examesSolicitados: exames.map((item, i) => ({
