@@ -12573,6 +12573,7 @@
     "editar": {
       "titulo": "Izmeni zapis",
       "dica": "Menja samo napomenu i put primene. Vlasnik ne dobija obaveštenje.",
+      "semMudanca": "Da biste sačuvali, promenite napomenu ili put primene.",
       "observacaoDica": "Ostaje samo u klinici, ne ide u aplikaciju. Prazna se briše iz zapisa.",
       "outrosCampos": "Vakcina, doza, datum i serija se ovde ne menjaju: obrišite zapis i upišite ga ponovo.",
       "apagarERegistrar": "Obriši i upiši ponovo",

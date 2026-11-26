@@ -242,6 +242,14 @@ async function salvar() {
     </form>
 
     <template #pe>
+      <!--
+        Sem mudança, o Salvar fica desligado (guia, item 6): a frase ao lado diz por quê. Sem ela,
+        quem escrevia só o motivo não entendia o botão apagado (26/11/2026).
+      -->
+      <p v-if="aplicacao && !encerrada && !corpo" id="editar-sem-mudanca" class="ea__porque">
+        <i class="ph ph-info" aria-hidden="true" />
+        <span>{{ t('vacinas.editar.semMudanca') }}</span>
+      </p>
       <Button
         type="button"
         severity="secondary"
@@ -258,6 +266,7 @@ async function salvar() {
         :label="t('cadastro.salvar')"
         :loading="salvando"
         :disabled="!corpo"
+        :aria-describedby="corpo ? undefined : 'editar-sem-mudanca'"
       />
     </template>
   </CadastroGaveta>
@@ -280,5 +289,23 @@ async function salvar() {
 
 .ea__outros .eg__dica {
   margin: 0;
+}
+
+/* Por que o Salvar está apagado: no pé, colado aos botões, empurrado para o começo da linha. */
+.ea__porque {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-inline-end: auto;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.ea__porque i {
+  flex: none;
+  color: var(--atencao-tinta);
+  font-size: 15px;
 }
 </style>

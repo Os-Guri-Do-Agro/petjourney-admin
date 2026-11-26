@@ -12573,6 +12573,7 @@
     "editar": {
       "titulo": "Editar registro",
       "dica": "Muda só a observação e a via. O responsável não é avisado.",
+      "semMudanca": "Para salvar, mude a observação ou a via.",
       "observacaoDica": "Fica só na clínica, não vai para o app. Vazia, sai do registro.",
       "outrosCampos": "Vacina, dose, data e lote não mudam aqui: apague o registro e registre de novo.",
       "apagarERegistrar": "Apagar e registrar de novo",

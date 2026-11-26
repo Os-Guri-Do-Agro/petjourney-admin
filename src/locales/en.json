@@ -12573,6 +12573,7 @@
     "editar": {
       "titulo": "Edit record",
       "dica": "Changes only the note and the route. The owner is not notified.",
+      "semMudanca": "To save, change the note or the route.",
       "observacaoDica": "Stays at the clinic, never goes to the app. Leave it empty to remove it.",
       "outrosCampos": "Vaccine, dose, date and batch do not change here: delete the record and record it again.",
       "apagarERegistrar": "Delete and record again",
