@@ -110,6 +110,7 @@ const tentou = ref(false)
 const salvando = ref(false)
 const erro = ref('')
 const campoPeso = ref<{ $el?: HTMLElement } | null>(null)
+const formulario = ref<HTMLFormElement | null>(null)
 
 const editando = computed(() => Boolean(props.prescricao))
 
@@ -318,7 +319,18 @@ async function gravar() {
   tentou.value = true
   erro.value = ''
   faltaPeso.value = false
-  if (!valido.value || faltaCiente.value) return
+  if (!valido.value) {
+    /*
+     * Cada campo que falta diz o que falta, e a gaveta rola até o primeiro: sem isso, o Salvar não
+     * fazia nada à vista (26/11/2026, a declaração do nome livre fora da tela).
+     */
+    await nextTick()
+    formulario.value
+      ?.querySelector('.eg__invalido, .eg__erro')
+      ?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    return
+  }
+  if (faltaCiente.value) return
   salvando.value = true
   try {
     const gravou = await props.esperarGravar()
@@ -411,7 +423,7 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
     icone="ph ph-prescription"
     largura="36rem"
   >
-    <form id="prescricao-form" class="eg" novalidate @submit.prevent="gravar">
+    <form id="prescricao-form" ref="formulario" class="eg" novalidate @submit.prevent="gravar">
       <!-- O medicamento: do catálogo ou pelo nome (fixo ao editar). -->
       <section v-if="editando" class="eg__secao">
         <span class="eg__rotulo">{{ t('atendimento.receita.prescrever.medicamento') }}</span>
@@ -453,6 +465,9 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
               </span>
             </template>
           </AutoComplete>
+          <small v-if="tentou && !escolhido" class="eg__invalido">{{
+            t('atendimento.receita.prescrever.falta.medicamento')
+          }}</small>
         </section>
         <template v-else>
           <section class="eg__secao">
@@ -465,17 +480,36 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
               :invalid="tentou && !nomeLivre.trim()"
               :disabled="salvando"
             />
-            <small class="eg__dica">{{ t('atendimento.receita.prescrever.nomeLivreDica') }}</small>
+            <small v-if="tentou && !nomeLivre.trim()" class="eg__invalido">{{
+              t('atendimento.receita.prescrever.falta.nome')
+            }}</small>
+            <small v-else class="eg__dica">{{
+              t('atendimento.receita.prescrever.nomeLivreDica')
+            }}</small>
           </section>
-          <label class="pg__check" for="pg-declara">
-            <Checkbox
-              v-model="declaraNaoControlado"
-              input-id="pg-declara"
-              binary
-              :disabled="salvando"
-            />
-            <span>{{ t('atendimento.receita.prescrever.declara') }}</span>
-          </label>
+          <!-- A declaração é obrigatória: a dica diz antes; sem ela, o Salvar mostra o que falta. -->
+          <section class="eg__secao pg__declaracao">
+            <label class="pg__check" for="pg-declara">
+              <Checkbox
+                v-model="declaraNaoControlado"
+                input-id="pg-declara"
+                binary
+                :invalid="tentou && !declaraNaoControlado"
+                aria-describedby="pg-declara-dica"
+                :disabled="salvando"
+              />
+              <span>{{ t('atendimento.receita.prescrever.declara') }}</span>
+            </label>
+            <small
+              id="pg-declara-dica"
+              :class="tentou && !declaraNaoControlado ? 'eg__invalido' : 'eg__dica'"
+              >{{
+                tentou && !declaraNaoControlado
+                  ? t('atendimento.receita.prescrever.falta.declaracao')
+                  : t('atendimento.receita.prescrever.declaraDica')
+              }}</small
+            >
+          </section>
         </template>
       </template>
 
@@ -508,6 +542,9 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
             :invalid="tentou && !mgPorKg"
             :disabled="salvando"
           />
+          <small v-if="tentou && !mgPorKg" class="eg__invalido">{{
+            t('atendimento.receita.prescrever.falta.dose')
+          }}</small>
         </section>
         <template v-else>
           <section class="eg__secao">
@@ -524,6 +561,9 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
               :invalid="tentou && !quantidade"
               :disabled="salvando"
             />
+            <small v-if="tentou && !quantidade" class="eg__invalido">{{
+              t('atendimento.receita.prescrever.falta.quantidade')
+            }}</small>
           </section>
           <section class="eg__secao">
             <label class="eg__rotulo" for="pg-unidade">{{
@@ -573,6 +613,9 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
             :invalid="tentou && !via"
             :disabled="salvando"
           />
+          <small v-if="tentou && !via" class="eg__invalido">{{
+            t('atendimento.receita.prescrever.falta.via')
+          }}</small>
         </section>
         <section class="eg__secao">
           <label class="eg__rotulo" for="pg-freq">{{
@@ -739,6 +782,15 @@ watch([mgPorKg, quantidade, unidade, pesoKg, modo], () => {
   color: var(--tinta);
   font-size: 14px;
   cursor: pointer;
+}
+
+/* A dica e o aviso da declaração alinham com o texto, não com o quadrinho. */
+.pg__declaracao {
+  gap: 4px;
+}
+
+.pg__declaracao small {
+  padding-inline-start: 28px;
 }
 
 .pg__duracao {

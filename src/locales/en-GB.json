@@ -13127,6 +13127,7 @@
         "nomeLivre": "Medication name",
         "nomeLivreDica": "Outside the catalogue, with no dose calculation: give the amount.",
         "declara": "I declare it is not a controlled medication.",
+        "declaraDica": "Required to save under a free name.",
         "dose": "Dose",
         "porPeso": "By weight",
         "porQuantidade": "By amount",
@@ -13153,7 +13154,15 @@
         "alterado": "The consultation changed in another tab. We reloaded it: try again.",
         "erro": "Could not save the prescription.",
         "confirmar": "Save",
-        "feito": "Prescription saved."
+        "feito": "Prescription saved.",
+        "falta": {
+          "medicamento": "Pick the medication from the list. If it isn't in the catalogue, use a free name.",
+          "nome": "Write the medication name.",
+          "declaracao": "Tick the declaration: without it, a free-name prescription won't save.",
+          "dose": "Enter the dose per kg.",
+          "quantidade": "Enter how much to give each time.",
+          "via": "Choose the route."
+        }
       },
       "assinar": {
         "acao": "Sign",

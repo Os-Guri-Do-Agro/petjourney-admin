@@ -13127,6 +13127,7 @@
         "nomeLivre": "Nome do medicamento",
         "nomeLivreDica": "Fora do catálogo, sem conta de dose: diga a quantidade.",
         "declara": "Declaro que não é um medicamento controlado.",
+        "declaraDica": "Obrigatória para salvar pelo nome livre.",
         "dose": "Dose",
         "porPeso": "Por peso",
         "porQuantidade": "Por quantidade",
@@ -13153,7 +13154,15 @@
         "alterado": "O atendimento mudou em outra aba. Relemos: tente de novo.",
         "erro": "Não deu para gravar a prescrição.",
         "confirmar": "Salvar",
-        "feito": "Prescrição salva."
+        "feito": "Prescrição salva.",
+        "falta": {
+          "medicamento": "Escolha o medicamento na lista. Se ele não estiver no catálogo, use o nome livre.",
+          "nome": "Escreva o nome do medicamento.",
+          "declaracao": "Marque a declaração: sem ela, a prescrição pelo nome livre não salva.",
+          "dose": "Diga a dose por kg.",
+          "quantidade": "Diga quanto dar por vez.",
+          "via": "Escolha a via."
+        }
       },
       "assinar": {
         "acao": "Assinar",

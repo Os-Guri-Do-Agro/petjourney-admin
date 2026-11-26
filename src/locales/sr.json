@@ -13127,6 +13127,7 @@
         "nomeLivre": "Naziv leka",
         "nomeLivreDica": "Van kataloga, bez proračuna doze: navedite količinu.",
         "declara": "Izjavljujem da lek nije pod kontrolom.",
+        "declaraDica": "Obavezno za čuvanje pod slobodnim nazivom.",
         "dose": "Doza",
         "porPeso": "Po težini",
         "porQuantidade": "Po količini",
@@ -13153,7 +13154,15 @@
         "alterado": "Pregled se promenio u drugoj kartici. Ponovo smo ga učitali: pokušajte ponovo.",
         "erro": "Propisani lek nije mogao da se sačuva.",
         "confirmar": "Sačuvaj",
-        "feito": "Propisani lek sačuvan."
+        "feito": "Propisani lek sačuvan.",
+        "falta": {
+          "medicamento": "Izaberite lek sa liste. Ako nije u katalogu, koristite slobodan naziv.",
+          "nome": "Upišite naziv leka.",
+          "declaracao": "Označite izjavu: bez nje se recept pod slobodnim nazivom ne čuva.",
+          "dose": "Navedite dozu po kg.",
+          "quantidade": "Navedite koliko se daje po davanju.",
+          "via": "Izaberite put primene."
+        }
       },
       "assinar": {
         "acao": "Potpiši",

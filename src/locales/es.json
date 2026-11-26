@@ -13127,6 +13127,7 @@
         "nomeLivre": "Nombre del medicamento",
         "nomeLivreDica": "Fuera del catálogo, sin cálculo de dosis: indique la cantidad.",
         "declara": "Declaro que no es un medicamento controlado.",
+        "declaraDica": "Obligatoria para guardar con nombre libre.",
         "dose": "Dosis",
         "porPeso": "Por peso",
         "porQuantidade": "Por cantidad",
@@ -13153,7 +13154,15 @@
         "alterado": "La consulta cambió en otra pestaña. La recargamos: intente de nuevo.",
         "erro": "No se pudo guardar la prescripción.",
         "confirmar": "Guardar",
-        "feito": "Prescripción guardada."
+        "feito": "Prescripción guardada.",
+        "falta": {
+          "medicamento": "Elija el medicamento de la lista. Si no está en el catálogo, use el nombre libre.",
+          "nome": "Escriba el nombre del medicamento.",
+          "declaracao": "Marque la declaración: sin ella, la prescripción con nombre libre no se guarda.",
+          "dose": "Indique la dosis por kg.",
+          "quantidade": "Indique cuánto dar en cada toma.",
+          "via": "Elija la vía."
+        }
       },
       "assinar": {
         "acao": "Firmar",
