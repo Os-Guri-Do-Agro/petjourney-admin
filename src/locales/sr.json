@@ -11992,6 +11992,11 @@
           "dica": "Oni koji su stigli preko aplikacije i linka."
         }
       }
+    },
+    "fuso": {
+      "frente": "Vreme klinike: {quanto} ispred vašeg računara",
+      "atras": "Vreme klinike: {quanto} iza vašeg računara",
+      "dica": "Raspored prikazuje vreme u vremenskoj zoni klinike ({fuso}). Menja se u odeljku {pagina}."
     }
   },
   "faltas": {

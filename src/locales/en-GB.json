@@ -11992,6 +11992,11 @@
           "dica": "The ones that came in through the app and the link."
         }
       }
+    },
+    "fuso": {
+      "frente": "Clinic time: {quanto} ahead of your computer",
+      "atras": "Clinic time: {quanto} behind your computer",
+      "dica": "The schedule shows times in the clinic's time zone ({fuso}). You can change it in {pagina}."
     }
   },
   "faltas": {

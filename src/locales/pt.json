@@ -11992,6 +11992,11 @@
           "dica": "Os que chegaram pelo app e pelo link."
         }
       }
+    },
+    "fuso": {
+      "frente": "Horário da clínica: {quanto} à frente do seu computador",
+      "atras": "Horário da clínica: {quanto} atrás do seu computador",
+      "dica": "A agenda mostra os horários no fuso da clínica ({fuso}). O fuso muda em {pagina}."
     }
   },
   "faltas": {

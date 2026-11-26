@@ -428,6 +428,52 @@ const agora = computed(() =>
     : null,
 )
 
+/*
+ * A agenda (e a linha do agora) fica na hora da clínica, que é a dos horários marcados. Quem olha de
+ * outro fuso (a clínica em São Paulo, o computador em Campo Grande) vê a linha uma hora adiante do
+ * relógio dele: o aviso diz a diferença, e só aparece quando ela existe.
+ */
+const fusoDoComputador = Intl.DateTimeFormat().resolvedOptions().timeZone
+
+/** Minutos que a clínica está à frente (positivo) ou atrás (negativo) do computador, agora. */
+const diferencaDoFuso = computed(() => {
+  if (!fusoDoComputador || fusoDoComputador === fuso.value) return 0
+
+  const diferenca =
+    minutosAgoraNoFuso(fuso.value, relogio.value) -
+    minutosAgoraNoFuso(fusoDoComputador, relogio.value)
+
+  /* Perto da meia-noite um lado já virou o dia: 23:30 contra 00:30 é uma hora, não 23. */
+  if (diferenca > 720) return diferenca - 1440
+  if (diferenca < -720) return diferenca + 1440
+  return diferenca
+})
+
+const avisoDoFuso = computed(() => {
+  const diferenca = diferencaDoFuso.value
+  if (!diferenca) return null
+
+  const minutos = Math.abs(diferenca)
+  const unidade = (valor: number, unit: 'hour' | 'minute') =>
+    new Intl.NumberFormat(rotulos.intl(), { style: 'unit', unit, unitDisplay: 'short' }).format(
+      valor,
+    )
+  const quanto = [
+    minutos >= 60 ? unidade(Math.floor(minutos / 60), 'hour') : '',
+    minutos % 60 ? unidade(minutos % 60, 'minute') : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return {
+    texto: t(diferenca > 0 ? 'agendamentos.fuso.frente' : 'agendamentos.fuso.atras', { quanto }),
+    dica: t('agendamentos.fuso.dica', {
+      fuso: fuso.value.replace(/_/g, ' '),
+      pagina: t('parceiro.estabelecimento.titulo'),
+    }),
+  }
+})
+
 /* ------------------------------------------------------------------------------- resumo */
 
 const marcadosNoDia = computed(
@@ -1123,6 +1169,11 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
             :label="t('agendamentos.hoje')"
             @click="irPara({ data: null })"
           />
+          <span v-if="avisoDoFuso" class="ag__fuso" :title="avisoDoFuso.dica">
+            <i class="ph ph-clock-countdown" aria-hidden="true" />
+            {{ avisoDoFuso.texto }}
+            <span class="sr-only">. {{ avisoDoFuso.dica }}</span>
+          </span>
         </div>
 
         <div class="ag__como">
@@ -1525,6 +1576,19 @@ const passosDaAgenda = computed<PassoDoGuia[]>(() => {
   align-items: center;
   justify-content: space-between;
   gap: 10px 16px;
+}
+
+/* O aviso do fuso: texto de apoio ao lado da data, não um alerta (nada está errado). */
+.ag__fuso {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta-2);
+  font-size: 13px;
+}
+
+.ag__fuso i {
+  font-size: 15px;
 }
 
 .ag__onde,
