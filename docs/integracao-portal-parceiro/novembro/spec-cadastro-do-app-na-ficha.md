@@ -114,6 +114,6 @@ Grave um evento por gravação, por exemplo `DADOS_DO_APP`, com os campos, o val
 ## 7. Pronto quando
 
 - O preenchimento e a atualização estão no dev, com `camposDoApp` no `contrato/openapi.json`.
-- O script rodou no dev, e a ficha do Thor (paciente `cmwwk2cyv012h0prvd68xix9w`, na hora ainda sem vínculo) se
-  preenche ao ligar de novo pelo app.
+- O script rodou no dev, e a ficha do Thor (paciente `cmwwk2cyv012h0prvd68xix9w`) mostra os dados do pet do app,
+  pelo script se o vínculo estiver ativo ou ao ligar de novo pelo app.
 - Depois disso, o Luís marca "do app" no portal e põe a frase da D3 na tela de aceite do app.
