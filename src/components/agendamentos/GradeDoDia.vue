@@ -98,6 +98,11 @@ function altoDe(inicio: number, fim: number) {
   return `${Math.max((fim - inicio) * PX, 20)}px`
 }
 
+/** Menos de 25 minutos: o cartão tem uma linha só, e a hora vai nela, antes do nome. */
+function ehCurto(cartao: CartaoNaGrade) {
+  return cartao.fimMin - cartao.inicioMin < 25
+}
+
 function estiloDoCartao(cartao: CartaoNaGrade) {
   const largura = 100 / cartao.faixas
   return {
@@ -292,7 +297,7 @@ function terminarArraste() {
           class="gd__cartao"
           :class="[
             `gd__cartao--${cartao.agendamento.status.toLowerCase()}`,
-            { 'gd__cartao--curto': cartao.fimMin - cartao.inicioMin < 25 },
+            { 'gd__cartao--curto': ehCurto(cartao) },
           ]"
           :style="estiloDoCartao(cartao)"
           :draggable="podeArrastar(cartao.agendamento)"
@@ -302,7 +307,10 @@ function terminarArraste() {
           @dragend="terminarArraste"
         >
           <span class="gd__linha1">
-            <span class="ui-num gd__inicio">{{ cartao.agendamento.inicio.slice(11, 16) }}</span>
+            <!-- No cartão curto a segunda linha não cabe: a hora fica aqui em cima. -->
+            <strong v-if="ehCurto(cartao)" class="ui-num gd__inicio">{{
+              cartao.agendamento.inicio.slice(11, 16)
+            }}</strong>
             <PetAvatar
               :nome="cartao.agendamento.paciente.nome"
               :iniciais="iniciais(cartao.agendamento.paciente.nome)"
@@ -327,6 +335,7 @@ function terminarArraste() {
             />
           </span>
           <span class="gd__linha2">
+            <strong class="ui-num gd__inicio">{{ cartao.agendamento.inicio.slice(11, 16) }}</strong>
             {{ nomeDoTipo(cartao.agendamento.tipoId) }}
             <template v-if="cartao.agendamento.encaixe">
               · {{ t('agendamentos.encaixe') }}</template
@@ -537,9 +546,12 @@ function terminarArraste() {
   font-size: 13px;
 }
 
+/* A hora em negrito, na tinta cheia: é o que se procura primeiro no cartão. */
 .gd__inicio {
-  color: var(--tinta-2);
+  margin-inline-end: 4px;
+  color: var(--tinta);
   font-size: 12px;
+  font-weight: 700;
 }
 
 .gd__paciente {
