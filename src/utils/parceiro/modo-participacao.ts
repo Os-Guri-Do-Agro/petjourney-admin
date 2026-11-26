@@ -204,6 +204,19 @@ export function resolveCadastroErrorView(error: unknown): {
   }
 
   /*
+   * A ONG (PJ-TJ07TW): aprovada, o CNPJ só muda pelo suporte; e um cadastro aprovado que nunca foi
+   * ONG não ganha a categoria ONG pelo portal (o admin acrescenta pelo CMS). Nada foi gravado: a
+   * frase da API, no campo que causou.
+   */
+  if (error.codigo === 'ONG_CNPJ_TROCA_PELO_SUPORTE') {
+    return { message: error.message, field: 'cnpj' }
+  }
+
+  if (error.codigo === 'ONG_CATEGORIA_PELO_SUPORTE') {
+    return { message: error.message, field: 'categorias' }
+  }
+
+  /*
    * Cadastro aprovado que ganha uma categoria com exigência que ele não tem (pedidos de 17/11):
    * clínica veterinária sem CNPJ, veterinário autônomo sem CRMV. Nada foi gravado; o `faltando`
    * diz o que falta e o foco vai ao campo (com os dois, o CNPJ primeiro).

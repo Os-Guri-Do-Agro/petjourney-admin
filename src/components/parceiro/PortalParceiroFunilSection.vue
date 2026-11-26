@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n'
 
 import PartnerStatusBadge from '@/components/parceiro/PartnerStatusBadge.vue'
 import PortalParceiroCadastroForm from '@/components/parceiro/PortalParceiroCadastroForm.vue'
+import { cnpjDaOngSoPeloSuporte } from '@/components/ong/regras-da-ong'
 import ProgramasAtivosResumo from '@/components/parceiro/ProgramasAtivosResumo.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
@@ -110,6 +111,18 @@ function programasToastDetail(programas: ModoParticipacao[] | undefined) {
   })
 }
 
+/**
+ * A ONG (PJ-TJ07TW): aprovada, o CNPJ só muda pelo suporte; em análise, a frase de que o CNPJ vai
+ * ser conferido e de que o módulo ONG vem ligado, sem custo, com a categoria (regra de 26/11/2026).
+ */
+const cnpjSoPeloSuporte = computed(() =>
+  cnpjDaOngSoPeloSuporte(store.status?.statusAuditoria, store.modulo('ONG')),
+)
+
+const cadastroDeOng = computed(() =>
+  Boolean(cadastro.value?.categorias?.includes('ONG') || cadastro.value?.categoria === 'ONG'),
+)
+
 /** PENDENTE/APROVADO: formulário sempre aberto com os dados, como no painel de Perfil. */
 const showInlineEdit = computed(
   () => canEditCadastro.value && (state.value === 'PENDENTE' || state.value === 'APROVADO'),
@@ -158,8 +171,10 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
         summary: t('parceiroCadastro.toast.enviado'),
         /* A confirmação sai de `programasSolicitados`, não do que foi marcado: é o
            backend que diz o que ficou de fato como pedido. */
-        detail: programasToastDetail(resultado.programasSolicitados),
-        life: 6000,
+        detail: payload.categorias?.includes('ONG')
+          ? `${programasToastDetail(resultado.programasSolicitados)} ${t('parceiroCadastro.ong.enviado')}`
+          : programasToastDetail(resultado.programasSolicitados),
+        life: payload.categorias?.includes('ONG') ? 9000 : 6000,
       })
     } else {
       cadastro.value = await atualizarParceiroCadastro(payload, parceiroQuery())
@@ -256,6 +271,9 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
           </li>
         </ul>
         <p class="funil__analise-hint">{{ t('parceiroCadastro.pendente.analiseHint') }}</p>
+        <p v-if="cadastroDeOng" class="funil__analise-hint">
+          {{ t('parceiroCadastro.ong.enviado') }}
+        </p>
       </div>
     </article>
 
@@ -418,6 +436,7 @@ async function handleSubmit(payload: ParceiroCadastroPayload) {
             :submit-label="t('parceiroCadastro.editar.submit')"
             :submitting="submitting"
             :error-field="errorField"
+            :cnpj-so-pelo-suporte="cnpjSoPeloSuporte"
             @submit="handleSubmit"
           />
         </div>

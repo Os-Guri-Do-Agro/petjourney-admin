@@ -1166,7 +1166,8 @@
       "ADESTRAMENTO": "Training",
       "HOTEL_CRECHE": "Hotel and daycare",
       "FARMACIA": "Pharmacy",
-      "OUTRO": "Other"
+      "OUTRO": "Other",
+      "ONG": "Charity (association or foundation)"
     },
     "form": {
       "nome": "Company name",
@@ -1287,6 +1288,11 @@
         "feature2": "Coupons and perks to attract new customers",
         "feature3": "Partner badge and invitations to network campaigns"
       }
+    },
+    "ong": {
+      "enviado": "We will check the CNPJ. The charity module is free and already comes on with the category: you can add animals as soon as the registration is approved.",
+      "cnpjPeloSuporte": "To change the charity CNPJ, contact support.",
+      "cnpjDica": "With the charity category, the CNPJ is the one of the association or foundation."
     }
   },
   "acessos": {

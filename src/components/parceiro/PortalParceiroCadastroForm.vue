@@ -38,6 +38,11 @@ const props = withDefaults(
     showProgramas?: boolean
     /** Blocos do `GET /status`, para não mexer em programa já ativo ou suspenso. */
     programasBlocos?: Partial<Record<ModoParticipacao, ModoStatusBloco>> | null
+    /**
+     * ONG aprovada (PJ-TJ07TW): o CNPJ só muda pelo suporte (409 `ONG_CNPJ_TROCA_PELO_SUPORTE`).
+     * O campo fica só para leitura, com a frase de quem procurar.
+     */
+    cnpjSoPeloSuporte?: boolean
   }>(),
   {
     initial: null,
@@ -45,6 +50,7 @@ const props = withDefaults(
     errorField: null,
     showProgramas: false,
     programasBlocos: null,
+    cnpjSoPeloSuporte: false,
   },
 )
 
@@ -66,6 +72,8 @@ const CATEGORIAS: CategoriaParceiro[] = [
   'ADESTRAMENTO',
   'HOTEL_CRECHE',
   'FARMACIA',
+  /* Associação ou fundação com CNPJ (PJ-TJ07TW): o módulo ONG vem ligado com a categoria. */
+  'ONG',
   'OUTRO',
 ]
 
@@ -382,13 +390,22 @@ function handleSubmit() {
           v-model="form.cnpj"
           :placeholder="t('parceiroCadastro.form.cnpjPlaceholder')"
           :invalid="Boolean(cnpjError) || errorField === 'cnpj'"
-          :aria-describedby="cnpjError ? 'cad-cnpj-error' : undefined"
+          :aria-describedby="
+            cnpjError ? 'cad-cnpj-error' : cnpjSoPeloSuporte ? 'cad-cnpj-suporte' : undefined
+          "
+          :readonly="cnpjSoPeloSuporte"
           autocapitalize="characters"
           maxlength="18"
           @input="onCnpjInput"
         />
         <small v-if="cnpjError" id="cad-cnpj-error" class="cad-form__error" role="alert">
           {{ cnpjError }}
+        </small>
+        <small v-else-if="cnpjSoPeloSuporte" id="cad-cnpj-suporte" class="cad-form__hint">
+          {{ t('parceiroCadastro.ong.cnpjPeloSuporte') }}
+        </small>
+        <small v-else-if="form.categorias.includes('ONG')" class="cad-form__hint">
+          {{ t('parceiroCadastro.ong.cnpjDica') }}
         </small>
       </div>
 
@@ -591,6 +608,13 @@ function handleSubmit() {
 .cad-form__hint {
   color: var(--tinta-2);
   font-size: 13px;
+}
+
+/* O CNPJ da ONG aprovada (PJ-TJ07TW): só para leitura, com a cara de campo travado. */
+.cad-form__field .p-inputtext[readonly] {
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  cursor: default;
 }
 
 .cad-form__legend {

@@ -1166,7 +1166,8 @@
       "ADESTRAMENTO": "Dresura",
       "HOTEL_CRECHE": "Hotel i dnevni boravak",
       "FARMACIA": "Apoteka",
-      "OUTRO": "Ostalo"
+      "OUTRO": "Ostalo",
+      "ONG": "Udruženje (udruženje građana ili fondacija)"
     },
     "form": {
       "nome": "Naziv firme",
@@ -1287,6 +1288,11 @@
         "feature2": "Kuponi i pogodnosti za privlačenje novih klijenata",
         "feature3": "Oznaka partnera i pozivnice za kampanje mreže"
       }
+    },
+    "ong": {
+      "enviado": "Proverićemo CNPJ. Modul za udruženja je besplatan i već je uključen uz kategoriju: životinje dodajete čim registracija bude odobrena.",
+      "cnpjPeloSuporte": "Da biste promenili CNPJ udruženja, obratite se podršci.",
+      "cnpjDica": "Uz kategoriju udruženja, CNPJ je onaj od udruženja ili fondacije."
     }
   },
   "acessos": {

@@ -1166,7 +1166,8 @@
       "ADESTRAMENTO": "Adiestramiento",
       "HOTEL_CRECHE": "Hotel y guardería",
       "FARMACIA": "Farmacia",
-      "OUTRO": "Otro"
+      "OUTRO": "Otro",
+      "ONG": "ONG (asociación o fundación)"
     },
     "form": {
       "nome": "Nombre de la empresa",
@@ -1287,6 +1288,11 @@
         "feature2": "Cupones y ventajas para atraer nuevos clientes",
         "feature3": "Sello de socio e invitaciones a acciones de la red"
       }
+    },
+    "ong": {
+      "enviado": "Vamos a revisar el CNPJ. El módulo ONG es gratuito y ya viene activado con la categoría: los animales entran apenas se apruebe el registro.",
+      "cnpjPeloSuporte": "Para cambiar el CNPJ de la ONG, habla con soporte.",
+      "cnpjDica": "Con la categoría ONG, el CNPJ es el de la asociación o fundación."
     }
   },
   "acessos": {

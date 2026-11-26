@@ -23,6 +23,8 @@ export type CategoriaParceiro =
   | 'HOTEL_CRECHE'
   | 'FARMACIA'
   | 'OUTRO'
+  /* Associação ou fundação com CNPJ (PJ-TJ07TW): o módulo ONG vem ligado com ela. */
+  | 'ONG'
 
 /** Reasons estáveis do funil de parceiro (Parte 9). Rotear UX por eles, nunca pela message. */
 export type ParceiroFunilReason =
