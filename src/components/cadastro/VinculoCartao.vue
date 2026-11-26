@@ -280,6 +280,12 @@ const liberado = computed(() =>
       <span>{{ erro }}</span>
     </p>
 
+    <!-- O pet passou para outra conta no app: este vínculo antigo não publica nem lê (N47). -->
+    <p v-if="vinculo && !vinculo.doDonoAtual" class="eg__aviso" role="status">
+      <i class="ph ph-warning" aria-hidden="true" />
+      <span>{{ t('cadastro.vinculo.outroDono') }}</span>
+    </p>
+
     <ul v-if="vinculo" class="vc__consentimento" :aria-label="t('cadastro.vinculo.liberou')">
       <li v-for="item in liberado" :key="item.chave" :class="{ vc__nao: !item.sim }">
         <i :class="item.sim ? 'ph ph-check-circle' : 'ph ph-minus-circle'" aria-hidden="true" />

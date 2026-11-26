@@ -19,9 +19,10 @@
  *
  * O telefone aparece como texto: a clínica liga pelo telefone dela, a tela não disca.
  *
- * Pedido pelo site (canal `LINK`): a gaveta procura o telefone no cadastro da clínica e, achando,
- * deixa escolhido o cliente que a casa já tem e a ficha de cada pet (mesmo nome e espécie), que vão
- * no `vincularA` do aceite. Sem isso, o aceite criava cliente e paciente repetidos.
+ * Pedido pelo site (canal `LINK`): a gaveta procura o telefone nos clientes da clínica (com ou sem o
+ * 55, o principal ou o secundário) e, achando, deixa escolhido o cliente que a casa já tem e a ficha
+ * de cada pet (mesmo nome e espécie), que vão no `vincularA` do aceite. Sem isso, o aceite criava
+ * cliente e paciente repetidos.
  */
 import Button from 'primevue/button'
 import RadioButton from 'primevue/radiobutton'
@@ -71,7 +72,11 @@ import {
   type MotivoDaRecusa,
   type SugestaoDoPedido,
 } from '@/service/parceiro/pedidos-service'
-import { listarPacientes, telefoneNaTela } from '@/service/parceiro/pacientes-service'
+import {
+  listarClientes,
+  pacientesDoCliente,
+  telefoneNaTela,
+} from '@/service/parceiro/pacientes-service'
 import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 const props = defineProps<{
@@ -84,6 +89,8 @@ const emit = defineEmits<{ respondido: [] }>()
 const visible = defineModel<boolean>('visible', { default: false })
 
 const LIMITE_DE_SUGESTOES = 6
+/** Os clientes com o telefone do pedido: o mesmo número em mais que isso não ajuda a escolher. */
+const CLIENTES_DO_TELEFONE = 10
 
 const { t, locale } = useI18n()
 const toast = useToast()
@@ -322,9 +329,19 @@ async function buscarCadastro() {
   buscandoCadastro.value = true
 
   try {
-    const pagina = await listarPacientes({ q: atual.telefone, limit: 50 }, parceiroQuery())
+    /* Os clientes com o telefone (N54) e as fichas de cada um, numa chamada por cliente (N47). */
+    const pagina = await listarClientes(
+      { telefone: atual.telefone, limit: CLIENTES_DO_TELEFONE },
+      parceiroQuery(),
+    )
+    const achados = await Promise.all(
+      pagina.itens.map(async (cliente) => ({
+        cliente,
+        pacientes: await pacientesDoCliente(cliente.id, parceiroQuery()).catch(() => []),
+      })),
+    )
     if (!leituraDoCadastro.valendo(vez)) return
-    clientesDaCasa.value = clientesDoTelefone(pagina.itens, atual.telefone, atual.quemPede)
+    clientesDaCasa.value = clientesDoTelefone(achados, atual.quemPede)
     /* Achou: o primeiro já vem escolhido (o cadastro novo repetiria o cliente); dá para trocar. */
     escolherCliente(clientesDaCasa.value[0]?.id ?? CADASTRO_NOVO)
   } catch {
@@ -765,7 +782,9 @@ const podeResponder = computed(
                 <span class="rp__opcao-texto">
                   <span>{{ cliente.nome }}</span>
                   <small>{{
-                    t('pedidos.caixa.cadastro.jaECliente', { pets: nomesDasFichas(cliente) })
+                    cliente.fichas.length
+                      ? t('pedidos.caixa.cadastro.jaECliente', { pets: nomesDasFichas(cliente) })
+                      : t('pedidos.caixa.cadastro.jaEClienteSemPet')
                   }}</small>
                 </span>
               </label>

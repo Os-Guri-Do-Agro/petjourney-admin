@@ -3102,7 +3102,8 @@
         "PUBLICAR": "Objavljivanje u aplikaciji",
         "IMPRIMIR": "Štampanje",
         "EXPORTAR": "Izvoz",
-        "LER_DADO_DO_APP": "Čitanje podataka iz aplikacije"
+        "LER_DADO_DO_APP": "Čitanje podataka iz aplikacije",
+        "EXCLUIR": "Brisanje"
       },
       "frase": {
         "LER": "je otvorio/la {recurso}",
@@ -10569,7 +10570,13 @@
       "semVoltaResponsavel": "Ono što se razlikovalo u drugom upisu se gubi, i on postaje neaktivan. Ne može da se poništi.",
       "trocar": "Izaberi drugi",
       "confirmar": "Spoji",
-      "feito": "Upisi su spojeni"
+      "feito": "Upisi su spojeni",
+      "procurarResponsavel": "Ime ili telefon vlasnika",
+      "pacientesAtivos": "Aktivni pacijenti: {n}",
+      "telefoneIncompleto": "Nepotpun broj telefona: unesite pozivni broj i broj.",
+      "esperando": "Spajanje upisa. Traje nekoliko sekundi.",
+      "taxa": "Spojili ste mnogo upisa za kratko vreme. Pokušajte ponovo za {tempo}.",
+      "demorou": "Spajanje je trajalo predugo i ništa se nije promenilo. Pokušajte ponovo za {tempo}."
     },
     "exclusao": {
       "titulo": "Brisanje na zahtev nosioca podataka",
@@ -10692,7 +10699,8 @@
         "semPermissao": "Pregledač nije dozvolio kameru. Dozvolite je u dozvolama sajta ili nalepite adresu QR koda.",
         "semCamera": "Kamera nije pronađena. Nalepite adresu QR koda.",
         "falhou": "Kamera nije mogla da se otvori. Zatvorite drugi program koji koristi kameru ili nalepite adresu QR koda."
-      }
+      },
+      "outroDono": "Ljubimac je promenio vlasnika u aplikaciji: ova veza više ne objavljuje niti deli podatke. Prekinite vezu da biste pozvali novog vlasnika."
     },
     "convite": {
       "titulo": "Pozovi u aplikaciju",
@@ -11156,7 +11164,8 @@
         "novo": "Novi klijent",
         "novoDica": "Pravi drugog klijenta sa podacima iz zahteva.",
         "fichaDe": "Karton za {nome}",
-        "fichaNova": "Novi karton"
+        "fichaNova": "Novi karton",
+        "jaEClienteSemPet": "Već je klijent, bez aktivnih pacijenata"
       },
       "marcadoLinha": "Zakazano: {dia}, {inicio} do {fim}",
       "horarioMarcado": "Zakazani termin",

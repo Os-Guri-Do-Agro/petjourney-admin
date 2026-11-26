@@ -83,6 +83,34 @@ describe('listarPacientes', () => {
   })
 })
 
+describe('clientes (N47/N54)', () => {
+  it('a lista busca por nome ou telefone, anda pelo cursor, e os pacientes vêm numa chamada', async () => {
+    const { listarClientes, pacientesDoCliente } = await loadService()
+    const fetchMock = responder({ itens: [], proximoCursor: null })
+
+    await listarClientes({ telefone: ' (11) 98411-2233 ', limit: 20 }, { parceiroId: 'p1' })
+    await listarClientes({ q: 'ana', cursor: 'c1' }, { parceiroId: 'p1' })
+    await pacientesDoCliente('c 1', { parceiroId: 'p1' })
+
+    const telefone = new URL(chamada(fetchMock, 0).url)
+    expect(telefone.pathname).toBe('/parceiro/portal/clientes')
+    expect(Object.fromEntries(telefone.searchParams)).toEqual({
+      parceiroId: 'p1',
+      telefone: '(11) 98411-2233',
+      limit: '20',
+    })
+    expect(Object.fromEntries(new URL(chamada(fetchMock, 1).url).searchParams)).toEqual({
+      parceiroId: 'p1',
+      q: 'ana',
+      cursor: 'c1',
+    })
+    const pacientes = new URL(chamada(fetchMock, 2).url)
+    expect(`${pacientes.pathname}${pacientes.search}`).toBe(
+      '/parceiro/portal/clientes/c%201/pacientes?parceiroId=p1',
+    )
+  })
+})
+
 describe('criarPaciente', () => {
   it('leva a Idempotency-Key da ação e o cliente novo no mesmo corpo', async () => {
     const { criarPaciente } = await loadService()

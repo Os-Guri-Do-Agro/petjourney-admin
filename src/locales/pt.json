@@ -3102,7 +3102,8 @@
         "PUBLICAR": "Publicação no app",
         "IMPRIMIR": "Impressão",
         "EXPORTAR": "Exportação",
-        "LER_DADO_DO_APP": "Leitura de dado do app"
+        "LER_DADO_DO_APP": "Leitura de dado do app",
+        "EXCLUIR": "Exclusão"
       },
       "frase": {
         "LER": "abriu {recurso}",
@@ -10569,7 +10570,13 @@
       "semVoltaResponsavel": "O que divergia no outro cadastro se perde, e ele fica inativo. Não tem como desfazer.",
       "trocar": "Escolher outro",
       "confirmar": "Juntar",
-      "feito": "Cadastros juntados"
+      "feito": "Cadastros juntados",
+      "procurarResponsavel": "Nome ou telefone do responsável",
+      "pacientesAtivos": "Pacientes ativos: {n}",
+      "telefoneIncompleto": "Telefone incompleto: digite o DDD e o número.",
+      "esperando": "Juntando os cadastros. Leva alguns segundos.",
+      "taxa": "Você juntou muitos cadastros em pouco tempo. Tente de novo em {tempo}.",
+      "demorou": "Juntar demorou demais e nada mudou. Tente de novo em {tempo}."
     },
     "exclusao": {
       "titulo": "Excluir a pedido do titular",
@@ -10692,7 +10699,8 @@
         "semPermissao": "O navegador não liberou a câmera. Libere nas permissões do site ou cole o endereço do QR.",
         "semCamera": "Nenhuma câmera encontrada. Cole o endereço do QR.",
         "falhou": "Não foi possível abrir a câmera. Feche outro programa que esteja usando a câmera ou cole o endereço do QR."
-      }
+      },
+      "outroDono": "O pet mudou de dono no app: este vínculo não publica nem libera leitura. Encerre o vínculo para convidar o novo responsável."
     },
     "convite": {
       "titulo": "Convidar para o app",
@@ -11156,7 +11164,8 @@
         "novo": "Cliente novo",
         "novoDica": "Cria outro cliente com os dados do pedido.",
         "fichaDe": "Ficha de {nome}",
-        "fichaNova": "Ficha nova"
+        "fichaNova": "Ficha nova",
+        "jaEClienteSemPet": "Já é cliente, sem paciente ativo"
       },
       "marcadoLinha": "Marcado: {dia}, {inicio} a {fim}",
       "horarioMarcado": "Horário marcado",

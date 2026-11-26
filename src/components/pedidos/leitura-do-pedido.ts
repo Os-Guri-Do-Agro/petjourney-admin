@@ -3,7 +3,11 @@
  * do instante (a API manda com o offset da clínica; nada de converter para o fuso do navegador), o
  * motivo e a recusa na chave dos textos que a demonstração já tinha.
  */
-import type { PacienteNaLista } from '@/service/parceiro/pacientes-service'
+import type {
+  ClienteDaLista,
+  PacienteDoCliente,
+  PacienteNaLista,
+} from '@/service/parceiro/pacientes-service'
 import type {
   Aceite,
   AgendamentoDoPedido,
@@ -97,63 +101,43 @@ export function conflitosQueAvisam(conflitos: readonly Conflito[]) {
 /**
  * O pedido pelo site (canal `LINK`) traz só o cadastro mínimo: sem escolha, o aceite cria um cliente
  * e um paciente novos, mesmo quando a clínica já tem os dois. O guia (6.5) manda oferecer o que a
- * casa já tem pelo `vincularA { clienteId?, pacientes: [{ pedidoId, pacienteId }] }`. A procura é
- * pelo telefone do pedido na lista de pacientes ativos (não há lista de clientes na API).
+ * casa já tem pelo `vincularA { clienteId?, pacientes: [{ pedidoId, pacienteId }] }`. Os clientes vêm
+ * da busca pelo telefone do pedido (`GET clientes?telefone=`: com ou sem o 55, o principal ou o
+ * secundário, N54), e as fichas de cada um numa chamada (`GET clientes/:id/pacientes`, N47). O
+ * cliente sem paciente ativo também aparece: o aceite cria a ficha nele, não outro cliente.
  */
 export type FichaDaCasa = Pick<PacienteNaLista, 'id' | 'nome' | 'especie' | 'fotoUrl'>
 export type ClienteDaCasa = { id: string; nome: string; fichas: FichaDaCasa[] }
 type PetDoPedido = { pedidoId: string; nome: string; especie: string }
-
-function digitos(texto: string | null | undefined) {
-  return (texto ?? '').replace(/\D/g, '')
-}
 
 /** Nome sem acento, caixa e espaço repetido: "Paçoca  C" e "pacoca c" são o mesmo. */
 function nomeComparavel(nome: string) {
   return nome.normalize('NFD').replace(/\p{M}/gu, '').trim().toLowerCase().replace(/\s+/g, ' ')
 }
 
-/** O mesmo telefone com ou sem o código do país: um termina no outro, a partir do DDD. */
-export function mesmoTelefone(a: string | null | undefined, b: string | null | undefined) {
-  const x = digitos(a)
-  const y = digitos(b)
-  if (x.length < 10 || y.length < 10) return false
-
-  return x.length >= y.length ? x.endsWith(y) : y.endsWith(x)
-}
-
 /**
- * Os clientes da casa com o telefone do pedido, cada um com as fichas ativas que a busca trouxe. O
- * de nome igual ao de quem pede vem primeiro.
+ * Os clientes da casa com o telefone do pedido, cada um com as fichas ativas dele. O de nome igual
+ * ao de quem pede vem primeiro.
  */
 export function clientesDoTelefone(
-  pacientes: readonly PacienteNaLista[],
-  telefone: string,
+  achados: readonly {
+    cliente: Pick<ClienteDaLista, 'id' | 'nome'>
+    pacientes: readonly PacienteDoCliente[]
+  }[],
   quemPede: string,
 ): ClienteDaCasa[] {
-  const porId = new Map<string, ClienteDaCasa>()
-
-  for (const paciente of pacientes) {
-    if (!paciente.ativo || !mesmoTelefone(paciente.cliente.telefone, telefone)) continue
-
-    const cliente = porId.get(paciente.cliente.id) ?? {
-      id: paciente.cliente.id,
-      nome: paciente.cliente.nome,
-      fichas: [],
-    }
-    cliente.fichas.push({
-      id: paciente.id,
-      nome: paciente.nome,
-      especie: paciente.especie,
-      fotoUrl: paciente.fotoUrl,
-    })
-    porId.set(cliente.id, cliente)
-  }
-
   const alvo = nomeComparavel(quemPede)
   const igual = (cliente: ClienteDaCasa) => (nomeComparavel(cliente.nome) === alvo ? 1 : 0)
 
-  return [...porId.values()].sort((a, b) => igual(b) - igual(a))
+  return achados
+    .map(({ cliente, pacientes }) => ({
+      id: cliente.id,
+      nome: cliente.nome,
+      fichas: pacientes
+        .filter((paciente) => paciente.ativo)
+        .map(({ id, nome, especie, fotoUrl }) => ({ id, nome, especie, fotoUrl })),
+    }))
+    .sort((a, b) => igual(b) - igual(a))
 }
 
 /**

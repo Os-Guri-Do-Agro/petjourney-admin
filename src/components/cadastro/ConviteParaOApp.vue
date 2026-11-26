@@ -52,11 +52,14 @@ const toast = useToast()
 const { store, parceiroQuery } = useParceiroPortal()
 const rotulos = useRotulosDoCadastro()
 
-/** O paciente mudou na API desde que a tela abriu: a lista de quem entra precisa ser lida de novo. */
+/**
+ * O paciente mudou na API desde que a tela abriu: a lista de quem entra precisa ser lida de novo. O
+ * pet que passou para outro cliente (juntado, por exemplo) dá 422 `PACIENTE_DE_OUTRO_CLIENTE` (N48).
+ */
 const CODIGOS_DE_DADO_MUDADO = new Set([
   'VINCULO_JA_ATIVO',
   'PACIENTE_INATIVO',
-  'VINCULO_INCOMPLETO',
+  'PACIENTE_DE_OUTRO_CLIENTE',
 ])
 
 /* -------------------------------------------------------------------- quem entra */

@@ -3102,7 +3102,8 @@
         "PUBLICAR": "Publicación en la app",
         "IMPRIMIR": "Impresión",
         "EXPORTAR": "Exportación",
-        "LER_DADO_DO_APP": "Lectura de datos de la app"
+        "LER_DADO_DO_APP": "Lectura de datos de la app",
+        "EXCLUIR": "Eliminación"
       },
       "frase": {
         "LER": "abrió {recurso}",
@@ -10569,7 +10570,13 @@
       "semVoltaResponsavel": "Lo que difería en el otro registro se pierde, y queda inactivo. No se puede deshacer.",
       "trocar": "Elegir otro",
       "confirmar": "Unir",
-      "feito": "Registros unidos"
+      "feito": "Registros unidos",
+      "procurarResponsavel": "Nombre o teléfono del responsable",
+      "pacientesAtivos": "Pacientes activos: {n}",
+      "telefoneIncompleto": "Teléfono incompleto: escribe el código de área y el número.",
+      "esperando": "Uniendo los registros. Tarda unos segundos.",
+      "taxa": "Uniste muchos registros en poco tiempo. Intenta de nuevo en {tempo}.",
+      "demorou": "La unión tardó demasiado y nada cambió. Intenta de nuevo en {tempo}."
     },
     "exclusao": {
       "titulo": "Eliminar a pedido del titular",
@@ -10692,7 +10699,8 @@
         "semPermissao": "El navegador no habilitó la cámara. Habilítela en los permisos del sitio o pegue la dirección del QR.",
         "semCamera": "No se encontró ninguna cámara. Pegue la dirección del QR.",
         "falhou": "No se pudo abrir la cámara. Cierre otro programa que esté usando la cámara o pegue la dirección del QR."
-      }
+      },
+      "outroDono": "La mascota cambió de dueño en la app: este vínculo ya no publica ni comparte datos. Termina el vínculo para invitar al nuevo responsable."
     },
     "convite": {
       "titulo": "Invitar a la app",
@@ -11156,7 +11164,8 @@
         "novo": "Cliente nuevo",
         "novoDica": "Crea otro cliente con los datos de la solicitud.",
         "fichaDe": "Ficha de {nome}",
-        "fichaNova": "Ficha nueva"
+        "fichaNova": "Ficha nueva",
+        "jaEClienteSemPet": "Ya es cliente, sin pacientes activos"
       },
       "marcadoLinha": "Reservado: {dia}, {inicio} a {fim}",
       "horarioMarcado": "Horario reservado",

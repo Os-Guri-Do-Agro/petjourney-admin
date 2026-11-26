@@ -34,10 +34,11 @@ import { listarEquipe } from '@/service/parceiro/equipe-service'
 const POR_PAGINA = 50
 
 /**
- * A API grava a criação e a exclusão de alguns registros (paciente, cliente, alerta) como ALTERAR, com
- * um marcador em `campos`: `criado` ou `excluido`. A linha lê o marcador como o verbo que ele é.
+ * Desde 25/11 (N7), a criação de alerta e de autorizado grava `CRIAR`, e a exclusão do cliente,
+ * `EXCLUIR`. As linhas de antes ficaram como ALTERAR com um marcador em `campos` (`criado` ou
+ * `excluido`): a linha lê o marcador como o verbo que ele é.
  */
-type AcaoLida = AcaoDaTrilha | 'EXCLUIR'
+type AcaoLida = AcaoDaTrilha
 
 const MARCADORES = new Map<string, AcaoLida>([
   ['criado', 'CRIAR'],

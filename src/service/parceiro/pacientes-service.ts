@@ -22,13 +22,16 @@ import type {
   AutorizadoDto,
   ClienteAnonimizadoDto,
   ClienteComAutorizadosDto,
+  ClienteDaListaDto,
   CriarAlertaDto,
   CriarAutorizadoDto,
   CriarClienteDto,
   CriarPacienteDto,
   InativarPacienteDto,
+  PacienteDoClienteDto,
   PacienteDto,
   PacienteResumoDto,
+  PaginaClientesDto,
   PaginaPacientesDto,
 } from '../contrato/openapi'
 import { comIdempotencia } from '../idempotencia'
@@ -37,6 +40,9 @@ export type Paciente = PacienteDto
 export type PacienteNaLista = PacienteResumoDto
 export type PaginaDePacientes = PaginaPacientesDto
 export type Cliente = ClienteComAutorizadosDto
+export type ClienteDaLista = ClienteDaListaDto
+export type PaginaDeClientes = PaginaClientesDto
+export type PacienteDoCliente = PacienteDoClienteDto
 export type Alerta = AlertaDto
 export type Autorizado = AutorizadoDto
 export type NovoPaciente = CriarPacienteDto
@@ -220,7 +226,12 @@ export function reativarPaciente(id: string, params?: ParceiroQuery) {
   )
 }
 
-/** O da rota fica; o histórico do `comPacienteId` passa para ele (seção 1.10). */
+/**
+ * O da rota fica; o histórico do `comPacienteId` passa para ele (seção 1.10), e o pedido de horário
+ * pelo link também. Leva 6 a 7 s (N20/N55). Juntar, aqui e no cliente: 429 `MESCLA_TAXA_EXCEDIDA`
+ * (30 por hora) e 503 `OPERACAO_DEMOROU_DEMAIS` (nada mudou) com `tenteDeNovoEmSegundos`, e 409
+ * `CADASTRO_EM_USO` (outra operação segura o cadastro).
+ */
 export function mesclarPaciente(id: string, comPacienteId: string, params?: ParceiroQuery) {
   return dados(
     apiFetch<ApiEnvelope<Paciente>>(
@@ -284,6 +295,52 @@ export function editarAlerta(
 }
 
 /* -------------------------------------------------------------------------------- clientes */
+
+export type FiltroDeClientes = {
+  /** Parte do nome do cliente (sem acento, sem caixa). */
+  q?: string
+  /**
+   * Com ou sem máscara e com ou sem o 55: casa, igual, o telefone principal ou o secundário. Menos
+   * de 8 dígitos: 400 `TELEFONE_INVALIDO`.
+   */
+  telefone?: string
+  /** `false` lista os inativos (mesclados, anonimizados). */
+  ativo?: boolean
+  cursor?: string | null
+  /** De 1 a 100 (padrão 30). */
+  limit?: number
+}
+
+/**
+ * Os clientes da casa por nome ou telefone, em ordem de nome, por cursor, com o número de pacientes
+ * ativos de cada um (N47/N54).
+ */
+export function listarClientes(filtro: FiltroDeClientes = {}, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<PaginaDeClientes>>(
+      comQuery(CLIENTES, {
+        parceiroId: params?.parceiroId,
+        q: filtro.q?.trim() || undefined,
+        telefone: filtro.telefone?.trim() || undefined,
+        ativo: filtro.ativo === false ? false : undefined,
+        cursor: filtro.cursor ?? undefined,
+        limit: filtro.limit,
+      }),
+    ),
+  )
+}
+
+/**
+ * Os pacientes do cliente numa chamada (até 100, ativos primeiro), com `vinculoAtivo` (ligado ao app
+ * pelo dono atual do pet). Os mesclados não vêm.
+ */
+export function pacientesDoCliente(clienteId: string, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<PacienteDoCliente[]>>(
+      doParceiro(`${CLIENTES}/${encodeURIComponent(clienteId)}/pacientes`, params),
+    ),
+  )
+}
 
 export function obterCliente(id: string, params?: ParceiroQuery) {
   return dados(

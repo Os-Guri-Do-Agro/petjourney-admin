@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { PacienteNaLista } from '@/service/parceiro/pacientes-service'
+import type { PacienteDoCliente } from '@/service/parceiro/pacientes-service'
 
 import {
   chaveDaRecusa,
@@ -12,7 +12,6 @@ import {
   diaCurto,
   diaLongo,
   fichasParecidas,
-  mesmoTelefone,
   vinculoDoAceite,
 } from '../leitura-do-pedido'
 
@@ -51,8 +50,8 @@ function paciente(
   id: string,
   nome: string,
   cliente: { id: string; nome: string; telefone: string | null },
-  extra: Partial<PacienteNaLista> = {},
-): PacienteNaLista {
+  extra: Partial<PacienteDoCliente> = {},
+): PacienteDoCliente {
   return {
     id,
     nome,
@@ -71,36 +70,33 @@ function paciente(
     codigoNaOrigem: null,
     cliente: { ...cliente, contatoPreferido: 'WHATSAPP' },
     alertas: [],
+    vinculoAtivo: false,
     ...extra,
   }
 }
 
 describe('o cadastro que a clínica já tem (pedido pelo link)', () => {
-  const ana = { id: 'c-ana', nome: 'Ana Souza', telefone: '5511970002411' }
+  const ana = { id: 'c-ana', nome: 'Ana Souza Lima', telefone: '5511970002411' }
   const copia = { id: 'c-copia', nome: 'Ana  souza', telefone: '11970002411' }
-  const outro = { id: 'c-outro', nome: 'Bruno', telefone: '5511970002412' }
 
-  it('o telefone é o mesmo com ou sem o código do país, e nunca sem DDD', () => {
-    expect(mesmoTelefone('5511970002411', '(11) 97000-2411')).toBe(true)
-    expect(mesmoTelefone('5511970002411', '5511970002412')).toBe(false)
-    expect(mesmoTelefone('970002411', '5511970002411')).toBe(false)
-    expect(mesmoTelefone(null, '5511970002411')).toBe(false)
-  })
-
-  it('agrupa as fichas ativas por cliente do mesmo telefone, com o de nome igual primeiro', () => {
+  it('cada cliente achado pelo telefone vem com as fichas ativas, o de nome igual primeiro', () => {
     const clientes = clientesDoTelefone(
       [
-        paciente('p-outro', 'Rex', outro),
-        paciente('p-copia', 'Paçoca', copia),
-        paciente('p-pacoca', 'Paçoca', ana),
-        paciente('p-nina', 'Nina', ana, { especie: 'GATO' }),
-        paciente('p-velho', 'Tico', ana, { ativo: false }),
+        {
+          cliente: ana,
+          pacientes: [
+            paciente('p-pacoca', 'Paçoca', ana),
+            paciente('p-nina', 'Nina', ana, { especie: 'GATO' }),
+            paciente('p-velho', 'Tico', ana, { ativo: false }),
+          ],
+        },
+        { cliente: copia, pacientes: [] },
       ],
-      '5511970002411',
       'ANA SOUZA',
     )
 
     expect(clientes.map((cliente) => cliente.id)).toEqual(['c-copia', 'c-ana'])
+    expect(clientes[0]!.fichas).toEqual([])
     expect(clientes[1]!.fichas.map((ficha) => ficha.id)).toEqual(['p-pacoca', 'p-nina'])
   })
 

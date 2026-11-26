@@ -17,7 +17,7 @@ import type {
   PropostaEnviadaDto,
   VinculoDoPacienteDto,
 } from '../contrato/openapi'
-import { listarPacientes } from './pacientes-service'
+import { pacientesDoCliente } from './pacientes-service'
 
 export type PropostaCriada = PropostaCriadaDto
 export type CanalDoConvite = ProporVinculoDto['canal']
@@ -109,36 +109,24 @@ type PacienteDoConvite = { id: string; nome: string }
 
 /**
  * Quem entra no convite: o paciente da tela, primeiro, e os outros do mesmo cliente que estão ativos
- * e sem vínculo. A API não lista os pacientes de um cliente: a busca pelo nome dele traz os pets da
- * casa, e ficam só os do mesmo `cliente.id`. Busca que falha deixa o convite só com o da tela; o
- * vínculo que não deu para ler deixa aquele pet de fora (nada de 409 por dúvida).
+ * e sem vínculo, numa chamada (`GET clientes/:id/pacientes`, N47: até 100, com `vinculoAtivo`; os
+ * mesclados não vêm). Leitura que falha deixa o convite só com o da tela.
  */
 export async function pacientesDoConvite(
-  paciente: PacienteDoConvite & { cliente: { id: string; nome: string } },
+  paciente: PacienteDoConvite & { cliente: { id: string } },
   params?: ParceiroQuery,
 ): Promise<PacienteDoConvite[]> {
   const atual = { id: paciente.id, nome: paciente.nome }
 
   try {
-    const pagina = await listarPacientes({ q: paciente.cliente.nome, limit: 50 }, params)
-    const irmaos = pagina.itens.filter(
-      (item) =>
-        item.cliente.id === paciente.cliente.id &&
-        item.id !== paciente.id &&
-        item.ativo &&
-        !item.obitoEm,
-    )
-    const livres = await Promise.all(
-      irmaos.map(async (item) => {
-        try {
-          return (await obterVinculo(item.id, params)) ? null : { id: item.id, nome: item.nome }
-        } catch {
-          return null
-        }
-      }),
-    )
+    const doCliente = await pacientesDoCliente(paciente.cliente.id, params)
+    const irmaos = doCliente
+      .filter(
+        (item) => item.id !== paciente.id && item.ativo && !item.obitoEm && !item.vinculoAtivo,
+      )
+      .map((item) => ({ id: item.id, nome: item.nome }))
 
-    return [atual, ...livres.filter((item): item is PacienteDoConvite => item !== null)]
+    return [atual, ...irmaos]
   } catch {
     return [atual]
   }

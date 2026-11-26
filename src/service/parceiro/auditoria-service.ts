@@ -26,6 +26,7 @@ export const ACOES_DA_TRILHA: AcaoDaTrilha[] = [
   'LER',
   'CRIAR',
   'ALTERAR',
+  'EXCLUIR',
   'FINALIZAR',
   'ANULAR',
   'PUBLICAR',

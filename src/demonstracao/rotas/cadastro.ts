@@ -21,6 +21,7 @@ import type {
   Anonimizacao,
   Autorizado,
   Cliente,
+  ClienteDaLista,
   EdicaoDoAlerta,
   EdicaoDoAutorizado,
   EdicaoDoCliente,
@@ -31,6 +32,8 @@ import type {
   NovoCliente,
   NovoPaciente,
   Paciente,
+  PacienteDoCliente,
+  PaginaDeClientes,
   PaginaDePacientes,
 } from '@/service/parceiro/pacientes-service'
 import {
@@ -489,7 +492,7 @@ function registrarPacientes() {
       ativo: true,
     }
     p.alertas.push(alerta)
-    anotar('ALTERAR', 'alerta-do-paciente', alerta.id, p.id, ['criado'])
+    anotar('CRIAR', 'alerta-do-paciente', alerta.id, p.id, Object.keys(corpo))
     return ok<Alerta>(alerta, 201)
   })
 
@@ -523,7 +526,75 @@ function clienteVisivel(id: string) {
   return c
 }
 
+/**
+ * Os telefones que a busca casa, igual (N54): com ou sem o 55 na frente. Menos de 8 dígitos não
+ * busca (400 `TELEFONE_INVALIDO`).
+ */
+function telefonesDaBusca(texto: string): string[] | null {
+  const digitos = texto.replace(/\D/g, '')
+  if (digitos.length < 8) return null
+  return digitos.startsWith('55') ? [digitos, digitos.slice(2)] : [digitos, `55${digitos}`]
+}
+
+function clienteDaLista(c: (typeof CLIENTES)[number]): ClienteDaLista {
+  return {
+    id: c.id,
+    nome: c.nome,
+    telefone: c.telefone,
+    telefoneSecundario: c.telefoneSecundario,
+    email: c.email,
+    contatoPreferido: c.contatoPreferido,
+    codigoNaOrigem: c.codigoNaOrigem,
+    ativo: c.ativo,
+    inativoMotivo: c.inativoMotivo as ClienteDaLista['inativoMotivo'],
+    mescladoEmId: c.mescladoEmId,
+    anonimizadoEm: c.anonimizadoEm,
+    pacientesAtivos: pacientesDoCliente(c.id).filter((p) => p.ativo).length,
+  }
+}
+
 function registrarClientes() {
+  /* N54: a lista de clientes por nome ou telefone (o principal ou o secundário), em ordem de nome. */
+  rota('GET', `${PORTAL}/clientes`, ({ query }) => {
+    const nome = normalizar((query.get('q') ?? '').trim())
+    const telefone = (query.get('telefone') ?? '').trim()
+    const ativos = query.get('ativo') !== 'false'
+    const valores = telefone ? telefonesDaBusca(telefone) : []
+    if (!valores) {
+      return erro(
+        400,
+        'TELEFONE_INVALIDO',
+        'Telefone inválido. Use DDD e número, ou o código do país com +.',
+      )
+    }
+    const lista = CLIENTES.filter((c) => {
+      if (Boolean(c.ativo && !c.anonimizadoEm) !== ativos) return false
+      if (nome && !normalizar(c.nome).includes(nome)) return false
+      if (valores.length && !valores.some((v) => v === c.telefone || v === c.telefoneSecundario)) {
+        return false
+      }
+      return true
+    }).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+    const { itens, proximoCursor } = paginar(lista, query, 30)
+    return ok<PaginaDeClientes>({ itens: itens.map(clienteDaLista), proximoCursor })
+  })
+
+  /* N47: os pacientes do cliente, ativos primeiro e por nome, com o vínculo do dono atual. */
+  rota('GET', `${PORTAL}/clientes/:id/pacientes`, ({ params }) => {
+    const c = clienteVisivel(params.id ?? '')
+    if (ehResposta(c)) return c
+    const lista = pacientesDoCliente(c.id)
+      .filter((p) => p.inativoMotivo !== 'DUPLICADO')
+      .sort((a, b) => Number(b.ativo) - Number(a.ativo) || a.nome.localeCompare(b.nome, 'pt-BR'))
+      .slice(0, 100)
+    return ok<PacienteDoCliente[]>(
+      lista.map((p) => ({
+        ...pacienteResumo(p.id),
+        vinculoAtivo: Boolean(vinculoDe(p.id)?.doDonoAtual),
+      })),
+    )
+  })
+
   rota('GET', `${PORTAL}/clientes/:id`, ({ params }) => {
     const c = clienteVisivel(params.id ?? '')
     if (ehResposta(c)) return c
@@ -624,7 +695,8 @@ function registrarClientes() {
     if (resultado === 'EXCLUIDO') {
       for (const p of pets) PACIENTES.splice(PACIENTES.indexOf(p), 1)
     }
-    anotar('ALTERAR', 'cliente-do-parceiro', c.id, null, ['excluido'])
+    if (resultado === 'EXCLUIDO') anotar('EXCLUIR', 'cliente-do-parceiro', c.id, null)
+    else anotar('ALTERAR', 'cliente-do-parceiro', c.id, null, ['anonimizadoEm'])
     return ok<Anonimizacao>({
       resultado,
       bloqueadoAte: c.bloqueadoAte,
@@ -655,7 +727,13 @@ function registrarClientes() {
       ativo: true,
     }
     c.autorizados.push(autorizado)
-    anotar('ALTERAR', 'cliente-do-parceiro', c.id, null, ['autorizados'])
+    anotar(
+      'CRIAR',
+      'autorizado-do-cliente',
+      autorizado.id,
+      null,
+      Object.keys(corpo).filter((campo) => corpo[campo as keyof NovoAutorizado]),
+    )
     return ok<Autorizado>(autorizado, 201)
   })
 

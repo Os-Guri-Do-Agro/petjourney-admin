@@ -111,15 +111,15 @@ describe('vinculo-service', () => {
     ])
   })
 
-  describe('quem entra no convite', () => {
+  describe('quem entra no convite (N47)', () => {
     const PACIENTE = { id: 'pac1', nome: 'Bolota', cliente: { id: 'cli1', nome: 'Marina Prado' } }
 
     function item(id: string, nome: string, extra: Record<string, unknown> = {}) {
-      return { id, nome, ativo: true, obitoEm: null, cliente: { id: 'cli1' }, ...extra }
+      return { id, nome, ativo: true, obitoEm: null, vinculoAtivo: false, ...extra }
     }
 
-    /** Responde a busca e o vínculo de cada paciente; o resto falha. */
-    function rotas(itens: unknown[], ligados: string[], falhaNoVinculo: string[] = []) {
+    /** Responde os pacientes do cliente; o resto falha. */
+    function rotas(itens: unknown[]) {
       const fetchMock = vi.fn<typeof fetch>().mockImplementation(async (url) => {
         const { pathname } = new URL(String(url))
         const envelope = (data: unknown, status = 200) =>
@@ -128,13 +128,7 @@ describe('vinculo-service', () => {
             headers: JSON_HEADERS,
           })
 
-        if (pathname === '/parceiro/portal/pacientes') {
-          return envelope({ itens, proximoCursor: null })
-        }
-
-        const vinculo = pathname.match(/^\/parceiro\/portal\/pacientes\/([^/]+)\/vinculo$/)?.[1]
-        if (vinculo && falhaNoVinculo.includes(vinculo)) return envelope(null, 500)
-        if (vinculo) return envelope(ligados.includes(vinculo) ? { id: 'v1' } : null)
+        if (pathname === '/parceiro/portal/clientes/cli1/pacientes') return envelope(itens)
 
         return envelope(null, 404)
       })
@@ -143,19 +137,15 @@ describe('vinculo-service', () => {
       return fetchMock
     }
 
-    it('o da tela primeiro, e os outros do cliente ativos e sem vínculo', async () => {
+    it('o da tela primeiro, e os outros do cliente ativos e sem vínculo, numa chamada', async () => {
       const servico = await loadService()
-      const fetchMock = rotas(
-        [
-          item('pac1', 'Bolota'),
-          item('pac2', 'Tofu'),
-          item('pac3', 'Mel'),
-          item('pac4', 'Nino', { ativo: false }),
-          item('pac5', 'Fubá', { obitoEm: '2026-10-01' }),
-          item('pac6', 'Bidu', { cliente: { id: 'cli2' } }),
-        ],
-        ['pac3'],
-      )
+      const fetchMock = rotas([
+        item('pac2', 'Tofu'),
+        item('pac1', 'Bolota'),
+        item('pac3', 'Mel', { vinculoAtivo: true }),
+        item('pac4', 'Nino', { ativo: false }),
+        item('pac5', 'Fubá', { obitoEm: '2026-10-01' }),
+      ])
 
       const lista = await servico.pacientesDoConvite(PACIENTE, { parceiroId: 'p1' })
 
@@ -164,20 +154,11 @@ describe('vinculo-service', () => {
         { id: 'pac2', nome: 'Tofu' },
       ])
       expect(chamadas(fetchMock)).toEqual([
-        ['GET', '/parceiro/portal/pacientes?parceiroId=p1&q=Marina+Prado&limit=50', undefined],
-        ['GET', '/parceiro/portal/pacientes/pac2/vinculo?parceiroId=p1', undefined],
-        ['GET', '/parceiro/portal/pacientes/pac3/vinculo?parceiroId=p1', undefined],
+        ['GET', '/parceiro/portal/clientes/cli1/pacientes?parceiroId=p1', undefined],
       ])
     })
 
-    it('o vínculo que não deu para ler deixa o pet de fora', async () => {
-      const servico = await loadService()
-      rotas([item('pac1', 'Bolota'), item('pac2', 'Tofu')], [], ['pac2'])
-
-      expect(await servico.pacientesDoConvite(PACIENTE)).toEqual([{ id: 'pac1', nome: 'Bolota' }])
-    })
-
-    it('busca que falha deixa o convite só com o da tela', async () => {
+    it('leitura que falha deixa o convite só com o da tela', async () => {
       const servico = await loadService()
       vi.stubGlobal(
         'fetch',

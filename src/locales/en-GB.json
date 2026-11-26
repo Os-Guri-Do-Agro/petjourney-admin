@@ -3102,7 +3102,8 @@
         "PUBLICAR": "Publishing to the app",
         "IMPRIMIR": "Printing",
         "EXPORTAR": "Export",
-        "LER_DADO_DO_APP": "Viewing app data"
+        "LER_DADO_DO_APP": "Viewing app data",
+        "EXCLUIR": "Deletion"
       },
       "frase": {
         "LER": "opened {recurso}",
@@ -10569,7 +10570,13 @@
       "semVoltaResponsavel": "What differed in the other record is lost, and it becomes inactive. This cannot be undone.",
       "trocar": "Choose another",
       "confirmar": "Merge",
-      "feito": "Records merged"
+      "feito": "Records merged",
+      "procurarResponsavel": "Guardian's name or phone",
+      "pacientesAtivos": "Active patients: {n}",
+      "telefoneIncompleto": "Incomplete phone number: enter the area code and the number.",
+      "esperando": "Merging the records. This takes a few seconds.",
+      "taxa": "You merged many records in a short time. Try again in {tempo}.",
+      "demorou": "Merging took too long and nothing changed. Try again in {tempo}."
     },
     "exclusao": {
       "titulo": "Delete at the data subject's request",
@@ -10692,7 +10699,8 @@
         "semPermissao": "The browser did not allow the camera. Allow it in the site permissions or paste the QR code address.",
         "semCamera": "No camera found. Paste the QR code address.",
         "falhou": "Could not open the camera. Close any other programme using the camera or paste the QR code address."
-      }
+      },
+      "outroDono": "The pet changed owner in the app: this link no longer publishes or shares data. End the link to invite the new guardian."
     },
     "convite": {
       "titulo": "Invite to the app",
@@ -11156,7 +11164,8 @@
         "novo": "New client",
         "novoDica": "Creates another client from the request details.",
         "fichaDe": "Patient record for {nome}",
-        "fichaNova": "New patient record"
+        "fichaNova": "New patient record",
+        "jaEClienteSemPet": "Already a client, no active patients"
       },
       "marcadoLinha": "Booked: {dia}, {inicio} to {fim}",
       "horarioMarcado": "Booked time",
