@@ -12038,14 +12038,41 @@
       "JUSTIFICADA": "Opravdano",
       "ENCERRADA": "Slučaj zatvoren (uginuće)"
     },
-    "jaReagendada": "Već zakazano ponovo.",
+    "estado": {
+      "PENDENTE": "Bez kontakta",
+      "SEM_RESPOSTA": "Bez odgovora",
+      "JUSTIFICADA": "Opravdano",
+      "ENCERRADA": "Slučaj zatvoren"
+    },
+    "selo": {
+      "obito": "Uginuo",
+      "inativo": "Neaktivan",
+      "aJustificar": "{n} za kontakt | {n} za kontakt | {n} za kontakt",
+      "aConvidar": "Za poziv",
+      "reincidente": "Ponovljeno"
+    },
+    "jaReagendada": "Ovaj nedolazak je već ponovo zakazan.",
+    "novo": {
+      "titulo": "Novi termin zakazan",
+      "pronto": "Gotovo, novi termin je zakazan",
+      "quando": "{dia} u {hora}",
+      "com": "sa {nome}",
+      "cancelado": "Novi termin ({quando}) je otkazan. Možete ponovo zakazati.",
+      "abrir": "Otvori novi termin"
+    },
     "anonimizado": "Podaci ovog vlasnika su obrisani na njegov zahtev: nema kontakta za beleženje.",
     "registro": {
-      "titulo": "Zapisi",
-      "nenhum": "Još nema zapisa.",
-      "vale": "Ovaj važi",
-      "peloApp": "Vlasnik u aplikaciji, {quando}",
-      "por": "{nome}, {quando}"
+      "semContato": "Još niko nije razgovarao sa vlasnikom o nedolasku. Kada razgovarate, zabeležite kontakt ovde.",
+      "motivo": "Razlog: {motivo}",
+      "aClinica": "Klinika",
+      "antes": "Raniji kontakti",
+      "frase": {
+        "APP": "Vlasnik je opravdao preko aplikacije {dia} u {hora}.",
+        "TELEFONE": "{quem}: razgovor sa vlasnikom telefonom {dia} u {hora}.",
+        "WHATSAPP": "{quem}: razgovor sa vlasnikom preko WhatsAppa {dia} u {hora}.",
+        "PRESENCIAL": "{quem}: razgovor sa vlasnikom lično {dia} u {hora}.",
+        "SEM_RESPOSTA": "{quem}: pokušaj kontakta sa vlasnikom {dia} u {hora}, bez odgovora."
+      }
     },
     "acao": {
       "contato": "Zabeleži kontakt",
@@ -12101,13 +12128,6 @@
       "pendentes": "Nema nedolazaka za kontakt",
       "todas": "Nema nedolazaka u periodu",
       "descricao": "Ovde se pojavljuju nedolasci označeni u rasporedu."
-    },
-    "selo": {
-      "obito": "Uginuo",
-      "inativo": "Neaktivan",
-      "aJustificar": "{n} za kontakt | {n} za kontakt | {n} za kontakt",
-      "aConvidar": "Za poziv",
-      "reincidente": "Ponovljeno"
     },
     "ultima": "poslednji {dia}",
     "contagem": "{n} nedolazak | {n} nedolaska | {n} nedolazaka",

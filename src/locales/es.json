@@ -12038,14 +12038,41 @@
       "JUSTIFICADA": "Justificada",
       "ENCERRADA": "Caso cerrado (fallecimiento)"
     },
-    "jaReagendada": "Ya reprogramada.",
+    "estado": {
+      "PENDENTE": "Sin contacto",
+      "SEM_RESPOSTA": "Sin respuesta",
+      "JUSTIFICADA": "Justificada",
+      "ENCERRADA": "Caso cerrado"
+    },
+    "selo": {
+      "obito": "Fallecido",
+      "inativo": "Inactivo",
+      "aJustificar": "{n} por justificar | {n} por justificar",
+      "aConvidar": "Por invitar",
+      "reincidente": "Reincidente"
+    },
+    "jaReagendada": "Esta ausencia ya se reprogramó.",
+    "novo": {
+      "titulo": "Nuevo horario reservado",
+      "pronto": "Listo, el nuevo horario está reservado",
+      "quando": "{dia}, a las {hora}",
+      "com": "con {nome}",
+      "cancelado": "El nuevo horario ({quando}) se canceló. Puedes reprogramar otra vez.",
+      "abrir": "Abrir el nuevo horario"
+    },
     "anonimizado": "Los datos de este responsable se borraron a su pedido: no hay contacto para registrar.",
     "registro": {
-      "titulo": "Registros",
-      "nenhum": "Ningún registro todavía.",
-      "vale": "Es el que vale",
-      "peloApp": "Por el responsable en la app, el {quando}",
-      "por": "{nome}, el {quando}"
+      "semContato": "Nadie habló todavía con el responsable sobre la ausencia. Cuando hables, registra el contacto aquí.",
+      "motivo": "Motivo: {motivo}",
+      "aClinica": "La clínica",
+      "antes": "Contactos anteriores",
+      "frase": {
+        "APP": "El responsable justificó por la app el {dia}, a las {hora}.",
+        "TELEFONE": "{quem} habló con el responsable por teléfono el {dia}, a las {hora}.",
+        "WHATSAPP": "{quem} habló con el responsable por WhatsApp el {dia}, a las {hora}.",
+        "PRESENCIAL": "{quem} habló con el responsable en persona el {dia}, a las {hora}.",
+        "SEM_RESPOSTA": "{quem} intentó hablar con el responsable el {dia}, a las {hora}, sin respuesta."
+      }
     },
     "acao": {
       "contato": "Registrar contacto",
@@ -12101,13 +12128,6 @@
       "pendentes": "Ninguna ausencia por justificar",
       "todas": "Ninguna ausencia en el período",
       "descricao": "Las ausencias marcadas en la agenda aparecen aquí."
-    },
-    "selo": {
-      "obito": "Fallecido",
-      "inativo": "Inactivo",
-      "aJustificar": "{n} por justificar | {n} por justificar",
-      "aConvidar": "Por invitar",
-      "reincidente": "Reincidente"
     },
     "ultima": "última el {dia}",
     "contagem": "{n} ausencia | {n} ausencias",

@@ -12038,14 +12038,41 @@
       "JUSTIFICADA": "Explained",
       "ENCERRADA": "Case closed (death)"
     },
-    "jaReagendada": "Already rescheduled.",
+    "estado": {
+      "PENDENTE": "No contact yet",
+      "SEM_RESPOSTA": "No answer",
+      "JUSTIFICADA": "Explained",
+      "ENCERRADA": "Case closed"
+    },
+    "selo": {
+      "obito": "Deceased",
+      "inativo": "Inactive",
+      "aJustificar": "{n} to follow up | {n} to follow up",
+      "aConvidar": "To invite back",
+      "reincidente": "Repeat"
+    },
+    "jaReagendada": "This no-show has already been rescheduled.",
+    "novo": {
+      "titulo": "New time booked",
+      "pronto": "Done, the new time is booked",
+      "quando": "{dia} at {hora}",
+      "com": "with {nome}",
+      "cancelado": "The new time ({quando}) was cancelled. You can reschedule again.",
+      "abrir": "Open the new time"
+    },
     "anonimizado": "This owner's data was erased at their request: there is no contact to record.",
     "registro": {
-      "titulo": "Records",
-      "nenhum": "No records yet.",
-      "vale": "This one counts",
-      "peloApp": "By the owner in the app, on {quando}",
-      "por": "{nome}, on {quando}"
+      "semContato": "Nobody has talked to the owner about the no-show yet. When you do, record the contact here.",
+      "motivo": "Reason: {motivo}",
+      "aClinica": "The clinic",
+      "antes": "Earlier contacts",
+      "frase": {
+        "APP": "The owner explained through the app on {dia} at {hora}.",
+        "TELEFONE": "{quem} talked to the owner by phone on {dia} at {hora}.",
+        "WHATSAPP": "{quem} talked to the owner on WhatsApp on {dia} at {hora}.",
+        "PRESENCIAL": "{quem} talked to the owner in person on {dia} at {hora}.",
+        "SEM_RESPOSTA": "{quem} tried to reach the owner on {dia} at {hora}, with no answer."
+      }
     },
     "acao": {
       "contato": "Record contact",
@@ -12101,13 +12128,6 @@
       "pendentes": "No no-shows to follow up",
       "todas": "No no-shows in the period",
       "descricao": "No-shows marked in the schedule show up here."
-    },
-    "selo": {
-      "obito": "Deceased",
-      "inativo": "Inactive",
-      "aJustificar": "{n} to follow up | {n} to follow up",
-      "aConvidar": "To invite back",
-      "reincidente": "Repeat"
     },
     "ultima": "last on {dia}",
     "contagem": "{n} no-show | {n} no-shows",

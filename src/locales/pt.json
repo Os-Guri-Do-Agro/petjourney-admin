@@ -12038,14 +12038,41 @@
       "JUSTIFICADA": "Justificada",
       "ENCERRADA": "Caso encerrado (óbito)"
     },
-    "jaReagendada": "Já reagendada.",
+    "estado": {
+      "PENDENTE": "Sem contato",
+      "SEM_RESPOSTA": "Sem resposta",
+      "JUSTIFICADA": "Justificada",
+      "ENCERRADA": "Caso encerrado"
+    },
+    "selo": {
+      "obito": "Óbito",
+      "inativo": "Inativo",
+      "aJustificar": "{n} a justificar | {n} a justificar",
+      "aConvidar": "A convidar",
+      "reincidente": "Reincidente"
+    },
+    "jaReagendada": "Esta falta já foi reagendada.",
+    "novo": {
+      "titulo": "Novo horário marcado",
+      "pronto": "Pronto, o novo horário está marcado",
+      "quando": "{dia}, às {hora}",
+      "com": "com {nome}",
+      "cancelado": "O novo horário ({quando}) foi cancelado. Dá para reagendar de novo.",
+      "abrir": "Abrir o novo horário"
+    },
     "anonimizado": "Os dados deste responsável foram apagados a pedido dele: não há contato a registrar.",
     "registro": {
-      "titulo": "Registros",
-      "nenhum": "Nenhum registro ainda.",
-      "vale": "É o que vale",
-      "peloApp": "Pelo responsável no app, em {quando}",
-      "por": "{nome}, em {quando}"
+      "semContato": "Ninguém falou com o responsável sobre a falta ainda. Quando falar, registre o contato aqui.",
+      "motivo": "Motivo: {motivo}",
+      "aClinica": "A clínica",
+      "antes": "Contatos anteriores",
+      "frase": {
+        "APP": "O responsável justificou pelo app em {dia}, às {hora}.",
+        "TELEFONE": "{quem} falou com o responsável por telefone em {dia}, às {hora}.",
+        "WHATSAPP": "{quem} falou com o responsável pelo WhatsApp em {dia}, às {hora}.",
+        "PRESENCIAL": "{quem} falou com o responsável pessoalmente em {dia}, às {hora}.",
+        "SEM_RESPOSTA": "{quem} tentou falar com o responsável em {dia}, às {hora}, sem resposta."
+      }
     },
     "acao": {
       "contato": "Registrar contato",
@@ -12101,13 +12128,6 @@
       "pendentes": "Nenhuma falta a justificar",
       "todas": "Nenhuma falta no período",
       "descricao": "As faltas marcadas na agenda aparecem aqui."
-    },
-    "selo": {
-      "obito": "Óbito",
-      "inativo": "Inativo",
-      "aJustificar": "{n} a justificar | {n} a justificar",
-      "aConvidar": "A convidar",
-      "reincidente": "Reincidente"
     },
     "ultima": "última em {dia}",
     "contagem": "{n} falta | {n} faltas",
