@@ -2,24 +2,29 @@
 /**
  * O checklist da internação (E5-02b, guia e5 14.1 e 16.1): de 12 h atrás a 12 h à frente, por
  * hora cheia, com a linha do "agora". A situação de cada dose é lida na hora (o atraso não é um
- * registro): a lista se relê a cada minuto com a aba visível e depois de cada registro.
+ * registro): a lista se relê depois de cada registro e quando o canal de tempo real avisa que
+ * alguém marcou ou desfez uma dose desta internação (PJ-3SO0WX: é o que evita a dose em dobro).
+ * O polling fica de reserva: 2 min com o canal entregando, 1 min sem ele, com a aba visível.
  *
  * Registrar é da enfermagem, do veterinário e do DONO (`internacao.executar`). O plantão vencido
  * não bloqueia o cuidado: só o aviso.
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useReleituraDeReserva, useTempoReal } from '@/composables/useTempoReal'
 import {
   lerChecklistDaInternacao,
+  RELER_CHECKLIST_AO_VIVO_MS,
   RELER_CHECKLIST_MS,
   type ChecklistDaInternacao,
   type DoseNoChecklist,
 } from '@/service/parceiro/plantao-da-internacao-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 import LinhaDaDose from './LinhaDaDose.vue'
 import RegistrarDoseGaveta from './RegistrarDoseGaveta.vue'
@@ -35,30 +40,39 @@ const checklist = ref<ChecklistDaInternacao | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
+/* O aviso, o polling e o registro podem pedir juntos: a resposta velha não cobre a nova. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   try {
-    checklist.value = await lerChecklistDaInternacao(props.internacaoId, {}, parceiroQuery())
+    const lido = await lerChecklistDaInternacao(props.internacaoId, {}, parceiroQuery())
+    if (!leitura.valendo(vez)) return
+    checklist.value = lido
     erro.value = ''
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('internacao.checklist.erro')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
 defineExpose({ carregar })
 
-let relendo: ReturnType<typeof setInterval> | null = null
-onMounted(() => {
-  void carregar()
-  relendo = setInterval(() => {
-    if (document.visibilityState === 'visible') void carregar()
-  }, RELER_CHECKLIST_MS)
+const { aoVivo } = useTempoReal({
+  tipos: ['internacao.checklist'],
+  filtro: (aviso) => aviso.id === props.internacaoId,
+  ativo: () => store.temPermissao('internacao.executar'),
+  aoMudar: () => void carregar(),
 })
-onBeforeUnmount(() => {
-  if (relendo) clearInterval(relendo)
+useReleituraDeReserva(() => void carregar(), aoVivo, {
+  aoVivoMs: RELER_CHECKLIST_AO_VIVO_MS,
+  foraMs: RELER_CHECKLIST_MS,
 })
+
+onMounted(() => void carregar())
 watch(
   () => props.internacaoId,
   () => void carregar(),

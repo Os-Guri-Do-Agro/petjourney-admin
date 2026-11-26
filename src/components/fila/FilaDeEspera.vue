@@ -7,6 +7,10 @@
  * As vagas liberadas moram numa gaveta, com os primeiros que cabem e o "Ofertar". O sim e o não do
  * telefone ficam na linha da oferta. Quem pode: ler é `agenda.ler`; gerir é `fila.gerir`; o sim
  * também pede `agenda.escrever`.
+ *
+ * A oferta que o responsável aceitou ou recusou pelo app, a que venceu e a que voltou para a fila
+ * aparecem na hora: o canal de tempo real avisa (`fila.oferta`, só a quem tem `fila.gerir`) e a
+ * lista e as vagas se releem (PJ-3SO0WX).
  */
 import Button from 'primevue/button'
 import SelectButton from 'primevue/selectbutton'
@@ -27,6 +31,7 @@ import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useTempoReal } from '@/composables/useTempoReal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
@@ -165,6 +170,15 @@ function recarregarTudo() {
   void carregar()
   void carregarVagas()
 }
+
+useTempoReal({
+  tipos: ['fila.oferta'],
+  ativo: () => store.temPermissao('fila.gerir'),
+  aoMudar: () => {
+    void carregar()
+    void carregarVagas()
+  },
+})
 
 /* ------------------------------------------------------------------------------- a linha */
 

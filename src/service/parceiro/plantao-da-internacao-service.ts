@@ -98,6 +98,8 @@ export const NOTA_DA_PASSAGEM_MAX = 1000
 export const TEXTO_DA_EVOLUCAO_MAX = 1000
 /** O checklist se relê a cada minuto com a aba visível (a situação é lida na hora). */
 export const RELER_CHECKLIST_MS = 60_000
+/** Com o canal de tempo real entregando os avisos do checklist, o polling é só reserva (PJ-3SO0WX). */
+export const RELER_CHECKLIST_AO_VIVO_MS = 2 * 60_000
 
 type ParceiroQuery = { parceiroId?: string | null }
 

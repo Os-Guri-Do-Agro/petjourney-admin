@@ -5,9 +5,11 @@
  * plantão da grade em que estamos. A dose atrasada nunca some: as de até 12 h antes vêm primeiro;
  * as mais antigas que isso pedem para abrir a internação.
  *
- * Sem observação interna (ela fica no checklist da internação). Relê a cada minuto.
+ * Sem observação interna (ela fica no checklist da internação). Relê quando o canal de tempo real
+ * avisa que alguém marcou ou desfez uma dose de qualquer internação (PJ-3SO0WX); o polling fica de
+ * reserva: 2 min com o canal entregando, 1 min sem ele.
  */
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
@@ -16,12 +18,15 @@ import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { useReleituraDeReserva, useTempoReal } from '@/composables/useTempoReal'
 import {
   lerChecklistDoPlantao,
+  RELER_CHECKLIST_AO_VIVO_MS,
   RELER_CHECKLIST_MS,
   type ChecklistDoPlantao,
   type DoseDoPlantao,
 } from '@/service/parceiro/plantao-da-internacao-service'
+import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 
 import LinhaDaDose from './LinhaDaDose.vue'
 import RegistrarDoseGaveta from './RegistrarDoseGaveta.vue'
@@ -34,28 +39,36 @@ const checklist = ref<ChecklistDoPlantao | null>(null)
 const carregando = ref(false)
 const erro = ref('')
 
+/* O aviso, o polling e o registro podem pedir juntos: a resposta velha não cobre a nova. */
+const leitura = criarUltimaLeitura()
+
 async function carregar() {
+  const vez = leitura.nova()
   carregando.value = true
   try {
-    checklist.value = await lerChecklistDoPlantao({}, parceiroQuery())
+    const lido = await lerChecklistDoPlantao({}, parceiroQuery())
+    if (!leitura.valendo(vez)) return
+    checklist.value = lido
     erro.value = ''
   } catch (err) {
+    if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('internacao.checklist.erro')).mensagem
   } finally {
-    carregando.value = false
+    if (leitura.valendo(vez)) carregando.value = false
   }
 }
 
-let relendo: ReturnType<typeof setInterval> | null = null
-onMounted(() => {
-  void carregar()
-  relendo = setInterval(() => {
-    if (document.visibilityState === 'visible') void carregar()
-  }, RELER_CHECKLIST_MS)
+const { aoVivo } = useTempoReal({
+  tipos: ['internacao.checklist'],
+  ativo: () => store.temPermissao('internacao.executar'),
+  aoMudar: () => void carregar(),
 })
-onBeforeUnmount(() => {
-  if (relendo) clearInterval(relendo)
+useReleituraDeReserva(() => void carregar(), aoVivo, {
+  aoVivoMs: RELER_CHECKLIST_AO_VIVO_MS,
+  foraMs: RELER_CHECKLIST_MS,
 })
+
+onMounted(() => void carregar())
 
 const registro = useRegistroDeDose(() => {
   void carregar()

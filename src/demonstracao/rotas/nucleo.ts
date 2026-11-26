@@ -18,7 +18,7 @@ import {
 } from '../base/clinica'
 import { CUPONS, RESGATES } from '../dados/portal'
 import { agora } from '../relogio'
-import { ok, rota, vazio } from '../roteador'
+import { erro, ok, rota, vazio } from '../roteador'
 import { tokensDaDemonstracao } from '../sessao'
 
 export function registrarNucleo() {
@@ -27,6 +27,8 @@ export function registrarNucleo() {
   rota('POST', '/auth/refresh', () => ok(tokensDaDemonstracao()))
   rota('POST', '/auth/trocar-perfil', () => ok(tokensDaDemonstracao()))
   rota('POST', '/auth/logout', () => vazio())
+  /* Sem canal de tempo real na demonstração: o 404 é o "desligado no ambiente" (fica o polling). */
+  rota('POST', '/eventos/ticket', () => erro(404, 'NAO_ENCONTRADO', 'Not Found'))
 
   rota('GET', '/auth/perfis', () =>
     ok<PerfisConta>({
