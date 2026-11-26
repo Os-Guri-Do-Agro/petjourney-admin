@@ -64,24 +64,31 @@ const telefones = ref<string[]>([])
 const carregando = ref(false)
 const erro = ref('')
 const recado = ref('')
+/** Enviou e entregou (ou descartou): ok. Enviou e não chegou a ninguém: atenção. */
+const recadoTom = ref<'ok' | 'atencao'>('ok')
 
 async function carregar(mais = false) {
   carregando.value = true
   erro.value = ''
   try {
-    const pagina = await lerConversaDoBoletim(
-      props.internacaoId,
-      mais ? conversa.value?.proximoCursor : null,
-      parceiroQuery(),
-    )
+    /* A conversa e a preferência juntas: uma depois da outra, a espera dobrava. */
+    const [pagina, pref] = await Promise.all([
+      lerConversaDoBoletim(
+        props.internacaoId,
+        mais ? conversa.value?.proximoCursor : null,
+        parceiroQuery(),
+      ),
+      store.temPermissao('boletim.compor')
+        ? lerPreferenciaDoBoletim(props.internacaoId, parceiroQuery()).catch(
+            () => preferencia.value,
+          )
+        : Promise.resolve(preferencia.value),
+    ])
     conversa.value =
       mais && conversa.value
         ? { ...pagina, itens: [...conversa.value.itens, ...pagina.itens] }
         : pagina
-    if (store.temPermissao('boletim.compor'))
-      preferencia.value = await lerPreferenciaDoBoletim(props.internacaoId, parceiroQuery()).catch(
-        () => preferencia.value,
-      )
+    preferencia.value = pref
     void lerTelefones()
   } catch (err) {
     erro.value = lerErroDoCadastro(err, t('internacao.boletim.erroAoCarregar')).mensagem
@@ -200,39 +207,59 @@ const resumoDaPreferencia = computed(() => {
 
 /* ----------------------------------------------------------------------------- as ações */
 
+/*
+ * Enviar e descartar seguem carregando até a lista relida mostrar o boletim no estado novo, e o
+ * recado aparece junto. Antes o botão parava, o item ficava igual por uns 2 s e só depois mudava,
+ * e o erro do envio sumia na hora, apagado pela releitura (26/11/2026).
+ */
 const ocupado = ref<string | null>(null)
+const acao = ref<'enviar' | 'descartar' | null>(null)
 
-async function enviar(item: Boletim) {
+type Resultado = { texto: string; tom: 'ok' | 'atencao' }
+
+async function agir(item: Boletim, qual: 'enviar' | 'descartar', fazer: () => Promise<Resultado>) {
   ocupado.value = item.id
+  acao.value = qual
   recado.value = ''
   erro.value = ''
+  let feito: Resultado | null = null
+  let falha = ''
   try {
-    const envio = await enviarBoletim(item.id, novaChaveDeIdempotencia(), parceiroQuery())
-    recado.value = envio.entregue
-      ? t('internacao.boletim.enviado')
-      : t(`internacao.boletim.semEntrega.${envio.motivo ?? 'SEM_CANAL_NO_APP'}`)
+    feito = await fazer()
     invalidarPendenciasDoPortal()
-    void carregar()
   } catch (err) {
-    erro.value = lerErroDoCadastro(err, t('internacao.boletim.erroEnviar')).mensagem
-    void carregar()
-  } finally {
-    ocupado.value = null
+    falha = lerErroDoCadastro(
+      err,
+      t(qual === 'enviar' ? 'internacao.boletim.erroEnviar' : 'internacao.boletim.erroDescartar'),
+    ).mensagem
   }
+  await carregar()
+  if (feito) {
+    recadoTom.value = feito.tom
+    recado.value = feito.texto
+  }
+  if (falha) erro.value = falha
+  ocupado.value = null
+  acao.value = null
 }
 
-async function descartar(item: Boletim) {
-  ocupado.value = item.id
-  erro.value = ''
-  try {
+function enviar(item: Boletim) {
+  return agir(item, 'enviar', async () => {
+    const envio = await enviarBoletim(item.id, novaChaveDeIdempotencia(), parceiroQuery())
+    return envio.entregue
+      ? { texto: t('internacao.boletim.enviado'), tom: 'ok' }
+      : {
+          texto: t(`internacao.boletim.semEntrega.${envio.motivo ?? 'SEM_CANAL_NO_APP'}`),
+          tom: 'atencao',
+        }
+  })
+}
+
+function descartar(item: Boletim) {
+  return agir(item, 'descartar', async () => {
     await descartarBoletim(item.id, parceiroQuery())
-    invalidarPendenciasDoPortal()
-    void carregar()
-  } catch (err) {
-    erro.value = lerErroDoCadastro(err, t('internacao.boletim.erroDescartar')).mensagem
-  } finally {
-    ocupado.value = null
-  }
+    return { texto: t('internacao.boletim.descartado'), tom: 'ok' }
+  })
 }
 
 const escreverAberta = ref(false)
@@ -259,6 +286,8 @@ function foto(item: Boletim) {
 }
 
 function mudou() {
+  recado.value = ''
+  erro.value = ''
   invalidarPendenciasDoPortal()
   void carregar()
 }
@@ -300,14 +329,17 @@ function mudou() {
       </span>
     </header>
 
-    <p v-if="recado" class="eg__aviso bl__nota" role="status">
-      <i class="ph ph-check-circle" aria-hidden="true" />
-      <span>{{ recado }}</span>
-    </p>
-    <p v-if="erro" class="eg__erro bl__nota" role="alert">
-      <i class="ph ph-warning-circle" aria-hidden="true" />
-      <span>{{ erro }}</span>
-    </p>
+    <!-- O resultado da ação, numa caixa com folga sob o fio do cabeçalho, no tom do que aconteceu. -->
+    <div v-if="recado || erro" class="bl__notas">
+      <p v-if="recado" class="bl__nota" :class="`bl__nota--${recadoTom}`" role="status">
+        <i :class="recadoTom === 'ok' ? 'ph ph-check-circle' : 'ph ph-info'" aria-hidden="true" />
+        <span>{{ recado }}</span>
+      </p>
+      <p v-if="erro" class="bl__nota bl__nota--risco" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>{{ erro }}</span>
+      </p>
+    </div>
 
     <ul v-if="conversa?.itens.length" class="ui-lista">
       <li
@@ -363,6 +395,7 @@ function mudou() {
             severity="secondary"
             outlined
             :label="t('internacao.boletim.descartar')"
+            :loading="ocupado === item.id && acao === 'descartar'"
             :disabled="ocupado === item.id"
             @click="descartar(item)"
           />
@@ -381,7 +414,8 @@ function mudou() {
             size="small"
             icon="ph ph-paper-plane-tilt"
             :label="t('internacao.boletim.enviar')"
-            :loading="ocupado === item.id"
+            :loading="ocupado === item.id && acao === 'enviar'"
+            :disabled="ocupado === item.id"
             @click="enviar(item)"
           />
         </span>
@@ -431,9 +465,53 @@ function mudou() {
 </template>
 
 <style scoped>
+/* Sob o fio do cabeçalho, com folga; a caixa no pastel do que aconteceu. */
+.bl__notas {
+  display: grid;
+  gap: 8px;
+  padding: 14px 24px 2px;
+}
+
 .bl__nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 0;
-  padding: 0 24px 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: var(--tinta);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.bl__nota i {
+  margin-top: 1px;
+  font-size: 17px;
+}
+
+.bl__nota--ok {
+  background: var(--ok-fundo);
+}
+
+.bl__nota--ok i {
+  color: var(--ok-tinta);
+}
+
+.bl__nota--atencao {
+  background: var(--atencao-fundo);
+}
+
+.bl__nota--atencao i {
+  color: var(--atencao-tinta);
+}
+
+.bl__nota--risco {
+  background: var(--risco-fundo);
+}
+
+.bl__nota--risco i {
+  color: var(--risco-tinta);
 }
 
 .bl__acoes {

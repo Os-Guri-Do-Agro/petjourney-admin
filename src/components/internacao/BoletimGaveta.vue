@@ -6,6 +6,7 @@
  * (a piora ou a entrada crítica): aí só sai depois da ligação.
  */
 import Button from 'primevue/button'
+import Skeleton from 'primevue/skeleton'
 import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -31,23 +32,43 @@ const { parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
 
 const modelos = ref<ModelosDoBoletim | null>(null)
+/*
+ * As sugestões levam uns 2 s para chegar (26/11/2026, API de dev): sem nada no lugar, parecia que
+ * não havia sugestão ou que tinha quebrado. Enquanto lê, o lugar delas já aparece, com o esqueleto
+ * e "Preparando as sugestões"; se a leitura falha, um aviso com "Tentar de novo" (antes, sumia).
+ */
+const lendoModelos = ref(false)
+const falhouModelos = ref(false)
+/** A leitura que vale: abrir de novo antes da resposta descarta a anterior. */
+let leitura = 0
+
 const texto = ref('')
 const tentou = ref(false)
 const salvando = ref(false)
 const erro = ref('')
 
-watch(aberta, async (agora) => {
+async function lerModelos() {
+  const minha = ++leitura
+  lendoModelos.value = true
+  falhouModelos.value = false
+  modelos.value = null
+  try {
+    const lidos = await lerModelosDoBoletim(props.internacaoId, parceiroQuery())
+    if (minha === leitura) modelos.value = lidos
+  } catch {
+    if (minha === leitura) falhouModelos.value = true
+  } finally {
+    if (minha === leitura) lendoModelos.value = false
+  }
+}
+
+watch(aberta, (agora) => {
   if (!agora) return
   texto.value = ''
   tentou.value = false
   erro.value = ''
-  modelos.value = null
   chaveador.concluir()
-  try {
-    modelos.value = await lerModelosDoBoletim(props.internacaoId, parceiroQuery())
-  } catch {
-    modelos.value = null
-  }
+  void lerModelos()
 })
 
 function usar(valor: string) {
@@ -109,7 +130,38 @@ async function escrever() {
         <span>{{ t('internacao.boletim.vaiRetido') }}</span>
       </p>
 
-      <section v-if="modelos?.sugestoes.length" class="eg__secao">
+      <!-- Lendo: o lugar das sugestões já aparece, com o desenho delas. -->
+      <section v-if="lendoModelos" class="eg__secao" aria-busy="true">
+        <span class="eg__rotulo">{{ t('internacao.boletim.sugestoes') }}</span>
+        <ul class="bg__sugestoes" aria-hidden="true">
+          <li v-for="n in 2" :key="n" class="bg__esqueleto">
+            <Skeleton width="100%" height="0.9rem" />
+            <Skeleton :width="n === 1 ? '62%' : '48%'" height="0.9rem" />
+            <Skeleton width="4.25rem" height="2rem" border-radius="999px" />
+          </li>
+        </ul>
+        <small class="eg__dica bg__preparando" role="status">
+          <i class="ph ph-spinner-gap" aria-hidden="true" />
+          {{ t('internacao.boletim.preparando') }}
+        </small>
+      </section>
+
+      <div v-else-if="falhouModelos" class="eg__aviso bg__falhou" role="alert">
+        <i class="ph ph-warning-circle" aria-hidden="true" />
+        <span>{{ t('internacao.boletim.semSugestoes') }}</span>
+        <Button
+          type="button"
+          size="small"
+          severity="secondary"
+          outlined
+          icon="ph ph-arrow-clockwise"
+          :label="t('internacao.boletim.tentarDeNovo')"
+          :disabled="salvando"
+          @click="lerModelos"
+        />
+      </div>
+
+      <section v-else-if="modelos?.sugestoes.length" class="eg__secao">
         <span class="eg__rotulo">{{ t('internacao.boletim.sugestoes') }}</span>
         <ul class="bg__sugestoes">
           <li v-for="item in modelos.sugestoes" :key="item.chave">
@@ -208,6 +260,31 @@ async function escrever() {
   padding: 10px 12px;
   border: 1px solid var(--linha);
   border-radius: var(--raio-controle);
+}
+
+/* O esqueleto tem a altura de uma sugestão de duas linhas: o campo de texto não pula quando chegam. */
+.bg__esqueleto {
+  gap: 9px;
+  padding-block: 12px;
+}
+
+.bg__preparando {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bg__preparando i {
+  animation: ph-giro 1s linear infinite;
+}
+
+.bg__falhou {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.bg__falhou span {
+  flex: 1 1 14rem;
 }
 
 .bg__sugestoes p,
