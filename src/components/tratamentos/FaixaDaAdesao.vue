@@ -13,7 +13,13 @@ import { useI18n } from 'vue-i18n'
 
 import '@/features/clinico/components/tratamento/faixa-cores.css'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { diasDaFaixa, type DoseNaFaixa, type FaixaDeDoses } from '@/service/parceiro/adesao-service'
+import {
+  diaDaClinica,
+  diasDaFaixa,
+  somarDias,
+  type DoseNaFaixa,
+  type FaixaDeDoses,
+} from '@/service/parceiro/adesao-service'
 
 const props = defineProps<{ faixa: FaixaDeDoses; rotulo: string }>()
 
@@ -53,15 +59,16 @@ watch(dias, () => {
   nextTick(irParaHoje)
 })
 
-/** O dia civil de cada coluna: `desde` é a meia-noite da clínica. */
+/**
+ * O dia civil de cada coluna, na parede da clínica: `desde` é a meia-noite dela. A data sai em
+ * UTC de propósito, para o fuso do navegador não trocar o dia.
+ */
 function dataDoDia(dia: number) {
-  const base = new Date(props.faixa.desde)
-  base.setDate(base.getDate() + dia)
-  return base
+  return new Date(`${somarDias(diaDaClinica(props.faixa.desde), dia)}T00:00:00Z`)
 }
 
 const formatoDoDia = computed(
-  () => new Intl.DateTimeFormat(intl.value, { day: '2-digit', month: '2-digit' }),
+  () => new Intl.DateTimeFormat(intl.value, { day: '2-digit', month: '2-digit', timeZone: 'UTC' }),
 )
 
 const CLASSE: Record<string, string> = {
@@ -93,9 +100,16 @@ function leitura(dose: DoseNaFaixa) {
   return partes.join(' · ')
 }
 
-/** Só o primeiro e o último dia levam a data embaixo: o meio é ritmo, não calendário. */
+/**
+ * Só o primeiro e o último dia levam a data embaixo: o meio é ritmo, não calendário. Numa faixa
+ * curta as duas datas se encostariam: abaixo de 6 dias, só a primeira.
+ */
+const MINIMO_PARA_DUAS_DATAS = 6
+
 function legendaDoDia(dia: number) {
-  return dia === 0 || dia === dias.value.length - 1 ? formatoDoDia.value.format(dataDoDia(dia)) : ''
+  const primeiro = dia === dias.value[0]?.dia
+  const ultimo = dias.value.length >= MINIMO_PARA_DUAS_DATAS && dia === dias.value.at(-1)?.dia
+  return primeiro || ultimo ? formatoDoDia.value.format(dataDoDia(dia)) : ''
 }
 </script>
 
@@ -168,7 +182,8 @@ function legendaDoDia(dia: number) {
   white-space: nowrap;
 }
 
-.fa__dia:last-child .fa__data {
+/* Com um dia só, a coluna é a primeira e a última: a data fica no começo, sem cortar. */
+.fa__dia:last-child:not(:first-child) .fa__data {
   inset-inline-start: auto;
   inset-inline-end: 0;
 }

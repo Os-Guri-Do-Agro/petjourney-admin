@@ -13253,7 +13253,8 @@
     },
     "encerrados": "Terminados ({n})",
     "truncado": "Hay más tratamientos; ábralos desde la lista de la clínica.",
-    "verMaisDias": "Ver los últimos 42 días",
+    "verMaisDias": "Ver los últimos {n} días",
+    "verDesdeOInicio": "Ver desde el inicio",
     "horarioQueDestoa": "Las dosis de las {horario} casi nunca se registran ({dadas} de {fechadas}).",
     "quem": {
       "O": "por el dueño",

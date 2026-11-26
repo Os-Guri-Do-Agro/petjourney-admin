@@ -13253,7 +13253,8 @@
     },
     "encerrados": "Završene ({n})",
     "truncado": "Ima još terapija; otvorite ih sa liste klinike.",
-    "verMaisDias": "Prikaži poslednja 42 dana",
+    "verMaisDias": "Prikaži poslednjih {n} dana",
+    "verDesdeOInicio": "Prikaži od početka",
     "horarioQueDestoa": "Doze u {horario} se skoro nikad ne beleže ({dadas} od {fechadas}).",
     "quem": {
       "O": "vlasnik",

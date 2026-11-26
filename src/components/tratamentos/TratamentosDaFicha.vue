@@ -23,9 +23,14 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import LegendaDaFaixa from '@/features/clinico/components/tratamento/LegendaDaFaixa.vue'
 import {
+  diaDaClinica,
+  diasDesde,
+  FAIXA_MAX_DIAS,
+  hojeNaClinica,
   lerAdesaoDoPaciente,
   lerDoses,
   marcarCritico,
+  somarDias,
   type Tratamento,
 } from '@/service/parceiro/adesao-service'
 
@@ -113,17 +118,55 @@ async function alternarCritico(item: Tratamento, critico: boolean) {
 /* ------------------------------------------------------------------------- faixa maior */
 
 const ampliando = ref<string | null>(null)
+const ampliados = ref<string[]>([])
 
-/** O período padrão da rota de doses: 42 dias até hoje, no lugar da faixa desde a consulta. */
+/*
+ * A faixa da ficha já vem com os últimos dias (na API, os 42 até hoje, o padrão da rota de doses):
+ * pedir a rota sem período trazia a mesma faixa, e o botão "não fazia nada" (26/11/2026). O botão
+ * só aparece quando o tratamento começou antes da faixa, e pede desde o início, até o máximo da
+ * rota (90 dias até hoje; o fim fica no padrão, que é hoje).
+ */
+
+/** O dia da clínica em que o tratamento começou, contado a partir da meia-noite da faixa. */
+function inicioNaClinica(item: Tratamento) {
+  if (!item.faixa) return null
+  return somarDias(diaDaClinica(item.faixa.desde), diasDesde(item.faixa.desde, item.inicioEm))
+}
+
+/** O primeiro dia que a rota aceita: 90 dias contando hoje. */
+function primeiroDiaDaRota(item: Tratamento) {
+  return item.faixa ? somarDias(hojeNaClinica(item.faixa.desde), -(FAIXA_MAX_DIAS - 1)) : null
+}
+
+function temMaisAntes(item: Tratamento) {
+  const inicio = inicioNaClinica(item)
+  return (
+    Boolean(item.faixa && inicio) &&
+    inicio! < diaDaClinica(item.faixa!.desde) &&
+    !ampliados.value.includes(item.tratamentoId)
+  )
+}
+
+function rotuloDeVerMais(item: Tratamento) {
+  return inicioNaClinica(item)! < primeiroDiaDaRota(item)!
+    ? t('adesao.verMaisDias', { n: FAIXA_MAX_DIAS })
+    : t('adesao.verDesdeOInicio')
+}
+
 async function verMaisDias(item: Tratamento) {
+  if (!item.faixa) return
   ampliando.value = item.tratamentoId
   try {
-    const doses = await lerDoses(item.tratamentoId, {}, parceiroQuery())
+    const inicio = inicioNaClinica(item)!
+    const limite = primeiroDiaDaRota(item)!
+    const desde = inicio > limite ? inicio : limite
+    const doses = await lerDoses(item.tratamentoId, { desde }, parceiroQuery())
     itens.value = itens.value.map((atual) =>
       atual.tratamentoId === item.tratamentoId
         ? { ...atual, faixa: doses.faixa, resumo: doses.resumo }
         : atual,
     )
+    ampliados.value = [...ampliados.value, item.tratamentoId]
   } catch (err) {
     toast.add({
       severity: 'error',
@@ -267,14 +310,17 @@ function contatoRegistrado() {
             }}</span>
           </p>
 
-          <div class="td__acoes">
+          <div
+            v-if="temMaisAntes(item) || (!item.alerta && item.situacao === 'ACOMPANHANDO')"
+            class="td__acoes"
+          >
             <Button
-              v-if="item.faixa"
+              v-if="temMaisAntes(item)"
               type="button"
               size="small"
               severity="secondary"
               outlined
-              :label="t('adesao.verMaisDias')"
+              :label="rotuloDeVerMais(item)"
               :loading="ampliando === item.tratamentoId"
               @click="verMaisDias(item)"
             />

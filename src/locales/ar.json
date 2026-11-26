@@ -13253,7 +13253,8 @@
     },
     "encerrados": "المنتهية ({n})",
     "truncado": "توجد علاجات أخرى؛ افتحها من قائمة العيادة.",
-    "verMaisDias": "عرض آخر 42 يومًا",
+    "verMaisDias": "عرض آخر {n} يومًا",
+    "verDesdeOInicio": "عرض منذ البداية",
     "horarioQueDestoa": "جرعات الساعة {horario} نادرًا ما تُسجَّل ({dadas} من {fechadas}).",
     "quem": {
       "O": "من المالك",

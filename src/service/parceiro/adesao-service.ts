@@ -167,12 +167,50 @@ export function dosesDaFaixa(faixa: FaixaDeDoses): DoseNaFaixa[] {
   }))
 }
 
-/** Os dias da faixa, cada um com as doses dele (o dia sem dose fica vazio, mas fica). */
+/**
+ * Os dias da faixa, cada um com as doses dele, da primeira dose à última (o dia sem dose no meio
+ * fica vazio, mas fica). A ficha manda os 42 dias até hoje: começar no dia 0 deixava um vão de
+ * semanas antes de um tratamento novo, com a data de 42 dias atrás na ponta (26/11/2026).
+ */
 export function diasDaFaixa(faixa: FaixaDeDoses) {
   const doses = dosesDaFaixa(faixa)
-  const ultimo = doses.reduce((maior, dose) => Math.max(maior, dose.dia), -1)
-  return Array.from({ length: ultimo + 1 }, (_, dia) => ({
-    dia,
-    doses: doses.filter((dose) => dose.dia === dia),
+  if (!doses.length) return []
+  const primeiro = Math.min(...doses.map((dose) => dose.dia))
+  const ultimo = Math.max(...doses.map((dose) => dose.dia))
+  return Array.from({ length: ultimo - primeiro + 1 }, (_, i) => ({
+    dia: primeiro + i,
+    doses: doses.filter((dose) => dose.dia === primeiro + i),
   }))
+}
+
+const DIA_MS = 86_400_000
+
+/**
+ * O dia (`AAAA-MM-DD`) de `faixa.desde` na parede da clínica. `desde` é a meia-noite da clínica,
+ * que fica a menos de 12 h da meia-noite UTC do mesmo dia: arredondar para a meia-noite UTC mais
+ * próxima dá o dia certo em qualquer fuso de -11 a +11, sem saber qual é. O fuso do navegador
+ * não serve: a clínica pode estar em outro (26/11/2026, a dose de 26/11 aparecia em 25/11).
+ */
+export function diaDaClinica(desde: string): string {
+  const meiaNoite = Math.round(Date.parse(desde) / DIA_MS) * DIA_MS
+  return new Date(meiaNoite).toISOString().slice(0, 10)
+}
+
+/**
+ * Hoje (`AAAA-MM-DD`) na parede da clínica. A distância entre `desde` (a meia-noite dela) e a
+ * meia-noite UTC mais próxima é o fuso da clínica: o relógio menos ele dá a hora da parede.
+ */
+export function hojeNaClinica(desde: string, agora = Date.now()): string {
+  const fuso = Date.parse(desde) - Math.round(Date.parse(desde) / DIA_MS) * DIA_MS
+  return new Date(agora - fuso).toISOString().slice(0, 10)
+}
+
+/** `AAAA-MM-DD` mais `n` dias (negativo volta), sem fuso. */
+export function somarDias(dia: string, n: number): string {
+  return new Date(Date.parse(`${dia}T00:00:00Z`) + n * DIA_MS).toISOString().slice(0, 10)
+}
+
+/** Quantos dias da clínica separam `desde` (a meia-noite da faixa) de um instante: negativo é antes. */
+export function diasDesde(desde: string, instante: string): number {
+  return Math.floor((Date.parse(instante) - Date.parse(desde)) / DIA_MS)
 }

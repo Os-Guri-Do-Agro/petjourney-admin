@@ -13253,7 +13253,8 @@
     },
     "encerrados": "Ended ({n})",
     "truncado": "There are more treatments; open them from the clinic's list.",
-    "verMaisDias": "See the last 42 days",
+    "verMaisDias": "See the last {n} days",
+    "verDesdeOInicio": "See from the start",
     "horarioQueDestoa": "The {horario} doses are hardly ever recorded ({dadas} of {fechadas}).",
     "quem": {
       "O": "by the owner",
