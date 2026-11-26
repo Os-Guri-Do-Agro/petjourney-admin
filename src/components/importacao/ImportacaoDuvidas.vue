@@ -19,6 +19,7 @@ import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import {
+  DUVIDAS_POR_PAGINA_MAX,
   listarDuvidas,
   responderDuvidas,
   type Duvida,
@@ -88,7 +89,7 @@ async function carregar() {
     do {
       const pagina = await listarDuvidas(
         id,
-        { pendentes: !props.revisao, cursor, limite: props.revisao ? 50 : 20 },
+        { pendentes: !props.revisao, cursor, limite: props.revisao ? DUVIDAS_POR_PAGINA_MAX : 20 },
         query(),
       )
       if (!leitura.valendo(vez)) return

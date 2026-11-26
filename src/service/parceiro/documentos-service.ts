@@ -16,9 +16,13 @@ import type {
   AceiteNoBalcaoDto,
   AceiteRegistradoDto,
   DocumentoClinicoDto,
+  DocumentoDaClinicaDto,
   LaudoDto,
   ListaDeLaudosDto,
+  PaginaDeDocumentosDaClinicaDto,
   PaginaDeDocumentosDto,
+  StatusDoAceiteDoTermo,
+  StatusDoDocumentoClinico,
   TipoDeDocumentoClinico,
   UrlDoDocumentoDto,
   UrlDoLaudoDto,
@@ -26,6 +30,10 @@ import type {
 import { comIdempotencia } from '../idempotencia'
 
 export type Documento = DocumentoClinicoDto
+/** A linha da lista da clínica (N35): o documento sem o `conteudo`, com o paciente. */
+export type DocumentoDaClinica = DocumentoDaClinicaDto
+export type AceiteDoTermo = StatusDoAceiteDoTermo
+export type StatusDoDocumento = StatusDoDocumentoClinico
 export type TipoDeDocumento = TipoDeDocumentoClinico
 export type IdiomaDoDocumento = DocumentoClinicoDto['idioma']
 export type ConteudoDoDocumento = Record<string, unknown>
@@ -154,6 +162,52 @@ export function listarDocumentosDoPaciente(
         atendimentoId: filtro.atendimentoId,
         cursor: filtro.cursor,
         limit: filtro.limit ?? 20,
+        parceiroId: params?.parceiroId,
+      }),
+    ),
+  )
+}
+
+export const STATUS_DO_DOCUMENTO: readonly StatusDoDocumento[] = ['RASCUNHO', 'EMITIDO', 'ANULADO']
+export const ACEITES_DO_TERMO: readonly AceiteDoTermo[] = [
+  'PENDENTE',
+  'ACEITO',
+  'RECUSADO',
+  'NAO_SE_APLICA',
+]
+
+/** A lista da clínica: até 50 por página (acima, 400). */
+export const DOCUMENTOS_DA_CLINICA_POR_PAGINA = 50
+
+export type FiltroDosDocumentosDaClinica = {
+  aceite?: AceiteDoTermo | null
+  tipo?: TipoDeDocumento | null
+  status?: StatusDoDocumento | null
+  pacienteId?: string | null
+}
+
+/**
+ * Os documentos da clínica toda, do mais novo (N35). O cursor é amarrado aos filtros: com outro
+ * filtro, a lista recomeça sem ele (reaproveitar dá 400 `CURSOR_INVALIDO`). `aceite=PENDENTE` é o
+ * recorte do selo de termos pendentes (só os emitidos).
+ */
+export function listarDocumentosDaClinica(
+  filtro: FiltroDosDocumentosDaClinica,
+  pagina: { cursor?: string | null; limit?: number } = {},
+  params?: ParceiroQuery,
+) {
+  return dados(
+    apiFetch<ApiEnvelope<PaginaDeDocumentosDaClinicaDto>>(
+      comQuery(`${CLINICA}/documentos`, {
+        aceite: filtro.aceite,
+        tipo: filtro.tipo,
+        status: filtro.status,
+        pacienteId: filtro.pacienteId,
+        cursor: pagina.cursor,
+        limit: Math.min(
+          pagina.limit ?? DOCUMENTOS_DA_CLINICA_POR_PAGINA,
+          DOCUMENTOS_DA_CLINICA_POR_PAGINA,
+        ),
         parceiroId: params?.parceiroId,
       }),
     ),

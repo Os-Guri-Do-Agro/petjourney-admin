@@ -547,7 +547,9 @@
       "genericStatus": "Error {status}",
       "servidor": "The server couldn't handle this right now. Please try again in a moment.",
       "semConexao": "No connection to the server. Check your internet and try again.",
-      "dadosRecusados": "The server didn't accept the data sent. Please check it and try again."
+      "dadosRecusados": "The server didn't accept the data sent. Please check it and try again.",
+      "tenteDeNovoEmSegundos": "You can try again in {n} second. | You can try again in {n} seconds.",
+      "tenteDeNovoEmMinutos": "You can try again in {n} minute. | You can try again in {n} minutes."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -10265,7 +10267,8 @@
       "contas": "Bills",
       "notasFiscais": "Invoices",
       "repasses": "Vet payouts",
-      "resultado": "Results"
+      "resultado": "Results",
+      "documentos": "Documents"
     },
     "abasAria": "{destino} screens",
     "secoes": {
@@ -12203,7 +12206,8 @@
       "semTipo": "The clinic has no active vaccine appointment type to book the next dose.",
       "especie": "This vaccine is not for the patient's species.",
       "semSaldo": "This lot has just run out: choose another.",
-      "codigoEstranho": "The code has a letter outside A to Z. Check the vial and confirm to continue."
+      "codigoEstranho": "The code has a letter outside A to Z. Check the vial and confirm to continue.",
+      "crmv": "Only a professional with CRMV, number and state on their profile can record the vaccine. Management completes the profile in Team, Professionals tab."
     },
     "situacao": {
       "ATRASADA": "Overdue",
@@ -12897,9 +12901,9 @@
       "liberar": "Release the summary",
       "publicado": "Summary published in the owner's app.",
       "liberadoEm": "Summary in the app since {dia}.",
-      "naoLiberado": "Summary not yet released to the app.",
+      "naoLiberado": "Summary awaiting release to the app.",
       "motivo": {
-        "SEM_VINCULO": "Not published: the patient has no owner linked in the app.",
+        "SEM_VINCULO": "No link: the pet's current owner is not linked to the clinic in the app.",
         "OBITO": "Not published: the patient has a recorded death.",
         "REMOVIDO_PELO_RESPONSAVEL": "Not published: the owner removed the clinic from the app.",
         "ANULADO": "Not published: the consultation was voided."
@@ -13304,6 +13308,54 @@
       "VENCIDO": "The check of your CRMV has expired: PetJourney needs to check it again before you issue documents.",
       "SEM_IDENTIDADE": "To issue documents, confirm your identity.",
       "CRMV_OBRIGATORIO": "To issue documents, add your CRMV and state to your professional record."
+    },
+    "daClinica": {
+      "recorte": {
+        "PENDENTE": "Awaiting acceptance",
+        "TODOS": "All"
+      },
+      "resumo": {
+        "PENDENTE": "Forms issued and waiting for the owner's answer, across the whole clinic.",
+        "TODOS": "All the clinic's documents, newest first."
+      },
+      "filtro": {
+        "aceite": "Acceptance",
+        "tipo": "Document type",
+        "situacao": "Status",
+        "paciente": "Patient",
+        "todosOsTipos": "All types",
+        "todasAsSituacoes": "All statuses",
+        "todosOsPacientes": "All patients"
+      },
+      "aceite": {
+        "PENDENTE": "Awaiting acceptance",
+        "ACEITO": "Accepted",
+        "RECUSADO": "Refused"
+      },
+      "vazio": {
+        "PENDENTE": "No forms awaiting acceptance",
+        "TODOS": "No documents yet",
+        "todosTexto": "Certificates, test requests, referrals and consent forms issued from the patient record or the visit show up here.",
+        "filtro": "No documents match these filters"
+      },
+      "verTodos": "See all documents",
+      "guia": {
+        "titulo": "How a form moves",
+        "texto": "Consent, refusal and euthanasia forms that have been issued stay here until the owner answers.",
+        "emitir": {
+          "titulo": "The clinic issues the form",
+          "texto": "From the patient record or the visit, under Documents.",
+          "acao": "Open patients"
+        },
+        "responder": {
+          "titulo": "The owner answers",
+          "texto": "At the front desk, signing on the tablet, or in the app when the clinic allows it."
+        },
+        "registrar": {
+          "titulo": "The answer stays on the document",
+          "texto": "Accepted or refused only once, with a PDF record."
+        }
+      }
     }
   },
   "laudos": {
@@ -13748,7 +13800,24 @@
         "DOSE_FUTURA": "Future doses were suspended.",
         "BOLETIM_RETIDO": "An update was on hold."
       },
-      "erro": "Could not close the hospitalisation."
+      "erro": "Could not close the hospitalisation.",
+      "previa": {
+        "titulo": "Before closing",
+        "lendo": "Checking doses and updates.",
+        "erro": "Couldn't check doses and updates right now. You can still close the hospitalization.",
+        "jaEncerrada": "This hospitalization has already been closed. Close the panel to see the outcome.",
+        "horas": "{n} h in hospital",
+        "feitas": "{n} dose given | {n} doses given",
+        "naoFeitas": "{n} dose not given | {n} doses not given",
+        "enviados": "{n} update sent | {n} updates sent",
+        "aviso": {
+          "DOSE_PENDENTE": "{n} dose pending now: if it was given, record it before closing. | {n} doses pending now: if they were given, record them before closing.",
+          "DOSE_FUTURA": "{n} future dose will be suspended. | {n} future doses will be suspended.",
+          "BOLETIM_RETIDO": "{n} update on hold, not yet sent to the owner. | {n} updates on hold, not yet sent to the owner."
+        },
+        "emDia": "No pending doses or updates on hold.",
+        "calculadoEm": "Checked at {hora}. The count is redone when you confirm."
+      }
     },
     "administrativo": {
       "acao": "Close without a vet",

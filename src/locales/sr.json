@@ -547,7 +547,9 @@
       "genericStatus": "Greška {status}",
       "servidor": "Server trenutno nije mogao da obradi zahtev. Pokušajte ponovo za trenutak.",
       "semConexao": "Nema veze sa serverom. Proverite internet i pokušajte ponovo.",
-      "dadosRecusados": "Server nije prihvatio poslate podatke. Proverite ih i pokušajte ponovo."
+      "dadosRecusados": "Server nije prihvatio poslate podatke. Proverite ih i pokušajte ponovo.",
+      "tenteDeNovoEmSegundos": "Možete pokušati ponovo za {n} sekundu. | Možete pokušati ponovo za {n} sekunde. | Možete pokušati ponovo za {n} sekundi.",
+      "tenteDeNovoEmMinutos": "Možete pokušati ponovo za {n} minut. | Možete pokušati ponovo za {n} minuta. | Možete pokušati ponovo za {n} minuta."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -10265,7 +10267,8 @@
       "contas": "Računi",
       "notasFiscais": "Fakture",
       "repasses": "Isplate veterinarima",
-      "resultado": "Rezultat"
+      "resultado": "Rezultat",
+      "documentos": "Dokumenti"
     },
     "abasAria": "Ekrani: {destino}",
     "secoes": {
@@ -12203,7 +12206,8 @@
       "semTipo": "Klinika nema aktivan tip pregleda za vakcinu da zakaže sledeću dozu.",
       "especie": "Ova vakcina nije za vrstu pacijenta.",
       "semSaldo": "Ova serija je upravo ostala bez doza: izaberite drugu.",
-      "codigoEstranho": "Šifra ima slovo van A do Z. Proverite bočicu i potvrdite da biste nastavili."
+      "codigoEstranho": "Šifra ima slovo van A do Z. Proverite bočicu i potvrdite da biste nastavili.",
+      "crmv": "Vakcinu beleži samo stručnjak sa CRMV brojem i državom u profilu. Uprava dopunjuje profil u Timu, na kartici Stručnjaci."
     },
     "situacao": {
       "ATRASADA": "Zakasnela",
@@ -12897,9 +12901,9 @@
       "liberar": "Objavi rezime",
       "publicado": "Rezime objavljen u aplikaciji vlasnika.",
       "liberadoEm": "Rezime u aplikaciji od {dia}.",
-      "naoLiberado": "Rezime još nije objavljen u aplikaciji.",
+      "naoLiberado": "Rezime čeka objavu u aplikaciji.",
       "motivo": {
-        "SEM_VINCULO": "Nije objavljeno: pacijent nema vlasnika povezanog u aplikaciji.",
+        "SEM_VINCULO": "Bez veze: sadašnji vlasnik ljubimca nije povezan sa klinikom u aplikaciji.",
         "OBITO": "Nije objavljeno: pacijent ima zabeleženu smrt.",
         "REMOVIDO_PELO_RESPONSAVEL": "Nije objavljeno: vlasnik je uklonio kliniku iz aplikacije.",
         "ANULADO": "Nije objavljeno: pregled je poništen."
@@ -13304,6 +13308,54 @@
       "VENCIDO": "Provera vašeg CRMV-a je istekla: PetJourney mora ponovo da je obavi pre izdavanja dokumenata.",
       "SEM_IDENTIDADE": "Da biste izdavali dokumente, potvrdite identitet.",
       "CRMV_OBRIGATORIO": "Da biste izdavali dokumente, unesite CRMV i saveznu državu u svoj profesionalni karton."
+    },
+    "daClinica": {
+      "recorte": {
+        "PENDENTE": "Čeka saglasnost",
+        "TODOS": "Sve"
+      },
+      "resumo": {
+        "PENDENTE": "Izdate saglasnosti koje čekaju odgovor vlasnika, u celoj klinici.",
+        "TODOS": "Dokumenti cele klinike, od najnovijeg."
+      },
+      "filtro": {
+        "aceite": "Saglasnost",
+        "tipo": "Vrsta dokumenta",
+        "situacao": "Status",
+        "paciente": "Pacijent",
+        "todosOsTipos": "Sve vrste",
+        "todasAsSituacoes": "Svi statusi",
+        "todosOsPacientes": "Svi pacijenti"
+      },
+      "aceite": {
+        "PENDENTE": "Čeka saglasnost",
+        "ACEITO": "Prihvaćeno",
+        "RECUSADO": "Odbijeno"
+      },
+      "vazio": {
+        "PENDENTE": "Nijedna saglasnost ne čeka odgovor",
+        "TODOS": "Još nema dokumenata",
+        "todosTexto": "Ovde se pojavljuju potvrde, uputi za analize, uputi drugom veterinaru i saglasnosti izdati u kartonu ili na pregledu.",
+        "filtro": "Nema dokumenata sa ovim filterima"
+      },
+      "verTodos": "Prikaži sve dokumente",
+      "guia": {
+        "titulo": "Kako saglasnost ide",
+        "texto": "Izdate saglasnosti za pristanak, odbijanje i eutanaziju ostaju ovde dok vlasnik ne odgovori.",
+        "emitir": {
+          "titulo": "Klinika izdaje saglasnost",
+          "texto": "U kartonu pacijenta ili na pregledu, u Dokumentima.",
+          "acao": "Otvori pacijente"
+        },
+        "responder": {
+          "titulo": "Vlasnik odgovara",
+          "texto": "Na šalteru, potpisom na tabletu, ili u aplikaciji kada klinika to dozvoli."
+        },
+        "registrar": {
+          "titulo": "Odgovor ostaje na dokumentu",
+          "texto": "Prihvaćeno ili odbijeno samo jednom, sa zapisom u PDF-u."
+        }
+      }
     }
   },
   "laudos": {
@@ -13748,7 +13800,24 @@
         "DOSE_FUTURA": "Buduće doze su obustavljene.",
         "BOLETIM_RETIDO": "Bio je zadržan izveštaj."
       },
-      "erro": "Hospitalizacija nije zatvorena."
+      "erro": "Hospitalizacija nije zatvorena.",
+      "previa": {
+        "titulo": "Pre zatvaranja",
+        "lendo": "Proveravamo doze i izveštaje.",
+        "erro": "Trenutno nije moguće proveriti doze i izveštaje. Zatvaranje je i dalje moguće.",
+        "jaEncerrada": "Ova hospitalizacija je već zatvorena. Zatvorite panel da vidite ishod.",
+        "horas": "{n} h hospitalizacije",
+        "feitas": "{n} data doza | {n} date doze | {n} datih doza",
+        "naoFeitas": "{n} nedata doza | {n} nedate doze | {n} nedatih doza",
+        "enviados": "{n} poslat izveštaj | {n} poslata izveštaja | {n} poslatih izveštaja",
+        "aviso": {
+          "DOSE_PENDENTE": "{n} doza sada čeka: ako je data, zabeležite je pre zatvaranja. | {n} doze sada čekaju: ako su date, zabeležite ih pre zatvaranja. | {n} doza sada čeka: ako su date, zabeležite ih pre zatvaranja.",
+          "DOSE_FUTURA": "{n} buduća doza biće obustavljena. | {n} buduće doze biće obustavljene. | {n} budućih doza biće obustavljeno.",
+          "BOLETIM_RETIDO": "{n} zadržan izveštaj, još nije poslat vlasniku. | {n} zadržana izveštaja, još nisu poslata vlasniku. | {n} zadržanih izveštaja, još nisu poslati vlasniku."
+        },
+        "emDia": "Nema doza na čekanju ni zadržanih izveštaja.",
+        "calculadoEm": "Provereno u {hora}. Račun se ponovo pravi pri potvrdi."
+      }
     },
     "administrativo": {
       "acao": "Zatvori bez veterinara",

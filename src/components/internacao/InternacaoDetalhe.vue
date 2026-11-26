@@ -638,6 +638,7 @@ function encerrou(encerrada: Internacao) {
         :internacao="internacao"
         :profissionais="profissionais"
         @encerrada="encerrou"
+        @desatualizada="carregar"
       />
       <EncerrarAdministrativoGaveta
         v-model:visible="administrativoAberta"

@@ -76,6 +76,7 @@ const { t } = useI18n()
           icon="ph ph-paper-plane-tilt"
           :label="t('atendimento.resumo.liberar')"
           :loading="liberando"
+          :disabled="resumo.temMotivo"
           @click="emit('liberar')"
         />
       </li>

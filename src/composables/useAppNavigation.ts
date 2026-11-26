@@ -305,6 +305,8 @@ const PATIENT_ROUTES = [
     to: '/clinica/historico-liberado',
     icon: 'ph ph-share-network',
   },
+  /* Os documentos da clínica toda (N35): o selo dos termos esperando aceite mora aqui. */
+  { key: 'documentos.titulo', to: '/clinica/documentos', icon: 'ph ph-files' },
   /* Os pedidos de cópia do prontuário (E4-06c): só existem pela API (`copia.gerir`). */
   {
     key: 'copias.titulo',

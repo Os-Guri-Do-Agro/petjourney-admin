@@ -23,6 +23,7 @@ import type {
   Mapa,
   MotivoDoLeitoInativo,
   NovaInternacao,
+  PreviaDoEncerramento,
   Vagas,
 } from '@/service/parceiro/internacao-service'
 import type {
@@ -514,6 +515,14 @@ function registrarCasos() {
 
   rota('POST', `${C}/internacoes/:id/encerrar`, (pedido) => encerrar(pedido))
 
+  /* N36: a prévia do encerrar, com as contas do POST e sem mexer em nada. */
+  rota('GET', `${C}/internacoes/:id/encerramento`, (pedido) => {
+    const i = daInternacao(pedido)
+    if (eResposta(i)) return i
+    if (!emCurso(i)) return encerrada()
+    return ok<PreviaDoEncerramento>({ ...contasDoEncerramento(i), calculadoEm: agoraIso() })
+  })
+
   rota('POST', `${C}/internacoes/:id/encerrar-administrativo`, (pedido) => {
     const i = daInternacao(pedido)
     if (eResposta(i)) return i
@@ -527,6 +536,37 @@ function registrarCasos() {
 }
 
 const DESFECHOS: Desfecho[] = ['ALTA', 'TRANSFERIDO', 'OBITO']
+
+/** O que o encerrar contaria agora (a prévia, N36): nada muda aqui. */
+function contasDoEncerramento(i: InternacaoDaDemo): Omit<PreviaDoEncerramento, 'calculadoEm'> {
+  const doses = dosesDa(i.id)
+  const pendentes = doses.filter((d) => d.status === 'PENDENTE')
+  const pendentesAgora = pendentes.filter((d) => {
+    const s = situacaoDe(d)
+    return s === 'na-janela' || s === 'atrasada'
+  }).length
+  const aSuspender = pendentes.filter((d) => situacaoDe(d) === 'futura').length
+  const boletinsRetidos = BOLETINS.filter(
+    (b) => b.internacaoId === i.id && b.status === 'RETIDO',
+  ).length
+  const avisos: PreviaDoEncerramento['avisos'] = []
+  if (pendentesAgora) avisos.push('DOSE_PENDENTE')
+  if (aSuspender) avisos.push('DOSE_FUTURA')
+  if (boletinsRetidos) avisos.push('BOLETIM_RETIDO')
+  return {
+    resumo: {
+      horas: internacaoDto(i).horasInternado,
+      feitas: doses.filter((d) => d.status === 'FEITA').length,
+      naoFeitas: doses.filter((d) => d.status === 'PULADA' || d.status === 'RECUSADA').length,
+      pendentesAgora,
+      aSuspender,
+      boletinsRetidos,
+      boletinsEnviados: BOLETINS.filter((b) => b.internacaoId === i.id && b.status === 'ENVIADO')
+        .length,
+    },
+    avisos,
+  }
+}
 
 function encerrar(pedido: Pedido): Resposta {
   const i = daInternacao(pedido)

@@ -81,19 +81,6 @@ function numero(valor: number, casas: number) {
   }).format(valor)
 }
 
-type FaixaLida = { min: number; max: number; unidade: string; precisao?: number }
-
-/**
- * A faixa do vital. O OpenAPI declara `{ vital, faixa }`, mas a API em dev devolve a faixa direto
- * (`{ min, max, unidade, fonte }`, lacuna N32): a tela lê as duas formas.
- */
-function faixaDo(lido: Atendimento['exameFisico']['vitais'][ChaveDoVital]): FaixaLida | null {
-  const bruta = lido.faixa as unknown as (FaixaLida & { faixa?: FaixaLida | null }) | null
-  if (!bruta) return null
-  if (bruta.faixa) return bruta.faixa
-  return typeof bruta.min === 'number' && typeof bruta.max === 'number' ? bruta : null
-}
-
 /** O status do servidor, só quando a tela mostra o mesmo valor que ele tem. */
 function statusDo(chave: ChaveDoVital) {
   const lido = props.servidor.vitais[chave]
@@ -101,8 +88,9 @@ function statusDo(chave: ChaveDoVital) {
   if (lido.naoAferido !== local.naoAferido) return null
   if (!local.naoAferido && lido.valor !== local.valor) return null
   if (lido.status === 'NAO_AFERIDO' || (lido.valor === null && !lido.naoAferido)) return null
-  const faixa = faixaDo(lido)
-  const casas = faixa?.precisao ?? LIMITES_DOS_VITAIS[chave].casas
+  /* A faixa é `{ min, max, unidade, fonte }` (N32, `FaixaDoVitalNoAtendimentoDto`), sem casas: as do vital. */
+  const faixa = lido.faixa
+  const casas = LIMITES_DOS_VITAIS[chave].casas
   return {
     texto: t(`atendimento.exame.status.${lido.status}`),
     tom: TOM[lido.status] ?? '',

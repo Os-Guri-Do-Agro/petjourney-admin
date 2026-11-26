@@ -19,7 +19,8 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { registrarAceiteNoBalcao, type Documento } from '@/service/parceiro/documentos-service'
 import { documentoDaPessoaValido } from '@/utils/documento-da-pessoa'
 
-const props = defineProps<{ documento: Documento | null }>()
+/* Só o id: a lista da clínica abre a gaveta com a linha dela, que não traz o conteúdo. */
+const props = defineProps<{ documento: Pick<Documento, 'id'> | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
 const emit = defineEmits<{ registrado: [] }>()
 

@@ -206,6 +206,47 @@ describe('apiFetch', () => {
     expect(error).toMatchObject({ statusCode: 400, error: 'Bad Request' })
     expect((error as Error).message).not.toContain('token must')
   })
+
+  it('429 com tenteDeNovoEmSegundos diz quanto esperar, e o número fica nos detalhes (N51b)', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    const mensagem = 'Muitos pedidos em pouco tempo. Aguarde alguns minutos e tente de novo.'
+    mockFetch(
+      new Response(
+        JSON.stringify({
+          statusCode: 429,
+          message: mensagem,
+          codigo: 'ATENDIMENTO_TAXA_EXCEDIDA',
+          limite: 600,
+          tenteDeNovoEmSegundos: 90,
+        }),
+        { status: 429, headers: { ...JSON_HEADERS, 'Retry-After': '90' } },
+      ),
+    )
+
+    const error = await apiFetch('/parceiro/portal/clinica/documentos').catch((e: unknown) => e)
+
+    expect(error).toMatchObject({
+      statusCode: 429,
+      codigo: 'ATENDIMENTO_TAXA_EXCEDIDA',
+      detalhes: { limite: 600, tenteDeNovoEmSegundos: 90 },
+    })
+    const texto = (error as Error).message
+    expect(texto.startsWith(mensagem)).toBe(true)
+    expect(texto.length).toBeGreaterThan(mensagem.length)
+    expect(texto).toContain('2')
+  })
+
+  it('429 sem tenteDeNovoEmSegundos fica com a frase da API como veio', async () => {
+    const { apiFetch } = await loadApi('https://api.exemplo.test')
+    mockFetch(
+      new Response(JSON.stringify({ statusCode: 429, message: 'Aguarde.', codigo: 'X' }), {
+        status: 429,
+        headers: JSON_HEADERS,
+      }),
+    )
+
+    await expect(apiFetch('/parceiro/portal/x')).rejects.toMatchObject({ message: 'Aguarde.' })
+  })
 })
 
 describe('apiFetch — 401 com sessão aberta', () => {

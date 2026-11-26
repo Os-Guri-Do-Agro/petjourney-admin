@@ -603,7 +603,10 @@ function vitaisDto(r: RegistroDoAtendimento): Atendimento['exameFisico']['vitais
           valor: medida.valor,
           naoAferido: medida.naoAferido,
           status: statusDoVital(medida.valor, medida.naoAferido, faixa),
-          faixa: faixa ? { vital, faixa } : null,
+          /* N32: a faixa do atendimento é `{ min, max, unidade, fonte }`, sem as casas. */
+          faixa: faixa
+            ? { min: faixa.min, max: faixa.max, unidade: faixa.unidade, fonte: faixa.fonte }
+            : null,
         },
       ]
     }),
@@ -2350,6 +2353,22 @@ export function documentosEmRascunho() {
   montarTermosDaSemana()
   rascunhosMontados()
   return [...DOCUMENTOS.values()].filter((d) => d.status === 'RASCUNHO')
+}
+
+/**
+ * A lista da clínica toda (N35): os documentos já montados (termos da semana, rascunhos abertos e o
+ * que a sessão criou), do mais novo pela criação, cada um com o paciente e sem o `conteudo`.
+ */
+export function documentosDaClinica() {
+  montarTermosDaSemana()
+  rascunhosMontados()
+  return [...DOCUMENTOS.values()]
+    .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
+    .map((doc) => {
+      const { conteudo: _conteudo, versaoDoAtendimento: _versao, ...resto } = doc
+      const p = pacienteDe(doc.pacienteId)
+      return { ...resto, paciente: { id: p.id, nome: p.nome, especie: p.especie } }
+    })
 }
 
 /* ----------------------------------------------------------------------- linha do tempo */

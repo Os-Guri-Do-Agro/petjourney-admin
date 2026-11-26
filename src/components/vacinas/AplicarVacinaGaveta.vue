@@ -239,6 +239,9 @@ function frase(err: unknown) {
       return t('vacinas.erro.semTipo')
     case 'VACINA_FORA_DA_ESPECIE':
       return t('vacinas.erro.especie')
+    /* N50: a ficha de quem registra está sem CRMV, número ou UF (403). */
+    case 'CRMV_OBRIGATORIO':
+      return t('vacinas.erro.crmv')
     default:
       return lido.mensagem
   }

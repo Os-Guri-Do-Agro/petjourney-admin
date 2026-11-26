@@ -547,7 +547,9 @@
       "genericStatus": "Erro {status}",
       "servidor": "O servidor não conseguiu atender agora. Tente de novo em instantes.",
       "semConexao": "Sem conexão com o servidor. Confira a internet e tente de novo.",
-      "dadosRecusados": "O servidor não aceitou os dados enviados. Confira e tente de novo."
+      "dadosRecusados": "O servidor não aceitou os dados enviados. Confira e tente de novo.",
+      "tenteDeNovoEmSegundos": "Dá para tentar de novo em {n} segundo. | Dá para tentar de novo em {n} segundos.",
+      "tenteDeNovoEmMinutos": "Dá para tentar de novo em {n} minuto. | Dá para tentar de novo em {n} minutos."
     },
     "notFound": {
       "brandAlt": "PetJourney",
@@ -10265,7 +10267,8 @@
       "contas": "Contas",
       "notasFiscais": "Notas fiscais",
       "repasses": "Repasses",
-      "resultado": "Resultado"
+      "resultado": "Resultado",
+      "documentos": "Documentos"
     },
     "abasAria": "Telas de {destino}",
     "secoes": {
@@ -12203,7 +12206,8 @@
       "semTipo": "A clínica não tem um tipo de atendimento de vacina ativo para marcar a próxima dose.",
       "especie": "Esta vacina não é para a espécie do paciente.",
       "semSaldo": "Este lote acabou de zerar: escolha outro.",
-      "codigoEstranho": "O código tem letra fora do A a Z. Confira o frasco e confirme para seguir."
+      "codigoEstranho": "O código tem letra fora do A a Z. Confira o frasco e confirme para seguir.",
+      "crmv": "Só um profissional com CRMV, número e UF na ficha registra a vacina. A gestão completa a ficha em Equipe, na aba Profissionais."
     },
     "situacao": {
       "ATRASADA": "Atrasada",
@@ -12897,9 +12901,9 @@
       "liberar": "Liberar o resumo",
       "publicado": "Resumo publicado no app do responsável.",
       "liberadoEm": "Resumo no app desde {dia}.",
-      "naoLiberado": "Resumo ainda não liberado para o app.",
+      "naoLiberado": "Resumo aguardando liberação para o app.",
       "motivo": {
-        "SEM_VINCULO": "Não publicado: o paciente não tem responsável ligado no app.",
+        "SEM_VINCULO": "Sem vínculo: o responsável atual do pet não está ligado à clínica no app.",
         "OBITO": "Não publicado: o paciente tem óbito registrado.",
         "REMOVIDO_PELO_RESPONSAVEL": "Não publicado: o responsável removeu a clínica do app.",
         "ANULADO": "Não publicado: o atendimento foi anulado."
@@ -13304,6 +13308,54 @@
       "VENCIDO": "A conferência do seu CRMV venceu: a PetJourney precisa conferir de novo para você emitir documentos.",
       "SEM_IDENTIDADE": "Para emitir documentos, confirme sua identidade.",
       "CRMV_OBRIGATORIO": "Para emitir documentos, cadastre o CRMV e a UF na sua ficha de profissional."
+    },
+    "daClinica": {
+      "recorte": {
+        "PENDENTE": "Esperando aceite",
+        "TODOS": "Todos"
+      },
+      "resumo": {
+        "PENDENTE": "Termos emitidos que esperam a resposta do responsável, da clínica toda.",
+        "TODOS": "Os documentos da clínica toda, do mais novo."
+      },
+      "filtro": {
+        "aceite": "Aceite",
+        "tipo": "Tipo de documento",
+        "situacao": "Situação",
+        "paciente": "Paciente",
+        "todosOsTipos": "Todos os tipos",
+        "todasAsSituacoes": "Todas as situações",
+        "todosOsPacientes": "Todos os pacientes"
+      },
+      "aceite": {
+        "PENDENTE": "Esperando aceite",
+        "ACEITO": "Aceito",
+        "RECUSADO": "Recusado"
+      },
+      "vazio": {
+        "PENDENTE": "Nenhum termo esperando aceite",
+        "TODOS": "Nenhum documento ainda",
+        "todosTexto": "Atestados, pedidos de exame, encaminhamentos e termos emitidos na ficha ou no atendimento aparecem aqui.",
+        "filtro": "Nenhum documento com estes filtros"
+      },
+      "verTodos": "Ver todos os documentos",
+      "guia": {
+        "titulo": "Como o termo anda",
+        "texto": "Os termos de consentimento, recusa e eutanásia emitidos ficam aqui até o responsável responder.",
+        "emitir": {
+          "titulo": "A clínica emite o termo",
+          "texto": "Na ficha do paciente ou no atendimento, em Documentos.",
+          "acao": "Abrir pacientes"
+        },
+        "responder": {
+          "titulo": "O responsável responde",
+          "texto": "No balcão, com a assinatura no tablet, ou pelo app, quando a clínica libera."
+        },
+        "registrar": {
+          "titulo": "O aceite fica no documento",
+          "texto": "Aceito ou recusado uma vez só, com o registro em PDF."
+        }
+      }
     }
   },
   "laudos": {
@@ -13748,7 +13800,24 @@
         "DOSE_FUTURA": "As doses futuras foram suspensas.",
         "BOLETIM_RETIDO": "Havia boletim retido."
       },
-      "erro": "Não deu para encerrar a internação."
+      "erro": "Não deu para encerrar a internação.",
+      "previa": {
+        "titulo": "Antes de encerrar",
+        "lendo": "Conferindo as doses e os boletins.",
+        "erro": "Não deu para conferir as doses e os boletins agora. O encerramento continua disponível.",
+        "jaEncerrada": "Esta internação já foi encerrada. Feche a gaveta para ver o desfecho.",
+        "horas": "{n} h de internação",
+        "feitas": "{n} dose dada | {n} doses dadas",
+        "naoFeitas": "{n} dose não dada | {n} doses não dadas",
+        "enviados": "{n} boletim enviado | {n} boletins enviados",
+        "aviso": {
+          "DOSE_PENDENTE": "{n} dose pendente agora: se foi dada, registre antes de encerrar. | {n} doses pendentes agora: se foram dadas, registre antes de encerrar.",
+          "DOSE_FUTURA": "{n} dose futura será suspensa. | {n} doses futuras serão suspensas.",
+          "BOLETIM_RETIDO": "{n} boletim retido, ainda não enviado ao responsável. | {n} boletins retidos, ainda não enviados ao responsável."
+        },
+        "emDia": "Nenhuma dose pendente nem boletim retido.",
+        "calculadoEm": "Conferido às {hora}. A conta se refaz na hora de confirmar."
+      }
     },
     "administrativo": {
       "acao": "Encerrar sem veterinário",

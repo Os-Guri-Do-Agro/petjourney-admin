@@ -12,6 +12,11 @@
  *   meia-noite grava o dia certo.
  *
  * O duplo toque leva a mesma Idempotency-Key e devolve a internação encerrada.
+ *
+ * Ao abrir, a prévia (N36, `GET .../encerramento`): o que fica para trás (doses, boletins) e os
+ * avisos, os mesmos que o encerrar devolveria agora, sem gravar nada. Aviso nunca trava: o botão
+ * continua disponível. Já encerrada (409 `INTERNACAO_ENCERRADA`, outra pessoa encerrou com a gaveta
+ * aberta): a gaveta diz isso, o botão sai e a tela relê a internação.
  */
 import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
@@ -25,6 +30,7 @@ import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { motivoDaRecusa, useSeloDeAssinatura } from '@/composables/useSeloDeAssinatura'
+import { ApiError } from '@/service/api'
 import { criarChaveadorDeIdempotencia } from '@/service/idempotencia'
 import {
   DESFECHOS,
@@ -32,16 +38,19 @@ import {
   instanteComOffset,
   ORIENTACAO_MAX,
   ORIENTACAO_MIN,
+  previaDoEncerramento,
+  type AvisoDoEncerramento,
   type Desfecho,
   type Internacao,
+  type PreviaDoEncerramento,
 } from '@/service/parceiro/internacao-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
 
 const props = defineProps<{ internacao: Internacao | null; profissionais: Profissional[] }>()
 const aberta = defineModel<boolean>('visible', { default: false })
-const emit = defineEmits<{ encerrada: [internacao: Internacao] }>()
+const emit = defineEmits<{ encerrada: [internacao: Internacao]; desatualizada: [] }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { store, parceiroQuery } = useParceiroPortal()
 const chaveador = criarChaveadorDeIdempotencia()
 const selo = useSeloDeAssinatura()
@@ -79,7 +88,78 @@ watch(aberta, (agora) => {
   tentou.value = false
   erro.value = ''
   chaveador.concluir()
+  void lerPrevia()
 })
+
+/* ------------------------------------------------------------------------------ a prévia */
+
+const previa = ref<PreviaDoEncerramento | null>(null)
+const lendoPrevia = ref(false)
+const erroDaPrevia = ref(false)
+const jaEncerrada = ref(false)
+let leituraDaPrevia = 0
+
+async function lerPrevia() {
+  const atual = props.internacao
+  previa.value = null
+  erroDaPrevia.value = false
+  jaEncerrada.value = false
+  if (!atual) return
+  const vez = ++leituraDaPrevia
+  lendoPrevia.value = true
+  try {
+    const lida = await previaDoEncerramento(atual.id, parceiroQuery())
+    if (vez === leituraDaPrevia) previa.value = lida
+  } catch (err) {
+    if (vez !== leituraDaPrevia) return
+    if (err instanceof ApiError && err.codigo === 'INTERNACAO_ENCERRADA') {
+      jaEncerrada.value = true
+      emit('desatualizada')
+    } else {
+      erroDaPrevia.value = true
+    }
+  } finally {
+    if (vez === leituraDaPrevia) lendoPrevia.value = false
+  }
+}
+
+/** O que ficou para trás, numa linha: horas, doses dadas e não dadas, boletins enviados. */
+const linhaDaPrevia = computed(() => {
+  const r = previa.value?.resumo
+  if (!r) return ''
+  return [
+    t('internacao.encerrar.previa.horas', { n: r.horas }),
+    t('internacao.encerrar.previa.feitas', { n: r.feitas }, r.feitas),
+    r.naoFeitas ? t('internacao.encerrar.previa.naoFeitas', { n: r.naoFeitas }, r.naoFeitas) : '',
+    r.boletinsEnviados
+      ? t('internacao.encerrar.previa.enviados', { n: r.boletinsEnviados }, r.boletinsEnviados)
+      : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
+})
+
+const QUANTOS: Record<AvisoDoEncerramento, keyof PreviaDoEncerramento['resumo']> = {
+  DOSE_PENDENTE: 'pendentesAgora',
+  DOSE_FUTURA: 'aSuspender',
+  BOLETIM_RETIDO: 'boletinsRetidos',
+}
+
+const avisosDaPrevia = computed(() =>
+  (previa.value?.avisos ?? []).map((aviso) => {
+    const n = previa.value?.resumo[QUANTOS[aviso]] ?? 0
+    return { aviso, texto: t(`internacao.encerrar.previa.aviso.${aviso}`, { n }, n) }
+  }),
+)
+
+const calculadoAs = computed(() =>
+  previa.value
+    ? new Date(previa.value.calculadoEm).toLocaleTimeString(locale.value, {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : '',
+)
 
 const opcoesDeDesfecho = computed(() =>
   DESFECHOS.map((valor) => ({ valor, rotulo: t(`internacao.desfecho.${valor}`) })),
@@ -166,7 +246,37 @@ async function encerrar() {
     icone="ph ph-sign-out"
     largura="36rem"
   >
-    <form id="encerrar-form" class="eg" novalidate @submit.prevent="encerrar">
+    <p v-if="jaEncerrada" class="eg__erro" role="alert">
+      <i class="ph ph-warning-circle" aria-hidden="true" />
+      <span>{{ t('internacao.encerrar.previa.jaEncerrada') }}</span>
+    </p>
+
+    <form v-else id="encerrar-form" class="eg" novalidate @submit.prevent="encerrar">
+      <!-- A prévia: o que fica para trás, antes de escolher e confirmar. Nada se grava aqui. -->
+      <section
+        class="eg__secao ui-poco enc__previa"
+        aria-labelledby="enc-previa"
+        :aria-busy="lendoPrevia"
+      >
+        <span id="enc-previa" class="eg__rotulo">{{ t('internacao.encerrar.previa.titulo') }}</span>
+        <p v-if="lendoPrevia" class="eg__dica">{{ t('internacao.encerrar.previa.lendo') }}</p>
+        <p v-else-if="erroDaPrevia" class="eg__dica">{{ t('internacao.encerrar.previa.erro') }}</p>
+        <template v-else-if="previa">
+          <p class="eg__dica enc__linha">{{ linhaDaPrevia }}</p>
+          <p v-for="item in avisosDaPrevia" :key="item.aviso" class="eg__aviso">
+            <i class="ph ph-warning" aria-hidden="true" />
+            <span>{{ item.texto }}</span>
+          </p>
+          <p v-if="!avisosDaPrevia.length" class="eg__aviso enc__em-dia">
+            <i class="ph ph-check-circle" aria-hidden="true" />
+            <span>{{ t('internacao.encerrar.previa.emDia') }}</span>
+          </p>
+          <small class="eg__dica">{{
+            t('internacao.encerrar.previa.calculadoEm', { hora: calculadoAs })
+          }}</small>
+        </template>
+      </section>
+
       <section class="eg__secao">
         <span id="enc-desfecho" class="eg__rotulo">{{ t('internacao.encerrar.desfecho') }}</span>
         <SelectButton
@@ -295,6 +405,7 @@ async function encerrar() {
         @click="aberta = false"
       />
       <Button
+        v-if="!jaEncerrada"
         type="submit"
         form="encerrar-form"
         :severity="desfecho === 'OBITO' ? 'danger' : undefined"
@@ -305,3 +416,18 @@ async function encerrar() {
     </template>
   </CadastroGaveta>
 </template>
+
+<style scoped>
+/* A prévia num poço: o que fica para trás se lê antes do formulário, sem competir com ele. */
+.enc__previa {
+  padding: 14px 16px;
+}
+
+.enc__linha {
+  color: var(--tinta);
+}
+
+.enc__em-dia i {
+  color: var(--ok-tinta);
+}
+</style>

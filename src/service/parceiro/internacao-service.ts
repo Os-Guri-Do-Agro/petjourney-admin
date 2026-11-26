@@ -24,6 +24,7 @@ import type {
   ListaDeLeitosDto,
   MapaDto,
   MudarLeitoDto,
+  PreviaDoEncerramentoDto,
   VagasDto,
 } from '../contrato/openapi'
 import { comIdempotencia } from '../idempotencia'
@@ -41,6 +42,8 @@ export type Gravidade = InternacaoDto['gravidade']
 export type StatusDaInternacao = InternacaoDto['status']
 export type NovaInternacao = InternarDto
 export type Desfecho = EncerrarInternacaoDto['desfecho']
+export type PreviaDoEncerramento = PreviaDoEncerramentoDto
+export type AvisoDoEncerramento = PreviaDoEncerramentoDto['avisos'][number]
 export type AvisoDeLeito = NonNullable<InternarDto['confirmarAvisos']>[number]
 export type NivelDeUrgencia = InternadoDoMapaDto['urgencia']['nivel']
 export type MotivoDeUrgencia = InternadoDoMapaDto['urgencia']['motivos'][number]
@@ -238,6 +241,18 @@ export function mudarPrevisaoDeAlta(
 }
 
 /* ---------------------------------------------------------------------------- encerrar */
+
+/**
+ * A prévia do encerrar (N36), para mostrar antes do botão: o mesmo resumo e os mesmos avisos que o
+ * POST devolveria agora, sem gravar nada. Internação já encerrada: 409 `INTERNACAO_ENCERRADA`.
+ */
+export function previaDoEncerramento(id: string, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<PreviaDoEncerramento>>(
+      comQuery(daInternacao(id, '/encerramento'), { parceiroId: params?.parceiroId }),
+    ),
+  )
+}
 
 export function encerrarInternacao(
   id: string,

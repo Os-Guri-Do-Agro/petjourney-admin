@@ -565,12 +565,15 @@ const aguardaSelo = computed(
           :label="t('atendimento.adendo.acao')"
           @click="adendoAberto = true"
         />
+        <!-- N59: com motivo (sem vínculo, óbito, removido), liberar não publica: fica indisponível. -->
         <Button
           v-if="podeLiberar && !atendimento.resumo.publicado"
           type="button"
           icon="ph ph-paper-plane-tilt"
           :label="t('atendimento.resumo.liberar')"
           :loading="liberando"
+          :disabled="Boolean(atendimento.resumo.motivoNaoPublicado)"
+          :title="atendimento.resumo.motivoNaoPublicado ? fraseDoResumo : undefined"
           @click="liberar"
         />
       </template>

@@ -165,6 +165,12 @@ export function enviarLinhas(
   )
 }
 
+/**
+ * As dúvidas vêm em páginas de até 50 (N25: cada dúvida lê até 20 linhas da planilha); acima disso
+ * a API responde 400 `IMPORTACAO_LIMITE_POR_PAGINA`. O teto fica aqui para nenhuma tela pedir mais.
+ */
+export const DUVIDAS_POR_PAGINA_MAX = 50
+
 export function listarDuvidas(
   id: string,
   filtro: { pendentes: boolean; cursor?: string | null; limite?: number },
@@ -176,7 +182,7 @@ export function listarDuvidas(
         parceiroId: params?.parceiroId,
         pendentes: filtro.pendentes,
         cursor: filtro.cursor,
-        limite: filtro.limite ?? 20,
+        limite: Math.min(filtro.limite ?? 20, DUVIDAS_POR_PAGINA_MAX),
       }),
     ),
   )

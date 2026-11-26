@@ -79,6 +79,13 @@ export const ROTAS_DOS_MODULOS: readonly RotaDeModulo[] = [
     permissao: 'prontuario.ler',
     integrada: true,
   },
+  /* Os documentos da clínica toda (N35): o selo de termos pendentes leva para cá. */
+  {
+    prefixo: '/clinica/documentos',
+    modulo: 'CLINICA',
+    permissao: 'prontuario.ler',
+    integrada: true,
+  },
   /* A cópia do prontuário (E4-06c): o dono e o gestor. */
   {
     prefixo: '/clinica/copias-do-prontuario',

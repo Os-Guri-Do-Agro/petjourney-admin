@@ -92,10 +92,28 @@ function mensagemDoErro(status: number, corpo: Record<string, unknown> | null) {
   }
 
   if (typeof mensagem === 'string' && mensagem) {
-    return mensagem
+    return status === 429 ? comAEspera(mensagem, corpo?.tenteDeNovoEmSegundos) : mensagem
   }
 
   return String(i18n.global.t('errors.api.genericStatus', { status }))
+}
+
+/**
+ * O 429 do portal (`ErroDeTaxaDto`, N51b) pode trazer `tenteDeNovoEmSegundos`: a frase da API diz
+ * "aguarde alguns minutos", e a tela diz quanto. Sem o número, fica a frase como veio.
+ */
+function comAEspera(mensagem: string, segundos: unknown) {
+  const n = Number(segundos)
+  if (!Number.isFinite(n) || n <= 0) return mensagem
+  const espera =
+    n < 60
+      ? i18n.global.t('errors.api.tenteDeNovoEmSegundos', { n: Math.ceil(n) }, Math.ceil(n))
+      : i18n.global.t(
+          'errors.api.tenteDeNovoEmMinutos',
+          { n: Math.ceil(n / 60) },
+          Math.ceil(n / 60),
+        )
+  return `${mensagem} ${String(espera)}`
 }
 
 export function getApiUrl() {

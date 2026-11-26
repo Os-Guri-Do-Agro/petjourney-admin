@@ -72,6 +72,22 @@ describe('documentos clínicos pela API', () => {
     )
   })
 
+  it('a lista da clínica leva só os filtros escolhidos e nunca pede mais de 50 (N35)', async () => {
+    const { documentos } = await carregar()
+    const fetchMock = responder({ itens: [], proximoCursor: null })
+    await documentos.listarDocumentosDaClinica({ aceite: 'PENDENTE' }, {}, { parceiroId: 'p-1' })
+    expect(ultima(fetchMock).caminho).toBe(
+      '/parceiro/portal/clinica/documentos?aceite=PENDENTE&limit=50&parceiroId=p-1',
+    )
+    await documentos.listarDocumentosDaClinica(
+      { tipo: 'TERMO_RECUSA', status: 'EMITIDO', pacienteId: 'pac-1' },
+      { cursor: 'c-2', limit: 100 },
+    )
+    expect(ultima(fetchMock).caminho).toBe(
+      '/parceiro/portal/clinica/documentos?tipo=TERMO_RECUSA&status=EMITIDO&pacienteId=pac-1&cursor=c-2&limit=50',
+    )
+  })
+
   it('emitir leva a senha, o aceite pelo app e a Idempotency-Key', async () => {
     const { documentos } = await carregar()
     const fetchMock = responder({ id: 'doc-1' })

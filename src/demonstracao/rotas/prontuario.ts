@@ -51,6 +51,7 @@ import type {
   ListaDeLaudosDto,
   ListaDePrescricoesDto,
   MedicamentoAdminDto,
+  PaginaDeDocumentosDaClinicaDto,
   PaginaDeDocumentosDto,
   PaginaDePedidosDeCopiaDto,
   PedidoDeCopiaRegistradoDto,
@@ -90,6 +91,7 @@ import {
   atoPorId,
   descartar,
   documentoPorId,
+  documentosDaClinica,
   documentosDoPaciente,
   emitir,
   esquecerDocumento,
@@ -919,6 +921,35 @@ function registrarDocumentos() {
       return ok<{ id: string; descartado: boolean }>({ id: doc.id, descartado: true })
     }),
   )
+
+  /*
+   * N35: a lista da clínica, até 50 por página. O cursor leva os filtros em que nasceu: com outro
+   * filtro, 400 `CURSOR_INVALIDO`, como a API.
+   */
+  rota('GET', `${CLINICA}/documentos`, ({ query }) => {
+    const filtros = ['aceite', 'tipo', 'status', 'pacienteId'].map((k) => query.get(k) ?? '')
+    const [aceite, tipo, status, pacienteId] = filtros
+    const chave = filtros.join(',')
+    const limite = Math.min(Number(query.get('limit') ?? 20) || 20, 50)
+    const cursor = query.get('cursor')
+    const [inicioTexto, chaveDoCursor] = cursor ? cursor.split('|') : ['0', chave]
+    if (chaveDoCursor !== chave)
+      return erro(400, 'CURSOR_INVALIDO', 'Esta página é de outra lista. Comece do início.')
+    const lista = documentosDaClinica().filter(
+      (d) =>
+        (!aceite ||
+          (d.aceiteStatus === aceite && (aceite !== 'PENDENTE' || d.status === 'EMITIDO'))) &&
+        (!tipo || d.tipo === tipo) &&
+        (!status || d.status === status) &&
+        (!pacienteId || d.pacienteId === pacienteId),
+    )
+    const inicio = Number(inicioTexto) || 0
+    const fim = inicio + limite
+    return ok<PaginaDeDocumentosDaClinicaDto>({
+      itens: lista.slice(inicio, fim),
+      proximoCursor: fim < lista.length ? `${fim}|${chave}` : null,
+    })
+  })
 
   rota('GET', `${CLINICA}/pacientes/:pid/documentos`, ({ params, query }) => {
     const pacienteId = params.pid ?? ''

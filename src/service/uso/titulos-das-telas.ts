@@ -56,6 +56,7 @@ export const TITULOS_DAS_TELAS: Readonly<Record<string, string>> = {
   '/clinica/bulario': 'Bulário',
   '/clinica/historico-liberado': 'Histórico liberado',
   '/clinica/copias-do-prontuario': 'Cópias do prontuário',
+  '/clinica/documentos': 'Documentos da clínica',
   '/clinica/financeiro': 'Financeiro · Caixa',
   '/clinica/financeiro/contas': 'Financeiro · Contas',
   '/clinica/financeiro/notas': 'Financeiro · Notas fiscais',

@@ -23,7 +23,12 @@ import {
 } from '../dados/internacao'
 import { vacinasAbaixoDoMinimo } from '../dados/estoque'
 import { pendenciasDoPortal } from '../dados/portal'
-import { copiasPorGerar, finalizadosSemResumo, prontuariosEmAberto } from '../dados/prontuario'
+import {
+  copiasPorGerar,
+  documentosComAceitePendente,
+  finalizadosSemResumo,
+  prontuariosEmAberto,
+} from '../dados/prontuario'
 import { tratamentosQuePedemAtencao } from '../dados/tratamentos'
 import { chamadaDeVacinas } from '../dados/vacinas'
 import { diasEntre, hoje, minutosAte, somarDias } from '../relogio'
@@ -126,6 +131,10 @@ export const fontes = {
   },
   copiasPendentes(): number {
     return copiasPorGerar().length
+  },
+  /** Os termos emitidos esperando o aceite (o contador `termosPendentes`, N35). */
+  termosPendentes(): number {
+    return documentosComAceitePendente().length
   },
 
   /* Internação. */

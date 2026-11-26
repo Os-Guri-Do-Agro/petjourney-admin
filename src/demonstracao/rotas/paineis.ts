@@ -476,6 +476,13 @@ function pendencias(query: URLSearchParams): Pendencia[] {
       rota: '/clinica/copias-do-prontuario',
     },
     {
+      chave: 'termosPendentes',
+      modulo: 'CLINICA',
+      valor: fontes.termosPendentes(),
+      tom: 'NEUTRO',
+      rota: '/clinica/documentos?aceite=PENDENTE',
+    },
+    {
       chave: 'dosesAtrasadasInternacao',
       modulo: 'CLINICA',
       valor: fontes.dosesAtrasadas(),
