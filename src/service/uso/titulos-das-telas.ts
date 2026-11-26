@@ -75,6 +75,11 @@ export const TITULOS_DAS_TELAS: Readonly<Record<string, string>> = {
   '/hotel/rotina-padrao': 'Rotina padrão',
   '/hotel/resumo': 'Resumo do hotel',
 
+  '/ong/animais': 'ONG · Animais',
+  '/ong/animal/:animalId': 'ONG · Ficha do animal',
+  '/ong/entregas': 'ONG · Entregas',
+  '/ong/perfil': 'Perfil da ONG',
+
   '/saude-publica': 'Saúde pública',
   '/saude-publica/painel': 'Saúde pública · Painel',
   '/saude-publica/campanhas': 'Saúde pública · Campanhas',
