@@ -3,7 +3,7 @@
   "titulo": "Lembrete de vacina pedido pela clínica",
   "sub": "A recepção liga o lembrete da dose que falta na lista de chamada, e o responsável recebe o aviso que abre a carteirinha do pet.",
   "contas": "Portal: portal-demo · App: qa-marina (Pipoca, gato)",
-  "antes": "A Pipoca precisa estar na lista de chamada: aplique antes a dose 1 da V4 (passo 1 do F12) e só anule depois deste fluxo.",
+  "antes": "A Pipoca precisa estar na lista de chamada com a dose 1 da V4 aplicada (passo 1 do F12, ainda sem anular). Depois deste fluxo, faça os passos 5 e 6 do F12.",
   "passos": [
     {
       "lado": "P",

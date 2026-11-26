@@ -3,12 +3,12 @@
   "titulo": "Ligar o pet do app à clínica",
   "sub": "A clínica convida pelo código ou pelo QR da carteirinha, o responsável aceita no app; quando ele encerra no app, a clínica é avisada.",
   "contas": "Portal: portal-demo · App: luis.qa.tutor (Thor)",
-  "antes": "Thor no app do luis.qa.tutor, sem vínculo com a Clínica e Hotel Demo. Hoje ele já é paciente e está ligado: para repetir, comece pelo passo 4 (encerrar) e, no lugar do passo 1, abra a ficha do Thor › \"Convidar para o app\" › \"Mostrar QR\".",
+  "antes": "O Thor já é paciente da clínica (cliente Luís QA Tutor) e está sem vínculo. Não use \"Cadastrar paciente\" para ele: o cadastro novo vira um cliente repetido, e o app recusa ligar porque o Thor do app já tem a clínica. Este fluxo termina com o Thor ligado (é como o F02 precisa); para repetir, encerre antes no app (passo 4).",
   "passos": [
     {
       "lado": "P",
-      "faz": "\"Pacientes\" › \"Cadastrar paciente\" › \"Cliente novo\" (Luís QA Tutor, (11) 95555-2411, luis.qa.tutor@petjourney.test) › \"Continuar\" › Thor, Cachorro › \"Continuar\" › \"Cadastrar paciente\" › \"Mostrar QR\".",
-      "ve": "\"Thor cadastrado\", \"Convidar para o app agora?\" e o QR em tela cheia com o código (7BFK-Q2V3) e \"Vale até 2 de dezembro\".",
+      "faz": "\"Pacientes\" › Thor (Luís QA Tutor) › no cartão \"No app\", \"Convidar para o app\" › \"Mostrar QR\".",
+      "ve": "O QR em tela cheia com o código (8 letras e números, como 7BFK-Q2V3) e \"Vale até\" (7 dias). Um convite novo cancela o anterior.",
       "print": "f01-01-convite-codigo",
       "recorte": {
         "x": 420,

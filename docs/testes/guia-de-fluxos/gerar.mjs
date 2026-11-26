@@ -73,7 +73,7 @@ function blocoDoFluxo(f, numero, etapa) {
   const falhou = /^(FALHOU|PARCIAL)/.test(f.resultado ?? '')
   return `<section class="fluxo">
   <div class="cabeca"><div class="topo"><span class="num">${numero}</span><div class="tit"><h2>${tela(f.titulo)}</h2><div class="sub">${tela(f.sub)}</div></div><span class="marca">☐ Passou ☐ Falhou</span></div>
-  <div class="meta"><span class="etapa">${etapa}</span> <b>Contas:</b> ${tela(f.contas)}${f.antes ? ` · <b>Antes:</b> ${tela(f.antes)}` : ''}</div></div>
+  <div class="meta"><span class="etapa">${etapa}</span> <b>Contas:</b> ${tela(f.contas)}</div>${f.antes ? `<div class="antes"><b>Antes de começar:</b> ${tela(f.antes)}</div>` : ''}</div>
   <ol>${f.passos.map(passo).join('')}</ol>
   <div class="figs">${f.passos.map((p, i) => figura(p, i + 1)).join('')}</div>
   ${f.naoConferido?.length ? `<div class="cel"><b>Só no celular:</b> ${f.naoConferido.map(tela).join('; ')}.</div>` : ''}
@@ -105,7 +105,7 @@ const contas = [
   ['qa-rafael@petjourney.test', 'App', 'Rafael Lima, responsável do Nino.'],
   ['qa-julia@petjourney.test', 'App', 'Júlia QA, responsável do Bisteca.'],
   ['qa-premium@petjourney.test', 'App', 'Responsável da Luna (acesso temporário; a Luna não é paciente da clínica).'],
-  ['luis.qa.tutor@petjourney.test', 'App', 'A sua conta de responsável: Thor (ligado à clínica no teste) e Espeto.'],
+  ['luis.qa.tutor@petjourney.test', 'App', 'A sua conta: Thor (paciente, sem vínculo; o fluxo 1 liga) e Espeto.'],
 ]
 
 const css = `
@@ -132,7 +132,8 @@ ol li { break-inside: avoid; }
 .tit { flex: 1; } .sub { color: #5B6B70; font-size: 8.6pt; }
 .num { width: 8mm; height: 8mm; border-radius: 50%; background: #2E5A4C; color: #fff; font-weight: 700; font-size: 10.5pt; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .marca { font-size: 8.4pt; color: #2E5A4C; white-space: nowrap; border: 1px solid #C9D6D2; border-radius: 5px; padding: .3mm 2mm; }
-.meta { font-size: 8.5pt; color: #3D4B50; margin-bottom: 1.6mm; }
+.meta { font-size: 8.5pt; color: #3D4B50; margin-bottom: 1.2mm; }
+.antes { background: #FBF1DC; color: #4A3A12; border-radius: 5px; padding: 1.2mm 2.5mm; font-size: 8.4pt; margin-bottom: 1.8mm; }
 .etapa { font-size: 7.4pt; font-weight: 700; color: #6A4A8C; background: #EEE6F6; border-radius: 3px; padding: .2mm 1.6mm; margin-right: 1mm; }
 ol { margin: 0 0 2mm; padding-left: 4.6mm; } ol li { margin: 0 0 1mm; padding-left: .5mm; }
 .ve { color: #2E6B47; }
@@ -161,6 +162,7 @@ const html = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><tit
 <div class="sub1">Toda a comunicação entre a clínica e o responsável com o pet, rodada de verdade na API de dev em 25/11 · portal develop de 25/11 (depois da ${VERSAO}) · app ${APP}</div>
 
 <div class="caixa"><h3>Como usar</h3><ul>
+<li>Antes de cada fluxo, leia o quadro amarelo "Antes de começar": ele diz como os dados precisam estar (estão prontos para o fluxo 1).</li>
 <li>Cada fluxo começa de um lado e termina do outro. A etiqueta <span class="lado lado-p">Portal</span> é o portal web da clínica (admin-dev, no computador) e <span class="lado lado-a">App</span> é o app do responsável no celular. Faça os passos na ordem e confira o que vem depois da seta; o texto entre aspas azuis é o que está escrito na tela.</li>
 <li>Os prints são do preparo: o número vermelho é o do passo, e a caixa vermelha dentro dele mostra onde olhar. Os do app foram tirados com o app aberto no navegador, do tamanho de um celular.</li>
 <li>O push só aparece no celular: no preparo, o aviso foi conferido na caixa de notificações do app (o sino). O que ficou só para o celular está no quadro azul de cada fluxo.</li>

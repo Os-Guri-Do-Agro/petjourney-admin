@@ -3,7 +3,7 @@
   "titulo": "Vacina aplicada na clínica vai para a carteirinha do app",
   "sub": "A dose que a clínica aplica com lote chega sozinha ao app do responsável, e a anulação tira a vacina de lá com aviso.",
   "contas": "Portal: portal-demo · App: qa-marina (Pipoca, gato)",
-  "antes": "Pipoca sem V4 válida (a desta rodada ficou anulada) e o lote V4F-2611 no Estoque (10 doses; a anulação devolve a dose).",
+  "antes": "Pipoca sem V4 válida (a desta rodada ficou anulada) e o lote V4F-2611 no Estoque (10 doses; a anulação devolve a dose). Se for fazer o F13 em seguida, deixe os passos 5 e 6 (anular) para depois dele: o F13 precisa da dose aplicada.",
   "passos": [
     {
       "lado": "P",
