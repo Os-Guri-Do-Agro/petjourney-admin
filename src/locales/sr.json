@@ -11417,7 +11417,7 @@
     },
     "semNaoResponderamTexto": "Ponude koje su istekle bez odgovora u poslednjih 7 dana ostaju ovde, da ih recepcija pozove.",
     "semVagasTitulo": "Nema termina za ponudu",
-    "semVagasTexto": "Kada se oslobodi termin u narednih 14 dana i odgovara nekome sa liste, pojavljuje se ovde."
+    "semVagasTexto": "Ovde se pojavljuje termin koji se oslobodi u narednih 14 dana (neko je otkazao, pomerio ili nije došao) i odgovara nekome sa liste čekanja: dan, vreme i usluga koje ta osoba prihvata. Termin koji je već bio slobodan ne ulazi ovde; njega zakažite direktno u rasporedu."
   },
   "importacao": {
     "erroAoCarregar": "Uvoz nije mogao da se učita.",

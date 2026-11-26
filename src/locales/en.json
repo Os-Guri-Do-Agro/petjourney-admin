@@ -11417,7 +11417,7 @@
     },
     "semNaoResponderamTexto": "Offers that expired unanswered in the last 7 days stay here, for the front desk to call.",
     "semVagasTitulo": "No slots to offer",
-    "semVagasTexto": "When a time in the next 14 days frees up and someone on the list fits it, the slot shows up here."
+    "semVagasTexto": "This lists times freed up in the next 14 days (someone canceled, rescheduled or missed) that suit someone on the waitlist: a day, time and service they accept. Times that were already free are not listed; book those straight on the schedule."
   },
   "importacao": {
     "erroAoCarregar": "The import could not be loaded.",

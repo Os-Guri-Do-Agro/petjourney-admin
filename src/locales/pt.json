@@ -11417,7 +11417,7 @@
     },
     "semNaoResponderamTexto": "Ofertas que venceram sem resposta nos últimos 7 dias ficam aqui, para a recepção ligar.",
     "semVagasTitulo": "Nenhuma vaga para ofertar",
-    "semVagasTexto": "Quando um horário dos próximos 14 dias fica livre e alguém da fila cabe nele, a vaga aparece aqui."
+    "semVagasTexto": "Aqui aparece o horário que vagar nos próximos 14 dias (alguém desmarcou, remarcou ou faltou) e que sirva para alguém da fila: dia, hora e serviço que a pessoa aceita. Horário que já estava livre não entra; para ele, marque direto na agenda."
   },
   "importacao": {
     "erroAoCarregar": "Não foi possível carregar a importação.",

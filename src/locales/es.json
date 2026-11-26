@@ -11417,7 +11417,7 @@
     },
     "semNaoResponderamTexto": "Las ofertas que vencieron sin respuesta en los últimos 7 días quedan aquí, para que recepción llame.",
     "semVagasTitulo": "Ningún hueco para ofrecer",
-    "semVagasTexto": "Cuando un horario de los próximos 14 días queda libre y alguien de la lista cabe en él, el hueco aparece aquí."
+    "semVagasTexto": "Aquí aparece el horario que se libere en los próximos 14 días (alguien canceló, reprogramó o faltó) y que le sirva a alguien de la lista de espera: día, hora y servicio que esa persona acepta. El horario que ya estaba libre no entra; para ese, reserva directo en la agenda."
   },
   "importacao": {
     "erroAoCarregar": "No se pudo cargar la importación.",
