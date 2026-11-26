@@ -13075,6 +13075,11 @@
       "fazerDica": "Takes the prescriptions that are not in a form yet.",
       "receitas": "Prescription forms",
       "receitasDica": "The PDF opens for 15 minutes. Once cancelled, it no longer opens.",
+      "noApp": {
+        "depoisDeFinalizar": "The owner gets the prescription in the app when you finish the visit and release the summary. That's when the notification goes out.",
+        "faltaLiberar": "Not in the app yet: release the summary so the owner gets the prescription and the notification.",
+        "publicado": "In the owner's app since {dia}."
+      },
       "rascunho": "Draft form",
       "porAssinar": "To sign",
       "descartar": "Discard",
@@ -13209,7 +13214,7 @@
       "titulo": "Visit finished",
       "texto": "{pet}'s record is closed. These are the next steps.",
       "resumoTitulo": "Summary for the owner",
-      "resumoDica": "Diagnosis, instructions and follow-up go to the owner's app.",
+      "resumoDica": "Diagnosis, instructions, prescription and follow-up go to the owner's app, with a notification on their phone.",
       "retornoTitulo": "Follow-up",
       "retornoEm": "Follow-up in {n} day, no time booked yet. | Follow-up in {n} days, no time booked yet.",
       "adendoTitulo": "Forgot something?",

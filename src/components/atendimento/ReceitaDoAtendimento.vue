@@ -108,6 +108,32 @@ const livres = computed(() => prescricoesLivres(prescricoes.value))
 const rascunho = computed(() => receitas.value.find((r) => r.status === 'RASCUNHO') ?? null)
 const fechadas = computed(() => receitas.value.filter((r) => r.status !== 'RASCUNHO'))
 
+/*
+ * Quando a receita chega ao responsável (guia E4 5.6 e 6.4): ela vai dentro do resumo do
+ * atendimento, e o aviso no celular sai quando o resumo é liberado, depois de finalizar. Assinar
+ * não avisa ninguém. Sem esta linha, quem assinava esperava o aviso na hora (26/11/2026).
+ */
+const noApp = computed<{ texto: string; tom: 'ok' | 'atencao' | null } | null>(() => {
+  if (!fechadas.value.some((r) => r.status !== 'CANCELADA')) return null
+  const { status, resumo } = props.atendimento
+  if (status === 'RASCUNHO') {
+    return { texto: t('atendimento.receita.noApp.depoisDeFinalizar'), tom: null }
+  }
+  if (status !== 'FINALIZADO') return null
+  if (resumo.publicado && resumo.liberadoEm) {
+    return {
+      texto: t('atendimento.receita.noApp.publicado', {
+        dia: rotulos.dia(resumo.liberadoEm.slice(0, 10)),
+      }),
+      tom: 'ok',
+    }
+  }
+  if (resumo.motivoNaoPublicado) {
+    return { texto: t(`atendimento.resumo.motivo.${resumo.motivoNaoPublicado}`), tom: 'atencao' }
+  }
+  return { texto: t('atendimento.receita.noApp.faltaLiberar'), tom: 'atencao' }
+})
+
 function situacaoDa(item: Prescricao) {
   if (item.receitaStatus === 'ASSINADA') return t('atendimento.receita.naReceitaAssinada')
   if (item.receitaStatus === 'RASCUNHO') return t('atendimento.receita.noRascunho')
@@ -414,6 +440,10 @@ function nomeDoItem(receita: Receita) {
         <div class="sa__sobre">
           <h3 id="rc-receitas" class="sa__titulo">{{ t('atendimento.receita.receitas') }}</h3>
           <p class="sa__descricao">{{ t('atendimento.receita.receitasDica') }}</p>
+          <p v-if="noApp" class="rc__app" :class="noApp.tom && `rc__app--${noApp.tom}`">
+            <i class="ph ph-device-mobile" aria-hidden="true" />
+            <span>{{ noApp.texto }}</span>
+          </p>
         </div>
         <ul class="sa__campos sa__lista">
           <li v-if="rascunho" class="rc__receita">
@@ -613,6 +643,30 @@ function nomeDoItem(receita: Receita) {
 }
 
 .rc__avisos,
+/* Quando a receita chega ao app: a cor fica no ícone, o texto segue sóbrio. */
+.rc__app {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 4px 0 0;
+  color: var(--tinta-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.rc__app i {
+  margin-top: 1px;
+  font-size: 15px;
+}
+
+.rc__app--ok i {
+  color: var(--ok-tinta);
+}
+
+.rc__app--atencao i {
+  color: var(--atencao-tinta);
+}
+
 .rc__fora {
   display: flex;
   align-items: flex-start;

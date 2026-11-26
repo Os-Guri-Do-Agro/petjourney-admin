@@ -13075,6 +13075,11 @@
       "fazerDica": "Uzima propisane lekove koji još nisu na receptu.",
       "receitas": "Recepti",
       "receitasDica": "PDF se otvara 15 minuta. Otkazan, više se ne otvara.",
+      "noApp": {
+        "depoisDeFinalizar": "Vlasnik dobija recept u aplikaciji kada završite pregled i objavite rezime. Tada stiže obaveštenje.",
+        "faltaLiberar": "Još nije u aplikaciji: objavite rezime da bi vlasnik dobio recept i obaveštenje.",
+        "publicado": "U aplikaciji vlasnika od {dia}."
+      },
       "rascunho": "Recept u nacrtu",
       "porAssinar": "Za potpis",
       "descartar": "Odbaci",
@@ -13209,7 +13214,7 @@
       "titulo": "Pregled završen",
       "texto": "Zapis za {pet} je zatvoren. Ovo su sledeći koraci.",
       "resumoTitulo": "Rezime za vlasnika",
-      "resumoDica": "Dijagnoza, uputstva i kontrola idu u aplikaciju vlasnika.",
+      "resumoDica": "Dijagnoza, uputstva, recept i kontrola idu u aplikaciju vlasnika, uz obaveštenje na telefon.",
       "retornoTitulo": "Kontrola",
       "retornoEm": "Kontrola za {n} dan, još bez termina. | Kontrola za {n} dana, još bez termina. | Kontrola za {n} dana, još bez termina.",
       "adendoTitulo": "Zaboravili ste nešto?",

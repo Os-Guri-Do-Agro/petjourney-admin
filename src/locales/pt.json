@@ -13075,6 +13075,11 @@
       "fazerDica": "Leva as prescrições que ainda não estão numa receita.",
       "receitas": "Receitas",
       "receitasDica": "O PDF abre por 15 minutos. Cancelada, não abre mais.",
+      "noApp": {
+        "depoisDeFinalizar": "O responsável recebe a receita no app quando você finalizar e liberar o resumo. É aí que sai o aviso no celular.",
+        "faltaLiberar": "Ainda não está no app: libere o resumo para o responsável receber a receita e o aviso.",
+        "publicado": "No app do responsável desde {dia}."
+      },
       "rascunho": "Receita em rascunho",
       "porAssinar": "Por assinar",
       "descartar": "Descartar",
@@ -13209,7 +13214,7 @@
       "titulo": "Atendimento finalizado",
       "texto": "O registro de {pet} está fechado. Estes são os próximos passos.",
       "resumoTitulo": "Resumo para o responsável",
-      "resumoDica": "Diagnóstico, orientações e retorno vão para o app do responsável.",
+      "resumoDica": "Diagnóstico, orientações, receita e retorno vão para o app do responsável, que recebe um aviso no celular.",
       "retornoTitulo": "Retorno",
       "retornoEm": "Retorno em {n} dia, ainda sem horário. | Retorno em {n} dias, ainda sem horário.",
       "adendoTitulo": "Esqueceu alguma coisa?",
