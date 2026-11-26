@@ -5456,7 +5456,7 @@
         "nadaFora": "Ništa neuobičajeno od poslednjeg pregleda.",
         "perdaContinua": "Stalan gubitak težine",
         "perda": "Pad težine",
-        "perdaDetalhe": "{de} → {para} kg ({percentual}) za nedelja: {semanas}",
+        "perdaDetalhe": "{de} → {para} kg ({percentual}) za {semanas} nedelju | {de} → {para} kg ({percentual}) za {semanas} nedelje | {de} → {para} kg ({percentual}) za {semanas} nedelja",
         "alarmeDetalhe": "zabeleženo kod kuće {data}, {quando}",
         "recorrenteDetalhe": "{vezes}× od poslednjeg pregleda",
         "mais": "još u rezimeu: {total}",

@@ -5456,7 +5456,7 @@
         "nadaFora": "لا شيء غير معتاد منذ الزيارة الأخيرة.",
         "perdaContinua": "فقدان وزن مستمر",
         "perda": "انخفاض الوزن",
-        "perdaDetalhe": "{de} ← {para} كغ ({percentual}) خلال أسابيع: {semanas}",
+        "perdaDetalhe": "{de} ← {para} كغ ({percentual}) خلال {semanas} أسبوع | {de} ← {para} كغ ({percentual}) خلال {semanas} أسبوع | {de} ← {para} كغ ({percentual}) خلال {semanas} أسبوعين | {de} ← {para} كغ ({percentual}) خلال {semanas} أسابيع | {de} ← {para} كغ ({percentual}) خلال {semanas} أسبوعًا | {de} ← {para} كغ ({percentual}) خلال {semanas} أسبوع",
         "alarmeDetalhe": "سُجّل في المنزل بتاريخ {data}، {quando}",
         "recorrenteDetalhe": "{vezes}× منذ الزيارة الأخيرة",
         "mais": "والمزيد في الملخص: {total}",
