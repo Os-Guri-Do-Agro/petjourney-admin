@@ -171,6 +171,17 @@ export function invalidarPendenciasDoPortal() {
   void carregar()
 }
 
+/**
+ * O valor que a última conferência deu a um contador: `null` sem conferência, com o contador fora da
+ * resposta ou falho no servidor. Serve à tela que lista a mesma coisa, para ela ver se o selo concorda
+ * com o que ela acabou de ler.
+ */
+export function valorConferido(chave: string): number | null {
+  if (conferidoPara.value === undefined) return null
+
+  return lista.value.find((item) => item.chave === chave)?.valor ?? null
+}
+
 const reconferencia = criarReconferencia({
   recarregar: carregar,
   conferidoEm: () => conferidoEm.value,

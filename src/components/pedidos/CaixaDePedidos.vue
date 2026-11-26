@@ -33,7 +33,7 @@ import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
 import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useParceiroPortal } from '@/composables/useParceiroPortal'
-import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
+import { invalidarPendenciasDoPortal, valorConferido } from '@/composables/usePendenciasDoPortal'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
 import {
   ABAS_DA_CAIXA,
@@ -115,12 +115,23 @@ async function carregar() {
     itens.value = pagina.itens
     proximoCursor.value = pagina.proximoCursor
     jaCarregou.value = true
+    if (aba.value === 'PENDENTES' && !pagina.proximoCursor) conferirOSelo(pagina.itens.length)
   } catch (err) {
     if (!leitura.valendo(vez)) return
     erro.value = lerErroDoCadastro(err, t('pedidos.caixa.erroAoCarregar')).mensagem
   } finally {
     if (leitura.valendo(vez)) carregando.value = false
   }
+}
+
+/**
+ * O selo da aba Pedidos vem da conferência do menu, que se refaz a cada 5 minutos; esta lista é lida
+ * agora. O pedido que chegou pelo app nesse meio-tempo aparece aqui e não no selo: com os dois
+ * diferentes, o menu confere de novo.
+ */
+function conferirOSelo(esperando: number) {
+  const noSelo = valorConferido('pedidos')
+  if (noSelo !== null && noSelo !== esperando) invalidarPendenciasDoPortal()
 }
 
 async function carregarMais() {
