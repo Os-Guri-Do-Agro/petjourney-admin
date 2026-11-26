@@ -12523,6 +12523,8 @@
       },
       "ligadoEm": "Activado el {quando}",
       "desligar": "Desactivar recordatorio",
+      "desligado": "Recordatorio desactivado.",
+      "desligadoTexto": "No sale más ningún aviso de esta vacuna para {responsavel}. Lo que ya llegó sigue en el celular.",
       "fechar": "Cerrar",
       "erro": {
         "generico": "No se pudo cambiar el recordatorio.",

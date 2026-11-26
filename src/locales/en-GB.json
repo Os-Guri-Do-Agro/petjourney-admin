@@ -12523,6 +12523,8 @@
       },
       "ligadoEm": "Turned on {quando}",
       "desligar": "Turn off reminder",
+      "desligado": "Reminder turned off.",
+      "desligadoTexto": "No more notifications about this vaccine go to {responsavel}. What already arrived stays on their mobile.",
       "fechar": "Close",
       "erro": {
         "generico": "Could not change the reminder.",

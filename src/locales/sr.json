@@ -12523,6 +12523,8 @@
       },
       "ligadoEm": "Uključeno {quando}",
       "desligar": "Isključi podsetnik",
+      "desligado": "Podsetnik isključen.",
+      "desligadoTexto": "{responsavel} više ne dobija obaveštenja o ovoj vakcini. Ono što je već stiglo ostaje na telefonu.",
       "fechar": "Zatvori",
       "erro": {
         "generico": "Podsetnik nije moguće promeniti.",

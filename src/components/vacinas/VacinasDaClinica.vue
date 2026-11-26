@@ -33,7 +33,11 @@ import { useParceiroPortal } from '@/composables/useParceiroPortal'
 import { invalidarPendenciasDoPortal } from '@/composables/usePendenciasDoPortal'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
 import { INTL_LOCALE, type Locale } from '@/i18n/locales'
-import { lembreteDoItem, semCanalNoApp } from '@/service/parceiro/lembrete-de-vacina-service'
+import {
+  lembreteDoItem,
+  semCanalNoApp,
+  type LembreteDaVacina,
+} from '@/service/parceiro/lembrete-de-vacina-service'
 import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import {
   lerAplicadas,
@@ -336,6 +340,19 @@ function anular(item: Chamada, corrigir: boolean) {
   fecharGavetas()
   aAnular.value = { item, corrigir }
   anularAberta.value = true
+}
+
+/**
+ * Ligou ou desligou: o cartão e a gaveta mudam na hora com o que a API devolveu; a releitura da
+ * lista (o `mudou`) chega depois e confirma. Esperar por ela deixava tudo parado uns 2 s.
+ */
+function lembreteTrocou(aplicacaoId: string, lembrete: LembreteDaVacina | null) {
+  chamada.value = chamada.value.map((item) =>
+    item.aplicacaoId === aplicacaoId ? { ...item, lembrete } : item,
+  )
+  if (lembreteDe.value?.aplicacaoId === aplicacaoId) {
+    lembreteDe.value = { ...lembreteDe.value, lembrete }
+  }
 }
 
 function abrirLembrete(item: Chamada) {
@@ -799,6 +816,7 @@ const resumo = computed(() =>
       <LembreteDaVacinaGaveta
         v-model:visible="lembreteAberta"
         :item="lembreteDe"
+        @trocou="lembreteTrocou"
         @mudou="carregarChamada()"
       />
       <EditarAplicacaoGaveta

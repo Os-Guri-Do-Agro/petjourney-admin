@@ -12523,6 +12523,8 @@
       },
       "ligadoEm": "Ativado em {quando}",
       "desligar": "Desligar lembrete",
+      "desligado": "Lembrete desligado.",
+      "desligadoTexto": "Não sai mais aviso desta vacina para {responsavel}. O que já chegou continua no celular.",
       "fechar": "Fechar",
       "erro": {
         "generico": "Não deu para mudar o lembrete.",

@@ -19,14 +19,26 @@ import { useI18n } from 'vue-i18n'
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import { useRotulosDoCadastro } from '@/components/cadastro/useRotulosDoCadastro'
-import { lembreteDoItem, semCanalNoApp } from '@/service/parceiro/lembrete-de-vacina-service'
+import {
+  lembreteDoItem,
+  semCanalNoApp,
+  type LembreteDaVacina,
+} from '@/service/parceiro/lembrete-de-vacina-service'
 import type { Chamada } from '@/service/parceiro/vacinacao-service'
 
 import { useLembretesDaChamada } from './useLembretesDaChamada'
 
 const props = defineProps<{ item: Chamada | null }>()
 const aberta = defineModel<boolean>('visible', { default: false })
-const emit = defineEmits<{ mudou: [] }>()
+/**
+ * `trocou` sai na hora, com o lembrete que a API devolveu (nulo ao desligar): a tela troca o item
+ * sem esperar a releitura. `mudou` pede a releitura, que confirma. Antes só havia o `mudou`, e a
+ * gaveta seguia "Lembrete ativo" por uns 2 s depois de desligar (26/11/2026).
+ */
+const emit = defineEmits<{
+  mudou: []
+  trocou: [aplicacaoId: string, lembrete: LembreteDaVacina | null]
+}>()
 
 const { t } = useI18n()
 const rotulos = useRotulosDoCadastro()
@@ -36,12 +48,15 @@ const salvando = ref(false)
 const erro = ref('')
 /** A dose saiu da lista (ou é de outra clínica): só fechar. */
 const foraDaLista = ref(false)
+/** Acabou de desligar: a gaveta confirma em vez de só sumir o "Lembrete ativo". */
+const desligou = ref(false)
 
 /* Com a gaveta aberta, outra vacina da lista troca o conteúdo (não só o abrir). */
 watch([aberta, () => props.item?.aplicacaoId] as const, ([agora]) => {
   if (!agora) return
   erro.value = ''
   foraDaLista.value = false
+  desligou.value = false
 })
 
 const lembrete = computed(() => (props.item ? lembreteDoItem(props.item) : null))
@@ -85,9 +100,16 @@ async function mudar(ligar: boolean) {
   if (!props.item) return
   salvando.value = true
   erro.value = ''
+  const id = props.item.aplicacaoId
   try {
-    if (ligar) await lembretes.ligar(props.item.aplicacaoId)
-    else await lembretes.desligar(props.item.aplicacaoId)
+    if (ligar) {
+      emit('trocou', id, await lembretes.ligar(id))
+      desligou.value = false
+    } else {
+      await lembretes.desligar(id)
+      emit('trocou', id, null)
+      desligou.value = true
+    }
     emit('mudou')
     if (ligar) aberta.value = false
   } catch (err) {
@@ -116,6 +138,15 @@ async function mudar(ligar: boolean) {
       <p class="lv__sobre">
         <strong>{{ item.vacina.nome }}</strong>
         <span>{{ t('vacinas.lembrete.de', { pet: item.paciente.nome, dia: diaDaDose }) }}</span>
+      </p>
+
+      <!-- Acabou de desligar: o que mudou, na hora, no lugar do "Lembrete ativo". -->
+      <p v-if="desligou && !lembrete" class="lv__desligado" role="status">
+        <i class="ph ph-bell-slash" aria-hidden="true" />
+        <span>
+          <strong>{{ t('vacinas.lembrete.desligado') }}</strong>
+          {{ t('vacinas.lembrete.desligadoTexto', { responsavel: item.cliente.nome }) }}
+        </span>
       </p>
 
       <!-- Ligado: desde quando, como saiu o último envio e se ainda vai sair outro. -->
@@ -184,7 +215,9 @@ async function mudar(ligar: boolean) {
         severity="secondary"
         outlined
         :label="
-          lembrete || semApp || foraDaLista ? t('vacinas.lembrete.fechar') : t('cadastro.cancelar')
+          lembrete || semApp || foraDaLista || desligou
+            ? t('vacinas.lembrete.fechar')
+            : t('cadastro.cancelar')
         "
         :disabled="salvando"
         @click="aberta = false"
@@ -216,6 +249,33 @@ async function mudar(ligar: boolean) {
 </template>
 
 <style scoped>
+/* A confirmação de desligado: papel com o fio, a cor só no ícone. */
+.lv__desligado {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--linha-suave);
+  border-radius: 12px;
+  background: var(--superficie-2);
+  color: var(--tinta-2);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.lv__desligado i {
+  margin-top: 1px;
+  color: var(--ok-tinta);
+  font-size: 18px;
+}
+
+.lv__desligado strong {
+  display: block;
+  color: var(--tinta);
+  font-weight: 650;
+}
+
 .lv__sobre {
   display: grid;
   gap: 2px;
