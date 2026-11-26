@@ -18,11 +18,16 @@ import Skeleton from 'primevue/skeleton'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { lerErroDoCadastro } from '@/components/cadastro/erros-do-cadastro'
 import ConfiguracaoOnlineGaveta from '@/components/pedidos/ConfiguracaoOnlineGaveta.vue'
-import { chaveDaRecusa, chaveDoMotivo, diaCurto } from '@/components/pedidos/leitura-do-pedido'
+import {
+  chaveDaRecusa,
+  chaveDoMotivo,
+  diaCurto,
+  rotaNaAgenda,
+} from '@/components/pedidos/leitura-do-pedido'
 import RespostaDoPedidoGaveta from '@/components/pedidos/RespostaDoPedidoGaveta.vue'
 import UiPagina from '@/components/ui/UiPagina.vue'
 import type { PassoDoGuia } from '@/components/ui/UiPassos.vue'
@@ -35,6 +40,7 @@ import {
   diaDoInstante,
   horaDoInstante,
   horarioEscolhido,
+  horarioMarcado,
   horarioSumiu,
   listarPedidos,
   obterConfiguracaoOnline,
@@ -58,6 +64,8 @@ const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 const clinicaEscreve = computed(() => Boolean(store.modulo('CLINICA')?.podeEscrever))
 const podeRecusar = computed(() => clinicaEscreve.value && store.temPermissao('pedido.responder'))
 const podeAceitar = computed(() => podeRecusar.value && store.temPermissao('agenda.escrever'))
+/** O horário marcado abre na agenda para quem a lê. */
+const leAgenda = computed(() => store.temPermissao('agenda.ler'))
 const podeConfigurar = computed(
   () => clinicaEscreve.value && store.temPermissao('estabelecimento.editar'),
 )
@@ -262,6 +270,29 @@ function desfechoDaLinha(pedido: PedidoNaCaixa) {
   return t(`pedidos.caixa.desfechoCurto.${pedido.status === 'DESISTIU' ? 'desistiu' : 'expirado'}`)
 }
 
+/**
+ * Aceito, o horário que ficou marcado (N24), além do pedido: começo, fim, profissional e situação,
+ * como o agendamento está agora. Abre na agenda, com a gaveta dele.
+ */
+function marcadoDaLinha(pedido: PedidoNaCaixa) {
+  const marcado = horarioMarcado(pedido)
+  if (!marcado) return null
+
+  const texto = [
+    t('pedidos.caixa.marcadoLinha', {
+      dia: diaCurto(diaDoInstante(marcado.inicio), intl.value),
+      inicio: horaDoInstante(marcado.inicio),
+      fim: horaDoInstante(marcado.fim),
+    }),
+    marcado.profissionalNome,
+    t(`agendamentos.status.${marcado.status}`),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+  return { texto, rota: rotaNaAgenda(marcado) }
+}
+
 const fraseDoResumo = computed(() => {
   if (!jaCarregou.value || aba.value !== 'PENDENTES') return ''
   if (!itens.value.length) return t('clinico.pedidos.resumo.nenhum')
@@ -438,6 +469,21 @@ function aoResponder() {
               />
             </strong>
             <span class="ui-linha__meta">{{ metaDaLinha(pedido) }}</span>
+            <template v-if="marcadoDaLinha(pedido)">
+              <RouterLink
+                v-if="leAgenda"
+                class="ui-linha__meta pc__marcado"
+                :to="marcadoDaLinha(pedido)!.rota"
+                @click.stop
+              >
+                <i class="ph ph-calendar-check" aria-hidden="true" />
+                <span>{{ marcadoDaLinha(pedido)!.texto }}</span>
+              </RouterLink>
+              <span v-else class="ui-linha__meta pc__marcado">
+                <i class="ph ph-calendar-check" aria-hidden="true" />
+                <span>{{ marcadoDaLinha(pedido)!.texto }}</span>
+              </span>
+            </template>
           </span>
 
           <span class="ui-linha__fim pc__fim">
@@ -578,6 +624,19 @@ function aoResponder() {
   margin-inline-start: 6px;
   color: var(--risco-tinta);
   vertical-align: -1px;
+}
+
+/* O horário marcado: o pedido aceito abre o agendamento dele na agenda. */
+.pc__marcado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--tinta);
+}
+
+a.pc__marcado span {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .pc__fim {

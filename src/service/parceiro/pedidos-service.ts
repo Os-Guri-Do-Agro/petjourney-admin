@@ -8,12 +8,16 @@
  *   aceitar pede também `agenda.escrever`.
  *
  * O pedido não segura o horário (decisão 25, 29/10): aceitar pode dar 409 `HORARIO_JA_TOMADO`, e a
- * tela leva às sugestões, à recusa ou ao encaixe de propósito (`professional-overlap`).
+ * tela leva às sugestões, à recusa ou ao encaixe de propósito (`professional-overlap`, N23/N53).
+ *
+ * Aceito, cada pet traz o agendamento que o aceite criou (`pets[].agendamento`, N24), como ele está
+ * agora: a hora marcada, que pode ser outra que a pedida (`pets[].inicio`).
  */
 import { apiFetch } from '../api'
 import type { ApiEnvelope } from '../api-envelope'
 import type {
   AceitarPedidoDto,
+  AgendamentoDoPedidoDto,
   AgendamentoOnlineConfigDto,
   ConflitoDto,
   DetalheDoPedidoDto,
@@ -25,8 +29,6 @@ import type {
   SugestaoDoPedidoDto,
   SugestoesDoPedidoDto,
 } from '../contrato/openapi'
-
-import { parceiroPeloToken } from './parceiro-do-token'
 
 export type ConfiguracaoOnline = AgendamentoOnlineConfigDto
 export type ConfiguracaoOnlineSalva = SalvarAgendamentoOnlineDto
@@ -41,6 +43,7 @@ export type Recusa = RecusarPedidoDto
 export type MotivoDaRecusa = RecusarPedidoDto['motivo']
 export type MotivoDoPedido = PedidoNaCaixaDto['motivo']
 export type Conflito = ConflitoDto
+export type AgendamentoDoPedido = AgendamentoDoPedidoDto
 
 export const ABAS_DA_CAIXA = ['PENDENTES', 'ACEITOS', 'RECUSADOS', 'ENCERRADOS'] as const
 export type AbaDaCaixa = (typeof ABAS_DA_CAIXA)[number]
@@ -126,23 +129,15 @@ export function configuracaoParaSalvar(atual: ConfiguracaoOnline): ConfiguracaoO
 
 /* --------------------------------------------------------------------------------- a caixa */
 
-/**
- * Lacuna N22: a lista da caixa e as sugestões recusam `?parceiroId=` (400 "property parceiroId
- * should not exist"), embora o contrato o declare. Elas usam o parceiro ativo do token, que é
- * realinhado à empresa em uso antes da chamada (`parceiroPeloToken`).
- */
-
 /** PENDENTES vêm do mais antigo; o resto, do mais recente. `cursor` é o `proximoCursor`. */
-export async function listarPedidos(
+export function listarPedidos(
   filtro: { status: AbaDaCaixa; cursor?: string | null },
   params?: ParceiroQuery,
 ) {
-  const parceiroId = await parceiroPeloToken(params?.parceiroId)
-
   return dados(
     apiFetch<ApiEnvelope<PaginaDaCaixa>>(
       comQuery(`${CLINICA}/pedidos`, {
-        parceiroId,
+        parceiroId: params?.parceiroId,
         status: filtro.status,
         cursor: filtro.cursor,
       }),
@@ -162,13 +157,11 @@ export function obterPedido(id: string, params?: ParceiroQuery) {
  * Dentro do que a pessoa pediu (ou perto do horário que sumiu), um por profissional por dia. Sem
  * nada, até 7 dias depois com `foraDaPreferencia` (ofereça, não marque calado).
  */
-export async function sugestoesDoPedido(id: string, limite: number, params?: ParceiroQuery) {
-  const parceiroId = await parceiroPeloToken(params?.parceiroId)
-
+export function sugestoesDoPedido(id: string, limite: number, params?: ParceiroQuery) {
   return dados(
     apiFetch<ApiEnvelope<SugestoesDoPedido>>(
       comQuery(`${CLINICA}/pedidos/${encodeURIComponent(id)}/sugestoes`, {
-        parceiroId,
+        parceiroId: params?.parceiroId,
         limite,
       }),
     ),
@@ -228,4 +221,26 @@ export function horarioEscolhido(pedido: Pick<PedidoNaCaixa, 'modo' | 'pets'>) {
   if (!inicios.length || !fins.length) return null
 
   return { inicio: inicios.sort()[0]!, fim: fins.sort()[fins.length - 1]! }
+}
+
+/**
+ * O horário que o aceite marcou (N24), do primeiro agendamento do grupo ao fim do último, com o
+ * profissional, a situação e o id do primeiro (o que abre na agenda). `null` enquanto não há
+ * agendamento: o pedido ainda não aceito mostra só a hora pedida.
+ */
+export function horarioMarcado(pedido: Pick<PedidoNaCaixa, 'pets'>): AgendamentoDoPedido | null {
+  const marcados = pedido.pets
+    .map((pet) => pet.agendamento)
+    .filter((agendamento): agendamento is AgendamentoDoPedido => Boolean(agendamento))
+    .sort((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio))
+  const primeiro = marcados[0]
+  if (!primeiro) return null
+
+  const fim = marcados.reduce(
+    (ultimo, agendamento) =>
+      Date.parse(agendamento.fim) > Date.parse(ultimo) ? agendamento.fim : ultimo,
+    primeiro.fim,
+  )
+
+  return { ...primeiro, fim }
 }

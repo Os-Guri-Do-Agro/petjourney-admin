@@ -1,37 +1,15 @@
 /**
- * A caixa de pedidos de horário (E3-05, PJ-SVL85R): as rotas do guia, o `parceiroId` que a lista e
- * as sugestões só levam quando não é o parceiro do token (lacuna N22) e a leitura do horário pelo
- * texto do instante.
+ * A caixa de pedidos de horário (E3-05, PJ-SVL85R): as rotas do guia, o `parceiroId` em toda
+ * chamada (a API aceita desde as lacunas N22/N34), a leitura do horário pelo texto do instante e o
+ * horário que o aceite marcou (N24).
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const JSON_HEADERS = { 'content-type': 'application/json' }
 
-function tokenCom(parceiroAtivoId: string) {
-  const parte = (objeto: unknown) =>
-    btoa(JSON.stringify(objeto)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
-  return `${parte({ alg: 'HS256' })}.${parte({ userId: 'u1', parceiroAtivoId, exp: 4102444800 })}.x`
-}
-
-const sessao = { parceiroAtivoId: undefined as string | undefined }
-const trocarParaParceiro = vi.fn()
-
-async function loadService(
-  parceiroAtivoId: string | undefined = 'p1',
-  troca: (parceiroId: string) => Promise<unknown> = async (parceiroId) => {
-    sessao.parceiroAtivoId = parceiroId
-  },
-) {
+async function loadService() {
   vi.resetModules()
   vi.stubEnv('VITE_API_URL', 'https://api.exemplo.test')
-  sessao.parceiroAtivoId = parceiroAtivoId
-  trocarParaParceiro.mockReset().mockImplementation(troca)
-  vi.doMock('../../auth/auth-session', async (original) => ({
-    ...(await original<typeof import('../../auth/auth-session')>()),
-    getAuthUser: () => ({ userId: 'u1', parceiroAtivoId: sessao.parceiroAtivoId }),
-    getAccessToken: () => tokenCom(sessao.parceiroAtivoId ?? ''),
-  }))
-  vi.doMock('../../auth/auth-service', () => ({ trocarParaParceiro }))
 
   return import('../pedidos-service')
 }
@@ -59,13 +37,11 @@ function chamadas(fetchMock: ReturnType<typeof responder>) {
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.unstubAllEnvs()
-  vi.doUnmock('../../auth/auth-session')
-  vi.doUnmock('../../auth/auth-service')
 })
 
 describe('rotas da caixa', () => {
-  it('lista e sugestões sem o parceiroId quando é o parceiro do token (N22)', async () => {
-    const servico = await loadService('p1')
+  it('toda rota leva o parceiroId da empresa em uso (N22)', async () => {
+    const servico = await loadService()
     const fetchMock = responder({ itens: [], proximoCursor: null, sugestoes: [] })
     const q = { parceiroId: 'p1' }
 
@@ -78,44 +54,29 @@ describe('rotas da caixa', () => {
     await servico.obterConfiguracaoOnline(q)
 
     expect(chamadas(fetchMock)).toEqual([
-      ['GET', '/parceiro/portal/clinica/pedidos?status=PENDENTES'],
-      ['GET', '/parceiro/portal/clinica/pedidos?status=ACEITOS&cursor=c1'],
+      ['GET', '/parceiro/portal/clinica/pedidos?parceiroId=p1&status=PENDENTES'],
+      ['GET', '/parceiro/portal/clinica/pedidos?parceiroId=p1&status=ACEITOS&cursor=c1'],
       ['GET', '/parceiro/portal/clinica/pedidos/g1?parceiroId=p1'],
-      ['GET', '/parceiro/portal/clinica/pedidos/g1/sugestoes?limite=6'],
+      ['GET', '/parceiro/portal/clinica/pedidos/g1/sugestoes?parceiroId=p1&limite=6'],
       ['POST', '/parceiro/portal/clinica/pedidos/g1/aceitar?parceiroId=p1'],
       ['POST', '/parceiro/portal/clinica/pedidos/g1/recusar?parceiroId=p1'],
       ['GET', '/parceiro/portal/clinica/agendamento-online?parceiroId=p1'],
     ])
   })
 
-  it('token sem o claim ou de outra empresa: realinha o token e lista sem o parceiroId', async () => {
-    for (const doToken of [undefined, 'p-do-token']) {
-      const servico = await loadService(doToken)
-      const fetchMock = responder({ itens: [], proximoCursor: null, sugestoes: [] })
+  it('o encaixe confirma a sobreposição e o dia fechado juntos (N23)', async () => {
+    const servico = await loadService()
+    const fetchMock = responder({ pedido: {}, agendamentoIds: [], conflitos: [] })
 
-      await servico.listarPedidos({ status: 'PENDENTES' }, { parceiroId: 'p2' })
-      await servico.sugestoesDoPedido('g1', 6, { parceiroId: 'p2' })
+    await servico.aceitarPedido(
+      'g1',
+      { confirmarConflitos: ['professional-overlap', 'holiday-closed'] },
+      { parceiroId: 'p1' },
+    )
 
-      expect(trocarParaParceiro).toHaveBeenCalledOnce()
-      expect(trocarParaParceiro).toHaveBeenCalledWith('p2')
-      expect(chamadas(fetchMock)).toEqual([
-        ['GET', '/parceiro/portal/clinica/pedidos?status=PENDENTES'],
-        ['GET', '/parceiro/portal/clinica/pedidos/g1/sugestoes?limite=6'],
-      ])
-    }
-  })
-
-  it('se o realinhamento falha, o parceiroId vai junto (nunca a caixa de outra empresa)', async () => {
-    const servico = await loadService('p-do-token', async () => {
-      throw new Error('403')
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      confirmarConflitos: ['professional-overlap', 'holiday-closed'],
     })
-    const fetchMock = responder({ itens: [], proximoCursor: null })
-
-    await servico.listarPedidos({ status: 'PENDENTES' }, { parceiroId: 'p2' })
-
-    expect(chamadas(fetchMock)).toEqual([
-      ['GET', '/parceiro/portal/clinica/pedidos?parceiroId=p2&status=PENDENTES'],
-    ])
   })
 
   it('o PUT da configuração manda só o que ela aceita', async () => {
@@ -180,6 +141,7 @@ describe('leitura do horário', () => {
       fim,
       horarioSumiu: sumiu,
       agendamentoId: null,
+      agendamento: null,
     })
     const grupo = {
       modo: 'HORARIO_ESCOLHIDO' as const,
@@ -195,5 +157,39 @@ describe('leitura do horário', () => {
     })
     expect(horarioSumiu(grupo)).toBe(true)
     expect(horarioEscolhido({ ...grupo, modo: 'MELHOR_HORARIO' })).toBeNull()
+  })
+})
+
+describe('o horário marcado (N24)', () => {
+  const agendamento = (id: string, inicio: string, fim: string) => ({
+    id,
+    inicio,
+    fim,
+    profissionalId: 'pr1',
+    profissionalNome: 'Dra. Ana',
+    status: 'AGENDADO' as const,
+  })
+  const pet = (marcado: ReturnType<typeof agendamento> | null) => ({ agendamento: marcado })
+
+  it('vai do primeiro agendamento do grupo ao fim do último', async () => {
+    const { horarioMarcado } = await loadService()
+
+    expect(
+      horarioMarcado({
+        pets: [
+          pet(agendamento('a2', '2026-11-06T10:30:00-04:00', '2026-11-06T11:00:00-04:00')),
+          pet(agendamento('a1', '2026-11-06T10:00:00-04:00', '2026-11-06T10:30:00-04:00')),
+        ],
+      } as never),
+    ).toEqual({
+      ...agendamento('a1', '2026-11-06T10:00:00-04:00', '2026-11-06T10:30:00-04:00'),
+      fim: '2026-11-06T11:00:00-04:00',
+    })
+  })
+
+  it('sem agendamento (o pedido ainda não aceito), nada', async () => {
+    const { horarioMarcado } = await loadService()
+
+    expect(horarioMarcado({ pets: [pet(null)] } as never)).toBeNull()
   })
 })

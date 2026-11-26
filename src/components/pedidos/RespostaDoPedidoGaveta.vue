@@ -11,7 +11,11 @@
  * O pedido não segura o horário (decisão 25): aceitar pode dar 409 `HORARIO_JA_TOMADO`. A gaveta
  * leva às sugestões, à recusa ou, com confirmação explícita, ao encaixe de propósito
  * (`professional-overlap`). O dia fechado (`CONFLITO_BLOQUEANTE`) pede a mesma confirmação
- * (`holiday-closed`). Os avisos que ficam depois do aceite aparecem no resultado.
+ * (`holiday-closed`); os dois juntos valem (N23/N53). Os avisos que ficam depois do aceite aparecem
+ * no resultado.
+ *
+ * Aceito, o horário que ficou marcado (`pets[].agendamento`, N24: começo, fim, profissional e
+ * situação, como está agora) aparece além do pedido, e abre na agenda.
  *
  * O telefone aparece como texto: a clínica liga pelo telefone dela, a tela não disca.
  *
@@ -28,6 +32,7 @@ import Textarea from 'primevue/textarea'
 import { useToast } from 'primevue/usetoast'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { RouterLink } from 'vue-router'
 
 import CadastroGaveta from '@/components/cadastro/CadastroGaveta.vue'
 import OpcaoDoPaciente from '@/components/cadastro/OpcaoDoPaciente.vue'
@@ -42,6 +47,7 @@ import {
   diaCurto,
   diaLongo,
   fichasParecidas,
+  rotaNaAgenda,
   vinculoDoAceite,
   type ClienteDaCasa,
   type FichaDaCasa,
@@ -53,6 +59,7 @@ import {
   diaDoInstante,
   horaDoInstante,
   horarioEscolhido,
+  horarioMarcado,
   horarioSumiu,
   MOTIVOS_DA_RECUSA,
   obterPedido,
@@ -80,7 +87,7 @@ const LIMITE_DE_SUGESTOES = 6
 
 const { t, locale } = useI18n()
 const toast = useToast()
-const { parceiroQuery } = useParceiroPortal()
+const { store, parceiroQuery } = useParceiroPortal()
 
 const intl = computed(() => INTL_LOCALE[locale.value as Locale])
 
@@ -391,7 +398,11 @@ async function aceitar(aceite: Aceite) {
 
   try {
     const resposta = await aceitarPedido(id, aceite, parceiroQuery())
-    const inicio = aceite.inicio ?? resposta.pedido.pets.find((pet) => pet.inicio)?.inicio ?? null
+    const inicio =
+      horarioMarcado(resposta.pedido)?.inicio ??
+      aceite.inicio ??
+      resposta.pedido.pets.find((pet) => pet.inicio)?.inicio ??
+      null
     pedido.value = resposta.pedido
     aConfirmar.value = null
     resultado.value = {
@@ -497,10 +508,7 @@ const desfecho = computed(() => {
   const atual = pedido.value
   if (!atual || atual.status === 'PENDENTE') return ''
 
-  /*
-   * Lacuna N24: com "outro horário", o pedido continua com o horário pedido (`pets[].inicio`) e não
-   * há leitura do agendamento por id; o desfecho não afirma hora que não sabe.
-   */
+  /* A hora que ficou marcada mora no bloco do horário marcado, abaixo (N24). */
   if (atual.status === 'ACEITO') {
     return t(
       atual.respondidoPor === 'AUTOMATICO'
@@ -516,6 +524,40 @@ const desfecho = computed(() => {
 
   return t(`clinico.pedidos.respondido.${atual.status === 'DESISTIU' ? 'desistiu' : 'expirado'}`)
 })
+
+/**
+ * O horário que ficou marcado, um por pet (o grupo de até 3 pets tem um agendamento cada), como o
+ * agendamento está agora. O nome do pet só entra quando são vários.
+ */
+const marcados = computed(() => {
+  const atual = pedido.value
+  if (!atual) return []
+
+  const varios = atual.pets.length > 1
+
+  return atual.pets.flatMap((pet) => {
+    const agendamento = pet.agendamento
+    if (!agendamento) return []
+
+    const texto = [
+      varios ? pet.nome : '',
+      t('pedidos.caixa.marcadoFaixa', {
+        dia: diaCurto(diaDoInstante(agendamento.inicio), intl.value),
+        inicio: horaDoInstante(agendamento.inicio),
+        fim: horaDoInstante(agendamento.fim),
+      }),
+      agendamento.profissionalNome ?? '',
+      t(`agendamentos.status.${agendamento.status}`),
+    ]
+      .filter(Boolean)
+      .join(' · ')
+
+    return [{ id: agendamento.id, texto, rota: rotaNaAgenda(agendamento) }]
+  })
+})
+
+/** Abrir na agenda é para quem a lê. */
+const leAgenda = computed(() => store.temPermissao('agenda.ler'))
 
 function textoDoAviso(aviso: DetalheDoPedido['avisos'][number]) {
   return t(`pedidos.caixa.aviso.${aviso.situacao}`, {
@@ -841,6 +883,26 @@ const podeResponder = computed(
           </li>
         </ul>
       </section>
+
+      <!-- Aceito: o horário que ficou marcado, que pode ser outro que o pedido (N24). -->
+      <section v-if="pedido.status === 'ACEITO' && marcados.length" class="eg__secao">
+        <span class="eg__rotulo">{{ t('pedidos.caixa.horarioMarcado') }}</span>
+        <ul class="rp__marcados">
+          <li v-for="marcado in marcados" :key="marcado.id">
+            <span class="ui-num">{{ marcado.texto }}</span>
+            <Button
+              v-if="leAgenda"
+              :as="RouterLink"
+              :to="marcado.rota"
+              size="small"
+              severity="secondary"
+              outlined
+              icon="ph ph-calendar-dots"
+              :label="t('pedidos.caixa.abrirNaAgenda')"
+            />
+          </li>
+        </ul>
+      </section>
     </template>
 
     <template #pe>
@@ -1085,6 +1147,24 @@ const podeResponder = computed(
 .rp__conflitos i,
 .rp__avisos i {
   margin-top: 2px;
+}
+
+.rp__marcados {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rp__marcados li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  color: var(--tinta);
+  font-size: 14px;
 }
 
 .rp__citacao {

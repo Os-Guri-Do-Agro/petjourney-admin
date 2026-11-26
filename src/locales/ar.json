@@ -11141,7 +11141,11 @@
         "novoDica": "يُنشئ عميلًا آخر من بيانات الطلب.",
         "fichaDe": "ملف {nome}",
         "fichaNova": "ملف جديد"
-      }
+      },
+      "marcadoLinha": "تم الحجز: {dia}، {inicio} إلى {fim}",
+      "horarioMarcado": "الموعد المحجوز",
+      "abrirNaAgenda": "فتح في جدول المواعيد",
+      "marcadoFaixa": "{dia}، {inicio} إلى {fim}"
     },
     "config": {
       "ativo": "استقبال الطلبات عبر التطبيق والموقع",

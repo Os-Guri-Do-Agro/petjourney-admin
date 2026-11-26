@@ -16,9 +16,9 @@ export type ModuloDaPendencia = PendenciaDto['modulo']
 export type TomDaPendencia = PendenciaDto['tom']
 
 /**
- * A rota do contador como o portal a conhece. Parte dos contadores da Clínica ainda manda
- * `/veterinario/...`, o endereço de antes de a Clínica virar `/clinica` (lacuna N4): o selo precisa
- * da rota de hoje para achar o item do menu.
+ * A rota do contador como o portal a conhece. Desde as lacunas N4/N9 (API de 25/11), os contadores da
+ * Clínica já mandam `/clinica/...` (e a importação, `/clinica/paciente/importar`); a troca de
+ * `/veterinario/...` fica como rede de segurança. As telas do hotel continuam com nome da API.
  */
 export function rotaDoPortal(rota: string) {
   return rota

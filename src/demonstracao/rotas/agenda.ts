@@ -28,6 +28,7 @@ import type {
   AgendaDaSemana,
   AgendaDoDia,
   AgendaDoIntervalo,
+  Agendamento,
   Agrupamento,
   Cancelamento,
   EdicaoDoAgendamento,
@@ -103,6 +104,7 @@ import {
   desfazer,
   diaDaAgenda,
   doGrupo,
+  dtoDe,
   ErroDaDemo,
   exigirAgendamento,
   exigirPacienteAtivo,
@@ -259,6 +261,11 @@ function registrarAcoes() {
       : null
     return ok<Mutacao>(mutacaoDe(principal, todos, guardarDesfazer([], todos), aviso), 201)
   })
+
+  /* O horário que o aceite de um pedido marcou, aberto pelo id (N24). */
+  registrar('GET', `${CLINICA}/agendamentos/:id`, (pedido) =>
+    ok<Agendamento>(dtoDe(exigirAgendamento(parametro(pedido, 'id')))),
+  )
 
   registrar('PATCH', `${CLINICA}/agendamentos/:id`, (pedido) => {
     const a = exigirAgendamento(parametro(pedido, 'id'))

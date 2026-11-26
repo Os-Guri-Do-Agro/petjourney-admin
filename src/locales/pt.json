@@ -11141,7 +11141,11 @@
         "novoDica": "Cria outro cliente com os dados do pedido.",
         "fichaDe": "Ficha de {nome}",
         "fichaNova": "Ficha nova"
-      }
+      },
+      "marcadoLinha": "Marcado: {dia}, {inicio} a {fim}",
+      "horarioMarcado": "Horário marcado",
+      "abrirNaAgenda": "Abrir na agenda",
+      "marcadoFaixa": "{dia}, {inicio} a {fim}"
     },
     "config": {
       "ativo": "Receber pedidos pelo app e pelo site",

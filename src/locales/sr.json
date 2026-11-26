@@ -11141,7 +11141,11 @@
         "novoDica": "Pravi drugog klijenta sa podacima iz zahteva.",
         "fichaDe": "Karton za {nome}",
         "fichaNova": "Novi karton"
-      }
+      },
+      "marcadoLinha": "Zakazano: {dia}, {inicio} do {fim}",
+      "horarioMarcado": "Zakazani termin",
+      "abrirNaAgenda": "Otvori u rasporedu",
+      "marcadoFaixa": "{dia}, {inicio} do {fim}"
     },
     "config": {
       "ativo": "Primaj zahteve preko aplikacije i sajta",

@@ -154,12 +154,21 @@ function carregar() {
 
 /**
  * Refaz a contagem, se alguém já a estava usando. Chamado por quem mexe num número: convite enviado
- * ou cancelado, por exemplo. O servidor invalida o próprio cache nesses eventos.
+ * ou cancelado, pedido de horário respondido (N56), por exemplo. O servidor invalida o próprio cache
+ * nesses eventos.
+ *
+ * Com uma conferência já a caminho, ela saiu antes da mudança e pode trazer o número velho: outra
+ * sai logo depois dela.
  */
 export function invalidarPendenciasDoPortal() {
-  if (conferidoPara.value !== undefined) {
-    void carregar()
+  if (conferidoPara.value === undefined) return
+
+  if (emVoo) {
+    void emVoo.then(() => carregar())
+    return
   }
+
+  void carregar()
 }
 
 const reconferencia = criarReconferencia({

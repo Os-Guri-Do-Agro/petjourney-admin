@@ -11141,7 +11141,11 @@
         "novoDica": "Creates another client from the request details.",
         "fichaDe": "Patient record for {nome}",
         "fichaNova": "New patient record"
-      }
+      },
+      "marcadoLinha": "Booked: {dia}, {inicio} to {fim}",
+      "horarioMarcado": "Booked time",
+      "abrirNaAgenda": "Open in the schedule",
+      "marcadoFaixa": "{dia}, {inicio} to {fim}"
     },
     "config": {
       "ativo": "Receive requests through the app and the website",

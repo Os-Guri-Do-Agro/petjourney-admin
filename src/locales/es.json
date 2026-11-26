@@ -11141,7 +11141,11 @@
         "novoDica": "Crea otro cliente con los datos de la solicitud.",
         "fichaDe": "Ficha de {nome}",
         "fichaNova": "Ficha nueva"
-      }
+      },
+      "marcadoLinha": "Reservado: {dia}, {inicio} a {fim}",
+      "horarioMarcado": "Horario reservado",
+      "abrirNaAgenda": "Abrir en la agenda",
+      "marcadoFaixa": "{dia}, {inicio} a {fim}"
     },
     "config": {
       "ativo": "Recibir solicitudes por la app y el sitio",

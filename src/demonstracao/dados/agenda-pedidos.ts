@@ -101,10 +101,28 @@ function sumiu(p: PedidoDaDemo, pet: Omit<PetDoPedido, 'horarioSumiu'>) {
   )
 }
 
+/** O agendamento que o aceite criou, como está agora na agenda (N24: a hora marcada, não a pedida). */
+function agendamentoDoPet(agendamentoId: string | null): PetDoPedido['agendamento'] {
+  const a = agendamentoId ? AGENDAMENTOS.find((x) => x.id === agendamentoId) : undefined
+  if (!a) return null
+  return {
+    id: a.id,
+    inicio: a.inicio,
+    fim: a.fim,
+    profissionalId: a.profissionalId,
+    profissionalNome: nomeDoProfissional(a.profissionalId),
+    status: a.status,
+  }
+}
+
 export function detalheDoPedido(p: PedidoDaDemo): DetalheDoPedido {
   return {
     ...p,
-    pets: p.pets.map((pet) => ({ ...pet, horarioSumiu: sumiu(p, pet) })),
+    pets: p.pets.map((pet) => ({
+      ...pet,
+      horarioSumiu: sumiu(p, pet),
+      agendamento: agendamentoDoPet(pet.agendamentoId),
+    })),
     prazo: prazoDe(p),
     avisos: p.avisos.map((a) => ({ ...a })),
   }
@@ -271,9 +289,8 @@ export function aceitarPedido(p: PedidoDaDemo, aceite: Partial<Aceite>): Respost
       { origem, pedidoId: p.id, criadoPorId: null },
     )
     criados.push(principal)
+    /* `pets[].inicio` continua a hora pedida; a marcada sai em `pets[].agendamento` (N24). */
     pet.agendamentoId = principal.id
-    pet.inicio = principal.inicio
-    pet.fim = principal.fim
   })
 
   p.status = 'ACEITO'

@@ -35,19 +35,8 @@ import type {
 } from '../contrato/openapi'
 import { comIdempotencia } from '../idempotencia'
 
-/**
- * O contrato gerado diz `FaixaDto { min, max }` no expediente, no almoço e nas faixas do dia (o nome
- * colide com outra faixa); a rota manda `{ inicio, fim }` em `HH:mm`, como o guia 2.2 (lacuna N27).
- */
-export type FaixaDoDia = { inicio: string; fim: string }
-export type ProfissionalNaAgenda = Omit<ProfissionalNaAgendaDto, 'faixas'> & {
-  faixas: FaixaDoDia[]
-}
-export type AgendaDoDia = Omit<AgendaDiaDto, 'expediente' | 'almoco' | 'profissionais'> & {
-  expediente: FaixaDoDia | null
-  almoco: FaixaDoDia | null
-  profissionais: ProfissionalNaAgenda[]
-}
+export type ProfissionalNaAgenda = ProfissionalNaAgendaDto
+export type AgendaDoDia = AgendaDiaDto
 export type AgendaDaSemana = AgendaSemanaDto
 export type AgendaDoIntervalo = AgendaIntervaloDto
 export type Agendamento = AgendamentoDaAgendaDto
@@ -133,6 +122,18 @@ export function obterDia(data: string, agrupar: Agrupamento, params?: ParceiroQu
   return dados(
     apiFetch<ApiEnvelope<AgendaDoDia>>(
       comQuery(`${AGENDA}/dia`, { parceiroId: params?.parceiroId, data, agrupar }),
+    ),
+  )
+}
+
+/**
+ * Um agendamento por id, na forma da linha do dia (os conflitos de agora e a foto do paciente). Abre
+ * o horário que o aceite de um pedido marcou (N24). De outro parceiro ou inexistente: 403.
+ */
+export function obterAgendamento(id: string, params?: ParceiroQuery) {
+  return dados(
+    apiFetch<ApiEnvelope<Agendamento>>(
+      comQuery(doAgendamento(id), { parceiroId: params?.parceiroId }),
     ),
   )
 }

@@ -78,6 +78,7 @@ import {
   desfazerNaAgenda,
   moverAgendamento,
   moverMudaParaOResponsavel,
+  obterAgendamento,
   obterDia,
   obterSemana,
   type AgendaDaSemana,
@@ -696,18 +697,55 @@ function abrir(agendamento: Agendamento) {
 }
 
 /**
- * Veio de outra tela (Meu dia, Atividades) com `?horario=<id>`: abre a gaveta dele quando o dia
- * chegar, uma vez, e tira o parâmetro (voltar não reabre).
+ * Veio de outra tela (Meu dia, Atividades, a caixa de pedidos) com `?horario=<id>`: abre a gaveta
+ * dele quando o dia chegar, uma vez, e tira o parâmetro (voltar não reabre). Fora do dia na tela, o
+ * horário é lido pelo id (N24) e a agenda vai ao dia dele.
  */
+function tirarHorarioDaUrl() {
+  const query = { ...route.query }
+  delete query.horario
+  void router.replace({ query })
+}
+
+let lendoHorario: string | null = null
+
+async function abrirPeloId(id: string) {
+  if (lendoHorario === id) return
+  lendoHorario = id
+
+  try {
+    const lido = await obterAgendamento(id, parceiroQuery())
+    if (route.query.horario !== id) return
+
+    const diaDele = lido.inicio.slice(0, 10)
+    if (visao.value === 'dia' && diaDele !== data.value) {
+      /* No dia dele, a leitura do dia traz o horário e o `watch` abaixo abre a gaveta. */
+      void router.replace({ query: { ...route.query, data: diaDele } })
+      return
+    }
+    abrir(lido)
+    tirarHorarioDaUrl()
+  } catch {
+    /* De outro parceiro, apagado ou sem rede: a agenda fica como está. */
+    if (route.query.horario === id) tirarHorarioDaUrl()
+  } finally {
+    lendoHorario = null
+  }
+}
+
 watch(
   () => [dia.value, route.query.horario] as const,
   ([lido, pedido]) => {
     if (!lido || typeof pedido !== 'string' || !pedido) return
+    /* A leitura de outro dia ainda na tela: espera a do dia pedido. */
+    if (lido.data !== data.value) return
     const alvo = lido.agendamentos.find((item) => item.id === pedido)
-    if (alvo) abrir(alvo)
-    const query = { ...route.query }
-    delete query.horario
-    void router.replace({ query })
+    if (!alvo) {
+      void abrirPeloId(pedido)
+      return
+    }
+    abrir(alvo)
+    tirarHorarioDaUrl()
   },
   { immediate: true },
 )

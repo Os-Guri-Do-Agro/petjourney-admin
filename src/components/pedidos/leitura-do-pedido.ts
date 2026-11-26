@@ -6,6 +6,7 @@
 import type { PacienteNaLista } from '@/service/parceiro/pacientes-service'
 import type {
   Aceite,
+  AgendamentoDoPedido,
   Conflito,
   MotivoDaRecusa,
   MotivoDoPedido,
@@ -73,6 +74,17 @@ export function chaveDoConflito(conflito: Pick<Conflito, 'kind'>) {
   return (KINDS_CONHECIDOS as readonly string[]).includes(conflito.kind)
     ? `pedidos.caixa.conflito.${conflito.kind}`
     : 'pedidos.caixa.conflito.outro'
+}
+
+/**
+ * O agendamento que o aceite marcou, na agenda: o dia dele e a gaveta aberta (`?horario=`, como o
+ * Meu dia e as Atividades levam). O dia sai do próprio texto do instante, no fuso da clínica.
+ */
+export function rotaNaAgenda(agendamento: Pick<AgendamentoDoPedido, 'id' | 'inicio'>) {
+  return {
+    path: '/clinica/agenda',
+    query: { data: agendamento.inicio.slice(0, 10), horario: agendamento.id },
+  }
 }
 
 /** Os avisos que importam ao aceitar: `info` não pede atenção de ninguém. */

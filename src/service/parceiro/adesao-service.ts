@@ -23,7 +23,6 @@ import type {
   ResumoDeAdesaoDto,
   TratamentoNaListaDto,
 } from '../contrato/openapi'
-import { parceiroPeloToken } from './parceiro-do-token'
 
 export type AdesaoDoPaciente = AdesaoDoPacienteDto
 export type Tratamento = AdesaoParaClinicaDto
@@ -85,25 +84,18 @@ export function lerAdesaoDoPaciente(pacienteId: string, params?: ParceiroQuery) 
   )
 }
 
-/**
- * Lacuna N34 (a mesma da N22): a lista recusa `?parceiroId=` (400 "property parceiroId should not
- * exist") e usa o parceiro ativo do token, realinhado antes da chamada (`parceiroPeloToken`).
- */
-
 /** A lista da clínica; `PEDEM_ATENCAO` = os críticos com alerta aberto (o que o cron gravou). */
-export async function listarTratamentos(
+export function listarTratamentos(
   filtro: { pedemAtencao?: boolean; cursor?: string | null; limit?: number } = {},
   params?: ParceiroQuery,
 ) {
-  const parceiroId = await parceiroPeloToken(params?.parceiroId)
-
   return dados(
     apiFetch<ApiEnvelope<PaginaDeTratamentos>>(
       comQuery(TRATAMENTOS, {
         filtro: filtro.pedemAtencao ? 'PEDEM_ATENCAO' : undefined,
         cursor: filtro.cursor,
         limit: filtro.limit ?? 30,
-        parceiroId,
+        parceiroId: params?.parceiroId,
       }),
       comFuso(),
     ),
