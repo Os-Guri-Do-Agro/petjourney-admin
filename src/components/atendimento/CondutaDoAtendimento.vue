@@ -201,7 +201,7 @@ function rotuloDoAto(ato: AtoNaLista) {
         </div>
       </section>
 
-      <!-- Só na clínica. -->
+      <!-- Anotação da equipe: fica só na clínica. -->
       <section class="sa__grupo" aria-labelledby="sa-conduta-interna">
         <div class="sa__sobre">
           <h3 id="sa-conduta-interna" class="sa__titulo">
@@ -215,6 +215,7 @@ function rotuloDoAto(ato: AtoNaLista) {
             rows="2"
             auto-resize
             :aria-label="t('atendimento.conduta.observacaoInterna')"
+            :placeholder="somenteLeitura ? undefined : t('atendimento.conduta.anotacaoExemplo')"
             :readonly="somenteLeitura"
           />
         </div>

@@ -12865,9 +12865,10 @@
       "abrirHorario": "Abrir el horario",
       "marcarAgora": "Agendar ahora",
       "marcarDica": "En el primer horario libre de quien atendió, a partir del vencimiento.",
-      "soNaClinica": "Solo en la clínica",
-      "soNaClinicaDica": "Nunca va a la app.",
-      "observacaoInterna": "Observación interna"
+      "soNaClinica": "Nota del equipo",
+      "soNaClinicaDica": "Un recado para los colegas de la clínica sobre esta consulta. El responsable no lo ve.",
+      "observacaoInterna": "Nota del equipo",
+      "anotacaoExemplo": "Ej.: se pone inquieto al sujetarlo; revisar el hemograma en el control."
     },
     "atos": {
       "titulo": "Actos de la consulta",
@@ -12950,7 +12951,7 @@
       "diagnosticos": "Diagnósticos",
       "nada": "Nada escrito",
       "retornoEm": "En {n} día | En {n} días",
-      "ficaNaClinica": "El diferencial y la observación interna quedan solo en la clínica.",
+      "ficaNaClinica": "El diferencial y la nota del equipo quedan solo en la clínica.",
       "depois": "Después de finalizar, una indicación errónea solo se corrige con una adenda.",
       "outroResponsavel": "Finalizo la consulta de {nome} y respondo por lo que está escrito.",
       "confirmeOutro": "Confirme que finaliza la consulta de otro veterinario.",

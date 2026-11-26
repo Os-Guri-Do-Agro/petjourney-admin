@@ -12865,9 +12865,10 @@
       "abrirHorario": "Open the appointment",
       "marcarAgora": "Book now",
       "marcarDica": "At the first free time with the same vet, from the due date.",
-      "soNaClinica": "Clinic only",
-      "soNaClinicaDica": "Never goes to the app.",
-      "observacaoInterna": "Internal note"
+      "soNaClinica": "Team note",
+      "soNaClinicaDica": "A note for your colleagues at the clinic about this visit. The owner never sees it.",
+      "observacaoInterna": "Team note",
+      "anotacaoExemplo": "E.g.: gets restless when restrained; check the blood count at the follow-up."
     },
     "atos": {
       "titulo": "Procedures in this consultation",
@@ -12950,7 +12951,7 @@
       "diagnosticos": "Diagnoses",
       "nada": "Nothing written",
       "retornoEm": "In {n} day | In {n} days",
-      "ficaNaClinica": "The differential and the internal note stay in the clinic.",
+      "ficaNaClinica": "The differential and the team note stay in the clinic.",
       "depois": "After finalising, a wrong instruction can only be corrected with an addendum.",
       "outroResponsavel": "I finalise the consultation of {nome} and take responsibility for what is written.",
       "confirmeOutro": "Confirm that you finalise another vet's consultation.",

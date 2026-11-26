@@ -12865,9 +12865,10 @@
       "abrirHorario": "Otvori termin",
       "marcarAgora": "Zakaži sada",
       "marcarDica": "U prvom slobodnom terminu kod istog veterinara, od dana isteka.",
-      "soNaClinica": "Samo u klinici",
-      "soNaClinicaDica": "Nikada ne ide u aplikaciju.",
-      "observacaoInterna": "Interna napomena"
+      "soNaClinica": "Napomena za tim",
+      "soNaClinicaDica": "Poruka kolegama u klinici o ovom pregledu. Vlasnik je ne vidi.",
+      "observacaoInterna": "Napomena za tim",
+      "anotacaoExemplo": "Npr.: uznemiri se pri fiksiranju; proveriti krvnu sliku na kontroli."
     },
     "atos": {
       "titulo": "Intervencije na pregledu",
@@ -12950,7 +12951,7 @@
       "diagnosticos": "Dijagnoze",
       "nada": "Ništa nije napisano",
       "retornoEm": "Za {n} dan | Za {n} dana | Za {n} dana",
-      "ficaNaClinica": "Diferencijalna dijagnoza i interna napomena ostaju samo u klinici.",
+      "ficaNaClinica": "Diferencijalna dijagnoza i napomena za tim ostaju samo u klinici.",
       "depois": "Posle završavanja, pogrešno uputstvo se ispravlja samo dodatkom.",
       "outroResponsavel": "Završavam pregled koji vodi {nome} i odgovaram za ono što je napisano.",
       "confirmeOutro": "Potvrdite da završavate pregled drugog veterinara.",
