@@ -28,7 +28,7 @@ import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 
 import AvisoAoResponsavelCampos from '@/components/agendamentos/AvisoAoResponsavelCampos.vue'
-import { ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
+import { horaNoFuso, ordenarConflitos } from '@/components/agendamentos/leitura-da-agenda'
 import { useAvisoAoResponsavel } from '@/components/agendamentos/useAvisoAoResponsavel'
 import {
   erroDoAviso,
@@ -248,6 +248,28 @@ function trocarTipo(novo: string) {
 /* ------------------------------------------------------------------------------ corpo */
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/
+
+/* O relógio da gaveta: o "já passou" acompanha a hora enquanto ela fica aberta. */
+const relogio = ref(Date.now())
+const tiqueDoRelogio = setInterval(() => {
+  relogio.value = Date.now()
+}, 30_000)
+onBeforeUnmount(() => clearInterval(tiqueDoRelogio))
+
+/**
+ * A hora de agora na clínica, quando o horário escolhido já passou no relógio dela; `null` se ainda
+ * não passou. Marca do mesmo jeito (registrar o que já aconteceu vale), mas no app ele fica entre os
+ * horários passados e o aviso ao responsável não sai (a API o registra fora do prazo). Quem marca de
+ * outro fuso confunde: 12:00 da clínica em São Paulo são 11:00 em Campo Grande.
+ */
+const jaPassou = computed(() => {
+  if (!HORA.test(hora.value)) return null
+
+  const inicio = Date.parse(instanteNoFuso(props.fuso, diaLocal(dia.value), hora.value))
+  if (Number.isNaN(inicio) || inicio >= relogio.value) return null
+
+  return horaNoFuso(new Date(relogio.value).toISOString(), props.fuso)
+})
 
 const problema = computed(() => {
   if (!paciente.value) return t('agendamentos.marcar.semPaciente')
@@ -567,6 +589,11 @@ const nomeDoProfissional = (id: string) =>
         </section>
       </div>
 
+      <p v-if="jaPassou" class="mg__passou" role="status">
+        <i class="ph ph-clock-counter-clockwise" aria-hidden="true" />
+        <span>{{ t('agendamentos.marcar.jaPassou', { agora: jaPassou }) }}</span>
+      </p>
+
       <!-- O que o servidor diz deste horário. -->
       <section
         v-if="chaveDaSimulacao"
@@ -819,6 +846,25 @@ const nomeDoProfissional = (id: string) =>
   .mg__simulacao {
     transition: none;
   }
+}
+
+/* O horário que já passou: atenção, não erro (registrar o que já aconteceu vale). */
+.mg__passou {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--atencao-fundo);
+  color: var(--atencao-tinta);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+.mg__passou i {
+  margin-top: 2px;
+  font-size: 16px;
 }
 
 .mg__livre {

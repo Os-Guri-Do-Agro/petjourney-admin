@@ -11850,7 +11850,8 @@
       "horaInvalida": "Hora inválida. Usa el formato 09:30.",
       "abrirOQueFicou": "Abrir el registro que quedó",
       "semTipos": "Para agendar, la clínica necesita un tipo de atención activo.",
-      "criarTipo": "Crear tipo de atención"
+      "criarTipo": "Crear tipo de atención",
+      "jaPassou": "Este horario ya pasó en el reloj de la clínica (allí son las {agora}). En la app queda entre los horarios pasados y el responsable no recibe aviso."
     },
     "preConsulta": {
       "titulo": "Preconsulta",

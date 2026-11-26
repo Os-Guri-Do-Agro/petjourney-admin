@@ -11850,7 +11850,8 @@
       "horaInvalida": "Hora inválida. Use o formato 09:30.",
       "abrirOQueFicou": "Abrir o cadastro que ficou",
       "semTipos": "Para marcar, a clínica precisa de um tipo de atendimento ativo.",
-      "criarTipo": "Criar tipo de atendimento"
+      "criarTipo": "Criar tipo de atendimento",
+      "jaPassou": "Esse horário já passou no relógio da clínica (lá são {agora}). No app ele fica entre os horários passados, e o responsável não recebe aviso."
     },
     "preConsulta": {
       "titulo": "Pré-consulta",

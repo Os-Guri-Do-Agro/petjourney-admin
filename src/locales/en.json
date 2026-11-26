@@ -11850,7 +11850,8 @@
       "horaInvalida": "Invalid time. Use the format 09:30.",
       "abrirOQueFicou": "Open the remaining record",
       "semTipos": "To book, the clinic needs an active appointment type.",
-      "criarTipo": "Create appointment type"
+      "criarTipo": "Create appointment type",
+      "jaPassou": "This time has already passed on the clinic's clock (it's {agora} there). In the app it shows with past appointments, and the owner isn't notified."
     },
     "preConsulta": {
       "titulo": "Pre-visit form",

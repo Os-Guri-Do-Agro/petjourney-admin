@@ -11850,7 +11850,8 @@
       "horaInvalida": "Neispravno vreme. Koristi format 09:30.",
       "abrirOQueFicou": "Otvori karton koji je ostao",
       "semTipos": "Za zakazivanje klinici treba aktivna vrsta pregleda.",
-      "criarTipo": "Napravi vrstu pregleda"
+      "criarTipo": "Napravi vrstu pregleda",
+      "jaPassou": "Ovo vreme je već prošlo po satu klinike (tamo je {agora}). U aplikaciji ide među prošle termine i vlasnik ne dobija obaveštenje."
     },
     "preConsulta": {
       "titulo": "Upitnik pre pregleda",
