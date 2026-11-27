@@ -3198,7 +3198,8 @@
         "resumo_do_paciente": "o resumo do paciente",
         "servico_realizado_do_app": "um serviço realizado para o app",
         "outro": "um registro ({tipo})",
-        "resumo_de_documentos": "o resumo dos documentos do app"
+        "resumo_de_documentos": "o resumo dos documentos do app",
+        "autorizado_do_cliente": "um autorizado a buscar o pet"
       },
       "guia": {
         "titulo": "Como a auditoria funciona",
@@ -11920,8 +11921,11 @@
           "AGENDAMENTO_FALTA": "Falta",
           "FILA_VAGA_OFERECIDA": "Vaga da lista de espera",
           "PRE_CONSULTA_PENDENTE": "Pré-consulta",
-          "VACINA_LEMBRETE_DA_CLINICA": "Lembrete de vacina"
+          "VACINA_LEMBRETE_DA_CLINICA": "Lembrete de vacina",
+          "PEDIDO_ACEITO": "Pedido aceito",
+          "PEDIDO_MARCADO_EM_OUTRO_HORARIO": "Pedido marcado em outro horário"
         },
+        "tipoOutro": "Aviso ao responsável",
         "situacao": {
           "PENDENTE": "Na fila",
           "ENVIADO": "Enviado",

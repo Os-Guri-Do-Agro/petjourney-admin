@@ -3198,7 +3198,8 @@
         "resumo_do_paciente": "ملخصَ المريض",
         "servico_realizado_do_app": "خدمةً منجزة للتطبيق",
         "outro": "سجلًا ({tipo})",
-        "resumo_de_documentos": "ملخص مستندات التطبيق"
+        "resumo_de_documentos": "ملخص مستندات التطبيق",
+        "autorizado_do_cliente": "شخص مخوّل باستلام الحيوان"
       },
       "guia": {
         "titulo": "كيف يعمل سجل التدقيق",
@@ -11920,8 +11921,11 @@
           "AGENDAMENTO_FALTA": "غياب",
           "FILA_VAGA_OFERECIDA": "مكان من قائمة الانتظار",
           "PRE_CONSULTA_PENDENTE": "ما قبل الاستشارة",
-          "VACINA_LEMBRETE_DA_CLINICA": "تذكير باللقاح"
+          "VACINA_LEMBRETE_DA_CLINICA": "تذكير باللقاح",
+          "PEDIDO_ACEITO": "تم قبول الطلب",
+          "PEDIDO_MARCADO_EM_OUTRO_HORARIO": "تم حجز الطلب في موعد آخر"
         },
+        "tipoOutro": "إشعار إلى المسؤول",
         "situacao": {
           "PENDENTE": "في الانتظار",
           "ENVIADO": "أُرسل",

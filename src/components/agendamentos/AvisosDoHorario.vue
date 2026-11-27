@@ -30,9 +30,19 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ canal: [semCanalNoApp: boolean | null] }>()
 
-const { t } = useI18n()
+const { t, te } = useI18n()
 const rotulos = useRotulosDoCadastro()
 const { parceiroQuery } = useParceiroPortal()
+
+/*
+ * O nome do aviso. A API manda tipos que o contrato não lista (PEDIDO_ACEITO e
+ * PEDIDO_MARCADO_EM_OUTRO_HORARIO no horário que nasceu de um pedido): sem o nome, a chave crua
+ * aparecia na gaveta (26/11/2026). Tipo novo que chegar sai como "Aviso ao responsável".
+ */
+function nomeDoTipo(tipo: string) {
+  const chave = `agendamentos.aviso.comprovante.tipo.${tipo}`
+  return te(chave) ? t(chave) : t('agendamentos.aviso.comprovante.tipoOutro')
+}
 
 const itens = ref<AvisoAoResponsavel[]>([])
 const fuso = ref<string | undefined>(undefined)
@@ -204,7 +214,7 @@ const rotuloDoVer = computed(() =>
       <!-- Recolhido: o último aviso, numa linha, e o botão que abre os outros. -->
       <p v-if="!aberto && ultimo" class="avh__linha">
         <i :class="ICONE[ultimo.situacao]" aria-hidden="true" />
-        <span class="avh__tipo">{{ t(`agendamentos.aviso.comprovante.tipo.${ultimo.tipo}`) }}</span>
+        <span class="avh__tipo">{{ nomeDoTipo(ultimo.tipo) }}</span>
         <span :class="SELO[ultimo.situacao]">{{
           t(`agendamentos.aviso.comprovante.situacao.${ultimo.situacao}`)
         }}</span>
@@ -214,9 +224,7 @@ const rotuloDoVer = computed(() =>
         <li v-for="item in itens" :key="item.id" class="avh__item">
           <p class="avh__linha">
             <i :class="ICONE[item.situacao]" aria-hidden="true" />
-            <span class="avh__tipo">{{
-              t(`agendamentos.aviso.comprovante.tipo.${item.tipo}`)
-            }}</span>
+            <span class="avh__tipo">{{ nomeDoTipo(item.tipo) }}</span>
             <span :class="SELO[item.situacao]">{{
               t(`agendamentos.aviso.comprovante.situacao.${item.situacao}`)
             }}</span>

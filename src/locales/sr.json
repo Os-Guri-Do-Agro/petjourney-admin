@@ -3198,7 +3198,8 @@
         "resumo_do_paciente": "sažetak o pacijentu",
         "servico_realizado_do_app": "obavljenu uslugu za aplikaciju",
         "outro": "zapis ({tipo})",
-        "resumo_de_documentos": "sažetak dokumenata iz aplikacije"
+        "resumo_de_documentos": "sažetak dokumenata iz aplikacije",
+        "autorizado_do_cliente": "osoba ovlašćena da preuzme ljubimca"
       },
       "guia": {
         "titulo": "Kako revizija funkcioniše",
@@ -11920,8 +11921,11 @@
           "AGENDAMENTO_FALTA": "Nedolazak",
           "FILA_VAGA_OFERECIDA": "Mesto sa liste čekanja",
           "PRE_CONSULTA_PENDENTE": "Pre pregleda",
-          "VACINA_LEMBRETE_DA_CLINICA": "Podsetnik za vakcinu"
+          "VACINA_LEMBRETE_DA_CLINICA": "Podsetnik za vakcinu",
+          "PEDIDO_ACEITO": "Zahtev prihvaćen",
+          "PEDIDO_MARCADO_EM_OUTRO_HORARIO": "Zahtev zakazan u drugom terminu"
         },
+        "tipoOutro": "Obaveštenje vlasniku",
         "situacao": {
           "PENDENTE": "U redu",
           "ENVIADO": "Poslato",

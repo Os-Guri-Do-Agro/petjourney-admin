@@ -36,7 +36,7 @@ export const TITULOS_DAS_TELAS: Readonly<Record<string, string>> = {
   '/clinica/internacao/plantao': 'Internação · Plantão',
   '/clinica/internacao/boletins-pendentes': 'Boletins pendentes',
   '/clinica/internacao/vagas': 'Vagas da internação',
-  '/clinica/atividades': 'Atividades',
+  '/clinica/atividades': 'Pendências',
   '/clinica/faltas': 'Faltas',
   '/clinica/retornos-pendentes': 'Retornos',
   '/clinica/vacinas': 'Vacinas',

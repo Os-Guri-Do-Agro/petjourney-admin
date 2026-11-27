@@ -3198,7 +3198,8 @@
         "resumo_do_paciente": "a patient summary",
         "servico_realizado_do_app": "a service record for the app",
         "outro": "a record ({tipo})",
-        "resumo_de_documentos": "the app document summary"
+        "resumo_de_documentos": "the app document summary",
+        "autorizado_do_cliente": "a person allowed to pick up the pet"
       },
       "guia": {
         "titulo": "How the audit log works",
@@ -11920,8 +11921,11 @@
           "AGENDAMENTO_FALTA": "No-show",
           "FILA_VAGA_OFERECIDA": "Waiting list slot",
           "PRE_CONSULTA_PENDENTE": "Pre-visit form",
-          "VACINA_LEMBRETE_DA_CLINICA": "Vaccine reminder"
+          "VACINA_LEMBRETE_DA_CLINICA": "Vaccine reminder",
+          "PEDIDO_ACEITO": "Request accepted",
+          "PEDIDO_MARCADO_EM_OUTRO_HORARIO": "Request booked at another time"
         },
+        "tipoOutro": "Notice to the owner",
         "situacao": {
           "PENDENTE": "Queued",
           "ENVIADO": "Sent",
