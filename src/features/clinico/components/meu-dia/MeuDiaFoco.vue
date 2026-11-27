@@ -29,11 +29,17 @@ import UiVazioIlustrado from '@/components/ui/UiVazioIlustrado.vue'
 import { useClinicFormat } from '@/features/clinico/composables/useClinicFormat'
 import type { HorarioDoDia, ModeloDoMeuDia } from '@/features/clinico/composables/modelo-do-meu-dia'
 import PetAvatar from '@/features/hotel/components/base/PetAvatar.vue'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ dia: ModeloDoMeuDia }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const formato = useClinicFormat()
+/*
+ * A hora do horário vem com o offset da clínica (`...T21:45:00-03:00`): lida do texto, sai a da clínica.
+ * O `formato.hora` usa o relógio fixo da demonstração (-04:00) e mostrava 20:45 para as 21:45 (26/11/2026).
+ */
+const horaDoHorario = (iso: string) => horaNaParede(iso, intlDe(locale.value))
 
 /** Quantos da fila aparecem antes do "mostrar mais": o que cabe numa tela de 900 px. */
 const LIMITE_DA_FILA = 7
@@ -228,7 +234,7 @@ function estadoDe(item: HorarioDoDia) {
     return tempoDesde(item.chegadaEm, 'espera')
   }
 
-  return t('clinico.meuDia.estado.marcado', { hora: formato.hora(item.inicio) })
+  return t('clinico.meuDia.estado.marcado', { hora: horaDoHorario(item.inicio) })
 }
 
 /** Quantos alertas cabem como selo ao lado do nome, na fila; o resto vira "+N". */
@@ -610,7 +616,7 @@ const opcoesDeEscopo = computed(() => [
               </span>
               <!-- A hora no quadradinho em véu, como a lista de consultas da home do app. -->
               <span v-else class="linha__hora" :title="formato.status(item.status)">
-                {{ formato.hora(item.inicio) }}
+                {{ horaDoHorario(item.inicio) }}
                 <i
                   v-if="item.status === 'confirmado'"
                   class="ph ph-check"

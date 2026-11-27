@@ -35,6 +35,7 @@ import {
   type MotivoDaNaoDada,
   type Registro,
 } from '@/service/parceiro/plantao-da-internacao-service'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 export type PedidoDeRegistro = {
   doseId: string
@@ -112,7 +113,7 @@ const dozeHorasAtras = () => new Date(Date.now() - 12 * 3600 * 1000)
 const agora = () => new Date()
 
 function hora(valor: string) {
-  return new Date(valor).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  return horaNaParede(valor, intlDe(locale.value))
 }
 
 const textoDoAviso = computed(() => {

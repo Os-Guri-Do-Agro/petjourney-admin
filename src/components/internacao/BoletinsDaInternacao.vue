@@ -39,6 +39,7 @@ import BoletimGaveta from './BoletimGaveta.vue'
 import FotoDoBoletimGaveta from './FotoDoBoletimGaveta.vue'
 import LigacaoGaveta, { type AlvoDaLigacao } from './LigacaoGaveta.vue'
 import PreferenciaDoBoletimGaveta from './PreferenciaDoBoletimGaveta.vue'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{
   internacaoId: string
@@ -122,7 +123,7 @@ defineExpose({ carregar })
 
 function quando(valor: string | null) {
   if (!valor) return ''
-  return new Date(valor).toLocaleString(locale.value, {
+  return formatarNaParede(valor, intlDe(locale.value), {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

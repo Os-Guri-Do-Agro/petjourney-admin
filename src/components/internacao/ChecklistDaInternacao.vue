@@ -29,6 +29,7 @@ import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 import LinhaDaDose from './LinhaDaDose.vue'
 import RegistrarDoseGaveta from './RegistrarDoseGaveta.vue'
 import { useRegistroDeDose } from './useRegistroDeDose'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ internacaoId: string; podeRegistrar: boolean }>()
 const emit = defineEmits<{ mudou: [] }>()
@@ -97,7 +98,7 @@ const podeRegistrar = computed(
 )
 
 function hora(valor: string) {
-  return new Date(valor).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  return horaNaParede(valor, intlDe(locale.value))
 }
 
 function titulo(dose: DoseNoChecklist) {

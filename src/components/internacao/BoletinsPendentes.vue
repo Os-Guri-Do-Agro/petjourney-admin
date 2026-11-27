@@ -32,6 +32,7 @@ import { telefoneNaTela } from '@/service/parceiro/pacientes-service'
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
 
 import LigacaoGaveta, { type AlvoDaLigacao } from './LigacaoGaveta.vue'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const { t, locale } = useI18n()
 const { store, parceiroQuery } = useParceiroPortal()
@@ -67,7 +68,7 @@ const pode = computed(
 
 function quando(valor: string | null) {
   if (!valor) return ''
-  return new Date(valor).toLocaleString(locale.value, {
+  return formatarNaParede(valor, intlDe(locale.value), {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

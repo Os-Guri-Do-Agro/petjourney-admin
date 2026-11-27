@@ -45,6 +45,7 @@ import {
   type PreviaDoEncerramento,
 } from '@/service/parceiro/internacao-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ internacao: Internacao | null; profissionais: Profissional[] }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -154,7 +155,7 @@ const avisosDaPrevia = computed(() =>
 
 const calculadoAs = computed(() =>
   previa.value
-    ? new Date(previa.value.calculadoEm).toLocaleTimeString(locale.value, {
+    ? formatarNaParede(previa.value.calculadoEm, intlDe(locale.value), {
         hour: '2-digit',
         minute: '2-digit',
       })

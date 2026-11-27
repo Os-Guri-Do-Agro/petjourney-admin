@@ -24,6 +24,7 @@ import {
 import { listarProfissionais, type Profissional } from '@/service/parceiro/profissionais-service'
 
 import PassagemGaveta from './PassagemGaveta.vue'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ podeExecutar: boolean }>()
 
@@ -57,7 +58,7 @@ onMounted(async () => {
 })
 
 function hora(valor: string) {
-  return new Date(valor).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  return horaNaParede(valor, intlDe(locale.value))
 }
 
 const frase = computed(() => {

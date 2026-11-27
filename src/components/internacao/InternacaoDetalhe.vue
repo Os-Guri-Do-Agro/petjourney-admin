@@ -47,6 +47,7 @@ import MudarLeitoGaveta from './MudarLeitoGaveta.vue'
 import PrescricoesDaInternacao from './PrescricoesDaInternacao.vue'
 import PrevisaoDeAltaGaveta from './PrevisaoDeAltaGaveta.vue'
 import { TOM_DA_GRAVIDADE, TOM_DO_STATUS } from './rotulos-da-internacao'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ internacaoId: string }>()
 
@@ -124,7 +125,7 @@ const podeAdministrativo = computed(
 
 function instante(valor: string | null) {
   if (!valor) return ''
-  return new Date(valor).toLocaleString(locale.value, {
+  return formatarNaParede(valor, intlDe(locale.value), {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

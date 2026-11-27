@@ -22,6 +22,7 @@ import {
   type Boletim,
   type ModelosDoBoletim,
 } from '@/service/parceiro/boletins-da-internacao-service'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ internacaoId: string; paciente: string }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -77,7 +78,7 @@ function usar(valor: string) {
 
 const desde = computed(() =>
   modelos.value
-    ? new Date(modelos.value.periodoDesde).toLocaleString(locale.value, {
+    ? formatarNaParede(modelos.value.periodoDesde, intlDe(locale.value), {
         day: 'numeric',
         month: 'short',
         hour: '2-digit',

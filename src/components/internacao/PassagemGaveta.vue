@@ -25,6 +25,7 @@ import {
   type PlantaoAtual,
 } from '@/service/parceiro/plantao-da-internacao-service'
 import type { Profissional } from '@/service/parceiro/profissionais-service'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{ plantao: PlantaoAtual | null; profissionais: Profissional[] }>()
 const aberta = defineModel<boolean>('visible', { default: false })
@@ -91,7 +92,7 @@ const internacoes = computed(
 function descricao(item: { prescricaoId: string; internacaoId: string; previstaPara: string }) {
   const internacao = internacoes.value.get(item.internacaoId)
   return [
-    new Date(item.previstaPara).toLocaleTimeString(locale.value, {
+    formatarNaParede(item.previstaPara, intlDe(locale.value), {
       hour: '2-digit',
       minute: '2-digit',
     }),

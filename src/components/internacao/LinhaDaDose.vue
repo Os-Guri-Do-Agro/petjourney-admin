@@ -18,6 +18,7 @@ import {
   type DoseNoChecklist,
   type PrescricaoNoChecklist,
 } from '@/service/parceiro/plantao-da-internacao-service'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{
   dose: DoseNoChecklist | DoseDoPlantao
@@ -41,7 +42,7 @@ const { t, te, locale } = useI18n()
 
 function hora(valor: string | null) {
   if (!valor) return ''
-  return new Date(valor).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  return horaNaParede(valor, intlDe(locale.value))
 }
 
 const barrada = computed(() =>

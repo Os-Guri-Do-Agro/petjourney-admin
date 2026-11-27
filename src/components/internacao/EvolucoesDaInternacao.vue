@@ -22,6 +22,7 @@ import {
 
 import EvolucaoGaveta from './EvolucaoGaveta.vue'
 import { TOM_DA_GRAVIDADE } from './rotulos-da-internacao'
+import { formatarNaParede, intlDe } from '@/utils/format/parede'
 
 const props = defineProps<{
   internacaoId: string
@@ -63,7 +64,7 @@ watch(
 )
 
 function quando(valor: string) {
-  return new Date(valor).toLocaleString(locale.value, {
+  return formatarNaParede(valor, intlDe(locale.value), {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',

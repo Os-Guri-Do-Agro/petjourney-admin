@@ -31,6 +31,7 @@ import { criarUltimaLeitura } from '@/utils/ultima-leitura'
 import LinhaDaDose from './LinhaDaDose.vue'
 import RegistrarDoseGaveta from './RegistrarDoseGaveta.vue'
 import { useRegistroDeDose } from './useRegistroDeDose'
+import { horaNaParede, intlDe } from '@/utils/format/parede'
 
 const { t, locale } = useI18n()
 const { store, parceiroQuery } = useParceiroPortal()
@@ -112,7 +113,7 @@ function podeDesfazer(dose: DoseDoPlantao) {
 }
 
 function hora(valor: string) {
-  return new Date(valor).toLocaleTimeString(locale.value, { hour: '2-digit', minute: '2-digit' })
+  return horaNaParede(valor, intlDe(locale.value))
 }
 
 /*
